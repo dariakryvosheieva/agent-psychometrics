@@ -1,360 +1,247 @@
 """
-Lunette analysis for SWE-bench trajectories.
+Lunette-based task difficulty analysis for SWE-bench.
 
-This script runs Lunette's built-in analysis plans on SWE-bench agent trajectories:
-- BottleneckPlan: on passing trajectories (what enabled success?)
-- IssueDetectionPlan: on failing trajectories (what went wrong?)
-- GradingPlan: on both passing and failing trajectories
+This script uses Lunette's GradingPlan to analyze SWE-bench tasks and extract
+features that predict IRT difficulty. It combines:
+1. Task-intrinsic features (same as llm_judge.py) - about the problem itself
+2. Trajectory-based signals - failure modes that indicate difficulty
+
+The agent trajectory is used as a vehicle to get into Lunette's sandbox,
+but the primary focus is grading the task difficulty, not agent performance.
 
 Usage:
-    python llm_judge/lunette_analysis.py --num_tasks 5
-    python llm_judge/lunette_analysis.py --task_id django__django-13658
+    python llm_judge/lunette_analysis.py --run_id <lunette-run-id>
+    python llm_judge/lunette_analysis.py --run_id <id> --output_path results.csv
 """
 
 import argparse
 import asyncio
 import json
-import random
 from pathlib import Path
-from typing import Optional
+
+import pandas as pd
 
 from lunette import LunetteClient
-from lunette.analysis import BottleneckPlan, IssueDetectionPlan, GradingPlan
-from lunette.models.run import Run
-from lunette.models.trajectory import Trajectory, ScalarScore
-from lunette.models.messages import SystemMessage, UserMessage, AssistantMessage, ToolMessage, ToolCall
+from lunette.analysis import GradingPlan
 
 
-def load_swebench_trajectory(traj_path: Path) -> dict:
-    """Load a SWE-bench trajectory file."""
-    with open(traj_path) as f:
-        return json.load(f)
+# Grading prompt that extracts task features (matching llm_judge.py)
+# plus trajectory-based failure mode signals
+TASK_GRADING_PROMPT = """You are analyzing a SWE-bench coding task to predict its difficulty.
+
+## Your Goals
+1. Evaluate features of the TASK ITSELF that predict difficulty
+2. Note trajectory-based signals that suggest the task is hard
+
+## Task-Intrinsic Features (about the problem, not the agent)
+
+Evaluate each feature based on the problem statement and gold patch:
+
+1. **fix_in_description** (0-3): Does the problem statement contain or suggest the fix?
+   - 0: No hint at the solution
+   - 1: Vague hint or direction
+   - 2: Clear description of what needs to change
+   - 3: Exact code fix provided in the description
+
+2. **problem_clarity** (1-5): How clear and well-specified is the problem?
+   - 1: Very vague, unclear what's wrong
+   - 3: Reasonably clear but some ambiguity
+   - 5: Crystal clear with reproduction steps and expected behavior
+
+3. **error_message_provided** (0/1): Does the problem include an error message or traceback?
+
+4. **reproduction_steps** (0/1): Are concrete reproduction steps provided?
+
+5. **fix_locality** (1-3): How localized is the fix?
+   - 1: Single location, few lines changed
+   - 2: Multiple locations in same file, or moderate changes
+   - 3: Multiple files or significant changes
+
+6. **domain_knowledge_required** (1-5): How much specialized knowledge is needed?
+   - 1: Basic Python, obvious fix
+   - 3: Framework-specific knowledge (Django, pytest, etc.)
+   - 5: Obscure APIs, protocols, or very specialized knowledge
+
+7. **fix_complexity** (1-5): How complex is the actual fix?
+   - 1: Trivial (add parameter, change value, simple one-liner)
+   - 3: Moderate (requires understanding context)
+   - 5: Very complex (architectural changes, subtle edge cases)
+
+## Trajectory-Based Difficulty Signals
+
+Observe the agent's trajectory for signals that indicate task difficulty:
+
+8. **agent_declared_success_wrongly** (0/1): Did the agent claim to have solved it but was wrong?
+   - This suggests the task has subtle correctness requirements
+
+9. **agent_looping** (0/1): Was the agent stuck in a loop or repeating similar actions?
+   - This suggests the task lacks clear progress indicators
+
+10. **agent_expressed_uncertainty** (0/1): Did the agent express confusion or doubt?
+    - This suggests the task is ambiguous or requires non-obvious reasoning
+
+11. **agent_wrong_file_focus** (0/1): Did the agent spend significant time on irrelevant files?
+    - This suggests the task requires difficult code localization
+
+12. **agent_gave_up_early** (0/1): Did the agent stop trying before exhausting options?
+    - This suggests the task seemed intractable to the agent
+
+Respond with ONLY a JSON object:
+{
+    "fix_in_description": <0-3>,
+    "problem_clarity": <1-5>,
+    "error_message_provided": <0 or 1>,
+    "reproduction_steps": <0 or 1>,
+    "fix_locality": <1-3>,
+    "domain_knowledge_required": <1-5>,
+    "fix_complexity": <1-5>,
+    "agent_declared_success_wrongly": <0 or 1>,
+    "agent_looping": <0 or 1>,
+    "agent_expressed_uncertainty": <0 or 1>,
+    "agent_wrong_file_focus": <0 or 1>,
+    "agent_gave_up_early": <0 or 1>,
+    "reasoning": "<2-3 sentence explanation of key difficulty factors>"
+}
+"""
 
 
-def convert_to_lunette_trajectory(
-    task_id: str,
-    swebench_traj: dict,
-    resolved: bool,
-) -> Trajectory:
-    """Convert a SWE-bench trajectory to Lunette format."""
-    messages = []
-    position = 0
+async def grade_run(client: LunetteClient, run_id: str) -> dict:
+    """Grade a Lunette run to extract task difficulty features."""
 
-    # Convert history messages to Lunette format
-    history = swebench_traj.get('history', [])
-
-    for msg in history:
-        role = msg.get('role', 'user')
-        content = msg.get('content', '')
-
-        if role == 'system':
-            messages.append(SystemMessage(position=position, content=content))
-        elif role == 'user':
-            messages.append(UserMessage(position=position, content=content))
-        elif role == 'assistant':
-            # Check if this contains a command (tool call)
-            if '<command>' in content and '</command>' in content:
-                # Extract the command
-                cmd_start = content.find('<command>') + len('<command>')
-                cmd_end = content.find('</command>')
-                command = content[cmd_start:cmd_end].strip()
-
-                # Create tool call
-                tool_call = ToolCall(
-                    id=f"call_{position}",
-                    function="bash",
-                    arguments={"command": command}
-                )
-                messages.append(AssistantMessage(
-                    position=position,
-                    content=content,
-                    tool_calls=[tool_call]
-                ))
-            else:
-                messages.append(AssistantMessage(position=position, content=content))
-
-        position += 1
-
-    # Get solution (patch) from info
-    info = swebench_traj.get('info', {})
-    solution = info.get('submission')
-
-    # Create score based on resolution status
-    scores = {
-        'resolved': ScalarScore(value=1.0 if resolved else 0.0)
-    }
-
-    return Trajectory(
-        sample=task_id,
-        messages=messages,
-        scores=scores,
-        solution=solution,
-        metadata={
-            'environment': swebench_traj.get('environment', ''),
-            'exit_status': info.get('exit_status', ''),
-        }
-    )
-
-
-def get_task_lists(results_path: Path, trajs_dir: Path) -> tuple[list[str], list[str]]:
-    """Get lists of resolved and unresolved task IDs."""
-    with open(results_path) as f:
-        results = json.load(f)
-
-    resolved_set = set(results.get('resolved', []))
-
-    all_tasks = [f.stem for f in trajs_dir.glob('*.traj')]
-    resolved = [t for t in all_tasks if t in resolved_set]
-    unresolved = [t for t in all_tasks if t not in resolved_set]
-
-    return resolved, unresolved
-
-
-async def run_analysis(
-    client: LunetteClient,
-    run_id: str,
-    plan_type: str,
-    prompt: str,
-) -> dict:
-    """Run an analysis plan on a saved run."""
-
-    if plan_type == 'bottleneck':
-        plan = BottleneckPlan(
-            name="swebench-bottleneck",
-            prompt=prompt,
-        )
-    elif plan_type == 'issue':
-        plan = IssueDetectionPlan(
-            name="swebench-issues",
-            prompt=prompt,
-        )
-    elif plan_type == 'grading':
-        plan = GradingPlan(
-            name="swebench-grading",
-            prompt=prompt,
-        )
-    else:
-        raise ValueError(f"Unknown plan type: {plan_type}")
+    print(f"Grading run: {run_id}")
 
     results = await client.investigate(
         run_id=run_id,
-        plan=plan,
-        limit=1,  # We're analyzing one trajectory at a time
+        plan=GradingPlan(
+            name="task-difficulty",
+            prompt=TASK_GRADING_PROMPT,
+        ),
+        limit=1,
     )
 
-    return results
+    if not results.results:
+        return {"error": "No results returned", "run_id": run_id}
+
+    # Extract the grading data
+    result_data = results.results[0].data
+    result_data["run_id"] = run_id
+
+    return result_data
 
 
-async def analyze_task(
-    client: LunetteClient,
-    task_id: str,
-    traj_path: Path,
-    resolved: bool,
-    model_name: str = "sweagent_claude3.5sonnet",
-) -> dict:
-    """Analyze a single task with appropriate plans."""
+async def grade_multiple_runs(run_ids: list[str], output_path: Path) -> pd.DataFrame:
+    """Grade multiple Lunette runs and save results."""
 
-    print(f"\n{'='*60}")
-    print(f"Analyzing: {task_id} ({'PASS' if resolved else 'FAIL'})")
-    print('='*60)
+    all_results = []
 
-    # Load and convert trajectory
-    swebench_traj = load_swebench_trajectory(traj_path)
-    lunette_traj = convert_to_lunette_trajectory(task_id, swebench_traj, resolved)
+    async with LunetteClient() as client:
+        for i, run_id in enumerate(run_ids):
+            print(f"\n[{i+1}/{len(run_ids)}] ", end="")
 
-    # Create a run with this single trajectory
-    run = Run(
-        task="swebench-verified",
-        model=model_name,
-        trajectories=[lunette_traj],
-    )
+            try:
+                result = await grade_run(client, run_id)
+                all_results.append(result)
 
-    # Save run to Lunette
-    print(f"  Uploading trajectory to Lunette...")
-    run_meta = await client.save_run(run)
-    run_id = run_meta['run_id']
-    print(f"  Run ID: {run_id}")
+                # Save incrementally
+                df = pd.DataFrame(all_results)
+                df.to_csv(output_path, index=False)
 
-    results = {
-        'task_id': task_id,
-        'resolved': resolved,
-        'run_id': run_id,
-    }
+                print(f"  -> fix_complexity={result.get('fix_complexity')}, "
+                      f"domain_knowledge={result.get('domain_knowledge_required')}")
 
-    # Run appropriate analysis plans
-    if resolved:
-        # For passing trajectories: run Bottleneck and Grading
-        print(f"\n  Running BottleneckPlan...")
-        try:
-            bottleneck_results = await run_analysis(
-                client, run_id, 'bottleneck',
-                prompt="""Analyze this successful SWE-bench trajectory.
-                What was the key insight or action that enabled the agent to solve the task?
-                What bottleneck did the agent overcome to succeed?"""
-            )
-            results['bottleneck'] = {
-                'trajectory_count': bottleneck_results.trajectory_count,
-                'results': [r.data for r in bottleneck_results.results] if bottleneck_results.results else []
-            }
-            print(f"    Bottleneck analysis complete")
-        except Exception as e:
-            print(f"    Bottleneck analysis failed: {e}")
-            results['bottleneck'] = {'error': str(e)}
+            except Exception as e:
+                print(f"  -> Error: {e}")
+                all_results.append({"run_id": run_id, "error": str(e)})
 
-        print(f"\n  Running GradingPlan (passing)...")
-        try:
-            grading_results = await run_analysis(
-                client, run_id, 'grading',
-                prompt="""Grade this successful SWE-bench trajectory on:
-                1. Efficiency: How directly did the agent find the solution?
-                2. Code quality: How clean and correct is the submitted patch?
-                3. Process: How systematic was the debugging/exploration approach?"""
-            )
-            results['grading'] = {
-                'trajectory_count': grading_results.trajectory_count,
-                'results': [r.data for r in grading_results.results] if grading_results.results else []
-            }
-            print(f"    Grading analysis complete")
-        except Exception as e:
-            print(f"    Grading analysis failed: {e}")
-            results['grading'] = {'error': str(e)}
+    return pd.DataFrame(all_results)
 
-    else:
-        # For failing trajectories: run IssueDetection and Grading
-        print(f"\n  Running IssueDetectionPlan...")
-        try:
-            issue_results = await run_analysis(
-                client, run_id, 'issue',
-                prompt="""Analyze this failed SWE-bench trajectory.
-                What issues prevented the agent from solving the task?
-                Consider: wrong approach, missing context, incorrect fix, etc."""
-            )
-            results['issues'] = {
-                'trajectory_count': issue_results.trajectory_count,
-                'results': [r.data for r in issue_results.results] if issue_results.results else []
-            }
-            print(f"    Issue detection complete")
-        except Exception as e:
-            print(f"    Issue detection failed: {e}")
-            results['issues'] = {'error': str(e)}
 
-        print(f"\n  Running GradingPlan (failing)...")
-        try:
-            grading_results = await run_analysis(
-                client, run_id, 'grading',
-                prompt="""Grade this failed SWE-bench trajectory on:
-                1. Effort: How much progress did the agent make toward the solution?
-                2. Understanding: Did the agent correctly identify the problem?
-                3. Approach: Was the debugging strategy reasonable?"""
-            )
-            results['grading'] = {
-                'trajectory_count': grading_results.trajectory_count,
-                'results': [r.data for r in grading_results.results] if grading_results.results else []
-            }
-            print(f"    Grading analysis complete")
-        except Exception as e:
-            print(f"    Grading analysis failed: {e}")
-            results['grading'] = {'error': str(e)}
+async def list_available_runs(client: LunetteClient) -> list[dict]:
+    """List available runs from Lunette API."""
+    import httpx
 
-    return results
+    # Load API key
+    config_path = Path.home() / ".lunette" / "config.json"
+    with open(config_path) as f:
+        api_key = json.load(f)["api_key"]
+
+    async with httpx.AsyncClient(
+        base_url="https://lunette.dev/api",
+        headers={"X-API-Key": api_key},
+        timeout=30
+    ) as http_client:
+        r = await http_client.get("/runs/")
+        runs = r.json()
+
+    # Filter to SWE-bench runs (not investigations)
+    swebench_runs = [
+        r for r in runs
+        if "swe" in r.get("task", "").lower()
+        and r.get("source_run_id") is None  # Not an investigation
+    ]
+
+    return swebench_runs
 
 
 async def main():
-    parser = argparse.ArgumentParser(description='Run Lunette analysis on SWE-bench trajectories')
-    parser.add_argument('--submission', type=str,
-                        default='verified/20240620_sweagent_claude3.5sonnet',
-                        help='Submission path under evaluation/')
-    parser.add_argument('--num_tasks', type=int, default=None,
-                        help='Number of tasks to analyze (samples from both pass/fail)')
-    parser.add_argument('--task_id', type=str, default=None,
-                        help='Analyze a specific task')
+    parser = argparse.ArgumentParser(
+        description='Grade SWE-bench tasks using Lunette for difficulty prediction'
+    )
+    parser.add_argument('--run_id', type=str, default=None,
+                        help='Specific Lunette run ID to grade')
+    parser.add_argument('--run_ids', type=str, default=None,
+                        help='Comma-separated list of run IDs')
+    parser.add_argument('--list_runs', action='store_true',
+                        help='List available SWE-bench runs')
+    parser.add_argument('--grade_all', action='store_true',
+                        help='Grade all available SWE-bench runs')
     parser.add_argument('--output_path', type=str,
-                        default='chris_output/lunette/analysis_results.json',
+                        default='chris_output/lunette/task_features.csv',
                         help='Output path for results')
-    parser.add_argument('--seed', type=int, default=42,
-                        help='Random seed for sampling')
     args = parser.parse_args()
-
-    # Setup paths (experiments/ is gitignored and contains SWE-bench data)
-    experiments_dir = Path(__file__).resolve().parents[1] / 'experiments'
-    eval_dir = experiments_dir / 'evaluation' / args.submission
-    trajs_dir = eval_dir / 'trajs'
-    results_path = eval_dir / 'results' / 'results.json'
 
     output_path = Path(args.output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Get task lists
-    resolved, unresolved = get_task_lists(results_path, trajs_dir)
-    print(f"Found {len(resolved)} resolved and {len(unresolved)} unresolved tasks")
-
-    # Select tasks to analyze
-    random.seed(args.seed)
-
-    if args.task_id:
-        task_ids = [args.task_id]
-        is_resolved = {args.task_id: args.task_id in resolved}
-    elif args.num_tasks:
-        # Sample equally from resolved and unresolved
-        n_each = args.num_tasks // 2
-        sampled_resolved = random.sample(resolved, min(n_each, len(resolved)))
-        sampled_unresolved = random.sample(unresolved, min(n_each, len(unresolved)))
-        task_ids = sampled_resolved + sampled_unresolved
-        is_resolved = {t: t in resolved for t in task_ids}
-    else:
-        # Default: analyze 2 of each
-        sampled_resolved = random.sample(resolved, min(2, len(resolved)))
-        sampled_unresolved = random.sample(unresolved, min(2, len(unresolved)))
-        task_ids = sampled_resolved + sampled_unresolved
-        is_resolved = {t: t in resolved for t in task_ids}
-
-    print(f"\nAnalyzing {len(task_ids)} tasks:")
-    for tid in task_ids:
-        print(f"  - {tid} ({'PASS' if is_resolved[tid] else 'FAIL'})")
-
-    # Run analysis
-    all_results = []
-
     async with LunetteClient() as client:
-        for task_id in task_ids:
-            traj_path = trajs_dir / f"{task_id}.traj"
-            if not traj_path.exists():
-                print(f"Warning: trajectory not found for {task_id}")
-                continue
 
-            result = await analyze_task(
-                client,
-                task_id,
-                traj_path,
-                is_resolved[task_id],
-            )
-            all_results.append(result)
+        if args.list_runs:
+            runs = await list_available_runs(client)
+            print(f"\nAvailable SWE-bench runs ({len(runs)}):")
+            for run in runs:
+                print(f"  {run['id']}: {run.get('model', 'unknown')} on {run.get('task', 'unknown')}")
+            return
 
-            # Save incrementally
-            with open(output_path, 'w') as f:
-                json.dump(all_results, f, indent=2)
+        if args.run_id:
+            result = await grade_run(client, args.run_id)
+            print(f"\nResults:")
+            for k, v in result.items():
+                if k != "reasoning":
+                    print(f"  {k}: {v}")
+            print(f"\nReasoning: {result.get('reasoning', 'N/A')}")
 
-    # Print summary
-    print("\n" + "="*60)
-    print("SUMMARY")
-    print("="*60)
+            # Save single result
+            pd.DataFrame([result]).to_csv(output_path, index=False)
+            print(f"\nSaved to {output_path}")
 
-    for result in all_results:
-        print(f"\n{result['task_id']} ({'PASS' if result['resolved'] else 'FAIL'}):")
+        elif args.run_ids:
+            run_ids = [r.strip() for r in args.run_ids.split(",")]
+            df = await grade_multiple_runs(run_ids, output_path)
+            print(f"\nGraded {len(df)} runs, saved to {output_path}")
 
-        if 'bottleneck' in result and 'results' in result['bottleneck']:
-            for r in result['bottleneck'].get('results', []):
-                print(f"  Bottleneck: {r}")
+        elif args.grade_all:
+            runs = await list_available_runs(client)
+            run_ids = [r["id"] for r in runs]
+            print(f"\nGrading {len(run_ids)} SWE-bench runs...")
+            df = await grade_multiple_runs(run_ids, output_path)
+            print(f"\nGraded {len(df)} runs, saved to {output_path}")
 
-        if 'issues' in result and 'results' in result['issues']:
-            for r in result['issues'].get('results', []):
-                print(f"  Issues: {r}")
-
-        if 'grading' in result and 'results' in result['grading']:
-            for r in result['grading'].get('results', []):
-                print(f"  Grading: {r}")
-
-    print(f"\nResults saved to: {output_path}")
+        else:
+            print("Please specify --run_id, --run_ids, --list_runs, or --grade_all")
+            print("\nExample usage:")
+            print("  python llm_judge/lunette_analysis.py --list_runs")
+            print("  python llm_judge/lunette_analysis.py --run_id abc123")
+            print("  python llm_judge/lunette_analysis.py --grade_all")
 
 
 if __name__ == "__main__":
