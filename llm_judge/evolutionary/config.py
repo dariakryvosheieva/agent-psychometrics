@@ -32,10 +32,9 @@ class EvolutionConfig:
 
     # Mutation operator weights (PromptBreeder-inspired)
     mutation_weights: dict = field(default_factory=lambda: {
-        "direct_mutation": 0.3,      # Mutate feature prompt directly
-        "eda_mutation": 0.2,         # Estimation of Distribution (crossover)
-        "hypermutation": 0.2,        # Mutate the mutation prompt itself
-        "lamarckian": 0.15,          # Working → simplified description
+        "direct_mutation": 0.35,     # Mutate feature prompt directly
+        "eda_mutation": 0.25,        # Estimation of Distribution (crossover)
+        "hypermutation": 0.25,       # Mutate the mutation prompt itself
         "zero_order": 0.15,          # Generate from scratch with context
     })
 

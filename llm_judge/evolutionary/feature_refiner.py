@@ -38,16 +38,6 @@ This mutation prompt achieved correlation: {correlation}
 The best features so far have correlations around: {best_correlation}
 
 Suggest an improved mutation prompt that would generate better features.""",
-
-    "lamarckian": """Simplify this working feature into a cleaner description.
-
-Current feature (r={correlation}):
-- Name: {name}
-- Description: {description}
-- Scale: 1 = {scale_low}, 5 = {scale_high}
-- Extraction prompt: {extraction_prompt}
-
-Create a simplified version that captures the essence of why this feature works.""",
 }
 
 
@@ -266,58 +256,6 @@ Respond with JSON:
 
         return new_feature, new_mutation_prompt
 
-    def lamarckian_mutation(
-        self,
-        feature: Feature,
-        evaluation: FeatureEvaluation,
-        generation: int,
-    ) -> Feature:
-        """Simplify a working feature (phenotype → genotype).
-
-        Args:
-            feature: Feature to simplify.
-            evaluation: Current evaluation results.
-            generation: Current generation number.
-
-        Returns:
-            Simplified Feature.
-        """
-        prompt = self.mutation_prompts["lamarckian"].format(
-            correlation=f"{evaluation.correlation:+.3f}",
-            name=feature.name,
-            description=feature.description,
-            scale_low=feature.scale_low,
-            scale_high=feature.scale_high,
-            extraction_prompt=feature.extraction_prompt,
-        )
-
-        prompt += """
-
-Create a cleaner, more focused version. Respond with JSON:
-{
-    "name": "<simplified_name>",
-    "description": "<clearer description>",
-    "scale_low": "<what 1 means>",
-    "scale_high": "<what 5 means>",
-    "hypothesis": "<refined hypothesis>",
-    "extraction_prompt": "<cleaner prompt>"
-}"""
-
-        response = self.llm_client.call_json(prompt, temperature=0.5)
-
-        return Feature(
-            id=f"gen{generation}_lam_{feature.name[:10]}",
-            name=response["name"],
-            description=response["description"],
-            extraction_prompt=response["extraction_prompt"],
-            scale_low=response["scale_low"],
-            scale_high=response["scale_high"],
-            hypothesis=response["hypothesis"],
-            parent_id=feature.id,
-            mutation_type="lamarckian",
-            generation=generation,
-        )
-
     def evolve_feature(
         self,
         feature: Feature,
@@ -371,9 +309,6 @@ Create a cleaner, more focused version. Respond with JSON:
             if random.random() < 0.3:  # 30% chance to keep evolved prompt
                 self.mutation_prompts["direct_mutation"] = new_prompt
             return new_feature
-
-        elif operator == "lamarckian":
-            return self.lamarckian_mutation(feature, evaluation, generation)
 
         elif operator == "zero_order":
             # Handled separately in evolution loop

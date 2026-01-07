@@ -245,10 +245,9 @@ Automatically discover and evolve LLM-extracted features that predict IRT diffic
 
 | Operator | Weight | Description |
 |----------|--------|-------------|
-| direct_mutation | 30% | Refine based on failure cases |
-| eda_mutation | 20% | Crossover between two features |
-| hypermutation | 20% | Self-referentially evolve the mutation prompt |
-| lamarckian | 15% | Simplify working features |
+| direct_mutation | 35% | Refine based on failure cases |
+| eda_mutation | 25% | Crossover between two features |
+| hypermutation | 25% | Self-referentially evolve the mutation prompt |
 | zero_order | 15% | Generate novel features with context |
 
 #### Usage
