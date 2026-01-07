@@ -240,11 +240,77 @@ echo '{"api_key": "your-key-here"}' > ~/.lunette/config.json
 ```bash
 # Run SWE-bench mini (50 tasks) with Lunette sandbox
 lunette eval swebench --model anthropic/claude-sonnet-4-20250514 --limit 1
+lunette eval swebench --model openai/gpt-4o-mini --limit 1
 
 # This runs inspect_evals/swe_bench_verified_mini with:
 #   --sandbox lunette
 #   --sandbox_config_template_file (Lunette's swebench preset)
 ```
+
+#### Lunette Grading API (LLM-as-Judge Replacement)
+
+The Grading API can replace direct LLM feature extraction. It returns structured scores (0-1) with explanations.
+
+**Retrieving Runs:**
+```python
+import httpx
+import json
+
+with open("~/.lunette/config.json") as f:
+    api_key = json.load(f)["api_key"]
+
+with httpx.Client(base_url="https://lunette.dev/api", headers={"X-API-Key": api_key}) as client:
+    r = client.get("/runs/")  # TRAILING SLASH REQUIRED
+    runs = r.json()
+    # Returns: [{"id": "...", "task": "...", "model": "...", "trajectory_count": N}, ...]
+```
+
+**Running Grading:**
+```python
+import asyncio
+from lunette import LunetteClient
+from lunette.analysis import GradingPlan
+
+async def grade_trajectory(run_id: str):
+    async with LunetteClient() as client:
+        results = await client.investigate(
+            run_id=run_id,
+            plan=GradingPlan(
+                name="swebench-difficulty",
+                prompt="""Grade this SWE-bench agent trajectory on:
+1. Task Understanding: Did the agent correctly identify the problem?
+2. Code Localization: How effectively did the agent find relevant code?
+3. Fix Quality: Was the proposed fix correct and minimal?
+4. Process Efficiency: Did the agent work systematically?
+
+Provide a score (0-1) and brief explanation for each dimension."""
+            ),
+            limit=1,
+        )
+
+        for result in results.results:
+            print(f"Dimension: {result.data['name']}")
+            print(f"Score: {result.data['score']}")
+            print(f"Explanation: {result.data['explanation']}")
+
+asyncio.run(grade_trajectory("your-run-id"))
+```
+
+**Example Output:**
+```
+Dimension: task_understanding
+Score: 0.85
+Explanation: The agent correctly identified that the AuthenticationForm's username
+field doesn't render the maxlength HTML attribute. The agent found the exact location
+in the code (line 194 of forms.py) where max_length is set on the form field but not
+on the widget's attrs dictionary...
+```
+
+**Tested Runs (2025-01-07):**
+| Model | Run ID | Task Solved | Grading Score |
+|-------|--------|-------------|---------------|
+| claude-sonnet-4 | c891a8ba-fd7c-468e-ad80-7b99ce332196 | No | 0.85 |
+| gpt-4o-mini | 36df6e4f-0960-4e7d-8a9b-3cdb330b7201 | Yes | 0.94 |
 
 #### Downloaded Trajectories
 
@@ -261,5 +327,5 @@ python -m analysis.download_logs evaluation/verified/20240620_sweagent_claude3.5
 | File | Purpose |
 |------|---------|
 | `llm_judge/llm_judge.py` | Direct LLM feature extraction (working) |
-| `llm_judge/lunette_analysis.py` | Lunette-based analysis (needs API fixes) |
+| `llm_judge/lunette_analysis.py` | Lunette-based analysis (uses SDK) |
 | `chris_output/llm_judge/features_50.csv` | LLM judge results for 49 tasks |
