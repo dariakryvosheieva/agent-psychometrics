@@ -1,0 +1,365 @@
+{
+  "_description": "Catalog of trajectory formats found in SWE-bench experiments",
+  "_last_updated": "2026-01-08",
+
+  "_conversion_stats": {
+    "total_agents_in_experiments": 131,
+    "agents_with_valid_trajectories": 78,
+    "agents_with_blob_or_limited_trajectories": 39,
+    "agents_with_empty_trajs_folder": 14,
+    "total_check": "78 + 39 + 14 = 131"
+  },
+
+  "supported_formats": {
+    "json_chat_list": {
+      "description": "JSON list of role/content messages",
+      "structure": "[{role, content}, ...]",
+      "extensions": [".json"],
+      "agent_count": 19
+    },
+    "log_text": {
+      "description": "Plain text log with timestamps or JSON iteration logs",
+      "structure": "========== timestamp Section: ... OR {iteration, input, response}",
+      "extensions": [".log"],
+      "agent_count": 16
+    },
+    "yaml_history": {
+      "description": "YAML/JSON with history array (chat format)",
+      "structure": "{history: [{role, content, agent}], environment}",
+      "extensions": [".yaml", ".traj"],
+      "agent_count": 7
+    },
+    "nested_lingma": {
+      "description": "Nested directory with debug_agent_*.json or *_agent.json files",
+      "structure": "trajs/<task_id>/debug_agent_write_patch_1.json with [{role, content}]",
+      "extensions": [".json"],
+      "agent_count": 4
+    },
+    "json_instance_messages": {
+      "description": "JSON with instance_id and messages array",
+      "structure": "{instance_id, messages: [{role, content}]}",
+      "extensions": [".json"],
+      "agent_count": 3
+    },
+    "category_logs": {
+      "description": "Category subdirectories containing log/jsonl files grouped by task_id",
+      "structure": "trajs/category_dir/<task_id>.log or trajs/category_dir/output.jsonl",
+      "extensions": [".log", ".jsonl"],
+      "agent_count": 3
+    },
+    "nested_logs": {
+      "description": "Nested directory with .log or .logs files",
+      "structure": "trajs/<task_id>/*.log",
+      "extensions": [".log", ".logs"],
+      "agent_count": 3
+    },
+    "json_zai_history": {
+      "description": "JSON with history containing action/message",
+      "structure": "{history: [{action, message, source}]}",
+      "extensions": [".json"],
+      "agent_count": 2
+    },
+    "nested_traj_json": {
+      "description": "Nested directory with *.traj.json files",
+      "structure": "trajs/<task_id>/*.traj.json with {trajectory, info}",
+      "extensions": [".traj.json"],
+      "agent_count": 2
+    },
+    "json_frogboss": {
+      "description": "JSON list with step_idx/thought/action/observation",
+      "structure": "[{step_idx, thought, action, observation}]",
+      "extensions": [".json"],
+      "agent_count": 2
+    },
+    "nested_cortexa": {
+      "description": "Nested directory with numbered JSON files (0_file_retrieval.json, etc.)",
+      "structure": "trajs/<task_id>/0_file_retrieval.json with {model: {user_prompt, response}}",
+      "extensions": [".json"],
+      "agent_count": 2
+    },
+    "jsonl_swefixer": {
+      "description": "SWE-Fixer JSONL format",
+      "structure": "{instance_id, prediction/model_patch, model_reasoning}",
+      "extensions": [".jsonl"],
+      "agent_count": 2
+    },
+    "nested_autocoderover": {
+      "description": "Nested directory with attempt_* subdirectories",
+      "structure": "trajs/<task_id>/attempt_0/*.json with [{role, content}]",
+      "extensions": [".json"],
+      "agent_count": 2
+    },
+    "json_langchain": {
+      "description": "Langchain message format with nested lists",
+      "structure": "[[[{lc, type, id, kwargs: {content}}]]]",
+      "extensions": [".json"],
+      "agent_count": 2
+    },
+    "txt_noext": {
+      "description": "Text files without extension",
+      "structure": "assistant: ... - command ...",
+      "extensions": [""],
+      "agent_count": 1
+    },
+    "json_wandb": {
+      "description": "Wandb format with testCommandTrajectory",
+      "structure": "{testCommandTrajectory: [{role, content, tool_calls}]}",
+      "extensions": [".json"],
+      "agent_count": 1
+    },
+    "nested_swerl": {
+      "description": "Nested directory with resolved/failed subdirs containing txt files",
+      "structure": "trajs/<task_id>/resolved/*.txt with Prompt/Response/Patch sections",
+      "extensions": [".txt"],
+      "agent_count": 1
+    },
+    "json_llm_call_data": {
+      "description": "JSON with llm_call_data array",
+      "structure": "{llm_call_data: [{role, content}]}",
+      "extensions": [".traj"],
+      "agent_count": 1
+    },
+    "nested_joycode": {
+      "description": "Nested directory with completed_trajectory.json",
+      "structure": "trajs/<task_id>/completed_trajectory.json with {test_generation, diff_generation}",
+      "extensions": [".json"],
+      "agent_count": 1
+    },
+    "nested_sweagent_traj": {
+      "description": "Nested directory with .traj files inside task subdirectories",
+      "structure": "trajs/<task_id>/<task_id>.traj with standard SWE-agent format",
+      "extensions": [".traj"],
+      "agent_count": 1
+    },
+    "json_uuid_messages": {
+      "description": "JSON list with UUID-keyed messages",
+      "structure": "[{uuid: {author_name, message}}]",
+      "extensions": [".json"],
+      "agent_count": 1
+    },
+    "nested_moatless": {
+      "description": "Nested directory with trajectory.json",
+      "structure": "trajs/<task_id>/trajectory.json with {nodes: [{user_message, action_steps}]}",
+      "extensions": [".json"],
+      "agent_count": 1
+    },
+    "jsonl_navie": {
+      "description": "JSON Lines with type/message",
+      "structure": "{type, message: {role, content}}",
+      "extensions": [".jsonl"],
+      "agent_count": 1
+    },
+    "json_blocks": {
+      "description": "JSON with role and blocks array",
+      "structure": "[{role, blocks: [{block_type, text}]}]",
+      "extensions": [".json"],
+      "agent_count": 1
+    },
+    "json_attempt_uuid": {
+      "description": "Nested attempt/traj/UUID format",
+      "structure": "{attempt_1: {traj: {uuid: {author_name, message}}}}",
+      "extensions": [".traj"],
+      "agent_count": 1
+    },
+    "json_string_list": {
+      "description": "JSON list of strings",
+      "structure": "['string1', 'string2', ...]",
+      "extensions": [".json"],
+      "agent_count": 1
+    }
+  },
+
+  "validated_agents": {
+    "description": "78 agents with valid multi-turn trajectory data suitable for analysis",
+    "count": 78,
+    "location": "trajectory_data/unified_trajs/<agent_name>/",
+    "agents": [
+      "20240402_sweagent_claude3opus",
+      "20240402_sweagent_gpt4",
+      "20240612_MASAI_gpt4o",
+      "20240620_sweagent_claude3.5sonnet",
+      "20240721_amazon-q-developer-agent-20240719-dev",
+      "20240728_sweagent_gpt4o",
+      "20240820_epam-ai-run-gpt-4o",
+      "20240820_honeycomb",
+      "20240918_lingma-agent_lingma-swe-gpt-72b",
+      "20240918_lingma-agent_lingma-swe-gpt-7b",
+      "20241002_lingma-agent_lingma-swe-gpt-72b",
+      "20241002_lingma-agent_lingma-swe-gpt-7b",
+      "20241007_nfactorial",
+      "20241016_composio_swekit",
+      "20241016_epam-ai-run-gpt-4o",
+      "20241025_composio_swekit",
+      "20241028_agentless-1.5_gpt4o",
+      "20241029_OpenHands-CodeAct-2.1-sonnet-20241022",
+      "20241029_epam-ai-run-claude-3-5-sonnet",
+      "20241030_nfactorial",
+      "20241105_nfactorial",
+      "20241106_navie-2-gpt4o-sonnet",
+      "20241108_autocoderover-v2.0-claude-3-5-sonnet-20241022",
+      "20241108_devlo",
+      "20241113_nebius-search-open-weight-models-11-24",
+      "20241125_enginelabs",
+      "20241125_marscode-agent-dev",
+      "20241128_SWE-Fixer_Qwen2.5-7b-retriever_Qwen2.5-72b-editor_20241128",
+      "20241202_agentless-1.5_claude-3.5-sonnet-20241022",
+      "20241212_epam-ai-run-claude-3-5-sonnet",
+      "20241213_devlo",
+      "20241221_codestory_midwit_claude-3-5-sonnet_swe-search",
+      "20250110_blackboxai_agent_v1.1",
+      "20250110_learn_by_interact_claude3.5",
+      "20250117_wandb_programmer_o1_crosscheck5",
+      "20250118_codeshellagent_gemini_2.0_flash_experimental",
+      "20250122_autocoderover-v2.1-claude-3-5-sonnet-20241022",
+      "20250203_openhands_4x_scaled",
+      "20250226_swerl_llama3_70b",
+      "20250228_epam-ai-run-claude-3-5-sonnet",
+      "20250306_SWE-Fixer_Qwen2.5-7b-retriever_Qwen2.5-72b-editor",
+      "20250410_cortexa",
+      "20250415_openhands",
+      "20250503_patchpilot-v1.1-o4-mini",
+      "20250511_sweagent_lm_32b",
+      "20250515_Refact_Agent",
+      "20250516_cortexa_o3",
+      "20250519_devlo",
+      "20250519_trae",
+      "20250520_openhands_devstral_small",
+      "20250522_sweagent_claude-4-sonnet-20250514",
+      "20250524_openhands_claude_4_sonnet",
+      "20250527_amazon.nova-premier-v1.0",
+      "20250528_patchpilot_Co-PatcheR",
+      "20250603_Refact_Agent_claude-4-sonnet",
+      "20250611_moatless_claude-4-sonnet-20250514",
+      "20250612_trae",
+      "20250616_Skywork-SWE-32B",
+      "20250616_Skywork-SWE-32B+TTS_Bo8",
+      "20250627_agentless_MCTS-Refine-7B",
+      "20250710_bloop",
+      "20250716_openhands_kimi_k2",
+      "20250728_zai_glm4-5",
+      "20250804_codesweep_sweagent_kimi_k2_instruct",
+      "20250804_epam-ai-run-claude-4-sonnet",
+      "20250807_openhands_gpt5",
+      "20250901_entroPO_R2E_QwenCoder30BA3B",
+      "20250901_entroPO_R2E_QwenCoder30BA3B_tts",
+      "20250915_JoyCode",
+      "20250924_artemis_agent_v2",
+      "20250928_trae_doubao_seed_code",
+      "20250929_Prometheus_v1.2_gpt5",
+      "20250930_zai_glm4-6",
+      "20251015_Prometheus_v1.2.1_gpt5",
+      "20251103_SalesforceAIResearch_SAGE_OpenHands",
+      "20251103_sonar-foundation-agent_claude-sonnet-4-5",
+      "20251110_frogboss-32b",
+      "20251110_frogmini-14b"
+    ]
+  },
+
+  "blob_style_agents": {
+    "description": "39 agents with blob-style or limited trajectory data - not useful for trajectory analysis",
+    "count": 39,
+    "location": "trajectory_data/unified_trajs/_blob_style/",
+    "reasons": {
+      "single_text_blob": "Single text dump without conversation structure",
+      "patch_only": "Only contains final diff patch, no intermediate reasoning",
+      "infrastructure_logs": "Contains Docker deployment/build logs, not agent reasoning"
+    },
+    "agents": {
+      "blob_style_original": {
+        "description": "36 agents that produce single text blobs without conversation structure",
+        "agents": [
+          "20240524_devlo-v0-gpt4o",
+          "20240630_agentless_gpt4o",
+          "20240702_codestory-mixed-Sonnet35",
+          "20240702_codestory-mixed-gpt4o",
+          "20240702_codestory-swebench-direct-Sonnet35",
+          "20240702_codestory-swebench-direct-gpt4o",
+          "20240703_SWE-bench-Lite_RepoUnderstander_gpt4o",
+          "20240706_sima_gpt4o",
+          "20240706_sima_gpt4o_no-hint",
+          "20240713_moatless_claude-3-5-sonnet",
+          "20240820_epam-ai-dial-gpt-4o",
+          "20240925_swe-bench-lite-solver_gpt-4o-mini",
+          "20241007_lingma-agent_lingma-swe-gpt-72b",
+          "20241007_lingma-agent_lingma-swe-gpt-7b",
+          "20241017_moatless_claude-3-5-sonnet-20241022",
+          "20241018_agentless-1.5_gpt4o",
+          "20241021_repoqa_solver_gpt4o",
+          "20241022_tools_claude-3-5-sonnet-updated",
+          "20241024_devlo",
+          "20241024_letta_solver_gpt4o",
+          "20241029_Bracket_gpt-4o",
+          "20241029_Bracket_o1-mini",
+          "20241029_Bracket_o1-preview",
+          "20241120_moatless_claude-3-5-sonnet-20241022",
+          "20241125_Lingxi-Agent_gpt4o",
+          "20241202_Lingxi-Agent_claude-3-5-sonnet",
+          "20241210_devlo",
+          "20241213_moatless_claude-3-5-sonnet-20241022",
+          "20241213_moatless_gpt-4o-2024-11-20",
+          "20241217_mentatbot_v3",
+          "20250121_agentless-1.5_gpt-4o-2024-11-20",
+          "20250122_moatless_claude-3-5-sonnet-20241022",
+          "20250223_moatless_claude-3-5-sonnet-20241022",
+          "20250227_moatless_claude-3-5-sonnet-20241022",
+          "20250409_moatless_gpt-4.1-turbo-mini",
+          "20250501_moatless_claude-3-5-sonnet-20241022"
+        ]
+      },
+      "patch_only": {
+        "description": "2 agents that only output final patches without reasoning trajectory",
+        "agents": [
+          "20251021_SalesforceAIResearch_SAGE_bash_only",
+          "20251120_livesweagent_gemini-3-pro-preview"
+        ]
+      },
+      "infrastructure_logs": {
+        "description": "1 agent that only contains infrastructure/deployment logs",
+        "agents": [
+          "20250725_sweagent_devstral_small_2507"
+        ]
+      }
+    }
+  },
+
+  "empty_trajs_folder_agents": {
+    "description": "14 agents with empty or missing trajs/ folder - no local trajectories available",
+    "count": 14,
+    "reason": "These agents either don't provide trajectory data or store it externally",
+    "agents": [
+      "20231010_rag_claude2",
+      "20231010_rag_gpt35",
+      "20231010_rag_swellama13b",
+      "20231010_rag_swellama7b",
+      "20240402_rag_claude3opus",
+      "20240402_rag_gpt4",
+      "20240509_amazon-q-developer-agent-20240430-dev",
+      "20240615_appmap-navie_gpt4o",
+      "20240617_factory_code_droid",
+      "20240628_autocoderover-v20240620",
+      "20250225_sweagent_claude-3-7-sonnet",
+      "20250405_swe-rizzo_claude37",
+      "20250805_openhands-Qwen3-Coder-30B-A3B-Instruct",
+      "20250805_openhands-Qwen3-Coder-480B-A35B-Instruct"
+    ]
+  },
+
+  "summary": {
+    "total_agents": 131,
+    "breakdown": {
+      "valid_trajectories": {
+        "count": 78,
+        "description": "Multi-turn conversation trajectories suitable for analysis"
+      },
+      "blob_or_limited": {
+        "count": 39,
+        "description": "Single text blobs, patch-only outputs, or infrastructure logs - not useful for trajectory analysis"
+      },
+      "empty_trajs": {
+        "count": 14,
+        "description": "No local trajectory data available"
+      }
+    },
+    "total_check": "78 + 39 + 14 = 131"
+  }
+}
