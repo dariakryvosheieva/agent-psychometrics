@@ -1,0 +1,10 @@
+{
+  "recommended_model": "1 feature (fix_in_description only)",
+  "n_samples": 30,
+  "n_features": 1,
+  "correlation": 0.466,
+  "adjusted_r2": 0.183,
+  "rmse": 1.557,
+  "p_value": 0.0094,
+  "note": "Leave-one-out cross-validation, Ridge regression (\u03b1=1.0)"
+}
