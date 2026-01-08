@@ -1,0 +1,33 @@
+localization_strategy,hypothesis_testing,incremental_vs_big_bang,error_recovery,verification_approach,exploration_depth,edit_precision,iteration_count,test_creation,context_gathering,brief_summary,task_id,agent,resolved,original_steps,filtered_steps,error,raw_response
+2.0,1.0,2.0,2.0,1.0,2.0,4.0,2.0,1.0,2.0,"Agent quickly found the issue in get_admin_url method using a simple search and made a targeted fix by adding current_app parameter, but struggled with test setup and execution.",django__django-14855,20240728_sweagent_gpt4o,True,68,64,,
+1.0,1.0,2.0,2.0,2.0,1.0,4.0,3.0,1.0,2.0,"The agent jumped directly to the correct file and method without visible search, made a focused fix to pass autoescape parameter, then created a reproduction test to verify the fix works.",django__django-11119,20240728_sweagent_gpt4o,True,24,18,,
+2.0,1.0,4.0,3.0,2.0,1.0,4.0,3.0,1.0,2.0,"Agent created a reproduction script, used error message to locate the bug via simple search, then iteratively fixed the array comparison issue through trial and error with different numpy comparison approaches.",astropy__astropy-14539,20240728_sweagent_gpt4o,True,12,9,,
+2.0,1.0,5.0,3.0,2.0,1.0,5.0,4.0,1.0,2.0,"Agent found the bug location via direct file search, made a surgical regex escape fix, then created a reproduction script to verify the fix works.",django__django-12143,20240728_sweagent_gpt4o,True,52,46,,
+1.0,1.0,2.0,2.0,2.0,1.0,4.0,2.0,1.0,1.0,"Agent immediately jumped to a specific file and line to make a change, then spent most time struggling with test setup rather than verifying the fix worked properly.",django__django-11951,20240728_sweagent_gpt4o,True,55,53,,
+,,,,,,,,,,,django__django-11880,20240728_sweagent_gpt4o,True,8,6,"JSON parse error: Expecting ',' delimiter: line 12 column 5 (char 288)","{
+    ""localization_strategy"": 2,
+    ""hypothesis_testing"": 2,
+    ""incremental_vs_big_bang"": 1,
+    ""error_recovery"": 0,
+    ""verification_approach"": 2,
+    ""exploration_depth"": 1,
+    ""edit_precision"": 4,
+    ""iteration_count"": 1,
+    ""test_creation"": 1,
+    ""context_gathering"": 2
+    ""brief_summary"": ""Agent used simple file search to locate the target file, made a single focused edit to add error_messages deepcopy, and created a reproduction script to verify the fix.""
+}"
+3.0,2.0,4.0,3.0,2.0,2.0,4.0,2.0,1.0,3.0,"Agent created a reproduction script to verify the memoryview bug, then located the HttpResponse class and fixed the content setter with a targeted edit to handle memoryview objects.",django__django-11133,20240728_sweagent_gpt4o,True,15,12,,
+2.0,1.0,4.0,2.0,2.0,1.0,5.0,3.0,1.0,2.0,"Agent used simple file search to locate validators, made precise regex changes to prevent newline acceptance, and created a reproduction script to verify the fix worked correctly.",django__django-11099,20240728_sweagent_gpt4o,True,12,9,,
+1.0,1.0,4.0,2.0,2.0,2.0,4.0,3.0,1.0,2.0,"Agent directly opened the target file and added a __reversed__ method to OrderedSet with minimal exploration, then created a simple test script to verify the implementation works.",django__django-14089,20240728_sweagent_gpt4o,True,14,11,,
+1.0,0.0,4.0,2.0,2.0,1.0,4.0,5.0,1.0,2.0,"Agent directly opened the admin options.py file and made targeted edits to add a get_inlines method and modify get_inline_instances, with multiple test attempts and minor adjustments when encountering syntax errors.",django__django-11095,20240728_sweagent_gpt4o,True,68,44,,
+3.0,1.0,3.0,3.0,2.0,2.0,3.0,4.0,1.0,2.0,"Agent created reproduction scripts to understand the issue with MySQL collation handling in Django migrations, then used iterative search and multiple small edits to locate and fix the problem.",django__django-15629,20240728_sweagent_gpt4o,False,62,50,,
+2.0,2.0,3.0,3.0,2.0,1.0,4.0,3.0,1.0,2.0,"Agent created a reproduction script to identify the bug, then found the specific error location through simple search and fixed it with targeted logic to handle non-tuple children in Q.deconstruct().",django__django-14140,20240728_sweagent_gpt4o,False,13,10,,
+2.0,1.0,4.0,2.0,2.0,1.0,2.0,5.0,1.0,2.0,"Agent created a reproduction script and attempted to add header_rows support to RST writer through multiple small edits, but failed to understand the proper table formatting requirements.",astropy__astropy-14182,20240728_sweagent_gpt4o,False,63,61,,
+2.0,1.0,1.0,1.0,2.0,2.0,1.0,5.0,1.0,2.0,"Agent created a reproduction script and found the bug location via simple search, but then made repeated identical failed edits without understanding the syntax errors, showing poor error recovery and editing precision.",astropy__astropy-14096,20240728_sweagent_gpt4o,False,66,65,,
+2.0,1.0,2.0,1.0,1.0,3.0,2.0,2.0,1.0,3.0,"Agent created a Django management command to test deletion behavior and made a small optimization to the Collector class, but struggled with test setup and environment configuration.",django__django-11087,20240728_sweagent_gpt4o,False,60,45,,
+1.0,1.0,2.0,1.0,2.0,1.0,2.0,5.0,1.0,1.0,Agent created a reproduction script but spent most effort struggling with Django setup issues rather than identifying and fixing the actual bug. Eventually found and modified the model save method after many setup attempts.,django__django-12209,20240728_sweagent_gpt4o,False,69,55,,
+1.0,1.0,1.0,1.0,1.0,1.0,1.0,5.0,1.0,2.0,"Agent jumped directly to modifying django/db/models/enums.py without exploration, adding do_not_call_in_templates to enum classes, but created multiple syntax errors and duplicated code without successfully resolving the TypeError from Python's enum inheritance restrictions.",django__django-12304,20240728_sweagent_gpt4o,False,41,38,,
+2.0,1.0,2.0,0.0,2.0,1.0,4.0,2.0,1.0,2.0,"Agent created a reproduction script to identify the issue, then directly located and fixed the _get_timezone_name function in django/utils/timezone.py with a targeted edit to handle Etc/GMT timezone name conversion.",django__django-14792,20240728_sweagent_gpt4o,False,9,6,,
+2.0,2.0,1.0,0.0,2.0,1.0,4.0,2.0,1.0,2.0,"Agent created a reproduction script to identify the bug, used a simple search to find the problematic file, then made a single targeted edit to catch ValueError and return NotImplemented.",astropy__astropy-13977,20240728_sweagent_gpt4o,False,9,7,,
+3.0,1.0,4.0,2.0,2.0,2.0,3.0,4.0,1.0,3.0,"The agent created a reproduction script and iteratively fixed configuration issues, then located the Exists class and attempted a fix by checking for empty queries in the as_sql method.",django__django-15382,20240728_sweagent_gpt4o,False,67,62,,

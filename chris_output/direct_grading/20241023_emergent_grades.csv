@@ -1,0 +1,21 @@
+localization_strategy,hypothesis_testing,incremental_vs_big_bang,error_recovery,verification_approach,exploration_depth,edit_precision,iteration_count,test_creation,context_gathering,brief_summary,task_id,agent,resolved,original_steps,filtered_steps
+1,0,1,0,0,1,1,1,0,1,No actions were performed in this empty trajectory.,pytest-dev__pytest-7982,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,"No actions were observed in the filtered trajectory, indicating the agent either took no action or only performed internal reasoning without any concrete coding steps.",django__django-11999,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,"No actions were performed - the agent made no attempts to locate, understand, or fix any issues in the codebase.",astropy__astropy-7166,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,No observable actions were taken - the trajectory appears to be empty or filtered to contain no relevant coding activities.,sphinx-doc__sphinx-10466,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,No trajectory data provided - agent appears to have taken no visible actions.,django__django-14349,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,"No actions were taken in this trajectory - the agent performed no file operations, code edits, or executions.",django__django-13821,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,"No actions were taken in this trajectory - the agent performed no file operations, code execution, or any other observable work.",django__django-13786,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,No actions were observed in the trajectory - the agent appears to have done nothing or the trajectory is empty.,django__django-12276,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,No actions were taken by the agent - the trajectory is empty with 0 steps.,sphinx-doc__sphinx-10449,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,"The agent performed no visible actions - no file operations, code execution, or edits were recorded in the trajectory.",django__django-11880,20241023_emergent,True,3,0
+1,0,1,0,0,1,1,1,0,1,No actions were taken by the agent - the trajectory is empty with 0 steps.,django__django-12325,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No observable actions were taken by the agent - the trajectory is empty or contains no visible work.,sphinx-doc__sphinx-9461,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No trajectory data available - the filtered trajectory contains 0 steps with no observable actions or results.,django__django-11087,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No trajectory data available - agent performed no visible actions or the trajectory was completely empty.,django__django-10999,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No trajectory data provided - agent performed no visible actions or operations.,django__django-12708,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No actions were taken - the trajectory is empty with zero steps recorded.,django__django-15973,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,"No actions were taken by the agent - the trajectory contains no file operations, code execution, or edits.",django__django-16631,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No meaningful actions observed in the trajectory - agent appears to have done nothing or the filtering removed all relevant steps.,sympy__sympy-21596,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,No actions were taken by the agent - the trajectory is empty with 0 steps.,django__django-10097,20241023_emergent,False,3,0
+1,0,1,0,0,1,1,1,0,1,The agent performed no visible actions in this empty trajectory.,django__django-15382,20241023_emergent,False,3,0
