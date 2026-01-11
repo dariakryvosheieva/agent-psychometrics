@@ -40,8 +40,9 @@ model_irt/
 ├── trajectory_upload/          # Trajectory conversion and upload to Lunette
 │   ├── trajectory_converter.py # Convert trajectories to unified format
 │   ├── trajectory_filter.py    # Filter trajectories by criteria
-│   ├── lunette_upload.py       # Single trajectory upload
-│   ├── lunette_batch_upload.py # Batch upload trajectories
+│   ├── lunette_reupload_with_metadata.py # **RECOMMENDED** Upload with SWE-bench metadata
+│   ├── lunette_upload.py       # [DEPRECATED] Single trajectory upload (no metadata)
+│   ├── lunette_batch_upload.py # [DEPRECATED] Batch upload (no metadata)
 │   ├── lunette_filtered_upload.py # Filtered upload
 │   └── lunette_augment_mappings.py # Pre-compute task-to-run mappings
 │
@@ -346,36 +347,48 @@ mkdir -p ~/.lunette
 echo '{"api_key": "your-key-here"}' > ~/.lunette/config.json
 ```
 
-#### Batch Upload System
+#### Batch Upload System (with SWE-bench Metadata)
 
-Upload existing SWE-bench agent trajectories to Lunette for analysis:
+**IMPORTANT:** Always use `lunette_reupload_with_metadata.py` for uploading trajectories. This script includes proper SWE-bench metadata (repo, patch, test_patch, version, etc.) in each trajectory.
 
 ```bash
-# Upload all agents
-python trajectory_upload/lunette_batch_upload.py
+# Upload all agents with proper metadata
+python trajectory_upload/lunette_reupload_with_metadata.py
 
 # Upload specific agents
-python trajectory_upload/lunette_batch_upload.py --agents 20240620_sweagent_claude3.5sonnet
+python trajectory_upload/lunette_reupload_with_metadata.py --agents 20240620_sweagent_claude3.5sonnet
 
 # Dry run to see what would be uploaded
-python trajectory_upload/lunette_batch_upload.py --dry_run
+python trajectory_upload/lunette_reupload_with_metadata.py --dry_run
+
+# Use smaller batch size for agents with large trajectories
+python trajectory_upload/lunette_reupload_with_metadata.py --batch_size 10
 ```
 
 **Key features:**
-- Automatically batches large uploads (>100 trajectories split into 100-trajectory runs)
+- Includes full SWE-bench metadata: repo, patch, test_patch, version, created_at, hints_text, base_commit, FAIL_TO_PASS, PASS_TO_PASS
+- Automatic retry with smaller batch sizes when encountering 413 errors
+- Deletes existing runs before re-uploading (safe to re-run)
 - Creates tracking files at `trajectory_data/unified_trajs/<agent>/_lunette_uploads.json`
-- Supports force re-upload with `--force` flag
+
+**Current upload status (as of 2026-01-10):**
+- 77/78 agents uploaded with proper metadata
+- 36,010 trajectories total
+- 1 agent (`20250118_codeshellagent_gemini_2.0_flash_experimental`) partially uploaded due to server issues
 
 **Tracking file structure:**
 ```json
 {
   "agent": "20240620_sweagent_claude3.5sonnet",
-  "run_ids": ["4b42140c-...", "c5dd5b11-...", ...],
-  "uploaded_at": "2026-01-08T12:34:56.123456",
+  "run_ids": ["d1c72b3d-...", "51528284-...", ...],
+  "uploaded_at": "2026-01-10T15:58:57.853428",
+  "has_swebench_metadata": true,
+  "trajectory_count": 500,
   "trajectories": [
     {
-      "task_id": "django__django-11728",
-      "trajectory_id": "0f77e97b-0dd2-406d-8b4f-54c123c6e139",
+      "task_id": "astropy__astropy-12907",
+      "trajectory_id": "09888d9d-...",
+      "run_id": "d1c72b3d-...",
       "resolved": false,
       "message_count": 91
     }

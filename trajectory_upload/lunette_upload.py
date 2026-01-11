@@ -1,21 +1,18 @@
 """
+DEPRECATED: This script uploads without SWE-bench metadata.
+Use lunette_reupload_with_metadata.py instead.
+
 Upload converted trajectories to Lunette.
 
 Takes the unified JSON trajectories from trajectory_converter.py and uploads
 them to Lunette for grading/analysis.
 
 Usage:
-    # Upload all converted trajectories for one agent
+    # RECOMMENDED: Use the metadata-aware uploader instead
+    python trajectory_upload/lunette_reupload_with_metadata.py --agents 20240620_sweagent_claude3.5sonnet
+
+    # Legacy (no metadata):
     python trajectory_upload/lunette_upload.py --agent 20240620_sweagent_claude3.5sonnet
-
-    # Upload from a specific directory
-    python trajectory_upload/lunette_upload.py --input_dir chris_output/unified_trajs/20240620_sweagent_claude3.5sonnet
-
-    # Upload with a limit
-    python trajectory_upload/lunette_upload.py --agent 20240620_sweagent_claude3.5sonnet --limit 50
-
-    # Dry run (show what would be uploaded)
-    python trajectory_upload/lunette_upload.py --agent 20240620_sweagent_claude3.5sonnet --dry_run
 """
 
 import argparse

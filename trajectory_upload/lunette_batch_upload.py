@@ -1,17 +1,17 @@
 """
+DEPRECATED: This script uploads without SWE-bench metadata.
+Use lunette_reupload_with_metadata.py instead.
+
 Batch upload all converted trajectories to Lunette.
 
 Uploads ALL trajectories for each agent in a SINGLE run (not one run per trajectory).
 
 Usage:
-    # Upload all agents
-    python trajectory_upload/lunette_batch_upload.py
+    # RECOMMENDED: Use the metadata-aware uploader instead
+    python trajectory_upload/lunette_reupload_with_metadata.py
 
-    # Upload specific agents
-    python trajectory_upload/lunette_batch_upload.py --agents 20240620_sweagent_claude3.5sonnet 20240728_sweagent_gpt4o
-
-    # Dry run
-    python trajectory_upload/lunette_batch_upload.py --dry_run
+    # Legacy (no metadata):
+    python trajectory_upload/lunette_batch_upload.py --agents 20240620_sweagent_claude3.5sonnet
 """
 
 import argparse
