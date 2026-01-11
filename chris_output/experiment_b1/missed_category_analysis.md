@@ -272,11 +272,61 @@ Implemented a hierarchical YES/NO question format for each of the 25 categories.
 
 ---
 
+## Alternative Classification Approaches Tested
+
+### Single-Label Classification (Predict ONE Primary Failure Mode)
+
+Hypothesis: Maybe multi-label is too hard. What if we ask for just the ONE most important failure mode?
+
+**Result: 0/6 accuracy (0%)**
+
+| Task | Ground Truth | Predicted |
+|------|-------------|-----------|
+| astropy-13236 | issue_interference | issue_misleading |
+| django-10999 | issue_interference | specific_case_overfitting |
+| astropy-13398 | issue_misleading | component_coordination |
+| astropy-13453 | redundant_erroneous_implementation, reproduction_output_misreading | insufficient_domain_knowledge |
+| astropy-8872 | reproduction_output_misreading, recurring_pattern, control_flow | algorithmic_implementation |
+| django-11087 | algorithmic_implementation, verification_weakening, etc. | non_progressive_iteration |
+
+**Finding**: Single-label performs WORSE than multi-label. The model and human annotators systematically disagree on what the "primary" failure mode is.
+
+### Top-K Classification (Predict TOP 3 Failure Modes)
+
+Hypothesis: Giving the model 3 chances should improve hit rate.
+
+**Result: 1/6 accuracy (16.7%)**
+
+Only astropy-13236 got a hit (issue_interference appeared in top 3).
+
+**Key pattern observed**: The model defaults to the same generic categories:
+- `algorithmic_implementation` appears in 4/6 predictions
+- `insufficient_domain_knowledge` appears in 4/6 predictions
+- `component_coordination` appears in 3/6 predictions
+
+These are broad "catch-all" categories. Specific categories like `issue_interference`, `issue_misleading`, `reproduction_output_misreading` are rarely picked unless explicitly forced.
+
+### Approach Comparison Summary
+
+| Approach | Jaccard | Hit Rate | Notes |
+|----------|---------|----------|-------|
+| Original multi-label | 0.152 | 50% overlap | Baseline |
+| **Hierarchical multi-label** | **0.276** | **66.7% overlap** | **BEST** |
+| Abstract few-shot | 0.056 | poor | Abstract descriptions hurt |
+| Real trajectory few-shot | 0.123 | moderate | Real examples slightly worse than original |
+| Hierarchical + examples | 0.024 | very poor | Format confusion, empty predictions |
+| Single-label (Top-1) | 0.00 | 0% | Model picks different primary causes |
+| Top-K (Top-3) | 0.02 | 16.7% | Model defaults to generic categories |
+
+**Key insight**: The hierarchical YES/NO approach works best because it FORCES the model to explicitly consider each specific category. When allowed to choose freely (single-label, top-K), the model defaults to generic categories and misses the specific distinctions that define failure modes.
+
+---
+
 ## Recommendations for Full 203-Task Run
 
-1. **Use hierarchical prompt** for improved detection of most categories
+1. **Use hierarchical prompt** - the only approach that consistently improves detection
 2. **Accept limitations** for verification_weakening and issue_misleading - these may require different approaches:
    - verification_weakening: Explicit file diff analysis
    - issue_misleading: More examples of what counts as misleading
-3. **Consider ensemble approach**: Run both original and hierarchical prompts, take union of predictions
-4. **Report per-category metrics** to understand which categories the judge handles well vs poorly
+3. **Report per-category metrics** to understand which categories the judge handles well vs poorly
+4. **Do NOT use**: single-label, top-K, or few-shot approaches - all performed worse than hierarchical

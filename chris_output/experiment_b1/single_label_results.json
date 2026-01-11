@@ -1,0 +1,56 @@
+[
+  {
+    "task_id": "astropy__astropy-13236",
+    "ground_truth": [
+      "issue_interference"
+    ],
+    "predicted": "issue_misleading",
+    "hit": false
+  },
+  {
+    "task_id": "django__django-10999",
+    "ground_truth": [
+      "issue_interference"
+    ],
+    "predicted": "specific_case_overfitting",
+    "hit": false
+  },
+  {
+    "task_id": "astropy__astropy-13398",
+    "ground_truth": [
+      "issue_misleading"
+    ],
+    "predicted": "component_coordination",
+    "hit": false
+  },
+  {
+    "task_id": "astropy__astropy-13453",
+    "ground_truth": [
+      "redundant_erroneous_implementation",
+      "reproduction_output_misreading"
+    ],
+    "predicted": "insufficient_domain_knowledge",
+    "hit": false
+  },
+  {
+    "task_id": "astropy__astropy-8872",
+    "ground_truth": [
+      "reproduction_output_misreading",
+      "recurring_pattern",
+      "control_flow"
+    ],
+    "predicted": "algorithmic_implementation",
+    "hit": false
+  },
+  {
+    "task_id": "django__django-11087",
+    "ground_truth": [
+      "algorithmic_implementation",
+      "verification_weakening",
+      "insufficient_domain_knowledge",
+      "control_flow"
+    ],
+    "predicted": "non_progressive_iteration",
+    "hit": false
+  }
+]

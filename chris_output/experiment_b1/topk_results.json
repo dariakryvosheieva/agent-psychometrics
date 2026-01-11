@@ -1,0 +1,88 @@
+[
+  {
+    "task_id": "astropy__astropy-13236",
+    "ground_truth": [
+      "issue_interference"
+    ],
+    "predictions": [
+      "insufficient_domain_knowledge",
+      "issue_interference",
+      "reproduction_output_misreading"
+    ],
+    "overlap": [
+      "issue_interference"
+    ],
+    "hit_any": true
+  },
+  {
+    "task_id": "django__django-10999",
+    "ground_truth": [
+      "issue_interference"
+    ],
+    "predictions": [
+      "algorithmic_implementation",
+      "insufficient_domain_knowledge",
+      "specific_case_overfitting"
+    ],
+    "overlap": [],
+    "hit_any": false
+  },
+  {
+    "task_id": "astropy__astropy-13398",
+    "ground_truth": [
+      "issue_misleading"
+    ],
+    "predictions": [
+      "algorithmic_implementation",
+      "component_coordination",
+      "insufficient_domain_knowledge"
+    ],
+    "overlap": [],
+    "hit_any": false
+  },
+  {
+    "task_id": "astropy__astropy-13453",
+    "ground_truth": [
+      "redundant_erroneous_implementation",
+      "reproduction_output_misreading"
+    ],
+    "predictions": [
+      "algorithmic_implementation",
+      "component_coordination",
+      "insufficient_verification_capability"
+    ],
+    "overlap": [],
+    "hit_any": false
+  },
+  {
+    "task_id": "astropy__astropy-8872",
+    "ground_truth": [
+      "control_flow",
+      "recurring_pattern",
+      "reproduction_output_misreading"
+    ],
+    "predictions": [
+      "algorithmic_implementation",
+      "component_coordination",
+      "insufficient_domain_knowledge"
+    ],
+    "overlap": [],
+    "hit_any": false
+  },
+  {
+    "task_id": "django__django-11087",
+    "ground_truth": [
+      "algorithmic_implementation",
+      "control_flow",
+      "insufficient_domain_knowledge",
+      "verification_weakening"
+    ],
+    "predictions": [
+      "insufficient_verification_capability",
+      "keywords_location",
+      "reproduction_script_failure"
+    ],
+    "overlap": [],
+    "hit_any": false
+  }
+]
