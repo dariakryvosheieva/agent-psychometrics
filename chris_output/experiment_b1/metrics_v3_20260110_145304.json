@@ -1,0 +1,78 @@
+{
+  "n_samples": 5,
+  "jaccard_mean": 0.0,
+  "jaccard_std": 0.0,
+  "exact_match_rate": 0.0,
+  "any_overlap_rate": 0.0,
+  "micro_precision": 0.0,
+  "micro_recall": 0.0,
+  "micro_f1": 0,
+  "category_metrics": {
+    "redundant_erroneous_implementation": {
+      "precision": 0,
+      "recall": 0.0,
+      "f1": 0,
+      "support": 1
+    },
+    "verification_abandonment": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "non_progressive_iteration": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "algorithmic_implementation": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "issue_misleading": {
+      "precision": 0,
+      "recall": 0.0,
+      "f1": 0,
+      "support": 1
+    },
+    "insufficient_domain_knowledge": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "reproduction_script_failure": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "reproduction_output_misreading": {
+      "precision": 0,
+      "recall": 0.0,
+      "f1": 0,
+      "support": 2
+    },
+    "issue_interference": {
+      "precision": 0,
+      "recall": 0.0,
+      "f1": 0,
+      "support": 1
+    },
+    "component_coordination": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0,
+      "support": 2
+    },
+    "insufficient_verification_capability": {
+      "precision": 0.0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    }
+  }
+}

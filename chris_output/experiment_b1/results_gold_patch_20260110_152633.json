@@ -1,0 +1,147 @@
+{
+  "llm_predictions": [
+    {
+      "task_id": "astropy__astropy-13236",
+      "predicted": [
+        "reproduction_output_misreading",
+        "specific_case_overfitting",
+        "issue_misleading",
+        "verification_abandonment"
+      ],
+      "explanation": "Looking at the agent trajectory compared to the GOLD PATCH, I can identify the root causes of failure:\n\n**Root Cause Analysis:**\n\nThe agent completely misunderstood the requirements. The PR description asked for:\n1. Add a FutureWarning in version 5.1 \n2. Remove the auto-transform behavior in version 5.2\n\nHowever, the GOLD PATCH shows that the actual requirement was to **immediately remove** the structured ndarray auto-transform code (lines 1242-1247 in the `_convert_data_to_col` method).\n\n**Key Failure Modes:**\n\n1. **issue_misleading** - The PR description was written as a future roadmap (\"Add FutureWarning in 5.1, remove in 5.2\") but the actual expectation was immediate removal of the problematic code.\n\n2. **reproduction_output_misreading** - The agent saw that structured arrays were being converted to NdarrayMixin and interpreted this as \"working correctly\" rather than recognizing this as the problematic behavior that needed to be removed.\n\n3. **specific_case_overfitting** - The agent implemented exactly what the PR description literally stated (adding warnings) rather than understanding the underlying goal of removing the auto-transform behavior.\n\n4. **verification_abandonment** - The agent declared success after confirming the warning appeared, without verifying that the core issue (unwanted auto-transformation) was actually resolved.\n\nThe agent treated the PR description as literal requirements rather than recognizing that the immediate need was to remove the auto-transform code entirely. The GOLD PATCH shows a simple deletion of the problematic code block, while the agent added warning logic that perpetuated the unwanted behavior.\n\n**Applicable Categories:**\n- issue_misleading\n- reproduction_output_misreading  \n- specific_case_overfitting\n- verification_abandonment",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13398",
+      "predicted": [
+        "issue_misleading",
+        "insufficient_domain_knowledge",
+        "redundant_erroneous_implementation",
+        "interface_contract",
+        "specific_case_overfitting",
+        "component_coordination",
+        "recurring_pattern",
+        "keywords_location",
+        "insufficient_verification_capability"
+      ],
+      "explanation": "Looking at the agent trajectory compared to the gold patch, I can identify several key failure modes:\n\n## ROOT CAUSE ANALYSIS\n\nThe agent **completely failed to localize** the actual problem. The PR description was about implementing direct ITRS-to-observed transformations, but the agent fundamentally misunderstood what needed to be done by comparing the agent's implementation with the gold patch.\n\n### Key Differences:\n\n1. **Gold patch modifies existing ITRS frame and transforms** - adds location attribute to ITRS, fixes existing intermediate rotation transforms, creates comprehensive ITRS-observed transforms with refraction support\n\n2. **Agent created entirely new standalone transforms** - made a simple new file without modifying the existing ITRS frame structure or fixing the core issues\n\n3. **Agent missed critical ITRS frame modifications** - the gold patch shows ITRS needs a `location` attribute and extensive documentation updates, which the agent completely ignored\n\n4. **Agent missed existing transform fixes** - the gold patch fixes bugs in `intermediate_rotation_transforms.py` where `EARTH_CENTER` should be `itrs_frame.location`, but agent never examined this file\n\n5. **Agent's implementation lacks refraction handling** - the gold patch includes sophisticated atmospheric refraction corrections using ERFA functions, while agent's code has no refraction support\n\n6. **Agent misunderstood the scope** - treated this as adding new transforms rather than fixing fundamental issues with how ITRS coordinates are handled in the existing transformation graph\n\n## FAILURE MODE CATEGORIES\n\n**A. LOCALIZATION FAILURES:**\n- **issue_misleading**: The PR description focused on the end goal but didn't clearly specify that existing ITRS frame and transforms needed modification\n- **keywords_location**: Agent focused on \"transformations\" keyword and created new transforms instead of understanding the deeper structural changes needed\n\n**B.1 Strategy Defects:**\n- **specific_case_overfitting**: Agent created a simple solution that handles basic cases but misses the comprehensive changes needed for proper ITRS handling\n- **redundant_erroneous_implementation**: Created duplicate transformation logic instead of fixing existing transforms\n\n**B.2 Implementation Defects:**\n- **insufficient_domain_knowledge**: Agent lacked understanding of astropy's coordinate transformation architecture and the role of frame attributes\n- **component_coordination**: Failed to coordinate changes across multiple files (ITRS frame definition, existing transforms, and new transforms)\n\n**B.3 Incomplete Repair:**\n- **interface_contract**: Didn't modify ITRS frame interface to include location attribute as required\n- **recurring_pattern**: Missed that similar location-handling bugs exist in multiple transform functions\n\n**C.1 Reproduction/Verification:**\n- **insufficient_verification_capability**: Agent's tests only verified basic functionality, not the complex scenarios the PR was meant to address (satellite observations, topocentric vs geocentric issues)\n\nThe agent essentially solved a different, simpler problem than what was actually required, demonstrating a fundamental failure to understand the scope and complexity of the changes needed.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13453",
+      "predicted": [
+        "verification_abandonment",
+        "insufficient_domain_knowledge",
+        "component_coordination",
+        "algorithmic_implementation"
+      ],
+      "explanation": "Looking at this trajectory, I can identify several failure modes:\n\n1. **component_coordination**: The agent correctly identified that the HTML writer needed to be modified to support formatting, but failed to implement the complete solution. The gold patch shows that two changes were needed:\n   - `self.data.cols = cols` (line 352)\n   - `self.data._set_col_formats()` (line 358)\n   \n   The agent only attempted to modify the column iteration logic but didn't ensure the formats were properly set up in the data object first.\n\n2. **algorithmic_implementation**: The agent's approach of checking `hasattr(col.info, 'format') and callable(col.info.format)` and then manually applying formatting was incorrect. The proper solution was to ensure the data object had the correct column references and call the existing `_set_col_formats()` method, which would set `col.info.format` appropriately for use by the existing `col.info.iter_str_vals()` method.\n\n3. **insufficient_domain_knowledge**: The agent didn't understand how the astropy formatting system works. The formats parameter gets processed by the base writer class and stored in `self.data.formats`, but the HTML writer needed to:\n   - Set `self.data.cols = cols` so the data object has the right column references\n   - Call `self.data._set_col_formats()` to apply the formats from `self.data.formats` to the individual columns\n   \n   Instead, the agent tried to manually implement format application, bypassing the existing framework.\n\n4. **verification_abandonment**: After implementing the fix, the agent ran the test and saw it didn't work, but then didn't pursue debugging further or try a different approach. The agent should have investigated why the format wasn't being set on the column.\n\nThe root cause was that the agent didn't understand the existing architecture where formats are applied via the `_set_col_formats()` method after ensuring the data object has proper column references. The gold patch shows this is a simple two-line fix that leverages existing infrastructure.\n\n**Applicable failure modes:**\n- component_coordination\n- algorithmic_implementation  \n- insufficient_domain_knowledge\n- verification_abandonment",
+      "method": "direct_llm",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "redundant_erroneous_implementation"
+      ],
+      "agent": "openhands"
+    }
+  ],
+  "lunette_predictions": [],
+  "llm_metrics": {
+    "n_samples": 3,
+    "jaccard_mean": 0.037037037037037035,
+    "jaccard_std": 0.05237828008789241,
+    "exact_match_rate": 0.0,
+    "any_overlap_rate": 0.3333333333333333,
+    "micro_precision": 0.058823529411764705,
+    "micro_recall": 0.25,
+    "micro_f1": 0.09523809523809523,
+    "category_metrics": {
+      "issue_misleading": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "support": 1
+      },
+      "verification_abandonment": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "insufficient_domain_knowledge": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "redundant_erroneous_implementation": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0,
+        "support": 1
+      },
+      "interface_contract": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "reproduction_output_misreading": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0,
+        "support": 1
+      },
+      "algorithmic_implementation": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "specific_case_overfitting": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "component_coordination": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "recurring_pattern": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "issue_interference": {
+        "precision": 0,
+        "recall": 0.0,
+        "f1": 0,
+        "support": 1
+      },
+      "keywords_location": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      },
+      "insufficient_verification_capability": {
+        "precision": 0.0,
+        "recall": 0,
+        "f1": 0,
+        "support": 0
+      }
+    }
+  },
+  "lunette_metrics": null
+}

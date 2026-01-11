@@ -1,0 +1,6 @@
+[
+  {
+    "error": "Server error '504 Gateway Time-out' for url 'https://lunette.dev/api/investigations/run'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/504",
+    "run_id": "4e928991-096b-4982-84f4-781f0524262b"
+  }
+]

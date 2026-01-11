@@ -1,0 +1,81 @@
+[
+  {
+    "task_id": "astropy__astropy-13236",
+    "trajectory_id": "ea860af8-94f2-451f-9a14-2455eff2eef6",
+    "run_id": "1bff9605-dbb1-4eab-9bd6-5f7b1673cb30",
+    "predicted": [
+      "verification_abandonment",
+      "non_progressive_iteration",
+      "insufficient_verification_capability"
+    ],
+    "explanation": "The trajectory demonstrates multiple failure modes from category C (Verification issues):\n\n**C1. Verification - insufficient_verification_capability**: The agent only created and ran custom reproduction scripts but completely failed to run the existing test suite. While the user stated they 'took care of test file changes', this meant test modifications were handled, not that tests shouldn't be run. The agent needed to verify the changes don't break existing functionality by running `pytest astropy/table/tests/` but never did.\n\n**C2. Iteration - non_progressive_iteration**: The agent prematurely declared success after only running custom scripts, stating 'The changes are minimal and focused on the specific issue' and 'Let me know if you'd like me to make any adjustments!' without running the comprehensive test suite that would have revealed whether the implementation was correct.\n\n**C1. Verification - verification_abandonment**: After running basic custom tests, the agent abandoned further verification. The repository clearly has test files in `astropy/table/tests/` including `test_mixin.py` which likely contains tests for NdarrayMixin behavior. These were never executed to validate the changes.\n\nThe implementation itself (adding a FutureWarning) appears technically correct for the 5.1 requirement, but the agent failed to verify this through the proper testing infrastructure. This is a classic case of insufficient verification leading to an incomplete solution that may have unintended consequences not caught by the limited custom tests.",
+    "agent": "openhands",
+    "ground_truth": [
+      "issue_interference"
+    ]
+  },
+  {
+    "task_id": "astropy__astropy-13398",
+    "trajectory_id": "ea24d87b-8663-448a-b57e-83ec3177c441",
+    "run_id": "1bff9605-dbb1-4eab-9bd6-5f7b1673cb30",
+    "predicted": [
+      "verification_abandonment",
+      "non_progressive_iteration",
+      "insufficient_verification_capability"
+    ],
+    "explanation": "Identified 3 primary failure modes in this failed SWE-bench trajectory:\n\n1. **insufficient_verification_capability** (C1.Verification): The agent never ran the actual test suite (pytest), only custom reproduction scripts. The task mentioned existing tests that the agent should have validated against, but the agent relied solely on manual verification of the happy path.\n\n2. **non_progressive_iteration** (C2.Iteration): After implementing the fix and seeing it work in simple test cases, the agent declared success without iterating further. When prompted to continue working, the agent did not respond or run comprehensive tests.\n\n3. **verification_abandonment** (C3.Retreat): The agent abandoned thorough verification practices by not running the full test suite. Instead of ensuring all tests pass, the agent was satisfied with demonstrating the feature worked in a few manually-created examples.\n\nThe agent's implementation appeared correct for the simple cases tested (adding header_rows parameter to RST class, properly handling position lines), but the 0.0 score indicates the solution failed actual tests. The root cause was inadequate verification - the agent never ran the real test suite to validate the implementation comprehensively, leading to undetected issues.",
+    "agent": "openhands",
+    "ground_truth": [
+      "issue_misleading"
+    ]
+  },
+  {
+    "task_id": "astropy__astropy-13453",
+    "trajectory_id": "816ec97b-d936-41a3-b62a-ed9a24dda5f7",
+    "run_id": "1bff9605-dbb1-4eab-9bd6-5f7b1673cb30",
+    "predicted": [
+      "algorithmic_implementation",
+      "non_progressive_iteration",
+      "component_coordination",
+      "insufficient_verification_capability"
+    ],
+    "explanation": "FAILED SWE-bench trajectory with multiple failure modes:\n\n1. **insufficient_verification_capability (C1)**: CRITICAL - Agent only tested with custom reproduction script, never ran actual test suite (pytest), did not verify existing tests still pass. This is the primary failure.\n\n2. **algorithmic_implementation (B2)**: Agent's approach of propagating NotImplemented through multiple layers may be incorrect. Made complex changes across 4 files with interconnected logic that may not properly implement the requirement.\n\n3. **component_coordination (B3)**: Modified multiple components (core.py, helpers.py, converters.py, quantity.py) without ensuring proper coordination. Edge cases (incompatible units, dimensionless+units) still fail, suggesting incomplete coordination.\n\n4. **non_progressive_iteration (C2)**: When edge cases failed, agent accepted errors as 'appropriate' without investigating if they indicated fundamental problems. Stopped iterating after main case worked without comprehensive validation.\n\nThe agent declared success based solely on their reproduction script working, never validating against the actual test suite. Score 0.0 confirms the implementation failed validation.",
+    "agent": "openhands",
+    "ground_truth": [
+      "reproduction_output_misreading",
+      "redundant_erroneous_implementation"
+    ]
+  },
+  {
+    "task_id": "astropy__astropy-13977",
+    "trajectory_id": "086d1f94-db90-4004-8a10-b0d3e69d65d0",
+    "run_id": "1bff9605-dbb1-4eab-9bd6-5f7b1673cb30",
+    "predicted": [
+      "insufficient_domain_knowledge",
+      "insufficient_verification_capability",
+      "non_progressive_iteration",
+      "reproduction_script_failure"
+    ],
+    "explanation": "FAILED SWE-bench trajectory with multiple critical verification failures.\n\nAPPLICABLE FAILURE MODES:\n\n1. **insufficient_verification_capability** (C1 - PRIMARY): Agent created custom test scripts that passed but NEVER ran the repository's actual test suite. The prompt explicitly mentioned existing tests (\"I've already taken care of all changes to any of the test files\"), but agent only verified with self-written tests. This is the core failure - verification was done against wrong test suite.\n\n2. **reproduction_script_failure** (C1): Agent never created a script to reproduce the original error/issue. Jumped directly to implementation without understanding what was actually failing. No attempt to run existing tests to see baseline failures.\n\n3. **non_progressive_iteration** (C2): After seeing custom tests pass, agent declared success without iterating to check repository tests. No discovery of actual failures that would have prompted fixes. Agent stopped at first apparent success without proper validation.\n\n4. **insufficient_domain_knowledge** (B2 - SUSPECTED): While implementation appears technically sound (rotation matrices, topocentric conversions look correct), without running actual tests we cannot rule out subtle integration issues, missing frame attribute handling, or edge cases covered by real test suite.\n\nROOT CAUSE: Agent fundamentally misunderstood verification requirements. Created and passed own tests instead of running existing test infrastructure that SWE-bench evaluates against. This represents a critical gap in verification methodology.\n\nIMPACT: Implementation may be partially or fully correct, but was never validated against actual requirements encoded in repository tests.",
+    "agent": "openhands",
+    "ground_truth": [
+      "component_coordination"
+    ]
+  },
+  {
+    "task_id": "astropy__astropy-14182",
+    "trajectory_id": "45186081-5732-42e3-a866-cdee360fa1c3",
+    "run_id": "1bff9605-dbb1-4eab-9bd6-5f7b1673cb30",
+    "predicted": [
+      "algorithmic_implementation",
+      "non_progressive_iteration",
+      "insufficient_verification_capability"
+    ],
+    "explanation": "FAILED SWE-bench trajectory analysis - Applicable failure modes:\n\n**C1. Verification: insufficient_verification_capability** - PRIMARY: The agent only tested with a custom reproduction script and never ran the actual test suite. The prompt stated 'I've already taken care of all changes to any of the test files,' indicating existing tests should validate the fix. The agent completely failed to run these tests before declaring completion.\n\n**B2. Implementation: algorithmic_implementation** - SECONDARY: The agent's fix directly applies format functions by iterating over column values, bypassing astropy's standard formatting mechanism (via col.info.format and _set_col_formats()). The agent attempted to use _set_col_formats() but encountered errors (AttributeError: 'HTMLData' object has no attribute 'cols'), then abandoned that approach entirely. The final implementation may not integrate properly with astropy's formatting infrastructure and could fail for complex format specifications.\n\n**C2. Iteration: non_progressive_iteration** - TERTIARY: After achieving success with the custom test, the agent immediately concluded the task was complete without running the actual test suite or verifying integration. The agent failed to progress from 'manual test passes' to 'all tests pass,' which is the actual completion criterion for SWE-bench tasks.",
+    "agent": "openhands",
+    "ground_truth": [
+      "reproduction_output_misreading",
+      "component_coordination"
+    ]
+  }
+]

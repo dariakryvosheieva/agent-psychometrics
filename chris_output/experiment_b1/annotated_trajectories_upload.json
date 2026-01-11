@@ -1,0 +1,2086 @@
+{
+  "run_ids": [
+    "7f5059a1-c6a4-4b85-a56d-ec75defb1d7a",
+    "2daff2de-6c82-49de-aded-d2440e151edb",
+    "a83024cb-1fc3-498a-bece-a44372eb26bf",
+    "678220e2-081a-404c-9f40-f2d491da3eaf",
+    "52d9b55f-7ed6-4fa9-9bd2-25a6a14cbfc3",
+    "bd8c5ddb-9114-41e4-81b4-e719d60e3968",
+    "69f09179-e96d-44d1-b6a9-4dab1c9ac14f",
+    "23bfac39-8549-4bda-a239-b6893765dc6f",
+    "f0d3aa44-fd40-492b-a49d-fd65aeec1a09",
+    "8e3e5f0f-7c6d-49b0-808d-9cebc2e133a1",
+    "3b5b5d4a-041a-49c9-be09-8f565a8044af",
+    "09bfd308-6490-4e68-ab9b-af948a465f12",
+    "b177be95-de8f-4b2b-8c90-b4d2dc2b00fe",
+    "e08505c0-51c8-4580-9c55-c618171c852a",
+    "3da81a4b-4083-465c-8863-cfb74c141e46",
+    "23aab3eb-9ed5-4831-8244-5d1efa677262",
+    "2c0b9523-ebf0-4942-a1dd-0681f732d392",
+    "60d69bb1-cd0c-46da-bc05-65fbf0acb36c",
+    "f9f302d7-2082-45eb-8047-0cfd933448e6",
+    "9cd203d9-cb8d-4f81-a288-413d995e2a17",
+    "c0e30343-f95c-4155-8fb5-cd11599860ac",
+    "c8d09c07-d3bd-4950-8a4c-4c0bc183291f",
+    "45da096e-fd9a-4b7a-ad15-0c98b2272d2f",
+    "2481cb0a-ced4-4683-b6e9-a61fa869096a",
+    "2c0f106c-1fa7-48f5-ae17-112b7906acf9",
+    "28eb0ba8-48df-4f25-8c4e-cde754f5c39a",
+    "0e978a89-a1d6-464e-8613-c210890feb49",
+    "8265b775-6907-4117-a4cf-a305576bc2ba",
+    "07f9a6d7-dc79-4f0f-8f5e-de8cb2ab0e38",
+    "b113318f-7007-474f-8c4a-6ff5bcffddd6",
+    "04742a4f-d789-4153-b42b-cbf1d1fb8024",
+    "8114335f-1b67-4928-94de-216422e62e09",
+    "fd0b6a36-5e99-43ac-bb8b-8fbaf3857c04",
+    "7e6f77da-5c7d-4e0d-b863-9e2cd81a3f31",
+    "d7057b8d-b5c0-4feb-995d-bce1ab5a0ca2",
+    "a9d612ca-84fe-4efc-a2c8-e73e526a8e1a",
+    "42cff045-7bea-4b32-9500-894bb47713f3",
+    "c3d864d4-7952-4206-be17-aa6ec519eb39",
+    "e695f4ef-cc7a-4cb0-9ffb-b276fe7704eb",
+    "02708571-5d8a-4c8a-bb6a-2bb3559d10b3",
+    "56284413-3922-4dd7-a0fd-e83f6f1cdb9a",
+    "dbb83b15-1aa5-4ca1-81b0-658a512303d2",
+    "24e65064-acb0-448b-9344-87c7e1f153ce",
+    "d2aa946d-6454-4848-86a1-8b833cfd792f",
+    "33bac990-4669-4d43-ae05-670e04882cc7",
+    "af261f9a-7500-4d46-b0fb-7e0d1818dc56",
+    "a0cf543c-ef9b-415d-84fb-c78bd4ef20f3",
+    "52c38f55-d3dd-471c-9faf-21257a05d1c1",
+    "654e0f14-d7fc-4c76-8045-9b9ff6fd92cf",
+    "e6b6ba44-b0da-42bc-97e1-b28aecd7666d",
+    "652fc75f-8900-49a1-a540-2d93a04f1dcb",
+    "95dc4d9f-0fc9-45c1-8a30-a75b5ade885e",
+    "fd25e242-8f64-46b5-93b5-c870184980aa",
+    "b5dc78bf-b36d-44f6-83b8-746dcefaac05",
+    "83ae8803-76e5-40c4-980e-00f40047ea85",
+    "bad17618-aa63-452f-a5f9-09c21a4cc3b0",
+    "1771a00b-a9c6-4723-964b-639a34b4a665",
+    "fd8e0213-dbf8-4694-bf84-aa9fb774f60c",
+    "2f3171ba-6b27-4557-8b47-0df074b135f5",
+    "61ff0926-c28a-4793-ae80-f7fcecc2ed69",
+    "3411ffa8-0a0e-4ffe-a741-18601033acf1",
+    "c81d7203-aab3-4e76-b8db-e8500fb1b12d",
+    "c23491da-ceb7-4605-a15f-c4620f0500a1",
+    "b09dc153-f225-47e6-90cb-67da52573998",
+    "f5f567fa-1123-4d62-9830-2fee6f0442a2",
+    "0a3c0259-eb20-42b1-8bdf-20491a832022",
+    "30fe2b05-509c-4e58-9237-566457388a31",
+    "fd01a016-47a7-42a9-820a-1dc558c84043",
+    "b755e06b-86f3-4450-8632-212f0e4488b5",
+    "bad36100-135c-4d07-8e4c-22dde6adac7e",
+    "134ad5f9-c6ab-4eeb-94f5-5565905fa585",
+    "02bbc6db-45c0-4932-837a-d51d233c448f",
+    "fe2dd195-8fcd-4607-abb1-2f1b59e18353",
+    "cfc96119-964a-4207-9371-6ff6dc8e64d6",
+    "3953e924-aae6-46b7-92f3-059f82bb616f",
+    "b38ec58f-68a2-4ba6-9920-f3cefbf87c4c",
+    "7f20a15a-01d7-4540-ac0c-feda9d348c96",
+    "06af00e4-c2ab-492d-b03a-9b4f74e2c284",
+    "7d000527-d7ee-4ee9-a9b2-a083598af3db",
+    "f6abe43f-2b5f-4b65-a2bc-264ef2ae8f74",
+    "64209f43-985e-4cbf-9a21-018931659207",
+    "e3ee3f5d-7d91-4651-933e-42629470b0e1",
+    "74362fb0-b925-4032-a5ec-a17060b3f806",
+    "f338edc6-e4e2-4151-a761-f8bbfbe87e80",
+    "a322640a-d697-4812-8b96-84a52ce9104f",
+    "ac83769e-6ef2-45e6-b36b-21fb6366c53f",
+    "5c85a268-f647-4e41-a4cd-3da4b239dae1",
+    "a0da7a79-30ba-46ac-8750-0cc3b6d2806f",
+    "43c8462a-ce82-4eca-a8d0-dd16b02d0acf",
+    "d733de67-660b-4152-8335-e8b5d14d28c5",
+    "222e60fb-39c0-40ac-b2e9-bcd9968b9168",
+    "6e93aa65-168b-457d-b3ab-dbd6900d6a98",
+    "74cabe5d-e58a-456b-9c0d-826ae997502c",
+    "54f118b4-c921-4f46-a581-533f9d844796",
+    "966cc79a-7ee5-45c8-b385-703741c92c85",
+    "1d6f244d-bbaf-4096-9ec4-35bb34077cf7",
+    "e09f06d0-6fda-4b8e-9343-ff2a35e4eead",
+    "6056a042-4a68-4aa7-8e73-7f643c531013",
+    "016d45da-a7b4-4d3e-b50d-e0880c85efcc",
+    "cdec3d69-dbcd-4040-9b3b-57adb43da1f8",
+    "fb5e5d28-68bf-4466-bf97-4584480a9a8f",
+    "57b3b97f-f568-4dda-a6f3-a18a8ad1df5b",
+    "2cf4a8bd-4b16-478a-89f0-02605359a87b",
+    "f5334cf5-3b12-46a8-b478-8509d8063624",
+    "976bcde1-b0dc-46ce-a73f-d69cd7c1a031",
+    "c82255bd-c7d5-4267-b766-1ba579fcdd81",
+    "a35458ac-da3a-482e-a6cb-12e1cfdaa394",
+    "dc0562e9-6167-4acc-acfc-c670891ec19d",
+    "b175ac8f-15ea-40b4-8882-11c6379c4d71",
+    "a240639c-b7e2-4bc1-abca-88c286e002bc",
+    "f6f9382f-c48c-4bec-be61-b121cd3fce83",
+    "910e0694-f25a-4b19-97a6-20f6395310a8",
+    "8f3fe69d-f6d2-40d6-ab04-94d7517a1879",
+    "70382b39-205b-408b-9075-a82bfaf484a5",
+    "f2d92665-f7df-489d-8db6-bc3619b277e1",
+    "0815e760-18fb-4ce6-9b42-7893646c5f40",
+    "8c467b61-bfa3-404a-bbfa-3f600d674d60",
+    "2adbafc0-ef03-4b1c-b5da-a57f492a7bbd",
+    "76d98931-9495-48a8-9378-bfe6d69cc94e",
+    "f13cd04b-6465-434b-b028-d0ab37a17836",
+    "8e753f8d-03bd-4deb-b909-497a6cd139d2",
+    "081334ea-d9b4-4b5d-8e72-48567bee8049",
+    "4773c3c9-0e5c-4cb1-add5-985f2cf89264",
+    "d32b7555-79e8-4040-be41-521d65ec5b3e",
+    "2ca05d97-d4c6-4663-8d00-b994e933706a",
+    "550c3473-b858-4402-baff-375d2061f7d1",
+    "1249ad19-a960-447e-acbd-9fd52543de2f",
+    "425ebf6a-7ce4-4522-b286-d91e5540b2c2",
+    "869b05dd-624e-483d-9ca0-0911b6ec4bbc",
+    "e79b6633-f7c5-4d85-b2b1-23740cd34d9b",
+    "5a44012e-c155-4481-b061-d90b6e9b274a",
+    "a9a476b5-9921-41f4-a1ee-fd406d4b348b",
+    "0f1ef752-3b6a-48cd-871b-9de6edbd36f6",
+    "7c46605b-bb47-45a4-93f3-f8df2e84f17c",
+    "dc21fae0-558e-4825-9154-1af2bf94ee78",
+    "61988fdd-8e61-483c-9525-d619c67edd8f",
+    "fa21e881-51fd-4a0a-9191-c78d9dbb5b25",
+    "0e445a9d-c668-4df4-b10a-7a0989336b94",
+    "0d42b133-d3df-4c74-97d0-11c75a88b7f4",
+    "458e9034-af43-4984-9fa1-f8e7f64c22c0",
+    "2593e044-e749-4c54-a366-956d18f9ac57",
+    "0f86adf4-8c92-4205-a5dc-fa2ff118cf65",
+    "ae5b77b1-bc85-4347-87c3-3744421e59df",
+    "b9834b63-8225-4ac0-b243-eccab34ab963",
+    "d9c0e55a-e6fa-46fb-91f0-18840071b6c9",
+    "4bae162d-16b8-4202-bb7e-8c720f0a8df0",
+    "2ce6df1c-b0c1-4d2f-a7cf-9f518517f11f",
+    "3f7d8fcd-9789-4131-95cf-6d52b6b6ce01",
+    "2aa6f123-de82-4764-bdf7-cb372e6f707f",
+    "bffce7c1-403a-4f21-b435-477f581eedee",
+    "226b258b-d8d1-4fde-8432-383dfed4afb0",
+    "edf72484-9ef7-4278-b8a7-07383deb5063",
+    "f587f248-c65e-425a-84cd-afd35bc5f72d",
+    "0ff59f71-876d-4dd2-b582-22d8e8f7c4d4",
+    "c4e567a3-d21e-4f93-8dda-2f78b727e1aa",
+    "a5900fce-a8ac-41f6-9d4e-ec9c60f25fc0",
+    "75a68d85-241d-47e6-bc0c-c0a582e4a470",
+    "2c93282c-d9b6-47b0-b08d-b25774e11eb4",
+    "e7aa5f02-46ac-40c8-8f00-a9aa4e93e857",
+    "c860642e-bed6-4106-a137-63410f44454c",
+    "3b9b70c2-cc76-4863-a2e1-67a6bd186a82",
+    "09ede16d-eac2-488c-9dd3-098d9d56839b",
+    "7701ec2b-dc21-4f40-b289-717c9b5d8ca7",
+    "f4a0f98c-e71d-43f1-ac3a-a5fa053892de",
+    "e81a3179-215d-4e0e-ae08-4ae058aa9e5a",
+    "a4aecb89-dfd4-4af5-939c-cee7676a50c4",
+    "95b08266-44b7-4e71-90d4-9b854cb1c17c",
+    "6c541559-d71f-4fdb-9369-db08cc488650",
+    "4605ad35-f67c-4abd-9db4-b42cc5134114",
+    "b596ce18-1a56-4b48-9f65-8043c6dcb85c",
+    "ef7390cc-f22d-4a71-bd9c-f7e5655e8593",
+    "24cd826f-cfd2-4c82-9e71-8bb5f097992a",
+    "2494ec0b-0829-4365-bfa2-534960f974aa",
+    "22b7be6b-53bf-49d2-96a9-c8a05a26418c",
+    "1dbc7302-b145-4e63-9c32-c1e20040af96",
+    "c3f6c775-3cc8-4f7a-910e-31585aeafece",
+    "b93e143c-2e96-4023-85f8-1350ede00252",
+    "011badc2-005c-41b7-bb24-120183ae4d8d",
+    "45d5f7b4-724c-4793-90c7-c909c22c45fb",
+    "82eb8f3f-d86d-4551-87cd-1e687b9c8624",
+    "a6a2b816-cc3a-4d51-bd1e-2ca2c1a1af4d",
+    "327d4b66-c703-4a84-af14-9ecf9a8bdd81",
+    "f44becbe-dbe5-4695-860f-0fd2d9de8a52",
+    "f891b491-dc20-477b-84f3-7c0223a3deab",
+    "46c557e9-b76e-4daf-9e72-ec0d351f57b4",
+    "a87d3a50-afaa-4d46-bf06-de2739fd436e",
+    "14e2f8c0-8001-42f0-9c53-4efe8918d245",
+    "1e9d144f-d0cd-43d2-ae00-b8f86aaf8451",
+    "27854e5b-c125-41ed-95d4-cf8c35f16abe",
+    "b9cf07dc-f8e3-4fb3-b9f9-c75b3da21d03",
+    "7473aa12-40ee-4f5a-ae62-cf92c261c5f2",
+    "54a8d523-2a3d-42a7-a290-5ca7ad7aa6f1",
+    "68aea125-1924-4a9f-9632-e7ff311ae6ec",
+    "03b1cee0-f990-4068-894c-9bdb036fe08a",
+    "7326b547-ee6f-4d9d-bac7-458e9ec2025a",
+    "39ef73cc-1601-4307-96ce-dafdb9912e5f",
+    "5a2380c2-cff8-447c-876d-1749a2bf540e",
+    "bc9e8453-078d-4a50-93b5-d5a312fad036",
+    "e616f006-e00a-46db-8bb7-8a2f3e674412",
+    "a17ecaf5-6fa2-4c9d-8671-8c2e2889c295",
+    "3c93743b-db1f-49fb-8d21-c641608f16ec",
+    "1895d04c-89c6-41df-8550-29e8f50bd789",
+    "fb9a03aa-f9ff-4d9c-acb8-c316359c6b17"
+  ],
+  "trajectory_count": 203,
+  "task_to_run": {
+    "astropy__astropy-13236": "b175ac8f-15ea-40b4-8882-11c6379c4d71",
+    "astropy__astropy-13398": "1895d04c-89c6-41df-8550-29e8f50bd789",
+    "astropy__astropy-13453": "a83024cb-1fc3-498a-bece-a44372eb26bf",
+    "astropy__astropy-13977": "a240639c-b7e2-4bc1-abca-88c286e002bc",
+    "astropy__astropy-14182": "f6f9382f-c48c-4bec-be61-b121cd3fce83",
+    "astropy__astropy-14508": "8f3fe69d-f6d2-40d6-ab04-94d7517a1879",
+    "astropy__astropy-7606": "70382b39-205b-408b-9075-a82bfaf484a5",
+    "astropy__astropy-8872": "f2d92665-f7df-489d-8db6-bc3619b277e1",
+    "django__django-10999": "0815e760-18fb-4ce6-9b42-7893646c5f40",
+    "django__django-11087": "8c467b61-bfa3-404a-bbfa-3f600d674d60",
+    "django__django-11138": "2adbafc0-ef03-4b1c-b5da-a57f492a7bbd",
+    "django__django-11141": "76d98931-9495-48a8-9378-bfe6d69cc94e",
+    "django__django-11206": "b177be95-de8f-4b2b-8c90-b4d2dc2b00fe",
+    "django__django-11239": "f13cd04b-6465-434b-b028-d0ab37a17836",
+    "django__django-11433": "081334ea-d9b4-4b5d-8e72-48567bee8049",
+    "django__django-11490": "4773c3c9-0e5c-4cb1-add5-985f2cf89264",
+    "django__django-11734": "d32b7555-79e8-4040-be41-521d65ec5b3e",
+    "django__django-11848": "550c3473-b858-4402-baff-375d2061f7d1",
+    "django__django-12039": "1249ad19-a960-447e-acbd-9fd52543de2f",
+    "django__django-12262": "9cd203d9-cb8d-4f81-a288-413d995e2a17",
+    "django__django-12406": "e79b6633-f7c5-4d85-b2b1-23740cd34d9b",
+    "django__django-12774": "c8d09c07-d3bd-4950-8a4c-4c0bc183291f",
+    "django__django-13195": "0f1ef752-3b6a-48cd-871b-9de6edbd36f6",
+    "django__django-13344": "7c46605b-bb47-45a4-93f3-f8df2e84f17c",
+    "django__django-13346": "dc21fae0-558e-4825-9154-1af2bf94ee78",
+    "django__django-13449": "28eb0ba8-48df-4f25-8c4e-cde754f5c39a",
+    "django__django-13512": "61988fdd-8e61-483c-9525-d619c67edd8f",
+    "django__django-13513": "fa21e881-51fd-4a0a-9191-c78d9dbb5b25",
+    "django__django-13551": "0e445a9d-c668-4df4-b10a-7a0989336b94",
+    "django__django-13568": "fb9a03aa-f9ff-4d9c-acb8-c316359c6b17",
+    "django__django-13925": "0d42b133-d3df-4c74-97d0-11c75a88b7f4",
+    "django__django-14011": "2593e044-e749-4c54-a366-956d18f9ac57",
+    "django__django-14034": "0f86adf4-8c92-4205-a5dc-fa2ff118cf65",
+    "django__django-14140": "ae5b77b1-bc85-4347-87c3-3744421e59df",
+    "django__django-14311": "b9834b63-8225-4ac0-b243-eccab34ab963",
+    "django__django-14534": "a9d612ca-84fe-4efc-a2c8-e73e526a8e1a",
+    "django__django-14725": "2ce6df1c-b0c1-4d2f-a7cf-9f518517f11f",
+    "django__django-14771": "3f7d8fcd-9789-4131-95cf-6d52b6b6ce01",
+    "django__django-14792": "2aa6f123-de82-4764-bdf7-cb372e6f707f",
+    "django__django-15037": "bffce7c1-403a-4f21-b435-477f581eedee",
+    "django__django-15127": "226b258b-d8d1-4fde-8432-383dfed4afb0",
+    "django__django-15375": "f587f248-c65e-425a-84cd-afd35bc5f72d",
+    "django__django-15741": "24e65064-acb0-448b-9344-87c7e1f153ce",
+    "django__django-16454": "a5900fce-a8ac-41f6-9d4e-ec9c60f25fc0",
+    "django__django-16560": "75a68d85-241d-47e6-bc0c-c0a582e4a470",
+    "django__django-16631": "2c93282c-d9b6-47b0-b08d-b25774e11eb4",
+    "django__django-16642": "a0cf543c-ef9b-415d-84fb-c78bd4ef20f3",
+    "django__django-16667": "e7aa5f02-46ac-40c8-8f00-a9aa4e93e857",
+    "django__django-16938": "654e0f14-d7fc-4c76-8045-9b9ff6fd92cf",
+    "django__django-17084": "c860642e-bed6-4106-a137-63410f44454c",
+    "matplotlib__matplotlib-14623": "09ede16d-eac2-488c-9dd3-098d9d56839b",
+    "matplotlib__matplotlib-20488": "7701ec2b-dc21-4f40-b289-717c9b5d8ca7",
+    "matplotlib__matplotlib-21568": "f4a0f98c-e71d-43f1-ac3a-a5fa053892de",
+    "matplotlib__matplotlib-22871": "a4aecb89-dfd4-4af5-939c-cee7676a50c4",
+    "matplotlib__matplotlib-23476": "95b08266-44b7-4e71-90d4-9b854cb1c17c",
+    "matplotlib__matplotlib-24870": "6c541559-d71f-4fdb-9369-db08cc488650",
+    "matplotlib__matplotlib-26342": "1771a00b-a9c6-4723-964b-639a34b4a665",
+    "mwaskom__seaborn-3069": "ef7390cc-f22d-4a71-bd9c-f7e5655e8593",
+    "psf__requests-1921": "2f3171ba-6b27-4557-8b47-0df074b135f5",
+    "psf__requests-6028": "24cd826f-cfd2-4c82-9e71-8bb5f097992a",
+    "pydata__xarray-2905": "3411ffa8-0a0e-4ffe-a741-18601033acf1",
+    "pydata__xarray-3095": "2494ec0b-0829-4365-bfa2-534960f974aa",
+    "pydata__xarray-4687": "22b7be6b-53bf-49d2-96a9-c8a05a26418c",
+    "pydata__xarray-6599": "b09dc153-f225-47e6-90cb-67da52573998",
+    "pydata__xarray-6938": "b93e143c-2e96-4023-85f8-1350ede00252",
+    "pydata__xarray-6992": "011badc2-005c-41b7-bb24-120183ae4d8d",
+    "pydata__xarray-7229": "45d5f7b4-724c-4793-90c7-c909c22c45fb",
+    "pylint-dev__pylint-4604": "fd01a016-47a7-42a9-820a-1dc558c84043",
+    "pylint-dev__pylint-4661": "b755e06b-86f3-4450-8632-212f0e4488b5",
+    "pylint-dev__pylint-4970": "bad36100-135c-4d07-8e4c-22dde6adac7e",
+    "pylint-dev__pylint-6386": "134ad5f9-c6ab-4eeb-94f5-5565905fa585",
+    "pytest-dev__pytest-10356": "02bbc6db-45c0-4932-837a-d51d233c448f",
+    "pytest-dev__pytest-6197": "fe2dd195-8fcd-4607-abb1-2f1b59e18353",
+    "pytest-dev__pytest-7324": "cfc96119-964a-4207-9371-6ff6dc8e64d6",
+    "pytest-dev__pytest-7490": "3953e924-aae6-46b7-92f3-059f82bb616f",
+    "scikit-learn__scikit-learn-10908": "b38ec58f-68a2-4ba6-9920-f3cefbf87c4c",
+    "scikit-learn__scikit-learn-12682": "7f20a15a-01d7-4540-ac0c-feda9d348c96",
+    "scikit-learn__scikit-learn-13124": "06af00e4-c2ab-492d-b03a-9b4f74e2c284",
+    "scikit-learn__scikit-learn-14983": "7d000527-d7ee-4ee9-a9b2-a083598af3db",
+    "scikit-learn__scikit-learn-25747": "f6abe43f-2b5f-4b65-a2bc-264ef2ae8f74",
+    "scikit-learn__scikit-learn-25973": "64209f43-985e-4cbf-9a21-018931659207",
+    "sphinx-doc__sphinx-10435": "e3ee3f5d-7d91-4651-933e-42629470b0e1",
+    "sphinx-doc__sphinx-10614": "74362fb0-b925-4032-a5ec-a17060b3f806",
+    "sphinx-doc__sphinx-11510": "f338edc6-e4e2-4151-a761-f8bbfbe87e80",
+    "sphinx-doc__sphinx-7757": "a322640a-d697-4812-8b96-84a52ce9104f",
+    "sphinx-doc__sphinx-7889": "ac83769e-6ef2-45e6-b36b-21fb6366c53f",
+    "sphinx-doc__sphinx-8551": "5c85a268-f647-4e41-a4cd-3da4b239dae1",
+    "sphinx-doc__sphinx-9461": "a0da7a79-30ba-46ac-8750-0cc3b6d2806f",
+    "sphinx-doc__sphinx-9591": "43c8462a-ce82-4eca-a8d0-dd16b02d0acf",
+    "sphinx-doc__sphinx-9602": "d733de67-660b-4152-8335-e8b5d14d28c5",
+    "sympy__sympy-13615": "a6a2b816-cc3a-4d51-bd1e-2ca2c1a1af4d",
+    "sympy__sympy-13798": "327d4b66-c703-4a84-af14-9ecf9a8bdd81",
+    "sympy__sympy-13974": "f891b491-dc20-477b-84f3-7c0223a3deab",
+    "sympy__sympy-14248": "46c557e9-b76e-4daf-9e72-ec0d351f57b4",
+    "sympy__sympy-14531": "966cc79a-7ee5-45c8-b385-703741c92c85",
+    "sympy__sympy-15809": "27854e5b-c125-41ed-95d4-cf8c35f16abe",
+    "sympy__sympy-16597": "b9cf07dc-f8e3-4fb3-b9f9-c75b3da21d03",
+    "sympy__sympy-17318": "54a8d523-2a3d-42a7-a290-5ca7ad7aa6f1",
+    "sympy__sympy-18211": "68aea125-1924-4a9f-9632-e7ff311ae6ec",
+    "sympy__sympy-19495": "cdec3d69-dbcd-4040-9b3b-57adb43da1f8",
+    "sympy__sympy-20428": "03b1cee0-f990-4068-894c-9bdb036fe08a",
+    "sympy__sympy-20438": "7326b547-ee6f-4d9d-bac7-458e9ec2025a",
+    "sympy__sympy-20590": "39ef73cc-1601-4307-96ce-dafdb9912e5f",
+    "sympy__sympy-21612": "5a2380c2-cff8-447c-876d-1749a2bf540e",
+    "sympy__sympy-21930": "bc9e8453-078d-4a50-93b5-d5a312fad036",
+    "sympy__sympy-23413": "e616f006-e00a-46db-8bb7-8a2f3e674412",
+    "sympy__sympy-23824": "a35458ac-da3a-482e-a6cb-12e1cfdaa394",
+    "sympy__sympy-24562": "3c93743b-db1f-49fb-8d21-c641608f16ec",
+    "astropy__astropy-14369": "910e0694-f25a-4b19-97a6-20f6395310a8",
+    "django__django-11265": "8e753f8d-03bd-4deb-b909-497a6cd139d2",
+    "django__django-11815": "2ca05d97-d4c6-4663-8d00-b994e933706a",
+    "django__django-12050": "425ebf6a-7ce4-4522-b286-d91e5540b2c2",
+    "django__django-12304": "869b05dd-624e-483d-9ca0-0911b6ec4bbc",
+    "django__django-12741": "5a44012e-c155-4481-b061-d90b6e9b274a",
+    "django__django-13033": "a9a476b5-9921-41f4-a1ee-fd406d4b348b",
+    "django__django-14007": "458e9034-af43-4984-9fa1-f8e7f64c22c0",
+    "django__django-14349": "d9c0e55a-e6fa-46fb-91f0-18840071b6c9",
+    "django__django-14580": "4bae162d-16b8-4202-bb7e-8c720f0a8df0",
+    "django__django-15268": "edf72484-9ef7-4278-b8a7-07383deb5063",
+    "django__django-15382": "0ff59f71-876d-4dd2-b582-22d8e8f7c4d4",
+    "django__django-15572": "c4e567a3-d21e-4f93-8dda-2f78b727e1aa",
+    "django__django-17087": "3b9b70c2-cc76-4863-a2e1-67a6bd186a82",
+    "matplotlib__matplotlib-22865": "e81a3179-215d-4e0e-ae08-4ae058aa9e5a",
+    "matplotlib__matplotlib-25332": "4605ad35-f67c-4abd-9db4-b42cc5134114",
+    "matplotlib__matplotlib-26291": "b596ce18-1a56-4b48-9f65-8043c6dcb85c",
+    "pydata__xarray-6721": "1dbc7302-b145-4e63-9c32-c1e20040af96",
+    "pydata__xarray-6744": "c3f6c775-3cc8-4f7a-910e-31585aeafece",
+    "sympy__sympy-12419": "82eb8f3f-d86d-4551-87cd-1e687b9c8624",
+    "sympy__sympy-13878": "f44becbe-dbe5-4695-860f-0fd2d9de8a52",
+    "sympy__sympy-14976": "a87d3a50-afaa-4d46-bf06-de2739fd436e",
+    "sympy__sympy-15017": "14e2f8c0-8001-42f0-9c53-4efe8918d245",
+    "sympy__sympy-15599": "1e9d144f-d0cd-43d2-ae00-b8f86aaf8451",
+    "sympy__sympy-16792": "7473aa12-40ee-4f5a-ae62-cf92c261c5f2",
+    "sympy__sympy-24066": "a17ecaf5-6fa2-4c9d-8671-8c2e2889c295"
+  },
+  "tasks": [
+    {
+      "task_id": "astropy__astropy-13236",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "b175ac8f-15ea-40b4-8882-11c6379c4d71"
+    },
+    {
+      "task_id": "astropy__astropy-13398",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "run_id": "1895d04c-89c6-41df-8550-29e8f50bd789"
+    },
+    {
+      "task_id": "astropy__astropy-13453",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "a83024cb-1fc3-498a-bece-a44372eb26bf"
+    },
+    {
+      "task_id": "astropy__astropy-13977",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "a240639c-b7e2-4bc1-abca-88c286e002bc"
+    },
+    {
+      "task_id": "astropy__astropy-14182",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "component_coordination"
+      ],
+      "run_id": "f6f9382f-c48c-4bec-be61-b121cd3fce83"
+    },
+    {
+      "task_id": "astropy__astropy-14508",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "8f3fe69d-f6d2-40d6-ab04-94d7517a1879"
+    },
+    {
+      "task_id": "astropy__astropy-7606",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "recurring_pattern",
+        "specific_case_overfitting",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "70382b39-205b-408b-9075-a82bfaf484a5"
+    },
+    {
+      "task_id": "astropy__astropy-8872",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "reproduction_output_misreading",
+        "recurring_pattern"
+      ],
+      "run_id": "f2d92665-f7df-489d-8db6-bc3619b277e1"
+    },
+    {
+      "task_id": "django__django-10999",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "0815e760-18fb-4ce6-9b42-7893646c5f40"
+    },
+    {
+      "task_id": "django__django-11087",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "algorithmic_implementation",
+        "verification_weakening",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "8c467b61-bfa3-404a-bbfa-3f600d674d60"
+    },
+    {
+      "task_id": "django__django-11138",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "recurring_pattern"
+      ],
+      "run_id": "2adbafc0-ef03-4b1c-b5da-a57f492a7bbd"
+    },
+    {
+      "task_id": "django__django-11141",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "boundary_handling"
+      ],
+      "run_id": "76d98931-9495-48a8-9378-bfe6d69cc94e"
+    },
+    {
+      "task_id": "django__django-11206",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "algorithmic_implementation"
+      ],
+      "run_id": "b177be95-de8f-4b2b-8c90-b4d2dc2b00fe"
+    },
+    {
+      "task_id": "django__django-11239",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "verification_abandonment",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "f13cd04b-6465-434b-b028-d0ab37a17836"
+    },
+    {
+      "task_id": "django__django-11433",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow"
+      ],
+      "run_id": "081334ea-d9b4-4b5d-8e72-48567bee8049"
+    },
+    {
+      "task_id": "django__django-11490",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "data_processing_errors",
+        "specific_case_overfitting"
+      ],
+      "run_id": "4773c3c9-0e5c-4cb1-add5-985f2cf89264"
+    },
+    {
+      "task_id": "django__django-11734",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "keywords_location",
+        "non_progressive_iteration"
+      ],
+      "run_id": "d32b7555-79e8-4040-be41-521d65ec5b3e"
+    },
+    {
+      "task_id": "django__django-11848",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "550c3473-b858-4402-baff-375d2061f7d1"
+    },
+    {
+      "task_id": "django__django-12039",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "inheritance"
+      ],
+      "run_id": "1249ad19-a960-447e-acbd-9fd52543de2f"
+    },
+    {
+      "task_id": "django__django-12262",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "verification_weakening"
+      ],
+      "run_id": "9cd203d9-cb8d-4f81-a288-413d995e2a17"
+    },
+    {
+      "task_id": "django__django-12406",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "e79b6633-f7c5-4d85-b2b1-23740cd34d9b"
+    },
+    {
+      "task_id": "django__django-12774",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "c8d09c07-d3bd-4950-8a4c-4c0bc183291f"
+    },
+    {
+      "task_id": "django__django-13195",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "interface_contract",
+        "reproduction_output_misreading",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "0f1ef752-3b6a-48cd-871b-9de6edbd36f6"
+    },
+    {
+      "task_id": "django__django-13344",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace",
+        "non_progressive_iteration",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "7c46605b-bb47-45a4-93f3-f8df2e84f17c"
+    },
+    {
+      "task_id": "django__django-13346",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "data_processing_errors",
+        "context_forgetting",
+        "non_progressive_iteration",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "dc21fae0-558e-4825-9154-1af2bf94ee78"
+    },
+    {
+      "task_id": "django__django-13449",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "specific_case_overfitting",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "28eb0ba8-48df-4f25-8c4e-cde754f5c39a"
+    },
+    {
+      "task_id": "django__django-13512",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "recurring_pattern"
+      ],
+      "run_id": "61988fdd-8e61-483c-9525-d619c67edd8f"
+    },
+    {
+      "task_id": "django__django-13513",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "issue_misleading",
+        "reproduction_output_misreading"
+      ],
+      "run_id": "fa21e881-51fd-4a0a-9191-c78d9dbb5b25"
+    },
+    {
+      "task_id": "django__django-13551",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "specific_case_overfitting",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "0e445a9d-c668-4df4-b10a-7a0989336b94"
+    },
+    {
+      "task_id": "django__django-13568",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "specific_case_overfitting"
+      ],
+      "run_id": "fb9a03aa-f9ff-4d9c-acb8-c316359c6b17"
+    },
+    {
+      "task_id": "django__django-13925",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "reproduction_script_failure",
+        "issue_interference"
+      ],
+      "run_id": "0d42b133-d3df-4c74-97d0-11c75a88b7f4"
+    },
+    {
+      "task_id": "django__django-14011",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "algorithmic_implementation",
+        "blindly_strategy_switching",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "2593e044-e749-4c54-a366-956d18f9ac57"
+    },
+    {
+      "task_id": "django__django-14034",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "0f86adf4-8c92-4205-a5dc-fa2ff118cf65"
+    },
+    {
+      "task_id": "django__django-14140",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "ae5b77b1-bc85-4347-87c3-3744421e59df"
+    },
+    {
+      "task_id": "django__django-14311",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "boundary_handling"
+      ],
+      "run_id": "b9834b63-8225-4ac0-b243-eccab34ab963"
+    },
+    {
+      "task_id": "django__django-14534",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "reproduction_output_misreading"
+      ],
+      "run_id": "a9d612ca-84fe-4efc-a2c8-e73e526a8e1a"
+    },
+    {
+      "task_id": "django__django-14725",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "inheritance"
+      ],
+      "run_id": "2ce6df1c-b0c1-4d2f-a7cf-9f518517f11f"
+    },
+    {
+      "task_id": "django__django-14771",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "specific_case_overfitting"
+      ],
+      "run_id": "3f7d8fcd-9789-4131-95cf-6d52b6b6ce01"
+    },
+    {
+      "task_id": "django__django-14792",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "2aa6f123-de82-4764-bdf7-cb372e6f707f"
+    },
+    {
+      "task_id": "django__django-15037",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "bffce7c1-403a-4f21-b435-477f581eedee"
+    },
+    {
+      "task_id": "django__django-15127",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "226b258b-d8d1-4fde-8432-383dfed4afb0"
+    },
+    {
+      "task_id": "django__django-15375",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace",
+        "non_progressive_iteration"
+      ],
+      "run_id": "f587f248-c65e-425a-84cd-afd35bc5f72d"
+    },
+    {
+      "task_id": "django__django-15741",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "24e65064-acb0-448b-9344-87c7e1f153ce"
+    },
+    {
+      "task_id": "django__django-16454",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "verification_weakening",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "a5900fce-a8ac-41f6-9d4e-ec9c60f25fc0"
+    },
+    {
+      "task_id": "django__django-16560",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "recurring_pattern",
+        "non_progressive_iteration"
+      ],
+      "run_id": "75a68d85-241d-47e6-bc0c-c0a582e4a470"
+    },
+    {
+      "task_id": "django__django-16631",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "algorithmic_implementation",
+        "component_coordination",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "2c93282c-d9b6-47b0-b08d-b25774e11eb4"
+    },
+    {
+      "task_id": "django__django-16642",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "insufficient_domain_knowledge",
+        "issue_interference"
+      ],
+      "run_id": "a0cf543c-ef9b-415d-84fb-c78bd4ef20f3"
+    },
+    {
+      "task_id": "django__django-16667",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "e7aa5f02-46ac-40c8-8f00-a9aa4e93e857"
+    },
+    {
+      "task_id": "django__django-16938",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "reproduction_script_failure",
+        "recurring_pattern"
+      ],
+      "run_id": "654e0f14-d7fc-4c76-8045-9b9ff6fd92cf"
+    },
+    {
+      "task_id": "django__django-17084",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "referred_code_location",
+        "non_progressive_iteration"
+      ],
+      "run_id": "c860642e-bed6-4106-a137-63410f44454c"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-14623",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "keywords_location"
+      ],
+      "run_id": "09ede16d-eac2-488c-9dd3-098d9d56839b"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-20488",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "reproduction_output_misreading",
+        "blindly_strategy_switching"
+      ],
+      "run_id": "7701ec2b-dc21-4f40-b289-717c9b5d8ca7"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-21568",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "algorithmic_implementation"
+      ],
+      "run_id": "f4a0f98c-e71d-43f1-ac3a-a5fa053892de"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-22871",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "control_flow"
+      ],
+      "run_id": "a4aecb89-dfd4-4af5-939c-cee7676a50c4"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-23476",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "evasive_repair",
+        "reproduction_script_failure",
+        "error_stack_trace"
+      ],
+      "run_id": "95b08266-44b7-4e71-90d4-9b854cb1c17c"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-24870",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "data_processing_errors",
+        "recurring_pattern",
+        "component_coordination"
+      ],
+      "run_id": "6c541559-d71f-4fdb-9369-db08cc488650"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-26342",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "inheritance"
+      ],
+      "run_id": "1771a00b-a9c6-4723-964b-639a34b4a665"
+    },
+    {
+      "task_id": "mwaskom__seaborn-3069",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "run_id": "ef7390cc-f22d-4a71-bd9c-f7e5655e8593"
+    },
+    {
+      "task_id": "psf__requests-1921",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "2f3171ba-6b27-4557-8b47-0df074b135f5"
+    },
+    {
+      "task_id": "psf__requests-6028",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "reproduction_script_failure",
+        "keywords_location"
+      ],
+      "run_id": "24cd826f-cfd2-4c82-9e71-8bb5f097992a"
+    },
+    {
+      "task_id": "pydata__xarray-2905",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "recurring_pattern"
+      ],
+      "run_id": "3411ffa8-0a0e-4ffe-a741-18601033acf1"
+    },
+    {
+      "task_id": "pydata__xarray-3095",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "algorithmic_implementation",
+        "blindly_strategy_switching"
+      ],
+      "run_id": "2494ec0b-0829-4365-bfa2-534960f974aa"
+    },
+    {
+      "task_id": "pydata__xarray-4687",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "algorithmic_implementation",
+        "non_progressive_iteration"
+      ],
+      "run_id": "22b7be6b-53bf-49d2-96a9-c8a05a26418c"
+    },
+    {
+      "task_id": "pydata__xarray-6599",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "data_processing_errors",
+        "blindly_strategy_switching",
+        "non_progressive_iteration"
+      ],
+      "run_id": "b09dc153-f225-47e6-90cb-67da52573998"
+    },
+    {
+      "task_id": "pydata__xarray-6938",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "inheritance"
+      ],
+      "run_id": "b93e143c-2e96-4023-85f8-1350ede00252"
+    },
+    {
+      "task_id": "pydata__xarray-6992",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "referred_code_location",
+        "error_stack_trace"
+      ],
+      "run_id": "011badc2-005c-41b7-bb24-120183ae4d8d"
+    },
+    {
+      "task_id": "pydata__xarray-7229",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "non_progressive_iteration"
+      ],
+      "run_id": "45d5f7b4-724c-4793-90c7-c909c22c45fb"
+    },
+    {
+      "task_id": "pylint-dev__pylint-4604",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "fd01a016-47a7-42a9-820a-1dc558c84043"
+    },
+    {
+      "task_id": "pylint-dev__pylint-4661",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "b755e06b-86f3-4450-8632-212f0e4488b5"
+    },
+    {
+      "task_id": "pylint-dev__pylint-4970",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "algorithmic_implementation",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "bad36100-135c-4d07-8e4c-22dde6adac7e"
+    },
+    {
+      "task_id": "pylint-dev__pylint-6386",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "134ad5f9-c6ab-4eeb-94f5-5565905fa585"
+    },
+    {
+      "task_id": "pytest-dev__pytest-10356",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "interface_contract",
+        "verification_weakening",
+        "specific_case_overfitting"
+      ],
+      "run_id": "02bbc6db-45c0-4932-837a-d51d233c448f"
+    },
+    {
+      "task_id": "pytest-dev__pytest-6197",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "context_forgetting",
+        "non_progressive_iteration"
+      ],
+      "run_id": "fe2dd195-8fcd-4607-abb1-2f1b59e18353"
+    },
+    {
+      "task_id": "pytest-dev__pytest-7324",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "keywords_location",
+        "specific_case_overfitting"
+      ],
+      "run_id": "cfc96119-964a-4207-9371-6ff6dc8e64d6"
+    },
+    {
+      "task_id": "pytest-dev__pytest-7490",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "control_flow",
+        "component_coordination"
+      ],
+      "run_id": "3953e924-aae6-46b7-92f3-059f82bb616f"
+    },
+    {
+      "task_id": "scikit-learn__scikit-learn-10908",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow"
+      ],
+      "run_id": "b38ec58f-68a2-4ba6-9920-f3cefbf87c4c"
+    },
+    {
+      "task_id": "scikit-learn__scikit-learn-12682",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "interface_contract",
+        "reproduction_script_failure",
+        "recurring_pattern"
+      ],
+      "run_id": "7f20a15a-01d7-4540-ac0c-feda9d348c96"
+    },
+    {
+      "task_id": "scikit-learn__scikit-learn-13124",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "algorithmic_implementation",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "06af00e4-c2ab-492d-b03a-9b4f74e2c284"
+    },
+    {
+      "task_id": "scikit-learn__scikit-learn-14983",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "specific_case_overfitting",
+        "component_coordination",
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "7d000527-d7ee-4ee9-a9b2-a083598af3db"
+    },
+    {
+      "task_id": "scikit-learn__scikit-learn-25747",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "f6abe43f-2b5f-4b65-a2bc-264ef2ae8f74"
+    },
+    {
+      "task_id": "scikit-learn__scikit-learn-25973",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "64209f43-985e-4cbf-9a21-018931659207"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-10435",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "e3ee3f5d-7d91-4651-933e-42629470b0e1"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-10614",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "algorithmic_implementation",
+        "reproduction_script_failure"
+      ],
+      "run_id": "74362fb0-b925-4032-a5ec-a17060b3f806"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-11510",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "f338edc6-e4e2-4151-a761-f8bbfbe87e80"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-7757",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "context_forgetting",
+        "algorithmic_implementation",
+        "reproduction_output_misreading"
+      ],
+      "run_id": "a322640a-d697-4812-8b96-84a52ce9104f"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-7889",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "error_stack_trace"
+      ],
+      "run_id": "ac83769e-6ef2-45e6-b36b-21fb6366c53f"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-8551",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "5c85a268-f647-4e41-a4cd-3da4b239dae1"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-9461",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "insufficient_verification_capability",
+        "evasive_repair",
+        "component_coordination"
+      ],
+      "run_id": "a0da7a79-30ba-46ac-8750-0cc3b6d2806f"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-9591",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "43c8462a-ce82-4eca-a8d0-dd16b02d0acf"
+    },
+    {
+      "task_id": "sphinx-doc__sphinx-9602",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "specific_case_overfitting",
+        "component_coordination"
+      ],
+      "run_id": "d733de67-660b-4152-8335-e8b5d14d28c5"
+    },
+    {
+      "task_id": "sympy__sympy-13615",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "a6a2b816-cc3a-4d51-bd1e-2ca2c1a1af4d"
+    },
+    {
+      "task_id": "sympy__sympy-13798",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "boundary_handling"
+      ],
+      "run_id": "327d4b66-c703-4a84-af14-9ecf9a8bdd81"
+    },
+    {
+      "task_id": "sympy__sympy-13974",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "context_forgetting",
+        "blindly_strategy_switching",
+        "component_coordination",
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "f891b491-dc20-477b-84f3-7c0223a3deab"
+    },
+    {
+      "task_id": "sympy__sympy-14248",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "keywords_location",
+        "non_progressive_iteration"
+      ],
+      "run_id": "46c557e9-b76e-4daf-9e72-ec0d351f57b4"
+    },
+    {
+      "task_id": "sympy__sympy-14531",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "recurring_pattern",
+        "non_progressive_iteration"
+      ],
+      "run_id": "966cc79a-7ee5-45c8-b385-703741c92c85"
+    },
+    {
+      "task_id": "sympy__sympy-15809",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "data_processing_errors",
+        "reproduction_output_misreading",
+        "control_flow"
+      ],
+      "run_id": "27854e5b-c125-41ed-95d4-cf8c35f16abe"
+    },
+    {
+      "task_id": "sympy__sympy-16597",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "keywords_location",
+        "specific_case_overfitting",
+        "component_coordination"
+      ],
+      "run_id": "b9cf07dc-f8e3-4fb3-b9f9-c75b3da21d03"
+    },
+    {
+      "task_id": "sympy__sympy-17318",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "reproduction_script_failure",
+        "error_stack_trace"
+      ],
+      "run_id": "54a8d523-2a3d-42a7-a290-5ca7ad7aa6f1"
+    },
+    {
+      "task_id": "sympy__sympy-18211",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "68aea125-1924-4a9f-9632-e7ff311ae6ec"
+    },
+    {
+      "task_id": "sympy__sympy-19495",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "cdec3d69-dbcd-4040-9b3b-57adb43da1f8"
+    },
+    {
+      "task_id": "sympy__sympy-20428",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "error_stack_trace",
+        "non_progressive_iteration"
+      ],
+      "run_id": "03b1cee0-f990-4068-894c-9bdb036fe08a"
+    },
+    {
+      "task_id": "sympy__sympy-20438",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "non_progressive_iteration",
+        "component_coordination"
+      ],
+      "run_id": "7326b547-ee6f-4d9d-bac7-458e9ec2025a"
+    },
+    {
+      "task_id": "sympy__sympy-20590",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "issue_misleading",
+        "reproduction_output_misreading"
+      ],
+      "run_id": "39ef73cc-1601-4307-96ce-dafdb9912e5f"
+    },
+    {
+      "task_id": "sympy__sympy-21612",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "5a2380c2-cff8-447c-876d-1749a2bf540e"
+    },
+    {
+      "task_id": "sympy__sympy-21930",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "recurring_pattern"
+      ],
+      "run_id": "bc9e8453-078d-4a50-93b5-d5a312fad036"
+    },
+    {
+      "task_id": "sympy__sympy-23413",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "control_flow",
+        "algorithmic_implementation",
+        "non_progressive_iteration"
+      ],
+      "run_id": "e616f006-e00a-46db-8bb7-8a2f3e674412"
+    },
+    {
+      "task_id": "sympy__sympy-23824",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "context_forgetting",
+        "algorithmic_implementation",
+        "non_progressive_iteration"
+      ],
+      "run_id": "a35458ac-da3a-482e-a6cb-12e1cfdaa394"
+    },
+    {
+      "task_id": "sympy__sympy-24562",
+      "paper_agent": "openhands",
+      "ground_truth": [
+        "data_processing_errors",
+        "algorithmic_implementation"
+      ],
+      "run_id": "3c93743b-db1f-49fb-8d21-c641608f16ec"
+    },
+    {
+      "task_id": "astropy__astropy-13236",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "b175ac8f-15ea-40b4-8882-11c6379c4d71"
+    },
+    {
+      "task_id": "astropy__astropy-13977",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "a240639c-b7e2-4bc1-abca-88c286e002bc"
+    },
+    {
+      "task_id": "astropy__astropy-14182",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "f6f9382f-c48c-4bec-be61-b121cd3fce83"
+    },
+    {
+      "task_id": "astropy__astropy-14369",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "control_flow"
+      ],
+      "run_id": "910e0694-f25a-4b19-97a6-20f6395310a8"
+    },
+    {
+      "task_id": "astropy__astropy-14508",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "8f3fe69d-f6d2-40d6-ab04-94d7517a1879"
+    },
+    {
+      "task_id": "astropy__astropy-7606",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "70382b39-205b-408b-9075-a82bfaf484a5"
+    },
+    {
+      "task_id": "astropy__astropy-8872",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "f2d92665-f7df-489d-8db6-bc3619b277e1"
+    },
+    {
+      "task_id": "django__django-10999",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "0815e760-18fb-4ce6-9b42-7893646c5f40"
+    },
+    {
+      "task_id": "django__django-11087",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "8c467b61-bfa3-404a-bbfa-3f600d674d60"
+    },
+    {
+      "task_id": "django__django-11138",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "recurring_pattern"
+      ],
+      "run_id": "2adbafc0-ef03-4b1c-b5da-a57f492a7bbd"
+    },
+    {
+      "task_id": "django__django-11141",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "boundary_handling"
+      ],
+      "run_id": "76d98931-9495-48a8-9378-bfe6d69cc94e"
+    },
+    {
+      "task_id": "django__django-11239",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "f13cd04b-6465-434b-b028-d0ab37a17836"
+    },
+    {
+      "task_id": "django__django-11265",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "8e753f8d-03bd-4deb-b909-497a6cd139d2"
+    },
+    {
+      "task_id": "django__django-11433",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "081334ea-d9b4-4b5d-8e72-48567bee8049"
+    },
+    {
+      "task_id": "django__django-11490",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "4773c3c9-0e5c-4cb1-add5-985f2cf89264"
+    },
+    {
+      "task_id": "django__django-11734",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "d32b7555-79e8-4040-be41-521d65ec5b3e"
+    },
+    {
+      "task_id": "django__django-11815",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "2ca05d97-d4c6-4663-8d00-b994e933706a"
+    },
+    {
+      "task_id": "django__django-11848",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "550c3473-b858-4402-baff-375d2061f7d1"
+    },
+    {
+      "task_id": "django__django-12039",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "recurring_pattern"
+      ],
+      "run_id": "1249ad19-a960-447e-acbd-9fd52543de2f"
+    },
+    {
+      "task_id": "django__django-12050",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "425ebf6a-7ce4-4522-b286-d91e5540b2c2"
+    },
+    {
+      "task_id": "django__django-12304",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "869b05dd-624e-483d-9ca0-0911b6ec4bbc"
+    },
+    {
+      "task_id": "django__django-12406",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "e79b6633-f7c5-4d85-b2b1-23740cd34d9b"
+    },
+    {
+      "task_id": "django__django-12741",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "interface_contract"
+      ],
+      "run_id": "5a44012e-c155-4481-b061-d90b6e9b274a"
+    },
+    {
+      "task_id": "django__django-13033",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "a9a476b5-9921-41f4-a1ee-fd406d4b348b"
+    },
+    {
+      "task_id": "django__django-13195",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "interface_contract"
+      ],
+      "run_id": "0f1ef752-3b6a-48cd-871b-9de6edbd36f6"
+    },
+    {
+      "task_id": "django__django-13344",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "7c46605b-bb47-45a4-93f3-f8df2e84f17c"
+    },
+    {
+      "task_id": "django__django-13346",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "dc21fae0-558e-4825-9154-1af2bf94ee78"
+    },
+    {
+      "task_id": "django__django-13512",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "61988fdd-8e61-483c-9525-d619c67edd8f"
+    },
+    {
+      "task_id": "django__django-13513",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "fa21e881-51fd-4a0a-9191-c78d9dbb5b25"
+    },
+    {
+      "task_id": "django__django-13551",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "0e445a9d-c668-4df4-b10a-7a0989336b94"
+    },
+    {
+      "task_id": "django__django-13925",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "run_id": "0d42b133-d3df-4c74-97d0-11c75a88b7f4"
+    },
+    {
+      "task_id": "django__django-14007",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "458e9034-af43-4984-9fa1-f8e7f64c22c0"
+    },
+    {
+      "task_id": "django__django-14011",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "2593e044-e749-4c54-a366-956d18f9ac57"
+    },
+    {
+      "task_id": "django__django-14034",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "0f86adf4-8c92-4205-a5dc-fa2ff118cf65"
+    },
+    {
+      "task_id": "django__django-14140",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "ae5b77b1-bc85-4347-87c3-3744421e59df"
+    },
+    {
+      "task_id": "django__django-14311",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "b9834b63-8225-4ac0-b243-eccab34ab963"
+    },
+    {
+      "task_id": "django__django-14349",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "d9c0e55a-e6fa-46fb-91f0-18840071b6c9"
+    },
+    {
+      "task_id": "django__django-14580",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "run_id": "4bae162d-16b8-4202-bb7e-8c720f0a8df0"
+    },
+    {
+      "task_id": "django__django-14725",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "interface_contract"
+      ],
+      "run_id": "2ce6df1c-b0c1-4d2f-a7cf-9f518517f11f"
+    },
+    {
+      "task_id": "django__django-14771",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "boundary_handling"
+      ],
+      "run_id": "3f7d8fcd-9789-4131-95cf-6d52b6b6ce01"
+    },
+    {
+      "task_id": "django__django-14792",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "2aa6f123-de82-4764-bdf7-cb372e6f707f"
+    },
+    {
+      "task_id": "django__django-15037",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "bffce7c1-403a-4f21-b435-477f581eedee"
+    },
+    {
+      "task_id": "django__django-15127",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "226b258b-d8d1-4fde-8432-383dfed4afb0"
+    },
+    {
+      "task_id": "django__django-15268",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "edf72484-9ef7-4278-b8a7-07383deb5063"
+    },
+    {
+      "task_id": "django__django-15375",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "f587f248-c65e-425a-84cd-afd35bc5f72d"
+    },
+    {
+      "task_id": "django__django-15382",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "0ff59f71-876d-4dd2-b582-22d8e8f7c4d4"
+    },
+    {
+      "task_id": "django__django-15572",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "recurring_pattern"
+      ],
+      "run_id": "c4e567a3-d21e-4f93-8dda-2f78b727e1aa"
+    },
+    {
+      "task_id": "django__django-16454",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "a5900fce-a8ac-41f6-9d4e-ec9c60f25fc0"
+    },
+    {
+      "task_id": "django__django-16560",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "redundant_erroneous_implementation"
+      ],
+      "run_id": "75a68d85-241d-47e6-bc0c-c0a582e4a470"
+    },
+    {
+      "task_id": "django__django-16631",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "2c93282c-d9b6-47b0-b08d-b25774e11eb4"
+    },
+    {
+      "task_id": "django__django-16667",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "e7aa5f02-46ac-40c8-8f00-a9aa4e93e857"
+    },
+    {
+      "task_id": "django__django-17084",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "c860642e-bed6-4106-a137-63410f44454c"
+    },
+    {
+      "task_id": "django__django-17087",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "3b9b70c2-cc76-4863-a2e1-67a6bd186a82"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-14623",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "09ede16d-eac2-488c-9dd3-098d9d56839b"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-20488",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "7701ec2b-dc21-4f40-b289-717c9b5d8ca7"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-21568",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "f4a0f98c-e71d-43f1-ac3a-a5fa053892de"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-22865",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "e81a3179-215d-4e0e-ae08-4ae058aa9e5a"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-22871",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "a4aecb89-dfd4-4af5-939c-cee7676a50c4"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-23476",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "95b08266-44b7-4e71-90d4-9b854cb1c17c"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-24870",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "6c541559-d71f-4fdb-9369-db08cc488650"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-25332",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "4605ad35-f67c-4abd-9db4-b42cc5134114"
+    },
+    {
+      "task_id": "matplotlib__matplotlib-26291",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "evasive_repair"
+      ],
+      "run_id": "b596ce18-1a56-4b48-9f65-8043c6dcb85c"
+    },
+    {
+      "task_id": "mwaskom__seaborn-3069",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "ef7390cc-f22d-4a71-bd9c-f7e5655e8593"
+    },
+    {
+      "task_id": "psf__requests-6028",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "24cd826f-cfd2-4c82-9e71-8bb5f097992a"
+    },
+    {
+      "task_id": "pydata__xarray-3095",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "2494ec0b-0829-4365-bfa2-534960f974aa"
+    },
+    {
+      "task_id": "pydata__xarray-4687",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "22b7be6b-53bf-49d2-96a9-c8a05a26418c"
+    },
+    {
+      "task_id": "pydata__xarray-6721",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "run_id": "1dbc7302-b145-4e63-9c32-c1e20040af96"
+    },
+    {
+      "task_id": "pydata__xarray-6744",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "c3f6c775-3cc8-4f7a-910e-31585aeafece"
+    },
+    {
+      "task_id": "pydata__xarray-6938",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "run_id": "b93e143c-2e96-4023-85f8-1350ede00252"
+    },
+    {
+      "task_id": "pydata__xarray-6992",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "011badc2-005c-41b7-bb24-120183ae4d8d"
+    },
+    {
+      "task_id": "pydata__xarray-7229",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "45d5f7b4-724c-4793-90c7-c909c22c45fb"
+    },
+    {
+      "task_id": "sympy__sympy-12419",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "82eb8f3f-d86d-4551-87cd-1e687b9c8624"
+    },
+    {
+      "task_id": "sympy__sympy-13615",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "a6a2b816-cc3a-4d51-bd1e-2ca2c1a1af4d"
+    },
+    {
+      "task_id": "sympy__sympy-13798",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "327d4b66-c703-4a84-af14-9ecf9a8bdd81"
+    },
+    {
+      "task_id": "sympy__sympy-13878",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "boundary_handling"
+      ],
+      "run_id": "f44becbe-dbe5-4695-860f-0fd2d9de8a52"
+    },
+    {
+      "task_id": "sympy__sympy-13974",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "boundary_handling"
+      ],
+      "run_id": "f891b491-dc20-477b-84f3-7c0223a3deab"
+    },
+    {
+      "task_id": "sympy__sympy-14248",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "run_id": "46c557e9-b76e-4daf-9e72-ec0d351f57b4"
+    },
+    {
+      "task_id": "sympy__sympy-14976",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "a87d3a50-afaa-4d46-bf06-de2739fd436e"
+    },
+    {
+      "task_id": "sympy__sympy-15017",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "14e2f8c0-8001-42f0-9c53-4efe8918d245"
+    },
+    {
+      "task_id": "sympy__sympy-15599",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "run_id": "1e9d144f-d0cd-43d2-ae00-b8f86aaf8451"
+    },
+    {
+      "task_id": "sympy__sympy-15809",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "insufficient_domain_knowledge"
+      ],
+      "run_id": "27854e5b-c125-41ed-95d4-cf8c35f16abe"
+    },
+    {
+      "task_id": "sympy__sympy-16597",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "keywords_location"
+      ],
+      "run_id": "b9cf07dc-f8e3-4fb3-b9f9-c75b3da21d03"
+    },
+    {
+      "task_id": "sympy__sympy-16792",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "7473aa12-40ee-4f5a-ae62-cf92c261c5f2"
+    },
+    {
+      "task_id": "sympy__sympy-17318",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "54a8d523-2a3d-42a7-a290-5ca7ad7aa6f1"
+    },
+    {
+      "task_id": "sympy__sympy-18211",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "68aea125-1924-4a9f-9632-e7ff311ae6ec"
+    },
+    {
+      "task_id": "sympy__sympy-20428",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "03b1cee0-f990-4068-894c-9bdb036fe08a"
+    },
+    {
+      "task_id": "sympy__sympy-20438",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "7326b547-ee6f-4d9d-bac7-458e9ec2025a"
+    },
+    {
+      "task_id": "sympy__sympy-20590",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "39ef73cc-1601-4307-96ce-dafdb9912e5f"
+    },
+    {
+      "task_id": "sympy__sympy-21612",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "5a2380c2-cff8-447c-876d-1749a2bf540e"
+    },
+    {
+      "task_id": "sympy__sympy-21930",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "recurring_pattern"
+      ],
+      "run_id": "bc9e8453-078d-4a50-93b5-d5a312fad036"
+    },
+    {
+      "task_id": "sympy__sympy-23413",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "referred_code_location"
+      ],
+      "run_id": "e616f006-e00a-46db-8bb7-8a2f3e674412"
+    },
+    {
+      "task_id": "sympy__sympy-24066",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "error_stack_trace"
+      ],
+      "run_id": "a17ecaf5-6fa2-4c9d-8671-8c2e2889c295"
+    },
+    {
+      "task_id": "sympy__sympy-24562",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "control_flow"
+      ],
+      "run_id": "3c93743b-db1f-49fb-8d21-c641608f16ec"
+    },
+    {
+      "task_id": "astropy__astropy-13398",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "run_id": "1895d04c-89c6-41df-8550-29e8f50bd789"
+    },
+    {
+      "task_id": "django__django-13568",
+      "paper_agent": "agentless",
+      "ground_truth": [
+        "algorithmic_implementation"
+      ],
+      "run_id": "fb9a03aa-f9ff-4d9c-acb8-c316359c6b17"
+    }
+  ]
+}

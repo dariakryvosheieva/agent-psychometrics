@@ -1,0 +1,37 @@
+{
+  "llm_predictions": [
+    {
+      "task_id": "astropy__astropy-13236",
+      "error": "Error code: 404 - {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4-5-20250514'}, 'request_id': 'req_011CWzZVqxg4SjaZfcmf6PU7'}",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13398",
+      "error": "Error code: 404 - {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4-5-20250514'}, 'request_id': 'req_011CWzZVrhZzw9UrxYedRPpN'}",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13453",
+      "error": "Error code: 404 - {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4-5-20250514'}, 'request_id': 'req_011CWzZVsoo2stTfWAjZgDMZ'}",
+      "method": "direct_llm",
+      "ground_truth": [
+        "redundant_erroneous_implementation",
+        "reproduction_output_misreading"
+      ],
+      "agent": "openhands"
+    }
+  ],
+  "lunette_predictions": [],
+  "llm_metrics": {
+    "error": "No valid predictions"
+  },
+  "lunette_metrics": null
+}

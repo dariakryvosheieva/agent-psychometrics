@@ -1,0 +1,311 @@
+{
+  "llm": [
+    {
+      "task_id": "astropy__astropy-13236",
+      "predicted": [
+        "algorithmic_implementation",
+        "issue_misleading",
+        "specific_case_overfitting"
+      ],
+      "explanation": "Looking at this agent trajectory, I need to compare what the agent did versus the GOLD PATCH to identify the root causes of failure.\n\n## Analysis\n\n**What the GOLD PATCH does:**\n- Simply removes the entire code block that converts structured ndarrays to NdarrayMixin (lines 1242-1247)\n- This is a clean removal with no replacement code\n\n**What the agent did:**\n- Added a FutureWarning to the existing code block \n- Kept the original behavior of converting structured arrays to NdarrayMixin\n- Did NOT remove the problematic code block\n\n## Root Cause Analysis\n\nThe agent fundamentally misunderstood the PR requirements. While the PR description mentions adding a FutureWarning \"in 5.1\" and changing behavior \"in 5.2\", the agent was actually supposed to implement the 5.2 behavior (removing the code block entirely) based on the gold patch. \n\nThe agent was misled by the temporal language in the PR description (\"Add a FutureWarning here...Change the behavior in 5.2\") and interpreted this as needing to implement the intermediate 5.1 step rather than the final solution. The gold patch clearly shows the final state should be the complete removal of the auto-transform behavior.\n\n## Applicable Failure Categories\n\n**issue_misleading** - The PR description contained temporal references to \"5.1\" and \"5.2\" changes that misled the agent about which version's behavior to implement, when the gold patch shows the final state (removal) was required.\n\n**specific_case_overfitting** - The agent focused on implementing the specific transitional warning mechanism described in the PR text rather than understanding that the ultimate goal was to remove the auto-transform behavior entirely.\n\n**algorithmic_implementation** - The core algorithm logic is incorrect - instead of removing the problematic code block, the agent preserved it and added warning logic on top.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13398",
+      "predicted": [
+        "component_coordination",
+        "insufficient_domain_knowledge",
+        "specific_case_overfitting",
+        "keywords_location",
+        "verification_abandonment"
+      ],
+      "explanation": "Looking at this trajectory, I need to compare what the agent implemented versus what the gold patch shows was actually needed.\n\n## Analysis of Agent vs Gold Patch\n\n**What the agent did:**\n- Created a new file `itrs_observed_transforms.py` with direct ITRS\u2194AltAz and ITRS\u2194HADec transformations\n- Added import to `__init__.py`\n- Implemented basic rotation matrix transformations\n- Created comprehensive tests showing the transforms work\n\n**What the gold patch shows was actually needed:**\n1. **Add location attribute to ITRS frame** - The agent completely missed this core requirement\n2. **Modify existing intermediate rotation transforms** to properly handle location parameter\n3. **Add comprehensive documentation** about topocentric vs geocentric ITRS\n4. **Update transform logic** in existing files to use `itrs_frame.location` instead of `EARTH_CENTER`\n5. **Import the new transforms module** (this the agent did do)\n\n## Root Cause Analysis\n\nThe agent fundamentally misunderstood the problem. The issue wasn't about creating entirely new transformation functions, but about:\n\n1. **Adding location support to ITRS frame itself** - The ITRS frame needed a `location` attribute to support topocentric coordinates\n2. **Modifying existing transformations** to respect the location parameter instead of forcing everything to geocentric\n3. **Enhancing the ITRS frame documentation** to explain topocentric vs geocentric usage\n\nThe agent focused on the superficial code example in the PR description and missed that this was about enhancing the existing ITRS frame capabilities, not replacing the transformation pathway entirely.\n\n## Applicable Failure Categories\n\n- **keywords_location**: Agent matched superficial keywords (ITRS, AltAz, HADec transformations) without understanding the actual problem was about adding location support to ITRS frame\n- **specific_case_overfitting**: Created a solution that works for the basic transformation case but doesn't address the core issue of ITRS needing location awareness\n- **insufficient_domain_knowledge**: Failed to understand that the issue was about topocentric vs geocentric coordinate handling within the existing framework\n- **component_coordination**: Only created new transforms but missed that existing ITRS frame and intermediate transforms needed modification\n- **verification_abandonment**: Declared success based on basic transformation tests without verifying the core location-aware ITRS functionality was implemented",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13453",
+      "predicted": [
+        "algorithmic_implementation",
+        "component_coordination",
+        "insufficient_domain_knowledge"
+      ],
+      "explanation": "Looking at this trajectory, I can identify several failure modes:\n\n## Analysis\n\nThe agent correctly identified the problem location (HTML writer in astropy/io/ascii/html.py) and understood the issue - that HTML output doesn't respect the `formats` argument while other formats do. However, the agent's solution was incomplete.\n\n**What the agent did:**\n1. Modified the HTML writer to check for `col.info.format` and use it if callable\n2. Applied the same fix to both regular columns and multicolumns\n3. The fix checked `hasattr(col.info, 'format') and callable(col.info.format)`\n\n**What was actually needed (from GOLD PATCH):**\n1. Set `self.data.cols = cols` (missing)\n2. Call `self.data._set_col_formats()` (missing)\n\nThe agent's approach tried to manually check for formats during iteration, but the real issue was that the HTML writer never:\n- Assigned the columns to `self.data.cols` \n- Called `_set_col_formats()` to actually apply the formats from the `formats` parameter to the column info\n\n**Root cause:** The agent didn't understand that the formats needed to be properly initialized on the data object before they could be used. The HTML writer was missing the essential setup steps that other writers had.\n\n## Applicable Failure Categories\n\n**component_coordination** - The agent fixed the symptom (checking for formats during iteration) but missed that multiple components needed coordination: the data object needed to have its cols set AND the formats needed to be applied via `_set_col_formats()` before the iteration logic could work.\n\n**insufficient_domain_knowledge** - The agent lacked understanding of how the astropy ASCII I/O framework works internally - specifically that formats need to be applied to the data object through `_set_col_formats()` rather than manually checked during iteration.\n\n**algorithmic_implementation** - The agent implemented a manual format-checking approach rather than using the existing framework's format application mechanism that other writers use.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "redundant_erroneous_implementation",
+        "reproduction_output_misreading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13977",
+      "predicted": [
+        "algorithmic_implementation",
+        "component_coordination",
+        "insufficient_domain_knowledge",
+        "specific_case_overfitting",
+        "data_processing_errors"
+      ],
+      "explanation": "Looking at this agent trajectory, I can identify several key failure modes:\n\n## ROOT CAUSE ANALYSIS\n\nThe agent correctly identified the problem location and understood the general issue - that `Quantity.__array_ufunc__()` should return `NotImplemented` when inputs are incompatible rather than raising a `ValueError`. However, the agent made critical implementation errors.\n\n## FAILURE MODE CATEGORIES\n\n**algorithmic_implementation** - The agent's core algorithm logic is incorrect. The gold patch shows that the entire `__array_ufunc__` method should be wrapped in a try-except block to catch `TypeError` and `ValueError` exceptions and then return `NotImplemented` under certain conditions. Instead, the agent tried to handle `NotImplemented` returns from individual converter functions, which is not how the system works.\n\n**insufficient_domain_knowledge** - The agent lacks deep understanding of how numpy's `__array_ufunc__` protocol works and how astropy's unit conversion system integrates with it. The gold patch shows sophisticated logic for determining when to return `NotImplemented` based on checking if other inputs/outputs have their own `__array_ufunc__` implementations, but the agent missed this entirely.\n\n**specific_case_overfitting** - The agent's fix attempts to handle the specific error case mentioned in the reproduction script, but doesn't address the broader architectural issue. The gold patch shows a comprehensive solution that handles various edge cases and maintains proper exception handling throughout the method.\n\n**data_processing_errors** - The agent incorrectly modified the `_condition_arg` function to return `NotImplemented`, but this function is supposed to validate and condition input values, not implement the `NotImplemented` protocol. The gold patch doesn't modify this function at all.\n\n**component_coordination** - The agent failed to understand that the solution requires coordinated changes to the overall exception handling strategy in `__array_ufunc__`, not just local fixes to individual functions.\n\nThe agent was close to understanding the problem but fundamentally misunderstood how to implement the `NotImplemented` protocol correctly within astropy's architecture.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-14182",
+      "predicted": [
+        "insufficient_verification_capability",
+        "boundary_handling",
+        "component_coordination"
+      ],
+      "explanation": "Looking at this agent trajectory, I need to compare what the agent did versus the gold patch to identify the root causes of failure.\n\n## Analysis of Agent's Implementation vs Gold Patch\n\n**What the Agent Did:**\n- Modified `RST.__init__()` to accept `header_rows` parameter and pass it to parent class\n- Modified `write()` method to use `len(self.header.header_rows)` to find the position line\n- Did not modify `SimpleRSTData.start_line` or add a `read()` method\n\n**What the Gold Patch Required:**\n- Remove `start_line = 3` from `SimpleRSTData` class\n- Add `header_rows` parameter to `RST.__init__()`\n- Modify `write()` method to use `idx = len(self.header.header_rows)`\n- Add a `read()` method that sets `self.data.start_line = 2 + len(self.header.header_rows)`\n- Update documentation with examples\n\n## Identified Failure Modes\n\n**component_coordination** - The agent only implemented the writing functionality but failed to implement the reading functionality. The gold patch shows that both reading and writing need to be coordinated to handle variable header rows properly. The agent missed the critical `read()` method and the removal of the hardcoded `start_line = 3`.\n\n**insufficient_verification_capability** - The agent only tested the writing functionality with `tbl.write()` but never tested reading functionality. A complete solution requires testing both directions, but the agent's verification was limited to write operations only.\n\n**boundary_handling** - The agent failed to handle the edge case where `SimpleRSTData.start_line = 3` is hardcoded, which would break reading when header_rows has a different length than the default. The gold patch removes this hardcoding and makes it dynamic in the `read()` method.\n\nThe agent's solution appears to work for writing but would fail for reading RST tables with variable header rows because the data start line calculation is incomplete and inconsistent between read/write operations.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "component_coordination",
+        "reproduction_output_misreading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-14508",
+      "predicted": [
+        "algorithmic_implementation",
+        "insufficient_domain_knowledge",
+        "redundant_erroneous_implementation"
+      ],
+      "explanation": "Looking at the agent trajectory and comparing it to the GOLD PATCH, I can identify several failure modes:\n\n## Analysis\n\nThe agent's implementation differs significantly from the correct solution:\n\n**Agent's approach:**\n1. Try `str(value)` first\n2. Add \".0\" if no decimal point\n3. Fall back to `f\"{value:.16G}\"` only if string > 20 chars\n4. Keep the complex exponent normalization logic\n\n**Gold patch approach:**\n1. Use `str(value).replace(\"e\", \"E\")` (simple and direct)\n2. Truncate if > 20 chars using specific logic for scientific vs decimal notation\n3. Remove all the complex exponent normalization logic\n\n## Root Cause Analysis\n\nThe agent's solution appears to work for the test case but has fundamental issues:\n\n1. **Algorithmic Implementation Error**: The agent misunderstood the core problem. The issue isn't just about when to use `str(value)` vs formatted strings - it's about simplifying the entire function to use `str(value)` consistently and then truncating appropriately.\n\n2. **Insufficient Domain Knowledge**: The agent didn't recognize that the complex exponent normalization logic in the original code was part of what should be removed. The gold patch shows this entire section should be eliminated in favor of a much simpler approach.\n\n3. **Redundant Erroneous Implementation**: The agent kept the old formatting logic as a fallback, creating redundant code paths when the gold solution shows the entire approach should be simplified.\n\n## Applicable Failure Categories\n\n**algorithmic_implementation** - The core algorithm logic is incorrect. The agent implemented a hybrid approach when the solution requires a complete replacement of the formatting strategy.\n\n**redundant_erroneous_implementation** - The agent added a fallback to the old formatting method instead of replacing it entirely, creating conflicting logic paths.\n\n**insufficient_domain_knowledge** - The agent didn't understand that the complex exponent normalization code was part of the problem and should be removed entirely.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-7606",
+      "predicted": [
+        "insufficient_domain_knowledge",
+        "recurring_pattern",
+        "component_coordination",
+        "specific_case_overfitting"
+      ],
+      "explanation": "Looking at the agent trajectory compared to the gold patch, I can identify several failure modes:\n\n## Analysis\n\nThe gold patch shows that the correct solution requires:\n1. Returning `NotImplemented` instead of `False` when Unit conversion fails in both `UnitBase.__eq__` and `UnrecognizedUnit.__eq__`\n2. Using try-catch blocks to handle exceptions properly\n3. Fixing a bug in `UnrecognizedUnit.__eq__` to compare `isinstance(other, type(self))` instead of `isinstance(other, UnrecognizedUnit)`\n\nHowever, the agent only:\n1. Added a simple `if other is None: return False` check to `UnrecognizedUnit.__eq__`\n2. Did not modify the main `UnitBase.__eq__` method at all\n3. Did not implement proper exception handling with `NotImplemented` return values\n4. Did not fix the type comparison bug\n\n## Root Cause Analysis\n\nThe agent focused only on the specific example case (comparison with `None`) mentioned in the problem description, without understanding the deeper issue about Python's comparison protocol. The correct solution requires returning `NotImplemented` to allow Python to try the reverse comparison operation, which is the proper way to handle comparison failures in Python's data model.\n\n## Applicable Failure Mode Categories\n\n- **specific_case_overfitting**: The agent only fixed the specific case of comparing with None, rather than addressing the general problem of failed Unit conversions in equality comparisons.\n\n- **insufficient_domain_knowledge**: The agent lacked understanding of Python's comparison protocol and when to return `NotImplemented` vs `False`.\n\n- **component_coordination**: The agent failed to recognize that multiple components (both `UnitBase.__eq__` and `UnrecognizedUnit.__eq__`) needed changes.\n\n- **recurring_pattern**: The same pattern of improper exception handling existed in multiple `__eq__` methods, but the agent only addressed one location.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "insufficient_domain_knowledge",
+        "recurring_pattern",
+        "specific_case_overfitting"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-8872",
+      "predicted": [
+        "recurring_pattern",
+        "algorithmic_implementation",
+        "component_coordination"
+      ],
+      "explanation": "Looking at this agent trajectory, I need to compare what the agent did versus the gold patch to identify the root causes of failure.\n\n## Analysis of Agent vs Gold Patch\n\n**What the Gold Patch does:**\n1. Updates documentation to clarify that integer and non-Quantity objects are converted to float\n2. Changes line 299-301: Replaces `np.can_cast(np.float32, value.dtype) or value.dtype.fields` with `value.dtype.kind in 'iu'` (only integers and unsigned integers get converted)\n3. Changes line 380-382: Replaces the complex condition with `value.dtype.kind in 'iuO'` (integers, unsigned integers, and object types get converted)\n\n**What the Agent did:**\n- Only modified line 381-382, changing the condition to `value.dtype.kind not in 'fc'`\n- Did not modify the earlier code block around lines 299-301\n- Did not update the documentation\n\n## Failure Mode Analysis\n\nThe agent's approach has several issues:\n\n1. **Incomplete Repair**: The agent only fixed one of the two locations where the problematic dtype casting logic existed. The gold patch shows there are two similar code blocks that need to be updated (around lines 299-301 and 380-382), but the agent only found and fixed one.\n\n2. **Algorithmic Implementation Error**: The agent's logic `value.dtype.kind not in 'fc'` is slightly different from the gold patch's approach. While it works for the test case, it may not handle all edge cases the same way as the intended fix.\n\n3. **Component Coordination**: The fix requires updating multiple related components (two similar code blocks + documentation), but the agent only addressed one part.\n\nBased on the failure taxonomy, the applicable categories are:\n\n- **component_coordination** - Multiple components need changes (two code locations + documentation), but only some were made\n- **recurring_pattern** - Same bug pattern in multiple places in the code, only fixed some occurrences  \n- **algorithmic_implementation** - While the logic works for the basic case, it's not identical to the intended algorithm in the gold patch",
+      "method": "direct_llm",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "recurring_pattern",
+        "control_flow"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "django__django-10999",
+      "predicted": [
+        "insufficient_domain_knowledge",
+        "specific_case_overfitting"
+      ],
+      "explanation": "Looking at this trajectory, I need to compare what the agent did versus the correct solution (GOLD PATCH).\n\n## Analysis:\n\n**What the GOLD PATCH does:**\nThe correct solution makes a more comprehensive fix:\n1. Adds a separate `(?P<sign>-?)` group to capture the overall sign\n2. Removes the `-?` from individual time components (hours, minutes, seconds)\n3. Updates the lookahead to `(?=\\d+:\\d+)` (no negative signs in lookahead)\n\n**What the agent did:**\nThe agent only made a partial fix:\n- Modified the lookahead from `(?=\\d+:\\d+)` to `(?=-?\\d+:-?\\d+)`\n- Left all the individual `-?` patterns in place for hours, minutes, seconds\n- Did not add the separate sign group\n\n**Why this matters:**\nThe GOLD PATCH uses a cleaner approach where there's one sign that applies to the entire time portion, rather than allowing each component to be individually negative. The agent's approach technically \"works\" for the test cases but doesn't follow the intended design pattern shown in the gold patch.\n\n**Root Cause Analysis:**\n1. The agent focused on the specific suggestion in the PR description rather than understanding the deeper architectural intention\n2. The agent made the minimal change to make the regex match, but didn't consider the broader design implications\n3. The agent's solution allows inconsistent sign patterns that the gold patch prevents\n\n## Applicable Failure Categories:\n\n**specific_case_overfitting** - The agent's fix handles the example cases mentioned in the PR description but doesn't implement the cleaner, more systematic approach shown in the gold patch.\n\n**insufficient_domain_knowledge** - The agent didn't fully understand the intended regex design pattern for duration parsing, missing the architectural insight that a single sign should control the entire time portion rather than allowing individual negative components.",
+      "method": "direct_llm",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "django__django-11087",
+      "predicted": [
+        "insufficient_domain_knowledge",
+        "keywords_location",
+        "verification_abandonment",
+        "reproduction_script_failure",
+        "context_forgetting"
+      ],
+      "explanation": "Looking at the agent trajectory and comparing it to the GOLD PATCH, I can identify several failure mode categories:\n\n1. **reproduction_script_failure** - The agent spent significant time trying to create a working reproduction script but encountered multiple errors (model registration issues, foreign key constraint failures, etc.) and never successfully created a working reproduction to verify the issue.\n\n2. **localization_failures** - The agent focused on creating a reproduction script rather than examining the actual problem location. The gold patch shows the fix is in `django/db/models/deletion.py` in the `collect` method around line 225, but the agent was looking at the wrong parts of the code (like the `delete` method in `query.py` at line 678).\n\n3. **insufficient_domain_knowledge** - The agent didn't understand that the core issue is about optimizing deletion by using `.only()` to fetch only required fields during cascade deletion, and adding a helper method `_has_signal_listeners` to check for signal listeners. The agent never identified that the problem was about fetching unnecessary fields during deletion operations.\n\n4. **verification_abandonment** - The agent never actually implemented any fix. It got stuck trying to create a reproduction script and never moved on to implementing the actual solution shown in the gold patch.\n\n5. **context_forgetting** - The agent lost track of the main objective (implementing the optimization to use only required fields in deletion) and got sidetracked by trying to reproduce the Unicode error mentioned in the problem description.\n\nThe applicable failure mode categories are:\n\n- **reproduction_script_failure**\n- **insufficient_domain_knowledge** \n- **verification_abandonment**\n- **context_forgetting**\n- **keywords_location** (focused on wrong parts of codebase)",
+      "method": "direct_llm",
+      "ground_truth": [
+        "algorithmic_implementation",
+        "verification_weakening",
+        "insufficient_domain_knowledge",
+        "control_flow"
+      ],
+      "agent": "openhands"
+    }
+  ],
+  "lunette": [
+    {
+      "task_id": "astropy__astropy-13236",
+      "predicted": [
+        "issue_misleading",
+        "reproduction_output_misreading"
+      ],
+      "explanation": "The agent failed to implement the correct solution. ROOT CAUSES: 1) **issue_misleading** - The PR description mentioned a two-phase approach (add FutureWarning in 5.1, remove code in 5.2) which misled the agent, when the actual requirement was to implement the 5.2 behavior directly (complete code removal). The phrase 'save 6 months in the change process' indicated skipping the warning phase. 2) **reproduction_output_misreading** - The agent misunderstood what the final behavior should be. It added a FutureWarning and kept the NdarrayMixin conversion logic, when the gold patch shows the entire if-block (lines 1242-1247) should be deleted. The agent added code when it should have removed code, resulting in structured arrays still being converted to NdarrayMixin instead of becoming Column objects as required.",
+      "method": "lunette",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13398",
+      "error": "Timeout after 900s",
+      "method": "lunette",
+      "ground_truth": [
+        "issue_misleading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13453",
+      "predicted": [
+        "insufficient_domain_knowledge",
+        "redundant_erroneous_implementation"
+      ],
+      "explanation": "The agent failed due to REPAIR FAILURES, specifically: (1) **insufficient_domain_knowledge** - The agent didn't understand how astropy's column formatting system works. After calling _set_col_formats(), the format attribute is automatically set on col.info.format, and col.info.iter_str_vals() automatically uses it during iteration. The agent didn't grasp this architectural pattern and thought manual format application was needed. (2) **redundant_erroneous_implementation** - The agent added unnecessary manual format checking code (lines 436-439, 448-451) that checks if formats exist and manually applies them. This duplicates functionality already provided by the formatting system after _set_col_formats() is called. The GOLD PATCH only adds TWO lines (self.data.cols = cols and self.data._set_col_formats()), while the agent's solution includes those correct lines PLUS redundant manual format application logic. The agent's solution works but is overly complex and demonstrates incomplete understanding of the framework's formatting architecture. The agent successfully identified the problem location and made the core fix, but failed to implement it minimally due to insufficient domain knowledge about how iter_str_vals() interacts with col.info.format.",
+      "method": "lunette",
+      "ground_truth": [
+        "redundant_erroneous_implementation",
+        "reproduction_output_misreading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-13977",
+      "predicted": [
+        "algorithmic_implementation",
+        "non_progressive_iteration",
+        "specific_case_overfitting",
+        "verification_abandonment",
+        "referred_code_location",
+        "error_stack_trace"
+      ],
+      "explanation": "The agent FAILED to implement the correct solution. ROOT CAUSES:\n\n1. **algorithmic_implementation** - The agent's algorithm is fundamentally different from the gold patch. The gold patch wraps the entire __array_ufunc__ method in a try-except block and returns NotImplemented when there's an exception AND other operands have __array_ufunc__. The agent instead modified multiple low-level functions (_condition_arg, converters_and_unit, make_converter, _get_converter) to propagate NotImplemented throughout the codebase. This is a completely different and incorrect approach.\n\n2. **verification_abandonment** - The agent never ran the actual test suite to verify the solution works. The agent only tested with a custom reproduction script showing basic cases work, but never confirmed that existing tests pass or that the solution is correct. The trajectory ends abruptly without completion verification.\n\n3. **non_progressive_iteration** - The agent made many changes across multiple files without systematically testing if each change was correct or necessary. The agent kept modifying different functions trying to propagate NotImplemented through the call stack, rather than stepping back to understand the correct approach.\n\n4. **referred_code_location** - The agent fixated on the error stack trace locations (_condition_arg in core.py, converters_and_unit) and tried to fix the problem by modifying those functions, rather than understanding that the correct fix is to wrap __array_ufunc__ at the top level.\n\n5. **specific_case_overfitting** - The agent's solution checks for __array_ufunc__ attribute in multiple places and tries to handle it specially, rather than using the general try-except pattern that handles all errors uniformly.\n\nThe correct solution (gold patch) is much simpler: wrap the __array_ufunc__ body in try-except, catch TypeError/ValueError, check if inputs/outputs have non-standard __array_ufunc__, and return NotImplemented if so. The agent's approach of modifying multiple internal functions is invasive, incorrect, and never validated.",
+      "method": "lunette",
+      "ground_truth": [
+        "component_coordination"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-14182",
+      "predicted": [
+        "insufficient_verification_capability",
+        "verification_abandonment",
+        "component_coordination"
+      ],
+      "explanation": "The agent failed to fully implement the required changes. Root causes: 1) COMPONENT_COORDINATION - The agent only fixed the write() method but failed to address the read() functionality. The gold patch shows three critical changes needed: (a) remove hardcoded 'start_line = 3' from SimpleRSTData, (b) add a read() method to RST class that dynamically sets start_line based on header_rows, and (c) update docstring examples. The agent only implemented changes to __init__() and write(), leaving the read functionality broken. 2) INSUFFICIENT_VERIFICATION_CAPABILITY - The agent only tested writing RST files with header_rows but never tested reading them back, which would have revealed that reading still fails with the hardcoded start_line. The verification was incomplete and one-sided, focusing only on the write path. 3) VERIFICATION_ABANDONMENT - After seeing write tests pass, the agent declared success without testing the complete round-trip (write then read) or considering that both read and write operations needed updates for the feature to work properly.",
+      "method": "lunette",
+      "ground_truth": [
+        "component_coordination",
+        "reproduction_output_misreading"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-14508",
+      "predicted": [
+        "algorithmic_implementation",
+        "specific_case_overfitting",
+        "verification_abandonment",
+        "insufficient_verification_capability",
+        "redundant_erroneous_implementation"
+      ],
+      "explanation": "REPAIR FAILURES - Multiple root causes identified:\n\n1. **verification_abandonment** (PRIMARY): Agent stopped verification after running only a custom reproduction script and self-created edge case tests. Never ran the existing test suite to validate the fix works comprehensively. This is evident as the resolved score is 0.0, indicating the fix failed actual tests.\n\n2. **specific_case_overfitting**: Agent's implementation successfully fixed the specific reproduction case (0.009125) but used an overly complex approach that differs significantly from the gold patch. Only tested against their own limited test cases.\n\n3. **algorithmic_implementation**: The algorithm differs from the gold solution in critical ways:\n   - Added unnecessary decimal point checking and '.0' appending logic\n   - Falls back to old .16G formatting when >20 chars instead of direct truncation\n   - Kept old exponent normalization code that should be removed\n   - Missing .replace('e', 'E') for case normalization\n   - Overall more complex than the simpler, correct gold solution\n\n4. **redundant_erroneous_implementation**: Agent added conflicting logic by keeping old code that should be removed while adding new code. The function now has redundant checks for decimal points and multiple paths for handling exponent formatting.\n\n5. **insufficient_verification_capability**: Agent created custom tests that passed but didn't verify against the actual test suite, showing inability to properly validate that the fix meets all requirements.\n\nThe agent understood the problem correctly and their fix worked for the reproduction case, but the implementation approach was fundamentally different from the required solution and they failed to properly verify it.",
+      "method": "lunette",
+      "ground_truth": [
+        "specific_case_overfitting"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-7606",
+      "predicted": [
+        "insufficient_domain_knowledge",
+        "evasive_repair",
+        "component_coordination",
+        "specific_case_overfitting"
+      ],
+      "explanation": "The agent failed to implement the correct solution due to multiple failure modes:\n\n1. **specific_case_overfitting**: The agent's fix only handles the example case (None) by explicitly checking 'if other is None: return False'. However, the correct solution should generalize to ANY type that can't be converted to a Unit. The agent's fix doesn't catch exceptions from Unit() conversion for other types.\n\n2. **evasive_repair**: The fix suppresses the error symptom without addressing the root cause. The agent returns False when comparing with None, but the proper Python convention is to return NotImplemented when a comparison operator can't handle a type. This allows Python to try the reflected operation (None.__eq__(x)) and properly implement comparison semantics. Returning False hardcodes the behavior instead of following the protocol.\n\n3. **insufficient_domain_knowledge**: The agent lacks understanding of Python's rich comparison protocol. The correct solution uses NotImplemented (not False) and wraps Unit() conversion in try-except blocks to catch ValueError, UnitsError, and TypeError. The agent also missed that isinstance(other, UnrecognizedUnit) should be changed to isinstance(other, type(self)).\n\n4. **component_coordination**: The gold patch requires changes in TWO locations: UnitBase.__eq__ (line ~728) and UnrecognizedUnit.__eq__ (line ~1710). The agent only modified UnrecognizedUnit.__eq__, missing the parallel issue in the parent class.\n\nThe agent's solution appears to work for the specific test case but doesn't implement the architecturally correct solution and would fail for other non-Unit types.",
+      "method": "lunette",
+      "ground_truth": [
+        "insufficient_domain_knowledge",
+        "recurring_pattern",
+        "specific_case_overfitting"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "astropy__astropy-8872",
+      "predicted": [
+        "insufficient_verification_capability",
+        "algorithmic_implementation",
+        "component_coordination"
+      ],
+      "explanation": "PRIMARY FAILURE MODE: component_coordination - The gold patch requires changes in THREE locations: (1) documentation update lines 215-219, (2) first code fix lines 296-301 for isinstance(value, Quantity) case, (3) second code fix lines 377-383 for general case. The agent only fixed ONE location (the second code fix around line 380), completely missing the first code fix around line 299 and the documentation update. The bug exists in two similar code paths that both handle dtype conversion, and fixing only one path leaves the bug present when creating a Quantity from another Quantity. SECONDARY FAILURES: algorithmic_implementation - Agent's fix uses '(value.dtype.kind not in \"fc\" or value.dtype.kind == \"O\")' which has redundant logic (if dtype is 'O' it's already not in 'fc'), while gold patch uses cleaner 'value.dtype.kind in \"iuO\"'. insufficient_verification_capability - Agent tested basic cases but didn't write tests to verify the Quantity-to-Quantity conversion path that would have revealed the missing fix. The agent's reproduction script only tested np.float16 * unit, not Quantity(np.float16, unit) which goes through the different code path.",
+      "method": "lunette",
+      "ground_truth": [
+        "reproduction_output_misreading",
+        "recurring_pattern",
+        "control_flow"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "django__django-10999",
+      "predicted": [
+        "insufficient_verification_capability",
+        "issue_misleading",
+        "referred_code_location",
+        "specific_case_overfitting"
+      ],
+      "explanation": "PRIMARY FAILURE MODES:\n\n1. **issue_misleading** (CRITICAL): The PR description explicitly suggested a fix: 'r'((?:(?P<hours>-?\\d+):)(?=-?\\d+:-?\\d+))?' which the agent implemented. However, the gold patch uses a completely different approach - it adds a separate 'sign' capture group and REMOVES negative signs from individual components, rather than adding them to the lookahead. The agent was misled by following the explicit (but incorrect) suggestion in the issue.\n\n2. **referred_code_location**: The agent fixated on the specific code change suggested in the PR description rather than independently analyzing the problem. The agent implemented line-for-line what the PR suggested without questioning whether it was the correct architectural approach.\n\n3. **insufficient_verification_capability**: The agent only verified that the fix 'works' (returns timedelta objects) but didn't verify correctness against expected behavior or existing test cases. The agent's solution allows each time component to be independently negative (e.g., '-2:-3:-4'), while the gold patch's architecture has a single sign applying to the entire time portion. These have different semantics and the agent didn't catch this.\n\n4. **specific_case_overfitting**: The agent's fix may work for the specific examples tested but doesn't match the architectural pattern of the gold solution, which separates sign handling from component parsing for cleaner logic.\n\nThe core issue: The agent trusted and implemented an explicit technical suggestion from the PR description that turned out to be incorrect, rather than independently determining the proper fix.",
+      "method": "lunette",
+      "ground_truth": [
+        "issue_interference"
+      ],
+      "agent": "openhands"
+    },
+    {
+      "task_id": "django__django-11087",
+      "predicted": [
+        "algorithmic_implementation",
+        "verification_abandonment",
+        "referred_code_location",
+        "non_progressive_iteration"
+      ],
+      "explanation": "LOCALIZATION & REPAIR FAILURES: The agent completely misunderstood the task. The gold patch shows the solution is to optimize `.delete()` by using `.only()` to defer unnecessary fields during CASCADE collection. The agent instead: (1) REFERRED_CODE_LOCATION: Got fixated on deletion.py but focused entirely on fixing foreign key constraint ordering issues rather than field optimization. (2) NON_PROGRESSIVE_ITERATION: Spent 100+ messages repeatedly modifying `add()`, `collect()`, `sort()`, and `delete()` methods trying to fix 'FOREIGN KEY constraint failed' errors, which was NOT the actual problem to solve. (3) ALGORITHMIC_IMPLEMENTATION: Added complex dependency tracking logic that was unnecessary and incorrect. (4) VERIFICATION_ABANDONMENT: Eventually got the test to pass by manually deleting children first, rather than fixing the actual CASCADE deletion optimization issue. The agent never implemented the core solution: adding `_has_signal_listeners()` helper, checking for signal listeners before deferring fields, and using `sub_objs.only(*referenced_fields)` in the collect method. The agent was solving a completely different problem (deletion ordering) than what was specified (field fetching optimization).",
+      "method": "lunette",
+      "ground_truth": [
+        "algorithmic_implementation",
+        "verification_weakening",
+        "insufficient_domain_knowledge",
+        "control_flow"
+      ],
+      "agent": "openhands"
+    }
+  ]
+}
