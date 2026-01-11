@@ -40,9 +40,7 @@ model_irt/
 ├── trajectory_upload/          # Trajectory conversion and upload to Lunette
 │   ├── trajectory_converter.py # Convert trajectories to unified format
 │   ├── trajectory_filter.py    # Filter trajectories by criteria
-│   ├── lunette_reupload_with_metadata.py # **RECOMMENDED** Upload with SWE-bench metadata
-│   ├── lunette_upload.py       # [DEPRECATED] Single trajectory upload (no metadata)
-│   ├── lunette_batch_upload.py # [DEPRECATED] Batch upload (no metadata)
+│   ├── lunette_reupload_with_metadata.py # Upload with SWE-bench metadata
 │   ├── lunette_filtered_upload.py # Filtered upload
 │   └── lunette_augment_mappings.py # Pre-compute task-to-run mappings
 │
@@ -617,7 +615,7 @@ python -m analysis.download_logs evaluation/verified/20240620_sweagent_claude3.5
 |------|---------|
 | `llm_judge/llm_judge.py` | Direct LLM feature extraction |
 | `lunette_utils/lunette_analysis.py` | Original Lunette-based grading (single-upload) |
-| `trajectory_upload/lunette_batch_upload.py` | Batch upload trajectories to Lunette |
+| `trajectory_upload/lunette_reupload_with_metadata.py` | Upload trajectories with SWE-bench metadata |
 | `trajectory_upload/lunette_augment_mappings.py` | Pre-compute task-to-run mappings |
 | `llm_judge/lunette_batch_grading.py` | Batch grading of uploaded trajectories |
 | `llm_judge/evolutionary/lunette_data_loader.py` | Data loader for uploaded trajectories |
