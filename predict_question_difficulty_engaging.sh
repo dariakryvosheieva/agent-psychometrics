@@ -19,7 +19,7 @@ set -euo pipefail
 cd ~/model_irt
 
 # Load modules
-module load python/3.11.4
+module load miniforge
 module load cuda/12.1
 
 # Activate venv
