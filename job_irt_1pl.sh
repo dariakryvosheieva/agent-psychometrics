@@ -16,6 +16,8 @@ which python
 python -V
 python -c "import sys; print(sys.executable)"
 
+export PYTHONHASHSEED=0
+
 python /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/swebench_irt/prep_swebench.py \
        --experiments_dir /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/experiments/evaluation/verified \
        --output_path /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/swebench_verified_20251115_full.jsonl
@@ -24,8 +26,9 @@ python swebench_irt/train.py \
        --data_path out/chris_irt/swebench_verified_20251115_full.jsonl \
        --dims 1 \
        --model 1pl \
-       --output_dir out/chris_irt/swebench_verified_20251115_full/1d_1pl \
-       --epochs 5000
+       --output_dir out/chris_irt/swebench_verified_20251115_full \
+       --epochs 5000 \
+       --seed 0
 
 
 

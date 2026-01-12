@@ -7,6 +7,8 @@ Call the function using the following syntax:
 """
 
 import sys
+import os
+import random
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +19,7 @@ import pyro
 import numpy as np
 import json
 import pandas as pd
+import torch
 from py_irt.dataset import Dataset
 from py_irt.models import Multidim2PL
 from py_irt.models import TwoParamLog
@@ -28,6 +31,85 @@ import argparse
 def resolve_path(path_str: str) -> Path:
     path = Path(path_str).expanduser()
     return path if path.is_absolute() else (ROOT / path)
+
+def resolve_output_dir(path_str: str) -> Path:
+    """
+    Resolve output directory in a user-friendly way.
+
+    - Absolute paths are used as-is
+    - Relative paths containing a separator are resolved relative to repo ROOT
+    - Bare names (e.g. "swebench_verified_20251115_full") go under
+      chris_output/clean_data/<name>
+    """
+    p = Path(path_str).expanduser()
+    if p.is_absolute():
+        return p
+    if "/" in path_str or "\\" in path_str:
+        return ROOT / p
+    return ROOT / "chris_output" / "clean_data" / p
+
+def _suggest_jsonl_paths(missing_path: Path) -> list[Path]:
+    # Look for likely candidates near the requested location, then fallback to repo-wide.
+    candidates: list[Path] = []
+    parent = missing_path.parent
+    if parent.exists():
+        candidates.extend(sorted(parent.glob("*.jsonl")))
+        candidates.extend(sorted(parent.glob("**/*.jsonl")))
+    if not candidates:
+        candidates.extend(sorted((ROOT / "chris_output").glob("**/*.jsonl")))
+    # De-duplicate while preserving order
+    seen = set()
+    out: list[Path] = []
+    for c in candidates:
+        if c not in seen:
+            seen.add(c)
+            out.append(c)
+    return out[:10]
+
+def validate_data_path(data_path: Path) -> None:
+    if data_path.exists():
+        return
+    suggestions = _suggest_jsonl_paths(data_path)
+    msg = [
+        f"Missing --data_path: {data_path}",
+        "",
+        "This file is typically produced by swebench_irt/prep_swebench.py (it builds the agent×task response matrix).",
+        "Example:",
+        f"  python {ROOT/'swebench_irt'/'prep_swebench.py'} \\",
+        "    --experiments_dir experiments/evaluation/verified \\",
+        f"    --output_path {data_path}",
+        "",
+    ]
+    if suggestions:
+        msg.append("Nearby candidate JSONL files:")
+        msg.extend([f"  - {p}" for p in suggestions])
+        msg.append("")
+    raise SystemExit("\n".join(msg))
+
+def set_seed(seed: int) -> None:
+    """
+    Best-effort reproducibility across reruns.
+
+    Notes:
+    - For full determinism of Python hashing, set PYTHONHASHSEED *before* starting Python,
+      e.g. `PYTHONHASHSEED=0 python ...` (setting it inside the process is too late for some uses).
+    - Deterministic algorithms can be slower; we enable them when possible.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    pyro.set_rng_seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+    # Make torch behavior more deterministic where possible.
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    try:
+        torch.use_deterministic_algorithms(True)
+    except Exception:
+        # Older torch versions may not support this; ignore.
+        pass
 
 def load_irt_data(filepath):
     """Load and reshape JSONL data for IRT analysis."""
@@ -43,7 +125,7 @@ def load_irt_data(filepath):
     item_columns = [col for col in df.columns if col != 'subject_id']
     return Dataset.from_pandas(df, subject_column="subject_id", item_columns=item_columns), item_columns
 
-def fit_1d_irt(data: Dataset, epochs: int, output_name: str) -> IrtModelTrainer:
+def fit_1d_irt(data: Dataset, epochs: int, output_dir: Path) -> IrtModelTrainer:
     config = IrtConfig(
         model_type=TwoParamLog,
         priors="hierarchical",
@@ -68,7 +150,7 @@ def fit_1d_irt(data: Dataset, epochs: int, output_name: str) -> IrtModelTrainer:
     diff_std = list(pyro.param("scale_diff").detach().cpu().numpy())
     disc_log_std = list(pyro.param("scale_slope").detach().cpu().numpy())
 
-    out_dir = ROOT / "clean_data" / output_name / "1d"
+    out_dir = output_dir / "1d"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     items_df = pd.DataFrame({
@@ -88,7 +170,7 @@ def fit_1d_irt(data: Dataset, epochs: int, output_name: str) -> IrtModelTrainer:
     return trainer
 
 
-def fit_1d_1pl_irt(data: Dataset, epochs: int, output_name: str) -> IrtModelTrainer:
+def fit_1d_1pl_irt(data: Dataset, epochs: int, output_dir: Path) -> IrtModelTrainer:
     """Fit a 1D 1PL (Rasch) model - no discrimination parameter."""
     config = IrtConfig(
         model_type=OneParamLog,
@@ -111,7 +193,7 @@ def fit_1d_1pl_irt(data: Dataset, epochs: int, output_name: str) -> IrtModelTrai
     ability_std = list(pyro.param("scale_ability").detach().cpu().numpy())
     diff_std = list(pyro.param("scale_diff").detach().cpu().numpy())
 
-    out_dir = ROOT / "clean_data" / output_name / "1d_1pl"
+    out_dir = output_dir / "1d_1pl"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # 1PL has no discrimination parameter - save only b
@@ -130,7 +212,7 @@ def fit_1d_1pl_irt(data: Dataset, epochs: int, output_name: str) -> IrtModelTrai
     return trainer
 
 
-def fit_md_irt(data: Dataset, dims:int, epochs:int, output_name:str) -> IrtModelTrainer:
+def fit_md_irt(data: Dataset, dims:int, epochs:int, output_dir: Path) -> IrtModelTrainer:
 
     config = IrtConfig(
         model_type=Multidim2PL,
@@ -163,14 +245,14 @@ def fit_md_irt(data: Dataset, dims:int, epochs:int, output_name:str) -> IrtModel
     # Convert from pytorch tensor to numpy array
     abilities = pyro.param("loc_ability").detach().cpu().numpy()  # [S, D]
     difficulties = pyro.param("loc_diff").detach().cpu().numpy()  # [I, D]
-        # For MIRT: discrimination uses Normal guide; do NOT exponentiate
+    # For MIRT: discrimination uses Normal guide; do NOT exponentiate
     discriminations = pyro.param("loc_disc").detach().cpu().numpy()  # [I, D]
 
     ability_std = pyro.param("scale_ability").detach().cpu().numpy()
     diff_std = pyro.param("scale_diff").detach().cpu().numpy()
     disc_std = pyro.param("scale_disc").detach().cpu().numpy()
 
-    out_dir = ROOT / "clean_data" / output_name / f"{dims}d"
+    out_dir = output_dir / f"{dims}d"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     item_id_map = trainer.best_params["item_ids"]
@@ -215,23 +297,33 @@ def main():
         help='Number of training epochs (default: 5000)')
     parser.add_argument('--model', type=str, default="2pl", choices=["1pl", "2pl"],
         help='IRT model type for 1D (1pl=Rasch, 2pl=discrimination+difficulty)')
+    parser.add_argument('--seed', type=int, default=None,
+        help="Random seed for reproducible training (default: unset)")
     args = parser.parse_args()
 
+    if args.seed is not None:
+        # Setting PYTHONHASHSEED here is best-effort; prefer exporting it before launch.
+        os.environ.setdefault("PYTHONHASHSEED", str(args.seed))
+        set_seed(args.seed)
+
     data_path = resolve_path(args.data_path)
+    validate_data_path(data_path)
     data, item_columns = load_irt_data(data_path)
+    output_dir = resolve_output_dir(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     for dim in args.dims:
         pyro.clear_param_store()  # Clear parameters between different dimensional models
         if dim == 1:
             if args.model == "1pl":
                 print(f"Training 1D 1PL (Rasch) model...")
-                fit_1d_1pl_irt(data=data, epochs=args.epochs, output_name=args.output_dir)
+                fit_1d_1pl_irt(data=data, epochs=args.epochs, output_dir=output_dir)
             else:
                 print(f"Training 1D 2PL model...")
-                fit_1d_irt(data=data, epochs=args.epochs, output_name=args.output_dir)
+                fit_1d_irt(data=data, epochs=args.epochs, output_dir=output_dir)
         else:
             print(f"Training {dim}D 2PL model...")
-            fit_md_irt(data=data, dims=dim, epochs=args.epochs, output_name=args.output_dir)
+            fit_md_irt(data=data, dims=dim, epochs=args.epochs, output_dir=output_dir)
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,4 @@
 #!/bin/bash
-#SBATCH -A mit_general
 #SBATCH -n 1
 #SBATCH -t 6:00:00
 #SBATCH --mem=100G
