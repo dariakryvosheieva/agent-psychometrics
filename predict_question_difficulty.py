@@ -148,22 +148,6 @@ def load_difficulties_csv(path: str) -> Dict[str, float]:
     return diffs
 
 
-def load_difficulties_ordered(path: str) -> List[Tuple[int, str]]:
-    """
-    Load an (item_ix, item_id) list in file order.
-    Used to export predictions in the same schema as IRT difficulty CSVs.
-    """
-    out: List[Tuple[int, str]] = []
-    with open(path, newline="") as f:
-        r = csv.DictReader(f)
-        if "item_ix" not in (r.fieldnames or []) or "item_id" not in (r.fieldnames or []):
-            raise ValueError(f"Expected columns item_ix,item_id in {path}; got {r.fieldnames}")
-        for row in r:
-            out.append((int(row["item_ix"]), str(row["item_id"])))
-    out.sort(key=lambda x: x[0])
-    return out
-
-
 def prompt_signature(instruction: str) -> str:
     """
     Short signature for the *actual* prompt formatting used for embeddings.
@@ -737,7 +721,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         task_ids = ids_sorted
 
     diffs = load_difficulties_csv(str(args.difficulties))
-    difficulty_order = load_difficulties_ordered(str(args.difficulties))
 
     # Align X with y by item_id / instance_id
     id_to_row = {tid: i for i, tid in enumerate(task_ids)}
@@ -845,25 +828,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 }
             )
 
-    # Also write a convenience file matching the IRT schema (item_ix,item_id,diff),
-    # but with diff replaced by the regression-predicted difficulty.
-    pred_by_id = {tid: float(yhat_all[i]) for i, tid in enumerate(common)}
-    pred_irt_path = os.path.join(args.out_dir, "predicted_question_difficulties.csv")
-    with open(pred_irt_path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["item_ix", "item_id", "diff"])
-        w.writeheader()
-        missing = 0
-        for item_ix, item_id in difficulty_order:
-            if item_id not in pred_by_id:
-                missing += 1
-                continue
-            w.writerow({"item_ix": int(item_ix), "item_id": item_id, "diff": float(pred_by_id[item_id])})
-    if missing:
-        print(f"WARNING: {missing} item_ids in difficulty CSV were missing predictions; wrote remaining rows.")
-
     print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
     print(f"Wrote predictions: {pred_path}")
-    print(f"Wrote predicted difficulties: {pred_irt_path}")
     return 0
 
 
