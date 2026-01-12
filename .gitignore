@@ -46,3 +46,6 @@ trajectory_data/unified_trajs/_blob_style/
 
 # Personal cluster setup notes
 MIT_ENGAGING_SETUP.md
+
+# SLURM scripts (cluster-specific, not version controlled)
+slurm_scripts/
