@@ -5,8 +5,8 @@
 #SBATCH --output=logs/irt_prior_%j.out
 #SBATCH --error=logs/irt_prior_%j.err
 #SBATCH --time=6:00:00
-#SBATCH --gres=gpu:1
-#SBATCH --mem=64G
+#SBATCH --gres=gpu:h200:1
+#SBATCH --mem=100G
 #SBATCH --cpus-per-task=8
 
 # MIT Engaging cluster adaptation of predict_question_difficulty.sh
