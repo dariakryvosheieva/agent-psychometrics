@@ -18,12 +18,9 @@ set -euo pipefail
 # Project in home directory
 cd ~/model_irt
 
-# Load modules
+# Load modules and activate conda environment
 module load miniforge
-module load cuda/12.1
-
-# Activate venv
-source .venv/bin/activate
+conda activate irt
 
 # Set HuggingFace cache (avoids filling home quota)
 export HF_HOME="${PWD}/.cache/huggingface"
