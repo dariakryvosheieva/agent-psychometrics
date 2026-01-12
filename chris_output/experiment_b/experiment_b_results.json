@@ -50,8 +50,8 @@
       "20250511_sweagent_lm_32b",
       "20250515_Refact_Agent",
       "20250516_cortexa_o3",
-      "20250519_devlo",
       "20250519_trae",
+      "20250519_devlo",
       "20250520_openhands_devstral_small",
       "20250522_sweagent_claude-4-sonnet-20250514",
       "20250524_openhands_claude_4_sonnet",
@@ -60,8 +60,8 @@
       "20250603_Refact_Agent_claude-4-sonnet",
       "20250611_moatless_claude-4-sonnet-20250514",
       "20250612_trae",
-      "20250616_Skywork-SWE-32B",
       "20250616_Skywork-SWE-32B+TTS_Bo8",
+      "20250616_Skywork-SWE-32B",
       "20250627_agentless_MCTS-Refine-7B",
       "20250710_bloop",
       "20250716_openhands_kimi_k2"
@@ -71,18 +71,18 @@
       "20250804_codesweep_sweagent_kimi_k2_instruct",
       "20250804_epam-ai-run-claude-4-sonnet",
       "20250807_openhands_gpt5",
-      "20250901_entroPO_R2E_QwenCoder30BA3B",
       "20250901_entroPO_R2E_QwenCoder30BA3B_tts",
+      "20250901_entroPO_R2E_QwenCoder30BA3B",
       "20250915_JoyCode",
       "20250924_artemis_agent_v2",
       "20250928_trae_doubao_seed_code",
       "20250929_Prometheus_v1.2_gpt5",
       "20250930_zai_glm4-6",
       "20251015_Prometheus_v1.2.1_gpt5",
-      "20251103_sonar-foundation-agent_claude-sonnet-4-5",
       "20251103_SalesforceAIResearch_SAGE_OpenHands",
-      "20251110_frogboss-32b",
-      "20251110_frogmini-14b"
+      "20251103_sonar-foundation-agent_claude-sonnet-4-5",
+      "20251110_frogmini-14b",
+      "20251110_frogboss-32b"
     ],
     "d_train_tasks": [
       "astropy__astropy-13236",
@@ -236,31 +236,31 @@
   },
   "prior_train": {
     "n": 119,
-    "pearson_r": 0.03131587221923127,
+    "pearson_r": 0.031315872219231225,
     "p_value": 0.7352931688961389,
     "mse": 1.8700733634870101,
     "rmse": 1.3675062572021417
   },
   "posterior_train": {
     "n": 119,
-    "pearson_r": 0.11372021902259624,
+    "pearson_r": 0.11372021902259623,
     "p_value": 0.21815608133304587,
     "mse": 1.4387177791255439,
     "rmse": 1.1994656223191826
   },
   "prior_valid": {
     "n": 26,
-    "pearson_r": -0.15311267217277877,
+    "pearson_r": -0.15311267217277874,
     "p_value": 0.4552159168653964,
-    "mse": 4.293482809139435,
-    "rmse": 2.0720721051979427
+    "mse": 4.2934828091394355,
+    "rmse": 2.072072105197943
   },
   "posterior_valid": {
     "n": 26,
-    "pearson_r": -0.08665386586807317,
+    "pearson_r": -0.08665386586807307,
     "p_value": 0.6738190660737887,
-    "mse": 1.717825376133786,
-    "rmse": 1.3106583750671974
+    "mse": 1.7178253761337858,
+    "rmse": 1.3106583750671972
   },
   "psi_coefficients": {
     "avg_message_count": -0.008609751357585085,
@@ -271,9 +271,10 @@
   },
   "posterior_training_stats": {
     "total_tasks": 119,
-    "tasks_with_trajectories": 119,
+    "tasks_with_features": 119,
     "tasks_used_for_training": 119,
-    "agents_used": 31
+    "agents_used": 31,
+    "feature_source": "simple"
   },
   "prior_coefficients": {
     "problem_len": -0.023156948291545142,
@@ -297,12 +298,15 @@
     "items_path": "clean_data/swebench_verified_20251115_full/1d/items.csv",
     "responses_path": "chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl",
     "trajectories_dir": "trajectory_data/unified_trajs",
+    "lunette_features_dir": "chris_output/experiment_b/lunette_features",
     "output_dir": "chris_output/experiment_b",
     "m1_fraction": 0.4,
     "m2_fraction": 0.4,
     "weak_threshold": 0.2,
     "strong_min_improvement": 0.1,
     "prior_alpha": 1.0,
-    "posterior_alpha": 1.0
+    "posterior_alpha": 1.0,
+    "feature_source": "simple",
+    "prior_only": false
   }
 }
