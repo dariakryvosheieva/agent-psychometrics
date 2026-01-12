@@ -5,8 +5,8 @@
 #SBATCH --output=logs/irt_prior_%j.out
 #SBATCH --error=logs/irt_prior_%j.err
 #SBATCH --time=6:00:00
-#SBATCH --gres=gpu:1
-#SBATCH --mem=64G
+#SBATCH --gres=gpu:h200:1
+#SBATCH --mem=100G
 #SBATCH --cpus-per-task=8
 
 # MIT Engaging cluster adaptation of predict_question_difficulty.sh
@@ -18,12 +18,9 @@ set -euo pipefail
 # Project in home directory
 cd ~/model_irt
 
-# Load modules
-module load python/3.11.4
-module load cuda/12.1
-
-# Activate venv
-source .venv/bin/activate
+# Load modules and activate conda environment
+module load miniforge
+conda activate irt
 
 # Set HuggingFace cache (avoids filling home quota)
 export HF_HOME="${PWD}/.cache/huggingface"

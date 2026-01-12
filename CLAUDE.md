@@ -20,6 +20,14 @@ model_irt/
 │   ├── prep_swebench.py        # Build response matrix
 │   └── ...
 │
+├── experiment_a/               # Experiment A: Prior validation (IRT AUC)
+│   ├── config.py               # Configuration parameters
+│   ├── data_loader.py          # Load IRT params, responses, task splits
+│   ├── difficulty_predictor.py # Predictor protocol + implementations
+│   ├── irt_evaluation.py       # AUC computation using 1PL IRT
+│   ├── baselines.py            # Agent-only, task-only baselines
+│   └── train_evaluate.py       # Main evaluation pipeline
+│
 ├── experiment_b/               # Experiment B: Posterior difficulty prediction
 │   ├── config.py               # Configuration parameters
 │   ├── data_splits.py          # Agent/task splitting logic
@@ -124,6 +132,7 @@ clean_data/swebench_verified_20251115_full/{1d,1d_1pl}/
 | `swebench_irt/train_rep.py` | Train with multiple random seeds for stability analysis |
 | `swebench_irt/compare_dims.py` | Compare models via AIC/BIC, optional 2D scatter |
 | `swebench_irt/prep_swebench.py` | Build JSONL response matrix from experiments repo |
+| `experiment_a/train_evaluate.py` | Run Experiment A: prior validation (IRT AUC) |
 | `experiment_b/train_evaluate.py` | Run Experiment B: posterior difficulty prediction |
 | `llm_judge/llm_judge.py` | Direct LLM feature extraction |
 | `llm_judge/predict_difficulty.py` | Heuristic feature prediction |
@@ -614,6 +623,94 @@ With default settings (weak_threshold=0.2):
 | D_valid (n=38) | -0.153 | -0.087 | +0.066 |
 
 **Interpretation:** Posterior shows modest improvement over prior on both train and validation sets. The weak correlations suggest trajectory features provide some signal, but more sophisticated features or larger datasets may be needed.
+
+### Experiment A: Prior Validation (IRT AUC)
+
+Evaluates how well a difficulty predictor can predict agent success on held-out tasks using the 1PL IRT model. This validates whether predicted difficulties are useful for forecasting agent performance.
+
+#### Core Formula
+
+```
+P(success) = sigmoid(theta_j - beta_i)
+```
+
+Where:
+- `theta_j` = agent ability (from 1PL IRT model)
+- `beta_i` = predicted task difficulty
+
+#### Evaluation Protocol
+
+1. Split **tasks** (not agents) into train/test sets
+2. Train difficulty predictor on train tasks
+3. Predict difficulty for test tasks
+4. For each (agent, task) pair: compute P(success) using IRT formula
+5. Calculate AUC comparing predicted probabilities to actual outcomes
+
+#### Usage
+
+```bash
+# Dry run to check config
+python -m experiment_a.train_evaluate --dry_run
+
+# Run without embeddings (baselines only)
+python -m experiment_a.train_evaluate
+
+# Run with pre-computed embeddings
+python -m experiment_a.train_evaluate --embeddings_path out/prior_qwen3vl8b/embeddings__*.npz
+```
+
+#### Generating Embeddings
+
+Run Daria's pipeline on Engaging cluster:
+
+```bash
+sbatch predict_question_difficulty_engaging.sh
+```
+
+This produces:
+```
+out/prior_qwen3vl8b/
+├── embeddings__Qwen__Qwen3-VL-8B-Instruct__*.npz  # Use this for experiment_a
+├── predictions.csv     # Per-task predictions
+└── metrics.json        # Train/test R², Pearson r
+```
+
+#### Baseline Results (2026-01-12)
+
+| Method | AUC | Description |
+|--------|-----|-------------|
+| Oracle (true b) | 0.9447 | Upper bound using ground truth IRT difficulty |
+| Constant (mean b) | 0.7176 | Predict mean difficulty for all tasks |
+| Agent-only | 0.7178 | Use agent's overall success rate |
+| Task-only | 0.5000 | Use mean pass rate (no discrimination) |
+
+#### Directory Structure
+
+```
+experiment_a/
+├── config.py               # ExperimentAConfig dataclass
+├── data_loader.py          # Load abilities, items, responses; task splitting
+├── difficulty_predictor.py # DifficultyPredictor protocol + implementations
+├── irt_evaluation.py       # AUC computation using 1PL IRT formula
+├── baselines.py            # Agent-only, task-only baselines
+└── train_evaluate.py       # Main pipeline
+```
+
+#### Output
+
+Results saved to `chris_output/experiment_a/experiment_a_results.json`:
+
+```json
+{
+  "config": {...},
+  "data_summary": {"n_agents": 130, "n_tasks_total": 500, "n_train": 400, "n_test": 100},
+  "oracle": {"auc": 0.9447},
+  "embedding_predictor": {"auc_result": {"auc": 0.XX}, "difficulty_metrics": {...}},
+  "constant_baseline": {"auc": 0.7176},
+  "agent_only_baseline": {"auc": 0.7178},
+  "task_only_baseline": {"auc": 0.5000}
+}
+```
 
 ### IRT Model Variants
 

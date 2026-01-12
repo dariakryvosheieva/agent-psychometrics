@@ -26,6 +26,7 @@ IssueSolvingEmpirical/
 # Output files
 *.out
 *.jsonl
+!chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
 *.jsonlines
 *.npz
 
