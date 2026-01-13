@@ -27,7 +27,9 @@ class ExperimentConfig:
     strong_min_improvement: float = 0.1  # Min improvement for strong group
 
     # Model parameters
-    prior_alpha: float = 1.0  # Ridge alpha for prior
+    # NOTE: For embedding prior, alpha=10000 gives r≈0.63 on held-out test (proper regularization)
+    #       alpha=1 causes overfitting (r=0.9999 on train, memorizes data)
+    prior_alpha: float = 10000.0  # Ridge alpha for embedding prior
     posterior_alpha: float = 1.0  # Ridge alpha for psi
 
     # Feature source: "simple" (message stats), "lunette" (Lunette API), or "llm_judge" (direct LLM API)

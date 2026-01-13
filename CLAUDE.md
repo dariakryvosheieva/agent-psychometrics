@@ -643,20 +643,21 @@ Results saved to `chris_output/experiment_b/experiment_b_results.json`:
 
 **Primary metric: AUC-ROC** - Uses IRT formula P(success) = sigmoid(θ - β) to predict agent-task outcomes. AUC avoids the restricted variance problem with correlation/RMSE on biased subsets.
 
-Results with embedding prior (Qwen3-VL-8B embeddings) and different trajectory feature sources:
+Results with embedding prior (Qwen3-VL-8B embeddings, alpha=10000) and different trajectory feature sources:
 
-| Feature Source | D_train AUC | D_valid AUC | Tasks w/ Features | Notes |
-|----------------|-------------|-------------|-------------------|-------|
-| Prior only (embedding) | 0.7550 | **0.7082** | 119/119 | Baseline |
-| + Simple features | 0.7549 | 0.7080 | 119/119 | -0.0002 on valid |
-| + LLM judge features | 0.7549 | 0.7082 | 100/119 | No improvement |
-| + Lunette features | 0.7550 | 0.7082 | 19/119 | Limited coverage |
+| Feature Source | D_train AUC | D_valid AUC | ΔAUC | Tasks w/ Features | Notes |
+|----------------|-------------|-------------|------|-------------------|-------|
+| Prior only (embedding) | 0.6830 | 0.7383 | — | 119/119 | Baseline |
+| + Simple features | 0.7076 | **0.7444** | **+0.0062** | 119/119 | Best result! |
+| + LLM judge features | 0.6929 | 0.7215 | -0.0168 | 100/119 | Overfits on train |
+| + Lunette features | 0.6846 | 0.7383 | +0.0000 | 19/119 | Too few features |
 
-**Key finding:** Trajectory features do NOT improve upon the embedding prior. The prior captures task difficulty well enough that observing how agents fail doesn't add information.
+**Key finding:** Simple trajectory features (message count, chars, resolve rate) provide a small but positive improvement (+0.62% AUC). LLM judge features overfit and hurt validation. Lunette has insufficient coverage.
 
 **Data used:**
 - D_train: 119 tasks (3,689 agent-task pairs) where M1 agents (oldest 40%) mostly failed but M2 passed
 - D_valid: 26 tasks (806 agent-task pairs) where M2 agents mostly failed but M3 (newest 20%) passed
+- Prior RMSE: 1.12 (D_train), 1.72 (D_valid) — meaningful residuals to predict
 - AUC computed using IRT formula with learned agent abilities (θ) and predicted task difficulties (β)
 
 **Prior Residual Analysis (2026-01-12):**
