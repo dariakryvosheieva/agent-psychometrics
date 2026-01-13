@@ -60,6 +60,10 @@ chris_output/experiment_b/lunette_features/
 # LLM judge extracted features (expensive to regenerate, large)
 chris_output/experiment_b/llm_judge_features/
 
+# Experiment B run outputs (regenerable)
+chris_output/experiment_b/embedding_*/
+chris_output/experiment_b/heuristic_*/
+
 # Experiment A Lunette features (large, regenerable from API)
 chris_output/experiment_a/lunette_features/
 chris_output/experiment_a/lunette_features.csv
