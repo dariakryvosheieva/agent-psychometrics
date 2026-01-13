@@ -22,7 +22,36 @@ echo '{"api_key": "your-key-here"}' > ~/.lunette/config.json
 
 - **Run**: A collection of trajectories, typically from one agent on multiple tasks
 - **Trajectory**: A single agent attempt at solving a task (messages, actions, results)
-- Trajectories are uploaded in batches and assigned run_ids
+- When uploading, trajectories are grouped into runs (batches of ~25)
+- Both runs and trajectories get their own UUIDs from Lunette's API
+
+#### Trajectory IDs
+
+When you upload a `Run` with multiple trajectories, Lunette assigns each trajectory its own UUID. The `save_run()` response includes both:
+
+```python
+run_meta = await client.save_run(run)
+run_id = run_meta["run_id"]           # UUID for the run
+traj_ids = run_meta["trajectory_ids"]  # List of UUIDs, one per trajectory
+```
+
+You can retrieve individual trajectories directly via their ID:
+
+```python
+# GET /trajectories/{trajectory_id}
+r = client.get(f"/trajectories/{traj_id}")
+trajectory = r.json()
+# Keys: id, run_id, task, model, messages, metadata, scores, ...
+```
+
+Or retrieve all trajectories in a run:
+
+```python
+# GET /runs/{run_id}
+r = client.get(f"/runs/{run_id}")
+run = r.json()
+trajectories = run["trajectories"]  # List of trajectory objects
+```
 
 ### Analysis Plans
 
