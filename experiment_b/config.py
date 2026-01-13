@@ -21,6 +21,7 @@ class ExperimentConfig:
     execution_features_dir: Path = Path("chris_output/experiment_b/execution_features")
     llm_judge_v6_features_dir: Path = Path("chris_output/experiment_b/llm_judge_v6_features")
     llm_judge_v7_features_dir: Path = Path("chris_output/experiment_b/llm_judge_v7_features")
+    trajectory_embeddings_dir: Path = Path("chris_output/experiment_b/trajectory_embeddings")
     output_dir: Path = Path("chris_output/experiment_b")
 
     # Agent splitting
@@ -48,7 +49,15 @@ class ExperimentConfig:
     # - "execution": Deterministic execution features (v2) - error misdirection, edit entropy, etc.
     # - "discoverability": LLM judge v6 solution discoverability
     # - "combined_v2": execution + discoverability combined
-    feature_source: Literal["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5", "llm_judge_v5_single", "execution", "discoverability", "combined_v2", "llm_judge_v7", "mechanical_v7"] = "simple"
+    feature_source: Literal["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5", "llm_judge_v5_single", "execution", "discoverability", "combined_v2", "llm_judge_v7", "mechanical_v7", "embedding"] = "simple"
+
+    # Embedding posterior configuration (when feature_source="embedding")
+    # Content type: how much trajectory information to include
+    embedding_content_type: Literal["full", "condensed", "failure_focused", "no_solution"] = "full"
+    # Instruction type: what question to ask at end of input
+    embedding_instruction_type: Literal["difficulty", "residual", "progress", "closeness"] = "difficulty"
+    # Aggregation: how to combine embeddings across agents
+    embedding_aggregation: Literal["mean_only", "mean_std", "weighted", "all_stats"] = "mean_std"
 
     # Prior source: "heuristic" (repo, text length) or "embedding" (Daria's embeddings)
     prior_source: Literal["heuristic", "embedding"] = "heuristic"
@@ -70,7 +79,7 @@ class ExperimentConfig:
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "ExperimentConfig":
         """Create config from dict, converting strings to Paths."""
-        path_fields = {"items_path", "responses_path", "trajectories_dir", "lunette_features_dir", "llm_judge_features_dir", "llm_judge_v4_features_dir", "llm_judge_v5_features_dir", "llm_judge_v5_single_features_dir", "execution_features_dir", "llm_judge_v6_features_dir", "llm_judge_v7_features_dir", "output_dir", "embeddings_path"}
+        path_fields = {"items_path", "responses_path", "trajectories_dir", "lunette_features_dir", "llm_judge_features_dir", "llm_judge_v4_features_dir", "llm_judge_v5_features_dir", "llm_judge_v5_single_features_dir", "execution_features_dir", "llm_judge_v6_features_dir", "llm_judge_v7_features_dir", "trajectory_embeddings_dir", "output_dir", "embeddings_path"}
         converted = {}
         for k, v in d.items():
             if k in path_fields and isinstance(v, str):
