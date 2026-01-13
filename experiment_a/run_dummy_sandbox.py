@@ -162,39 +162,65 @@ class TrackingManager:
         return [t for t in all_task_ids if t not in completed]
 
 
-async def find_run_info_from_api(client: LunetteClient, task_id: str) -> Optional[Dict]:
-    """Find run_id and trajectory_id for a task from Lunette API."""
+async def find_all_task_runs_from_api(client: LunetteClient, task_ids: List[str], max_runs: int = 500) -> Dict[str, Dict]:
+    """Find run_id and trajectory_id for multiple tasks from Lunette API.
+
+    Args:
+        client: Lunette client
+        task_ids: List of task IDs to find
+        max_runs: Maximum number of runs to search through
+
+    Returns:
+        Dict mapping task_id -> {run_id, trajectory_id}
+    """
+    found = {}
+    task_id_set = set(task_ids)
+
     try:
         async with httpx.AsyncClient(
             base_url=client.base_url,
             headers={"X-API-Key": client.api_key},
-            timeout=30
+            timeout=120
         ) as http:
             # Get recent runs
             r = await http.get("/runs/")
             runs = r.json()
 
-            # Find runs from dummy_swebench task
-            for run in runs:
-                if run.get("task") == "dummy_swebench":
-                    run_id = run.get("id")
+            # Filter to dummy_swebench runs and search
+            dummy_runs = [run for run in runs if run.get("task") == "dummy_swebench"]
+            print(f"    Found {len(dummy_runs)} dummy_swebench runs to search")
+
+            for run in dummy_runs[:max_runs]:
+                run_id = run.get("id")
+
+                try:
                     # Fetch run details to get trajectories
                     r2 = await http.get(f"/runs/{run_id}")
                     run_data = r2.json()
 
                     trajectories = run_data.get("trajectories", [])
                     for traj in trajectories:
-                        if traj.get("sample") == task_id:
-                            return {
+                        sample_id = traj.get("sample")
+                        if sample_id in task_id_set and sample_id not in found:
+                            found[sample_id] = {
                                 "run_id": run_id,
                                 "trajectory_id": traj.get("id"),
                             }
 
-            return None
+                except Exception as e:
+                    # Skip individual run errors
+                    continue
+
+                # Stop if we've found all tasks
+                if len(found) == len(task_ids):
+                    break
+
+            print(f"    Found run info for {len(found)}/{len(task_ids)} tasks")
 
     except Exception as e:
         print(f"    Error querying Lunette API: {e}")
-        return None
+
+    return found
 
 
 def parse_eval_log(log_path: str) -> Dict:
@@ -227,7 +253,14 @@ def parse_eval_log(log_path: str) -> Dict:
 def run_inspect_batch(task_ids: List[str], output_dir: Path, timeout: int = 600) -> Dict:
     """Run Inspect eval on a batch of tasks.
 
-    Returns dict with log_path and any errors.
+    Creates a single Lunette run with all tasks as separate trajectories.
+    Each trajectory gets its own sandbox with the repo at the correct commit.
+
+    The batch is uploaded as ONE run to Lunette, which is more efficient than
+    creating separate runs per task. Each trajectory can still be investigated
+    individually using limit=1 in the investigate() call.
+
+    Returns dict with log_path, run info, and any errors.
     """
     if not task_ids:
         return {"error": "No tasks provided"}
@@ -239,11 +272,8 @@ def run_inspect_batch(task_ids: List[str], output_dir: Path, timeout: int = 600)
         "--model", "mockllm/model",
         "--sandbox", "lunette",
         "--no-score",
+        "--sample-id", ",".join(task_ids),  # Comma-separated list
     ]
-
-    # Add sample IDs
-    for task_id in task_ids:
-        cmd.extend(["--sample-id", task_id])
 
     print(f"    Running: {' '.join(cmd[:8])} ... ({len(task_ids)} tasks)")
 
@@ -331,11 +361,14 @@ async def run_sandbox_pipeline(
             log_info = parse_eval_log(result["log_path"])
             print(f"  Samples in log: {len(log_info.get('samples', {}))}")
 
-        # Query Lunette API to get run_ids and trajectory_ids
+        # Query Lunette API to get run_ids and trajectory_ids for all tasks in batch
         print("  Querying Lunette API for run info...")
         async with LunetteClient() as client:
+            # Find all tasks in batch at once (more efficient)
+            all_run_info = await find_all_task_runs_from_api(client, batch_task_ids)
+
             for task_id in batch_task_ids:
-                run_info = await find_run_info_from_api(client, task_id)
+                run_info = all_run_info.get(task_id)
 
                 if run_info:
                     tracker.mark_completed(

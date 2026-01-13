@@ -3,8 +3,13 @@
 
 This script grades the sandbox runs created by run_dummy_sandbox.py using
 Lunette's investigate() API with structured output schemas. The grading judge
-now has full sandbox access and can run shell commands to extract accurate
+has full sandbox access and can run shell commands to extract accurate
 environment-based features.
+
+IMPORTANT: Batch grading does NOT work. When using limit > 1 in investigate(),
+the Lunette API returns 504 Gateway Timeout errors. Each investigation takes
+~55 seconds, and the API cannot handle multiple simultaneous investigations.
+Therefore, this script grades tasks one at a time.
 
 Usage:
     # Dry run to see execution plan
@@ -107,6 +112,10 @@ async def grade_single_task(
     semantic_only: bool = False,
 ) -> Optional[Dict]:
     """Grade a single task using Lunette with structured output.
+
+    Note: Batch grading (limit > 1 in investigate()) causes 504 Gateway Timeout
+    errors, so we must grade each task individually. Each investigation takes
+    approximately 55 seconds.
 
     Args:
         client: Lunette client
@@ -262,10 +271,6 @@ async def main():
         help="Skip tasks with existing feature files"
     )
     parser.add_argument(
-        "--concurrency", type=int, default=5,
-        help="Number of concurrent grading tasks (default: 5)"
-    )
-    parser.add_argument(
         "--semantic_only", action="store_true",
         help="Use SemanticOnlyFeatures schema (faster, no shell exploration)"
     )
@@ -337,7 +342,7 @@ async def main():
     if args.dry_run:
         print("\n=== DRY RUN ===")
         print(f"\nOutput directory: {output_dir}")
-        print(f"Concurrency: {args.concurrency}")
+        print(f"Batch size: {args.batch_size} trajectories per investigate() call")
         print(f"Schema: {'SemanticOnlyFeatures' if args.semantic_only else 'TaskDifficultyFeatures'}")
         print(f"\nSample tasks (first 10):")
         for task in tasks_to_grade[:10]:
@@ -356,7 +361,10 @@ async def main():
         print("Run: pip install lunette-sdk")
         return
 
-    # Grade tasks
+    # Grade tasks one at a time
+    # NOTE: Batch grading (limit > 1 in investigate()) causes 504 Gateway Timeout errors.
+    # The Lunette API takes ~55 seconds per single investigation, and batching causes timeouts.
+    # Therefore we must grade each task individually.
     stats = {
         "total": len(tasks_to_grade),
         "success": 0,
@@ -364,45 +372,31 @@ async def main():
     }
 
     all_features = []
-    semaphore = asyncio.Semaphore(args.concurrency)
 
-    async def grade_with_semaphore(client, task, idx, total):
-        """Grade a task with concurrency limiting."""
-        async with semaphore:
+    async with LunetteClient() as client:
+        for task_idx, task in enumerate(tasks_to_grade):
             task_id = task["task_id"]
             run_id = task["run_id"]
-            metadata = task["metadata"]
 
-            print(f"\n[{idx + 1}/{total}] {task_id}")
-            print(f"    run_id: {run_id[:16]}...")
+            print(f"\n[{task_idx + 1}/{len(tasks_to_grade)}] Grading: {task_id}")
+            print(f"  Run ID: {run_id[:16]}...")
 
-            return await grade_single_task(
+            features = await grade_single_task(
                 client=client,
                 task_id=task_id,
                 run_id=run_id,
-                task_metadata=metadata,
+                task_metadata=task["metadata"],
                 output_dir=output_dir,
                 semantic_only=args.semantic_only,
             )
 
-    async with LunetteClient() as client:
-        coroutines = [
-            grade_with_semaphore(client, task, i, len(tasks_to_grade))
-            for i, task in enumerate(tasks_to_grade)
-        ]
-
-        results = await asyncio.gather(*coroutines, return_exceptions=True)
-
-        for features in results:
-            if isinstance(features, Exception):
-                print(f"    Exception: {features}")
-                stats["failed"] += 1
-            elif features:
+            if features:
                 all_features.append(features)
                 stats["success"] += 1
-                print(f"    Success - {len(features)} features extracted")
+                print(f"  ✓ Success")
             else:
                 stats["failed"] += 1
+                print(f"  ✗ Failed")
 
     # Aggregate to CSV
     csv_path = aggregate_to_csv(output_dir)

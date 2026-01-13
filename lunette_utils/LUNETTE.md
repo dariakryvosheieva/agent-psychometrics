@@ -53,6 +53,36 @@ run = r.json()
 trajectories = run["trajectories"]  # List of trajectory objects
 ```
 
+### Batching: One Run, Multiple Trajectories
+
+When running multiple tasks through Inspect with `--sandbox lunette`, you can batch them into a **single run with multiple trajectories** using comma-separated sample IDs:
+
+```bash
+# Creates ONE run with 3 trajectories (efficient)
+inspect eval lunette_utils/dummy_swebench_task.py@dummy_swebench \
+    --model mockllm/model \
+    --sandbox lunette \
+    --sample-id "task1,task2,task3"
+```
+
+Each trajectory gets its own sandbox with the repo at the correct commit. You can then investigate individual trajectories using `limit=1`:
+
+```python
+# Investigate one trajectory at a time
+results = await client.investigate(
+    run_id=run_id,
+    plan=plan,
+    limit=1,  # IMPORTANT: Must be 1 - higher values cause 504 timeouts
+)
+```
+
+**IMPORTANT:** You MUST grade trajectories one at a time (`limit=1`). Using `limit > 1` causes 504 Gateway Timeout errors because each investigation takes ~55 seconds. See [Batch Investigation Timeout](#batch-investigation-timeout-limit--1) for details.
+
+This batching approach is still more efficient than creating separate runs per task because:
+1. Fewer API calls for run management
+2. Easier to track progress (one run_id per batch)
+3. Single Inspect invocation provisions multiple sandboxes
+
 ### Analysis Plans
 
 Lunette provides several analysis plan types:
@@ -450,11 +480,10 @@ inv_id = r.json()["run_id"]
 |------|---------|
 | `trajectory_upload/lunette_reupload_with_metadata.py` | Upload trajectories with SWE-bench metadata |
 | `llm_judge/lunette_batch_grading.py` | Batch grading of uploaded trajectories |
-| `lunette_utils/lunette_analysis.py` | Lunette grading utilities |
 | `lunette_utils/dummy_solver.py` | **Dummy solver for feature extraction (use with Inspect + --sandbox lunette)** |
-| `lunette_utils/dummy_swebench_task.py` | Pre-built Inspect task with Lunette sandbox config |
+| `lunette_utils/dummy_swebench_task.py` | **Inspect task definition with Docker Compose config for sandbox creation** |
 | **Experiment A (Task Features)** | |
-| `experiment_a/run_dummy_sandbox.py` | **Step 1: Run dummy solver through Inspect with sandbox** |
+| `experiment_a/run_dummy_sandbox.py` | **Step 1: Run dummy solver through Inspect with sandbox (batched)** |
 | `experiment_a/grade_sandbox_runs.py` | **Step 2: Grade sandbox runs with structured output** |
 | `experiment_a/lunette_structured_output.py` | Pydantic schemas for structured output |
 | **Experiment B (Trajectory Features)** | |
@@ -532,6 +561,30 @@ results = await client.investigate(
     timeout=600,  # 10 minutes
 )
 ```
+
+### Batch Investigation Timeout (limit > 1)
+
+**Symptom:** When calling `investigate()` with `limit > 1`, the API returns a **504 Gateway Timeout** error after ~60 seconds.
+
+**Cause:** Each investigation takes approximately 55 seconds to complete. When requesting multiple trajectories in a single call, the total execution time exceeds the API gateway timeout.
+
+**Technical details:**
+- `limit=1` works consistently (~55 seconds per call)
+- `limit=2` sometimes works, sometimes times out
+- `limit=3+` reliably times out with 504 Gateway Timeout
+
+**Solution:** Grade trajectories one at a time:
+```python
+# ❌ DOES NOT WORK - will timeout
+results = await client.investigate(run_id=run_id, plan=plan, limit=10)
+
+# ✅ WORKS - grade one at a time
+for task in tasks_to_grade:
+    result = await client.investigate(run_id=task["run_id"], plan=plan, limit=1)
+    # Process result...
+```
+
+**Note:** While batching multiple tasks into a single run (via `--sample-id "task1,task2,task3"`) is efficient for sandbox creation, grading must still happen one trajectory at a time due to this timeout limitation.
 
 ### Feature Extraction Differs Between Runs
 
