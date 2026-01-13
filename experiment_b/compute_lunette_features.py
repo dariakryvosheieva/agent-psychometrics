@@ -80,6 +80,100 @@ def parse_features_json(text: str) -> Optional[dict]:
         return None
 
 
+def parse_features_from_explanation(explanation: str) -> Optional[dict]:
+    """Parse features from Lunette's explanation text.
+
+    Lunette returns {name, score, explanation} format. This function
+    extracts feature scores from the explanation text which contains
+    patterns like "backtracking_exploration: 3/4" or "Backtracking (2/4)".
+    """
+    if not explanation:
+        return None
+
+    features = {}
+
+    # Parse competency scores - various formats:
+    # "backtracking_exploration: 3/4"
+    # "Backtracking (2/4)"
+    # "1. backtracking_exploration: 3/4"
+    competency_patterns = [
+        (r'backtracking[_\s]*(?:exploration)?[:\s(]+(\d)[/\s]*4', 'backtracking_exploration'),
+        (r'task[_\s]*decomposition[:\s(]+(\d)[/\s]*4', 'task_decomposition'),
+        (r'observation[_\s]*reading[:\s(]+(\d)[/\s]*4', 'observation_reading'),
+        (r'self[_\s]*verification[:\s(]+(\d)[/\s]*4', 'self_verification'),
+    ]
+
+    for pattern, feature_name in competency_patterns:
+        match = re.search(pattern, explanation, re.IGNORECASE)
+        if match:
+            features[feature_name] = int(match.group(1))
+
+    # Parse failure mode indicators - look for positive mentions
+    # Exclude negations like "no strategy_defect" or "all 0"
+    failure_patterns = {
+        'localization_failure': r'(?<!no\s)(?<!No\s)localization[_\s]*failure[s]?(?!\s*\(all\s*0)',
+        'strategy_defect': r'(?:Failures\s*detected:.*|Failures:.*)?strategy[_\s]*defect(?:\s*\([^)]+\))?',
+        'implementation_defect': r'(?:Failures\s*detected:.*|Failures:.*)?implementation[_\s]*defect(?:\s*\([^)]+\))?',
+        'incomplete_repair': r'(?:Failures\s*detected:.*|Failures:.*)?incomplete[_\s]*repair(?:\s*\([^)]+\))?',
+        'verification_failure': r'(?:Failures\s*detected:.*|Failures:.*)?verification[_\s]*failure(?:\s*\([^)]+\))?',
+    }
+
+    # Check for "all 0" or "no failures" patterns
+    no_failures = bool(re.search(r'failure\s*modes?\s*\(all\s*0\)|no\s+(?:failures|defects)', explanation, re.IGNORECASE))
+
+    for feature_name, pattern in failure_patterns.items():
+        if no_failures:
+            features[feature_name] = 0
+        else:
+            # Look for positive mentions in "Failures detected:" section
+            failures_section = re.search(r'Failures\s*(?:detected)?:([^.]+)', explanation, re.IGNORECASE)
+            if failures_section:
+                section_text = failures_section.group(1)
+                if feature_name.replace('_', '') in section_text.lower().replace('_', '').replace(' ', ''):
+                    features[feature_name] = 1
+                else:
+                    features[feature_name] = 0
+            else:
+                # Fallback: check whole text but avoid negations
+                if re.search(pattern, explanation, re.IGNORECASE):
+                    features[feature_name] = 1
+                else:
+                    features[feature_name] = 0
+
+    # Parse trajectory signals - similar logic
+    no_signals = bool(re.search(r'trajectory\s*signals?\s*\(all\s*0\)|signals?\s*\(all\s*0\)', explanation, re.IGNORECASE))
+
+    signal_patterns = {
+        'agent_looping': r'agent[_\s]*looping|looping\s*\(',
+        'agent_gave_up_early': r'gave[_\s]*up|stopped\s*early|abandoned',
+        'agent_wrong_focus': r'wrong[_\s]*focus|fixated\s*on\s*irrelevant',
+        'context_overflow': r'context[_\s]*overflow|lost\s*track|forgot',
+    }
+
+    for feature_name, pattern in signal_patterns.items():
+        if no_signals:
+            features[feature_name] = 0
+        else:
+            # Look for positive mentions in "Signals:" section
+            signals_section = re.search(r'Signals?:([^.]+)', explanation, re.IGNORECASE)
+            if signals_section:
+                section_text = signals_section.group(1)
+                if feature_name.replace('agent_', '').replace('_', '') in section_text.lower().replace('_', '').replace(' ', ''):
+                    features[feature_name] = 1
+                else:
+                    features[feature_name] = 0
+            else:
+                if re.search(pattern, explanation, re.IGNORECASE):
+                    features[feature_name] = 1
+                else:
+                    features[feature_name] = 0
+
+    # Return if we found at least some features
+    if len(features) >= 4:
+        return features
+    return None
+
+
 async def grade_trajectory(
     client: LunetteClient,
     run_id: str,
@@ -93,10 +187,10 @@ async def grade_trajectory(
         task_id: SWE-bench task ID
 
     Returns:
-        Feature dict or None on failure
+        Feature dict with lunette_difficulty_score and parsed features
     """
     try:
-        plan = GradingPlan(name="trajectory-features", prompt=TRAJECTORY_GRADING_PROMPT)
+        plan = GradingPlan(name="difficulty-prediction", prompt=TRAJECTORY_GRADING_PROMPT)
 
         results = await client.investigate(
             run_id=run_id,
@@ -109,21 +203,25 @@ async def grade_trajectory(
             return None
 
         result_data = results.results[0].data
-        # Try to parse JSON from explanation or data fields
+
+        # Lunette returns {name, score, explanation}
         if isinstance(result_data, dict):
+            # Get the difficulty score (0-1) from Lunette's score field
+            lunette_score = result_data.get("score", 0.5)
             explanation = result_data.get("explanation", "")
-            features = parse_features_json(explanation)
-            if features:
-                return features
-            # Check if result_data itself has the features
-            if any(k in result_data for k in LUNETTE_FEATURE_NAMES):
-                return result_data
-            return {"_raw": str(result_data), "_parse_failed": True}
+
+            # Start with the main score
+            features = {"lunette_difficulty_score": float(lunette_score)}
+
+            # Parse additional features from explanation
+            explanation_features = parse_features_from_explanation(explanation)
+            if explanation_features:
+                features.update(explanation_features)
+
+            return features
         else:
-            features = parse_features_json(str(result_data))
-            if features:
-                return features
-            return {"_raw": str(result_data), "_parse_failed": True}
+            # Unexpected format
+            return {"lunette_difficulty_score": 0.5, "_raw": str(result_data), "_unexpected_format": True}
 
     except Exception as e:
         print(f"    Error grading {task_id}: {e}")

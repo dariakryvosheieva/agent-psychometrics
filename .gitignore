@@ -51,5 +51,8 @@ trajectory_data/unified_trajs/_blob_style/
 # Experiment B reference papers
 experiment_b/LLM judge inspiration papers/
 
+# Lunette extracted features (large, regenerable from API)
+chris_output/experiment_b/lunette_features/
+
 # Personal cluster setup notes
 MIT_ENGAGING_SETUP.md

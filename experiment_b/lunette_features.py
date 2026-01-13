@@ -16,7 +16,10 @@ import numpy as np
 
 
 # Feature names for the Lunette-extracted feature vector
+# Main output is lunette_difficulty_score (0-1), plus parsed features from explanation
 LUNETTE_FEATURE_NAMES = [
+    # Primary output: Lunette's difficulty prediction (0=easy, 1=hard)
+    "lunette_difficulty_score",
     # Agentic competencies (1-4 scale, from AgentDiagnose)
     "backtracking_exploration",
     "task_decomposition",
@@ -35,84 +38,66 @@ LUNETTE_FEATURE_NAMES = [
     "context_overflow",
 ]
 
-# Grading prompt for Lunette
-TRAJECTORY_GRADING_PROMPT = """You are analyzing a SWE-bench agent trajectory to extract signals about task difficulty.
+# Grading prompt for Lunette - outputs difficulty as score (0-1)
+TRAJECTORY_GRADING_PROMPT = """You are analyzing a SWE-bench agent trajectory to PREDICT TASK DIFFICULTY.
 
-The trajectory shows an agent attempting to solve a software engineering task. Your job is to rate the agent's behavior and identify failure patterns.
+The trajectory shows an agent attempting to solve a software engineering task. Based on how the agent struggled (or didn't), estimate how difficult this task is.
 
-## AGENTIC COMPETENCIES (score 1-4)
+## YOUR TASK: Predict Difficulty (0.0 to 1.0)
 
-Rate how well the agent exhibited each competency:
+Output a **difficulty score** between 0.0 and 1.0:
+- 0.0 = Very easy task (agent solved it quickly with no issues)
+- 0.3 = Easy task (minor struggles but clear path to solution)
+- 0.5 = Medium difficulty (some exploration needed, partial failures)
+- 0.7 = Hard task (significant struggles, multiple failure modes)
+- 1.0 = Very hard task (agent failed completely despite substantial effort)
 
-1. **backtracking_exploration**: Did the agent try alternative approaches when stuck?
-   - 1 = Never explored alternatives, stuck in one approach
-   - 2 = Rarely tried alternatives, mostly persisted with failing approach
-   - 3 = Sometimes explored alternatives when clearly stuck
-   - 4 = Systematically explored alternatives, good breadth-first search
+## Difficulty Indicators to Consider
 
-2. **task_decomposition**: Did the agent break down the problem into subproblems?
-   - 1 = Never decomposed, jumped straight to implementation
-   - 2 = Minimal decomposition, mostly ad-hoc
-   - 3 = Some structured decomposition into steps
-   - 4 = Systematic decomposition with clear subgoals
+### Positive (harder task) indicators:
+- Agent tried multiple approaches that failed
+- Agent got stuck in loops or repeated similar mistakes
+- Agent mislocated the relevant code
+- Agent's fix was superficial or incomplete
+- Agent lost track of context
+- Many back-and-forth iterations without progress
 
-3. **observation_reading**: Did the agent correctly understand command outputs and errors?
-   - 1 = Ignored or misread most outputs
-   - 2 = Often misinterpreted outputs
-   - 3 = Usually understood outputs correctly
-   - 4 = Accurately interpreted all outputs and errors
+### Negative (easier task) indicators:
+- Agent found the right location quickly
+- Agent's first approach worked
+- Clear error messages guided the agent
+- Simple, localized fix was sufficient
+- Agent verified solution correctly
 
-4. **self_verification**: Did the agent verify its progress and test its fixes?
-   - 1 = Never verified, declared success without testing
-   - 2 = Minimal verification, often skipped tests
-   - 3 = Usually ran tests, but sometimes ignored failures
-   - 4 = Thorough verification, ran tests and interpreted results correctly
+## In your explanation, briefly note:
 
-## FAILURE MODE DETECTION (0 or 1)
+1. **Competencies** (1-4 scale each): backtracking_exploration, task_decomposition, observation_reading, self_verification
 
-Indicate whether each failure pattern occurred (0=no, 1=yes):
+2. **Failure modes detected** (if any): localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure
 
-- **localization_failure**: Agent searched in wrong files/locations, failed to find the relevant code
-- **strategy_defect**: Fix was superficial (only handles specific case, suppresses error without fixing root cause)
-- **implementation_defect**: Algorithm logic, control flow, or boundary handling errors in the fix
-- **incomplete_repair**: Multiple components needed changes but agent only fixed some
-- **verification_failure**: Failed to create working test, misread test output, or abandoned verification
+3. **Trajectory signals** (if any): agent_looping, agent_gave_up_early, agent_wrong_focus, context_overflow
 
-## TRAJECTORY SIGNALS (0 or 1)
+## REQUIRED: Structure your explanation as follows:
 
-Indicate whether each signal is present (0=no, 1=yes):
+COMPETENCIES: backtracking=X/4, decomposition=X/4, observation=X/4, verification=X/4
+FAILURES: [list any that apply: localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure]
+SIGNALS: [list any that apply: agent_looping, agent_gave_up_early, agent_wrong_focus, context_overflow]
+REASONING: [1-2 sentences explaining why this difficulty score]
 
-- **agent_looping**: Agent repeated similar actions multiple times without meaningful progress
-- **agent_gave_up_early**: Agent stopped trying before exhausting reasonable approaches
-- **agent_wrong_focus**: Agent fixated on irrelevant code or wrong part of the codebase
-- **context_overflow**: Agent appeared to lose track of earlier context or findings
-
-## OUTPUT FORMAT
-
-Return a JSON object with exactly these 13 keys:
-{
-    "backtracking_exploration": <1-4>,
-    "task_decomposition": <1-4>,
-    "observation_reading": <1-4>,
-    "self_verification": <1-4>,
-    "localization_failure": <0 or 1>,
-    "strategy_defect": <0 or 1>,
-    "implementation_defect": <0 or 1>,
-    "incomplete_repair": <0 or 1>,
-    "verification_failure": <0 or 1>,
-    "agent_looping": <0 or 1>,
-    "agent_gave_up_early": <0 or 1>,
-    "agent_wrong_focus": <0 or 1>,
-    "context_overflow": <0 or 1>
-}
-
-Analyze the trajectory carefully and return ONLY the JSON object, no other text.
+Example for a hard task:
+"COMPETENCIES: backtracking=2/4, decomposition=2/4, observation=2/4, verification=1/4
+FAILURES: localization_failure, strategy_defect
+SIGNALS: agent_looping, context_overflow
+REASONING: Agent struggled to find the correct file, tried multiple superficial fixes, and lost track of earlier findings."
 """
 
 
 @dataclass
 class LunetteFeatures:
     """Features extracted from a trajectory using Lunette."""
+
+    # Primary output: Lunette's difficulty prediction (0=easy, 1=hard)
+    lunette_difficulty_score: float
 
     # Agentic competencies (1-4 scale)
     backtracking_exploration: float
@@ -136,6 +121,7 @@ class LunetteFeatures:
     def to_vector(self) -> np.ndarray:
         """Convert to feature vector in standard order."""
         return np.array([
+            self.lunette_difficulty_score,
             self.backtracking_exploration,
             self.task_decomposition,
             self.observation_reading,
@@ -155,6 +141,7 @@ class LunetteFeatures:
     def from_dict(cls, d: Dict) -> "LunetteFeatures":
         """Create from dictionary (e.g., parsed JSON)."""
         return cls(
+            lunette_difficulty_score=float(d.get("lunette_difficulty_score", 0.5)),
             backtracking_exploration=float(d.get("backtracking_exploration", 2.5)),
             task_decomposition=float(d.get("task_decomposition", 2.5)),
             observation_reading=float(d.get("observation_reading", 2.5)),
@@ -174,6 +161,7 @@ class LunetteFeatures:
     def default(cls) -> "LunetteFeatures":
         """Return default/neutral features."""
         return cls(
+            lunette_difficulty_score=0.5,
             backtracking_exploration=2.5,
             task_decomposition=2.5,
             observation_reading=2.5,
