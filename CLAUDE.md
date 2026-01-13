@@ -639,16 +639,25 @@ Results saved to `chris_output/experiment_b/experiment_b_results.json`:
 }
 ```
 
-#### Initial Results (2026-01-12)
+#### Results (2026-01-12)
 
-With default settings (weak_threshold=0.2):
+**Primary metric: AUC-ROC** - Uses IRT formula P(success) = sigmoid(θ - β) to predict agent-task outcomes. AUC avoids the restricted variance problem with correlation/RMSE on biased subsets.
 
-| Dataset | Prior r | Posterior r | Improvement |
-|---------|---------|-------------|-------------|
-| D_train (n=45) | 0.031 | 0.114 | +0.083 |
-| D_valid (n=38) | -0.153 | -0.087 | +0.066 |
+Results with embedding prior (Qwen3-VL-8B embeddings) and different trajectory feature sources:
 
-**Interpretation:** Posterior shows modest improvement over prior on both train and validation sets. The weak correlations suggest trajectory features provide some signal, but more sophisticated features or larger datasets may be needed.
+| Feature Source | D_train AUC | D_valid AUC | Tasks w/ Features | Notes |
+|----------------|-------------|-------------|-------------------|-------|
+| Prior only (embedding) | 0.7550 | **0.7082** | 119/119 | Baseline |
+| + Simple features | 0.7549 | 0.7080 | 119/119 | -0.0002 on valid |
+| + LLM judge features | 0.7549 | 0.7082 | 100/119 | No improvement |
+| + Lunette features | 0.7550 | 0.7082 | 19/119 | Limited coverage |
+
+**Key finding:** Trajectory features do NOT improve upon the embedding prior. The prior captures task difficulty well enough that observing how agents fail doesn't add information.
+
+**Data used:**
+- D_train: 119 tasks (3,689 agent-task pairs) where M1 agents (oldest 40%) mostly failed but M2 passed
+- D_valid: 26 tasks (806 agent-task pairs) where M2 agents mostly failed but M3 (newest 20%) passed
+- AUC computed using IRT formula with learned agent abilities (θ) and predicted task difficulties (β)
 
 **Prior Residual Analysis (2026-01-12):**
 
