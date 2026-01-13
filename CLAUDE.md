@@ -517,7 +517,7 @@ experiment_b/
 |------|---------|
 | `config.py` | `ExperimentConfig` dataclass with paths, split fractions, thresholds |
 | `data_splits.py` | Split agents by date (M1/M2/M3), filter tasks by pass rate |
-| `prior_model.py` | Ridge regression on task features (problem_len, patch_len, repo) |
+| `prior_model.py` | Ridge regression on task features (problem_len, patch_len, repo). **Note:** Uses StandardScaler, so coefficients in output JSON are on standardized scale, not raw scale |
 | `trajectory_features.py` | Extract 5 features: message_count, total_chars, assistant_ratio, message_length, resolved_rate |
 | `posterior_model.py` | Learn psi coefficients to correct prior predictions using trajectory features |
 | `train_evaluate.py` | Full pipeline: load data → split → train prior → train posterior → evaluate |
@@ -591,6 +591,32 @@ class ExperimentConfig:
 | `avg_message_length` | Average characters per message |
 | `resolved_rate` | Fraction of trajectories that resolved the task |
 
+#### Feature Sources
+
+Experiment B supports three feature sources via `--feature_source`:
+
+| Source | Description | Files |
+|--------|-------------|-------|
+| `simple` (default) | Basic trajectory stats (message count, chars, resolve rate) | `trajectory_features.py` |
+| `lunette` | Lunette API grading features (14 features) | `lunette_features.py`, `compute_lunette_features.py` |
+| `llm_judge` | Direct LLM API grading (14 features, same as Lunette) | `llm_judge_features.py`, `compute_llm_judge_features.py` |
+
+**LLM Judge Features (14 total):**
+- Primary: `llm_judge_difficulty_score` (0-1)
+- Competencies (1-4): `backtracking_exploration`, `task_decomposition`, `observation_reading`, `self_verification`
+- Failure modes (0-1): `localization_failure`, `strategy_defect`, `implementation_defect`, `incomplete_repair`, `verification_failure`
+- Trajectory signals (0-1): `agent_looping`, `agent_gave_up_early`, `agent_wrong_focus`, `context_overflow`
+
+**Usage:**
+```bash
+# Pre-compute LLM judge features (uses Claude Opus 4.5 by default)
+python -m experiment_b.compute_llm_judge_features --dry_run  # See what would be computed
+python -m experiment_b.compute_llm_judge_features --limit 50  # Compute 50 features
+
+# Run experiment with LLM judge features
+python -m experiment_b.train_evaluate --feature_source llm_judge
+```
+
 #### Output
 
 Results saved to `chris_output/experiment_b/experiment_b_results.json`:
@@ -623,6 +649,19 @@ With default settings (weak_threshold=0.2):
 | D_valid (n=38) | -0.153 | -0.087 | +0.066 |
 
 **Interpretation:** Posterior shows modest improvement over prior on both train and validation sets. The weak correlations suggest trajectory features provide some signal, but more sophisticated features or larger datasets may be needed.
+
+**Prior Residual Analysis (2026-01-12):**
+
+The prior model (heuristic features: problem_len, patch_len, repo) has r=0.031 with ground truth on D_train tasks. Residual analysis reveals:
+- High positive residuals (harder than expected): Tasks involving subtle API interactions, multi-model inheritance, pandas transform output. Example: `scikit-learn__scikit-learn-25747` (residual +4.13)
+- High negative residuals (easier than expected): Tasks with large patches but simple conceptual fixes. Example: `sympy__sympy-13091` (residual -4.74, 17K char patch but just changing `return False` to `return NotImplemented`)
+
+**Simple trajectory features correlated with residual:**
+- `avg_code_blocks`: r=-0.329 (p=0.0003) - More code blocks → lower residual
+- `resolve_rate`: r=-0.247 (p=0.007) - Higher resolve rate → lower residual
+- `avg_msg_count`: r=-0.242 (p=0.008) - More messages → lower residual
+
+This suggests LLM judge should focus on: (1) whether the problem has a "trick" that makes it harder than patch size suggests, (2) how confused/exploratory vs directed agents are, (3) whether agents give up or succeed with short/focused attempts.
 
 ### Experiment A: Prior Validation (IRT AUC)
 
