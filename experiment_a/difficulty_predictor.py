@@ -1,7 +1,12 @@
-"""Difficulty predictor protocol and implementations."""
+"""Difficulty predictor base class and implementations.
 
+All difficulty predictors inherit from DifficultyPredictorBase and implement
+the fit() and predict() methods for use in Experiment A.
+"""
+
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Protocol, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,13 +16,13 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 
-class DifficultyPredictor(Protocol):
-    """Protocol for difficulty predictors.
+class DifficultyPredictorBase(ABC):
+    """Abstract base class for all difficulty predictors.
 
-    Any class implementing this protocol can be used to predict task difficulties
-    in the Experiment A pipeline.
+    Provides the common interface that all predictors must implement.
     """
 
+    @abstractmethod
     def fit(self, task_ids: List[str], ground_truth_b: np.ndarray) -> None:
         """Train on tasks with known IRT difficulties.
 
@@ -27,6 +32,7 @@ class DifficultyPredictor(Protocol):
         """
         ...
 
+    @abstractmethod
     def predict(self, task_ids: List[str]) -> Dict[str, float]:
         """Predict difficulty for tasks.
 
@@ -38,8 +44,14 @@ class DifficultyPredictor(Protocol):
         """
         ...
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        ...
 
-class EmbeddingPredictor:
+
+class EmbeddingPredictor(DifficultyPredictorBase):
     """Difficulty predictor using pre-computed embeddings + Ridge regression.
 
     Based on Daria's predict_question_difficulty.py pipeline.
@@ -65,6 +77,11 @@ class EmbeddingPredictor:
 
         # Load embeddings immediately
         self._load_embeddings()
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        return "Embedding"
 
     def _load_embeddings(self) -> None:
         """Load embeddings from .npz file."""
@@ -140,11 +157,16 @@ class EmbeddingPredictor:
         return len(self._embeddings) if self._embeddings else 0
 
 
-class ConstantPredictor:
+class ConstantPredictor(DifficultyPredictorBase):
     """Baseline: predict mean difficulty for all tasks."""
 
     def __init__(self):
         self._mean_b: Optional[float] = None
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        return "Constant"
 
     def fit(self, task_ids: List[str], ground_truth_b: np.ndarray) -> None:
         """Compute mean difficulty from training data.
@@ -170,7 +192,7 @@ class ConstantPredictor:
         return {t: self._mean_b for t in task_ids}
 
 
-class GroundTruthPredictor:
+class GroundTruthPredictor(DifficultyPredictorBase):
     """Oracle: use actual IRT difficulties (upper bound baseline)."""
 
     def __init__(self, items_df: pd.DataFrame):
@@ -180,6 +202,11 @@ class GroundTruthPredictor:
             items_df: DataFrame with index=task_id, column 'b' for difficulty
         """
         self._items = items_df
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        return "Oracle"
 
     def fit(self, task_ids: List[str], ground_truth_b: np.ndarray) -> None:
         """No training needed for oracle.
@@ -206,13 +233,10 @@ class GroundTruthPredictor:
         return predictions
 
 
-class LunettePredictor:
+class LunettePredictor(DifficultyPredictorBase):
     """Difficulty predictor using Lunette-extracted features + Ridge regression.
 
-    Includes automatic feature selection to handle high-dimensional features.
-    Supports two selection methods:
-    - "lasso_cv": Use Lasso with cross-validation for sparse selection
-    - "select_k_best": Use correlation-based selection (faster)
+    Includes automatic feature selection using LassoCV for sparse selection.
     """
 
     # Default feature columns to use (exclude metadata and reasoning)
@@ -274,6 +298,11 @@ class LunettePredictor:
 
         # Load features immediately
         self._load_features()
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        return "Lunette"
 
     def _load_features(self) -> None:
         """Load features from CSV file."""

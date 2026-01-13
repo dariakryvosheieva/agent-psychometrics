@@ -21,10 +21,11 @@ from experiment_a.data_loader import (
     stable_split_tasks,
 )
 from experiment_a.difficulty_predictor import (
-    DifficultyPredictor,
+    DifficultyPredictorBase,
     EmbeddingPredictor,
     ConstantPredictor,
     GroundTruthPredictor,
+    LunettePredictor,
 )
 from experiment_a.irt_evaluation import compute_auc, compute_irt_probability
 from experiment_a.baselines import agent_only_baseline, task_only_baseline
@@ -36,10 +37,11 @@ __all__ = [
     "load_items",
     "load_responses",
     "stable_split_tasks",
-    "DifficultyPredictor",
+    "DifficultyPredictorBase",
     "EmbeddingPredictor",
     "ConstantPredictor",
     "GroundTruthPredictor",
+    "LunettePredictor",
     "compute_auc",
     "compute_irt_probability",
     "agent_only_baseline",
