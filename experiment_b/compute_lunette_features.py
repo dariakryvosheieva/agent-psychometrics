@@ -1,13 +1,19 @@
 """Compute Lunette features for trajectories.
 
-This script uses Lunette's GradingPlan API to extract semantic features
-from agent trajectories. Features are saved to disk for use by the
-posterior model.
+This script uses Lunette's structured output API to extract semantic features
+from agent trajectories. Features are saved to disk for use by the posterior model.
+
+The structured output approach uses a custom AnalysisPlan subclass that includes
+the Pydantic model's JSON schema in the serialized plan, forcing the Lunette
+judge to return data matching that schema.
 
 Usage:
     python -m experiment_b.compute_lunette_features --dry_run
     python -m experiment_b.compute_lunette_features --limit 10
     python -m experiment_b.compute_lunette_features --agents agent1 agent2
+
+    # Use legacy mode (text parsing instead of structured output)
+    python -m experiment_b.compute_lunette_features --legacy
 """
 
 import argparse
@@ -20,7 +26,6 @@ from pathlib import Path
 from typing import List, Optional
 
 from lunette import LunetteClient
-from lunette.analysis import GradingPlan
 
 # Add parent to path for imports
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +34,27 @@ if str(ROOT) not in sys.path:
 
 from experiment_b.config import ExperimentConfig
 from experiment_b.data_splits import create_experiment_split
-from experiment_b.lunette_features import TRAJECTORY_GRADING_PROMPT, LUNETTE_FEATURE_NAMES
+from experiment_b.lunette_features import LUNETTE_FEATURE_NAMES
+
+# Import structured output support
+try:
+    from experiment_b.lunette_structured_output import (
+        TrajectoryGradingPlan,
+        TrajectoryFeatures,
+        TRAJECTORY_GRADING_PROMPT,
+    )
+    HAS_STRUCTURED_OUTPUT = True
+except ImportError:
+    HAS_STRUCTURED_OUTPUT = False
+    # Fallback to legacy prompt
+    from experiment_b.lunette_features import TRAJECTORY_GRADING_PROMPT
+
+# Legacy import for backward compatibility
+try:
+    from lunette.analysis import GradingPlan
+    HAS_GRADING_PLAN = True
+except ImportError:
+    HAS_GRADING_PLAN = False
 
 
 # Directories
@@ -178,6 +203,7 @@ async def grade_trajectory(
     client: LunetteClient,
     run_id: str,
     task_id: str,
+    use_structured_output: bool = True,
 ) -> Optional[dict]:
     """Grade a single trajectory using Lunette.
 
@@ -185,12 +211,23 @@ async def grade_trajectory(
         client: LunetteClient instance
         run_id: Lunette run ID
         task_id: SWE-bench task ID
+        use_structured_output: If True, use structured output schema (default)
 
     Returns:
         Feature dict with lunette_difficulty_score and parsed features
     """
     try:
-        plan = GradingPlan(name="difficulty-prediction", prompt=TRAJECTORY_GRADING_PROMPT)
+        # Choose plan based on structured output mode
+        if use_structured_output and HAS_STRUCTURED_OUTPUT:
+            plan = TrajectoryGradingPlan(
+                name="difficulty-prediction",
+                prompt=TRAJECTORY_GRADING_PROMPT,
+            )
+        elif HAS_GRADING_PLAN:
+            plan = GradingPlan(name="difficulty-prediction", prompt=TRAJECTORY_GRADING_PROMPT)
+        else:
+            print(f"    No GradingPlan available for {task_id}")
+            return None
 
         results = await client.investigate(
             run_id=run_id,
@@ -204,21 +241,41 @@ async def grade_trajectory(
 
         result_data = results.results[0].data
 
-        # Lunette returns {name, score, explanation}
         if isinstance(result_data, dict):
-            # Get the difficulty score (0-1) from Lunette's score field
-            lunette_score = result_data.get("score", 0.5)
-            explanation = result_data.get("explanation", "")
+            if use_structured_output and HAS_STRUCTURED_OUTPUT:
+                # With structured output, data matches TrajectoryFeatures schema
+                # Map the schema fields to our expected feature names
+                features = {
+                    "lunette_difficulty_score": float(result_data.get("difficulty_score", 0.5)),
+                    "backtracking_exploration": int(result_data.get("backtracking_exploration", 2)),
+                    "task_decomposition": int(result_data.get("task_decomposition", 2)),
+                    "observation_reading": int(result_data.get("observation_reading", 2)),
+                    "self_verification": int(result_data.get("self_verification", 2)),
+                    "localization_failure": int(result_data.get("localization_failure", 0)),
+                    "strategy_defect": int(result_data.get("strategy_defect", 0)),
+                    "implementation_defect": int(result_data.get("implementation_defect", 0)),
+                    "incomplete_repair": int(result_data.get("incomplete_repair", 0)),
+                    "verification_failure": int(result_data.get("verification_failure", 0)),
+                    "agent_looping": int(result_data.get("agent_looping", 0)),
+                    "agent_gave_up_early": int(result_data.get("agent_gave_up_early", 0)),
+                    "agent_wrong_focus": int(result_data.get("agent_wrong_focus", 0)),
+                    "context_overflow": int(result_data.get("context_overflow", 0)),
+                    "_reasoning": result_data.get("reasoning", ""),
+                    "_structured_output": True,
+                }
+                return features
+            else:
+                # Legacy mode: parse from score and explanation
+                lunette_score = result_data.get("score", 0.5)
+                explanation = result_data.get("explanation", "")
 
-            # Start with the main score
-            features = {"lunette_difficulty_score": float(lunette_score)}
+                features = {"lunette_difficulty_score": float(lunette_score)}
 
-            # Parse additional features from explanation
-            explanation_features = parse_features_from_explanation(explanation)
-            if explanation_features:
-                features.update(explanation_features)
+                explanation_features = parse_features_from_explanation(explanation)
+                if explanation_features:
+                    features.update(explanation_features)
 
-            return features
+                return features
         else:
             # Unexpected format
             return {"lunette_difficulty_score": 0.5, "_raw": str(result_data), "_unexpected_format": True}
@@ -245,8 +302,17 @@ async def compute_features_for_agent(
     task_ids: List[str],
     output_dir: Path,
     skip_existing: bool = True,
+    use_structured_output: bool = True,
 ) -> dict:
     """Compute features for all tasks for one agent.
+
+    Args:
+        client: LunetteClient instance
+        agent: Agent name
+        task_ids: List of task IDs to process
+        output_dir: Directory to save features
+        skip_existing: Skip tasks with existing features
+        use_structured_output: Use structured output schema (default True)
 
     Returns:
         Stats dict with success/failure counts
@@ -284,7 +350,10 @@ async def compute_features_for_agent(
 
         print(f"  [{i+1}/{len(task_ids)}] {task_id}...")
 
-        features = await grade_trajectory(client, run_info["run_id"], task_id)
+        features = await grade_trajectory(
+            client, run_info["run_id"], task_id,
+            use_structured_output=use_structured_output,
+        )
 
         if features and not features.get("_parse_failed"):
             # Save features
@@ -311,7 +380,19 @@ async def main():
                        help="Skip tasks with existing features")
     parser.add_argument("--weak_threshold", type=float, default=0.2,
                        help="Pass rate threshold for weak agents")
+    parser.add_argument("--legacy", action="store_true",
+                       help="Use legacy text parsing instead of structured output")
     args = parser.parse_args()
+
+    # Determine structured output mode
+    use_structured_output = not args.legacy
+    if use_structured_output and HAS_STRUCTURED_OUTPUT:
+        print("Using structured output mode (Pydantic schema)")
+    elif use_structured_output and not HAS_STRUCTURED_OUTPUT:
+        print("Warning: Structured output not available, falling back to legacy mode")
+        use_structured_output = False
+    else:
+        print("Using legacy mode (text parsing)")
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -378,6 +459,7 @@ async def main():
                 all_tasks,
                 OUTPUT_DIR,
                 skip_existing=args.skip_existing,
+                use_structured_output=use_structured_output,
             )
             all_stats.append(stats)
             print(f"  Done: {stats}")
