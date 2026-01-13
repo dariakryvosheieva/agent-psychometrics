@@ -32,6 +32,11 @@ from .llm_judge_features_v5 import (
     load_llm_judge_v5_features_for_task,
     aggregate_llm_judge_v5_features,
 )
+from .llm_judge_features_v5_single import (
+    LLM_JUDGE_V5_SINGLE_FEATURE_NAMES,
+    load_llm_judge_v5_single_features_for_task,
+    aggregate_llm_judge_v5_single_features,
+)
 
 
 class PosteriorModel:
@@ -46,11 +51,12 @@ class PosteriorModel:
         self,
         prior_model: PriorModel,
         alpha: float = 1.0,
-        feature_source: Literal["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5"] = "simple",
+        feature_source: Literal["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5", "llm_judge_v5_single"] = "simple",
         lunette_features_dir: Optional[Path] = None,
         llm_judge_features_dir: Optional[Path] = None,
         llm_judge_v4_features_dir: Optional[Path] = None,
         llm_judge_v5_features_dir: Optional[Path] = None,
+        llm_judge_v5_single_features_dir: Optional[Path] = None,
     ):
         """Initialize posterior model.
 
@@ -59,11 +65,12 @@ class PosteriorModel:
             alpha: Ridge regularization parameter for psi
             feature_source: "simple" for message stats, "lunette" for Lunette API,
                            "llm_judge" for direct LLM API, "llm_judge_v4" for V4 features,
-                           "llm_judge_v5" for V5 features (failure pattern analysis)
+                           "llm_judge_v5" for V5 features, "llm_judge_v5_single" for single feature
             lunette_features_dir: Directory containing pre-computed Lunette features
             llm_judge_features_dir: Directory containing pre-computed LLM judge features
             llm_judge_v4_features_dir: Directory for V4 LLM judge features
             llm_judge_v5_features_dir: Directory for V5 LLM judge features
+            llm_judge_v5_single_features_dir: Directory for V5 single feature (location_vs_fix_alignment only)
         """
         self.prior_model = prior_model
         self.alpha = alpha
@@ -72,6 +79,7 @@ class PosteriorModel:
         self.llm_judge_features_dir = llm_judge_features_dir
         self.llm_judge_v4_features_dir = llm_judge_v4_features_dir
         self.llm_judge_v5_features_dir = llm_judge_v5_features_dir
+        self.llm_judge_v5_single_features_dir = llm_judge_v5_single_features_dir
         self.psi_model: Optional[Ridge] = None
         self.training_stats: Dict = {}
 
@@ -84,6 +92,8 @@ class PosteriorModel:
             self.feature_names = LLM_JUDGE_V4_FEATURE_NAMES
         elif feature_source == "llm_judge_v5":
             self.feature_names = LLM_JUDGE_V5_FEATURE_NAMES
+        elif feature_source == "llm_judge_v5_single":
+            self.feature_names = LLM_JUDGE_V5_SINGLE_FEATURE_NAMES
         else:
             self.feature_names = TRAJECTORY_FEATURE_NAMES
 
@@ -130,6 +140,15 @@ class PosteriorModel:
             if not features:
                 return None
             return aggregate_llm_judge_v5_features(features)
+        elif self.feature_source == "llm_judge_v5_single":
+            if self.llm_judge_v5_single_features_dir is None:
+                return None
+            features = load_llm_judge_v5_single_features_for_task(
+                task_id, agents, self.llm_judge_v5_single_features_dir
+            )
+            if not features:
+                return None
+            return aggregate_llm_judge_v5_single_features(features)
         else:
             # Simple trajectory features
             traj_features = load_trajectories_for_task(task_id, agents, trajectories_dir)

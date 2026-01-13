@@ -169,6 +169,7 @@ def run_experiment(config: ExperimentConfig) -> Dict:
     llm_judge_features_dir = ROOT / config.llm_judge_features_dir
     llm_judge_v4_features_dir = ROOT / config.llm_judge_v4_features_dir
     llm_judge_v5_features_dir = ROOT / config.llm_judge_v5_features_dir
+    llm_judge_v5_single_features_dir = ROOT / config.llm_judge_v5_single_features_dir
     output_dir = ROOT / config.output_dir
 
     # Load IRT difficulties and abilities
@@ -247,6 +248,7 @@ def run_experiment(config: ExperimentConfig) -> Dict:
             llm_judge_features_dir=llm_judge_features_dir,
             llm_judge_v4_features_dir=llm_judge_v4_features_dir,
             llm_judge_v5_features_dir=llm_judge_v5_features_dir,
+            llm_judge_v5_single_features_dir=llm_judge_v5_single_features_dir,
         )
         posterior_model.fit(
             task_ids=split.d_train_tasks,
@@ -386,9 +388,9 @@ def main():
     parser.add_argument(
         "--feature_source",
         type=str,
-        choices=["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5"],
+        choices=["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5", "llm_judge_v5_single"],
         default="simple",
-        help="Feature source: 'simple', 'lunette', 'llm_judge', 'llm_judge_v4', or 'llm_judge_v5'",
+        help="Feature source: 'simple', 'lunette', 'llm_judge', 'llm_judge_v4', 'llm_judge_v5', or 'llm_judge_v5_single'",
     )
     parser.add_argument(
         "--prior_source",
