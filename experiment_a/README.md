@@ -28,7 +28,7 @@ python -m experiment_a.train_evaluate
 python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz
 
 # Run with Lunette features
-python -m experiment_a.run_evaluation_v2
+python -m experiment_a.train_evaluate --lunette_features_path chris_output/experiment_a/sandbox_features/lunette_features.csv
 
 # Dry run to check config
 python -m experiment_a.train_evaluate --dry_run
@@ -71,41 +71,70 @@ out/prior_qwen3vl8b/
 └── metrics.json        # Train/test R², Pearson r
 ```
 
-### 2. Lunette Features (24 total)
+### 2. Lunette Features (with Sandbox Access)
 
-Extracts features using Lunette's sandbox environment:
+Lunette feature extraction uses a **two-step process** to ensure the grading judge has sandbox access:
+
+#### Step 1: Create Sandbox Runs
+
+Run a dummy solver through Inspect with `--sandbox lunette` to provision Docker containers:
+
+```bash
+# Dry run to see execution plan
+python -m experiment_a.run_dummy_sandbox --dry_run
+
+# Run with batching (25 tasks per Inspect invocation)
+python -m experiment_a.run_dummy_sandbox --batch_size 25
+
+# Resume after interruption
+python -m experiment_a.run_dummy_sandbox --resume
+
+# Monitor progress
+cat chris_output/experiment_a/sandbox_runs/tracking.json | python -c "import json,sys; d=json.load(sys.stdin); print(f\"Progress: {d['stats']['completed']}/{d['stats']['total']}\")"
+```
+
+This creates sandboxes with the actual repo checkout at the correct commit for each task.
+
+#### Step 2: Grade Sandbox Runs
+
+Extract features using Lunette's investigate() API:
+
+```bash
+# Dry run
+python -m experiment_a.grade_sandbox_runs --dry_run
+
+# Grade all completed sandbox runs
+python -m experiment_a.grade_sandbox_runs --skip_existing
+
+# Grade specific tasks
+python -m experiment_a.grade_sandbox_runs --task_ids "django__django-12345,astropy__astropy-12907"
+```
+
+**Important limitations:**
+- Each investigation takes ~55 seconds
+- Batch grading (limit > 1) causes 504 Gateway Timeout errors
+- Tasks must be graded one at a time
+
+**Output:** `chris_output/experiment_a/sandbox_features/lunette_features.csv`
+
+#### Feature Schema (25 features)
 
 **Environment-based (15)**: repo_file_count, repo_line_count, patch_file_count, patch_line_count, test_file_count, related_file_count, import_count, class_count_in_file, function_count_in_file, test_count_fail_to_pass, test_count_pass_to_pass, git_commit_count, directory_depth, has_conftest, has_init
 
-**Semantic (9)**: fix_in_description (0-3), problem_clarity (1-5), error_message_provided (0/1), reproduction_steps (0/1), fix_locality (1-3), domain_knowledge_required (1-5), fix_complexity (1-5), logical_reasoning_required (1-5), atypicality (1-5)
+**Semantic (10)**: fix_in_description (0-3), problem_clarity (1-5), error_message_provided (0/1), reproduction_steps (0/1), fix_locality (1-3), domain_knowledge_required (1-5), fix_complexity (1-5), logical_reasoning_required (1-5), atypicality (1-5), reasoning (text)
 
-**Running extraction:**
+**Note:** The Lunette API currently returns a simplified `{name, score, explanation}` format instead of the full structured schema. Check with Fulcrum team about `result_schema` support.
+
+### 3. LLM Judge Features (Alternative)
+
+For feature extraction without sandbox access, use the direct LLM judge approach:
+
 ```bash
-# Dry run
-python -m experiment_a.overnight_lunette_extraction --dry_run
-
-# Full extraction (~$75 for 500 tasks)
-nohup python -m experiment_a.overnight_lunette_extraction --concurrency 5 &> overnight.log &
-
-# Resume after interruption
-python -m experiment_a.overnight_lunette_extraction --resume --concurrency 5
-
-# Monitor progress
-tail -f overnight.log
-cat chris_output/experiment_a/lunette_features_v2/progress.json
+python -m experiment_a.compute_llm_judge_features --dry_run
+python -m experiment_a.compute_llm_judge_features --limit 100
 ```
 
-**Output:** `chris_output/experiment_a/lunette_features_v2/`
-
-**Top Lunette coefficients (Ridge on standardized features):**
-
-| Feature | Coefficient | Interpretation |
-|---------|-------------|----------------|
-| domain_knowledge_required | +0.89 | More domain knowledge → harder |
-| has_init | -0.73 | Package structure → easier |
-| test_count_fail_to_pass | +0.70 | More failing tests → harder |
-| directory_depth | -0.60 | Deeper directories → easier |
-| fix_complexity | +0.58 | Complex fixes → harder |
+This uses Claude directly with structured output but cannot run shell commands in the repo.
 
 ## Module Structure
 
@@ -117,11 +146,12 @@ experiment_a/
 ├── difficulty_predictor.py        # DifficultyPredictor protocol + implementations
 ├── irt_evaluation.py              # AUC computation using 1PL IRT formula
 ├── baselines.py                   # Agent-only, task-only baselines
-├── train_evaluate.py              # Main pipeline
-├── lunette_grading_prompt.py      # 24-feature extraction prompt
-├── overnight_lunette_extraction.py # Robust overnight extraction
-├── postprocess_lunette_features.py # Parse features from Lunette responses
-└── run_evaluation_v2.py           # Run evaluation with v2 features
+├── train_evaluate.py              # Main evaluation pipeline
+├── run_dummy_sandbox.py           # Step 1: Create sandbox runs via Inspect
+├── grade_sandbox_runs.py          # Step 2: Grade runs with Lunette investigate()
+├── lunette_structured_output.py   # Pydantic schemas for structured output
+├── compute_llm_judge_features.py  # Alternative: Direct LLM feature extraction
+└── llm_judge_prompt.py            # Prompts for LLM judge
 ```
 
 ## Output
@@ -143,12 +173,13 @@ Results saved to `chris_output/experiment_a/experiment_a_results.json`:
 ## Command Line Options
 
 ```
---test_fraction     Fraction of tasks for test set (default: 0.2)
---split_seed        Random seed for train/test split (default: 0)
---embeddings_path   Path to pre-computed embeddings .npz file
---ridge_alpha       Ridge regression alpha (default: 10000.0)
---output_dir        Output directory (default: chris_output/experiment_a)
---dry_run           Show configuration without running
+--test_fraction       Fraction of tasks for test set (default: 0.2)
+--split_seed          Random seed for train/test split (default: 0)
+--embeddings_path     Path to pre-computed embeddings .npz file
+--lunette_features_path  Path to Lunette features CSV
+--ridge_alpha         Ridge regression alpha (default: 10000.0)
+--output_dir          Output directory (default: chris_output/experiment_a)
+--dry_run             Show configuration without running
 ```
 
 ## Known Issues
@@ -158,9 +189,12 @@ Results saved to `chris_output/experiment_a/experiment_a_results.json`:
 - Test tasks: mean b = -0.27
 - Effect size: Cohen's d = 0.25 (small)
 
-For fully reliable results, run Lunette extraction on all 500 tasks.
+For fully reliable results, run feature extraction on all 500 tasks.
+
+**Lunette Structured Output:** The Lunette API currently ignores custom `result_schema` and returns a hardcoded `{name, score, explanation}` format. The features need to be parsed from the explanation text or use the LLM Judge alternative.
 
 ## References
 
 - [Truong et al. (2025)](https://arxiv.org/pdf/2503.13335) - Amortized model-based evaluation
 - IRT formula: `P = sigmoid(theta - beta)` matches py_irt's 1PL implementation
+- [Lunette documentation](../lunette_utils/LUNETTE.md) - Detailed Lunette integration guide
