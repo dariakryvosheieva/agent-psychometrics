@@ -26,6 +26,7 @@ from experiment_a.difficulty_predictor import (
     ConstantPredictor,
     GroundTruthPredictor,
     LunettePredictor,
+    LLMJudgePredictor,
 )
 from experiment_a.irt_evaluation import compute_auc, compute_irt_probability
 from experiment_a.baselines import agent_only_baseline, task_only_baseline
@@ -42,6 +43,7 @@ __all__ = [
     "ConstantPredictor",
     "GroundTruthPredictor",
     "LunettePredictor",
+    "LLMJudgePredictor",
     "compute_auc",
     "compute_irt_probability",
     "agent_only_baseline",
