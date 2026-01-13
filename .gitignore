@@ -76,5 +76,10 @@ chris_output/experiment_b/llm_judge_v4_features/
 overnight.log
 overnight_resume.log
 
+# Temporary/intermediate result files
+chris_output/experiment_a/missing_test_tasks.txt
+chris_output/experiment_b/llm_judge_residual_analysis.json
+chris_output/experiment_b/v3_prompt_test_results.json
+
 # Personal cluster setup notes
 MIT_ENGAGING_SETUP.md
