@@ -20,6 +20,7 @@ from experiment_a.difficulty_predictor import (
     ConstantPredictor,
     GroundTruthPredictor,
     LunettePredictor,
+    LLMJudgePredictor,
 )
 from experiment_a.irt_evaluation import compute_auc, compute_difficulty_prediction_metrics
 from experiment_a.baselines import agent_only_baseline, task_only_baseline
@@ -232,6 +233,72 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
         print("\n7. No Lunette features path provided, skipping Lunette predictor")
         results["lunette_predictor"] = {"error": "No lunette_features_path provided"}
 
+    # 10. LLM Judge predictor (if features provided)
+    if config.llm_judge_features_path is not None:
+        llm_judge_path = ROOT / config.llm_judge_features_path
+        if llm_judge_path.exists():
+            print(f"\n8. Training LLM Judge predictor...")
+            print(f"   Loading features from: {llm_judge_path}")
+
+            try:
+                llm_judge_predictor = LLMJudgePredictor(
+                    features_path=llm_judge_path,
+                    ridge_alpha=config.llm_judge_ridge_alpha,
+                    max_features=config.llm_judge_max_features,
+                )
+                print(f"   Features loaded: {llm_judge_predictor.n_tasks} tasks")
+                print(f"   Feature count: {llm_judge_predictor.n_features}")
+
+                llm_judge_predictor.fit(data.train_tasks, train_b)
+
+                # Print selected features
+                llm_judge_predictor.print_selected_features()
+
+                llm_judge_preds = llm_judge_predictor.predict(data.test_tasks)
+
+                # IRT-based AUC
+                llm_judge_result = compute_auc(
+                    llm_judge_preds, data.abilities, data.responses, data.test_tasks
+                )
+                print(f"\n   LLM Judge AUC: {llm_judge_result.get('auc', 'N/A'):.4f}")
+
+                # Difficulty prediction metrics
+                diff_metrics = compute_difficulty_prediction_metrics(
+                    llm_judge_preds, data.items, data.test_tasks
+                )
+                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
+
+                results["llm_judge_predictor"] = {
+                    "auc_result": llm_judge_result,
+                    "difficulty_metrics": diff_metrics,
+                    "features_path": str(llm_judge_path),
+                    "ridge_alpha": config.llm_judge_ridge_alpha,
+                    "max_features": config.llm_judge_max_features,
+                    "n_tasks": llm_judge_predictor.n_tasks,
+                    "n_features": llm_judge_predictor.n_features,
+                    "selected_features": llm_judge_predictor.selected_features,
+                    "feature_coefficients": llm_judge_predictor.feature_coefficients,
+                }
+
+                # Store predictions for analysis
+                if "difficulty_predictions" not in results:
+                    results["difficulty_predictions"] = {
+                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
+                    }
+                results["difficulty_predictions"]["llm_judge"] = llm_judge_preds
+
+            except Exception as e:
+                print(f"   Error loading LLM Judge features: {e}")
+                import traceback
+                traceback.print_exc()
+                results["llm_judge_predictor"] = {"error": str(e)}
+        else:
+            print(f"\n8. LLM Judge features file not found: {llm_judge_path}")
+            results["llm_judge_predictor"] = {"error": f"File not found: {llm_judge_path}"}
+    else:
+        print("\n8. No LLM Judge features path provided, skipping LLM Judge predictor")
+        results["llm_judge_predictor"] = {"error": "No llm_judge_features_path provided"}
+
     # Print summary
     print("\n" + "=" * 60)
     print("SUMMARY")
@@ -242,14 +309,15 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
     for name, key in [
         ("Oracle (true b)", "oracle"),
-        ("Lunette predictor", "lunette_predictor"),
         ("Embedding predictor", "embedding_predictor"),
+        ("LLM Judge predictor", "llm_judge_predictor"),
+        ("Lunette predictor", "lunette_predictor"),
         ("Constant (mean b)", "constant_baseline"),
         ("Agent-only", "agent_only_baseline"),
         ("Task-only", "task_only_baseline"),
     ]:
         result = results.get(key, {})
-        if key in ("embedding_predictor", "lunette_predictor") and "auc_result" in result:
+        if key in ("embedding_predictor", "lunette_predictor", "llm_judge_predictor") and "auc_result" in result:
             auc = result["auc_result"].get("auc")
         else:
             auc = result.get("auc")
@@ -322,6 +390,25 @@ def main():
         default=10,
         help="Max features to select for Lunette (default: 10)",
     )
+    # LLM Judge predictor arguments
+    parser.add_argument(
+        "--llm_judge_features_path",
+        type=str,
+        default=None,
+        help="Path to LLM judge features CSV file",
+    )
+    parser.add_argument(
+        "--llm_judge_ridge_alpha",
+        type=float,
+        default=1.0,
+        help="Ridge alpha for LLM Judge predictor (default: 1.0)",
+    )
+    parser.add_argument(
+        "--llm_judge_max_features",
+        type=int,
+        default=None,
+        help="Max features to select for LLM Judge (default: None = all 9)",
+    )
     parser.add_argument(
         "--dry_run",
         action="store_true",
@@ -340,6 +427,10 @@ def main():
         lunette_ridge_alpha=args.lunette_ridge_alpha,
         lunette_feature_selection=args.lunette_feature_selection,
         lunette_max_features=args.lunette_max_features,
+        # LLM Judge config
+        llm_judge_features_path=Path(args.llm_judge_features_path) if args.llm_judge_features_path else None,
+        llm_judge_ridge_alpha=args.llm_judge_ridge_alpha,
+        llm_judge_max_features=args.llm_judge_max_features,
     )
 
     if args.dry_run:
