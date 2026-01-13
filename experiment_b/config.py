@@ -14,6 +14,7 @@ class ExperimentConfig:
     responses_path: Path = Path("chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
     trajectories_dir: Path = Path("trajectory_data/unified_trajs")
     lunette_features_dir: Path = Path("chris_output/experiment_b/lunette_features")
+    llm_judge_features_dir: Path = Path("chris_output/experiment_b/llm_judge_features")
     output_dir: Path = Path("chris_output/experiment_b")
 
     # Agent splitting
@@ -29,8 +30,8 @@ class ExperimentConfig:
     prior_alpha: float = 1.0  # Ridge alpha for prior
     posterior_alpha: float = 1.0  # Ridge alpha for psi
 
-    # Feature source: "simple" (message stats) or "lunette" (LLM-extracted)
-    feature_source: Literal["simple", "lunette"] = "simple"
+    # Feature source: "simple" (message stats), "lunette" (Lunette API), or "llm_judge" (direct LLM API)
+    feature_source: Literal["simple", "lunette", "llm_judge"] = "simple"
 
     # Prior source: "heuristic" (repo, text length) or "embedding" (Daria's embeddings)
     prior_source: Literal["heuristic", "embedding"] = "heuristic"
@@ -52,7 +53,7 @@ class ExperimentConfig:
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "ExperimentConfig":
         """Create config from dict, converting strings to Paths."""
-        path_fields = {"items_path", "responses_path", "trajectories_dir", "lunette_features_dir", "output_dir", "embeddings_path"}
+        path_fields = {"items_path", "responses_path", "trajectories_dir", "lunette_features_dir", "llm_judge_features_dir", "output_dir", "embeddings_path"}
         converted = {}
         for k, v in d.items():
             if k in path_fields and isinstance(v, str):
