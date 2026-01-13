@@ -1,10 +1,17 @@
-"""Extract trajectory features using Lunette as LLM judge.
+"""Extract trajectory features using direct LLM API calls (no Lunette sandbox).
 
-This module provides rich semantic features extracted from agent trajectories,
-combining insights from:
-- AgentDiagnose (EMNLP 2025): Agentic competency ratings
-- SWE-bench Failures paper: Failure mode taxonomy
-- SWE-bench Pro: Additional trajectory signals
+This module provides semantic features extracted from agent trajectories using
+direct LLM API calls (Anthropic/OpenAI). It mirrors the interface of
+lunette_features.py for consistent evaluation in Experiment B.
+
+Features are the same 14 dimensions as Lunette for direct comparison:
+- Primary output: llm_judge_difficulty_score (0-1)
+- Agentic competencies (1-4): backtracking_exploration, task_decomposition,
+  observation_reading, self_verification
+- Failure modes (0-1): localization_failure, strategy_defect, implementation_defect,
+  incomplete_repair, verification_failure
+- Trajectory signals (0-1): agent_looping, agent_gave_up_early, agent_wrong_focus,
+  context_overflow
 """
 
 import json
@@ -15,11 +22,10 @@ from typing import Dict, List, Optional
 import numpy as np
 
 
-# Feature names for the Lunette-extracted feature vector
-# Main output is lunette_difficulty_score (0-1), plus parsed features from explanation
-LUNETTE_FEATURE_NAMES = [
-    # Primary output: Lunette's difficulty prediction (0=easy, 1=hard)
-    "lunette_difficulty_score",
+# Feature names - same structure as lunette_features.py
+LLM_JUDGE_FEATURE_NAMES = [
+    # Primary output: LLM judge's difficulty prediction (0=easy, 1=hard)
+    "llm_judge_difficulty_score",
     # Agentic competencies (1-4 scale, from AgentDiagnose)
     "backtracking_exploration",
     "task_decomposition",
@@ -38,12 +44,40 @@ LUNETTE_FEATURE_NAMES = [
     "context_overflow",
 ]
 
-# Grading prompt for Lunette - outputs difficulty as score (0-1)
+
+# Grading prompt - includes both trajectory AND SWE-bench metadata
 TRAJECTORY_GRADING_PROMPT = """You are analyzing a SWE-bench agent trajectory to PREDICT TASK DIFFICULTY.
 
-The trajectory shows an agent attempting to solve a software engineering task. Based on how the agent struggled (or didn't), estimate how difficult this task is.
+## TASK METADATA (from SWE-bench Verified)
+
+**Task ID:** {instance_id}
+**Repository:** {repo}
+**Version:** {version}
+
+**Problem Statement:**
+{problem_statement}
+
+**Gold Patch (correct solution):**
+```diff
+{patch}
+```
+
+**Tests that should pass after fix (FAIL_TO_PASS):**
+{fail_to_pass}
+
+{hints_section}
+
+## AGENT TRAJECTORY
+
+The following shows the agent's attempt at solving this task:
+
+{trajectory_text}
+
+**Outcome:** {resolved_status}
 
 ## YOUR TASK: Predict Difficulty (0.0 to 1.0)
+
+Based on how the agent struggled (or didn't), estimate how difficult this task is.
 
 Output a **difficulty score** between 0.0 and 1.0:
 - 0.0 = Very easy task (agent solved it quickly with no issues)
@@ -69,35 +103,54 @@ Output a **difficulty score** between 0.0 and 1.0:
 - Simple, localized fix was sufficient
 - Agent verified solution correctly
 
-## In your explanation, briefly note:
+## In your response, provide:
 
-1. **Competencies** (1-4 scale each): backtracking_exploration, task_decomposition, observation_reading, self_verification
+1. **Competencies** (1-4 scale each):
+   - backtracking_exploration: How well did the agent backtrack and explore alternatives?
+   - task_decomposition: How well did the agent break down the problem?
+   - observation_reading: How well did the agent read and understand outputs?
+   - self_verification: How well did the agent verify its own work?
 
-2. **Failure modes detected** (if any): localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure
+2. **Failure modes detected** (0 or 1 each):
+   - localization_failure: Failed to find the right code location
+   - strategy_defect: Used wrong approach/strategy
+   - implementation_defect: Implementation bugs in the fix
+   - incomplete_repair: Fix was partial/incomplete
+   - verification_failure: Failed to verify the fix worked
 
-3. **Trajectory signals** (if any): agent_looping, agent_gave_up_early, agent_wrong_focus, context_overflow
+3. **Trajectory signals** (0 or 1 each):
+   - agent_looping: Got stuck in repetitive loops
+   - agent_gave_up_early: Stopped before fully exploring
+   - agent_wrong_focus: Fixated on irrelevant code/issues
+   - context_overflow: Lost track of earlier findings
 
-## REQUIRED: Structure your explanation as follows:
-
-COMPETENCIES: backtracking=X/4, decomposition=X/4, observation=X/4, verification=X/4
-FAILURES: [list any that apply: localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure]
-SIGNALS: [list any that apply: agent_looping, agent_gave_up_early, agent_wrong_focus, context_overflow]
-REASONING: [1-2 sentences explaining why this difficulty score]
-
-Example for a hard task:
-"COMPETENCIES: backtracking=2/4, decomposition=2/4, observation=2/4, verification=1/4
-FAILURES: localization_failure, strategy_defect
-SIGNALS: agent_looping, context_overflow
-REASONING: Agent struggled to find the correct file, tried multiple superficial fixes, and lost track of earlier findings."
+Respond with ONLY a JSON object in this exact format:
+{{
+    "llm_judge_difficulty_score": <0.0-1.0>,
+    "backtracking_exploration": <1-4>,
+    "task_decomposition": <1-4>,
+    "observation_reading": <1-4>,
+    "self_verification": <1-4>,
+    "localization_failure": <0 or 1>,
+    "strategy_defect": <0 or 1>,
+    "implementation_defect": <0 or 1>,
+    "incomplete_repair": <0 or 1>,
+    "verification_failure": <0 or 1>,
+    "agent_looping": <0 or 1>,
+    "agent_gave_up_early": <0 or 1>,
+    "agent_wrong_focus": <0 or 1>,
+    "context_overflow": <0 or 1>,
+    "reasoning": "<brief explanation of your difficulty assessment, 2-3 sentences>"
+}}
 """
 
 
 @dataclass
-class LunetteFeatures:
-    """Features extracted from a trajectory using Lunette."""
+class LLMJudgeFeatures:
+    """Features extracted from a trajectory using direct LLM API."""
 
-    # Primary output: Lunette's difficulty prediction (0=easy, 1=hard)
-    lunette_difficulty_score: float
+    # Primary output: LLM judge's difficulty prediction (0=easy, 1=hard)
+    llm_judge_difficulty_score: float
 
     # Agentic competencies (1-4 scale)
     backtracking_exploration: float
@@ -121,7 +174,7 @@ class LunetteFeatures:
     def to_vector(self) -> np.ndarray:
         """Convert to feature vector in standard order."""
         return np.array([
-            self.lunette_difficulty_score,
+            self.llm_judge_difficulty_score,
             self.backtracking_exploration,
             self.task_decomposition,
             self.observation_reading,
@@ -138,10 +191,10 @@ class LunetteFeatures:
         ])
 
     @classmethod
-    def from_dict(cls, d: Dict) -> "LunetteFeatures":
+    def from_dict(cls, d: Dict) -> "LLMJudgeFeatures":
         """Create from dictionary (e.g., parsed JSON)."""
         return cls(
-            lunette_difficulty_score=float(d.get("lunette_difficulty_score", 0.5)),
+            llm_judge_difficulty_score=float(d.get("llm_judge_difficulty_score", 0.5)),
             backtracking_exploration=float(d.get("backtracking_exploration", 2.5)),
             task_decomposition=float(d.get("task_decomposition", 2.5)),
             observation_reading=float(d.get("observation_reading", 2.5)),
@@ -158,10 +211,10 @@ class LunetteFeatures:
         )
 
     @classmethod
-    def default(cls) -> "LunetteFeatures":
+    def default(cls) -> "LLMJudgeFeatures":
         """Return default/neutral features."""
         return cls(
-            lunette_difficulty_score=0.5,
+            llm_judge_difficulty_score=0.5,
             backtracking_exploration=2.5,
             task_decomposition=2.5,
             observation_reading=2.5,
@@ -178,12 +231,12 @@ class LunetteFeatures:
         )
 
 
-def load_lunette_features(
+def load_llm_judge_features(
     task_id: str,
     agent: str,
     features_dir: Path,
-) -> Optional[LunetteFeatures]:
-    """Load pre-computed Lunette features for a task-agent pair.
+) -> Optional[LLMJudgeFeatures]:
+    """Load pre-computed LLM judge features for a task-agent pair.
 
     Args:
         task_id: Task instance ID
@@ -191,7 +244,7 @@ def load_lunette_features(
         features_dir: Base directory for features
 
     Returns:
-        LunetteFeatures or None if not found
+        LLMJudgeFeatures or None if not found
     """
     feature_file = features_dir / agent / f"{task_id}.json"
     if not feature_file.exists():
@@ -200,17 +253,17 @@ def load_lunette_features(
     try:
         with open(feature_file) as f:
             data = json.load(f)
-        return LunetteFeatures.from_dict(data)
+        return LLMJudgeFeatures.from_dict(data)
     except (json.JSONDecodeError, IOError, KeyError):
         return None
 
 
-def load_lunette_features_for_task(
+def load_llm_judge_features_for_task(
     task_id: str,
     agents: List[str],
     features_dir: Path,
-) -> Dict[str, LunetteFeatures]:
-    """Load Lunette features for a task across multiple agents.
+) -> Dict[str, LLMJudgeFeatures]:
+    """Load LLM judge features for a task across multiple agents.
 
     Args:
         task_id: Task instance ID
@@ -218,34 +271,34 @@ def load_lunette_features_for_task(
         features_dir: Base directory for features
 
     Returns:
-        Dict mapping agent -> LunetteFeatures
+        Dict mapping agent -> LLMJudgeFeatures
     """
     result = {}
     for agent in agents:
-        features = load_lunette_features(task_id, agent, features_dir)
+        features = load_llm_judge_features(task_id, agent, features_dir)
         if features is not None:
             result[agent] = features
     return result
 
 
-def aggregate_lunette_features(features: Dict[str, LunetteFeatures]) -> np.ndarray:
-    """Aggregate Lunette features across multiple trajectories.
+def aggregate_llm_judge_features(features: Dict[str, LLMJudgeFeatures]) -> np.ndarray:
+    """Aggregate LLM judge features across multiple trajectories.
 
     Returns averaged feature vector across all agents.
     """
     if not features:
-        return np.zeros(len(LUNETTE_FEATURE_NAMES))
+        return np.zeros(len(LLM_JUDGE_FEATURE_NAMES))
 
     vectors = [f.to_vector() for f in features.values()]
     return np.mean(vectors, axis=0)
 
 
-def load_and_aggregate_lunette_features(
+def load_and_aggregate_llm_judge_features(
     task_ids: List[str],
     agents: List[str],
     features_dir: Path,
 ) -> Dict[str, np.ndarray]:
-    """Load and aggregate Lunette features for multiple tasks.
+    """Load and aggregate LLM judge features for multiple tasks.
 
     Args:
         task_ids: List of task IDs
@@ -257,7 +310,7 @@ def load_and_aggregate_lunette_features(
     """
     result = {}
     for task_id in task_ids:
-        features = load_lunette_features_for_task(task_id, agents, features_dir)
+        features = load_llm_judge_features_for_task(task_id, agents, features_dir)
         if features:
-            result[task_id] = aggregate_lunette_features(features)
+            result[task_id] = aggregate_llm_judge_features(features)
     return result
