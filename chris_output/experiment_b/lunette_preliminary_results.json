@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-01-12T17:49:59.423474",
+  "description": "Preliminary Lunette feature extraction results for Experiment B",
+  "data_summary": {
+    "n_trajectories": 49,
+    "n_unique_tasks": 25,
+    "n_agents": 3,
+    "agents": [
+      "20240402_sweagent_gpt4",
+      "20240620_sweagent_claude3.5sonnet",
+      "20240728_sweagent_gpt4o"
+    ]
+  },
+  "correlations_with_irt_difficulty": [
+    {
+      "feature": "agent_gave_up_early",
+      "pearson_r": 0.06490153384734387,
+      "p_value": 0.757915588697832,
+      "significant": false
+    },
+    {
+      "feature": "agent_looping",
+      "pearson_r": 0.13066989718551122,
+      "p_value": 0.5335612257605871,
+      "significant": false
+    },
+    {
+      "feature": "agent_wrong_focus",
+      "pearson_r": -0.15475610033422976,
+      "p_value": 0.46012965027577324,
+      "significant": false
+    },
+    {
+      "feature": "context_overflow",
+      "pearson_r": 0.010059818489024791,
+      "p_value": 0.9619354056388864,
+      "significant": false
+    },
+    {
+      "feature": "implementation_defect",
+      "pearson_r": 0.20256365609745275,
+      "p_value": 0.3315070544965416,
+      "significant": false
+    },
+    {
+      "feature": "incomplete_repair",
+      "pearson_r": 0.008047728199629067,
+      "p_value": 0.9695449208648366,
+      "significant": false
+    },
+    {
+      "feature": "localization_failure",
+      "pearson_r": 0.06467817078620638,
+      "p_value": 0.7587245242170103,
+      "significant": false
+    },
+    {
+      "feature": "lunette_difficulty_score",
+      "pearson_r": 0.09183503075664542,
+      "p_value": 0.6624074679264841,
+      "significant": false
+    },
+    {
+      "feature": "strategy_defect",
+      "pearson_r": 0.10764523602299711,
+      "p_value": 0.6085366732893298,
+      "significant": false
+    },
+    {
+      "feature": "verification_failure",
+      "pearson_r": -0.14399497720617033,
+      "p_value": 0.4922673704258938,
+      "significant": false
+    }
+  ],
+  "conclusion": "No statistically significant correlations found. Strongest predictor was implementation_defect (r=+0.20, p=0.33). Sample size (n=25 tasks) may be too small, or trajectory-based failure modes may not capture task difficulty well.",
+  "recommendation": "Consider using vanilla LLM-as-judge on task description + gold patch instead of trajectory analysis."
+}
