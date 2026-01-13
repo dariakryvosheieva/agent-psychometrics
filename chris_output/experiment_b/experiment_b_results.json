@@ -1,8 +1,8 @@
 {
   "split": {
     "m1_agents": [
-      "20240402_sweagent_gpt4",
       "20240402_sweagent_claude3opus",
+      "20240402_sweagent_gpt4",
       "20240612_MASAI_gpt4o",
       "20240620_sweagent_claude3.5sonnet",
       "20240721_amazon-q-developer-agent-20240719-dev",
@@ -23,11 +23,11 @@
       "20241030_nfactorial",
       "20241105_nfactorial",
       "20241106_navie-2-gpt4o-sonnet",
-      "20241108_autocoderover-v2.0-claude-3-5-sonnet-20241022",
       "20241108_devlo",
+      "20241108_autocoderover-v2.0-claude-3-5-sonnet-20241022",
       "20241113_nebius-search-open-weight-models-11-24",
-      "20241125_marscode-agent-dev",
       "20241125_enginelabs",
+      "20241125_marscode-agent-dev",
       "20241128_SWE-Fixer_Qwen2.5-7b-retriever_Qwen2.5-72b-editor_20241128",
       "20241202_agentless-1.5_claude-3.5-sonnet-20241022",
       "20241212_epam-ai-run-claude-3-5-sonnet",
@@ -35,8 +35,8 @@
     ],
     "m2_agents": [
       "20241221_codestory_midwit_claude-3-5-sonnet_swe-search",
-      "20250110_blackboxai_agent_v1.1",
       "20250110_learn_by_interact_claude3.5",
+      "20250110_blackboxai_agent_v1.1",
       "20250117_wandb_programmer_o1_crosscheck5",
       "20250118_codeshellagent_gemini_2.0_flash_experimental",
       "20250122_autocoderover-v2.1-claude-3-5-sonnet-20241022",
@@ -79,8 +79,8 @@
       "20250929_Prometheus_v1.2_gpt5",
       "20250930_zai_glm4-6",
       "20251015_Prometheus_v1.2.1_gpt5",
-      "20251103_SalesforceAIResearch_SAGE_OpenHands",
       "20251103_sonar-foundation-agent_claude-sonnet-4-5",
+      "20251103_SalesforceAIResearch_SAGE_OpenHands",
       "20251110_frogmini-14b",
       "20251110_frogboss-32b"
     ],
@@ -236,45 +236,54 @@
   },
   "prior_train": {
     "n": 119,
-    "pearson_r": 0.031315872219231225,
+    "pearson_r": 0.031315872219231246,
     "p_value": 0.7352931688961389,
-    "mse": 1.8700733634870101,
+    "mse": 1.8700733634870104,
     "rmse": 1.3675062572021417
   },
   "posterior_train": {
     "n": 119,
-    "pearson_r": 0.11372021902259623,
-    "p_value": 0.21815608133304587,
-    "mse": 1.4387177791255439,
-    "rmse": 1.1994656223191826
+    "pearson_r": 0.07726857594844488,
+    "p_value": 0.40357512089932035,
+    "mse": 1.4230365085488625,
+    "rmse": 1.1929109390683206
   },
   "prior_valid": {
     "n": 26,
-    "pearson_r": -0.15311267217277874,
+    "pearson_r": -0.1531126721727787,
     "p_value": 0.4552159168653964,
-    "mse": 4.2934828091394355,
-    "rmse": 2.072072105197943
+    "mse": 4.293482809139435,
+    "rmse": 2.0720721051979427
   },
   "posterior_valid": {
     "n": 26,
-    "pearson_r": -0.08665386586807307,
-    "p_value": 0.6738190660737887,
-    "mse": 1.7178253761337858,
-    "rmse": 1.3106583750671972
+    "pearson_r": -0.1531126721727787,
+    "p_value": 0.4552159168653964,
+    "mse": 4.293482809139435,
+    "rmse": 2.0720721051979427
   },
   "psi_coefficients": {
-    "avg_message_count": -0.008609751357585085,
-    "avg_total_chars": -4.556552598138986e-07,
-    "avg_assistant_ratio": 0.2728968798261025,
-    "avg_message_length": -0.0002544753317028059,
-    "resolved_rate": -1.7478467488779246
+    "llm_judge_difficulty_score": -1.7922940418846007,
+    "backtracking_exploration": 0.3270525948882769,
+    "task_decomposition": -0.8397264682296459,
+    "observation_reading": -0.04116387152006642,
+    "self_verification": 0.5336167273771414,
+    "localization_failure": -0.08479512681705571,
+    "strategy_defect": 0.47586622121317507,
+    "implementation_defect": 0.14912966089452304,
+    "incomplete_repair": -0.3124415490506122,
+    "verification_failure": 0.7786457699208793,
+    "agent_looping": 0.02121787334506638,
+    "agent_gave_up_early": -0.01807069875417713,
+    "agent_wrong_focus": -0.19323115314003997,
+    "context_overflow": 0.3141284472666682
   },
   "posterior_training_stats": {
     "total_tasks": 119,
-    "tasks_with_features": 119,
-    "tasks_used_for_training": 119,
+    "tasks_with_features": 100,
+    "tasks_used_for_training": 100,
     "agents_used": 31,
-    "feature_source": "simple"
+    "feature_source": "llm_judge"
   },
   "prior_coefficients": {
     "problem_len": -0.023156948291545142,
@@ -299,6 +308,7 @@
     "responses_path": "chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl",
     "trajectories_dir": "trajectory_data/unified_trajs",
     "lunette_features_dir": "chris_output/experiment_b/lunette_features",
+    "llm_judge_features_dir": "chris_output/experiment_b/llm_judge_features",
     "output_dir": "chris_output/experiment_b",
     "m1_fraction": 0.4,
     "m2_fraction": 0.4,
@@ -306,7 +316,9 @@
     "strong_min_improvement": 0.1,
     "prior_alpha": 1.0,
     "posterior_alpha": 1.0,
-    "feature_source": "simple",
+    "feature_source": "llm_judge",
+    "prior_source": "heuristic",
+    "embeddings_path": null,
     "prior_only": false
   }
 }
