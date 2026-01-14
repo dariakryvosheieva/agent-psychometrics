@@ -313,6 +313,9 @@ def discover_trajectories(
 
         for json_file in agent_dir.glob("*.json"):
             task_id = json_file.stem
+            # Skip metadata files (not actual trajectories)
+            if task_id.startswith("_"):
+                continue
             results.append((agent, task_id, json_file))
 
     return results
