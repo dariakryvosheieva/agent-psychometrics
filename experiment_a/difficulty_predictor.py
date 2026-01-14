@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from scipy import stats as scipy_stats
 from sklearn.linear_model import Ridge, LassoCV
 from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.pipeline import Pipeline
@@ -155,6 +156,238 @@ class EmbeddingPredictor(DifficultyPredictorBase):
     def n_embeddings(self) -> int:
         """Return number of loaded embeddings."""
         return len(self._embeddings) if self._embeddings else 0
+
+
+class EmbeddingSimilarityPredictor(DifficultyPredictorBase):
+    """Difficulty predictor using embedding similarity distributions.
+
+    Instead of fitting a linear model directly on embeddings, this predictor:
+    1. Computes cosine similarity between each task and all training tasks
+    2. Extracts distributional statistics from these similarities
+    3. Fits a Ridge regression on these statistics to predict difficulty
+
+    This approach captures how "typical" or "isolated" a task is relative
+    to the training distribution, using only ~10 features instead of 4096.
+    """
+
+    FEATURE_NAMES = [
+        "sim_mean", "sim_std", "sim_min", "sim_max", "sim_median",
+        "sim_p25", "sim_p75", "sim_p90", "sim_skew", "sim_kurtosis"
+    ]
+
+    def __init__(
+        self,
+        embeddings_path: Path,
+        ridge_alpha: float = 1.0,
+    ):
+        """Initialize embedding similarity predictor.
+
+        Args:
+            embeddings_path: Path to pre-computed embeddings .npz file
+            ridge_alpha: Ridge regression regularization parameter
+        """
+        self.embeddings_path = embeddings_path
+        self.ridge_alpha = ridge_alpha
+
+        # Embeddings storage
+        self._embeddings: Optional[Dict[str, np.ndarray]] = None
+        self._embedding_dim: Optional[int] = None
+
+        # Training state
+        self._train_task_ids: Optional[List[str]] = None
+        self._train_embeddings: Optional[np.ndarray] = None  # (n_train, dim)
+
+        # Model
+        self._model: Optional[Pipeline] = None
+        self._feature_coefficients: Optional[Dict[str, float]] = None
+
+        # Load embeddings immediately
+        self._load_embeddings()
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        return "Embedding Similarity"
+
+    def _load_embeddings(self) -> None:
+        """Load embeddings from .npz file."""
+        data = np.load(self.embeddings_path, allow_pickle=True)
+
+        # Extract task IDs and embedding matrix
+        task_ids = [str(x) for x in data["task_ids"].tolist()]
+        X = data["X"].astype(np.float32)
+
+        self._embedding_dim = int(X.shape[1])
+        self._embeddings = {task_id: X[i] for i, task_id in enumerate(task_ids)}
+
+    def _compute_similarity_features(
+        self,
+        query_embedding: np.ndarray,
+        reference_embeddings: np.ndarray,
+        exclude_idx: Optional[int] = None,
+    ) -> np.ndarray:
+        """Compute distributional statistics from cosine similarity scores.
+
+        Args:
+            query_embedding: (dim,) embedding of the query task
+            reference_embeddings: (n_ref, dim) embeddings of reference tasks
+            exclude_idx: If provided, exclude this index (for leave-one-out)
+
+        Returns:
+            (n_features,) array of distributional statistics
+        """
+        # Normalize embeddings for cosine similarity
+        query_norm = query_embedding / (np.linalg.norm(query_embedding) + 1e-8)
+        ref_norms = reference_embeddings / (
+            np.linalg.norm(reference_embeddings, axis=1, keepdims=True) + 1e-8
+        )
+
+        # Compute cosine similarities
+        similarities = ref_norms @ query_norm  # (n_ref,)
+
+        # Exclude self if needed (for leave-one-out during training)
+        if exclude_idx is not None:
+            similarities = np.delete(similarities, exclude_idx)
+
+        # Extract distributional statistics
+        return np.array([
+            np.mean(similarities),
+            np.std(similarities),
+            np.min(similarities),
+            np.max(similarities),
+            np.median(similarities),
+            np.percentile(similarities, 25),
+            np.percentile(similarities, 75),
+            np.percentile(similarities, 90),
+            scipy_stats.skew(similarities),
+            scipy_stats.kurtosis(similarities),
+        ])
+
+    def fit(self, task_ids: List[str], ground_truth_b: np.ndarray) -> None:
+        """Fit Ridge regression on similarity-based features.
+
+        Uses leave-one-out during training to avoid data leakage.
+
+        Args:
+            task_ids: List of training task identifiers
+            ground_truth_b: Array of ground truth difficulty values
+        """
+        if self._embeddings is None:
+            raise RuntimeError("Embeddings not loaded")
+
+        # Get embeddings for training tasks
+        available_tasks = [t for t in task_ids if t in self._embeddings]
+        if len(available_tasks) < len(task_ids):
+            missing = len(task_ids) - len(available_tasks)
+            print(f"Warning: {missing} tasks missing from embeddings")
+
+        # Store training state
+        self._train_task_ids = available_tasks
+        self._train_embeddings = np.stack(
+            [self._embeddings[t] for t in available_tasks]
+        )
+
+        # Get corresponding ground truth values
+        y = np.array([ground_truth_b[task_ids.index(t)] for t in available_tasks])
+
+        # Compute features for each training task using leave-one-out
+        features = []
+        for i in range(len(available_tasks)):
+            feat = self._compute_similarity_features(
+                self._train_embeddings[i],
+                self._train_embeddings,
+                exclude_idx=i,  # Exclude self to avoid leakage
+            )
+            features.append(feat)
+
+        X = np.stack(features)
+
+        # Fit StandardScaler + Ridge
+        self._model = Pipeline([
+            ("scaler", StandardScaler(with_mean=True, with_std=True)),
+            ("ridge", Ridge(alpha=self.ridge_alpha)),
+        ])
+        self._model.fit(X, y)
+
+        # Store coefficients for interpretability
+        ridge_coefs = self._model.named_steps["ridge"].coef_
+        self._feature_coefficients = dict(zip(self.FEATURE_NAMES, ridge_coefs.tolist()))
+
+    def predict(self, task_ids: List[str]) -> Dict[str, float]:
+        """Predict difficulty for tasks using similarity to training set.
+
+        Args:
+            task_ids: List of task identifiers
+
+        Returns:
+            Dict mapping task_id to predicted difficulty
+        """
+        if self._model is None:
+            raise RuntimeError("Model not fitted. Call fit() first.")
+        if self._embeddings is None:
+            raise RuntimeError("Embeddings not loaded")
+        if self._train_embeddings is None:
+            raise RuntimeError("Training embeddings not stored")
+
+        # Get embeddings for prediction tasks
+        available_tasks = [t for t in task_ids if t in self._embeddings]
+
+        if not available_tasks:
+            return {}
+
+        # Compute features for each test task (no exclusion needed)
+        features = []
+        for t in available_tasks:
+            feat = self._compute_similarity_features(
+                self._embeddings[t],
+                self._train_embeddings,
+                exclude_idx=None,  # Compare to all training tasks
+            )
+            features.append(feat)
+
+        X = np.stack(features)
+        preds = self._model.predict(X)
+
+        return dict(zip(available_tasks, preds.tolist()))
+
+    @property
+    def embedding_dim(self) -> Optional[int]:
+        """Return the embedding dimensionality."""
+        return self._embedding_dim
+
+    @property
+    def n_embeddings(self) -> int:
+        """Return number of loaded embeddings."""
+        return len(self._embeddings) if self._embeddings else 0
+
+    @property
+    def n_train_tasks(self) -> int:
+        """Return number of training tasks."""
+        return len(self._train_task_ids) if self._train_task_ids else 0
+
+    @property
+    def feature_names(self) -> List[str]:
+        """Return names of similarity features."""
+        return self.FEATURE_NAMES
+
+    @property
+    def feature_coefficients(self) -> Optional[Dict[str, float]]:
+        """Return coefficients of features."""
+        return self._feature_coefficients
+
+    def print_feature_coefficients(self) -> None:
+        """Print feature coefficients for interpretability."""
+        if self._feature_coefficients is None:
+            print("Model not fitted yet")
+            return
+
+        print(f"\n   Similarity feature coefficients:")
+        sorted_features = sorted(
+            self._feature_coefficients.items(), key=lambda x: abs(x[1]), reverse=True
+        )
+        for name, coef in sorted_features:
+            sign = "+" if coef >= 0 else ""
+            print(f"     {name:15s}: {sign}{coef:.4f}")
 
 
 class ConstantPredictor(DifficultyPredictorBase):

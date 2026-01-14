@@ -17,6 +17,7 @@ from experiment_a.config import ExperimentAConfig
 from experiment_a.data_loader import load_experiment_data, ExperimentAData
 from experiment_a.difficulty_predictor import (
     EmbeddingPredictor,
+    EmbeddingSimilarityPredictor,
     ConstantPredictor,
     GroundTruthPredictor,
     LunettePredictor,
@@ -165,6 +166,68 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
         print("\n6. No embeddings path provided, skipping embedding predictor")
         results["embedding_predictor"] = {"error": "No embeddings_path provided"}
 
+    # 8b. Embedding Similarity predictor (if embeddings provided)
+    if config.embeddings_path is not None:
+        embeddings_path = ROOT / config.embeddings_path
+        if embeddings_path.exists():
+            print(f"\n6b. Training embedding similarity predictor...")
+
+            try:
+                sim_predictor = EmbeddingSimilarityPredictor(
+                    embeddings_path=embeddings_path,
+                    ridge_alpha=config.embedding_similarity_ridge_alpha,
+                )
+                print(f"   Embeddings loaded: {sim_predictor.n_embeddings} tasks")
+                print(f"   Embedding dim: {sim_predictor.embedding_dim}")
+                print(f"   Features: {len(sim_predictor.feature_names)} similarity statistics")
+
+                sim_predictor.fit(data.train_tasks, train_b)
+                sim_preds = sim_predictor.predict(data.test_tasks)
+
+                # IRT-based AUC
+                sim_result = compute_auc(
+                    sim_preds, data.abilities, data.responses, data.test_tasks
+                )
+                print(f"   Embedding Similarity AUC: {sim_result.get('auc', 'N/A'):.4f}")
+
+                # Difficulty prediction metrics
+                diff_metrics = compute_difficulty_prediction_metrics(
+                    sim_preds, data.items, data.test_tasks
+                )
+                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
+
+                # Print feature coefficients for interpretability
+                sim_predictor.print_feature_coefficients()
+
+                results["embedding_similarity_predictor"] = {
+                    "auc_result": sim_result,
+                    "difficulty_metrics": diff_metrics,
+                    "embeddings_path": str(embeddings_path),
+                    "ridge_alpha": config.embedding_similarity_ridge_alpha,
+                    "n_embeddings": sim_predictor.n_embeddings,
+                    "embedding_dim": sim_predictor.embedding_dim,
+                    "n_train_tasks": sim_predictor.n_train_tasks,
+                    "feature_names": sim_predictor.feature_names,
+                    "feature_coefficients": sim_predictor.feature_coefficients,
+                }
+
+                # Store predictions for analysis
+                if "difficulty_predictions" not in results:
+                    results["difficulty_predictions"] = {
+                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
+                    }
+                results["difficulty_predictions"]["embedding_similarity"] = sim_preds
+
+            except Exception as e:
+                print(f"   Error with embedding similarity predictor: {e}")
+                import traceback
+                traceback.print_exc()
+                results["embedding_similarity_predictor"] = {"error": str(e)}
+        else:
+            results["embedding_similarity_predictor"] = {"error": f"File not found: {embeddings_path}"}
+    else:
+        results["embedding_similarity_predictor"] = {"error": "No embeddings_path provided"}
+
     # 9. Lunette predictor (if features provided)
     if config.lunette_features_path is not None:
         lunette_path = ROOT / config.lunette_features_path
@@ -310,6 +373,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
     for name, key in [
         ("Oracle (true b)", "oracle"),
         ("Embedding predictor", "embedding_predictor"),
+        ("Embedding Similarity", "embedding_similarity_predictor"),
         ("LLM Judge predictor", "llm_judge_predictor"),
         ("Lunette predictor", "lunette_predictor"),
         ("Constant (mean b)", "constant_baseline"),
@@ -317,7 +381,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
         ("Task-only", "task_only_baseline"),
     ]:
         result = results.get(key, {})
-        if key in ("embedding_predictor", "lunette_predictor", "llm_judge_predictor") and "auc_result" in result:
+        if key in ("embedding_predictor", "embedding_similarity_predictor", "lunette_predictor", "llm_judge_predictor") and "auc_result" in result:
             auc = result["auc_result"].get("auc")
         else:
             auc = result.get("auc")
@@ -410,6 +474,12 @@ def main():
         help="Max features to select for LLM Judge (default: None = all 9)",
     )
     parser.add_argument(
+        "--embedding_similarity_ridge_alpha",
+        type=float,
+        default=1.0,
+        help="Ridge alpha for embedding similarity predictor (default: 1.0)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="Show configuration without running",
@@ -431,6 +501,8 @@ def main():
         llm_judge_features_path=Path(args.llm_judge_features_path) if args.llm_judge_features_path else None,
         llm_judge_ridge_alpha=args.llm_judge_ridge_alpha,
         llm_judge_max_features=args.llm_judge_max_features,
+        # Embedding Similarity config
+        embedding_similarity_ridge_alpha=args.embedding_similarity_ridge_alpha,
     )
 
     if args.dry_run:
