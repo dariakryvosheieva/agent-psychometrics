@@ -32,6 +32,8 @@ model_irt/
 
 ## Quick Start
 
+**Important:** This project uses a Python virtual environment. Always activate it before running any Python commands:
+
 ```bash
 source .venv/bin/activate
 

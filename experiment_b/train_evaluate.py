@@ -243,6 +243,7 @@ def run_experiment(config: ExperimentConfig) -> Dict:
         print("   Skipping posterior (prior_only mode)")
         posterior_model = None
     else:
+        test_progression_features_dir = ROOT / config.test_progression_features_dir
         posterior_model = PosteriorModel(
             prior_model,
             alpha=config.posterior_alpha,
@@ -255,6 +256,7 @@ def run_experiment(config: ExperimentConfig) -> Dict:
             execution_features_dir=execution_features_dir,
             llm_judge_v6_features_dir=llm_judge_v6_features_dir,
             llm_judge_v7_features_dir=llm_judge_v7_features_dir,
+            test_progression_features_dir=test_progression_features_dir,
         )
         posterior_model.fit(
             task_ids=split.d_train_tasks,
@@ -400,9 +402,9 @@ def main():
     parser.add_argument(
         "--feature_source",
         type=str,
-        choices=["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5", "llm_judge_v5_single", "execution", "discoverability", "combined_v2", "llm_judge_v7", "mechanical_v7"],
+        choices=["simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5", "llm_judge_v5_single", "execution", "discoverability", "combined_v2", "llm_judge_v7", "mechanical_v7", "test_progression"],
         default="simple",
-        help="Feature source: 'simple', 'execution' (mechanical), 'llm_judge_v7' (semantic), 'mechanical_v7' (both), or legacy options",
+        help="Feature source: 'simple', 'execution' (mechanical), 'llm_judge_v7' (semantic), 'mechanical_v7' (both), 'test_progression', or legacy options",
     )
     parser.add_argument(
         "--prior_source",
@@ -423,13 +425,19 @@ def main():
         help="Run prior-only baseline (no trajectory correction)",
     )
     parser.add_argument(
+        "--items_path",
+        type=str,
+        default=None,
+        help="Path to IRT items.csv (overrides config default)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="Show configuration without running",
     )
     args = parser.parse_args()
 
-    config = ExperimentConfig(
+    config_kwargs = dict(
         weak_threshold=args.weak_threshold,
         strong_min_improvement=args.strong_min_improvement,
         output_dir=Path(args.output_dir),
@@ -438,6 +446,9 @@ def main():
         embeddings_path=Path(args.embeddings_path) if args.embeddings_path else None,
         prior_only=args.prior_only,
     )
+    if args.items_path:
+        config_kwargs["items_path"] = Path(args.items_path)
+    config = ExperimentConfig(**config_kwargs)
 
     if args.dry_run:
         print("DRY RUN - Configuration:")

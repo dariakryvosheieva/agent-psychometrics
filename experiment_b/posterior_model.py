@@ -51,6 +51,11 @@ from .llm_judge.features_v7 import (
     load_llm_judge_v7_features_for_task,
     aggregate_llm_judge_v7_features,
 )
+from .test_progression import (
+    TEST_PROGRESSION_FEATURE_NAMES,
+    features_from_dict,
+    aggregate_test_progression_features,
+)
 
 
 class PosteriorModel:
@@ -68,7 +73,7 @@ class PosteriorModel:
         feature_source: Literal[
             "simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5",
             "llm_judge_v5_single", "execution", "discoverability", "combined_v2",
-            "llm_judge_v7", "mechanical_v7"
+            "llm_judge_v7", "mechanical_v7", "test_progression"
         ] = "simple",
         lunette_features_dir: Optional[Path] = None,
         llm_judge_features_dir: Optional[Path] = None,
@@ -78,6 +83,7 @@ class PosteriorModel:
         execution_features_dir: Optional[Path] = None,
         llm_judge_v6_features_dir: Optional[Path] = None,
         llm_judge_v7_features_dir: Optional[Path] = None,
+        test_progression_features_dir: Optional[Path] = None,
     ):
         """Initialize posterior model.
 
@@ -102,6 +108,7 @@ class PosteriorModel:
             execution_features_dir: Directory for execution features (v2)
             llm_judge_v6_features_dir: Directory for v6 discoverability features
             llm_judge_v7_features_dir: Directory for v7 unified semantic features
+            test_progression_features_dir: Directory for test progression features
         """
         self.prior_model = prior_model
         self.alpha = alpha
@@ -114,6 +121,7 @@ class PosteriorModel:
         self.execution_features_dir = execution_features_dir
         self.llm_judge_v6_features_dir = llm_judge_v6_features_dir
         self.llm_judge_v7_features_dir = llm_judge_v7_features_dir
+        self.test_progression_features_dir = test_progression_features_dir
         self.psi_model: Optional[Ridge] = None
         self.training_stats: Dict = {}
 
@@ -139,6 +147,8 @@ class PosteriorModel:
         elif feature_source == "mechanical_v7":
             # Mechanical features + v7 semantic features
             self.feature_names = EXECUTION_FEATURE_NAMES + LLM_JUDGE_V7_FEATURE_NAMES
+        elif feature_source == "test_progression":
+            self.feature_names = TEST_PROGRESSION_FEATURE_NAMES
         else:
             self.feature_names = TRAJECTORY_FEATURE_NAMES
 
@@ -246,6 +256,8 @@ class PosteriorModel:
                 return exec_feat
             v7_agg = aggregate_llm_judge_v7_features(v7_features)
             return np.concatenate([exec_feat, v7_agg])
+        elif self.feature_source == "test_progression":
+            return self._load_test_progression_features(task_id, agents)
         else:
             # Simple trajectory features
             traj_features = load_trajectories_for_task(task_id, agents, trajectories_dir)
@@ -277,6 +289,42 @@ class PosteriorModel:
             return None
         except (json.JSONDecodeError, IOError):
             return None
+
+    def _load_test_progression_features(
+        self, task_id: str, agents: List[str]
+    ) -> Optional[np.ndarray]:
+        """Load pre-computed test progression features for a task.
+
+        Args:
+            task_id: Task instance ID
+            agents: List of agent names to load features for
+
+        Returns:
+            Aggregated feature vector or None
+        """
+        if self.test_progression_features_dir is None:
+            return None
+
+        # Load features for each agent
+        agent_features = {}
+        for agent in agents:
+            feature_file = self.test_progression_features_dir / agent / f"{task_id}.json"
+            if not feature_file.exists():
+                continue
+
+            try:
+                with open(feature_file) as f:
+                    data = json.load(f)
+                # Only use features with test output for better signal
+                if data.get("has_test_output", False):
+                    agent_features[agent] = features_from_dict(data)
+            except (json.JSONDecodeError, IOError):
+                continue
+
+        if not agent_features:
+            return None
+
+        return aggregate_test_progression_features(agent_features)
 
     def fit(
         self,
