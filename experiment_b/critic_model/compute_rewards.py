@@ -313,9 +313,6 @@ def discover_trajectories(
 
         for json_file in agent_dir.glob("*.json"):
             task_id = json_file.stem
-            # Skip metadata files (not actual trajectories)
-            if task_id.startswith("_"):
-                continue
             results.append((agent, task_id, json_file))
 
     return results
@@ -363,7 +360,8 @@ def process_trajectories(
 
     # Process each trajectory
     processed = 0
-    skipped = 0
+    skipped_existing = 0
+    skipped_no_assistant = 0
     errors = 0
 
     for agent, task_id, filepath in tqdm(all_trajs, desc="Computing rewards"):
@@ -372,7 +370,7 @@ def process_trajectories(
         output_file = agent_output_dir / f"{task_id}.npz"
 
         if skip_existing and output_file.exists():
-            skipped += 1
+            skipped_existing += 1
             continue
 
         # Load trajectory
@@ -384,6 +382,11 @@ def process_trajectories(
         # Compute rewards
         try:
             rewards = critic.get_per_step_rewards(traj.messages)
+
+            # Skip trajectories with no assistant turns
+            if len(rewards) == 0:
+                skipped_no_assistant += 1
+                continue
 
             # Save results
             agent_output_dir.mkdir(exist_ok=True)
@@ -405,7 +408,8 @@ def process_trajectories(
 
     print(f"\nCompleted:")
     print(f"  Processed: {processed}")
-    print(f"  Skipped (existing): {skipped}")
+    print(f"  Skipped (existing): {skipped_existing}")
+    print(f"  Skipped (no assistant turns): {skipped_no_assistant}")
     print(f"  Errors: {errors}")
 
 
