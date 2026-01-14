@@ -42,6 +42,8 @@ OUT_DIR="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt_qwen3vl
   --cv_folds 5 \
   --out_dir "${OUT_DIR}" \
   --trust_remote_code \
-  --embedding_layer -1
+  --embedding_layer -1 \
+  --overwrite \
+  --agent_results /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/swebench_verified_20251115_full.jsonl
 
 

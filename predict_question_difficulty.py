@@ -25,6 +25,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 import csv
 import hashlib
 import json
@@ -32,7 +33,7 @@ import os
 import random
 import re
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Dict, Iterator, List, Optional, Sequence, Set, Tuple
 
 
 def _require(pkg: str) -> None:
@@ -63,6 +64,7 @@ from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 import inspect
+from typing import Any
 
 
 DIFFICULTY_INSTRUCTION = (
@@ -118,16 +120,52 @@ def stable_split_ids(ids: Sequence[str], test_fraction: float, seed: int) -> Tup
     """
     if not (0.0 < test_fraction < 1.0):
         raise ValueError("test_fraction must be between 0 and 1")
+
+    n_test_target = int(round(len(ids) * float(test_fraction)))
+
     xs: List[Tuple[float, int]] = []
     for i, s in enumerate(ids):
         h = hashlib.md5((str(s) + f"::{seed}").encode("utf-8")).hexdigest()
         x = int(h[:8], 16) / float(16**8)
         xs.append((x, i))
     xs.sort()
-    n_test = int(round(len(ids) * float(test_fraction)))
-    test = [i for _, i in xs[:n_test]]
-    train = [i for _, i in xs[n_test:]]
+
+    test_set = set([i for _, i in xs[:n_test_target]])
+    test = sorted(test_set)
+    train = [i for i in range(len(ids)) if i not in test_set]
     return train, test
+
+
+def load_zero_success_task_ids_from_subject_responses_jsonl(path: str) -> List[str]:
+    """
+    Compute the set of task ids that no subject got correct from a JSONL file with schema:
+      {"subject_id": "...", "responses": {"task_id": 0/1, ...}}
+
+    Returns normalized ids.
+    """
+    counts: Dict[str, int] = defaultdict(int)
+    all_ids: Set[str] = set()
+
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            obj = json.loads(line)
+            resp = obj.get("responses", {}) or {}
+            if not isinstance(resp, dict):
+                continue
+            for raw_id, v in resp.items():
+                tid = normalize_swebench_item_id(str(raw_id))
+                if not tid:
+                    continue
+                all_ids.add(tid)
+                try:
+                    counts[tid] += int(v)
+                except Exception:
+                    counts[tid] += 1 if v else 0
+
+    return sorted([tid for tid in all_ids if counts.get(tid, 0) == 0])
 
 
 def last_token_pool(last_hidden_state: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
@@ -355,6 +393,87 @@ def iter_swebench_items(
         if not item_id:
             item_id = f"row_{int(i)}"
         yield ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
+
+
+def load_items_by_ids(
+    *,
+    dataset_name: str,
+    split: str,
+    dataset_path: str,
+    item_ids: Sequence[str],
+) -> Tuple[List[ItemRecord], List[str]]:
+    """
+    Load SWE-bench-style tasks and return ItemRecords for a specific set of item_ids.
+
+    - Preserves the order of `item_ids`.
+    - Returns (items_found_in_order, missing_ids).
+    """
+    want = [normalize_swebench_item_id(x) for x in list(item_ids)]
+    want = [x for x in want if str(x).strip()]
+    want_set = set(want)
+    if not want:
+        return [], []
+
+    ds_path = str(dataset_path or "").strip()
+    if ds_path:
+        ds = load_dataset("json", data_files=str(ds_path), split="train")
+        ds_name = f"json:{ds_path}"
+        ds_split = "train"
+    else:
+        ds = load_dataset(str(dataset_name), split=str(split))
+        ds_name = str(dataset_name)
+        ds_split = str(split)
+
+    n_total = len(ds)
+    if n_total == 0:
+        raise RuntimeError(f"Loaded empty dataset: {ds_name} split={ds_split}")
+
+    solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
+    id_keys = ["instance_id", "task_id", "id"]
+    qs_keys = ["problem_statement", "statement", "description"]
+
+    found: Dict[str, ItemRecord] = {}
+    # Scan dataset once; stop early when all requested ids have been found.
+    for i in range(n_total):
+        row = ds[int(i)]
+        item_id = ""
+        for k in id_keys:
+            v = row.get(k, None)
+            if v is None:
+                continue
+            s = str(v).strip()
+            if s:
+                item_id = normalize_swebench_item_id(s)
+                break
+        if not item_id or item_id not in want_set or item_id in found:
+            continue
+
+        qs = ""
+        for k in qs_keys:
+            v = row.get(k, None)
+            if v is None:
+                continue
+            s = str(v)
+            if str(s).strip():
+                qs = s
+                break
+        sol = ""
+        for k in solution_keys:
+            v = row.get(k, None)
+            if v is None:
+                continue
+            s = str(v)
+            if s.strip():
+                sol = s
+                break
+
+        found[item_id] = ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
+        if len(found) >= len(want_set):
+            break
+
+    items = [found[tid] for tid in want if tid in found]
+    missing = [tid for tid in want if tid not in found]
+    return items, missing
 
 
 def _try_load_model_class(backbone: str, *, trust_remote_code: bool, model_kwargs: dict):
@@ -659,6 +778,99 @@ def _npz_scalar(value, default=None):
     return value
 
 
+def _as_1d_float32(x: object) -> np.ndarray:
+    a = np.asarray(x, dtype=np.float64).reshape(-1)
+    return a.astype(np.float32, copy=False)
+
+
+def _as_float(x: object) -> float:
+    try:
+        v = np.asarray(x).reshape(-1)
+        if v.size == 0:
+            return float("nan")
+        return float(v[0])
+    except Exception:
+        return float(x)  # type: ignore[arg-type]
+
+
+def save_regression_weights(
+    *,
+    out_dir: str,
+    model: Any,
+    regressor_name: str,
+    feature_dim: int,
+    metadata: dict,
+) -> Tuple[str, str]:
+    """
+    Save a minimal, sklearn-version-agnostic representation of the trained regressor.
+
+    Writes:
+      - regression_weights.json (metadata)
+      - regression_weights.npz  (arrays: coef, intercept, scaler_mean, scaler_scale)
+    """
+    ensure_dir(out_dir)
+
+    uses_scaler = False
+    coef = np.zeros((0,), dtype=np.float32)
+    intercept = np.zeros((1,), dtype=np.float32)
+    scaler_mean = np.zeros((0,), dtype=np.float32)
+    scaler_scale = np.ones((0,), dtype=np.float32)
+
+    if isinstance(model, Pipeline):
+        scaler = model.named_steps.get("scaler", None)
+        reg = model.named_steps.get("ridge", None)
+        if scaler is not None and hasattr(scaler, "mean_") and hasattr(scaler, "scale_"):
+            uses_scaler = True
+            scaler_mean = _as_1d_float32(getattr(scaler, "mean_"))
+            scaler_scale = _as_1d_float32(getattr(scaler, "scale_"))
+        if reg is not None and hasattr(reg, "coef_") and hasattr(reg, "intercept_"):
+            coef = _as_1d_float32(getattr(reg, "coef_"))
+            intercept = np.array([_as_float(getattr(reg, "intercept_"))], dtype=np.float32)
+    else:
+        # LinearRegression (no scaler in this script).
+        if hasattr(model, "coef_") and hasattr(model, "intercept_"):
+            coef = _as_1d_float32(getattr(model, "coef_"))
+            intercept = np.array([_as_float(getattr(model, "intercept_"))], dtype=np.float32)
+
+    if int(coef.size) != int(feature_dim):
+        raise RuntimeError(
+            f"Saved coef has dim={int(coef.size)} but expected feature_dim={int(feature_dim)}. "
+            f"regressor={regressor_name}"
+        )
+    if uses_scaler and int(scaler_mean.size) != int(feature_dim):
+        raise RuntimeError(
+            f"Saved scaler_mean has dim={int(scaler_mean.size)} but expected feature_dim={int(feature_dim)}. "
+            f"regressor={regressor_name}"
+        )
+    if uses_scaler and int(scaler_scale.size) != int(feature_dim):
+        raise RuntimeError(
+            f"Saved scaler_scale has dim={int(scaler_scale.size)} but expected feature_dim={int(feature_dim)}. "
+            f"regressor={regressor_name}"
+        )
+
+    weights_npz = os.path.join(out_dir, "regression_weights.npz")
+    np.savez_compressed(
+        weights_npz,
+        coef=coef.astype(np.float32, copy=False),
+        intercept=intercept.astype(np.float32, copy=False),
+        scaler_mean=scaler_mean.astype(np.float32, copy=False),
+        scaler_scale=scaler_scale.astype(np.float32, copy=False),
+    )
+
+    weights_json = os.path.join(out_dir, "regression_weights.json")
+    meta = dict(metadata or {})
+    meta.update(
+        {
+            "regressor": str(regressor_name),
+            "feature_dim": int(feature_dim),
+            "uses_scaler": bool(uses_scaler),
+            "weights_npz": str(weights_npz),
+        }
+    )
+    save_json(weights_json, meta)
+    return weights_json, weights_npz
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument(
@@ -704,6 +916,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--overwrite", action="store_true")
 
     p.add_argument("--test_fraction", type=float, default=0.2)
+    p.add_argument(
+        "--agent_results",
+        type=str,
+        default="",
+        help=(
+            "Optional path to a JSONL file with per-subject responses of the form "
+            "{'subject_id': ..., 'responses': {'task_id': 0/1, ...}}. Any task_id with "
+            "zero successes across all subjects will be excluded from both train and test; "
+            "after training/evaluating on the remaining items, predictions for these zero-success "
+            "items will be printed (sorted) to stdout."
+        ),
+    )
     p.add_argument(
         "--regressor",
         type=str,
@@ -815,20 +1039,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     diffs = load_ground_truth_csv(str(args.difficulties))
 
-    # Align X with y by item_id / instance_id
+    # Align X with y by item_id / instance_id.
+    # NOTE: we will optionally exclude "zero-success" items from BOTH train and test.
     id_to_row = {tid: i for i, tid in enumerate(task_ids)}
-    common = [tid for tid in task_ids if tid in diffs]
+    labeled_ids = [tid for tid in task_ids if tid in diffs]
     missing_diff = [tid for tid in task_ids if tid not in diffs]
     if missing_diff:
         print(f"WARNING: {len(missing_diff)} item_ids missing difficulty; ignoring (e.g. {missing_diff[:3]})")
-    if not common:
+    if not labeled_ids:
         raise RuntimeError("No overlap between embedded ids and difficulty CSV item_id values.")
 
-    Xy = np.stack([X[id_to_row[tid]] for tid in common], axis=0).astype(np.float32)
-    y = np.array([diffs[tid] for tid in common], dtype=np.float32)
+    zero_success_source = str(args.agent_results or "").strip()
+    zero_success_ids: List[str] = []
+    if zero_success_source:
+        zero_success_ids = load_zero_success_task_ids_from_subject_responses_jsonl(zero_success_source)
+    zero_success_set = set(zero_success_ids)
 
-    # Deterministic split
-    train_idx, test_idx = stable_split_ids(common, test_fraction=float(args.test_fraction), seed=int(args.seed))
+    # Items used for train/test evaluation: labeled AND not zero-success.
+    eligible = [tid for tid in labeled_ids if tid not in zero_success_set]
+    if zero_success_source:
+        print(
+            f"Excluding zero-success items from train/test: {len(labeled_ids) - len(eligible)}/{len(labeled_ids)} labeled items "
+            f"(source={zero_success_source})"
+        )
+    if not eligible:
+        raise RuntimeError("After excluding zero-success items, no labeled items remain for train/test.")
+
+    Xy = np.stack([X[id_to_row[tid]] for tid in eligible], axis=0).astype(np.float32)
+    y = np.array([diffs[tid] for tid in eligible], dtype=np.float32)
+
+    # Deterministic split on eligible items only.
+    train_idx, test_idx = stable_split_ids(eligible, test_fraction=float(args.test_fraction), seed=int(args.seed))
     X_train, y_train = Xy[train_idx], y[train_idx]
     X_test, y_test = Xy[test_idx], y[test_idx]
 
@@ -871,10 +1112,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     metrics = {
         "n_items_total": int(len(task_ids)),
-        "n_items_with_difficulty": int(len(common)),
+        "n_items_with_difficulty": int(len(labeled_ids)),
+        "n_items_eligible_train_test": int(len(eligible)),
+        "n_items_zero_success_labeled_excluded": int(len(labeled_ids) - len(eligible)),
+        "zero_success_source": (zero_success_source or None),
         "embedding_dim": int(Xy.shape[1]),
         "train_fraction": float(1.0 - args.test_fraction),
         "test_fraction": float(args.test_fraction),
+        "test_fraction_actual": float(len(test_idx) / max(1, len(eligible))),
+        "n_test_target": int(round(len(eligible) * float(args.test_fraction))),
+        "n_test_actual": int(len(test_idx)),
         "seed": int(args.seed),
         "train_r2": float(r2_score(y_train, yhat_train)),
         "test_r2": float(r2_score(y_test, yhat_test)),
@@ -903,15 +1150,67 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "embeddings_cache": emb_cache,
         "ground_truth_csv": str(args.difficulties),
     }
+
+    # Save regression weights (coef/intercept + optional StandardScaler stats) for reuse.
+    # This is intentionally a minimal representation so it can be applied without sklearn.
+    weights_meta = {
+        "script": os.path.abspath(__file__),
+        "backbone": str(args.backbone),
+        "trust_remote_code": bool(args.trust_remote_code),
+        "pooling": "last_token_of_hidden_state",
+        "embedding_layer": int(args.embedding_layer),
+        "max_length": int(args.max_length),
+        "instruction": str(args.instruction),
+        "instruction_signature": str(instr_sig),
+        "device_map": str(args.device_map),
+        "torch_dtype": str(args.torch_dtype),
+        "attn_implementation": str(args.attn_implementation),
+        "dataset_name": str(args.dataset_name),
+        "split": str(args.split),
+        "dataset_path": str(args.dataset_path),
+        "id_normalization": "strip instance_ prefix; strip -v.* suffix",
+        "seed": int(args.seed),
+        "test_fraction": float(args.test_fraction),
+        "ridge_alpha": ridge_alpha,
+        "cv_folds": (int(args.cv_folds) if regressor_name == "ridge_cv" else None),
+        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
+    }
+    weights_json, weights_npz = save_regression_weights(
+        out_dir=str(args.out_dir),
+        model=model,
+        regressor_name=str(regressor_name),
+        feature_dim=int(X_train.shape[1]),
+        metadata=weights_meta,
+    )
+    metrics.update({"regression_weights_json": weights_json, "regression_weights_npz": weights_npz})
+    # Predict on zero-success items (excluded from train/test).
+    zero_embedded: List[str] = []
+    yhat_zero: Optional[np.ndarray] = None
+    if zero_success_set:
+        zero_embedded = [tid for tid in task_ids if tid in zero_success_set]
+        if zero_embedded:
+            X_zero = np.stack([X[id_to_row[tid]] for tid in zero_embedded], axis=0).astype(np.float32)
+            yhat_zero = model.predict(X_zero).astype(np.float64)
+        else:
+            print("NOTE: zero-success ids provided, but none were present in embedded task_ids; nothing to predict.")
+
+    metrics.update(
+        {
+            "n_items_zero_success_embedded": int(len(zero_embedded)),
+            "n_items_zero_success_predicted": int(0 if yhat_zero is None else int(np.asarray(yhat_zero).size)),
+        }
+    )
     save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
-    # Write per-item predictions
+    # Write per-item predictions (train/test plus optional zero_success rows).
     split_set = set(test_idx)
     pred_path = os.path.join(args.out_dir, "predictions.csv")
     with open(pred_path, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["item_id", "diff_true", "diff_pred", "split"])
         w.writeheader()
-        for i, tid in enumerate(common):
+
+        # Train/test rows (eligible only).
+        for i, tid in enumerate(eligible):
             w.writerow(
                 {
                     "item_id": tid,
@@ -920,6 +1219,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "split": "test" if i in split_set else "train",
                 }
             )
+
+        # Zero-success rows (separate split label).
+        if yhat_zero is not None and zero_embedded:
+            for tid, score in zip(zero_embedded, yhat_zero.tolist()):
+                # diff_true is available if present in the ground-truth CSV; keep it for analysis.
+                diff_true = diffs.get(tid, None)
+                w.writerow(
+                    {
+                        "item_id": tid,
+                        "diff_true": "" if diff_true is None else float(diff_true),
+                        "diff_pred": float(score),
+                        "split": "zero_success",
+                    }
+                )
+
+    # Print a sorted list to stdout for convenience.
+    if yhat_zero is not None and zero_embedded:
+        pairs = list(zip(zero_embedded, yhat_zero.tolist()))
+        pairs.sort(key=lambda kv: float(kv[1]), reverse=True)
+        print("\n=== ZERO_SUCCESS_PREDICTIONS_SORTED (task_id, diff_pred) ===")
+        for tid, score in pairs:
+            print(f"{tid}\t{float(score):.6f}")
 
     print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
     print(f"Wrote predictions: {pred_path}")

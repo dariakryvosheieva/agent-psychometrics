@@ -100,10 +100,14 @@ def load_predictions(
             yp = _to_float(row.get(y_pred_col))
             if yt is None or yp is None:
                 continue
+            if has_split:
+                split_v = str(row.get(split_col, "") or "").strip()
+                # By default, only keep the train/test splits; ignore others (e.g. zero_success).
+                if split_v not in ("train", "test"):
+                    continue
+                splits.append(split_v)
             y_true.append(float(yt))
             y_pred.append(float(yp))
-            if has_split:
-                splits.append(str(row.get(split_col, "") or "").strip())
 
     splits_out = splits if splits else None
     return np.asarray(y_true, dtype=np.float64), np.asarray(y_pred, dtype=np.float64), splits_out
@@ -135,6 +139,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     ap.add_argument("--y_true_col", type=str, default="diff_true")
     ap.add_argument("--y_pred_col", type=str, default="diff_pred")
     ap.add_argument("--split_col", type=str, default="split")
+    ap.add_argument("--test_split_value", type=str, default="test")
     ap.add_argument("--json_out", type=str, default="", help="Optional path to write results as JSON.")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -162,6 +167,11 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
             "split_col": str(args.split_col),
             "overall": {"r2": float(overall.r2), "n": int(overall.n)},
             "by_split": {k: {"r2": float(v.r2), "n": int(v.n)} for k, v in by_split.items()},
+            "test": {
+                "test_split_value": str(args.test_split_value),
+                "r2": (float(test_r2.r2) if test_r2 is not None else None),
+                "n": (int(test_r2.n) if test_r2 is not None else None),
+            },
         }
         Path(str(args.json_out)).parent.mkdir(parents=True, exist_ok=True)
         Path(str(args.json_out)).write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

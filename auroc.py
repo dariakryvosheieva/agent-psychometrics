@@ -26,6 +26,7 @@ import csv
 import json
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
+import re
 
 
 def _require(pkg: str) -> None:
@@ -45,6 +46,17 @@ from torchmetrics import AUROC
 # Resolve relative paths from the `fulcrum/fellowship/` directory (where this script lives),
 # so defaults like `./out/...` work when invoked from anywhere.
 ROOT = Path(__file__).resolve().parent
+
+
+_V_SUFFIX_RE = re.compile(r"-v.*$")
+
+
+def normalize_swebench_item_id(raw_item_id: str) -> str:
+    s = str(raw_item_id or "").strip()
+    if s.startswith("instance_"):
+        s = s[len("instance_") :]
+    s = _V_SUFFIX_RE.sub("", s)
+    return s.strip()
 
 
 def resolve_path(path_str: str) -> Path:
@@ -84,7 +96,7 @@ def load_zs_predictions_csv(path: Path) -> Dict[str, Tuple[float, str]]:
             raise ValueError(f"Missing columns {missing} in {path}; got columns={sorted(fns)}")
 
         for row in r:
-            item_id = str(row.get("item_id", "") or "").strip()
+            item_id = normalize_swebench_item_id(str(row.get("item_id", "") or "").strip())
             split = str(row.get("split", "") or "").strip().lower()
             z_s = str(row.get("diff_pred", "") or "").strip()
             if not item_id or split not in ("train", "test") or not z_s:
@@ -108,7 +120,10 @@ def iter_responses_jsonl(path: Path) -> Iterable[Tuple[str, Dict[str, int]]]:
             out: Dict[str, int] = {}
             for k, v in responses.items():
                 try:
-                    out[str(k)] = int(v)
+                    item_id = normalize_swebench_item_id(str(k))
+                    if not item_id:
+                        continue
+                    out[item_id] = int(v)
                 except Exception:
                     continue
             yield sid, out
