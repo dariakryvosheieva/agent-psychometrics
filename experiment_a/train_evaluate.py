@@ -241,6 +241,8 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
                     lr=config.mle_lr,
                     max_iter=config.mle_max_iter,
                     l2_lambda=config.mle_l2_lambda,
+                    use_mc_abilities=config.mle_use_mc_abilities,
+                    n_mc_samples=config.mle_n_mc_samples,
                     verbose=True,
                 )
                 print(f"   Embeddings loaded: {mle_predictor.n_embeddings} tasks")
@@ -274,6 +276,8 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
                     "mle_lr": config.mle_lr,
                     "mle_max_iter": config.mle_max_iter,
                     "mle_l2_lambda": config.mle_l2_lambda,
+                    "mle_use_mc_abilities": config.mle_use_mc_abilities,
+                    "mle_n_mc_samples": config.mle_n_mc_samples if config.mle_use_mc_abilities else None,
                     "n_embeddings": mle_predictor.n_embeddings,
                     "embedding_dim": mle_predictor.embedding_dim,
                     "final_loss": mle_predictor.training_loss_history[-1] if mle_predictor.training_loss_history else None,
@@ -580,6 +584,17 @@ def main():
         help="L2 regularization for MLE weights (default: 0.15, tuned)",
     )
     parser.add_argument(
+        "--mle_use_mc_abilities",
+        action="store_true",
+        help="Use MC marginalization over abilities instead of fixed θ values",
+    )
+    parser.add_argument(
+        "--mle_n_mc_samples",
+        type=int,
+        default=100,
+        help="Number of MC samples for ability marginalization (default: 100)",
+    )
+    parser.add_argument(
         "--dry_run",
         action="store_true",
         help="Show configuration without running",
@@ -608,6 +623,8 @@ def main():
         mle_lr=args.mle_lr,
         mle_max_iter=args.mle_max_iter,
         mle_l2_lambda=args.mle_l2_lambda,
+        mle_use_mc_abilities=args.mle_use_mc_abilities,
+        mle_n_mc_samples=args.mle_n_mc_samples,
     )
 
     if args.dry_run:

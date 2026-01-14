@@ -60,6 +60,8 @@ class ExperimentAConfig:
     mle_lr: float = 0.1  # L-BFGS learning rate
     mle_max_iter: int = 100  # Max L-BFGS iterations
     mle_l2_lambda: float = 0.15  # L2 regularization strength (tuned)
+    mle_use_mc_abilities: bool = False  # MC marginalization over abilities
+    mle_n_mc_samples: int = 100  # Number of MC samples for ability marginalization
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""

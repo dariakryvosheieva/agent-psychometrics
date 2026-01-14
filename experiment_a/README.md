@@ -66,9 +66,17 @@ The MLE approach (Truong et al. 2025) achieves slightly better AUC (0.8337 vs 0.
 - Smaller dataset (500 tasks vs 78K items in their paper)
 - Already well-tuned Ridge regularization (α=10000)
 
+**MC ability marginalization**: The paper uses Monte Carlo sampling from N(0,1) to marginalize over abilities. We tested this approach (`--mle_use_mc_abilities`) but it performs worse (0.8258 AUC) because:
+- We have reliable IRT-estimated abilities for all 130 agents
+- MC marginalization ignores agent-specific information
+
 To enable MLE training:
 ```bash
+# With fixed abilities (recommended)
 python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz --use_mle_embedding
+
+# With MC ability marginalization (not recommended for our setting)
+python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz --use_mle_embedding --mle_use_mc_abilities
 ```
 
 ## Feature Sources

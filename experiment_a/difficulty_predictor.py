@@ -183,6 +183,8 @@ class MLEEmbeddingPredictor(DifficultyPredictorBase):
         max_iter: int = 100,
         tol: float = 1e-5,
         l2_lambda: float = 0.01,
+        use_mc_abilities: bool = False,
+        n_mc_samples: int = 100,
         verbose: bool = True,
     ):
         """Initialize MLE embedding predictor.
@@ -193,6 +195,10 @@ class MLEEmbeddingPredictor(DifficultyPredictorBase):
             max_iter: Maximum number of L-BFGS iterations
             tol: Convergence tolerance for loss, weight change, and gradient
             l2_lambda: L2 regularization strength on weights
+            use_mc_abilities: If True, marginalize over abilities using MC sampling
+                from N(0,1) prior instead of using fixed IRT-estimated abilities.
+                This matches the approach in Truong et al. (2025).
+            n_mc_samples: Number of MC samples for ability marginalization
             verbose: Whether to print training progress
         """
         self.embeddings_path = embeddings_path
@@ -200,6 +206,8 @@ class MLEEmbeddingPredictor(DifficultyPredictorBase):
         self.max_iter = max_iter
         self.tol = tol
         self.l2_lambda = l2_lambda
+        self.use_mc_abilities = use_mc_abilities
+        self.n_mc_samples = n_mc_samples
         self.verbose = verbose
 
         self._embeddings: Optional[Dict[str, np.ndarray]] = None
@@ -216,6 +224,8 @@ class MLEEmbeddingPredictor(DifficultyPredictorBase):
     @property
     def name(self) -> str:
         """Human-readable predictor name."""
+        if self.use_mc_abilities:
+            return "Embedding (MLE-MC)"
         return "Embedding (MLE)"
 
     def _load_embeddings(self) -> None:
@@ -316,19 +326,47 @@ class MLEEmbeddingPredictor(DifficultyPredictorBase):
         self._training_loss_history = []
 
         l2_lambda = self.l2_lambda
+        use_mc = self.use_mc_abilities
+        n_mc = self.n_mc_samples
+        n_agents = len(agent_ids)
+        n_tasks = len(available_tasks)
+
+        # Pre-generate MC samples for ability marginalization (if enabled)
+        # Shape: (n_mc_samples, n_agents)
+        if use_mc:
+            torch.manual_seed(42)  # Reproducibility
+            mc_thetas = torch.randn(n_mc, n_agents, device=device)
 
         def closure():
             optim.zero_grad()
             # z = difficulty prediction: (n_tasks,)
             z = torch.matmul(embed_tensor, w) + b
 
-            # P(success) = sigmoid(theta - z)
-            # theta_tensor: (n_agents,) -> (n_agents, 1)
-            # z: (n_tasks,) -> (1, n_tasks)
-            probs = torch.sigmoid(theta_tensor[:, None] - z[None, :])
+            if use_mc:
+                # Monte Carlo marginalization over abilities
+                # mc_thetas: (n_mc, n_agents)
+                # z: (n_tasks,)
+                # probs: (n_mc, n_agents, n_tasks)
+                probs = torch.sigmoid(mc_thetas[:, :, None] - z[None, None, :])
 
-            # Negative log-likelihood (only for valid responses)
-            nll = -Bernoulli(probs=probs[mask]).log_prob(response_tensor[mask]).mean()
+                # Log-likelihood for each MC sample: (n_mc,)
+                # Average over MC samples in log-space using logsumexp
+                log_probs = Bernoulli(probs=probs).log_prob(response_tensor[None, :, :])
+                # Mask and sum over valid responses: (n_mc,)
+                log_probs_masked = (log_probs * mask[None, :, :]).sum(dim=(1, 2))
+                # Monte Carlo average (log-space): log(1/M * sum(exp(log_p)))
+                log_marginal = torch.logsumexp(log_probs_masked, dim=0) - np.log(n_mc)
+                # Normalize by number of valid responses
+                nll = -log_marginal / mask.sum()
+            else:
+                # Fixed abilities approach
+                # P(success) = sigmoid(theta - z)
+                # theta_tensor: (n_agents,) -> (n_agents, 1)
+                # z: (n_tasks,) -> (1, n_tasks)
+                probs = torch.sigmoid(theta_tensor[:, None] - z[None, :])
+
+                # Negative log-likelihood (only for valid responses)
+                nll = -Bernoulli(probs=probs[mask]).log_prob(response_tensor[mask]).mean()
 
             # L2 regularization on weights
             l2_reg = l2_lambda * torch.sum(w ** 2)
@@ -339,7 +377,10 @@ class MLEEmbeddingPredictor(DifficultyPredictorBase):
 
         # Training loop
         if self.verbose:
-            print(f"   MLE Training: {len(available_tasks)} tasks, {len(agent_ids)} agents")
+            mode = "MC marginalization" if use_mc else "fixed abilities"
+            print(f"   MLE Training ({mode}): {n_tasks} tasks, {n_agents} agents")
+            if use_mc:
+                print(f"   MC samples: {n_mc}")
             print(f"   Valid response pairs: {mask.sum().item()}")
 
         for iteration in range(self.max_iter):
