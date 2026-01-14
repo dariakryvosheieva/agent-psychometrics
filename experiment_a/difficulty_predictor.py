@@ -158,6 +158,275 @@ class EmbeddingPredictor(DifficultyPredictorBase):
         return len(self._embeddings) if self._embeddings else 0
 
 
+class MLEEmbeddingPredictor(DifficultyPredictorBase):
+    """Difficulty predictor using direct MLE on embeddings.
+
+    Instead of fitting regression on ground-truth difficulties (plug-in estimator),
+    this directly maximizes the IRT log-likelihood:
+
+        maximize: Σ_agents Σ_tasks log P(y_ij | θ_j, β_i)
+
+    where β_i = embeddings[i] @ w + b is a linear function of embeddings.
+
+    This approach trains the embedding-to-difficulty mapping end-to-end to predict
+    agent responses, rather than fitting to IRT difficulty estimates as an
+    intermediate target.
+
+    Approach inspired by Truong et al. (2025) "Reliable and Efficient Amortized
+    Model-based Evaluation" (https://arxiv.org/pdf/2503.13335)
+    """
+
+    def __init__(
+        self,
+        embeddings_path: Path,
+        lr: float = 0.1,
+        max_iter: int = 100,
+        tol: float = 1e-5,
+        l2_lambda: float = 0.01,
+        verbose: bool = True,
+    ):
+        """Initialize MLE embedding predictor.
+
+        Args:
+            embeddings_path: Path to pre-computed embeddings .npz file
+            lr: Learning rate for L-BFGS optimizer
+            max_iter: Maximum number of L-BFGS iterations
+            tol: Convergence tolerance for loss, weight change, and gradient
+            l2_lambda: L2 regularization strength on weights
+            verbose: Whether to print training progress
+        """
+        self.embeddings_path = embeddings_path
+        self.lr = lr
+        self.max_iter = max_iter
+        self.tol = tol
+        self.l2_lambda = l2_lambda
+        self.verbose = verbose
+
+        self._embeddings: Optional[Dict[str, np.ndarray]] = None
+        self._embedding_dim: Optional[int] = None
+        self._weights: Optional[np.ndarray] = None  # (embed_dim,)
+        self._bias: Optional[float] = None
+        self._scaler_mean: Optional[np.ndarray] = None
+        self._scaler_std: Optional[np.ndarray] = None
+        self._training_loss_history: List[float] = []
+
+        # Load embeddings immediately
+        self._load_embeddings()
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        return "Embedding (MLE)"
+
+    def _load_embeddings(self) -> None:
+        """Load embeddings from .npz file."""
+        data = np.load(self.embeddings_path, allow_pickle=True)
+
+        # Extract task IDs and embedding matrix
+        task_ids = [str(x) for x in data["task_ids"].tolist()]
+        X = data["X"].astype(np.float32)
+
+        self._embedding_dim = int(X.shape[1])
+        self._embeddings = {task_id: X[i] for i, task_id in enumerate(task_ids)}
+
+    def fit(
+        self,
+        task_ids: List[str],
+        ground_truth_b: np.ndarray,
+        abilities: pd.DataFrame,
+        responses: Dict[str, Dict[str, int]],
+    ) -> None:
+        """Fit by maximizing IRT log-likelihood.
+
+        Note: This method requires additional arguments (abilities, responses)
+        compared to the base class, since we train on the response matrix
+        rather than ground-truth difficulties.
+
+        Args:
+            task_ids: List of training task identifiers
+            ground_truth_b: Array of ground truth difficulty values (unused, kept for API)
+            abilities: DataFrame with index=agent_id, column 'theta'
+            responses: Dict mapping agent_id -> {task_id -> 0|1}
+        """
+        try:
+            import torch
+            from torch.optim import LBFGS
+            from torch.distributions import Bernoulli
+        except ImportError:
+            raise ImportError("PyTorch is required for MLEEmbeddingPredictor")
+
+        if self._embeddings is None:
+            raise RuntimeError("Embeddings not loaded")
+
+        # Get embeddings for training tasks
+        available_tasks = [t for t in task_ids if t in self._embeddings]
+        if len(available_tasks) < len(task_ids):
+            missing = len(task_ids) - len(available_tasks)
+            print(f"Warning: {missing} tasks missing from embeddings")
+
+        if len(available_tasks) == 0:
+            raise ValueError("No tasks available for training")
+
+        # Build embedding matrix for training tasks: (n_tasks, embed_dim)
+        embed_matrix = np.stack([self._embeddings[t] for t in available_tasks])
+
+        # Standardize embeddings
+        self._scaler_mean = embed_matrix.mean(axis=0)
+        self._scaler_std = embed_matrix.std(axis=0) + 1e-8
+        embed_scaled = (embed_matrix - self._scaler_mean) / self._scaler_std
+
+        # Get agent IDs that have responses for at least one training task
+        agent_ids = [a for a in abilities.index if a in responses]
+
+        # Build response matrix: (n_agents, n_tasks)
+        # Value is 0, 1, or NaN (missing)
+        response_matrix = np.full((len(agent_ids), len(available_tasks)), np.nan)
+        for i, agent_id in enumerate(agent_ids):
+            for j, task_id in enumerate(available_tasks):
+                if task_id in responses.get(agent_id, {}):
+                    response_matrix[i, j] = responses[agent_id][task_id]
+
+        # Get agent abilities: (n_agents,)
+        thetas = np.array([abilities.loc[a, "theta"] for a in agent_ids])
+
+        # Convert to PyTorch tensors
+        device = "cpu"  # Small enough for CPU
+        embed_tensor = torch.tensor(embed_scaled, dtype=torch.float32, device=device)
+        response_tensor = torch.tensor(response_matrix, dtype=torch.float32, device=device)
+        theta_tensor = torch.tensor(thetas, dtype=torch.float32, device=device)
+
+        # Mask for valid (non-NaN) responses
+        mask = ~torch.isnan(response_tensor)
+
+        # Initialize weights and bias
+        # Note: z = embed @ w + b, and P(success) = sigmoid(theta - z)
+        # So z represents difficulty (positive z = harder)
+        w = torch.zeros(self._embedding_dim, requires_grad=True, device=device)
+        b = torch.zeros(1, requires_grad=True, device=device)
+
+        # L-BFGS optimizer
+        optim = LBFGS(
+            [w, b],
+            lr=self.lr,
+            max_iter=20,
+            history_size=50,
+            line_search_fn="strong_wolfe",
+        )
+
+        self._training_loss_history = []
+
+        l2_lambda = self.l2_lambda
+
+        def closure():
+            optim.zero_grad()
+            # z = difficulty prediction: (n_tasks,)
+            z = torch.matmul(embed_tensor, w) + b
+
+            # P(success) = sigmoid(theta - z)
+            # theta_tensor: (n_agents,) -> (n_agents, 1)
+            # z: (n_tasks,) -> (1, n_tasks)
+            probs = torch.sigmoid(theta_tensor[:, None] - z[None, :])
+
+            # Negative log-likelihood (only for valid responses)
+            nll = -Bernoulli(probs=probs[mask]).log_prob(response_tensor[mask]).mean()
+
+            # L2 regularization on weights
+            l2_reg = l2_lambda * torch.sum(w ** 2)
+
+            loss = nll + l2_reg
+            loss.backward()
+            return loss
+
+        # Training loop
+        if self.verbose:
+            print(f"   MLE Training: {len(available_tasks)} tasks, {len(agent_ids)} agents")
+            print(f"   Valid response pairs: {mask.sum().item()}")
+
+        for iteration in range(self.max_iter):
+            if iteration > 0:
+                previous_w = w.clone().detach()
+                previous_loss = loss.clone().detach()
+
+            loss = optim.step(closure)
+            self._training_loss_history.append(loss.item())
+
+            if iteration > 0:
+                d_loss = (previous_loss - loss).item()
+                d_w = torch.norm(previous_w - w.detach(), p=2).item()
+                grad_norm = w.grad.abs().max().item() if w.grad is not None else 0
+
+                if self.verbose and (iteration % 10 == 0 or iteration < 5):
+                    print(f"     Iter {iteration}: loss={loss.item():.6f}, "
+                          f"d_loss={d_loss:.2e}, d_w={d_w:.2e}, grad={grad_norm:.2e}")
+
+                # Check convergence
+                if abs(d_loss) < self.tol and d_w < self.tol and grad_norm < self.tol:
+                    if self.verbose:
+                        print(f"   Converged at iteration {iteration}")
+                    break
+
+        # Store learned parameters
+        self._weights = w.detach().numpy()
+        self._bias = b.detach().item()
+
+        if self.verbose:
+            print(f"   Final loss: {loss.item():.6f}")
+
+    def predict(self, task_ids: List[str]) -> Dict[str, float]:
+        """Predict difficulty for tasks.
+
+        Args:
+            task_ids: List of task identifiers
+
+        Returns:
+            Dict mapping task_id to predicted difficulty
+        """
+        if self._weights is None or self._bias is None:
+            raise RuntimeError("Model not fitted. Call fit() first.")
+        if self._embeddings is None:
+            raise RuntimeError("Embeddings not loaded")
+
+        # Get embeddings for prediction tasks
+        available_tasks = [t for t in task_ids if t in self._embeddings]
+
+        if not available_tasks:
+            return {}
+
+        # Build embedding matrix and scale
+        embed_matrix = np.stack([self._embeddings[t] for t in available_tasks])
+        embed_scaled = (embed_matrix - self._scaler_mean) / self._scaler_std
+
+        # Predict: z = embed @ w + b
+        preds = embed_scaled @ self._weights + self._bias
+
+        return dict(zip(available_tasks, preds.tolist()))
+
+    @property
+    def embedding_dim(self) -> Optional[int]:
+        """Return the embedding dimensionality."""
+        return self._embedding_dim
+
+    @property
+    def n_embeddings(self) -> int:
+        """Return number of loaded embeddings."""
+        return len(self._embeddings) if self._embeddings else 0
+
+    @property
+    def weights(self) -> Optional[np.ndarray]:
+        """Return learned weights."""
+        return self._weights
+
+    @property
+    def bias(self) -> Optional[float]:
+        """Return learned bias."""
+        return self._bias
+
+    @property
+    def training_loss_history(self) -> List[float]:
+        """Return training loss history."""
+        return self._training_loss_history
+
+
 class EmbeddingSimilarityPredictor(DifficultyPredictorBase):
     """Difficulty predictor using embedding similarity distributions.
 

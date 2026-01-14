@@ -47,11 +47,29 @@ python -m experiment_a.train_evaluate --dry_run
 | Method | AUC | Description |
 |--------|-----|-------------|
 | Oracle (true b) | 0.9447 | Upper bound using ground truth IRT difficulty |
-| **Embedding** | **0.8333** | Qwen3-VL-8B embeddings + Ridge |
+| **Embedding (MLE)** | **0.8337** | Direct MLE training (Truong et al. 2025) |
+| **Embedding** | **0.8333** | Qwen3-VL-8B embeddings + Ridge (plug-in) |
+| **LLM Judge** | **0.8071** | 9 semantic features with Lasso selection |
 | **Lunette v2** | **0.7522** | 24 features with Lasso selection |
 | Constant baseline | 0.7176 | Predict mean difficulty for all tasks |
 | Agent-only | 0.7178 | Use agent's overall success rate |
 | Task-only | 0.5000 | Use mean pass rate (no discrimination) |
+
+### MLE vs Plug-in Training
+
+Two approaches for training the embedding→difficulty mapping:
+
+1. **Plug-in (default)**: Fit Ridge regression on ground-truth IRT difficulties as targets
+2. **MLE**: Directly maximize the IRT log-likelihood of agent responses
+
+The MLE approach (Truong et al. 2025) achieves slightly better AUC (0.8337 vs 0.8333), but the improvement is minimal on our dataset. This may be due to:
+- Smaller dataset (500 tasks vs 78K items in their paper)
+- Already well-tuned Ridge regularization (α=10000)
+
+To enable MLE training:
+```bash
+python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz --use_mle_embedding
+```
 
 ## Feature Sources
 
@@ -177,8 +195,11 @@ Results saved to `chris_output/experiment_a/experiment_a_results.json`:
 --split_seed          Random seed for train/test split (default: 0)
 --embeddings_path     Path to pre-computed embeddings .npz file
 --lunette_features_path  Path to Lunette features CSV
+--llm_judge_features_path  Path to LLM judge features CSV
 --ridge_alpha         Ridge regression alpha (default: 10000.0)
 --output_dir          Output directory (default: chris_output/experiment_a)
+--use_mle_embedding   Enable MLE embedding predictor (Truong et al. 2025)
+--mle_l2_lambda       L2 regularization for MLE weights (default: 0.15)
 --dry_run             Show configuration without running
 ```
 

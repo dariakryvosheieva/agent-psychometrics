@@ -18,6 +18,7 @@ from experiment_a.data_loader import load_experiment_data, ExperimentAData
 from experiment_a.difficulty_predictor import (
     EmbeddingPredictor,
     EmbeddingSimilarityPredictor,
+    MLEEmbeddingPredictor,
     ConstantPredictor,
     GroundTruthPredictor,
     LunettePredictor,
@@ -228,6 +229,75 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
     else:
         results["embedding_similarity_predictor"] = {"error": "No embeddings_path provided"}
 
+    # 8c. MLE Embedding predictor (Truong et al. 2025 approach)
+    if config.use_mle_embedding and config.embeddings_path is not None:
+        embeddings_path = ROOT / config.embeddings_path
+        if embeddings_path.exists():
+            print(f"\n6c. Training MLE embedding predictor (Truong et al. 2025)...")
+
+            try:
+                mle_predictor = MLEEmbeddingPredictor(
+                    embeddings_path=embeddings_path,
+                    lr=config.mle_lr,
+                    max_iter=config.mle_max_iter,
+                    l2_lambda=config.mle_l2_lambda,
+                    verbose=True,
+                )
+                print(f"   Embeddings loaded: {mle_predictor.n_embeddings} tasks")
+                print(f"   Embedding dim: {mle_predictor.embedding_dim}")
+
+                # MLE fit requires abilities and responses
+                mle_predictor.fit(
+                    data.train_tasks,
+                    train_b,
+                    abilities=data.abilities,
+                    responses=data.responses,
+                )
+                mle_preds = mle_predictor.predict(data.test_tasks)
+
+                # IRT-based AUC
+                mle_result = compute_auc(
+                    mle_preds, data.abilities, data.responses, data.test_tasks
+                )
+                print(f"   MLE Embedding AUC: {mle_result.get('auc', 'N/A'):.4f}")
+
+                # Difficulty prediction metrics
+                diff_metrics = compute_difficulty_prediction_metrics(
+                    mle_preds, data.items, data.test_tasks
+                )
+                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
+
+                results["mle_embedding_predictor"] = {
+                    "auc_result": mle_result,
+                    "difficulty_metrics": diff_metrics,
+                    "embeddings_path": str(embeddings_path),
+                    "mle_lr": config.mle_lr,
+                    "mle_max_iter": config.mle_max_iter,
+                    "mle_l2_lambda": config.mle_l2_lambda,
+                    "n_embeddings": mle_predictor.n_embeddings,
+                    "embedding_dim": mle_predictor.embedding_dim,
+                    "final_loss": mle_predictor.training_loss_history[-1] if mle_predictor.training_loss_history else None,
+                }
+
+                # Store predictions for analysis
+                if "difficulty_predictions" not in results:
+                    results["difficulty_predictions"] = {
+                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
+                    }
+                results["difficulty_predictions"]["mle_embedding"] = mle_preds
+
+            except Exception as e:
+                print(f"   Error with MLE embedding predictor: {e}")
+                import traceback
+                traceback.print_exc()
+                results["mle_embedding_predictor"] = {"error": str(e)}
+        else:
+            results["mle_embedding_predictor"] = {"error": f"File not found: {embeddings_path}"}
+    elif config.use_mle_embedding:
+        results["mle_embedding_predictor"] = {"error": "No embeddings_path provided"}
+    else:
+        results["mle_embedding_predictor"] = {"skipped": "use_mle_embedding is False"}
+
     # 9. Lunette predictor (if features provided)
     if config.lunette_features_path is not None:
         lunette_path = ROOT / config.lunette_features_path
@@ -370,9 +440,15 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
     print(f"\n{'Method':<30} {'AUC':>10}")
     print("-" * 42)
 
+    predictors_with_auc_result = {
+        "embedding_predictor", "embedding_similarity_predictor",
+        "mle_embedding_predictor", "lunette_predictor", "llm_judge_predictor"
+    }
+
     for name, key in [
         ("Oracle (true b)", "oracle"),
         ("Embedding predictor", "embedding_predictor"),
+        ("Embedding (MLE)", "mle_embedding_predictor"),
         ("Embedding Similarity", "embedding_similarity_predictor"),
         ("LLM Judge predictor", "llm_judge_predictor"),
         ("Lunette predictor", "lunette_predictor"),
@@ -381,7 +457,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
         ("Task-only", "task_only_baseline"),
     ]:
         result = results.get(key, {})
-        if key in ("embedding_predictor", "embedding_similarity_predictor", "lunette_predictor", "llm_judge_predictor") and "auc_result" in result:
+        if key in predictors_with_auc_result and "auc_result" in result:
             auc = result["auc_result"].get("auc")
         else:
             auc = result.get("auc")
@@ -479,6 +555,30 @@ def main():
         default=1.0,
         help="Ridge alpha for embedding similarity predictor (default: 1.0)",
     )
+    # MLE Embedding predictor arguments (Truong et al. 2025)
+    parser.add_argument(
+        "--use_mle_embedding",
+        action="store_true",
+        help="Enable MLE embedding predictor (Truong et al. 2025 approach)",
+    )
+    parser.add_argument(
+        "--mle_lr",
+        type=float,
+        default=0.1,
+        help="Learning rate for MLE L-BFGS optimizer (default: 0.1)",
+    )
+    parser.add_argument(
+        "--mle_max_iter",
+        type=int,
+        default=100,
+        help="Max iterations for MLE training (default: 100)",
+    )
+    parser.add_argument(
+        "--mle_l2_lambda",
+        type=float,
+        default=0.15,
+        help="L2 regularization for MLE weights (default: 0.15, tuned)",
+    )
     parser.add_argument(
         "--dry_run",
         action="store_true",
@@ -503,6 +603,11 @@ def main():
         llm_judge_max_features=args.llm_judge_max_features,
         # Embedding Similarity config
         embedding_similarity_ridge_alpha=args.embedding_similarity_ridge_alpha,
+        # MLE Embedding config (Truong et al. 2025)
+        use_mle_embedding=args.use_mle_embedding,
+        mle_lr=args.mle_lr,
+        mle_max_iter=args.mle_max_iter,
+        mle_l2_lambda=args.mle_l2_lambda,
     )
 
     if args.dry_run:

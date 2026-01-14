@@ -55,6 +55,12 @@ class ExperimentAConfig:
     # Embedding Similarity predictor config
     embedding_similarity_ridge_alpha: float = 1.0
 
+    # MLE Embedding predictor config (Truong et al. 2025 approach)
+    use_mle_embedding: bool = False  # Whether to run MLE embedding predictor
+    mle_lr: float = 0.1  # L-BFGS learning rate
+    mle_max_iter: int = 100  # Max L-BFGS iterations
+    mle_l2_lambda: float = 0.15  # L2 regularization strength (tuned)
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""
         d = asdict(self)
