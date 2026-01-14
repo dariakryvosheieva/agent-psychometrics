@@ -101,7 +101,7 @@ Tested trajectory embeddings with PCA dimensionality reduction and varying ridge
 | `avg_message_length` | Average characters per message |
 | `resolved_rate` | Fraction of trajectories that resolved the task |
 
-### 2. LLM Judge Features (14 total)
+### 2. LLM Judge Features
 
 Pre-compute with:
 ```bash
@@ -109,7 +109,18 @@ python -m experiment_b.llm_judge.compute_features_v1 --dry_run  # See what would
 python -m experiment_b.llm_judge.compute_features_v7 --limit 50  # Compute v7 features
 ```
 
-Features:
+**Important: Feature Version Coverage**
+
+| Version | Tasks | Agents | Notes |
+|---------|-------|--------|-------|
+| v5_single | **143** | 1 | Best coverage, single agent (location_vs_fix_alignment) |
+| v4 | 143 | 5 | Multi-agent features |
+| v1 | 126 | 3 | Original features |
+| v7 | 26 | 31 | Most agents but fewest tasks - **insufficient for D_valid** |
+
+**Recommendation:** Use `--feature_source llm_judge_v5_single` for best task coverage. v7 only has 26 tasks with features, which means D_valid tasks likely have no features and fall back to prior-only predictions.
+
+Features (v7):
 - **Primary**: `llm_judge_difficulty_score` (0-1)
 - **Competencies (1-4)**: backtracking_exploration, task_decomposition, observation_reading, self_verification
 - **Failure modes (0-1)**: localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure
@@ -164,6 +175,35 @@ experiment_b/
     ├── compute_features.py        # Pre-compute with Lunette API
     └── structured_output.py       # Structured output utilities
 ```
+
+## Regression Modes
+
+Three approaches for combining trajectory features with the prior:
+
+```bash
+# Compare all modes
+python -m experiment_b.train_evaluate --feature_source llm_judge_v5_single --compare_modes
+
+# Run specific mode
+python -m experiment_b.train_evaluate --regression_mode direct_with_prior
+```
+
+| Mode | Formula | Features | Target |
+|------|---------|----------|--------|
+| `residual` (default) | `prior + psi * features` | trajectory only | ground_truth - prior |
+| `direct_with_prior` | `model(features, prior)` | trajectory + prior prediction | ground_truth |
+| `direct_with_prior_features` | `model(features, embeddings)` | trajectory + prior input features | ground_truth |
+
+**Results (llm_judge_v5_single, 2026-01-14):**
+
+| Mode | D_train AUC | D_valid AUC | ΔAUC vs Prior |
+|------|-------------|-------------|---------------|
+| Prior only | 0.6823 | 0.7362 | — |
+| residual | 0.6830 | **0.7344** | -0.0018 |
+| direct_with_prior | 0.7374 | 0.6964 | -0.0397 |
+| direct_with_prior_features | 0.7691 | 0.6070 | -0.1292 |
+
+**Key finding:** Direct regression modes massively overfit. The `direct_with_prior_features` mode has 4097 features (1 trajectory + 4096 embeddings) trained on 117 samples, achieving r=0.976 on train but collapsing on validation. **Use `residual` mode** which preserves prior performance.
 
 ## Configuration
 
