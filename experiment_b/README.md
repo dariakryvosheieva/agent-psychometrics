@@ -205,6 +205,50 @@ python -m experiment_b.train_evaluate --regression_mode direct_with_prior
 
 **Key finding:** Even with RidgeCV selecting optimal regularization (alpha=1e+06), direct regression modes underperform. The residual mode perfectly preserves the prior's AUC. Direct modes fail because they try to predict absolute difficulty from scratch rather than learning a correction—with 117 training samples, they can't generalize even with strong regularization. **Use `residual` mode**.
 
+## Evaluation Baselines
+
+Always compare against these baselines when evaluating new features:
+
+| Baseline | D_train AUC | D_valid AUC | Description |
+|----------|-------------|-------------|-------------|
+| **Constant (mean)** | 0.7343 | 0.6873 | Predict mean training difficulty for all tasks |
+| **Prior (embedding)** | 0.6823 | **0.7362** | Task embeddings → difficulty (no trajectories) |
+
+**Why both baselines matter:**
+- **Constant baseline**: Lower bound. If your model doesn't beat this, it has learned nothing useful.
+- **Prior baseline**: Target to beat. The prior uses task information; trajectory features should add signal beyond this.
+
+Note: The constant baseline has higher *training* AUC but lower *validation* AUC than the prior. This is because predicting the mean overfits to the training distribution but doesn't generalize.
+
+## Interpreting Ridge Alpha
+
+RidgeCV selects regularization strength automatically. The selected alpha is diagnostic:
+
+| Alpha Selected | Interpretation |
+|----------------|----------------|
+| **Small (0.01-1)** | Features have strong signal; model can use them freely |
+| **Medium (10-1000)** | Features have some signal but need regularization |
+| **Large (1e5-1e6)** | Features have **no useful signal**; regularization zeros them out |
+
+**When alpha → 1e6:**
+- Coefficients shrink to ~0 (e.g., 1e-6)
+- Model outputs approximately the intercept (mean target) for all inputs
+- For `residual` mode: prediction ≈ `prior + mean_residual` (preserves prior ranking)
+- For `direct` modes: prediction ≈ `mean_difficulty` (constant, like baseline)
+
+**Example (llm_judge_v5_single with alpha=1e6):**
+```
+MODE: residual
+  Intercept: 0.2655, Coefficients: [4.97e-06]
+  → prediction ≈ prior + 0.27 (prior ranking preserved)
+
+MODE: direct_with_prior
+  Intercept: 1.5554, Coefficients: [4.95e-06, 1.40e-05]
+  → prediction ≈ 1.55 for all tasks (= mean difficulty)
+```
+
+This explains why direct modes with alpha=1e6 have D_valid AUC ≈ 0.69 (same as constant baseline) while residual mode has AUC ≈ 0.74 (same as prior)—the residual formulation degrades gracefully when features are uninformative.
+
 ## Configuration
 
 ```python
