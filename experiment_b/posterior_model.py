@@ -2,12 +2,13 @@
 
 import json
 from pathlib import Path
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Union
 
 import numpy as np
 from sklearn.linear_model import Ridge
 
-from .prior_model import PriorModel
+from .config import RegressionMode
+from .prior_model import PriorModel, EmbeddingPriorModel
 from .trajectory_features import (
     TRAJECTORY_FEATURE_NAMES,
     load_trajectories_for_task,
@@ -60,7 +61,12 @@ from .test_progression import (
 
 class PosteriorModel:
     """
-    Posterior difficulty = Prior(x_i) + psi^T * avg_features(trajectories)
+    Posterior difficulty prediction with multiple regression modes.
+
+    Supports three regression modes:
+    - "residual": posterior = prior + psi * traj_features (learn correction to prior)
+    - "direct_with_prior": posterior = model(traj_features, prior_pred) (prior as feature)
+    - "direct_with_prior_features": posterior = model(traj_features, prior_input_features)
 
     From the proposal:
     posterior_difficulty_i = prior(x_i) + psi^T * (1/|M|) * sum_j f(tau_ij)
@@ -68,13 +74,14 @@ class PosteriorModel:
 
     def __init__(
         self,
-        prior_model: PriorModel,
+        prior_model: Union[PriorModel, EmbeddingPriorModel],
         alpha: float = 1.0,
         feature_source: Literal[
             "simple", "lunette", "llm_judge", "llm_judge_v4", "llm_judge_v5",
             "llm_judge_v5_single", "execution", "discoverability", "combined_v2",
             "llm_judge_v7", "mechanical_v7", "test_progression"
         ] = "simple",
+        regression_mode: RegressionMode = "residual",
         lunette_features_dir: Optional[Path] = None,
         llm_judge_features_dir: Optional[Path] = None,
         llm_judge_v4_features_dir: Optional[Path] = None,
@@ -100,6 +107,10 @@ class PosteriorModel:
                 - "execution": Deterministic execution features (v2)
                 - "discoverability": LLM judge v6 solution discoverability
                 - "combined_v2": execution + discoverability combined
+            regression_mode: How to train the model:
+                - "residual": Learn correction to prior (posterior = prior + correction)
+                - "direct_with_prior": Predict difficulty directly with prior as feature
+                - "direct_with_prior_features": Predict difficulty with prior's input features
             lunette_features_dir: Directory containing pre-computed Lunette features
             llm_judge_features_dir: Directory containing pre-computed LLM judge features
             llm_judge_v4_features_dir: Directory for V4 LLM judge features
@@ -113,6 +124,7 @@ class PosteriorModel:
         self.prior_model = prior_model
         self.alpha = alpha
         self.feature_source = feature_source
+        self.regression_mode = regression_mode
         self.lunette_features_dir = lunette_features_dir
         self.llm_judge_features_dir = llm_judge_features_dir
         self.llm_judge_v4_features_dir = llm_judge_v4_features_dir
@@ -124,6 +136,7 @@ class PosteriorModel:
         self.test_progression_features_dir = test_progression_features_dir
         self.psi_model: Optional[Ridge] = None
         self.training_stats: Dict = {}
+        self._prior_feature_dim: Optional[int] = None
 
         # Set feature names based on source
         if feature_source == "lunette":
@@ -333,20 +346,31 @@ class PosteriorModel:
         weak_agents: List[str],
         trajectories_dir: Path,
     ) -> "PosteriorModel":
-        """Fit the correction term psi.
+        """Fit the model based on regression_mode.
 
         Args:
             task_ids: Training task IDs (D_train)
             ground_truth_difficulties: IRT b values for tasks (aligned with task_ids)
             weak_agents: M1 agents whose trajectories to use
             trajectories_dir: Base directory for trajectories
+
+        Regression modes:
+            - "residual": Learn psi s.t. posterior = prior + psi * features
+            - "direct_with_prior": Learn model(features, prior) -> difficulty
+            - "direct_with_prior_features": Learn model(features, prior_input_features) -> difficulty
         """
         # Get prior predictions
         prior_preds = self.prior_model.get_prior_predictions(task_ids)
 
-        # Compute residuals (what prior doesn't explain)
+        # Get prior input features if needed
+        prior_features = None
+        if self.regression_mode == "direct_with_prior_features":
+            prior_features = self.prior_model.get_prior_features(task_ids)
+            self._prior_feature_dim = self.prior_model.get_prior_feature_dim()
+
+        # Build training data
         X_features = []
-        y_residuals = []
+        y_targets = []
         valid_task_ids = []
         tasks_with_features = 0
 
@@ -354,18 +378,39 @@ class PosteriorModel:
             if task_id not in prior_preds:
                 continue
 
-            # Load features for this task
-            feat_vec = self._load_features_for_task(task_id, weak_agents, trajectories_dir)
-
-            if feat_vec is None:
-                continue  # No features available
+            # Load trajectory features for this task
+            traj_feat = self._load_features_for_task(task_id, weak_agents, trajectories_dir)
+            if traj_feat is None:
+                continue
 
             tasks_with_features += 1
-            X_features.append(feat_vec)
 
-            # Residual = ground_truth - prior
-            residual = ground_truth_difficulties[i] - prior_preds[task_id]
-            y_residuals.append(residual)
+            # Build feature vector based on regression mode
+            if self.regression_mode == "residual":
+                # Features: just trajectory features
+                # Target: residual (ground_truth - prior)
+                features = traj_feat
+                target = ground_truth_difficulties[i] - prior_preds[task_id]
+
+            elif self.regression_mode == "direct_with_prior":
+                # Features: trajectory features + prior prediction
+                # Target: ground truth difficulty
+                features = np.concatenate([traj_feat, [prior_preds[task_id]]])
+                target = ground_truth_difficulties[i]
+
+            elif self.regression_mode == "direct_with_prior_features":
+                # Features: trajectory features + prior's input features (e.g., task embeddings)
+                # Target: ground truth difficulty
+                if prior_features is None or task_id not in prior_features:
+                    continue
+                features = np.concatenate([traj_feat, prior_features[task_id]])
+                target = ground_truth_difficulties[i]
+
+            else:
+                raise ValueError(f"Unknown regression_mode: {self.regression_mode}")
+
+            X_features.append(features)
+            y_targets.append(target)
             valid_task_ids.append(task_id)
 
         self.training_stats = {
@@ -374,6 +419,7 @@ class PosteriorModel:
             "tasks_used_for_training": len(valid_task_ids),
             "agents_used": len(weak_agents),
             "feature_source": self.feature_source,
+            "regression_mode": self.regression_mode,
         }
 
         if not X_features:
@@ -382,15 +428,15 @@ class PosteriorModel:
             return self
 
         X = np.array(X_features)
-        y = np.array(y_residuals)
+        y = np.array(y_targets)
 
-        # Fit Ridge regression for psi
+        # Fit Ridge regression
         self.psi_model = Ridge(alpha=self.alpha)
         self.psi_model.fit(X, y)
 
-        print(f"Posterior model ({self.feature_source}) trained on {len(valid_task_ids)} tasks")
+        print(f"Posterior model ({self.feature_source}, {self.regression_mode}) trained on {len(valid_task_ids)} tasks")
         print(f"  Tasks with features: {tasks_with_features}")
-        print(f"  Psi coefficients: {dict(zip(self.feature_names, self.psi_model.coef_))}")
+        print(f"  Feature dim: {X.shape[1]}")
 
         return self
 
@@ -400,12 +446,20 @@ class PosteriorModel:
         weak_agents: List[str],
         trajectories_dir: Path,
     ) -> Dict[str, float]:
-        """Predict posterior difficulty.
+        """Predict posterior difficulty based on regression_mode.
 
-        posterior = prior + psi^T * features
+        Regression modes:
+            - "residual": posterior = prior + model(features)
+            - "direct_with_prior": posterior = model(features, prior)
+            - "direct_with_prior_features": posterior = model(features, prior_input_features)
         """
         # Get prior predictions
         prior_preds = self.prior_model.get_prior_predictions(task_ids)
+
+        # Get prior input features if needed
+        prior_features = None
+        if self.regression_mode == "direct_with_prior_features":
+            prior_features = self.prior_model.get_prior_features(task_ids)
 
         predictions = {}
         for task_id in task_ids:
@@ -419,15 +473,30 @@ class PosteriorModel:
                 predictions[task_id] = prior
                 continue
 
-            # Load and aggregate features
-            feat_vec = self._load_features_for_task(task_id, weak_agents, trajectories_dir)
-
-            if feat_vec is None:
+            # Load trajectory features
+            traj_feat = self._load_features_for_task(task_id, weak_agents, trajectories_dir)
+            if traj_feat is None:
                 predictions[task_id] = prior
                 continue
 
-            correction = self.psi_model.predict([feat_vec])[0]
-            predictions[task_id] = prior + correction
+            # Build feature vector and predict based on regression mode
+            if self.regression_mode == "residual":
+                # posterior = prior + correction
+                correction = self.psi_model.predict([traj_feat])[0]
+                predictions[task_id] = prior + correction
+
+            elif self.regression_mode == "direct_with_prior":
+                # posterior = model(features, prior)
+                features = np.concatenate([traj_feat, [prior]])
+                predictions[task_id] = self.psi_model.predict([features])[0]
+
+            elif self.regression_mode == "direct_with_prior_features":
+                # posterior = model(features, prior_input_features)
+                if prior_features is None or task_id not in prior_features:
+                    predictions[task_id] = prior
+                    continue
+                features = np.concatenate([traj_feat, prior_features[task_id]])
+                predictions[task_id] = self.psi_model.predict([features])[0]
 
         return predictions
 

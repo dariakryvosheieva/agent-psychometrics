@@ -101,3 +101,10 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 | `swebench_irt/train.py` | Train IRT models |
 | `swebench_irt/prep_swebench.py` | Build response matrix |
 | `llm_judge/llm_judge.py` | LLM feature extraction |
+
+## Development Guidelines
+
+**Keep git status clean:**
+- Always commit changes after completing a group of related modifications
+- Add any new experimental output files to `.gitignore` before committing
+- Goal: leave the repository in the same clean state you found it

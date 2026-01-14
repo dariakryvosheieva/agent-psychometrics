@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from experiment_b.config import ExperimentConfig
+from experiment_b.config import ExperimentConfig, RegressionMode
 from experiment_b.data_splits import create_experiment_split
 from experiment_b.prior_model import PriorModel, EmbeddingPriorModel
 from experiment_b.embeddings.aggregator import AggregationType
@@ -54,6 +54,7 @@ class EmbeddingExperimentConfig:
     # Posterior model
     aggregation: AggregationType = "mean_std"
     posterior_alpha: Union[float, str] = "cv"
+    regression_mode: RegressionMode = "residual"
 
     # Data splits
     m1_fraction: float = 0.4
@@ -84,6 +85,7 @@ class EmbeddingExperimentConfig:
             # Posterior model
             "aggregation": self.aggregation,
             "posterior_alpha": str(self.posterior_alpha),
+            "regression_mode": self.regression_mode,
             # Data splits
             "m1_fraction": self.m1_fraction,
             "m2_fraction": self.m2_fraction,
@@ -109,6 +111,7 @@ class EmbeddingExperimentConfig:
         if self.instruction_type:
             parts.append(self.instruction_type)
         parts.append(self.aggregation)
+        parts.append(self.regression_mode)
         parts.append(f"alpha_{self.posterior_alpha}")
         return "__".join(parts) if parts else "default"
 
@@ -347,6 +350,7 @@ def run_embedding_experiment(config: EmbeddingExperimentConfig) -> Dict:
         aggregation=config.aggregation,
         alpha=config.posterior_alpha,
         abilities=abilities_dict if config.aggregation == "weighted" else None,
+        regression_mode=config.regression_mode,
     )
 
     posterior_model.fit(
@@ -619,6 +623,20 @@ def main():
         help="Prior model source",
     )
 
+    # Regression mode
+    parser.add_argument(
+        "--regression_mode",
+        type=str,
+        choices=["residual", "direct_with_prior", "direct_with_prior_features"],
+        default="residual",
+        help="Regression mode: 'residual' (prior + correction), 'direct_with_prior' (prior as feature), 'direct_with_prior_features' (prior input features)",
+    )
+    parser.add_argument(
+        "--compare_modes",
+        action="store_true",
+        help="Run all regression modes and compare results",
+    )
+
     args = parser.parse_args()
 
     if args.ablations:
@@ -627,6 +645,60 @@ def main():
             embeddings_base_dir=args.embeddings_base_dir,
             output_dir=args.output_dir,
         )
+    elif args.compare_modes:
+        # Compare all regression modes
+        if args.embeddings_dir is None:
+            args.embeddings_dir = Path("chris_output/experiment_b/trajectory_embeddings/full_difficulty")
+
+        from dataclasses import replace
+        modes: List[RegressionMode] = ["residual", "direct_with_prior", "direct_with_prior_features"]
+        all_results = {}
+
+        for mode in modes:
+            print(f"\n{'='*60}")
+            print(f"RUNNING REGRESSION MODE: {mode}")
+            print(f"{'='*60}")
+
+            config = EmbeddingExperimentConfig(
+                embeddings_dir=args.embeddings_dir,
+                aggregation=args.aggregation,
+                posterior_alpha=float(args.alpha) if args.alpha != "cv" else "cv",
+                output_dir=args.output_dir,
+                prior_source=args.prior_source,
+                regression_mode=mode,
+            )
+
+            try:
+                results = run_embedding_experiment(config)
+                all_results[mode] = results
+            except Exception as e:
+                print(f"Error running mode {mode}: {e}")
+                all_results[mode] = {"error": str(e)}
+
+        # Print comparison summary
+        print("\n" + "=" * 80)
+        print("REGRESSION MODE COMPARISON")
+        print("=" * 80)
+        print(f"{'Mode':<30} {'Train AUC':>12} {'Valid AUC':>12}")
+        print("-" * 60)
+
+        for mode in modes:
+            if mode not in all_results or "error" in all_results[mode]:
+                print(f"{mode:<30} {'ERROR':>12}")
+                continue
+            train_auc = all_results[mode].get("posterior_train_auc", {}).get("auc")
+            valid_auc = all_results[mode].get("posterior_valid_auc", {}).get("auc")
+            train_str = f"{train_auc:.4f}" if train_auc else "N/A"
+            valid_str = f"{valid_auc:.4f}" if valid_auc else "N/A"
+            print(f"{mode:<30} {train_str:>12} {valid_str:>12}")
+
+        # Save comparison results
+        output_dir = ROOT / args.output_dir
+        output_dir.mkdir(parents=True, exist_ok=True)
+        comparison_path = output_dir / "mode_comparison_results.json"
+        with open(comparison_path, "w") as f:
+            json.dump(all_results, f, indent=2, default=str)
+        print(f"\nComparison results saved to: {comparison_path}")
     else:
         # Single experiment
         if args.embeddings_dir is None:
@@ -638,6 +710,7 @@ def main():
             posterior_alpha=float(args.alpha) if args.alpha != "cv" else "cv",
             output_dir=args.output_dir,
             prior_source=args.prior_source,
+            regression_mode=args.regression_mode,
         )
 
         run_embedding_experiment(config)

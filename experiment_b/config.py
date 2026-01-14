@@ -4,6 +4,12 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional
 
+# Regression mode for posterior model
+# - "residual": posterior = prior + psi * traj_features (current behavior)
+# - "direct_with_prior": posterior = model(traj_features, prior_pred)
+# - "direct_with_prior_features": posterior = model(traj_features, prior_input_features)
+RegressionMode = Literal["residual", "direct_with_prior", "direct_with_prior_features"]
+
 
 @dataclass
 class ExperimentConfig:
@@ -69,6 +75,9 @@ class ExperimentConfig:
 
     # Prior-only mode (no trajectory correction)
     prior_only: bool = False
+
+    # Regression mode for posterior model
+    regression_mode: RegressionMode = "residual"
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""

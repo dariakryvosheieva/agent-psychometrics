@@ -1,11 +1,10 @@
 """
 Posterior model using trajectory embeddings.
 
-Predicts:
-    posterior_difficulty = prior_difficulty + psi^T * aggregated_embedding
-
-The psi weights are learned by ridge regression on the residuals:
-    residual = ground_truth_difficulty - prior_difficulty
+Supports three regression modes:
+- "residual": posterior = prior + psi * traj_embeddings (learn correction to prior)
+- "direct_with_prior": posterior = model(traj_embeddings, prior_pred) (prior as feature)
+- "direct_with_prior_features": posterior = model(traj_embeddings, prior_input_features)
 """
 
 from pathlib import Path
@@ -24,13 +23,17 @@ from .aggregator import (
     batch_aggregate_embeddings,
     aggregate_task_embeddings,
 )
+from ..config import RegressionMode
 from ..prior_model import EmbeddingPriorModel, PriorModel
 
 
 class EmbeddingPosteriorModel:
     """Posterior difficulty model using trajectory embeddings.
 
-    posterior_difficulty = prior + psi^T * f(trajectories)
+    Supports three regression modes:
+    - "residual": posterior = prior + psi * f(trajectories)
+    - "direct_with_prior": posterior = model(f(trajectories), prior_pred)
+    - "direct_with_prior_features": posterior = model(f(trajectories), prior_input_features)
 
     Where f(trajectories) aggregates embeddings across agent trajectories.
     """
@@ -42,6 +45,7 @@ class EmbeddingPosteriorModel:
         alpha: Union[float, str] = "cv",
         abilities: Optional[Dict[str, float]] = None,
         pca_components: Optional[int] = None,
+        regression_mode: RegressionMode = "residual",
     ):
         """Initialize posterior model.
 
@@ -56,12 +60,17 @@ class EmbeddingPosteriorModel:
             abilities: Agent abilities (theta) for weighted aggregation
             pca_components: Number of PCA components for dimensionality reduction.
                 If None, no PCA is applied. Recommended: 50-100 for high-dim embeddings.
+            regression_mode: How to train the model:
+                - "residual": Learn correction to prior (posterior = prior + correction)
+                - "direct_with_prior": Predict difficulty directly with prior as feature
+                - "direct_with_prior_features": Predict difficulty with prior's input features
         """
         self.prior_model = prior_model
         self.aggregation = aggregation
         self.alpha = alpha
         self.abilities = abilities
         self.pca_components = pca_components
+        self.regression_mode = regression_mode
 
         self.aggregator = EmbeddingAggregator(
             aggregation=aggregation,
@@ -73,6 +82,7 @@ class EmbeddingPosteriorModel:
         self.embedding_dim: Optional[int] = None
         self.pca_dim: Optional[int] = None
         self.best_alpha: Optional[float] = None
+        self._prior_feature_dim: Optional[int] = None
 
     def fit(
         self,
@@ -82,7 +92,7 @@ class EmbeddingPosteriorModel:
         embeddings_dir: Path,
         min_agents_per_task: int = 1,
     ) -> "EmbeddingPosteriorModel":
-        """Fit the correction term psi by ridge regression on residuals.
+        """Fit the model based on regression_mode.
 
         Args:
             task_ids: Training task IDs
@@ -91,15 +101,26 @@ class EmbeddingPosteriorModel:
             embeddings_dir: Directory with pre-computed embeddings
             min_agents_per_task: Minimum embeddings required per task
 
+        Regression modes:
+            - "residual": Learn psi s.t. posterior = prior + psi * embeddings
+            - "direct_with_prior": Learn model(embeddings, prior) -> difficulty
+            - "direct_with_prior_features": Learn model(embeddings, prior_input_features) -> difficulty
+
         Returns:
             self
         """
         # Get prior predictions
         prior_preds = self.prior_model.get_prior_predictions(task_ids)
 
+        # Get prior input features if needed
+        prior_features = None
+        if self.regression_mode == "direct_with_prior_features":
+            prior_features = self.prior_model.get_prior_features(task_ids)
+            self._prior_feature_dim = self.prior_model.get_prior_feature_dim()
+
         # Build feature matrix
         X_features = []
-        y_residuals = []
+        y_targets = []
         valid_task_ids = []
 
         for i, task_id in enumerate(task_ids):
@@ -107,21 +128,42 @@ class EmbeddingPosteriorModel:
                 continue
 
             # Aggregate embeddings for this task
-            feat_vec = aggregate_task_embeddings(
+            traj_emb = aggregate_task_embeddings(
                 task_id=task_id,
                 agents=weak_agents,
                 embeddings_dir=embeddings_dir,
                 aggregator=self.aggregator,
             )
 
-            if feat_vec is None:
+            if traj_emb is None:
                 continue
 
-            # Compute residual
-            residual = ground_truth_difficulties[i] - prior_preds[task_id]
+            # Build feature vector and target based on regression mode
+            if self.regression_mode == "residual":
+                # Features: just trajectory embeddings
+                # Target: residual (ground_truth - prior)
+                features = traj_emb
+                target = ground_truth_difficulties[i] - prior_preds[task_id]
 
-            X_features.append(feat_vec)
-            y_residuals.append(residual)
+            elif self.regression_mode == "direct_with_prior":
+                # Features: trajectory embeddings + prior prediction
+                # Target: ground truth difficulty
+                features = np.concatenate([traj_emb, [prior_preds[task_id]]])
+                target = ground_truth_difficulties[i]
+
+            elif self.regression_mode == "direct_with_prior_features":
+                # Features: trajectory embeddings + prior's input features
+                # Target: ground truth difficulty
+                if prior_features is None or task_id not in prior_features:
+                    continue
+                features = np.concatenate([traj_emb, prior_features[task_id]])
+                target = ground_truth_difficulties[i]
+
+            else:
+                raise ValueError(f"Unknown regression_mode: {self.regression_mode}")
+
+            X_features.append(features)
+            y_targets.append(target)
             valid_task_ids.append(task_id)
 
         self.training_stats = {
@@ -129,6 +171,7 @@ class EmbeddingPosteriorModel:
             "tasks_with_embeddings": len(valid_task_ids),
             "agents_used": len(weak_agents),
             "aggregation": self.aggregation,
+            "regression_mode": self.regression_mode,
         }
 
         if not X_features:
@@ -137,7 +180,7 @@ class EmbeddingPosteriorModel:
             return self
 
         X = np.array(X_features)
-        y = np.array(y_residuals)
+        y = np.array(y_targets)
 
         self.embedding_dim = X.shape[1]
 
@@ -174,8 +217,8 @@ class EmbeddingPosteriorModel:
             self.psi_model.fit(X, y)
             self.best_alpha = float(self.alpha)
 
-        print(f"Embedding posterior ({self.aggregation}) trained on {len(valid_task_ids)} tasks")
-        print(f"  Original feature dim: {self.embedding_dim}")
+        print(f"Embedding posterior ({self.aggregation}, {self.regression_mode}) trained on {len(valid_task_ids)} tasks")
+        print(f"  Feature dim: {self.embedding_dim}")
         if self.pca_dim is not None:
             print(f"  PCA reduced dim: {self.pca_dim}")
 
@@ -187,9 +230,12 @@ class EmbeddingPosteriorModel:
         weak_agents: List[str],
         embeddings_dir: Path,
     ) -> Dict[str, float]:
-        """Predict posterior difficulties.
+        """Predict posterior difficulties based on regression_mode.
 
-        posterior = prior + psi^T * features
+        Regression modes:
+            - "residual": posterior = prior + model(embeddings)
+            - "direct_with_prior": posterior = model(embeddings, prior)
+            - "direct_with_prior_features": posterior = model(embeddings, prior_input_features)
 
         Args:
             task_ids: Tasks to predict
@@ -200,6 +246,12 @@ class EmbeddingPosteriorModel:
             Dict mapping task_id -> posterior difficulty
         """
         prior_preds = self.prior_model.get_prior_predictions(task_ids)
+
+        # Get prior input features if needed
+        prior_features = None
+        if self.regression_mode == "direct_with_prior_features":
+            prior_features = self.prior_model.get_prior_features(task_ids)
+
         predictions = {}
 
         for task_id in task_ids:
@@ -213,21 +265,36 @@ class EmbeddingPosteriorModel:
                 predictions[task_id] = prior
                 continue
 
-            # Get aggregated features
-            feat_vec = aggregate_task_embeddings(
+            # Get aggregated trajectory embeddings
+            traj_emb = aggregate_task_embeddings(
                 task_id=task_id,
                 agents=weak_agents,
                 embeddings_dir=embeddings_dir,
                 aggregator=self.aggregator,
             )
 
-            if feat_vec is None:
+            if traj_emb is None:
                 predictions[task_id] = prior
                 continue
 
-            # Predict correction
-            correction = self.psi_model.predict([feat_vec])[0]
-            predictions[task_id] = prior + correction
+            # Build feature vector and predict based on regression mode
+            if self.regression_mode == "residual":
+                # posterior = prior + correction
+                correction = self.psi_model.predict([traj_emb])[0]
+                predictions[task_id] = prior + correction
+
+            elif self.regression_mode == "direct_with_prior":
+                # posterior = model(embeddings, prior)
+                features = np.concatenate([traj_emb, [prior]])
+                predictions[task_id] = self.psi_model.predict([features])[0]
+
+            elif self.regression_mode == "direct_with_prior_features":
+                # posterior = model(embeddings, prior_input_features)
+                if prior_features is None or task_id not in prior_features:
+                    predictions[task_id] = prior
+                    continue
+                features = np.concatenate([traj_emb, prior_features[task_id]])
+                predictions[task_id] = self.psi_model.predict([features])[0]
 
         return predictions
 

@@ -167,6 +167,42 @@ class PriorModel:
 
         return dict(zip(all_names, coeffs))
 
+    def get_prior_features(self, task_ids: List[str]) -> Dict[str, np.ndarray]:
+        """Get the raw input features used by the prior model.
+
+        For the heuristic prior, returns the preprocessed feature vectors
+        (scaled numerical + one-hot encoded categorical).
+
+        Args:
+            task_ids: List of task IDs to get features for
+
+        Returns:
+            Dict mapping task_id -> feature vector (preprocessed)
+        """
+        if self.model is None or self._features_cache is None:
+            return {}
+
+        preprocessor = self.model.named_steps["preprocessor"]
+        valid_tasks = [t for t in task_ids if t in self._features_cache.index]
+
+        if not valid_tasks:
+            return {}
+
+        X = self._features_cache.loc[valid_tasks]
+        X_transformed = preprocessor.transform(X)
+
+        return {task_id: X_transformed[i] for i, task_id in enumerate(valid_tasks)}
+
+    def get_prior_feature_dim(self) -> int:
+        """Get the dimensionality of prior input features."""
+        if self.model is None:
+            return 0
+        preprocessor = self.model.named_steps["preprocessor"]
+        # Count numerical + categorical features
+        num_features = len(self.feature_names)
+        cat_features = len(preprocessor.named_transformers_["cat"].get_feature_names_out(["repo"]))
+        return num_features + cat_features
+
 
 class EmbeddingPriorModel:
     """Prior model using Daria's pre-computed embeddings + Ridge regression.
@@ -277,3 +313,27 @@ class EmbeddingPriorModel:
             "coef_std": float(np.std(ridge.coef_)),
             "coef_max": float(np.max(np.abs(ridge.coef_))),
         }
+
+    def get_prior_features(self, task_ids: List[str]) -> Dict[str, np.ndarray]:
+        """Get the raw embedding features used by the prior model.
+
+        Returns the task embeddings (before scaling) that were used to train the prior.
+
+        Args:
+            task_ids: List of task IDs to get features for
+
+        Returns:
+            Dict mapping task_id -> embedding vector (raw, unscaled)
+        """
+        if self._embeddings is None:
+            return {}
+
+        return {
+            task_id: self._embeddings[task_id]
+            for task_id in task_ids
+            if task_id in self._embeddings
+        }
+
+    def get_prior_feature_dim(self) -> int:
+        """Get the dimensionality of prior input features (embedding dim)."""
+        return self._embedding_dim if self._embedding_dim is not None else 0

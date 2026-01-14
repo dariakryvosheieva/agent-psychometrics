@@ -70,6 +70,7 @@ chris_output/experiment_b/llm_judge_prior_results.json
 chris_output/experiment_b/test_progression_features/
 chris_output/experiment_b/embedding_plus_*.json
 chris_output/experiment_b/experiment_b_results.json
+chris_output/experiment_b/experiment_b_mode_comparison*.json
 
 # Experiment A Lunette features (large, regenerable from API)
 chris_output/experiment_a/lunette_features/
