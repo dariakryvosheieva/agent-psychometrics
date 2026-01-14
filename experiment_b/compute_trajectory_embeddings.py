@@ -114,6 +114,23 @@ def load_trajectory(trajectories_dir: Path, agent: str, task_id: str) -> Optiona
         return None
 
 
+def _normalize_content(content) -> str:
+    """Normalize message content to string.
+
+    Some agents (OpenHands, codesweep) store content as a list of content blocks
+    like [{'type': 'text', 'text': '...'}] instead of a plain string.
+    """
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if isinstance(item, dict):
+                text_parts.append(item.get("text", str(item)))
+            else:
+                text_parts.append(str(item))
+        return " ".join(text_parts)
+    return str(content) if content else ""
+
+
 def extract_trajectory_text(messages: List[Dict], max_chars: int = 50000) -> str:
     """Extract text content from trajectory messages.
 
@@ -132,7 +149,7 @@ def extract_trajectory_text(messages: List[Dict], max_chars: int = 50000) -> str
 
     for msg in msgs:
         role = msg.get("role", "unknown")
-        content = msg.get("content", "")
+        content = _normalize_content(msg.get("content", ""))
 
         # Add role prefix for clarity
         if role == "user":
@@ -169,7 +186,7 @@ def extract_errors_only(messages: List[Dict], max_chars: int = 20000) -> str:
 
     errors = []
     for msg in messages:
-        content = msg.get("content", "")
+        content = _normalize_content(msg.get("content", ""))
         for pattern in error_patterns:
             matches = re.findall(pattern, content, re.DOTALL | re.MULTILINE)
             errors.extend(matches)
@@ -199,7 +216,7 @@ def summarize_trajectory(messages: List[Dict], max_chars: int = 15000) -> str:
     parts.append("=== Initial Messages ===\n")
     for msg in msgs[:first_n]:
         role = msg.get("role", "?")
-        content = msg.get("content", "")[:2000]
+        content = _normalize_content(msg.get("content", ""))[:2000]
         parts.append(f"[{role}] {content}\n")
 
     # Last 3 exchanges (final state)
@@ -208,7 +225,7 @@ def summarize_trajectory(messages: List[Dict], max_chars: int = 15000) -> str:
         last_n = min(6, len(msgs) - first_n)
         for msg in msgs[-last_n:]:
             role = msg.get("role", "?")
-            content = msg.get("content", "")[:2000]
+            content = _normalize_content(msg.get("content", ""))[:2000]
             parts.append(f"[{role}] {content}\n")
 
     summary = "".join(parts)
