@@ -53,35 +53,54 @@ run = r.json()
 trajectories = run["trajectories"]  # List of trajectory objects
 ```
 
-### Batching: One Run, Multiple Trajectories
+### ⛔ CRITICAL: DO NOT BATCH - ONE RUN = ONE TRAJECTORY ⛔
 
-When running multiple tasks through Inspect with `--sandbox lunette`, you can batch them into a **single run with multiple trajectories** using comma-separated sample IDs:
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                     DO NOT BATCH TASKS                                ║
+║                                                                       ║
+║  Lunette grading DOES NOT WORK with batched runs.                    ║
+║  Each task MUST have its own run with exactly ONE trajectory.        ║
+║                                                                       ║
+║  If you batch: grading targets the WRONG trajectory = WRONG DATA     ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
 
+**NEVER do this:**
 ```bash
-# Creates ONE run with 3 trajectories (efficient)
+# ❌ WRONG - Creates ONE run with multiple trajectories - GRADING WILL FAIL
 inspect eval lunette_utils/dummy_swebench_task.py@dummy_swebench \
     --model mockllm/model \
     --sandbox lunette \
     --sample-id "task1,task2,task3"
+
+# ❌ WRONG - Using batch_size > 1 in run_dummy_sandbox.py
+python -m experiment_a.run_dummy_sandbox --batch_size 10  # BROKEN
 ```
 
-Each trajectory gets its own sandbox with the repo at the correct commit. You can then investigate individual trajectories using `limit=1`:
+**ALWAYS do this:**
+```bash
+# ✅ CORRECT - Creates separate runs, one trajectory each
+inspect eval ... --sample-id "task1"
+inspect eval ... --sample-id "task2"
+inspect eval ... --sample-id "task3"
 
-```python
-# Investigate one trajectory at a time
-results = await client.investigate(
-    run_id=run_id,
-    plan=plan,
-    limit=1,  # IMPORTANT: Must be 1 - higher values cause 504 timeouts
-)
+# ✅ CORRECT - run_dummy_sandbox.py with default batch_size=1
+python -m experiment_a.run_dummy_sandbox  # Correct (batch_size=1 by default)
 ```
 
-**IMPORTANT:** You MUST grade trajectories one at a time (`limit=1`). Using `limit > 1` causes 504 Gateway Timeout errors because each investigation takes ~55 seconds. See [Batch Investigation Timeout](#batch-investigation-timeout-limit--1) for details.
+**Why batching breaks grading:**
+1. `investigate()` picks an ARBITRARY trajectory from the run, not the one you want
+2. `TrajectoryFilters(sample=task_id)` does NOT reliably work
+3. You will extract features from the WRONG task without knowing it
+4. Your entire dataset will be corrupted with mismatched features
 
-This batching approach is still more efficient than creating separate runs per task because:
-1. Fewer API calls for run management
-2. Easier to track progress (one run_id per batch)
-3. Single Inspect invocation provisions multiple sandboxes
+**If you accidentally created batched runs:**
+1. Delete them from Lunette API using `delete_bad_lunette_runs.py`
+2. Remove entries from `tracking.json`
+3. Re-upload each task individually with `batch_size=1`
+
+**Best practice:** Use `experiment_a/run_dummy_sandbox.py` which enforces `batch_size=1` and will ERROR if you try to change it.
 
 ### Analysis Plans
 
@@ -103,7 +122,161 @@ Lunette provides several analysis plan types:
 
 The `score` is the main numeric output. For multiple scoring dimensions, include them in the `explanation` using a structured format that you parse.
 
-## Uploading Trajectories with Metadata
+## Dummy Trajectory Grading for Task Feature Extraction
+
+When you want to extract task features (difficulty, complexity, etc.) without actually running an agent, you need to:
+1. Create a sandbox with the repo checked out at the correct commit
+2. Run a "dummy" solver that does nothing
+3. Grade the resulting trajectory to extract task features
+
+This is the approach used in **Experiment A** to predict task difficulty from task features alone.
+
+### Step 1: Create Sandbox Runs (One Per Task)
+
+```bash
+# Create individual sandbox runs for each task
+# IMPORTANT: batch_size=1 ensures one run per trajectory
+python -m experiment_a.run_dummy_sandbox --batch_size 1
+
+# Or process specific tasks
+python -m experiment_a.run_dummy_sandbox --task_ids "django__django-12345,astropy__astropy-14539"
+
+# Resume from previous run (skips already-completed tasks)
+python -m experiment_a.run_dummy_sandbox --resume --batch_size 1
+```
+
+This runs `lunette_utils/dummy_swebench_task.py@dummy_swebench` through Inspect with `--sandbox lunette`, which:
+- Provisions a Docker container with the repo at the correct commit
+- Runs a dummy solver that produces no output
+- Uploads the trajectory to Lunette with sandbox access preserved
+
+### Step 2: Grade the Sandbox Runs
+
+```bash
+# Grade all pending runs
+python -m experiment_a.grade_sandbox_runs
+
+# Skip already-graded tasks (recommended for resuming)
+python -m experiment_a.grade_sandbox_runs --skip_existing
+
+# Dry run to see what would be graded
+python -m experiment_a.grade_sandbox_runs --dry_run
+
+# Grade specific tasks only
+python -m experiment_a.grade_sandbox_runs --task_ids "django__django-12345,astropy__astropy-14539"
+```
+
+Grading uses structured output (`TaskDifficultyFeatures` schema) to extract 25 features per task. The judge has full sandbox access and can run shell commands to verify features.
+
+**How grading works:**
+
+1. Loads tracking file to get `run_id` and `trajectory_id` for each task
+2. Loads SWE-bench metadata (problem statement, hints, patch info)
+3. Calls `client.investigate(run_id=run_id, plan=FeatureExtractionPlan(...), limit=1)`
+4. The Lunette judge spins up a Docker container with the repo at the correct commit
+5. Judge analyzes the task and returns structured features matching `TaskDifficultyFeatures`
+6. Features are saved to `chris_output/experiment_a/sandbox_features/<task_id>.json`
+7. Tracking file is updated with `graded=true` and `graded_at` timestamp
+
+**Timing:** Each grading call takes ~55 seconds due to Docker container provisioning. For 500 tasks, expect ~8 hours total runtime.
+
+**504 Timeout handling:** The grading script automatically retries on 504 Gateway Timeout errors (up to 3 retries with 60s delay). Failed tasks are logged and can be retried later with `--skip_existing`.
+
+**Re-running failed tasks:**
+```bash
+# After overnight run, re-run to catch failed tasks
+python -m experiment_a.grade_sandbox_runs --skip_existing
+
+# Check which tasks failed
+grep "Failed" chris_output/experiment_a/logs/grading_loop.log
+```
+
+### Step 3: Run Overnight (Parallel Creation + Grading)
+
+```bash
+# Script that runs sandbox creation and grading in parallel
+./experiment_a/run_overnight.sh
+```
+
+This script:
+- Runs `run_dummy_sandbox.py` with `--resume --batch_size 1`
+- Runs `grade_sandbox_runs.py` in a retry loop (every 5 minutes)
+- Uses `caffeinate` to prevent Mac from sleeping
+- Logs to `chris_output/experiment_a/logs/`
+
+### Tracking File Format
+
+The tracking file (`chris_output/experiment_a/sandbox_runs/tracking.json`) maintains the mapping between SWE-bench tasks and their Lunette runs:
+
+```json
+{
+  "completed_tasks": {
+    "django__django-12345": {
+      "run_id": "68aac133-1234-5678-abcd-...",
+      "trajectory_id": "0b8cddce-abcd-1234-...",
+      "model": "mockllm/model",
+      "uploaded": true,
+      "graded": true,
+      "created_at": "2026-01-14T10:30:00Z",
+      "graded_at": "2026-01-14T11:45:00Z"
+    },
+    "astropy__astropy-14539": {
+      "run_id": "896c8926-...",
+      "trajectory_id": "1a2b3c4d-...",
+      "model": "mockllm/model",
+      "uploaded": true,
+      "graded": false,
+      "created_at": "2026-01-14T10:31:00Z"
+    }
+  },
+  "failed_tasks": {},
+  "stats": {
+    "total_uploaded": 500,
+    "total_graded": 61,
+    "finalized_at": "2026-01-14T12:00:00Z"
+  }
+}
+```
+
+**Field descriptions:**
+
+| Field | Description |
+|-------|-------------|
+| `run_id` | UUID of the Lunette run containing this task's trajectory |
+| `trajectory_id` | UUID of the specific trajectory within the run |
+| `model` | Model used (always `mockllm/model` for dummy sandbox runs) |
+| `uploaded` | Whether the run was successfully uploaded to Lunette |
+| `graded` | Whether features have been extracted via `investigate()` |
+| `created_at` | When the run was created |
+| `graded_at` | When features were extracted (only if graded=true) |
+
+**Maintenance scripts:**
+
+| Script | Purpose |
+|--------|---------|
+| `experiment_a/cleanup_and_finalize.py` | Upload missing tasks, delete duplicates, rebuild tracking |
+| `experiment_a/verify_lunette_state.py` | Verify tracking matches Lunette API state |
+| `experiment_a/repair_tracking.py` | Rebuild tracking from Lunette API (source of truth) |
+
+### Output Files
+
+- **Tracking file:** `chris_output/experiment_a/sandbox_runs/tracking.json`
+- **Feature files:** `chris_output/experiment_a/sandbox_features/<task_id>.json`
+- **Aggregated CSV:** `chris_output/experiment_a/sandbox_features/lunette_features.csv`
+- **Grading logs:** `chris_output/experiment_a/logs/grading_loop.log`
+
+### Verifying Grading Quality
+
+1. Check the Lunette dashboard: `https://lunette.dev/runs/<run_id>`
+2. Look for investigation trajectories showing shell commands executed
+3. Verify features have real values (not 0 or estimated)
+
+```bash
+# Check a graded task
+cat chris_output/experiment_a/sandbox_features/django__django-12345.json | jq .
+```
+
+## Uploading Real Agent Trajectories with Metadata
 
 **IMPORTANT:** Always use `trajectory_upload/lunette_reupload_with_metadata.py` for uploading trajectories. This includes proper SWE-bench metadata (repo, patch, test_patch, etc.) which the judge uses.
 
@@ -167,11 +340,11 @@ async def grade_trajectory(run_id: str):
 
 Lunette supports **structured output** by passing a Pydantic model schema to the API. This forces the judge to return data matching your exact schema, eliminating the need to parse free-form text.
 
-#### How It Works
+#### How It Works (lunette-sdk >= 0.2.3)
 
 1. Define a Pydantic model with your desired output fields
-2. Create a custom `AnalysisPlan` subclass that includes the schema
-3. Override `model_dump()` to include the JSON schema in the serialized plan
+2. Create a custom `AnalysisPlan` subclass with `result_schema: ClassVar[type[YourModel]]`
+3. The SDK automatically populates `result_schema_json` from your `result_schema`
 4. The Lunette backend forces the judge to use a tool matching your schema
 
 #### Example: Custom Feature Extraction
@@ -192,19 +365,13 @@ class TaskDifficultyFeatures(BaseModel):
     reasoning: str = Field(description="Brief explanation of the difficulty")
 
 
-# 2. Create a custom plan that includes the schema
+# 2. Create a custom plan with result_schema ClassVar
 class FeatureExtractionPlan(AnalysisPlanBase):
     """Custom plan with structured output schema."""
 
     kind: Literal["grading"] = "grading"  # Use grading type
     result_schema: ClassVar[type[TaskDifficultyFeatures]] = TaskDifficultyFeatures
-
-    def model_dump(self, **kwargs):
-        """Include result_schema in serialized output."""
-        d = super().model_dump(**kwargs)
-        if self.result_schema is not None:
-            d["result_schema"] = self.result_schema.model_json_schema()
-        return d
+    # No model_dump override needed - SDK auto-populates result_schema_json
 
 
 # 3. Use the plan
@@ -223,6 +390,8 @@ async def extract_features(run_id: str):
         print(features["reasoning"])       # str
 ```
 
+**Note:** In lunette-sdk < 0.2.3, you needed to override `model_dump()` to include the schema. This is no longer necessary.
+
 #### Pre-built Plans
 
 This codebase includes pre-built structured output plans:
@@ -238,7 +407,8 @@ This codebase includes pre-built structured output plans:
 ```bash
 # Experiment A: Two-step process with proper sandbox access
 # Step 1: Create sandbox runs via Inspect (provisions Docker containers)
-python -m experiment_a.run_dummy_sandbox --limit 20 --batch_size 10
+# NOTE: batch_size MUST be 1 (default) - batching breaks grading!
+python -m experiment_a.run_dummy_sandbox --limit 20
 
 # Step 2: Grade the sandbox runs (judge has full shell access)
 python -m experiment_a.grade_sandbox_runs --skip_existing
@@ -438,9 +608,64 @@ await client.investigate(run_id=run_id, plan=plan, enable_sandbox=True)
 # TypeError: got an unexpected keyword argument 'enable_sandbox'
 ```
 
-## API Quirks
+## REST API
 
-### Trailing Slashes
+### Deleting Runs
+
+To delete runs (e.g., cleanup bad batched runs or dummy agent uploads):
+
+```python
+from lunette import LunetteClient
+import httpx
+
+async def delete_run(run_id: str):
+    """Delete a run from Lunette."""
+    async with LunetteClient() as client:
+        # Access the underlying HTTP client
+        response = await client._client.delete(f"/runs/{run_id}")
+        if response.status_code == 200:
+            print(f"Deleted run {run_id}")
+        else:
+            print(f"Failed to delete {run_id}: {response.status_code}")
+```
+
+**Bulk deletion example:**
+
+```python
+import asyncio
+
+async def delete_runs_by_agent(agent_name: str):
+    """Delete all runs for a specific agent."""
+    async with LunetteClient() as client:
+        # List runs for the agent
+        response = await client._client.get(f"/runs/?model={agent_name}")
+        runs = response.json()
+
+        for run in runs:
+            run_id = run["id"]
+            await client._client.delete(f"/runs/{run_id}")
+            print(f"Deleted {run_id}")
+
+# Delete dummy_agent runs
+asyncio.run(delete_runs_by_agent("dummy_agent"))
+```
+
+### Listing Runs
+
+```python
+# List all runs
+response = await client._client.get("/runs/")
+
+# Filter by model/agent
+response = await client._client.get("/runs/?model=dummy_agent")
+
+# Filter by task
+response = await client._client.get("/runs/?task=swebench-verified")
+```
+
+### API Quirks
+
+#### Trailing Slashes
 
 - GET requests require trailing slash: `/runs/`
 - DELETE requests must NOT have trailing slash: `/runs/{id}`
@@ -478,15 +703,15 @@ inv_id = r.json()["run_id"]
 
 | File | Purpose |
 |------|---------|
-| `trajectory_upload/lunette_reupload_with_metadata.py` | Upload trajectories with SWE-bench metadata |
-| `llm_judge/lunette_batch_grading.py` | Batch grading of uploaded trajectories |
-| `lunette_utils/dummy_solver.py` | **Dummy solver for feature extraction (use with Inspect + --sandbox lunette)** |
-| `lunette_utils/dummy_swebench_task.py` | **Inspect task definition with Docker Compose config for sandbox creation** |
-| **Experiment A (Task Features)** | |
-| `experiment_a/run_dummy_sandbox.py` | **Step 1: Run dummy solver through Inspect with sandbox (batched)** |
-| `experiment_a/grade_sandbox_runs.py` | **Step 2: Grade sandbox runs with structured output** |
-| `experiment_a/lunette_structured_output.py` | Pydantic schemas for structured output |
-| **Experiment B (Trajectory Features)** | |
+| **Core Lunette Utilities** | |
+| `lunette_utils/dummy_swebench_task.py` | Inspect task definition with Docker Compose config for sandbox creation |
+| `trajectory_upload/lunette_reupload_with_metadata.py` | Upload real agent trajectories with SWE-bench metadata |
+| **Experiment A: Task Feature Extraction** | |
+| `experiment_a/run_dummy_sandbox.py` | Step 1: Create sandbox runs via Inspect (one run per task) |
+| `experiment_a/grade_sandbox_runs.py` | Step 2: Grade sandbox runs to extract 25 task features |
+| `experiment_a/lunette_structured_output.py` | Pydantic schemas (`TaskDifficultyFeatures`, `FeatureExtractionPlan`) |
+| `experiment_a/run_overnight.sh` | Overnight script for parallel sandbox creation + grading |
+| **Experiment B: Trajectory Feature Extraction** | |
 | `experiment_b/lunette_structured_output.py` | Pydantic schemas for trajectory grading |
 | `experiment_b/compute_lunette_features.py` | Extract trajectory features with structured output |
 | `experiment_b/lunette_features.py` | Feature definitions and loading utilities |
@@ -584,7 +809,39 @@ for task in tasks_to_grade:
     # Process result...
 ```
 
-**Note:** While batching multiple tasks into a single run (via `--sample-id "task1,task2,task3"`) is efficient for sandbox creation, grading must still happen one trajectory at a time due to this timeout limitation.
+**Note:** See [Batching: AVOID for Grading](#batching-avoid-for-grading-one-run--one-trajectory) for why you should use one run per trajectory instead of batching.
+
+### Grading Wrong Trajectory in Batched Runs
+
+**Symptom:** Investigation results don't match the expected task. Features are extracted for the wrong task.
+
+**Cause:** You batched multiple trajectories into a single run (using `--sample-id "task1,task2,task3"`), and `investigate()` graded an arbitrary trajectory.
+
+**Solution:**
+
+1. **Best:** Re-create runs with one trajectory each:
+   ```bash
+   # Re-run sandbox creation with batch_size=1
+   python -m experiment_a.run_dummy_sandbox --resume --batch_size 1
+   ```
+
+2. **Workaround:** Use `trajectory_filters` to target specific task:
+   ```python
+   from lunette.analysis import TrajectoryFilters
+
+   trajectory_filter = TrajectoryFilters(sample=task_id)
+   plan = FeatureExtractionPlan(
+       name="...",
+       prompt="...",
+       trajectory_filters=trajectory_filter,
+   )
+   ```
+
+3. **Cleanup:** Delete the bad batched runs and their investigations:
+   ```python
+   # See REST API > Deleting Runs section
+   await client._client.delete(f"/runs/{run_id}")
+   ```
 
 ### Feature Extraction Differs Between Runs
 

@@ -5,9 +5,29 @@ This script runs the dummy_swebench task through Inspect with --sandbox lunette,
 which provisions Docker containers with the actual repo checkout at the correct commit.
 This is required for Lunette grading judges to have sandbox access and run shell commands.
 
+##############################################################################
+# CRITICAL: DO NOT BATCH TASKS - ONE RUN PER TASK ONLY
+##############################################################################
+#
+# When grading with Lunette, if a run contains multiple trajectories (batched),
+# the grading judge targets the WRONG trajectory. Lunette's investigate() API
+# does not properly support TrajectoryFilters to target a specific trajectory
+# within a batched run.
+#
+# Therefore: ALWAYS use batch_size=1 (the default). Each task MUST have its
+# own dedicated run with exactly ONE trajectory.
+#
+# If you accidentally create batched runs, you must:
+# 1. Delete the batched runs from Lunette API
+# 2. Delete the entries from tracking.json
+# 3. Re-upload each task individually with batch_size=1
+#
+# See lunette_utils/LUNETTE.md for more details on this issue.
+##############################################################################
+
 The script:
 1. Loads SWE-bench Verified tasks
-2. Runs Inspect eval in batches with --sandbox lunette
+2. Runs Inspect eval ONE TASK AT A TIME with --sandbox lunette
 3. Parses eval logs to extract run_ids and trajectory_ids
 4. Saves tracking info for subsequent grading
 
@@ -15,8 +35,8 @@ Usage:
     # Dry run to see execution plan
     python -m experiment_a.run_dummy_sandbox --dry_run
 
-    # Run on small sample for validation
-    python -m experiment_a.run_dummy_sandbox --limit 20 --batch_size 10
+    # Run on small sample for validation (ONE task per run)
+    python -m experiment_a.run_dummy_sandbox --limit 20
 
     # Run on test split only (priority for AUC)
     python -m experiment_a.run_dummy_sandbox --test_only
@@ -24,7 +44,7 @@ Usage:
     # Resume from previous run
     python -m experiment_a.run_dummy_sandbox --resume
 
-    # Full run
+    # Full run (one task per run, this is correct)
     python -m experiment_a.run_dummy_sandbox
 """
 
@@ -156,10 +176,38 @@ class TrackingManager:
         """Check if a task is already completed."""
         return task_id in self.data["completed_tasks"]
 
-    def get_pending_tasks(self, all_task_ids: List[str]) -> List[str]:
-        """Get list of task IDs that haven't been completed yet."""
-        completed = set(self.data["completed_tasks"].keys())
-        return [t for t in all_task_ids if t not in completed]
+    def get_pending_tasks(self, all_task_ids: List[str], require_unbatched: bool = True) -> List[str]:
+        """Get list of task IDs that need sandbox runs.
+
+        Returns tasks that either:
+        1. Haven't been processed yet
+        2. Were processed but don't have a valid run_id (e.g., from batched runs)
+        3. If require_unbatched=True, also returns tasks that are in batched runs
+           (multiple tasks sharing the same run_id) since these need re-creation
+           for proper grading.
+        """
+        # First, count how many tasks share each run_id
+        from collections import Counter
+        run_id_counts = Counter()
+        for task_id in all_task_ids:
+            if task_id in self.data["completed_tasks"]:
+                run_id = self.data["completed_tasks"][task_id].get("run_id")
+                if run_id and run_id != "unknown":
+                    run_id_counts[run_id] += 1
+
+        pending = []
+        for task_id in all_task_ids:
+            if task_id not in self.data["completed_tasks"]:
+                pending.append(task_id)
+            else:
+                run_id = self.data["completed_tasks"][task_id].get("run_id")
+                # Include tasks with invalid run_ids
+                if not run_id or run_id == "unknown":
+                    pending.append(task_id)
+                # Include tasks in batched runs if require_unbatched
+                elif require_unbatched and run_id_counts[run_id] > 1:
+                    pending.append(task_id)
+        return pending
 
 
 async def find_all_task_runs_from_api(client: LunetteClient, task_ids: List[str], max_runs: int = 500) -> Dict[str, Dict]:
@@ -251,17 +299,29 @@ def parse_eval_log(log_path: str) -> Dict:
 
 
 def run_inspect_batch(task_ids: List[str], output_dir: Path, timeout: int = 600) -> Dict:
-    """Run Inspect eval on a batch of tasks.
+    """Run Inspect eval on task(s).
 
-    Creates a single Lunette run with all tasks as separate trajectories.
-    Each trajectory gets its own sandbox with the repo at the correct commit.
-
-    The batch is uploaded as ONE run to Lunette, which is more efficient than
-    creating separate runs per task. Each trajectory can still be investigated
-    individually using limit=1 in the investigate() call.
+    ##########################################################################
+    # CRITICAL: ALWAYS PASS EXACTLY ONE TASK (batch_size=1)
+    ##########################################################################
+    #
+    # Lunette grading DOES NOT WORK with batched runs (multiple trajectories
+    # per run). The investigate() API targets the wrong trajectory when a run
+    # has multiple trajectories, even with TrajectoryFilters.
+    #
+    # This function accepts a list for API compatibility, but you MUST only
+    # pass a single task_id. The default batch_size=1 ensures this.
+    ##########################################################################
 
     Returns dict with log_path, run info, and any errors.
     """
+    # SAFETY CHECK: Warn loudly if someone tries to batch
+    if len(task_ids) > 1:
+        print("=" * 70)
+        print("WARNING: BATCHING MULTIPLE TASKS IS NOT SUPPORTED FOR GRADING!")
+        print(f"You passed {len(task_ids)} tasks. Lunette grading will FAIL.")
+        print("Use batch_size=1 (the default) to create one run per task.")
+        print("=" * 70)
     if not task_ids:
         return {"error": "No tasks provided"}
 
@@ -405,9 +465,12 @@ async def main():
         "--dry_run", action="store_true",
         help="Show execution plan without running"
     )
+    # CRITICAL: batch_size MUST be 1 for Lunette grading to work correctly.
+    # Batched runs (multiple trajectories per run) cause grading to target
+    # the wrong trajectory. DO NOT CHANGE THIS DEFAULT.
     parser.add_argument(
-        "--batch_size", type=int, default=10,
-        help="Number of tasks per Inspect eval invocation (default: 10)"
+        "--batch_size", type=int, default=1,
+        help="MUST BE 1. Batching breaks Lunette grading. (default: 1)"
     )
     parser.add_argument(
         "--limit", type=int, default=None,
@@ -434,6 +497,19 @@ async def main():
         help="Output directory for tracking files"
     )
     args = parser.parse_args()
+
+    # CRITICAL: Enforce batch_size=1
+    if args.batch_size != 1:
+        print("=" * 70)
+        print("ERROR: batch_size MUST be 1!")
+        print("")
+        print("Lunette grading DOES NOT WORK with batched runs. When a run has")
+        print("multiple trajectories, the investigate() API targets the wrong one.")
+        print("")
+        print("Each task MUST have its own run with exactly ONE trajectory.")
+        print("Remove --batch_size or set it to 1.")
+        print("=" * 70)
+        return
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -29,6 +29,7 @@ import argparse
 import asyncio
 import json
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -110,12 +111,16 @@ async def grade_single_task(
     task_metadata: dict,
     output_dir: Path,
     semantic_only: bool = False,
+    max_retries: int = 3,
+    retry_delay: int = 60,
 ) -> Optional[Dict]:
     """Grade a single task using Lunette with structured output.
 
     Note: Batch grading (limit > 1 in investigate()) causes 504 Gateway Timeout
     errors, so we must grade each task individually. Each investigation takes
     approximately 55 seconds.
+
+    Includes retry logic for 504 Gateway Timeout errors.
 
     Args:
         client: Lunette client
@@ -124,44 +129,104 @@ async def grade_single_task(
         task_metadata: SWE-bench task metadata
         output_dir: Directory to save features
         semantic_only: Use SemanticOnlyFeatures schema (faster)
+        max_retries: Maximum number of retries on 504 timeout
+        retry_delay: Seconds to wait between retries
 
     Returns:
         Feature dict or None if failed
     """
     output_file = output_dir / f"{task_id}.json"
 
+    # Format grading prompt with task info
+    grading_prompt = format_feature_extraction_prompt(
+        instance_id=task_id,
+        repo=task_metadata["repo"],
+        version=task_metadata.get("version", "unknown"),
+        problem_statement=task_metadata["problem_statement"],
+        patch=task_metadata["patch"],
+        fail_to_pass=task_metadata.get("FAIL_TO_PASS", "[]"),
+        pass_to_pass=task_metadata.get("PASS_TO_PASS", "[]"),
+        hints_text=task_metadata.get("hints_text", ""),
+    )
+
+    # Create plan with structured output schema
+    # Use trajectory_filters to target the specific task within a batched run
+    from lunette.analysis import TrajectoryFilters
+
+    trajectory_filter = TrajectoryFilters(sample=task_id)
+
+    if semantic_only:
+        plan = SemanticFeatureExtractionPlan(
+            name="task-difficulty-features-semantic",
+            prompt=grading_prompt,
+            trajectory_filters=trajectory_filter,
+        )
+    else:
+        plan = FeatureExtractionPlan(
+            name="task-difficulty-features",
+            prompt=grading_prompt,
+            trajectory_filters=trajectory_filter,
+        )
+
+    # Retry loop for 504 timeouts
+    last_error = None
+    timeout_log_file = output_dir / "504_timeout_log.jsonl"
+
+    for attempt in range(max_retries + 1):
+        try:
+            # Run investigation
+            results = await client.investigate(
+                run_id=run_id,
+                plan=plan,
+                limit=1,
+            )
+            # Success - break out of retry loop
+            break
+        except Exception as e:
+            last_error = e
+            error_str = str(e)
+            # Check if it's a 504 timeout
+            if "504" in error_str or "Gateway Time-out" in error_str:
+                # Log the 504 timeout for troubleshooting
+                timeout_entry = {
+                    "timestamp": datetime.now().isoformat(),
+                    "task_id": task_id,
+                    "run_id": run_id,
+                    "attempt": attempt + 1,
+                    "max_retries": max_retries,
+                    "error": error_str,
+                    "plan_name": plan.name,
+                    "semantic_only": semantic_only,
+                }
+                with open(timeout_log_file, "a") as log_f:
+                    log_f.write(json.dumps(timeout_entry) + "\n")
+
+                if attempt < max_retries:
+                    print(f"    504 timeout at {datetime.now().strftime('%H:%M:%S')}, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})...")
+                    time.sleep(retry_delay)
+                    continue
+                else:
+                    print(f"    504 timeout after {max_retries} retries, giving up")
+            else:
+                # Non-timeout error, don't retry
+                raise
+    else:
+        # All retries exhausted
+        if last_error:
+            # Save error and return None
+            print(f"    Error after retries: {last_error}")
+            error_file = output_dir / f"{task_id}_error.json"
+            with open(error_file, "w") as f:
+                json.dump({
+                    "error": str(last_error),
+                    "task_id": task_id,
+                    "run_id": run_id,
+                    "graded_at": datetime.now().isoformat(),
+                }, f, indent=2)
+            return None
+
+    # Process results
     try:
-        # Format grading prompt with task info
-        grading_prompt = format_feature_extraction_prompt(
-            instance_id=task_id,
-            repo=task_metadata["repo"],
-            version=task_metadata.get("version", "unknown"),
-            problem_statement=task_metadata["problem_statement"],
-            patch=task_metadata["patch"],
-            fail_to_pass=task_metadata.get("FAIL_TO_PASS", "[]"),
-            pass_to_pass=task_metadata.get("PASS_TO_PASS", "[]"),
-            hints_text=task_metadata.get("hints_text", ""),
-        )
-
-        # Create plan with structured output schema
-        if semantic_only:
-            plan = SemanticFeatureExtractionPlan(
-                name="task-difficulty-features-semantic",
-                prompt=grading_prompt,
-            )
-        else:
-            plan = FeatureExtractionPlan(
-                name="task-difficulty-features",
-                prompt=grading_prompt,
-            )
-
-        # Run investigation
-        results = await client.investigate(
-            run_id=run_id,
-            plan=plan,
-            limit=1,
-        )
-
         if not results.results:
             print(f"    No results returned from Lunette")
             return None
@@ -189,7 +254,7 @@ async def grade_single_task(
         return features
 
     except Exception as e:
-        print(f"    Error: {e}")
+        print(f"    Error processing results: {e}")
         import traceback
         traceback.print_exc()
 
@@ -299,21 +364,30 @@ async def main():
 
     # Build list of tasks to grade
     tasks_to_grade = []
+    skipped_no_run_id = 0
+    skipped_no_metadata = 0
     for task_id, run_info in tracking_info.items():
         run_id = run_info.get("run_id")
+        trajectory_id = run_info.get("trajectory_id", "unknown")
         if not run_id or run_id == "unknown":
-            print(f"  Skipping {task_id}: no run_id")
+            skipped_no_run_id += 1
             continue
 
         if task_id not in swebench_metadata:
-            print(f"  Skipping {task_id}: not in SWE-bench metadata")
+            skipped_no_metadata += 1
             continue
 
         tasks_to_grade.append({
             "task_id": task_id,
             "run_id": run_id,
+            "trajectory_id": trajectory_id,
             "metadata": swebench_metadata[task_id],
         })
+
+    if skipped_no_run_id > 0:
+        print(f"  Skipped {skipped_no_run_id} tasks with no run_id")
+    if skipped_no_metadata > 0:
+        print(f"  Skipped {skipped_no_metadata} tasks not in SWE-bench metadata")
 
     # Filter to specific task IDs if provided
     if args.task_ids:
@@ -342,7 +416,6 @@ async def main():
     if args.dry_run:
         print("\n=== DRY RUN ===")
         print(f"\nOutput directory: {output_dir}")
-        print(f"Batch size: {args.batch_size} trajectories per investigate() call")
         print(f"Schema: {'SemanticOnlyFeatures' if args.semantic_only else 'TaskDifficultyFeatures'}")
         print(f"\nSample tasks (first 10):")
         for task in tasks_to_grade[:10]:
@@ -373,13 +446,18 @@ async def main():
 
     all_features = []
 
+    # Grading log file for detailed tracking
+    grading_log_file = output_dir / "grading_log.jsonl"
+
     async with LunetteClient() as client:
         for task_idx, task in enumerate(tasks_to_grade):
             task_id = task["task_id"]
             run_id = task["run_id"]
+            trajectory_id = task.get("trajectory_id", "unknown")
 
             print(f"\n[{task_idx + 1}/{len(tasks_to_grade)}] Grading: {task_id}")
             print(f"  Run ID: {run_id[:16]}...")
+            print(f"  Trajectory ID: {trajectory_id[:16]}...")
 
             features = await grade_single_task(
                 client=client,
@@ -390,10 +468,34 @@ async def main():
                 semantic_only=args.semantic_only,
             )
 
+            # Log grading result
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "task_id": task_id,
+                "run_id": run_id,
+                "trajectory_id": trajectory_id,
+                "success": features is not None,
+            }
+            with open(grading_log_file, "a") as log_f:
+                log_f.write(json.dumps(log_entry) + "\n")
+
             if features:
                 all_features.append(features)
                 stats["success"] += 1
                 print(f"  ✓ Success")
+
+                # Update tracking file to mark as graded
+                tracking_info[task_id]["graded"] = True
+                tracking_info[task_id]["graded_at"] = datetime.now().isoformat()
+                with open(tracking_file, "w") as f:
+                    json.dump({
+                        "completed_tasks": tracking_info,
+                        "failed_tasks": {},
+                        "stats": {
+                            "total_uploaded": len(tracking_info),
+                            "total_graded": stats["success"],
+                        }
+                    }, f, indent=2)
             else:
                 stats["failed"] += 1
                 print(f"  ✗ Failed")
