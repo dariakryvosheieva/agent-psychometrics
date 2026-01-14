@@ -207,8 +207,20 @@ async def grade_single_task(
                     continue
                 else:
                     print(f"    504 timeout after {max_retries} retries, giving up")
+            elif "404" in error_str or "Not Found" in error_str:
+                # Run doesn't exist in Lunette - skip this task
+                print(f"    404 Not Found - run doesn't exist in Lunette, skipping")
+                error_file = output_dir / f"{task_id}_error.json"
+                with open(error_file, "w") as f:
+                    json.dump({
+                        "error": "404 Not Found - run doesn't exist",
+                        "task_id": task_id,
+                        "run_id": run_id,
+                        "graded_at": datetime.now().isoformat(),
+                    }, f, indent=2)
+                return None
             else:
-                # Non-timeout error, don't retry
+                # Non-timeout, non-404 error, don't retry
                 raise
     else:
         # All retries exhausted

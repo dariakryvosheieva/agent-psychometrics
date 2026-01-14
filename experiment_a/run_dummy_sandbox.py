@@ -109,7 +109,7 @@ def load_swebench_verified() -> List[dict]:
 
 def get_test_task_ids() -> set:
     """Get the set of test task IDs for the default train/test split."""
-    items_path = ROOT / "clean_data" / "swebench_verified_20251115_full" / "1d_1pl" / "items.csv"
+    items_path = ROOT / "clean_data" / "swebench_verified_20251120_full" / "1d_1pl" / "items.csv"
     if not items_path.exists():
         print(f"Warning: items.csv not found at {items_path}")
         return set()
