@@ -28,9 +28,9 @@ class ExperimentAConfig:
     """
 
     # Data paths
-    abilities_path: Path = Path("clean_data/swebench_verified_20251115_full/1d_1pl/abilities.csv")
-    items_path: Path = Path("clean_data/swebench_verified_20251115_full/1d_1pl/items.csv")
-    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
+    abilities_path: Path = Path("clean_data/swebench_verified_20251120_full/1d_1pl/abilities.csv")
+    items_path: Path = Path("clean_data/swebench_verified_20251120_full/1d_1pl/items.csv")
+    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
     output_dir: Path = Path("chris_output/experiment_a")
 
     # Train/test splitting

@@ -61,7 +61,7 @@ def load_llm_judge_features_detailed(
 def main():
     # Load config and paths
     embeddings_path = ROOT / "out/prior_qwen3vl8b/embeddings__Qwen__Qwen3-VL-8B-Instruct__pool-lasttoken__qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_instance-v1__princeton-nlp_SWE-bench_Verified__test__n500__maxlen8192__seed0.npz"
-    items_path = ROOT / "clean_data/swebench_verified_20251115_full/1d/items.csv"
+    items_path = ROOT / "clean_data/swebench_verified_20251120_full/1d/items.csv"
     llm_judge_dir = ROOT / "chris_output/experiment_b/llm_judge_features"
     results_path = ROOT / "chris_output/experiment_b/embedding_llm_judge_fixed/experiment_b_results.json"
 

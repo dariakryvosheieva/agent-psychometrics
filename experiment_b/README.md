@@ -171,8 +171,8 @@ experiment_b/
 @dataclass
 class ExperimentConfig:
     # Data paths (use 1PL model for consistency with evaluation formula)
-    items_path: Path = Path("clean_data/swebench_verified_20251115_full/1d_1pl/items.csv")
-    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
+    items_path: Path = Path("clean_data/swebench_verified_20251120_full/1d_1pl/items.csv")
+    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
     trajectories_dir: Path = Path("trajectory_data/unified_trajs")
     output_dir: Path = Path("chris_output/experiment_b")
 

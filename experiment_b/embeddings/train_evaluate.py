@@ -40,8 +40,8 @@ from experiment_b.embeddings.posterior_model import EmbeddingPosteriorModel
 class EmbeddingExperimentConfig:
     """Configuration for embedding-based experiment."""
     # Data paths
-    items_path: Path = Path("clean_data/swebench_verified_20251115_full/1d/items.csv")
-    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
+    items_path: Path = Path("clean_data/swebench_verified_20251120_full/1d/items.csv")
+    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
     trajectories_dir: Path = Path("trajectory_data/unified_trajs")
     embeddings_dir: Path = Path("chris_output/experiment_b/trajectory_embeddings/full_difficulty")
     output_dir: Path = Path("chris_output/experiment_b/embedding_results")

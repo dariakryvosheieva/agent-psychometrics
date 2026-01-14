@@ -208,9 +208,9 @@ def run_pca_ablation(
     # Load data
     print("\n1. Loading data...")
 
-    abilities_path = ROOT / "clean_data/swebench_verified_20251115_full/1d/abilities.csv"
-    items_path = ROOT / "clean_data/swebench_verified_20251115_full/1d/items.csv"
-    responses_path = ROOT / "clean_data/swebench_verified/swebench_verified_20251115_full.jsonl"
+    abilities_path = ROOT / "clean_data/swebench_verified_20251120_full/1d/abilities.csv"
+    items_path = ROOT / "clean_data/swebench_verified_20251120_full/1d/items.csv"
+    responses_path = ROOT / "clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"
 
     data = load_experiment_data(
         abilities_path=abilities_path,

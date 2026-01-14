@@ -138,9 +138,9 @@ def run_pca_ablation(
     print("=" * 60)
 
     # Paths
-    items_path = ROOT / "clean_data/swebench_verified_20251115_full/1d/items.csv"
-    abilities_path = ROOT / "clean_data/swebench_verified_20251115_full/1d/abilities.csv"
-    responses_path = ROOT / "clean_data/swebench_verified/swebench_verified_20251115_full.jsonl"
+    items_path = ROOT / "clean_data/swebench_verified_20251120_full/1d/items.csv"
+    abilities_path = ROOT / "clean_data/swebench_verified_20251120_full/1d/abilities.csv"
+    responses_path = ROOT / "clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"
     trajectories_dir = ROOT / "trajectory_data/unified_trajs"
     prior_embeddings_path = ROOT / "out/prior_qwen3vl8b/embeddings__Qwen__Qwen3-VL-8B-Instruct__pool-lasttoken__qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_instance-v1__princeton-nlp_SWE-bench_Verified__test__n500__maxlen8192__seed0.npz"
 
