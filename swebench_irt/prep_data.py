@@ -8,7 +8,7 @@ from pathlib import Path
 import jsonlines
 
 INPUT_DIR = Path("raw_data/mmlu_data")
-OUTPUT_DIR = Path("chris_output/clean_data/mmlu_data")
+OUTPUT_DIR = Path("clean_data/mmlu_data")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def process_single_model(json_path: Path) -> dict[str, int]:

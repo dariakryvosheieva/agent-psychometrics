@@ -135,15 +135,15 @@ To fit IRT models to SWE-bench Pro:
    # Create JSONL format (similar to prep_swebench.py)
    python swebench_irt/prep_swebench_pro.py \
        --input data/swe-bench-pro.csv \
-       --output chris_output/clean_data/swebench_pro/swebench_pro.jsonl
+       --output clean_data/swebench_pro/swebench_pro.jsonl
    ```
 
 3. **Train IRT models:**
    ```bash
    python swebench_irt/train.py \
-       --data_path chris_output/clean_data/swebench_pro/swebench_pro.jsonl \
+       --data_path clean_data/swebench_pro/swebench_pro.jsonl \
        --dims 1 2 3 \
-       --output_dir chris_output/clean_data/swebench_pro
+       --output_dir clean_data/swebench_pro
    ```
 
 4. **Compare with SWE-bench Verified:**

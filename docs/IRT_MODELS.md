@@ -44,7 +44,7 @@ source .venv/bin/activate
 
 # Train 1PL model (saves to 1d_1pl/)
 python swebench_irt/train.py \
-    --data_path chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl \
+    --data_path clean_data/swebench_verified/swebench_verified_20251115_full.jsonl \
     --dims 1 \
     --model 1pl \
     --output_dir clean_data/swebench_verified_20251115_full \
@@ -52,7 +52,7 @@ python swebench_irt/train.py \
 
 # Train 2PL model (saves to 1d/)
 python swebench_irt/train.py \
-    --data_path chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl \
+    --data_path clean_data/swebench_verified/swebench_verified_20251115_full.jsonl \
     --dims 1 \
     --model 2pl \
     --output_dir clean_data/swebench_verified_20251115_full \

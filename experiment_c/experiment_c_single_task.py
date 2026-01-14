@@ -31,7 +31,7 @@ OUTPUT_DIR = Path("chris_output/experiment_c")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # IRT difficulty data for stratified sampling
-ITEMS_PATH = Path("chris_output/clean_data/swebench_verified_20250930_full/1d/items.csv")
+ITEMS_PATH = Path("clean_data/swebench_verified_20250930_full/1d/items.csv")
 
 
 def get_lunette_api_key() -> str:

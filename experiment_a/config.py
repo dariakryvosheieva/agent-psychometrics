@@ -30,7 +30,7 @@ class ExperimentAConfig:
     # Data paths
     abilities_path: Path = Path("clean_data/swebench_verified_20251115_full/1d_1pl/abilities.csv")
     items_path: Path = Path("clean_data/swebench_verified_20251115_full/1d_1pl/items.csv")
-    responses_path: Path = Path("chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
+    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
     output_dir: Path = Path("chris_output/experiment_a")
 
     # Train/test splitting
@@ -51,6 +51,9 @@ class ExperimentAConfig:
     llm_judge_features_path: Optional[Path] = None  # Required for LLMJudgePredictor
     llm_judge_ridge_alpha: float = 1.0
     llm_judge_max_features: Optional[int] = None  # None = use all 9 features
+
+    # Embedding Similarity predictor config
+    embedding_similarity_ridge_alpha: float = 1.0
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""

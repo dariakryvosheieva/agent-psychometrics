@@ -9,7 +9,7 @@ experiments/evaluation/verified/<agent>/results/results.json
          ↓
     swebench_irt/prep_swebench.py (--complete_matrix --cutoff_date 20251115)
          ↓
-chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
+clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
          ↓
     swebench_irt/train.py (--dims 1 --model 1pl/2pl)
          ↓
@@ -33,7 +33,7 @@ clean_data/swebench_verified_20251115_full/{1d,1d_1pl}/
 python swebench_irt/prep_swebench.py \
     --complete_matrix \
     --cutoff_date 20251115 \
-    --output_path chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
+    --output_path clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
 ```
 
 **Input:** `experiments/evaluation/verified/<agent>/results/results.json`

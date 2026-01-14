@@ -173,7 +173,7 @@ def scrape_all_agents(headless: bool = True, delay: float = 1.0):
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape Terminal Bench and convert to IRT format")
-    parser.add_argument("--output", type=str, default="chris_output/clean_data/terminal_bench/terminal_bench_2.0.jsonl",
+    parser.add_argument("--output", type=str, default="clean_data/terminal_bench/terminal_bench_2.0.jsonl",
                        help="Output JSONL file path")
     parser.add_argument("--threshold", type=str, default="any", choices=["any", "majority", "all"],
                        help="How to convert multi-trial results to binary")

@@ -11,9 +11,9 @@ import numpy as np
 from pathlib import Path
 
 # Load data
-responses_path = Path("chris_output/clean_data/swebench_verified/swebench_verified_20250930_full.jsonl")
-abilities_path = Path("chris_output/clean_data/swebench_verified_20250930_full/1d/abilities.csv")
-items_path = Path("chris_output/clean_data/swebench_verified_20250930_full/1d/items.csv")
+responses_path = Path("clean_data/swebench_verified/swebench_verified_20250930_full.jsonl")
+abilities_path = Path("clean_data/swebench_verified_20250930_full/1d/abilities.csv")
+items_path = Path("clean_data/swebench_verified_20250930_full/1d/items.csv")
 
 # Load abilities and items
 abilities = pd.read_csv(abilities_path, index_col=0)

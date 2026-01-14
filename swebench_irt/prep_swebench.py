@@ -99,7 +99,7 @@ def main() -> None:
     parser.add_argument(
         "--output_path",
         type=str,
-        default="chris_output/clean_data/swebench_verified/swebench_verified.jsonl",
+        default="clean_data/swebench_verified/swebench_verified.jsonl",
         help="Output JSONL path",
     )
     args = parser.parse_args()

@@ -443,7 +443,7 @@ def main():
                         default='llm_judge/evolutionary_results',
                         help='Output directory for results')
     parser.add_argument('--items_path', type=str,
-                        default='chris_output/clean_data/swebench_verified_20250930_full/1d/items.csv',
+                        default='clean_data/swebench_verified_20250930_full/1d/items.csv',
                         help='Path to IRT items CSV')
 
     # Execution modes

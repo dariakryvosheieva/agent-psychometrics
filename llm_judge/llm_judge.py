@@ -189,7 +189,7 @@ def load_tasks() -> pd.DataFrame:
     from datasets import load_dataset
 
     # Load IRT items
-    items = pd.read_csv("chris_output/clean_data/swebench_verified_20250930_full/1d/items.csv", index_col=0)
+    items = pd.read_csv("clean_data/swebench_verified_20250930_full/1d/items.csv", index_col=0)
 
     # Load SWE-bench from Hugging Face
     ds = load_dataset("princeton-nlp/SWE-bench_Verified", split="test")

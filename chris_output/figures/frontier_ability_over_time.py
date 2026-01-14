@@ -16,7 +16,7 @@ import numpy as np
 
 # Load IRT abilities
 abilities = pd.read_csv(
-    "/Users/chrisge/Downloads/model_irt/chris_output/clean_data/swebench_verified_20250930_full/1d/abilities.csv",
+    "/Users/chrisge/Downloads/model_irt/clean_data/swebench_verified_20250930_full/1d/abilities.csv",
     index_col=0
 )
 

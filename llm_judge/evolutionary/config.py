@@ -53,7 +53,7 @@ class EvolutionConfig:
     # Paths
     output_dir: Path = field(default_factory=lambda: Path("llm_judge/evolutionary_results"))
     items_path: Path = field(default_factory=lambda: Path(
-        "chris_output/clean_data/swebench_verified_20250930_full/1d/items.csv"
+        "clean_data/swebench_verified_20250930_full/1d/items.csv"
     ))
 
     def __post_init__(self):

@@ -1,3 +1,0 @@
-usage: train.py [-h] [--dims [DIMS ...]] [--output_dir OUTPUT_DIR]
-                [--data_path DATA_PATH] [--epochs EPOCHS]
-train.py: error: argument --dims: invalid int value: ''

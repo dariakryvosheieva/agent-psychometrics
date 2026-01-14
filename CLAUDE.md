@@ -43,7 +43,7 @@ python -m experiment_b.train_evaluate --dry_run
 
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
-    --data_path chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
+    --data_path clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
 
 # Run tests
 pytest tests/test_irt_pipeline.py -v

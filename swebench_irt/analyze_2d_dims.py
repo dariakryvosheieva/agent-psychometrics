@@ -291,7 +291,7 @@ def plot_dimension_specialization(abilities: pd.DataFrame, output_path: Path):
 def main():
     parser = argparse.ArgumentParser(description="Analyze 2D IRT difficulty dimensions")
     parser.add_argument("--results_dir", type=str,
-                        default="chris_output/clean_data/swebench_verified_20250930_full",
+                        default="clean_data/swebench_verified_20250930_full",
                         help="Directory containing trained model results")
     parser.add_argument("--output_dir", type=str,
                         default="chris_output/figures/2d_analysis",

@@ -201,7 +201,7 @@ def plot_results(y_true: np.ndarray, y_pred: np.ndarray,
 def main():
     parser = argparse.ArgumentParser(description='Predict IRT difficulty from task features')
     parser.add_argument('--irt_path', type=str,
-                       default='chris_output/clean_data/swebench_verified_20250930_full/1d/items.csv',
+                       default='clean_data/swebench_verified_20250930_full/1d/items.csv',
                        help='Path to IRT items.csv')
     parser.add_argument('--output_dir', type=str,
                        default='chris_output/difficulty_prediction',

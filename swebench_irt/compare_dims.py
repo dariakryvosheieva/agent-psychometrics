@@ -3,7 +3,7 @@
 """
 Compare 1D vs 2D vs 3D IRT fits using log-likelihood, AIC, and BIC.
 
-Reads parameters from a results directory (e.g., chris_output/clean_data/.../{1d,2d,3d}/) and
+Reads parameters from a results directory (e.g., clean_data/.../{1d,2d,3d}/) and
 responses from a JSONL file, then prints a compact table and saves it to
 chris_output/figures/model_selection.csv by default.
 """

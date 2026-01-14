@@ -21,6 +21,7 @@ trajectory_data/unified_trajs/
 trajectory_data/filtered_unified/
 trajectory_data/swebench_pro/
 IssueSolvingEmpirical/
+reeval/
 
 # Embeddings from cluster (large files, don't sync back)
 out/
@@ -29,7 +30,7 @@ out/
 # Output files
 *.out
 *.jsonl
-!chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
+!clean_data/swebench_verified/swebench_verified_20251115_full.jsonl
 *.jsonlines
 *.npz
 

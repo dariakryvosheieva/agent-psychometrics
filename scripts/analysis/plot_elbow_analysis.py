@@ -11,8 +11,8 @@ from pathlib import Path
 from scipy.interpolate import UnivariateSpline
 
 # Load data
-responses_path = Path("chris_output/clean_data/swebench_verified/swebench_verified_20250930_full.jsonl")
-abilities_path = Path("chris_output/clean_data/swebench_verified_20250930_full/1d/abilities.csv")
+responses_path = Path("clean_data/swebench_verified/swebench_verified_20250930_full.jsonl")
+abilities_path = Path("clean_data/swebench_verified_20250930_full/1d/abilities.csv")
 
 abilities = pd.read_csv(abilities_path, index_col=0)
 

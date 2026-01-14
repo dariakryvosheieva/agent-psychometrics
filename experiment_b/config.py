@@ -11,7 +11,7 @@ class ExperimentConfig:
 
     # Data paths
     items_path: Path = Path("clean_data/swebench_verified_20251115_full/1d/items.csv")
-    responses_path: Path = Path("chris_output/clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
+    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251115_full.jsonl")
     trajectories_dir: Path = Path("trajectory_data/unified_trajs")
     lunette_features_dir: Path = Path("chris_output/experiment_b/lunette_features")
     llm_judge_features_dir: Path = Path("chris_output/experiment_b/llm_judge_features")
