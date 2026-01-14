@@ -13,6 +13,7 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from sklearn.decomposition import PCA
 from sklearn.linear_model import Ridge, RidgeCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -40,6 +41,7 @@ class EmbeddingPosteriorModel:
         aggregation: AggregationType = "mean_std",
         alpha: Union[float, str] = "cv",
         abilities: Optional[Dict[str, float]] = None,
+        pca_components: Optional[int] = None,
     ):
         """Initialize posterior model.
 
@@ -52,11 +54,14 @@ class EmbeddingPosteriorModel:
                 - "all_stats": Mean + std + min + max
             alpha: Ridge regression alpha. Use "cv" for cross-validation search.
             abilities: Agent abilities (theta) for weighted aggregation
+            pca_components: Number of PCA components for dimensionality reduction.
+                If None, no PCA is applied. Recommended: 50-100 for high-dim embeddings.
         """
         self.prior_model = prior_model
         self.aggregation = aggregation
         self.alpha = alpha
         self.abilities = abilities
+        self.pca_components = pca_components
 
         self.aggregator = EmbeddingAggregator(
             aggregation=aggregation,
@@ -66,6 +71,7 @@ class EmbeddingPosteriorModel:
         self.psi_model: Optional[Pipeline] = None
         self.training_stats: Dict = {}
         self.embedding_dim: Optional[int] = None
+        self.pca_dim: Optional[int] = None
         self.best_alpha: Optional[float] = None
 
     def fit(
@@ -135,29 +141,43 @@ class EmbeddingPosteriorModel:
 
         self.embedding_dim = X.shape[1]
 
+        # Determine PCA components (can't exceed n_samples - 1 or n_features)
+        if self.pca_components is not None:
+            n_samples, n_features = X.shape
+            actual_pca_components = min(self.pca_components, n_samples - 1, n_features)
+            self.pca_dim = actual_pca_components
+            print(f"Using PCA: {n_features} -> {actual_pca_components} components")
+        else:
+            self.pca_dim = None
+
+        # Build pipeline steps
+        pipeline_steps = [("scaler", StandardScaler(with_mean=True, with_std=True))]
+
+        # Add PCA if requested
+        if self.pca_dim is not None:
+            pipeline_steps.append(("pca", PCA(n_components=self.pca_dim)))
+
         # Fit ridge regression
         if self.alpha == "cv":
             # Use cross-validation to find best alpha
             alphas = [1e-4, 1e-3, 1e-2, 1e-1, 1, 10, 100, 1000, 10000, 100000]
             ridge_cv = RidgeCV(alphas=alphas, cv=5, scoring="neg_mean_squared_error")
+            pipeline_steps.append(("ridge", ridge_cv))
 
-            self.psi_model = Pipeline([
-                ("scaler", StandardScaler(with_mean=True, with_std=True)),
-                ("ridge", ridge_cv),
-            ])
+            self.psi_model = Pipeline(pipeline_steps)
             self.psi_model.fit(X, y)
             self.best_alpha = self.psi_model.named_steps["ridge"].alpha_
             print(f"RidgeCV selected alpha={self.best_alpha}")
         else:
-            self.psi_model = Pipeline([
-                ("scaler", StandardScaler(with_mean=True, with_std=True)),
-                ("ridge", Ridge(alpha=float(self.alpha))),
-            ])
+            pipeline_steps.append(("ridge", Ridge(alpha=float(self.alpha))))
+            self.psi_model = Pipeline(pipeline_steps)
             self.psi_model.fit(X, y)
             self.best_alpha = float(self.alpha)
 
         print(f"Embedding posterior ({self.aggregation}) trained on {len(valid_task_ids)} tasks")
-        print(f"  Feature dim: {self.embedding_dim}")
+        print(f"  Original feature dim: {self.embedding_dim}")
+        if self.pca_dim is not None:
+            print(f"  PCA reduced dim: {self.pca_dim}")
 
         return self
 
