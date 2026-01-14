@@ -64,6 +64,11 @@ chris_output/experiment_b/llm_judge_features/
 # Experiment B run outputs (regenerable)
 chris_output/experiment_b/embedding_*/
 chris_output/experiment_b/heuristic_*/
+chris_output/experiment_b/llm_judge_combined_features/
+chris_output/experiment_b/llm_judge_prior_features/
+chris_output/experiment_b/llm_judge_prior_results.json
+chris_output/experiment_b/test_progression_features/
+chris_output/experiment_b/embedding_plus_*.json
 
 # Experiment A Lunette features (large, regenerable from API)
 chris_output/experiment_a/lunette_features/
