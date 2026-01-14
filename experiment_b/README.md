@@ -194,16 +194,16 @@ python -m experiment_b.train_evaluate --regression_mode direct_with_prior
 | `direct_with_prior` | `model(features, prior)` | trajectory + prior prediction | ground_truth |
 | `direct_with_prior_features` | `model(features, embeddings)` | trajectory + prior input features | ground_truth |
 
-**Results (llm_judge_v5_single, 2026-01-14):**
+**Results (llm_judge_v5_single, 2026-01-14, with RidgeCV alpha selection):**
 
-| Mode | D_train AUC | D_valid AUC | ΔAUC vs Prior |
-|------|-------------|-------------|---------------|
-| Prior only | 0.6823 | 0.7362 | — |
-| residual | 0.6830 | **0.7344** | -0.0018 |
-| direct_with_prior | 0.7374 | 0.6964 | -0.0397 |
-| direct_with_prior_features | 0.7691 | 0.6070 | -0.1292 |
+| Mode | Best Alpha | D_train AUC | D_valid AUC | ΔAUC vs Prior |
+|------|------------|-------------|-------------|---------------|
+| Prior only | — | 0.6823 | **0.7362** | — |
+| residual | 1e+06 | 0.6820 | **0.7362** | +0.0000 |
+| direct_with_prior | 1e+06 | 0.7350 | 0.6911 | -0.0451 |
+| direct_with_prior_features | 1e+06 | 0.7353 | 0.6880 | -0.0481 |
 
-**Key finding:** Direct regression modes massively overfit. The `direct_with_prior_features` mode has 4097 features (1 trajectory + 4096 embeddings) trained on 117 samples, achieving r=0.976 on train but collapsing on validation. **Use `residual` mode** which preserves prior performance.
+**Key finding:** Even with RidgeCV selecting optimal regularization (alpha=1e+06), direct regression modes underperform. The residual mode perfectly preserves the prior's AUC. Direct modes fail because they try to predict absolute difficulty from scratch rather than learning a correction—with 117 training samples, they can't generalize even with strong regularization. **Use `residual` mode**.
 
 ## Configuration
 
