@@ -34,8 +34,10 @@ source .venv/bin/activate
 export HF_HUB_ENABLE_HF_TRANSFER=1
 
 # Check for existing checkpoint to resume from
+# Find the most recently modified checkpoint (any type)
 RESUME_ARG=""
-LATEST_CHECKPOINT=$(ls -t "$OUTPUT_DIR"/checkpoint_epoch_*.pt 2>/dev/null | head -1)
+LATEST_CHECKPOINT=$(ls -t "$OUTPUT_DIR"/checkpoint_*.pt 2>/dev/null | head -1)
+
 if [ -n "$LATEST_CHECKPOINT" ]; then
     echo "Found checkpoint to resume from: $LATEST_CHECKPOINT"
     RESUME_ARG="--resume_from $LATEST_CHECKPOINT"

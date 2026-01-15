@@ -352,4 +352,17 @@ class Trainer:
         self.best_auc = checkpoint.get("best_auc", 0.0)
         self._resume_epoch = checkpoint.get("epoch", 0)
 
+        # Check if there's a separate best checkpoint with higher AUC
+        # This prevents overwriting a better checkpoint when resuming from epoch checkpoint
+        best_checkpoint_path = self.output_dir / "checkpoint_best.pt"
+        if best_checkpoint_path.exists() and str(best_checkpoint_path) != checkpoint_path:
+            try:
+                best_checkpoint = torch.load(best_checkpoint_path, map_location="cpu")
+                existing_best_auc = best_checkpoint.get("best_auc", 0.0)
+                if existing_best_auc > self.best_auc:
+                    logger.info(f"Found existing best checkpoint with higher AUC: {existing_best_auc:.4f} > {self.best_auc:.4f}")
+                    self.best_auc = existing_best_auc
+            except Exception as e:
+                logger.warning(f"Could not load existing best checkpoint: {e}")
+
         logger.info(f"Resumed from step {self.global_step}, epoch {self._resume_epoch}, best_auc={self.best_auc:.4f}")
