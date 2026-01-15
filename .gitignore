@@ -118,6 +118,9 @@ chris_output/experiment_b/v3_prompt_test_results.json
 # Personal cluster setup notes
 MIT_ENGAGING_SETUP.md
 
+# Paper PDFs (reference papers in root)
+*.pdf
+
 # Experiment B execution features (regenerable)
 chris_output/experiment_b/execution_features/
 

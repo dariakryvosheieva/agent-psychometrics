@@ -57,6 +57,10 @@ pytest tests/test_irt_pipeline.py -v
 - **500 tasks** (SWE-bench Verified)
 - **78 agents** with unified trajectories
 
+**Default data files:**
+- Response matrix: `clean_data/swebench_verified/swebench_verified_20251120_full.jsonl`
+- IRT model outputs: `clean_data/swebench_verified_20251120_full/1d/` (abilities.csv, items.csv)
+
 ## Documentation
 
 | Document | Purpose |

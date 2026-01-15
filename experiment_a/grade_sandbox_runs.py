@@ -456,8 +456,6 @@ async def main():
         "failed": 0,
     }
 
-    all_features = []
-
     # Grading log file for detailed tracking
     grading_log_file = output_dir / "grading_log.jsonl"
 
@@ -492,7 +490,6 @@ async def main():
                 log_f.write(json.dumps(log_entry) + "\n")
 
             if features:
-                all_features.append(features)
                 stats["success"] += 1
                 print(f"  ✓ Success")
 
