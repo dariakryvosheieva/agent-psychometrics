@@ -67,6 +67,8 @@ def parse_args() -> SADIRTConfig:
     parser.add_argument("--dry_run", action="store_true")
     parser.add_argument("--max_samples", type=int, default=None)
     parser.add_argument("--smoke_test", action="store_true", help="Quick test: load model, run 1 batch, exit")
+    parser.add_argument("--overfit_test", action="store_true", help="Test overfitting on small batch (sanity check)")
+    parser.add_argument("--debug_gradients", action="store_true", help="Enable verbose gradient logging")
 
     # Resumption
     parser.add_argument("--resume_from", type=str, default=None, help="Path to checkpoint to resume from")
@@ -93,6 +95,8 @@ def parse_args() -> SADIRTConfig:
         dry_run=args.dry_run,
         max_samples=args.max_samples,
         smoke_test=args.smoke_test,
+        overfit_test=args.overfit_test,
+        debug_gradients=args.debug_gradients,
         resume_from=args.resume_from,
     )
 
@@ -169,8 +173,32 @@ def run_smoke_test(config: SADIRTConfig):
     # Move batch to device
     batch = {k: v.to(device) for k, v in batch.items()}
 
+    # Shape validation
+    logger.info("=" * 40)
+    logger.info("SHAPE VALIDATION")
+    logger.info("=" * 40)
+    batch_size = batch["input_ids"].shape[0]
+    seq_len = batch["input_ids"].shape[1]
+    logger.info(f"  batch_size: {batch_size}")
+    logger.info(f"  seq_len: {seq_len}")
+    logger.info(f"  agent_idx shape: {batch['agent_idx'].shape} (expected: [{batch_size}])")
+    logger.info(f"  task_idx shape: {batch['task_idx'].shape} (expected: [{batch_size}])")
+    logger.info(f"  input_ids shape: {batch['input_ids'].shape} (expected: [{batch_size}, {seq_len}])")
+    logger.info(f"  attention_mask shape: {batch['attention_mask'].shape} (expected: [{batch_size}, {seq_len}])")
+    logger.info(f"  response shape: {batch['response'].shape} (expected: [{batch_size}])")
+
+    # Validate shapes
+    assert batch["agent_idx"].shape == (batch_size,), f"agent_idx shape mismatch"
+    assert batch["task_idx"].shape == (batch_size,), f"task_idx shape mismatch"
+    assert batch["input_ids"].shape[0] == batch_size, f"input_ids batch size mismatch"
+    assert batch["attention_mask"].shape == batch["input_ids"].shape, f"attention_mask shape mismatch"
+    assert batch["response"].shape == (batch_size,), f"response shape mismatch"
+    logger.info("Shape validation PASSED")
+
     # Forward pass
-    logger.info("Running forward pass...")
+    logger.info("=" * 40)
+    logger.info("FORWARD PASS")
+    logger.info("=" * 40)
     model.train()
     logits = model(
         agent_idx=batch["agent_idx"],
@@ -178,24 +206,191 @@ def run_smoke_test(config: SADIRTConfig):
         input_ids=batch["input_ids"],
         attention_mask=batch["attention_mask"],
     )
-    logger.info(f"Forward pass OK: logits shape = {logits.shape}, values = {logits.detach().cpu().numpy()}")
+    logger.info(f"Output logits shape: {logits.shape} (expected: [{batch_size}])")
+    logger.info(f"Output logits values: {logits.detach().cpu().numpy()}")
+    assert logits.shape == (batch_size,), f"logits shape mismatch: {logits.shape} vs expected ({batch_size},)"
+    logger.info("Forward pass PASSED")
 
     # Backward pass
-    logger.info("Running backward pass...")
+    logger.info("=" * 40)
+    logger.info("BACKWARD PASS")
+    logger.info("=" * 40)
     loss = torch.nn.functional.binary_cross_entropy_with_logits(logits, batch["response"])
     loss.backward()
-    logger.info(f"Backward pass OK: loss = {loss.item():.4f}")
+    logger.info(f"Loss: {loss.item():.4f}")
 
     # Check gradients exist
     grad_count = sum(1 for p in model.parameters() if p.grad is not None)
     total_params = sum(1 for p in model.parameters() if p.requires_grad)
     logger.info(f"Gradients computed for {grad_count}/{total_params} trainable parameters")
 
+    # Verify key parameters have gradients
+    has_theta_grad = any("theta" in n and p.grad is not None for n, p in model.named_parameters())
+    has_beta_grad = any("beta" in n and p.grad is not None for n, p in model.named_parameters())
+    has_lora_grad = any("lora" in n and p.grad is not None for n, p in model.named_parameters())
+    has_head_grad = any("psi_head" in n and p.grad is not None for n, p in model.named_parameters())
+
+    logger.info(f"  theta (agent ability) has gradients: {has_theta_grad}")
+    logger.info(f"  beta (task difficulty) has gradients: {has_beta_grad}")
+    logger.info(f"  LoRA encoder has gradients: {has_lora_grad}")
+    logger.info(f"  psi_head MLP has gradients: {has_head_grad}")
+
+    assert has_theta_grad, "theta embeddings have no gradients!"
+    assert has_beta_grad, "beta embeddings have no gradients!"
+    assert has_lora_grad, "LoRA parameters have no gradients!"
+    assert has_head_grad, "psi_head has no gradients!"
+    logger.info("Gradient flow PASSED")
+
     logger.info("=" * 60)
-    logger.info("SMOKE TEST PASSED")
+    logger.info("SMOKE TEST PASSED - All checks OK")
     logger.info("=" * 60)
 
     return {"status": "passed"}
+
+
+def run_overfit_test(config: SADIRTConfig):
+    """Test that model can overfit a small batch (sanity check).
+
+    This verifies:
+    1. Gradients flow to all parameters
+    2. Loss decreases to near-zero on repeated same batch
+    3. Model can memorize small data (no fundamental bugs)
+    """
+    logger.info("=" * 60)
+    logger.info("OVERFIT TEST: Verifying model can memorize small batch")
+    logger.info("=" * 60)
+
+    set_seed(config.seed)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"Using device: {device}")
+
+    # Load tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(config.model_name, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    # Create minimal dataset
+    full_dataset = TrajectoryIRTDataset(
+        response_matrix_path=config.response_matrix_path,
+        trajectory_dir=config.trajectory_dir,
+        tokenizer=tokenizer,
+        max_length=config.max_length,
+        swebench_dataset=config.swebench_dataset,
+    )
+
+    # Get 8 samples (mix of 0s and 1s ideally)
+    train_pairs, _ = create_train_test_split(full_dataset, test_fraction=0.5, seed=config.seed)
+    train_pairs = train_pairs[:8]
+
+    mini_dataset = TrajectoryIRTDataset(
+        response_matrix_path=config.response_matrix_path,
+        trajectory_dir=config.trajectory_dir,
+        tokenizer=tokenizer,
+        max_length=config.max_length,
+        agent_ids=full_dataset.agent_ids,
+        task_ids=full_dataset.task_ids,
+        pairs=train_pairs,
+        swebench_dataset=config.swebench_dataset,
+    )
+
+    loader = DataLoader(mini_dataset, batch_size=8, shuffle=False, num_workers=0)
+    batch = next(iter(loader))
+    batch = {k: v.to(device) for k, v in batch.items()}
+
+    logger.info(f"Batch: {len(batch['response'])} samples")
+    logger.info(f"Response distribution: {batch['response'].cpu().numpy()}")
+    logger.info(f"Input shape: {batch['input_ids'].shape}")
+
+    # Create model
+    model = SADIRT(
+        num_agents=full_dataset.num_agents,
+        num_tasks=full_dataset.num_tasks,
+        model_name=config.model_name,
+        lora_r=config.lora_r,
+    ).to(device)
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    criterion = torch.nn.BCEWithLogitsLoss()
+
+    # Train for 100 steps on same batch
+    logger.info("Training 100 steps on same batch...")
+    model.train()
+    losses = []
+
+    for step in range(100):
+        optimizer.zero_grad()
+
+        logits = model(
+            agent_idx=batch["agent_idx"],
+            task_idx=batch["task_idx"],
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+        )
+
+        loss = criterion(logits, batch["response"])
+        loss.backward()
+
+        # Check gradient norms at first step
+        if step == 0:
+            logger.info("Gradient check at step 0:")
+            for name, param in model.named_parameters():
+                if param.grad is not None:
+                    grad_norm = param.grad.norm().item()
+                    if grad_norm > 0:
+                        logger.info(f"  {name}: grad_norm={grad_norm:.6f}")
+
+        optimizer.step()
+        losses.append(loss.item())
+
+        if step % 10 == 0:
+            probs = torch.sigmoid(logits).detach().cpu().numpy()
+            logger.info(f"Step {step}: loss={loss.item():.4f}, probs={probs}")
+
+    # Analyze results
+    logger.info("=" * 40)
+    logger.info("OVERFIT TEST RESULTS")
+    logger.info("=" * 40)
+
+    initial_loss = losses[0]
+    final_loss = losses[-1]
+    loss_reduction = (initial_loss - final_loss) / initial_loss * 100
+
+    logger.info(f"Initial loss: {initial_loss:.4f}")
+    logger.info(f"Final loss: {final_loss:.4f}")
+    logger.info(f"Loss reduction: {loss_reduction:.1f}%")
+
+    # Final predictions
+    model.eval()
+    with torch.no_grad():
+        final_logits = model(
+            agent_idx=batch["agent_idx"],
+            task_idx=batch["task_idx"],
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+        )
+    final_probs = torch.sigmoid(final_logits).cpu().numpy()
+    targets = batch["response"].cpu().numpy()
+
+    logger.info(f"Final predictions: {final_probs}")
+    logger.info(f"Targets:           {targets}")
+
+    # Check if we can overfit
+    if final_loss < 0.1:
+        logger.info("OVERFIT TEST PASSED: Model can memorize small batch")
+        status = "passed"
+    elif final_loss < 0.3:
+        logger.info("OVERFIT TEST PARTIAL: Loss decreased but didn't fully converge")
+        status = "partial"
+    else:
+        logger.info("OVERFIT TEST FAILED: Model cannot fit small batch - check for bugs")
+        status = "failed"
+
+    return {
+        "status": status,
+        "initial_loss": initial_loss,
+        "final_loss": final_loss,
+        "loss_reduction_pct": loss_reduction,
+    }
 
 
 def run_full_auc_evaluation(config: SADIRTConfig):
@@ -399,9 +594,18 @@ def main():
     for key, value in vars(config).items():
         logger.info(f"  {key}: {value}")
 
+    # Enable debug logging if requested
+    if config.debug_gradients:
+        logging.getLogger("experiment_sad_irt.train").setLevel(logging.DEBUG)
+
     # Smoke test mode - just check code paths
     if config.smoke_test:
         run_smoke_test(config)
+        return
+
+    # Overfit test mode - verify model can memorize small batch
+    if config.overfit_test:
+        run_overfit_test(config)
         return
 
     if config.mode == "full_auc":

@@ -18,6 +18,48 @@ from .evaluate import compute_metrics
 logger = logging.getLogger(__name__)
 
 
+def compute_gradient_norms(model: nn.Module) -> Dict[str, float]:
+    """Compute gradient norms for each parameter group.
+
+    Returns dict with:
+    - total_norm: Overall gradient norm
+    - embedding_norm: Gradient norm for theta/beta embeddings
+    - encoder_norm: Gradient norm for encoder (LoRA) params
+    - head_norm: Gradient norm for psi_head MLP
+    """
+    norms = {"embedding": 0.0, "encoder": 0.0, "head": 0.0, "other": 0.0}
+    counts = {"embedding": 0, "encoder": 0, "head": 0, "other": 0}
+
+    for name, param in model.named_parameters():
+        if param.grad is None:
+            continue
+        grad_norm = param.grad.data.norm(2).item() ** 2
+
+        if "theta" in name or "beta" in name:
+            norms["embedding"] += grad_norm
+            counts["embedding"] += 1
+        elif "lora" in name:
+            norms["encoder"] += grad_norm
+            counts["encoder"] += 1
+        elif "psi_head" in name:
+            norms["head"] += grad_norm
+            counts["head"] += 1
+        else:
+            norms["other"] += grad_norm
+            counts["other"] += 1
+
+    # Convert to actual norms
+    result = {}
+    total = 0.0
+    for key in norms:
+        if counts[key] > 0:
+            result[f"{key}_norm"] = norms[key] ** 0.5
+            total += norms[key]
+    result["total_norm"] = total ** 0.5
+
+    return result
+
+
 class Trainer:
     """Trainer for SAD-IRT model."""
 
@@ -92,9 +134,18 @@ class Trainer:
         return AdamW(param_groups, weight_decay=self.config.weight_decay)
 
     def _setup_scheduler(self):
-        """Setup learning rate scheduler with warmup."""
-        num_training_steps = len(self.train_loader) * self.config.epochs
-        num_warmup_steps = int(num_training_steps * self.config.warmup_ratio)
+        """Setup learning rate scheduler with warmup.
+
+        Note: Counts are in optimizer steps (after gradient accumulation),
+        not raw batches.
+        """
+        # Calculate optimizer steps, not raw batches
+        batches_per_epoch = len(self.train_loader)
+        optimizer_steps_per_epoch = batches_per_epoch // self.config.gradient_accumulation_steps
+        num_optimizer_steps = optimizer_steps_per_epoch * self.config.epochs
+        num_warmup_steps = int(num_optimizer_steps * self.config.warmup_ratio)
+
+        logger.info(f"Scheduler setup: {num_optimizer_steps} optimizer steps, {num_warmup_steps} warmup steps")
 
         warmup_scheduler = LinearLR(
             self.optimizer,
@@ -105,7 +156,7 @@ class Trainer:
 
         cosine_scheduler = CosineAnnealingLR(
             self.optimizer,
-            T_max=num_training_steps - num_warmup_steps,
+            T_max=num_optimizer_steps - num_warmup_steps,
             eta_min=1e-6,
         )
 
@@ -161,12 +212,18 @@ class Trainer:
                 # Logging
                 if self.global_step % self.config.logging_steps == 0:
                     lr = self.scheduler.get_last_lr()[0]
-                    pbar.set_postfix({"loss": loss.item() * self.config.gradient_accumulation_steps, "lr": lr})
+                    current_loss = loss.item() * self.config.gradient_accumulation_steps
+                    pbar.set_postfix({"loss": current_loss, "lr": f"{lr:.2e}"})
+
+                    # Log gradient norms (before clipping, so compute before step)
+                    # Note: gradients are already accumulated at this point
+                    grad_norms = compute_gradient_norms(self.model)
+                    logger.debug(f"Step {self.global_step} gradients: {grad_norms}")
 
                     # Log ψ stats if SAD-IRT
                     if self.is_sad_irt and hasattr(self.model, "get_psi_stats"):
                         psi_stats = self.model.get_psi_stats()
-                        logger.debug(f"ψ stats: {psi_stats}")
+                        logger.debug(f"Step {self.global_step} ψ stats: {psi_stats}")
 
                 # Evaluation
                 if self.eval_loader is not None and self.global_step % self.config.eval_steps == 0:

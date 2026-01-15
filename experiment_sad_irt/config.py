@@ -52,6 +52,8 @@ class SADIRTConfig:
     dry_run: bool = False
     max_samples: Optional[int] = None  # Limit samples for testing
     smoke_test: bool = False  # Just check code paths, no real training
+    overfit_test: bool = False  # Test overfitting on small batch
+    debug_gradients: bool = False  # Enable verbose gradient logging
 
     # Resumption
     resume_from: Optional[str] = None  # Path to checkpoint to resume from
