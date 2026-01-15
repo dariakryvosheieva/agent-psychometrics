@@ -113,7 +113,7 @@ async def grade_single_task(
     semantic_only: bool = False,
     max_retries: int = 3,
     retry_delay: int = 60,
-) -> Optional[Dict]:
+) -> tuple[Optional[Dict], dict]:
     """Grade a single task using Lunette with structured output.
 
     Note: Batch grading (limit > 1 in investigate()) causes 504 Gateway Timeout
@@ -133,8 +133,10 @@ async def grade_single_task(
         retry_delay: Seconds to wait between retries
 
     Returns:
-        Feature dict or None if failed
+        Tuple of (feature dict or None, timing dict)
     """
+    timing = {"task_id": task_id, "attempts": 0, "retry_wait_s": 0.0, "api_call_s": 0.0}
+    task_start = time.perf_counter()
     output_file = output_dir / f"{task_id}.json"
 
     # Format grading prompt with task info
@@ -173,16 +175,20 @@ async def grade_single_task(
     timeout_log_file = output_dir / "504_timeout_log.jsonl"
 
     for attempt in range(max_retries + 1):
+        timing["attempts"] = attempt + 1
         try:
             # Run investigation
+            api_start = time.perf_counter()
             results = await client.investigate(
                 run_id=run_id,
                 plan=plan,
                 limit=1,
             )
+            timing["api_call_s"] += time.perf_counter() - api_start
             # Success - break out of retry loop
             break
         except Exception as e:
+            timing["api_call_s"] += time.perf_counter() - api_start
             last_error = e
             error_str = str(e)
             # Check if it's a 504 timeout
@@ -203,6 +209,7 @@ async def grade_single_task(
 
                 if attempt < max_retries:
                     print(f"    504 timeout at {datetime.now().strftime('%H:%M:%S')}, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})...")
+                    timing["retry_wait_s"] += retry_delay
                     time.sleep(retry_delay)
                     continue
                 else:
@@ -218,7 +225,8 @@ async def grade_single_task(
                         "run_id": run_id,
                         "graded_at": datetime.now().isoformat(),
                     }, f, indent=2)
-                return None
+                timing["total_s"] = time.perf_counter() - task_start
+                return None, timing
             else:
                 # Non-timeout, non-404 error, don't retry
                 raise
@@ -235,13 +243,15 @@ async def grade_single_task(
                     "run_id": run_id,
                     "graded_at": datetime.now().isoformat(),
                 }, f, indent=2)
-            return None
+            timing["total_s"] = time.perf_counter() - task_start
+            return None, timing
 
     # Process results
     try:
         if not results.results:
             print(f"    No results returned from Lunette")
-            return None
+            timing["total_s"] = time.perf_counter() - task_start
+            return None, timing
 
         # Get structured response
         result_data = results.results[0].data
@@ -250,7 +260,8 @@ async def grade_single_task(
             features = result_data
         else:
             print(f"    Unexpected result type: {type(result_data)}")
-            return None
+            timing["total_s"] = time.perf_counter() - task_start
+            return None, timing
 
         # Add metadata
         features["_instance_id"] = task_id
@@ -263,7 +274,8 @@ async def grade_single_task(
         with open(output_file, "w") as f:
             json.dump(features, f, indent=2)
 
-        return features
+        timing["total_s"] = time.perf_counter() - task_start
+        return features, timing
 
     except Exception as e:
         print(f"    Error processing results: {e}")
@@ -280,7 +292,8 @@ async def grade_single_task(
                 "graded_at": datetime.now().isoformat(),
             }, f, indent=2)
 
-        return None
+        timing["total_s"] = time.perf_counter() - task_start
+        return None, timing
 
 
 def aggregate_to_csv(output_dir: Path) -> Optional[Path]:
@@ -458,6 +471,7 @@ async def main():
 
     # Grading log file for detailed tracking
     grading_log_file = output_dir / "grading_log.jsonl"
+    timing_log_file = output_dir / "timing_log.jsonl"
 
     async with LunetteClient() as client:
         for task_idx, task in enumerate(tasks_to_grade):
@@ -469,7 +483,7 @@ async def main():
             print(f"  Run ID: {run_id[:16]}...")
             print(f"  Trajectory ID: {trajectory_id[:16]}...")
 
-            features = await grade_single_task(
+            features, timing = await grade_single_task(
                 client=client,
                 task_id=task_id,
                 run_id=run_id,
@@ -477,6 +491,17 @@ async def main():
                 output_dir=output_dir,
                 semantic_only=args.semantic_only,
             )
+
+            # Log timing data
+            timing["timestamp"] = datetime.now().isoformat()
+            timing["success"] = features is not None
+            with open(timing_log_file, "a") as tf:
+                tf.write(json.dumps(timing) + "\n")
+
+            # Print timing summary
+            api_pct = (timing["api_call_s"] / timing["total_s"] * 100) if timing["total_s"] > 0 else 0
+            retry_pct = (timing["retry_wait_s"] / timing["total_s"] * 100) if timing["total_s"] > 0 else 0
+            print(f"  Time: {timing['total_s']:.1f}s (API: {timing['api_call_s']:.1f}s/{api_pct:.0f}%, retry wait: {timing['retry_wait_s']:.0f}s/{retry_pct:.0f}%, attempts: {timing['attempts']})")
 
             # Log grading result
             log_entry = {
