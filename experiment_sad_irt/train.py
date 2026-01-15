@@ -230,10 +230,10 @@ class Trainer:
                     metrics = self.evaluate()
                     logger.info(f"Step {self.global_step}: {metrics}")
 
-                    # Save best model
+                    # Save best model (with metrics for easy identification)
                     if metrics["auc"] > self.best_auc:
                         self.best_auc = metrics["auc"]
-                        self.save_checkpoint("best")
+                        self.save_checkpoint("best", metrics=metrics)
 
                     self.model.train()
 
@@ -293,10 +293,10 @@ class Trainer:
 
                 if eval_metrics["auc"] > self.best_auc:
                     self.best_auc = eval_metrics["auc"]
-                    self.save_checkpoint("best")
+                    self.save_checkpoint("best", metrics=eval_metrics)
 
-            # Save checkpoint
-            self.save_checkpoint(f"epoch_{epoch + 1}")
+            # Save epoch checkpoint (with eval metrics if available)
+            self.save_checkpoint(f"epoch_{epoch + 1}", metrics=eval_metrics if self.eval_loader else None)
 
         # Final evaluation
         final_metrics = {}
@@ -306,9 +306,19 @@ class Trainer:
 
         return final_metrics
 
-    def save_checkpoint(self, name: str):
-        """Save model checkpoint."""
-        checkpoint_path = self.output_dir / f"checkpoint_{name}.pt"
+    def save_checkpoint(self, name: str, metrics: Optional[Dict[str, float]] = None):
+        """Save model checkpoint with versioned filename.
+
+        Checkpoints are saved with timestamp to avoid overwriting.
+        Format: checkpoint_{name}_step{step}_{timestamp}.pt
+
+        Args:
+            name: Checkpoint type (e.g., "best", "epoch_1")
+            metrics: Optional metrics dict to include (e.g., {"auc": 0.85})
+        """
+        import time
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        checkpoint_path = self.output_dir / f"checkpoint_{name}_step{self.global_step}_{timestamp}.pt"
 
         # For SAD-IRT, only save the trainable parts
         if self.is_sad_irt:
@@ -321,22 +331,30 @@ class Trainer:
         else:
             state_dict = self.model.state_dict()
 
-        torch.save(
-            {
-                "model_state_dict": state_dict,
-                "optimizer_state_dict": self.optimizer.state_dict(),
-                "scheduler_state_dict": self.scheduler.state_dict(),
-                "global_step": self.global_step,
-                "best_auc": self.best_auc,
-                "config": self.config,
-                "epoch": getattr(self, "_current_epoch", 0),
-            },
-            checkpoint_path,
-        )
+        checkpoint_data = {
+            "model_state_dict": state_dict,
+            "optimizer_state_dict": self.optimizer.state_dict(),
+            "scheduler_state_dict": self.scheduler.state_dict(),
+            "global_step": self.global_step,
+            "best_auc": self.best_auc,
+            "config": self.config,
+            "epoch": getattr(self, "_current_epoch", 0),
+            "timestamp": timestamp,
+        }
+        if metrics:
+            checkpoint_data["metrics"] = metrics
+
+        torch.save(checkpoint_data, checkpoint_path)
         logger.info(f"Saved checkpoint to {checkpoint_path}")
 
     def load_checkpoint(self, checkpoint_path: str):
-        """Load model checkpoint for resumption."""
+        """Load model checkpoint for resumption.
+
+        Args:
+            checkpoint_path: Path to checkpoint file. The checkpoint contains
+                model weights, optimizer state, scheduler state, and training
+                progress (global_step, epoch, best_auc).
+        """
         logger.info(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=self.device)
 
@@ -352,17 +370,10 @@ class Trainer:
         self.best_auc = checkpoint.get("best_auc", 0.0)
         self._resume_epoch = checkpoint.get("epoch", 0)
 
-        # Check if there's a separate best checkpoint with higher AUC
-        # This prevents overwriting a better checkpoint when resuming from epoch checkpoint
-        best_checkpoint_path = self.output_dir / "checkpoint_best.pt"
-        if best_checkpoint_path.exists() and str(best_checkpoint_path) != checkpoint_path:
-            try:
-                best_checkpoint = torch.load(best_checkpoint_path, map_location="cpu")
-                existing_best_auc = best_checkpoint.get("best_auc", 0.0)
-                if existing_best_auc > self.best_auc:
-                    logger.info(f"Found existing best checkpoint with higher AUC: {existing_best_auc:.4f} > {self.best_auc:.4f}")
-                    self.best_auc = existing_best_auc
-            except Exception as e:
-                logger.warning(f"Could not load existing best checkpoint: {e}")
-
+        # Log checkpoint info
+        timestamp = checkpoint.get("timestamp", "unknown")
+        metrics = checkpoint.get("metrics", {})
         logger.info(f"Resumed from step {self.global_step}, epoch {self._resume_epoch}, best_auc={self.best_auc:.4f}")
+        logger.info(f"Checkpoint timestamp: {timestamp}")
+        if metrics:
+            logger.info(f"Checkpoint metrics: {metrics}")
