@@ -103,7 +103,7 @@ def load_predictions(
             if has_split:
                 split_v = str(row.get(split_col, "") or "").strip()
                 # By default, only keep the train/test splits; ignore others (e.g. zero_success).
-                if split_v not in ("train", "test"):
+                if split_v not in ("train", "test", "inference"):
                     continue
                 splits.append(split_v)
             y_true.append(float(yt))
@@ -167,11 +167,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
             "split_col": str(args.split_col),
             "overall": {"r2": float(overall.r2), "n": int(overall.n)},
             "by_split": {k: {"r2": float(v.r2), "n": int(v.n)} for k, v in by_split.items()},
-            "test": {
-                "test_split_value": str(args.test_split_value),
-                "r2": (float(test_r2.r2) if test_r2 is not None else None),
-                "n": (int(test_r2.n) if test_r2 is not None else None),
-            },
+            "test_split_value": str(args.test_split_value),
         }
         Path(str(args.json_out)).parent.mkdir(parents=True, exist_ok=True)
         Path(str(args.json_out)).write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

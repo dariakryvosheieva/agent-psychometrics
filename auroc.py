@@ -99,7 +99,7 @@ def load_zs_predictions_csv(path: Path) -> Dict[str, Tuple[float, str]]:
             item_id = normalize_swebench_item_id(str(row.get("item_id", "") or "").strip())
             split = str(row.get("split", "") or "").strip().lower()
             z_s = str(row.get("diff_pred", "") or "").strip()
-            if not item_id or split not in ("train", "test") or not z_s:
+            if not item_id or split not in ("train", "test", "inference") or not z_s:
                 continue
             out[item_id] = (float(z_s), split)
     return out
@@ -153,7 +153,7 @@ def main(argv: List[str] | None = None) -> int:
     ap.add_argument(
         "--zs",
         type=str,
-        default="./out/chris_irt_qwen3vl8b_linear/predictions.csv",
+        default="./out/swebench_verified/predictions.csv",
         help="Path to predictions.csv (expects columns: item_id,diff_true,diff_pred,split).",
     )
     ap.add_argument(
