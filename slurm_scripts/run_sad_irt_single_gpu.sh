@@ -2,11 +2,12 @@
 #SBATCH --job-name=sad_irt
 #SBATCH --output=logs/sad_irt_%j.out
 #SBATCH --error=logs/sad_irt_%j.err
-#SBATCH --partition=sched_mit_psfc_gpu_r8
-#SBATCH --time=8:00:00
+#SBATCH --partition=mit_normal_gpu
+#SBATCH --account=mit_general
+#SBATCH --time=6:00:00
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:h200:1
 #SBATCH --nodes=1
 
 # Configuration
