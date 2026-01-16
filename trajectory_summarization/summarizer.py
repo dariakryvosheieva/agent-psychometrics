@@ -56,7 +56,6 @@ class TrajectorySummarizer:
             max_num_seqs=config.max_num_seqs,
             max_model_len=config.max_model_len,
             trust_remote_code=True,
-            enforce_eager=True,  # Disable torch.compile to avoid MoE kernel issues
         )
 
         self.sampling_params = SamplingParams(
