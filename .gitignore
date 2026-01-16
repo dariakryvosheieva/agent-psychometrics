@@ -150,9 +150,6 @@ chris_output/experiment_a_*/
 chris_output/experiment_b_*/
 chris_output/experiment_pass_at_k/
 
-# Pass@K experiment outputs
-experiment_pass_at_k/
-
 # Trajectory summaries (large, generated on cluster or via API)
 chris_output/trajectory_summaries/
 chris_output/trajectory_summaries_api/
