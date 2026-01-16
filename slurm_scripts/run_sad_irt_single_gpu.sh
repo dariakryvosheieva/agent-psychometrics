@@ -12,7 +12,7 @@
 
 # Configuration
 OUTPUT_DIR="chris_output/sad_irt"
-EPOCHS=10
+EPOCHS=3
 
 # Create directories
 mkdir -p logs
@@ -56,7 +56,7 @@ fi
 python -m experiment_sad_irt.train_evaluate \
     --mode full_auc \
     --model_name Qwen/Qwen3-0.6B \
-    --max_length 8192 \
+    --max_length 4096 \
     --batch_size 16 \
     --gradient_accumulation_steps 2 \
     --epochs $EPOCHS \

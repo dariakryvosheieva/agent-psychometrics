@@ -148,3 +148,10 @@ chris_output/experiment_a/experiment_a_results.json
 # Additional experiment output directories
 chris_output/experiment_a_*/
 chris_output/experiment_b_*/
+chris_output/experiment_pass_at_k/
+
+# Pass@K experiment outputs
+experiment_pass_at_k/
+
+# Trajectory summaries (large, generated on cluster)
+chris_output/trajectory_summaries/

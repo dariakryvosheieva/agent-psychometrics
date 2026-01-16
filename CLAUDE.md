@@ -112,3 +112,8 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 - Always commit changes after completing a group of related modifications
 - Add any new experimental output files to `.gitignore` before committing
 - Goal: leave the repository in the same clean state you found it
+
+**OpenAI API Usage:**
+- Use the new Responses API (`client.responses.create()`) instead of the older Chat Completions API (`client.chat.completions.create()`)
+- Key differences: use `input=` instead of `messages=`, and access output via `response.output_text`
+- See `trajectory_summarization_api/openai_client.py` for async implementation example
