@@ -109,8 +109,8 @@ def parse_args():
     parser.add_argument(
         "--max_num_seqs",
         type=int,
-        default=40,
-        help="Maximum number of sequences for continuous batching (limited by KV cache at 128K)",
+        default=16,
+        help="Maximum number of sequences for continuous batching",
     )
 
     # Debug arguments
