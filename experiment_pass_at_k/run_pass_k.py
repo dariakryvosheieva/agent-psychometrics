@@ -39,7 +39,7 @@ from experiment_pass_at_k.config import ExperimentPassKConfig
 # Pricing per 1M tokens (as of Jan 2026)
 # Sources: https://openai.com/api/pricing/, https://platform.openai.com/docs/pricing
 PRICING = {
-    "openai/o1-2024-12-05": {"input": 15.0, "output": 60.0},  # o1 pricing
+    "openai/o1-2024-12-17": {"input": 15.0, "output": 60.0},  # o1 pricing
     "openai/o3-2025-04-16": {"input": 2.0, "output": 8.0},    # o3 pricing (post June 2025 80% discount)
     "openai/o1-preview-2024-09-12": {"input": 15.0, "output": 60.0},
     "openai/gpt-4o-2024-08-06": {"input": 2.5, "output": 10.0},
@@ -130,28 +130,35 @@ def extract_result_from_eval_log(log_path: Path, model: str) -> Dict:
                         result["cost_usd"] = input_cost + output_cost
 
             # Extract success from samples
-            # samples.json contains the actual results with scores
+            # Inspect uses either samples.json OR samples/<task_id>_epoch_<n>.json
+            sample = None
             if 'samples.json' in zf.namelist():
                 with zf.open('samples.json') as f:
                     samples = json.load(f)
                     if samples and len(samples) > 0:
-                        sample = samples[0]  # We run one sample at a time
-                        # Check for score
-                        if "scores" in sample:
-                            # SWE-bench uses a custom scorer
-                            # Success is typically indicated by a score > 0
-                            scores = sample["scores"]
-                            if scores:
-                                # Get the first score value
-                                for scorer_name, score_data in scores.items():
-                                    if isinstance(score_data, dict) and "value" in score_data:
-                                        result["success"] = score_data["value"] == 1 or score_data["value"] == "C"
-                                        result["score"] = score_data["value"]
-                                        break
-                                    elif isinstance(score_data, (int, float)):
-                                        result["success"] = score_data == 1
-                                        result["score"] = score_data
-                                        break
+                        sample = samples[0]
+            else:
+                # Look for samples/<task_id>_epoch_1.json pattern
+                sample_files = [n for n in zf.namelist() if n.startswith('samples/') and n.endswith('.json')]
+                if sample_files:
+                    with zf.open(sample_files[0]) as f:
+                        sample = json.load(f)
+
+            if sample and "scores" in sample:
+                # SWE-bench uses a custom scorer
+                # Success is typically indicated by a score > 0
+                scores = sample["scores"]
+                if scores:
+                    # Get the first score value
+                    for scorer_name, score_data in scores.items():
+                        if isinstance(score_data, dict) and "value" in score_data:
+                            result["success"] = score_data["value"] == 1 or score_data["value"] == 1.0 or score_data["value"] == "C"
+                            result["score"] = score_data["value"]
+                            break
+                        elif isinstance(score_data, (int, float)):
+                            result["success"] = score_data == 1 or score_data == 1.0
+                            result["score"] = score_data
+                            break
 
     except Exception as e:
         result["extraction_error"] = str(e)
@@ -364,6 +371,12 @@ def main():
         dest="cleanup",
         help="Keep Docker images after task completion",
     )
+    parser.add_argument(
+        "--parallel-tasks",
+        type=int,
+        default=1,
+        help="Number of tasks to run in parallel (default: 1 = sequential). Higher values use more disk for Docker images.",
+    )
     args = parser.parse_args()
 
     # Load config
@@ -375,6 +388,7 @@ def main():
     message_limit = args.message_limit or config.message_limit
     max_parallel = args.parallel
     cleanup_images = args.cleanup
+    parallel_tasks = args.parallel_tasks
 
     # Load tasks
     if args.task_ids:
@@ -450,72 +464,90 @@ def main():
         print("No work to do!")
         return
 
-    # Process one task at a time: run all k attempts in parallel, then delete image
-    print(f"\nProcessing tasks (parallel attempts per task, cleanup={cleanup_images})...")
+    # Process tasks in batches based on parallel_tasks setting
+    print(f"\nProcessing tasks (parallel_tasks={parallel_tasks}, parallel_attempts={max_parallel}, cleanup={cleanup_images})...")
     print("-" * 60)
 
     all_results = []
     completed_jobs = 0
     start_time = time.time()
 
-    for task_idx, task_info in enumerate(tasks_to_run):
-        task_id = task_info["task_id"]
-        difficulty = task_info["difficulty"]
-        existing_attempts = task_info["existing"]
-        needed_attempts = task_info["needed"]
+    # Process tasks in batches
+    for batch_start in range(0, len(tasks_to_run), parallel_tasks):
+        batch = tasks_to_run[batch_start:batch_start + parallel_tasks]
+        batch_task_ids = [t["task_id"] for t in batch]
 
-        print(f"\n[{task_idx + 1}/{len(tasks_to_run)}] {task_id} ({len(needed_attempts)} attempts)")
+        print(f"\n=== Batch {batch_start // parallel_tasks + 1}: {len(batch)} tasks ===")
+        for t in batch:
+            print(f"  - {t['task_id']} ({len(t['needed'])} attempts needed)")
 
-        # Build jobs for all k attempts of this task
-        jobs = []
-        for attempt_num in needed_attempts:
-            job_log_dir = base_log_dir / f"{task_id}_attempt{attempt_num}"
-            job_log_dir.mkdir(parents=True, exist_ok=True)
-            jobs.append((
-                model,
-                task_id,
-                attempt_num,
-                message_limit,
-                config.sandbox,
-                job_log_dir,
-            ))
+        # Build ALL jobs for ALL tasks in this batch
+        all_jobs = []
+        job_to_task = {}  # Map job to task info for result aggregation
+        for task_info in batch:
+            task_id = task_info["task_id"]
+            for attempt_num in task_info["needed"]:
+                job_log_dir = base_log_dir / f"{task_id}_attempt{attempt_num}"
+                job_log_dir.mkdir(parents=True, exist_ok=True)
+                job = (
+                    model,
+                    task_id,
+                    attempt_num,
+                    message_limit,
+                    config.sandbox,
+                    job_log_dir,
+                )
+                all_jobs.append(job)
+                job_to_task[job] = task_info
 
-        # Run all k attempts for this task in parallel
-        task_results = existing_attempts.copy()
+        # Initialize results storage for each task in batch
+        batch_results = {t["task_id"]: t["existing"].copy() for t in batch}
 
-        with ThreadPoolExecutor(max_workers=min(max_parallel, len(jobs))) as executor:
-            futures = {executor.submit(run_single_job, job): job for job in jobs}
+        # Run ALL jobs for ALL tasks in batch in parallel
+        total_workers = min(max_parallel * parallel_tasks, len(all_jobs))
+        print(f"\nRunning {len(all_jobs)} jobs with {total_workers} workers...")
+
+        with ThreadPoolExecutor(max_workers=total_workers) as executor:
+            futures = {executor.submit(run_single_job, job): job for job in all_jobs}
             for future in as_completed(futures):
+                job = futures[future]
+                task_id = job[1]  # task_id is second element of job tuple
                 try:
                     result = future.result()
-                    task_results.append(result)
+                    batch_results[task_id].append(result)
                     completed_jobs += 1
+
+                    # Progress update
+                    elapsed = time.time() - start_time
+                    rate = completed_jobs / elapsed if elapsed > 0 else 0
+                    eta = (total_jobs - completed_jobs) / rate if rate > 0 else 0
+                    safe_print(f"  [{completed_jobs}/{total_jobs}] {task_id} attempt {result.get('attempt', '?')}: {'SUCCESS' if result.get('success') else 'FAIL'} - ETA: {eta/60:.1f} min")
                 except Exception as e:
-                    safe_print(f"  ERROR: {e}")
+                    safe_print(f"  ERROR on {task_id}: {e}")
                     completed_jobs += 1
 
-        # Save results for this task
-        task_result = save_task_result(
-            output_dir=config.output_dir,
-            model=model,
-            task_id=task_id,
-            irt_difficulty=difficulty,
-            k=k,
-            attempts=task_results,
-        )
-        all_results.append(task_result)
+        # Save results for each task in batch
+        for task_info in batch:
+            task_id = task_info["task_id"]
+            task_results = batch_results[task_id]
+            task_result = save_task_result(
+                output_dir=config.output_dir,
+                model=model,
+                task_id=task_id,
+                irt_difficulty=task_info["difficulty"],
+                k=k,
+                attempts=task_results,
+            )
+            all_results.append(task_result)
+            successes = sum(1 for a in task_results if a.get("success", False))
+            print(f"  {task_id}: {successes}/{len(task_results)} passed")
 
-        # Progress update
-        elapsed = time.time() - start_time
-        rate = completed_jobs / elapsed if elapsed > 0 else 0
-        eta = (total_jobs - completed_jobs) / rate if rate > 0 else 0
-        successes = sum(1 for a in task_results if a.get("success", False))
-        print(f"  Done: {successes}/{len(task_results)} passed. Overall: {completed_jobs}/{total_jobs} ({completed_jobs/total_jobs*100:.1f}%) - ETA: {eta/60:.1f} min")
-
-        # Delete the Docker image for this task
+        # Delete Docker images for tasks in this batch
         if cleanup_images:
-            image_name = get_docker_image_name(task_id)
-            delete_docker_image(image_name)
+            print(f"\nCleaning up Docker images for batch...")
+            for task_id in batch_task_ids:
+                image_name = get_docker_image_name(task_id)
+                delete_docker_image(image_name)
 
     # Also include tasks that were already complete (skipped above)
     for task in tasks:

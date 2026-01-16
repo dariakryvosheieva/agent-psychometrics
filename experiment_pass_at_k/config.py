@@ -21,7 +21,7 @@ class ExperimentPassKConfig:
     # Models (date-checkpointed versions)
     # M1: Best reasoning model before M1 cutoff (Dec 12, 2024)
     # M2: Best reasoning model before M2 cutoff (July 20, 2025)
-    m1_model: str = "openai/o1-2024-12-05"
+    m1_model: str = "openai/o1-2024-12-17"
     m2_model: str = "openai/o3-2025-04-16"
 
     # Inspect eval settings
