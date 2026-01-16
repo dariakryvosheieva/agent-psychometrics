@@ -41,6 +41,8 @@ from experiment_pass_at_k.config import ExperimentPassKConfig
 PRICING = {
     "openai/o1-2024-12-17": {"input": 15.0, "output": 60.0},  # o1 pricing
     "openai/o3-2025-04-16": {"input": 2.0, "output": 8.0},    # o3 pricing (post June 2025 80% discount)
+    "openai/o4-mini": {"input": 1.10, "output": 4.40},        # o4-mini pricing
+    "openai/gpt-5-mini": {"input": 0.25, "output": 2.0},      # gpt-5-mini pricing
     "openai/o1-preview-2024-09-12": {"input": 15.0, "output": 60.0},
     "openai/gpt-4o-2024-08-06": {"input": 2.5, "output": 10.0},
     "openai/gpt-4o": {"input": 2.5, "output": 10.0},
