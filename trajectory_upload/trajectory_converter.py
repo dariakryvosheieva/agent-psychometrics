@@ -1308,6 +1308,9 @@ def convert_agent_trajectories(
 
             task_id = traj_path.stem
             task_id = re.sub(r'_traj$', '', task_id)
+            # Handle instance_ prefix (seen in blackboxai agent)
+            if task_id.startswith('instance_'):
+                task_id = task_id[9:]
 
             # Filter by verified task IDs if specified
             if verified_task_ids is not None and task_id not in verified_task_ids:
@@ -1519,14 +1522,14 @@ def convert_all_agents(
         agent_name = agent_dir.name
         trajs_dir = agent_dir / 'trajs'
 
-        # Check if has files
-        traj_files = list(trajs_dir.iterdir()) if trajs_dir.exists() else []
-        traj_files = [f for f in traj_files if f.is_file() and not f.name.startswith('.')]
+        # Check if has files or directories (nested formats have subdirs, not files)
+        traj_items = list(trajs_dir.iterdir()) if trajs_dir.exists() else []
+        traj_items = [f for f in traj_items if not f.name.startswith('.')]
 
-        if not traj_files:
+        if not traj_items:
             continue
 
-        print(f"\n[{i+1}/{len(agent_dirs)}] {agent_name} ({len(traj_files)} files)")
+        print(f"\n[{i+1}/{len(agent_dirs)}] {agent_name} ({len(traj_items)} items)")
 
         output_dir = output_base_dir / agent_name
 
