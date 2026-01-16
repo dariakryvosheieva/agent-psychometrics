@@ -11,7 +11,7 @@
 #SBATCH --array=0-1
 
 # Trajectory Summarization Pipeline
-# Uses vLLM with Qwen3-Coder-30B-A3B-Instruct (MoE: 30B total, 3B active)
+# Uses vLLM with Qwen2.5-14B-Instruct (dense model, no MoE kernels needed)
 # Runs as job array: each job gets 1 GPU and processes half the data
 #
 # Run from: ~/model_irt
@@ -48,7 +48,8 @@ echo ""
 # Configuration
 TRAJECTORY_DIR="trajectory_data/unified_trajs"
 OUTPUT_DIR="chris_output/trajectory_summaries"
-MODEL="Qwen/Qwen3-Coder-30B-A3B-Instruct"
+# Using dense model to avoid MoE kernel issues (vLLM _moe_C not compiled)
+MODEL="Qwen/Qwen2.5-14B-Instruct"
 BATCH_SIZE=16
 NUM_SHARDS=2
 SHARD_ID=${SLURM_ARRAY_TASK_ID}

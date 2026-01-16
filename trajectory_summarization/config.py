@@ -10,9 +10,9 @@ class SummarizationConfig:
     """Configuration for trajectory summarization."""
 
     # Model settings
-    # Qwen3-Coder-30B-A3B is MoE with 30B total params, 3B active per forward pass
-    # Inference speed ~= 3B dense model, but needs 30B memory (fine for H200)
-    model_name: str = "Qwen/Qwen3-Coder-30B-A3B-Instruct"
+    # Using Qwen2.5-14B-Instruct (dense model) - MoE models require custom CUDA
+    # kernels (_moe_C) that aren't compiled in the cluster's vLLM installation
+    model_name: str = "Qwen/Qwen2.5-14B-Instruct"
     quantization: str = "fp8"  # FP8 for H200
     tensor_parallel_size: int = 1  # Single GPU per instance (data parallelism)
     gpu_memory_utilization: float = 0.90
