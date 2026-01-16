@@ -37,7 +37,12 @@ Cover these areas in flowing narrative (1-2 sentences each):
 
 7. **Task Characteristics**: What made this task easy or difficult?
 
-IMPORTANT: Avoid redundancy. Do not repeat information across sections. Summarize repetitive actions in one phrase (e.g., "multiple failed edits"). Only preserve code/errors absolutely essential for understanding. Omit boilerplate descriptions.
+IMPORTANT:
+- Write in THIRD PERSON (e.g., "The agent reproduced the bug..." not "I reproduced the bug...")
+- Avoid redundancy. Do not repeat information across sections.
+- Summarize repetitive actions in one phrase (e.g., "multiple failed edits").
+- Only preserve code/errors absolutely essential for understanding.
+- Omit boilerplate descriptions.
 
 Summary:"""
 
