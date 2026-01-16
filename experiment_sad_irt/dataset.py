@@ -33,6 +33,7 @@ class TrajectoryIRTDataset(Dataset):
         task_ids: Optional[List[str]] = None,
         pairs: Optional[List[Tuple[int, int]]] = None,
         swebench_dataset: str = "princeton-nlp/SWE-bench_Verified",
+        use_summaries: bool = True,
     ):
         """Initialize dataset.
 
@@ -45,10 +46,12 @@ class TrajectoryIRTDataset(Dataset):
             task_ids: Optional list of task IDs to include (for filtering)
             pairs: Optional list of (agent_idx, task_idx) pairs to include
             swebench_dataset: HuggingFace dataset name for problem/solution text
+            use_summaries: If True (default), load from trajectory summaries instead of full trajectories
         """
         self.trajectory_dir = Path(trajectory_dir)
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.use_summaries = use_summaries
 
         # Load SWE-bench data for problem statements and patches
         self.task_data = self._load_swebench_data(swebench_dataset)
@@ -174,21 +177,28 @@ class TrajectoryIRTDataset(Dataset):
         return samples
 
     def _load_trajectory(self, agent_id: str, task_id: str) -> str:
-        """Load trajectory text from JSON file."""
+        """Load trajectory text from JSON file.
+
+        If use_summaries is True, loads the 'summary' field from summary JSON.
+        Otherwise, loads full trajectory messages.
+        """
         traj_path = self.trajectory_dir / agent_id / f"{task_id}.json"
 
         with open(traj_path, "r") as f:
             data = json.load(f)
 
-        # Concatenate all messages into trajectory text
-        messages = data.get("messages", [])
-        trajectory_parts = []
-        for msg in messages:
-            role = msg.get("role", "unknown")
-            content = msg.get("content", "")
-            trajectory_parts.append(f"[{role.upper()}]\n{content}")
-
-        return "\n\n".join(trajectory_parts)
+        if self.use_summaries:
+            # Summary format: {"summary": "...", "task_id": "...", "agent": "...", ...}
+            return data.get("summary", "")
+        else:
+            # Full trajectory format: {"messages": [{"role": "...", "content": "..."}, ...]}
+            messages = data.get("messages", [])
+            trajectory_parts = []
+            for msg in messages:
+                role = msg.get("role", "unknown")
+                content = msg.get("content", "")
+                trajectory_parts.append(f"[{role.upper()}]\n{content}")
+            return "\n\n".join(trajectory_parts)
 
     def _format_input(self, task_id: str, trajectory_text: str) -> str:
         """Format input text with problem, solution, and trajectory.

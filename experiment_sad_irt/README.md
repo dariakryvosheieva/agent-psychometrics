@@ -101,10 +101,11 @@ Each sample combines:
 ### Data
 
 - **Response matrix**: 131 agents × 500 tasks
-- **Trajectories available**: 76 agents (~44% coverage)
+- **Trajectories available**: 74 agents with both trajectories AND responses (~57% of agents)
+- **Total trajectory files**: 35,989 (not all agents have all 500 tasks)
 - **Train/test split**: 80/20 by (agent, task) pairs
-- **Training samples**: ~29,438 pairs (after filtering missing trajectories)
-- **Test samples**: ~7,359 pairs
+- **Training samples**: ~28,791 pairs (80% of trajectory files)
+- **Test samples**: ~7,198 pairs (20% of trajectory files)
 
 ## Evaluation
 

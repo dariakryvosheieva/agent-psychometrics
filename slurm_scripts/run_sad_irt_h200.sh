@@ -65,7 +65,7 @@ accelerate launch \
     -m experiment_sad_irt.train_evaluate \
     --mode full_auc \
     --model_name Qwen/Qwen3-0.6B \
-    --max_length 2048 \
+    --max_length 4096 \
     --batch_size 16 \
     --gradient_accumulation_steps 1 \
     --epochs $EPOCHS \
