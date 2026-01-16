@@ -161,8 +161,11 @@ class TrajectorySummarizer:
         problem_statement = task_info.get("problem_statement", "")
         repo = task_info.get("repo", "unknown")
 
-        # Format trajectory text
-        trajectory_text = format_trajectory(traj.messages)
+        # Format trajectory text (with truncation for very long trajectories)
+        trajectory_text = format_trajectory(
+            traj.messages,
+            max_chars=self.config.max_trajectory_chars,
+        )
 
         # Build prompt
         prompt = format_summarization_prompt(
