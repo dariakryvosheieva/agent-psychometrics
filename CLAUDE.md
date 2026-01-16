@@ -113,6 +113,10 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 - Add any new experimental output files to `.gitignore` before committing
 - Goal: leave the repository in the same clean state you found it
 
+**MIT Engaging Cluster:**
+- HuggingFace cache is stored on scratch to avoid home quota limits
+- Always set this in SLURM scripts: `export HF_HOME="$HOME/orcd/scratch/.cache/huggingface"`
+
 **OpenAI API Usage:**
 - Use the new Responses API (`client.responses.create()`) instead of the older Chat Completions API (`client.chat.completions.create()`)
 - Key differences: use `input=` instead of `messages=`, and access output via `response.output_text`
