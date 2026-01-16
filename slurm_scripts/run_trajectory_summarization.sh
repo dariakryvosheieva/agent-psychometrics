@@ -10,7 +10,7 @@
 #SBATCH --cpus-per-task=16
 
 # Trajectory Summarization Pipeline
-# Uses vLLM with Qwen3-8B-Instruct to summarize agent trajectories
+# Uses vLLM with Qwen3-Coder-30B-A3B-Instruct (MoE: 30B total, 3B active)
 # Each GPU runs an independent copy of the model processing half the data
 #
 # Run from: ~/model_irt
@@ -46,7 +46,7 @@ echo ""
 # Configuration
 TRAJECTORY_DIR="trajectory_data/unified_trajs"
 OUTPUT_DIR="chris_output/trajectory_summaries"
-MODEL="Qwen/Qwen3-8B-Instruct"
+MODEL="Qwen/Qwen3-Coder-30B-A3B-Instruct"
 BATCH_SIZE=16
 
 echo "=== Configuration ==="

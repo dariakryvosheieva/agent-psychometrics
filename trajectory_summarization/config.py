@@ -10,14 +10,16 @@ class SummarizationConfig:
     """Configuration for trajectory summarization."""
 
     # Model settings
-    model_name: str = "Qwen/Qwen3-8B-Instruct"
+    # Qwen3-Coder-30B-A3B is MoE with 30B total params, 3B active per forward pass
+    # Inference speed ~= 3B dense model, but needs 30B memory (fine for H200)
+    model_name: str = "Qwen/Qwen3-Coder-30B-A3B-Instruct"
     quantization: str = "fp8"  # FP8 for H200
     tensor_parallel_size: int = 1  # Single GPU per instance (data parallelism)
     gpu_memory_utilization: float = 0.90
     max_num_seqs: int = 16  # Concurrent sequences for continuous batching
 
     # Context limits
-    max_model_len: int = 32768  # Qwen3-8B supports 32K context
+    max_model_len: int = 32768  # Qwen3-Coder supports 256K natively, but 32K is enough
     max_output_tokens: int = 700  # Target ~500 tokens, buffer for safety
 
     # Data paths

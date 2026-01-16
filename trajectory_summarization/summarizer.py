@@ -6,7 +6,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from .config import SummarizationConfig
 from .data_loader import TrajectoryData, format_trajectory, estimate_tokens
@@ -36,6 +36,7 @@ class TrajectorySummarizer:
             config: Summarization configuration
         """
         self.config = config
+        self.swebench_data = self._load_swebench_data()
 
         if config.dry_run:
             logger.info("Dry run mode - skipping model initialization")
@@ -64,6 +65,18 @@ class TrajectorySummarizer:
         )
 
         logger.info("Model loaded successfully")
+
+    def _load_swebench_data(self) -> Dict[str, dict]:
+        """Load SWE-bench dataset for problem statements."""
+        try:
+            from datasets import load_dataset
+
+            logger.info("Loading SWE-bench Verified dataset...")
+            ds = load_dataset("princeton-nlp/SWE-bench_Verified", split="test")
+            return {ex["instance_id"]: ex for ex in ds}
+        except Exception as e:
+            logger.warning(f"Could not load SWE-bench dataset: {e}")
+            return {}
 
     def summarize_batch(
         self,
@@ -101,13 +114,19 @@ class TrajectorySummarizer:
             # Format full trajectory (truncate if exceeds model context)
             # Leave room for prompt overhead (~500 tokens)
             max_traj_chars = (self.config.max_model_len - 500) * 4
-            full_trajectory = format_trajectory(traj.messages, max_chars=max_traj_chars)
+            trajectory_text = format_trajectory(traj.messages, max_chars=max_traj_chars)
+
+            # Get task context from SWE-bench
+            task_info = self.swebench_data.get(traj.task_id, {})
+            problem_statement = task_info.get("problem_statement", "")
+            repo = task_info.get("repo", "unknown")
 
             prompt = format_summarization_prompt(
                 task_id=traj.task_id,
-                agent=traj.agent,
+                repo=repo,
                 resolved=traj.resolved,
-                full_trajectory=full_trajectory,
+                problem_statement=problem_statement,
+                trajectory_text=trajectory_text,
             )
             prompts.append(prompt)
 
