@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=tb_embed
-#SBATCH --output=slurm_logs/terminalbench_embeddings_%j.out
-#SBATCH --error=slurm_logs/terminalbench_embeddings_%j.err
+#SBATCH --output=logs/terminalbench_embeddings_%j.out
+#SBATCH --error=logs/terminalbench_embeddings_%j.err
 #SBATCH --time=02:00:00
 #SBATCH --partition=mit_normal_gpu
 #SBATCH --account=mit_general
@@ -20,7 +20,7 @@ echo "Node: $SLURM_NODELIST"
 echo "Start time: $(date)"
 
 # Set up environment
-cd /home/chrisge/orcd/model_irt
+cd ~/model_irt
 source .venv/bin/activate
 
 # Use scratch for HuggingFace cache (avoid home quota limits)
@@ -31,8 +31,8 @@ mkdir -p "$HF_HOME"
 OUTPUT_DIR="chris_output/experiment_a_terminalbench/embeddings"
 mkdir -p "$OUTPUT_DIR"
 
-# Create slurm logs directory if needed
-mkdir -p slurm_logs
+# Create logs directory if needed
+mkdir -p logs
 
 echo ""
 echo "Environment:"
