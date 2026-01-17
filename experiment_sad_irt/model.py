@@ -33,7 +33,7 @@ class SADIRT(nn.Module):
         lora_alpha: int = 32,
         lora_dropout: float = 0.1,
         lora_target_modules: Optional[list] = None,
-        use_gradient_checkpointing: bool = False,  # Disabled: was causing LoRA gradients to be zero
+        use_gradient_checkpointing: bool = True,  # Required for memory efficiency
         psi_normalization: str = "batchnorm",
     ):
         """Initialize SAD-IRT model.
@@ -75,11 +75,7 @@ class SADIRT(nn.Module):
             torch_dtype=torch.bfloat16,
         )
 
-        # Enable gradient checkpointing for memory efficiency (disabled by default)
-        if use_gradient_checkpointing:
-            self.encoder.gradient_checkpointing_enable()
-
-        # Apply LoRA
+        # Apply LoRA first, before enabling gradient checkpointing
         if lora_target_modules is None:
             lora_target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
 
@@ -92,6 +88,13 @@ class SADIRT(nn.Module):
             task_type="FEATURE_EXTRACTION",
         )
         self.encoder = get_peft_model(self.encoder, peft_config)
+
+        # Enable gradient checkpointing AFTER applying LoRA
+        # Use use_reentrant=False which is required for LoRA gradients to flow properly
+        if use_gradient_checkpointing:
+            self.encoder.base_model.model.gradient_checkpointing_enable(
+                gradient_checkpointing_kwargs={"use_reentrant": False}
+            )
 
         # Log trainable parameters
         trainable_params = sum(p.numel() for p in self.encoder.parameters() if p.requires_grad)
