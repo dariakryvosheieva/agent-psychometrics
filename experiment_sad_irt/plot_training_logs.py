@@ -46,7 +46,8 @@ def parse_log_file(log_path: str) -> dict:
     # Explicit log: Step 10: loss=0.123456, lr=1.00e-04
     step_loss_pattern = re.compile(r'Step (\d+): loss=([\d.]+), lr=([\d.e+-]+)')
 
-    # Progress bar fallback: loss=0.255, lr=6.94e-05
+    # Progress bar: loss=0.255, lr=6.94e-05 (may be truncated in logs)
+    # Handles both full format and truncated like "lr=5.91e-" or "lr=6.02"
     pbar_pattern = re.compile(r'loss=([\d.]+),\s*lr=([\d.e+-]+)')
 
     # Step gradients: Step 10 gradients (pre-clip): total=2.246549, embedding=0.062246, encoder=1.121982, head=1.945319
@@ -233,6 +234,20 @@ def print_summary(data: dict):
         print(f"  Final:   {data['lora_top_grads'][-1]:.6f}")
 
 
+def merge_data(data1: dict, data2: dict) -> dict:
+    """Merge two parsed data dicts."""
+    merged = {}
+    for key in data1:
+        if isinstance(data1[key], list):
+            merged[key] = data1[key] + data2.get(key, [])
+        elif isinstance(data1[key], dict):
+            merged[key] = {k: data1[key].get(k, []) + data2.get(key, {}).get(k, [])
+                          for k in set(data1[key]) | set(data2.get(key, {}))}
+        else:
+            merged[key] = data1[key]
+    return merged
+
+
 def main():
     parser = argparse.ArgumentParser(description="Parse and plot SAD-IRT training logs")
     parser.add_argument("log_file", help="Path to log file (e.g., logs/sad_irt_long_8175794.out)")
@@ -241,17 +256,27 @@ def main():
     parser.add_argument("--no-plot", action="store_true", help="Skip plotting, just print summary")
     args = parser.parse_args()
 
-    # Parse log
-    print(f"Parsing {args.log_file}...")
-    data = parse_log_file(args.log_file)
+    log_path = Path(args.log_file)
+
+    # Parse main log file
+    print(f"Parsing {log_path}...")
+    data = parse_log_file(str(log_path))
+
+    # Also try to parse .err file if .out file was given (tqdm goes to stderr)
+    if log_path.suffix == '.out':
+        err_path = log_path.with_suffix('.err')
+        if err_path.exists():
+            print(f"Also parsing {err_path} (tqdm output)...")
+            err_data = parse_log_file(str(err_path))
+            data = merge_data(data, err_data)
 
     # Print summary
     print_summary(data)
 
     # Plot
     if not args.no_plot:
-        title = args.title or Path(args.log_file).stem
-        output = args.output or str(Path(args.log_file).with_suffix('.png'))
+        title = args.title or log_path.stem
+        output = args.output or str(log_path.with_suffix('.png'))
         plot_training_curves(data, output_path=output, title=title)
 
 
