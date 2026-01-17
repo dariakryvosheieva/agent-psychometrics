@@ -445,6 +445,143 @@ def test_with_real_data():
     return lora_grad_norm > 1e-10
 
 
+def test_debug_token_positions():
+    """Debug: check what's happening with token positions in real data."""
+
+    import sys
+    sys.path.insert(0, '.')
+
+    from experiment_sad_irt.model import SADIRT
+    from experiment_sad_irt.dataset import TrajectoryIRTDataset
+    from transformers import AutoTokenizer
+    from torch.utils.data import DataLoader
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"\n{'='*60}")
+    print("DEBUG: Token positions and gradient flow analysis")
+    print(f"{'='*60}")
+
+    # Load tokenizer
+    model_name = "Qwen/Qwen3-0.6B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    print(f"pad_token_id: {tokenizer.pad_token_id}")
+
+    # Load dataset
+    dataset = TrajectoryIRTDataset(
+        response_matrix_path="clean_data/swebench_verified/swebench_verified_20251120_full.jsonl",
+        trajectory_dir="chris_output/trajectory_summaries_api",
+        tokenizer=tokenizer,
+        max_length=512,
+    )
+
+    # Get one sample
+    sample = dataset[0]
+    input_ids = sample["input_ids"]
+    attention_mask = sample["attention_mask"]
+
+    print(f"\nSample 0:")
+    print(f"  input_ids shape: {input_ids.shape}")
+    print(f"  attention_mask shape: {attention_mask.shape}")
+    print(f"  attention_mask sum (non-pad tokens): {attention_mask.sum().item()}")
+
+    # Find first and last non-padding token
+    non_pad_positions = (attention_mask == 1).nonzero(as_tuple=True)[0]
+    first_non_pad = non_pad_positions[0].item() if len(non_pad_positions) > 0 else -1
+    last_non_pad = non_pad_positions[-1].item() if len(non_pad_positions) > 0 else -1
+
+    print(f"  First non-pad position: {first_non_pad}")
+    print(f"  Last non-pad position: {last_non_pad}")
+    print(f"  Padding is on the {'LEFT' if first_non_pad > 0 else 'NONE or RIGHT'}")
+
+    # Check OLD seq_lengths calculation (the bug)
+    old_calc = attention_mask.sum() - 1
+    print(f"  OLD calculation (mask.sum() - 1): {old_calc.item()}")
+    print(f"  This was {'INCORRECT' if old_calc != last_non_pad else 'correct'} for left-padded data")
+
+    # Check NEW calculation (the fix)
+    seq_len = attention_mask.size(0)
+    positions = torch.arange(seq_len)
+    masked_positions = positions * attention_mask.long() - (1 - attention_mask.long())
+    new_calc = masked_positions.argmax()
+    print(f"  NEW calculation (argmax of masked positions): {new_calc.item()}")
+    print(f"  This is {'CORRECT' if new_calc == last_non_pad else 'INCORRECT'} for left-padded data")
+
+    if old_calc != last_non_pad:
+        print(f"\n  ✅ LEFT PADDING BUG CONFIRMED:")
+        print(f"     OLD code would use position {old_calc.item()} (inside padding!)")
+        print(f"     NEW code correctly uses position {new_calc.item()} (last real token)")
+
+    # Now test with a batch
+    print(f"\n{'='*60}")
+    print("Testing gradient flow with batch of real data")
+    print(f"{'='*60}")
+
+    loader = DataLoader(dataset, batch_size=4, shuffle=True)
+    batch = next(iter(loader))
+    batch = {k: v.to(device) for k, v in batch.items()}
+
+    input_ids = batch["input_ids"]
+    attention_mask = batch["attention_mask"]
+
+    print(f"\nBatch:")
+    print(f"  input_ids shape: {input_ids.shape}")
+    print(f"  attention_mask shape: {attention_mask.shape}")
+
+    # Check each sample in batch
+    for i in range(input_ids.shape[0]):
+        mask = attention_mask[i]
+        non_pad_positions = (mask == 1).nonzero(as_tuple=True)[0]
+        first_non_pad = non_pad_positions[0].item() if len(non_pad_positions) > 0 else -1
+        last_non_pad = non_pad_positions[-1].item() if len(non_pad_positions) > 0 else -1
+        seq_len_calc = mask.sum().item() - 1
+        print(f"  Sample {i}: non-pad range [{first_non_pad}, {last_non_pad}], mask.sum()-1 = {seq_len_calc}")
+        if seq_len_calc != last_non_pad:
+            print(f"    ⚠️  MISMATCH!")
+
+    # Create model and test forward/backward
+    model = SADIRT(
+        num_agents=dataset.num_agents,
+        num_tasks=dataset.num_tasks,
+        model_name=model_name,
+        psi_normalization="center",
+    ).to(device)
+
+    # Forward pass
+    logits = model(
+        agent_idx=batch["agent_idx"],
+        task_idx=batch["task_idx"],
+        input_ids=input_ids,
+        attention_mask=attention_mask,
+    )
+
+    loss = nn.functional.binary_cross_entropy_with_logits(logits, batch["response"])
+    print(f"\nLoss: {loss.item():.6f}")
+
+    # Backward
+    loss.backward()
+
+    # Check gradients
+    lora_grad_norm = 0.0
+    lora_count = 0
+    for name, param in model.named_parameters():
+        if "lora" in name and param.requires_grad and param.grad is not None:
+            lora_grad_norm += param.grad.norm().item() ** 2
+            lora_count += 1
+
+    lora_grad_norm = lora_grad_norm ** 0.5
+    print(f"LoRA total grad norm: {lora_grad_norm:.8f} ({lora_count} params)")
+    print(f"psi_head.weight grad norm: {model.psi_head.weight.grad.norm().item():.8f}")
+
+    if lora_grad_norm < 1e-10:
+        print(f"\n❌ LoRA gradients are NOT flowing")
+        return False
+    else:
+        print(f"\n✅ LoRA gradients ARE flowing")
+        return True
+
+
 def test_with_trainer():
     """Test using actual Trainer class with one step."""
 
@@ -557,6 +694,11 @@ if __name__ == "__main__":
         test5_pass = test_with_real_data()
         test6_pass = test_with_trainer()
 
+    # Critical test: token position debugging
+    test7_pass = None
+    if not args.skip_data:
+        test7_pass = test_debug_token_positions()
+
     print("\n" + "="*60)
     print("SUMMARY")
     print("="*60)
@@ -568,3 +710,5 @@ if __name__ == "__main__":
         print(f"Test 5 (real data): {'✅ PASS' if test5_pass else '❌ FAIL'}")
     if test6_pass is not None:
         print(f"Test 6 (actual Trainer): {'✅ PASS (see logs)' if test6_pass else '❌ FAIL'}")
+    if test7_pass is not None:
+        print(f"Test 7 (token positions): {'✅ PASS' if test7_pass else '❌ FAIL'}")

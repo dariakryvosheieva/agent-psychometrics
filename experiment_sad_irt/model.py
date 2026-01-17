@@ -162,10 +162,23 @@ class SADIRT(nn.Module):
         hidden_states = outputs.last_hidden_state  # (batch_size, seq_len, hidden_dim)
 
         # Get representation from last non-padding token
-        # Find the position of the last non-padding token for each sequence
-        seq_lengths = attention_mask.sum(dim=1) - 1  # (batch_size,)
-        batch_indices = torch.arange(hidden_states.size(0), device=hidden_states.device)
-        last_token_hidden = hidden_states[batch_indices, seq_lengths]  # (batch_size, hidden_dim)
+        # IMPORTANT: Dataset uses LEFT padding (pad tokens at beginning, real tokens at end)
+        # So attention_mask looks like [0, 0, 0, 1, 1, 1, 1] for left-padded sequences
+        # We need the index of the LAST 1 in the mask, not mask.sum() - 1
+        # For left-padded data: last non-pad position = seq_len - 1 (always the last position)
+        # But to handle both left and right padding, we find the actual last non-pad position
+        batch_size = hidden_states.size(0)
+        seq_len = hidden_states.size(1)
+
+        # Find index of last non-padding token for each sequence
+        # Create position indices [0, 1, 2, ..., seq_len-1] and mask out padding positions
+        positions = torch.arange(seq_len, device=hidden_states.device).unsqueeze(0).expand(batch_size, -1)
+        # Set padding positions to -1 so they don't win the argmax
+        masked_positions = positions * attention_mask.long() - (1 - attention_mask.long())
+        last_token_positions = masked_positions.argmax(dim=1)  # (batch_size,)
+
+        batch_indices = torch.arange(batch_size, device=hidden_states.device)
+        last_token_hidden = hidden_states[batch_indices, last_token_positions]  # (batch_size, hidden_dim)
 
         # Predict ψ
         psi_raw = self.psi_head(last_token_hidden.float())  # (batch_size, 1)
