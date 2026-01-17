@@ -29,7 +29,7 @@ from .data_splits import (
 )
 from .dataset import TrajectoryIRTDataset
 from .evaluate import compute_metrics, compute_frontier_difficulty_metrics, log_parameter_stats
-from .model import SADIRT, StandardIRT
+from .model import SADIRT
 from .train import Trainer
 
 # Setup logging
@@ -39,6 +39,153 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
+
+
+def compute_accuracy_based_init(
+    responses_path: Path,
+    agent_ids: list,
+    task_ids: list,
+    eps: float = 1e-3,
+) -> tuple:
+    """Compute accuracy-based initialization for θ and β.
+
+    Uses the same approach as py_irt's difficulty_from_accuracy initializer:
+    β_i = logit(1 - accuracy_i) = log((1 - acc) / acc)
+    θ_j = logit(accuracy_j) = log(acc / (1 - acc))
+
+    Args:
+        responses_path: Path to response matrix JSONL
+        agent_ids: List of agent IDs (for θ)
+        task_ids: List of task IDs (for β)
+        eps: Small constant to avoid log(0)
+
+    Returns:
+        Tuple of (theta_init, beta_init) as dicts mapping id -> value
+    """
+    import math
+    from collections import defaultdict
+
+    agent_set = set(agent_ids)
+    task_set = set(task_ids)
+
+    # Compute per-task accuracy (for β) and per-agent accuracy (for θ)
+    task_correct = defaultdict(int)
+    task_total = defaultdict(int)
+    agent_correct = defaultdict(int)
+    agent_total = defaultdict(int)
+
+    with open(responses_path, 'r') as f:
+        for line in f:
+            record = json.loads(line)
+            agent_id = record['subject_id']
+            if agent_id not in agent_set:
+                continue
+            for task_id, response in record['responses'].items():
+                if task_id not in task_set:
+                    continue
+                task_total[task_id] += 1
+                agent_total[agent_id] += 1
+                if response == 1:
+                    task_correct[task_id] += 1
+                    agent_correct[agent_id] += 1
+
+    # Compute β from task accuracy: β = logit(1 - acc) = log((1-acc)/acc)
+    beta_init = {}
+    for task_id in task_ids:
+        if task_total[task_id] > 0:
+            acc = task_correct[task_id] / task_total[task_id]
+            acc = max(eps, min(1 - eps, acc))  # Clamp to avoid log(0)
+            beta_init[task_id] = math.log((1 - acc) / acc)
+        else:
+            beta_init[task_id] = 0.0
+
+    # Compute θ from agent accuracy: θ = logit(acc) = log(acc/(1-acc))
+    theta_init = {}
+    for agent_id in agent_ids:
+        if agent_total[agent_id] > 0:
+            acc = agent_correct[agent_id] / agent_total[agent_id]
+            acc = max(eps, min(1 - eps, acc))
+            theta_init[agent_id] = math.log(acc / (1 - acc))
+        else:
+            theta_init[agent_id] = 0.0
+
+    return theta_init, beta_init
+
+
+def train_baseline_irt_on_prefrontier(
+    responses_path: Path,
+    pre_frontier_agents: list,
+    output_dir: Path,
+    epochs: int = 2000,
+) -> dict:
+    """Train standard IRT on pre-frontier agents only using py_irt.
+
+    Args:
+        responses_path: Path to response matrix JSONL
+        pre_frontier_agents: List of pre-frontier agent IDs to include
+        output_dir: Directory to save IRT outputs
+        epochs: Number of training epochs for py_irt
+
+    Returns:
+        Dict mapping task_id -> difficulty (β)
+    """
+    import pandas as pd
+    import pyro
+
+    from py_irt.dataset import Dataset
+    from py_irt.models import OneParamLog
+    from py_irt.config import IrtConfig
+    from py_irt.training import IrtModelTrainer
+
+    # Load response matrix and filter to pre-frontier agents
+    pre_frontier_set = set(pre_frontier_agents)
+    data_list = []
+    with open(responses_path, 'r') as f:
+        for line in f:
+            record = json.loads(line)
+            if record['subject_id'] in pre_frontier_set:
+                row = {'subject_id': record['subject_id']}
+                row.update(record['responses'])
+                data_list.append(row)
+
+    logger.info(f"Loaded {len(data_list)} pre-frontier agent responses")
+
+    df = pd.DataFrame(data_list)
+    item_columns = [col for col in df.columns if col != 'subject_id']
+    dataset = Dataset.from_pandas(df, subject_column="subject_id", item_columns=item_columns)
+
+    # Train 1PL IRT (same as SAD-IRT uses)
+    config = IrtConfig(
+        model_type=OneParamLog,
+        priors="hierarchical",
+        initializers=[
+            {"name": "difficulty_from_accuracy", "eps": 1e-3},
+        ],
+    )
+
+    # Clear pyro param store to avoid conflicts
+    pyro.clear_param_store()
+
+    trainer = IrtModelTrainer(config=config, data_path=None, dataset=dataset)
+    trainer.train(epochs=epochs)
+
+    # Extract difficulty parameters
+    difficulties = list(trainer.best_params["diff"])
+    item_id_map = trainer.best_params["item_ids"]
+    item_ids = [item_id_map[i] for i in range(len(difficulties))]
+
+    # Save outputs
+    output_dir.mkdir(parents=True, exist_ok=True)
+    items_df = pd.DataFrame({
+        "b": difficulties,
+    }, index=item_ids)
+    items_df.to_csv(output_dir / "items.csv")
+
+    logger.info(f"Baseline IRT saved to {output_dir}")
+    logger.info(f"β stats: mean={np.mean(difficulties):.4f}, std={np.std(difficulties):.4f}")
+
+    # Return as dict
+    return {task_id: diff for task_id, diff in zip(item_ids, difficulties)}
 
 
 def parse_args() -> SADIRTConfig:
@@ -583,12 +730,20 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
         psi_normalization=psi_normalization,
     ).to(device)
 
-    # Initialize θ/β from oracle IRT (for pre-frontier agents/all tasks)
-    sad_irt_model.initialize_from_pretrained_irt(
+    # Initialize θ/β from accuracy-based estimates (pre-frontier data only)
+    # This follows py_irt's difficulty_from_accuracy approach:
+    # β = logit(1 - task_accuracy), θ = logit(agent_accuracy)
+    # Using oracle init would be unfair since oracle was trained on post-frontier agents too
+    theta_init, beta_init = compute_accuracy_based_init(
+        responses_path=Path(config.response_matrix_path),
         agent_ids=train_dataset.agent_ids,
         task_ids=train_dataset.task_ids,
-        abilities_df=oracle_abilities_df,
-        items_df=oracle_items_df,
+    )
+    sad_irt_model.initialize_from_accuracy(
+        agent_ids=train_dataset.agent_ids,
+        task_ids=train_dataset.task_ids,
+        theta_init=theta_init,
+        beta_init=beta_init,
     )
 
     # Optionally freeze θ/β (ablation: only train ψ predictor)
@@ -638,24 +793,14 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
     logger.info("Step 7: Baseline comparison (standard IRT on pre-frontier)")
     logger.info("=" * 40)
 
-    # Train standard IRT on same pre-frontier data
-    baseline_model = StandardIRT(
-        num_agents=train_dataset.num_agents,
-        num_tasks=train_dataset.num_tasks,
-    ).to(device)
-
-    # Initialize from oracle
-    baseline_model.theta.weight.data.copy_(sad_irt_model.theta.weight.data.clone())
-    baseline_model.beta.weight.data.copy_(sad_irt_model.beta.weight.data.clone())
-
-    # Note: For a fair comparison, we should train baseline IRT from scratch on pre-frontier data
-    # But since we initialize SAD-IRT from oracle, baseline should also use oracle init
-    # The comparison is: does trajectory encoding improve over the pre-trained β?
-
-    baseline_beta = {
-        task_id: float(oracle_items_df.loc[task_id, "b"]) if task_id in oracle_items_df.index else 0.0
-        for task_id in train_dataset.task_ids
-    }
+    # Train standard IRT on pre-frontier responses only using py_irt
+    # This is the proper baseline: what can we learn about difficulty without trajectories?
+    baseline_beta = train_baseline_irt_on_prefrontier(
+        responses_path=responses_path,
+        pre_frontier_agents=pre_frontier_agents,
+        output_dir=Path(config.output_dir) / "baseline_irt",
+    )
+    logger.info(f"Baseline IRT trained on {len(pre_frontier_agents)} pre-frontier agents")
 
     baseline_frontier_metrics = compute_frontier_difficulty_metrics(
         predicted_beta=baseline_beta,

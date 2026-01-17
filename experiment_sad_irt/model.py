@@ -243,6 +243,43 @@ class SADIRT(nn.Module):
             f"β for {initialized_tasks}/{len(task_ids)} tasks from pre-trained IRT"
         )
 
+    def initialize_from_accuracy(
+        self,
+        agent_ids: list,
+        task_ids: list,
+        theta_init: dict,
+        beta_init: dict,
+    ):
+        """Initialize θ and β from accuracy-based estimates.
+
+        This follows the py_irt 'difficulty_from_accuracy' approach:
+        β = logit(1 - task_accuracy)
+        θ = logit(agent_accuracy)
+
+        Args:
+            agent_ids: List of agent IDs in order matching model indices
+            task_ids: List of task IDs in order matching model indices
+            theta_init: Dict mapping agent_id -> initial θ value
+            beta_init: Dict mapping task_id -> initial β value
+        """
+        with torch.no_grad():
+            initialized_agents = 0
+            for i, agent_id in enumerate(agent_ids):
+                if agent_id in theta_init:
+                    self.theta.weight[i] = theta_init[agent_id]
+                    initialized_agents += 1
+
+            initialized_tasks = 0
+            for i, task_id in enumerate(task_ids):
+                if task_id in beta_init:
+                    self.beta.weight[i] = beta_init[task_id]
+                    initialized_tasks += 1
+
+        logger.info(
+            f"Initialized θ for {initialized_agents}/{len(agent_ids)} agents, "
+            f"β for {initialized_tasks}/{len(task_ids)} tasks from accuracy"
+        )
+
 
 class StandardIRT(nn.Module):
     """Standard 1PL IRT model without trajectory features (baseline).
@@ -281,3 +318,39 @@ class StandardIRT(nn.Module):
 
     def get_difficulties(self) -> torch.Tensor:
         return self.beta.weight.detach().squeeze(-1)
+
+    def initialize_from_pretrained_irt(
+        self,
+        agent_ids: list,
+        task_ids: list,
+        abilities_df,  # pandas DataFrame with agent abilities
+        items_df,  # pandas DataFrame with item difficulties
+    ):
+        """Initialize θ and β from pre-trained IRT parameters.
+
+        Args:
+            agent_ids: List of agent IDs in order matching embedding indices
+            task_ids: List of task IDs in order matching embedding indices
+            abilities_df: DataFrame with agent abilities (column 'ability' or 'theta')
+            items_df: DataFrame with item difficulties (column 'b' or 'difficulty')
+        """
+        # Initialize θ from abilities
+        ability_col = 'ability' if 'ability' in abilities_df.columns else 'theta'
+        initialized_agents = 0
+        for i, agent_id in enumerate(agent_ids):
+            if agent_id in abilities_df.index:
+                self.theta.weight.data[i, 0] = abilities_df.loc[agent_id, ability_col]
+                initialized_agents += 1
+
+        # Initialize β from difficulties
+        diff_col = 'b' if 'b' in items_df.columns else 'difficulty'
+        initialized_tasks = 0
+        for i, task_id in enumerate(task_ids):
+            if task_id in items_df.index:
+                self.beta.weight.data[i, 0] = items_df.loc[task_id, diff_col]
+                initialized_tasks += 1
+
+        logger.info(
+            f"Initialized θ for {initialized_agents}/{len(agent_ids)} agents, "
+            f"β for {initialized_tasks}/{len(task_ids)} tasks from pre-trained IRT"
+        )
