@@ -20,7 +20,7 @@ class SADIRTConfig:
     lora_alpha: int = 32
     lora_dropout: float = 0.1
     lora_target_modules: list = field(
-        default_factory=lambda: ["q_proj", "k_proj", "v_proj", "o_proj"]
+        default_factory=lambda: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
     )
 
     # Data
