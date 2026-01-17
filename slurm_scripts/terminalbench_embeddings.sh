@@ -45,7 +45,7 @@ echo ""
 python -m experiment_a_terminalbench.generate_embeddings \
     --items_path chris_output/terminal_bench_2.0_binomial_1pl/1d/items.csv \
     --repo_path terminal-bench \
-    --output_path "$OUTPUT_DIR/embeddings.npz" \
+    --out_dir "$OUTPUT_DIR" \
     --backbone Qwen/Qwen3-VL-8B-Instruct \
     --max_length 8192 \
     --batch_size 4
