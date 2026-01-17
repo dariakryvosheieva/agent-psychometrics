@@ -755,10 +755,14 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
     sad_irt_trainer = Trainer(
         model=sad_irt_model,
         train_loader=train_loader,
-        eval_loader=None,  # No eval during training
+        eval_loader=None,
         config=config,
         device=device,
         is_sad_irt=True,
+        # Pass frontier evaluation data for checkpoint selection based on Spearman ρ
+        task_ids=train_dataset.task_ids,
+        frontier_task_ids=frontier_task_ids,
+        oracle_beta=oracle_beta,
     )
 
     # Resume from checkpoint if specified

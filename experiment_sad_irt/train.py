@@ -82,6 +82,10 @@ class Trainer:
         config: SADIRTConfig,
         device: torch.device,
         is_sad_irt: bool = True,
+        # Frontier evaluation data (for checkpoint selection based on Spearman ρ)
+        task_ids: Optional[list] = None,
+        frontier_task_ids: Optional[list] = None,
+        oracle_beta: Optional[Dict[str, float]] = None,
     ):
         """Initialize trainer.
 
@@ -92,6 +96,9 @@ class Trainer:
             config: Training configuration
             device: Device to train on
             is_sad_irt: Whether model is SAD-IRT (affects optimizer setup)
+            task_ids: List of task IDs in order matching model indices (for frontier eval)
+            frontier_task_ids: List of frontier task IDs (for checkpoint selection)
+            oracle_beta: Dict mapping task_id -> oracle difficulty (for checkpoint selection)
         """
         self.model = model
         self.train_loader = train_loader
@@ -99,6 +106,11 @@ class Trainer:
         self.config = config
         self.device = device
         self.is_sad_irt = is_sad_irt
+
+        # Frontier evaluation data
+        self.task_ids = task_ids
+        self.frontier_task_ids = frontier_task_ids
+        self.oracle_beta = oracle_beta
 
         # Setup optimizer with different learning rates
         self.optimizer = self._setup_optimizer()
@@ -112,6 +124,7 @@ class Trainer:
         # Training state
         self.global_step = 0
         self.best_auc = 0.0
+        self.best_spearman = -1.0  # For frontier evaluation
 
         # Output directory
         self.output_dir = Path(config.output_dir)
@@ -376,6 +389,46 @@ class Trainer:
 
         return compute_metrics(all_logits, all_responses)
 
+    @torch.no_grad()
+    def evaluate_frontier(self) -> Dict[str, float]:
+        """Evaluate Spearman ρ on frontier tasks against oracle β.
+
+        This is the primary metric for checkpoint selection in frontier difficulty mode.
+        """
+        if self.frontier_task_ids is None or self.oracle_beta is None or self.task_ids is None:
+            return {}
+
+        from scipy import stats
+
+        self.model.eval()
+
+        # Get current learned β values
+        learned_beta_tensor = self.model.get_difficulties()
+        learned_beta = {
+            task_id: float(learned_beta_tensor[i])
+            for i, task_id in enumerate(self.task_ids)
+        }
+
+        # Compute Spearman ρ on frontier tasks
+        predicted_values = []
+        oracle_values = []
+
+        for task_id in self.frontier_task_ids:
+            if task_id in learned_beta and task_id in self.oracle_beta:
+                predicted_values.append(learned_beta[task_id])
+                oracle_values.append(self.oracle_beta[task_id])
+
+        if len(predicted_values) < 3:
+            return {"frontier_spearman_rho": float("nan"), "num_frontier_tasks": len(predicted_values)}
+
+        spearman_rho, spearman_p = stats.spearmanr(predicted_values, oracle_values)
+
+        return {
+            "frontier_spearman_rho": float(spearman_rho),
+            "frontier_spearman_p": float(spearman_p),
+            "num_frontier_tasks": len(predicted_values),
+        }
+
     def train(self) -> Dict[str, float]:
         """Full training loop."""
         logger.info(f"Starting training for {self.config.epochs} epochs")
@@ -391,23 +444,24 @@ class Trainer:
             train_metrics = self.train_epoch(epoch)
             logger.info(f"Epoch {epoch + 1} train metrics: {train_metrics}")
 
-            # End of epoch evaluation
-            if self.eval_loader is not None:
-                eval_metrics = self.evaluate()
-                logger.info(f"Epoch {epoch + 1} eval metrics: {eval_metrics}")
+            # Frontier evaluation (Spearman ρ-based) - primary metric for SAD-IRT
+            frontier_metrics = self.evaluate_frontier()
+            if frontier_metrics:
+                logger.info(f"Epoch {epoch + 1} frontier metrics: {frontier_metrics}")
 
-                if eval_metrics["auc"] > self.best_auc:
-                    self.best_auc = eval_metrics["auc"]
-                    self.save_checkpoint("best", metrics=eval_metrics)
+                spearman = frontier_metrics.get("frontier_spearman_rho", -1.0)
+                if not math.isnan(spearman) and spearman > self.best_spearman:
+                    self.best_spearman = spearman
+                    self.save_checkpoint("best", metrics=frontier_metrics)
+                    logger.info(f"New best Spearman ρ: {spearman:.4f}")
 
-            # Save epoch checkpoint (with eval metrics if available)
-            self.save_checkpoint(f"epoch_{epoch + 1}", metrics=eval_metrics if self.eval_loader else None)
+            # Save epoch checkpoint
+            self.save_checkpoint(f"epoch_{epoch + 1}", metrics=frontier_metrics if frontier_metrics else None)
 
         # Final evaluation
-        final_metrics = {}
-        if self.eval_loader is not None:
-            final_metrics = self.evaluate()
-            logger.info(f"Final eval metrics: {final_metrics}")
+        final_metrics = self.evaluate_frontier()
+        if final_metrics:
+            logger.info(f"Final frontier metrics: {final_metrics}")
 
         return final_metrics
 
