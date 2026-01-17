@@ -559,9 +559,10 @@ def run_full_auc_evaluation(config: SADIRTConfig):
     logger.info("Training SAD-IRT (with trajectory encoder)")
     logger.info("=" * 40)
 
-    # When freezing IRT params, disable BatchNorm on ψ to avoid instability
-    # (BatchNorm forces zero-mean which conflicts with frozen optimal θ/β)
-    use_batchnorm = not config.freeze_irt
+    # When freezing IRT params, use centering instead of full BatchNorm
+    # BatchNorm's variance scaling amplifies tiny ψ values and destabilizes training
+    # Centering just enforces zero-mean without the harmful scaling
+    psi_normalization = "center" if config.freeze_irt else "batchnorm"
 
     sad_irt_model = SADIRT(
         num_agents=full_dataset.num_agents,
@@ -570,7 +571,7 @@ def run_full_auc_evaluation(config: SADIRTConfig):
         lora_r=config.lora_r,
         lora_alpha=config.lora_alpha,
         lora_dropout=config.lora_dropout,
-        use_batchnorm=use_batchnorm,
+        psi_normalization=psi_normalization,
     ).to(device)
 
     # Initialize θ/β from pre-trained IRT (much better than random init)
