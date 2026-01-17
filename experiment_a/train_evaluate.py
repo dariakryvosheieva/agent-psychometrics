@@ -61,8 +61,8 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
     print(f"   Train tasks: {data.n_train_tasks}")
     print(f"   Test tasks: {data.n_test_tasks}")
 
-    # 2. Get ground truth difficulties for training
-    train_b = data.items.loc[data.train_tasks, "b"].values
+    # 2. Get ground truth difficulties for training (from train-only IRT, no leakage)
+    train_b = data.train_items.loc[data.train_tasks, "b"].values
 
     # 3. Initialize results dict
     results: Dict[str, Any] = {

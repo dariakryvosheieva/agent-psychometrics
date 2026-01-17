@@ -133,6 +133,28 @@ For binomial data (k successes out of n trials):
 
 This properly weights agent-task pairs by trial count.
 
+## Data Leakage Prevention
+
+The IRT model provides ground truth difficulties (β) used as training targets. To avoid data leakage, we train **two separate IRT models**:
+
+1. **Train-only IRT**: Trained on train tasks only → provides uncontaminated ground truth for training the difficulty predictor
+2. **Full IRT**: Trained on all tasks → used for oracle baseline and final evaluation
+
+This ensures the difficulty predictor's training targets are not influenced by test task information. The split IRT models are cached in `chris_output/experiment_a_terminalbench/irt_splits/` and automatically reused when the split parameters match.
+
+The IRT training uses **binomial IRT** to properly model the (k successes / n trials) data format:
+
+```bash
+# To manually train split IRT model for TerminalBench
+python -m experiment_a.train_irt_split --binomial \
+    --responses_path data/terminal_bench/terminal_bench_2.0_raw.jsonl \
+    --output_dir chris_output/experiment_a_terminalbench/irt_splits \
+    --dry_run  # See what would happen
+
+# Or just run train_evaluate.py which handles this automatically
+python -m experiment_a_terminalbench.train_evaluate
+```
+
 ## Feature Sources
 
 ### 1. Embeddings
@@ -193,6 +215,10 @@ experiment_a_terminalbench/
 ├── generate_embeddings.py         # Generate VLM embeddings for tasks
 ├── compute_llm_judge_features.py  # Extract LLM judge semantic features
 └── llm_judge_prompt.py            # Prompt template for feature extraction
+
+# Shared with experiment_a (reused via import):
+# - experiment_a/train_irt_split.py  # Train IRT on train tasks only (--binomial flag)
+# - experiment_a/data_loader.py      # stable_split_tasks()
 ```
 
 ## Output

@@ -37,10 +37,27 @@ python -m experiment_a.train_evaluate --dry_run
 ## Evaluation Protocol
 
 1. **Split tasks** (not agents) into train/test sets using deterministic hash-based splitting
-2. **Train difficulty predictor** on train tasks (e.g., embeddings → Ridge regression → difficulty)
-3. **Predict difficulty** for test tasks
-4. **Compute IRT probabilities**: For each (agent, task) pair, compute P(success) = sigmoid(θ - β̂)
-5. **Calculate AUC**: Compare predicted probabilities to actual 0/1 outcomes
+2. **Train IRT on train tasks only** to get uncontaminated ground truth difficulties (avoids data leakage)
+3. **Train difficulty predictor** on train tasks using train-only IRT difficulties as targets
+4. **Predict difficulty** for test tasks
+5. **Compute IRT probabilities**: For each (agent, task) pair, compute P(success) = sigmoid(θ - β̂)
+6. **Calculate AUC**: Compare predicted probabilities to actual 0/1 outcomes
+
+### Data Leakage Prevention
+
+The IRT model provides ground truth difficulties (β) used as training targets. To avoid data leakage, we train **two separate IRT models**:
+
+1. **Train-only IRT**: Trained on train tasks only → provides uncontaminated ground truth for training the difficulty predictor
+2. **Full IRT**: Trained on all tasks → used for oracle baseline and final evaluation
+
+This ensures the difficulty predictor's training targets are not influenced by test task information. The split IRT models are cached in `chris_output/experiment_a/irt_splits/` and automatically reused when the split parameters match.
+
+```bash
+# To manually train split IRT model
+python -m experiment_a.train_irt_split --dry_run  # See what would happen
+python -m experiment_a.train_irt_split            # Train on train tasks only
+python -m experiment_a.train_irt_split --force    # Force retrain even if cached
+```
 
 ## Results (2026-01-13)
 
@@ -169,6 +186,7 @@ experiment_a/
 ├── __init__.py                    # Module exports
 ├── config.py                      # ExperimentAConfig dataclass
 ├── data_loader.py                 # Load IRT params, responses; create splits
+├── train_irt_split.py             # Train IRT on train tasks only (avoids leakage)
 ├── difficulty_predictor.py        # DifficultyPredictor protocol + implementations
 ├── irt_evaluation.py              # AUC computation using 1PL IRT formula
 ├── baselines.py                   # Agent-only, task-only baselines
