@@ -22,6 +22,7 @@ trajectory_data/filtered_unified/
 trajectory_data/swebench_pro/
 IssueSolvingEmpirical/
 reeval/
+terminal_bench/
 
 # Embeddings from cluster (large files, don't sync back)
 out/
