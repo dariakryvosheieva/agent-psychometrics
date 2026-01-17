@@ -235,8 +235,9 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
                 elif "instance_id" in features_df.columns:
                     features_df = features_df.set_index("instance_id")
 
-                # Get feature columns (exclude index-like columns)
-                feature_cols = [c for c in features_df.columns if c not in ["task_id", "instance_id"]]
+                # Get feature columns (only numeric semantic features)
+                from experiment_a_terminalbench.llm_judge_prompt import LLM_JUDGE_SEMANTIC_FEATURES
+                feature_cols = [c for c in LLM_JUDGE_SEMANTIC_FEATURES if c in features_df.columns]
                 print(f"   Features loaded: {len(features_df)} tasks")
                 print(f"   Feature count: {len(feature_cols)}")
 
