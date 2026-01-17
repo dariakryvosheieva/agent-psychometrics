@@ -22,6 +22,8 @@ PSI_NORM=""
 PSI_NORM_VALUE=""
 FREEZE_IRT=""
 FREEZE_ENCODER=""
+LORA_R=""
+LORA_R_VALUE=""
 for arg in "$@"; do
     case $arg in
         --no_resume) NO_RESUME="--no_resume" ;;
@@ -32,6 +34,10 @@ for arg in "$@"; do
             ;;
         --freeze_irt) FREEZE_IRT="--freeze_irt" ;;
         --freeze_encoder) FREEZE_ENCODER="--freeze_encoder" ;;
+        --lora_r=*)
+            LORA_R_VALUE="${arg#*=}"
+            LORA_R="--lora_r $LORA_R_VALUE"
+            ;;
     esac
 done
 
@@ -46,6 +52,9 @@ else
 fi
 if [ -n "$PSI_NORM_VALUE" ]; then
     OUTPUT_DIR="${OUTPUT_DIR}_psi_${PSI_NORM_VALUE}"
+fi
+if [ -n "$LORA_R_VALUE" ]; then
+    OUTPUT_DIR="${OUTPUT_DIR}_lora_r${LORA_R_VALUE}"
 fi
 
 # Create directories
@@ -106,6 +115,7 @@ python -m experiment_sad_irt.train_evaluate \
     $PSI_NORM \
     $FREEZE_IRT \
     $FREEZE_ENCODER \
+    $LORA_R \
     $RESUME_ARG
 
 echo "End time: $(date)"
