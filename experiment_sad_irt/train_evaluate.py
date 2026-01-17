@@ -65,6 +65,9 @@ def parse_args() -> SADIRTConfig:
 
     # Ablations
     parser.add_argument("--freeze_irt", action="store_true", help="Freeze θ/β and only train ψ predictor")
+    parser.add_argument("--psi_normalization", type=str, default=None,
+                        choices=["batchnorm", "center", "none"],
+                        help="How to normalize ψ (default: center if frozen, batchnorm otherwise)")
 
     # Debug
     parser.add_argument("--dry_run", action="store_true")
@@ -96,6 +99,7 @@ def parse_args() -> SADIRTConfig:
         output_dir=args.output_dir,
         seed=args.seed,
         freeze_irt=args.freeze_irt,
+        psi_normalization=args.psi_normalization,
         dry_run=args.dry_run,
         max_samples=args.max_samples,
         smoke_test=args.smoke_test,
@@ -559,10 +563,15 @@ def run_full_auc_evaluation(config: SADIRTConfig):
     logger.info("Training SAD-IRT (with trajectory encoder)")
     logger.info("=" * 40)
 
-    # When freezing IRT params, use centering instead of full BatchNorm
-    # BatchNorm's variance scaling amplifies tiny ψ values and destabilizes training
-    # Centering just enforces zero-mean without the harmful scaling
-    psi_normalization = "center" if config.freeze_irt else "batchnorm"
+    # Determine ψ normalization strategy
+    # - If explicitly specified via CLI, use that
+    # - Otherwise: use centering for frozen IRT (to avoid BatchNorm instability),
+    #   and batchnorm for trainable IRT (following SAD-IRT paper)
+    if hasattr(config, 'psi_normalization') and config.psi_normalization is not None:
+        psi_normalization = config.psi_normalization
+    else:
+        psi_normalization = "center" if config.freeze_irt else "batchnorm"
+    logger.info(f"Using psi_normalization={psi_normalization}")
 
     sad_irt_model = SADIRT(
         num_agents=full_dataset.num_agents,

@@ -50,6 +50,7 @@ class SADIRTConfig:
 
     # Ablations
     freeze_irt: bool = False  # If True, freeze θ/β and only train ψ predictor
+    psi_normalization: Optional[str] = None  # "batchnorm", "center", or "none" (None = auto)
 
     # Debug
     dry_run: bool = False
