@@ -276,6 +276,223 @@ The tracking file (`chris_output/experiment_a/sandbox_runs/tracking.json`) maint
 cat chris_output/experiment_a/sandbox_features/django__django-12345.json | jq .
 ```
 
+## Running Full Agents on SWE-bench Tasks
+
+To run a real LLM agent (not the dummy solver) on SWE-bench tasks with automatic Lunette upload, use `inspect eval`. The `lunette_logger` hook automatically uploads trajectories to Lunette for **any** `inspect eval` run when `lunette-sdk` is installed.
+
+### The lunette_logger Hook
+
+When `lunette-sdk` is installed, it registers the `lunette_logger` hook via Python entry points. This hook:
+
+1. **Automatically activates** for all `inspect eval` commands
+2. **Buffers trajectories** as samples complete during evaluation
+3. **Uploads the run** to Lunette at task end (via `client.save_run()`)
+4. **Works with any sandbox** - both `--sandbox docker` and `--sandbox lunette`
+
+You'll see it in the startup output:
+```
+inspect_ai v0.3.159
+- hooks enabled: 1
+  lunette/lunette_logger: Auto-save evaluation runs to backend
+```
+
+**To disable the hook**, uninstall `lunette-sdk` or set an environment variable to skip it (if supported by your version).
+
+### Option 1: Using `lunette eval` (Recommended for Lunette Cloud)
+
+The simplest approach uses the `lunette eval` CLI wrapper:
+
+```bash
+source .venv/bin/activate
+
+# Run on the mini dataset (50 curated tasks)
+lunette eval swebench --model anthropic/claude-opus-4-5-20251101 --limit 1
+
+# Note: lunette eval swebench uses swe_bench_verified_mini dataset
+# To run a specific task, it must be in that mini dataset
+```
+
+This automatically configures the Lunette sandbox properly. However, it uses `swe_bench_verified_mini` which only has ~50 tasks.
+
+### Option 2: Using `inspect eval` with Lunette Sandbox Config
+
+For the full SWE-bench Verified dataset (500 tasks), use `inspect eval` with the Lunette sandbox config:
+
+```bash
+source .venv/bin/activate
+
+# Get the path to Lunette's swebench config
+LUNETTE_CONFIG=$(python -c "import importlib.resources; print(importlib.resources.files('lunette.presets').joinpath('swebench.yaml'))")
+
+# Run with proper Lunette sandbox configuration
+inspect eval inspect_evals/swe_bench \
+    -T "dataset=princeton-nlp/SWE-bench_Verified" \
+    -T "instance_ids=['sphinx-doc__sphinx-10614']" \
+    -T "sandbox_config_template_file=$LUNETTE_CONFIG" \
+    -T "sandbox_type=lunette" \
+    -T "build_docker_images=False" \
+    --model anthropic/claude-opus-4-5-20251101 \
+    --sandbox lunette \
+    --message-limit 100
+```
+
+### Option 3: Using `inspect eval` with Docker (Local Execution)
+
+For local execution without Lunette cloud, use Docker sandbox:
+
+```bash
+source .venv/bin/activate
+
+inspect eval inspect_evals/swe_bench \
+    -T "dataset=princeton-nlp/SWE-bench_Verified" \
+    -T "instance_ids=['sphinx-doc__sphinx-10614']" \
+    --model anthropic/claude-opus-4-5-20251101 \
+    --sandbox docker \
+    --message-limit 100
+```
+
+Trajectories are still uploaded to Lunette via the `lunette_logger` hook.
+
+### Sandbox Options Comparison
+
+| Approach | Environment | Lunette Upload | Notes |
+|----------|-------------|----------------|-------|
+| `lunette eval swebench` | ✅ Lunette cloud with `/testbed` | ✅ Native | Mini dataset only |
+| `inspect eval ... --sandbox lunette` + config | ✅ Lunette cloud with `/testbed` | ✅ Native | Full dataset, requires config params |
+| `inspect eval ... --sandbox lunette` (no config) | ❌ No `/testbed` | ✅ Yes | **Broken** - missing config |
+| `inspect eval ... --sandbox docker` | ✅ Local Docker with `/testbed` | ✅ Via hook | Local execution |
+
+**Key insight**: Using `--sandbox lunette` alone does NOT work for SWE-bench. You MUST either:
+1. Use `lunette eval swebench` (handles config automatically), OR
+2. Pass the sandbox config parameters: `sandbox_config_template_file`, `sandbox_type=lunette`, `build_docker_images=False`
+
+### Key Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `inspect_evals/swe_bench` | The SWE-bench task from inspect_evals |
+| `-T "dataset=..."` | Which SWE-bench split (Verified, Lite, Full) |
+| `-T "instance_ids=['...']"` | Specific task ID(s) to run (use Python list syntax) |
+| `--model` | Model to use (e.g., `anthropic/claude-opus-4-5-20251101`, `openai/gpt-4o`) |
+| `--sandbox docker` | Use local Docker (recommended for agent runs) |
+| `--message-limit` | Max agent turns (default varies; 50-200 typical for SWE-bench) |
+
+### Supported Models
+
+```bash
+# Claude models
+--model anthropic/claude-opus-4-5-20251101
+--model anthropic/claude-sonnet-4-5-20250929
+
+# OpenAI models
+--model openai/gpt-4o
+--model openai/o1-2024-12-17
+--model openai/o3-2025-04-16
+--model openai/o4-mini
+```
+
+### Running Multiple Tasks
+
+Run tasks **one at a time** (not batched) to ensure proper Lunette tracking:
+
+```bash
+# ✅ CORRECT - Run each task separately
+for task in "django__django-16569" "sphinx-doc__sphinx-10614" "sympy__sympy-12481"; do
+    inspect eval inspect_evals/swe_bench \
+        -T "dataset=princeton-nlp/SWE-bench_Verified" \
+        -T "instance_ids=['$task']" \
+        --model anthropic/claude-opus-4-5-20251101 \
+        --sandbox docker \
+        --message-limit 100
+done
+
+# ❌ WRONG - Don't batch multiple instance_ids (creates batched run on Lunette)
+inspect eval ... -T "instance_ids=['task1', 'task2', 'task3']"
+```
+
+### Using the Python Script (Recommended for Experiments)
+
+For running experiments with multiple tasks, use `experiment_pass_at_k/run_pass_k.py`:
+
+```bash
+# Run a model on selected tasks with k attempts each
+python -m experiment_pass_at_k.run_pass_k \
+    --model anthropic/claude-opus-4-5-20251101 \
+    --k 1 \
+    --task_ids "sphinx-doc__sphinx-10614,django__django-16569"
+
+# Resume a previous run
+python -m experiment_pass_at_k.run_pass_k \
+    --model anthropic/claude-opus-4-5-20251101 \
+    --resume
+```
+
+### What Happens During a Run
+
+1. **Environment Setup**: Docker container is provisioned with the repo at the correct base commit
+2. **Agent Execution**: Your model receives the problem statement and can use bash/editor tools
+3. **Trajectory Buffering**: The `lunette_logger` hook captures messages as the agent works
+4. **Upload**: At task end, the complete trajectory is uploaded to Lunette
+5. **Scoring**: SWE-bench scorer checks if the agent's patch passes the test suite
+6. **Cleanup**: Docker environment is cleaned up
+
+### Viewing Results
+
+**Local logs** (Inspect .eval files):
+```bash
+# List recent eval logs
+ls -la logs/*.eval | tail -5
+
+# Extract results from an eval log
+python3 -c "
+import zipfile, json
+with zipfile.ZipFile('logs/YOUR_LOG.eval', 'r') as zf:
+    with zf.open('samples/TASK_ID_epoch_1.json') as f:
+        sample = json.load(f)
+        print('Score:', sample.get('scores'))
+"
+```
+
+**Lunette dashboard**:
+```
+https://lunette.dev/runs/<run_id>
+```
+
+Find your run via the Lunette API:
+```python
+from lunette import LunetteClient
+import asyncio
+
+async def list_my_runs():
+    async with LunetteClient() as client:
+        response = await client._client.get('/runs/', params={'model': 'anthropic/claude-opus-4-5-20251101'})
+        for run in response.json()[:5]:
+            print(f"{run['id']}: {run.get('task')}")
+
+asyncio.run(list_my_runs())
+```
+
+### Hook Logs
+
+The `lunette_logger` hook writes logs to `~/.lunette/logs/hook.log`:
+```bash
+# Check hook activity
+tail -50 ~/.lunette/logs/hook.log
+```
+
+### Common Issues
+
+**Agent doesn't submit a patch**: Increase `--message-limit` (try 150-200 for complex tasks).
+
+**Docker image not found**: The SWE-bench Docker images are pulled automatically. First run may be slow.
+
+**Score is 0 but agent made edits**: The patch may not pass the test suite. Check the scorer explanation in the eval log.
+
+**Trajectories not appearing on Lunette**:
+1. Check that `lunette_logger` shows in the startup hooks
+2. Verify your API key in `~/.lunette/config.json`
+3. Check `~/.lunette/logs/hook.log` for errors
+
 ## Uploading Real Agent Trajectories with Metadata
 
 **IMPORTANT:** Always use `trajectory_upload/lunette_reupload_with_metadata.py` for uploading trajectories. This includes proper SWE-bench metadata (repo, patch, test_patch, etc.) which the judge uses.
@@ -449,12 +666,33 @@ Then parse the explanation using regex patterns. See `experiment_b/compute_lunet
 
 Lunette's power comes from **sandbox access** - the ability to run shell commands in an environment containing the repo checkout. However, sandbox creation is **not automatic** and depends on how you create/upload trajectories.
 
+### Sandbox vs Hook: Understanding the Two Systems
+
+There are two independent systems at play:
+
+1. **Sandbox** (`--sandbox X`): Where the agent runs during evaluation
+2. **Hook** (`lunette_logger`): Auto-uploads trajectories to Lunette after evaluation
+
+| Command | Agent Environment | Uploaded to Lunette? | Use Case |
+|---------|-------------------|----------------------|----------|
+| `lunette eval swebench` | ✅ Lunette cloud with `/testbed` | ✅ Native | Recommended for Lunette |
+| `--sandbox lunette` + config params | ✅ Lunette cloud with `/testbed` | ✅ Native | Full dataset on Lunette |
+| `--sandbox lunette` (no config) | ❌ No `/testbed` | ✅ Yes | **Broken** for SWE-bench |
+| `--sandbox docker` | ✅ Local Docker with `/testbed` | ✅ Via hook | Local execution |
+
+**Key point**: `--sandbox lunette` alone does NOT provision the SWE-bench environment. You must EITHER:
+1. Use `lunette eval swebench` (auto-configures), OR
+2. Pass the config params: `-T sandbox_config_template_file=... -T sandbox_type=lunette -T build_docker_images=False`
+
+See "Running Full Agents on SWE-bench Tasks" section for complete commands.
+
 ### When Sandboxes Are Created
 
 | Method | Sandbox Created? | Notes |
 |--------|------------------|-------|
-| Run through Inspect with `--sandbox lunette` | ✅ Yes | Full environment with repo checkout |
-| `client.save_run()` + `client.investigate()` | ❌ No | Just stores trajectory data, no environment |
+| `--sandbox lunette` | ✅ Yes | For grading access, but NOT for agent execution |
+| `--sandbox docker` + hook | ❌ No | Trajectory uploaded, no grading sandbox |
+| `client.save_run()` only | ❌ No | Just stores trajectory data |
 | `client.create_sandbox(service)` | ✅ Yes | Manual sandbox, requires ComposeService config |
 
 **Important:** The `investigate()` API does NOT have an `enable_sandbox` parameter. Sandboxes must be created through Inspect's sandbox system or manually via `create_sandbox()`.
@@ -498,27 +736,27 @@ When this happens, the grading judge will report errors like:
 - "Sandbox appears to be empty"
 - Features will be estimated/guessed rather than verified
 
-### Solution 1: Run Through Inspect (Recommended for SWE-bench)
+### Solution 1: Run Through Inspect with Docker Sandbox (Recommended for SWE-bench)
 
-For SWE-bench tasks, run agents through Inspect with the Lunette sandbox:
+For SWE-bench tasks, run agents through Inspect with the Docker sandbox:
 
 ```bash
-# Run with Lunette sandbox - creates proper environment
-lunette eval swebench --solver my_solver.py:solver --model gpt-4 --sandbox lunette
-
-# Or with inspect directly
-inspect eval inspect_evals/swe_bench_verified_mini \
-    --solver my_solver.py:solver \
-    --model gpt-4 \
-    --sandbox lunette \
-    -T sandbox_type=lunette
+# Run with Docker sandbox - proper SWE-bench environment
+inspect eval inspect_evals/swe_bench \
+    -T "dataset=princeton-nlp/SWE-bench_Verified" \
+    -T "instance_ids=['django__django-16569']" \
+    --model anthropic/claude-opus-4-5-20251101 \
+    --sandbox docker \
+    --message-limit 100
 ```
 
 This:
-1. Provisions a sandbox with the repo checkout at the correct commit
-2. Runs your agent in that sandbox
-3. Uploads the trajectory with proper sandbox state
-4. Grading judges can then access the same environment
+1. Provisions a Docker container with the repo at the correct commit (`/testbed`)
+2. Runs your agent with full access to the codebase
+3. Uploads the trajectory to Lunette via the `lunette_logger` hook
+4. Scores the result using SWE-bench's test suite
+
+**Note**: The grading judge will NOT have sandbox access to replay commands - only the trajectory data is uploaded. For grading with environment access, see the dummy solver workflow in Experiment A.
 
 ### Solution 2: Create Sandbox Manually
 
