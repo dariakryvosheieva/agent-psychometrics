@@ -11,22 +11,37 @@
 #SBATCH --nodes=1
 
 # Configuration - 10 epochs for longer training
-OUTPUT_DIR="chris_output/sad_irt_long"
+BASE_OUTPUT_DIR="chris_output/sad_irt_long"
 EPOCHS=10
 
 # Parse command line flags
 DEBUG_GRADIENTS=""
 NO_RESUME=""
 PSI_NORM=""
+PSI_NORM_VALUE=""
 FREEZE_IRT=""
 for arg in "$@"; do
     case $arg in
         --no_resume) NO_RESUME="--no_resume" ;;
         --debug_gradients) DEBUG_GRADIENTS="--debug_gradients" ;;
-        --psi_normalization=*) PSI_NORM="--psi_normalization ${arg#*=}" ;;
+        --psi_normalization=*)
+            PSI_NORM_VALUE="${arg#*=}"
+            PSI_NORM="--psi_normalization $PSI_NORM_VALUE"
+            ;;
         --freeze_irt) FREEZE_IRT="--freeze_irt" ;;
     esac
 done
+
+# Build output directory based on ablation hyperparams
+OUTPUT_DIR="$BASE_OUTPUT_DIR"
+if [ -n "$FREEZE_IRT" ]; then
+    OUTPUT_DIR="${OUTPUT_DIR}/freeze_irt"
+else
+    OUTPUT_DIR="${OUTPUT_DIR}/full"
+fi
+if [ -n "$PSI_NORM_VALUE" ]; then
+    OUTPUT_DIR="${OUTPUT_DIR}_psi_${PSI_NORM_VALUE}"
+fi
 
 # Create directories
 mkdir -p logs
