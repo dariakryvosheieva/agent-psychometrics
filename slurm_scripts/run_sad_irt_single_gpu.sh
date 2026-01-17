@@ -13,6 +13,7 @@
 # Configuration
 OUTPUT_DIR="chris_output/sad_irt"
 EPOCHS=3
+NO_RESUME=${1:-""}  # Pass --no_resume as first arg to skip checkpoint loading
 
 # Create directories
 mkdir -p logs
@@ -36,18 +37,23 @@ export HF_HUB_ENABLE_HF_TRANSFER=1
 # Check for existing checkpoint to resume from
 # Find the most recently modified checkpoint (any type)
 RESUME_ARG=""
-echo "Available checkpoints in $OUTPUT_DIR:"
-ls -lt "$OUTPUT_DIR"/checkpoint_*.pt 2>/dev/null | head -5 || echo "  (none)"
 
-LATEST_CHECKPOINT=$(ls -t "$OUTPUT_DIR"/checkpoint_*.pt 2>/dev/null | head -1)
-
-if [ -n "$LATEST_CHECKPOINT" ]; then
-    echo ""
-    echo "Auto-selected most recent checkpoint: $LATEST_CHECKPOINT"
-    echo "To use a different checkpoint, cancel and run with: --resume_from <path>"
-    RESUME_ARG="--resume_from $LATEST_CHECKPOINT"
+if [ "$NO_RESUME" = "--no_resume" ]; then
+    echo "Skipping checkpoint loading (--no_resume flag set)"
 else
-    echo "No checkpoint found, starting fresh"
+    echo "Available checkpoints in $OUTPUT_DIR:"
+    ls -lt "$OUTPUT_DIR"/checkpoint_*.pt 2>/dev/null | head -5 || echo "  (none)"
+
+    LATEST_CHECKPOINT=$(ls -t "$OUTPUT_DIR"/checkpoint_*.pt 2>/dev/null | head -1)
+
+    if [ -n "$LATEST_CHECKPOINT" ]; then
+        echo ""
+        echo "Auto-selected most recent checkpoint: $LATEST_CHECKPOINT"
+        echo "To skip checkpoint loading, run with: sbatch script.sh --no_resume"
+        RESUME_ARG="--resume_from $LATEST_CHECKPOINT"
+    else
+        echo "No checkpoint found, starting fresh"
+    fi
 fi
 
 # Run training (single GPU)
