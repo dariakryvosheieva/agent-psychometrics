@@ -3,7 +3,8 @@
 #SBATCH --output=slurm_logs/terminalbench_embeddings_%j.out
 #SBATCH --error=slurm_logs/terminalbench_embeddings_%j.err
 #SBATCH --time=02:00:00
-#SBATCH --partition=sched_mit_psfc_gpu_r8
+#SBATCH --partition=mit_normal_gpu
+#SBATCH --account=mit_general
 #SBATCH --gres=gpu:h200:1
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=8
