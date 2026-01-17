@@ -13,6 +13,7 @@
 # Configuration - 10 epochs for longer training
 BASE_OUTPUT_DIR="chris_output/sad_irt_long"
 EPOCHS=10
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Parse command line flags
 DEBUG_GRADIENTS=""
@@ -35,9 +36,9 @@ done
 # Build output directory based on ablation hyperparams
 OUTPUT_DIR="$BASE_OUTPUT_DIR"
 if [ -n "$FREEZE_IRT" ]; then
-    OUTPUT_DIR="${OUTPUT_DIR}/freeze_irt"
+    OUTPUT_DIR="${OUTPUT_DIR}/freeze_irt_${TIMESTAMP}"
 else
-    OUTPUT_DIR="${OUTPUT_DIR}/full"
+    OUTPUT_DIR="${OUTPUT_DIR}/full_${TIMESTAMP}"
 fi
 if [ -n "$PSI_NORM_VALUE" ]; then
     OUTPUT_DIR="${OUTPUT_DIR}_psi_${PSI_NORM_VALUE}"
