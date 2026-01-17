@@ -227,6 +227,7 @@ def parse_args() -> SADIRTConfig:
 
     # Ablations
     parser.add_argument("--freeze_irt", action="store_true", help="Freeze θ/β and only train ψ predictor")
+    parser.add_argument("--freeze_encoder", action="store_true", help="Freeze encoder (no LoRA), only train psi_head")
     parser.add_argument("--psi_normalization", type=str, default=None,
                         choices=["batchnorm", "center", "none"],
                         help="How to normalize ψ (default: center if frozen, batchnorm otherwise)")
@@ -264,6 +265,7 @@ def parse_args() -> SADIRTConfig:
         output_dir=args.output_dir,
         seed=args.seed,
         freeze_irt=args.freeze_irt,
+        freeze_encoder=args.freeze_encoder,
         psi_normalization=args.psi_normalization,
         dry_run=args.dry_run,
         max_samples=args.max_samples,
@@ -730,6 +732,7 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
         lora_alpha=config.lora_alpha,
         lora_dropout=config.lora_dropout,
         psi_normalization=psi_normalization,
+        freeze_encoder=config.freeze_encoder,
     ).to(device)
 
     # Initialize θ/β from accuracy-based estimates (pre-frontier data only)

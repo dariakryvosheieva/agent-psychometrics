@@ -21,6 +21,7 @@ NO_RESUME=""
 PSI_NORM=""
 PSI_NORM_VALUE=""
 FREEZE_IRT=""
+FREEZE_ENCODER=""
 for arg in "$@"; do
     case $arg in
         --no_resume) NO_RESUME="--no_resume" ;;
@@ -30,12 +31,15 @@ for arg in "$@"; do
             PSI_NORM="--psi_normalization $PSI_NORM_VALUE"
             ;;
         --freeze_irt) FREEZE_IRT="--freeze_irt" ;;
+        --freeze_encoder) FREEZE_ENCODER="--freeze_encoder" ;;
     esac
 done
 
 # Build output directory based on ablation hyperparams
 OUTPUT_DIR="$BASE_OUTPUT_DIR"
-if [ -n "$FREEZE_IRT" ]; then
+if [ -n "$FREEZE_ENCODER" ]; then
+    OUTPUT_DIR="${OUTPUT_DIR}/freeze_encoder_${TIMESTAMP}"
+elif [ -n "$FREEZE_IRT" ]; then
     OUTPUT_DIR="${OUTPUT_DIR}/freeze_irt_${TIMESTAMP}"
 else
     OUTPUT_DIR="${OUTPUT_DIR}/full_${TIMESTAMP}"
@@ -55,6 +59,7 @@ echo "GPUs: $CUDA_VISIBLE_DEVICES"
 echo "Start time: $(date)"
 echo "Epochs: $EPOCHS"
 echo "Freeze IRT: ${FREEZE_IRT:-no}"
+echo "Freeze Encoder: ${FREEZE_ENCODER:-no}"
 
 # Load modules
 module load miniforge 2>/dev/null || true
@@ -100,6 +105,7 @@ python -m experiment_sad_irt.train_evaluate \
     $DEBUG_GRADIENTS \
     $PSI_NORM \
     $FREEZE_IRT \
+    $FREEZE_ENCODER \
     $RESUME_ARG
 
 echo "End time: $(date)"

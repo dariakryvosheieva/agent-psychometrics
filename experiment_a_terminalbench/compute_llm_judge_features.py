@@ -111,13 +111,12 @@ def call_openai(prompt: str, model: str = "gpt-5.2") -> str:
 
     client = openai.OpenAI()
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=model,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=1024,
+        input=prompt,
     )
 
-    return response.choices[0].message.content.strip()
+    return response.output_text.strip()
 
 
 def extract_features_for_task(

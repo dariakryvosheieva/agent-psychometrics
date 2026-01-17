@@ -35,6 +35,7 @@ class SADIRT(nn.Module):
         lora_target_modules: Optional[list] = None,
         use_gradient_checkpointing: bool = False,  # Disable: breaks LoRA gradients
         psi_normalization: str = "batchnorm",
+        freeze_encoder: bool = False,  # If True, don't use LoRA, freeze encoder entirely
     ):
         """Initialize SAD-IRT model.
 
@@ -42,7 +43,7 @@ class SADIRT(nn.Module):
             num_agents: Number of unique agents
             num_tasks: Number of unique tasks
             model_name: HuggingFace model name for trajectory encoder
-            lora_r: LoRA rank
+            lora_r: LoRA rank (ignored if freeze_encoder=True)
             lora_alpha: LoRA alpha scaling
             lora_dropout: LoRA dropout
             lora_target_modules: Modules to apply LoRA to
@@ -51,6 +52,7 @@ class SADIRT(nn.Module):
                 - "batchnorm": Full BatchNorm (zero-mean + unit variance) - default
                 - "center": Just subtract mean (zero-mean only) - for frozen IRT
                 - "none": No normalization - raw ψ values
+            freeze_encoder: If True, freeze encoder (no LoRA), only train psi_head + IRT params
         """
         super().__init__()
 
@@ -75,33 +77,43 @@ class SADIRT(nn.Module):
             torch_dtype=torch.bfloat16,
         )
 
-        # Apply LoRA first, before enabling gradient checkpointing
-        if lora_target_modules is None:
-            lora_target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
+        # Apply LoRA or freeze encoder
+        self.freeze_encoder = freeze_encoder
+        if freeze_encoder:
+            # Freeze all encoder parameters - only train psi_head and IRT params
+            for param in self.encoder.parameters():
+                param.requires_grad = False
+            logger.info("Encoder frozen (no LoRA) - only training psi_head and IRT params")
+            trainable_params = 0
+            total_params = sum(p.numel() for p in self.encoder.parameters())
+        else:
+            # Apply LoRA for efficient fine-tuning
+            if lora_target_modules is None:
+                lora_target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
 
-        peft_config = LoraConfig(
-            r=lora_r,
-            lora_alpha=lora_alpha,
-            lora_dropout=lora_dropout,
-            target_modules=lora_target_modules,
-            bias="none",
-            task_type="FEATURE_EXTRACTION",
-        )
-        self.encoder = get_peft_model(self.encoder, peft_config)
+            peft_config = LoraConfig(
+                r=lora_r,
+                lora_alpha=lora_alpha,
+                lora_dropout=lora_dropout,
+                target_modules=lora_target_modules,
+                bias="none",
+                task_type="FEATURE_EXTRACTION",
+            )
+            self.encoder = get_peft_model(self.encoder, peft_config)
 
-        # Enable gradient checkpointing for memory efficiency
-        # Note: This may cause LoRA gradients to be zero with use_reentrant=True (default)
-        # but we need it for memory. The LoRA learning happens through the psi_head gradient.
-        if use_gradient_checkpointing:
-            self.encoder.gradient_checkpointing_enable()
+            # Enable gradient checkpointing for memory efficiency
+            # Note: This may cause LoRA gradients to be zero with use_reentrant=True (default)
+            # but we need it for memory. The LoRA learning happens through the psi_head gradient.
+            if use_gradient_checkpointing:
+                self.encoder.gradient_checkpointing_enable()
 
-        # Log trainable parameters
-        trainable_params = sum(p.numel() for p in self.encoder.parameters() if p.requires_grad)
-        total_params = sum(p.numel() for p in self.encoder.parameters())
-        logger.info(
-            f"LoRA applied: {trainable_params:,} trainable params "
-            f"({trainable_params / total_params * 100:.2f}% of {total_params:,} total)"
-        )
+            # Log trainable parameters
+            trainable_params = sum(p.numel() for p in self.encoder.parameters() if p.requires_grad)
+            total_params = sum(p.numel() for p in self.encoder.parameters())
+            logger.info(
+                f"LoRA applied: {trainable_params:,} trainable params "
+                f"({trainable_params / total_params * 100:.2f}% of {total_params:,} total)"
+            )
 
         # Get hidden size from config
         encoder_dim = config.hidden_size
