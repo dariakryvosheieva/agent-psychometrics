@@ -142,3 +142,49 @@ python -m experiment_sad_irt.train_evaluate \
 | `pre_frontier_threshold` | 0.1 | Max pass rate for pre-frontier |
 | `post_frontier_threshold` | 0.1 | Min pass rate for post-frontier |
 | `oracle_irt_dir` | `clean_data/swebench_verified_20251120_full/1d` | Pre-trained IRT |
+
+## Baseline Variance Analysis
+
+To understand whether improvements in Spearman ρ are meaningful, we evaluated the variance of the baseline IRT across 50 random seeds. This establishes the noise floor for the metric.
+
+### Results (n=50 seeds)
+
+| Statistic | Spearman ρ |
+|-----------|------------|
+| Mean | 0.378 |
+| Std Dev | 0.029 |
+| Min | 0.328 |
+| Max | 0.447 |
+| Range | 0.120 |
+
+**Percentiles:**
+
+| Percentile | Value |
+|------------|-------|
+| 5th | 0.337 |
+| 25th | 0.355 |
+| 50th (Median) | 0.371 |
+| 75th | 0.401 |
+| 95th | 0.427 |
+
+**95% Confidence Interval: [0.322, 0.435]**
+
+### Interpretation
+
+The baseline IRT has substantial variance due to Pyro's stochastic variational inference. A single run can produce Spearman ρ anywhere from ~0.33 to ~0.45 purely due to random seed.
+
+**To claim meaningful improvement over baseline:**
+- Results should consistently exceed the **95th percentile (~0.43)**
+- Or show improvement across multiple seeds
+
+### Running the Variance Analysis
+
+```bash
+# On MIT Engaging cluster
+sbatch slurm_scripts/run_baseline_variance.sh
+
+# With custom parameters
+sbatch slurm_scripts/run_baseline_variance.sh --num_seeds 100 --start_seed 0
+```
+
+Results are saved to `chris_output/baseline_variance/summary.json`.
