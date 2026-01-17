@@ -206,7 +206,7 @@ def parse_args() -> SADIRTConfig:
 
     # Data
     parser.add_argument("--response_matrix_path", type=str, default="clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
-    parser.add_argument("--trajectory_dir", type=str, default="trajectory_data/unified_trajs")
+    parser.add_argument("--trajectory_dir", type=str, default="chris_output/trajectory_summaries_api")
     parser.add_argument("--max_length", type=int, default=1024)
     parser.add_argument("--oracle_irt_dir", type=str, default="clean_data/swebench_verified_20251120_full/1d")
 
