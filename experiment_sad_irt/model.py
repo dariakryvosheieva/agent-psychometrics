@@ -34,6 +34,7 @@ class SADIRT(nn.Module):
         lora_dropout: float = 0.1,
         lora_target_modules: Optional[list] = None,
         use_gradient_checkpointing: bool = True,
+        use_batchnorm: bool = True,
     ):
         """Initialize SAD-IRT model.
 
@@ -46,6 +47,7 @@ class SADIRT(nn.Module):
             lora_dropout: LoRA dropout
             lora_target_modules: Modules to apply LoRA to
             use_gradient_checkpointing: Enable gradient checkpointing for memory efficiency
+            use_batchnorm: Apply BatchNorm to ψ for zero-mean constraint (disable for frozen IRT)
         """
         super().__init__()
 
@@ -110,7 +112,13 @@ class SADIRT(nn.Module):
         nn.init.zeros_(self.psi_head.bias)
 
         # BatchNorm for zero-mean constraint (affine=False to not learn shift/scale)
-        self.psi_bn = nn.BatchNorm1d(1, affine=False, momentum=0.1)
+        # Disable for frozen IRT ablation where it causes instability
+        self.use_batchnorm = use_batchnorm
+        if use_batchnorm:
+            self.psi_bn = nn.BatchNorm1d(1, affine=False, momentum=0.1)
+        else:
+            self.psi_bn = None
+            logger.info("BatchNorm disabled for ψ - using raw values")
 
     def forward(
         self,
@@ -154,16 +162,20 @@ class SADIRT(nn.Module):
         # Predict ψ
         psi_raw = self.psi_head(last_token_hidden.float())  # (batch_size, 1)
 
-        # Apply BatchNorm for zero-mean constraint
-        # Only apply during training with batch size > 1
-        if self.training and psi_raw.size(0) > 1:
-            psi = self.psi_bn(psi_raw)
+        # Apply BatchNorm for zero-mean constraint (if enabled)
+        if self.use_batchnorm and self.psi_bn is not None:
+            # Only apply during training with batch size > 1
+            if self.training and psi_raw.size(0) > 1:
+                psi = self.psi_bn(psi_raw)
+            else:
+                # During eval or batch_size=1, use running stats
+                self.psi_bn.eval()
+                psi = self.psi_bn(psi_raw)
+                if self.training:
+                    self.psi_bn.train()
         else:
-            # During eval or batch_size=1, use running stats
-            self.psi_bn.eval()
-            psi = self.psi_bn(psi_raw)
-            if self.training:
-                self.psi_bn.train()
+            # No BatchNorm - use raw ψ values
+            psi = psi_raw
 
         # IRT formula: logit = θ - (β + ψ)
         logits = theta - (beta + psi)
@@ -180,9 +192,12 @@ class SADIRT(nn.Module):
 
     def get_psi_stats(self) -> dict:
         """Get statistics about ψ BatchNorm."""
+        if self.psi_bn is None:
+            return {"running_mean": None, "running_var": None, "batchnorm_enabled": False}
         return {
             "running_mean": self.psi_bn.running_mean.item() if self.psi_bn.running_mean is not None else None,
             "running_var": self.psi_bn.running_var.item() if self.psi_bn.running_var is not None else None,
+            "batchnorm_enabled": True,
         }
 
     def initialize_from_pretrained_irt(
