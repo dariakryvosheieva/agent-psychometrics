@@ -1,300 +1,269 @@
 #!/usr/bin/env python3
-"""Analyze SAD-IRT checkpoints for parameter changes and gradient flow.
+"""Analyze SAD-IRT experiment results with clean summary output.
 
-This script checks:
-1. Whether LoRA parameters changed from initialization
-2. Whether LoRA parameters are nonzero
-3. Parameter statistics across training
+Shows:
+1. Spearman ρ comparison (SAD-IRT vs baseline)
+2. Parameter change summary (LoRA, IRT, ψ head)
+3. Loss curve plot
 
 Usage:
     python -m experiment_sad_irt.analyze_checkpoint chris_output/sad_irt_long/full
-    python -m experiment_sad_irt.analyze_checkpoint chris_output/sad_irt_long/freeze_irt
+    python -m experiment_sad_irt.analyze_checkpoint chris_output/sad_irt_long/full chris_output/sad_irt_long/freeze_irt
 """
 
 import argparse
+import json
 import re
 from pathlib import Path
 
-import torch
+import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 
-def analyze_lora_params(state_dict: dict) -> dict:
-    """Analyze LoRA parameters in a state dict."""
-    lora_stats = {
-        "lora_A": {"count": 0, "total_params": 0, "nonzero": 0, "norm": 0.0, "max_abs": 0.0},
-        "lora_B": {"count": 0, "total_params": 0, "nonzero": 0, "norm": 0.0, "max_abs": 0.0},
-    }
+def load_results(output_dir: Path) -> dict:
+    """Load results.json from output directory."""
+    results_path = output_dir / "results.json"
+    if not results_path.exists():
+        return {}
+    with open(results_path, "r") as f:
+        return json.load(f)
 
-    for key, param in state_dict.items():
-        if "lora_A" in key:
-            cat = "lora_A"
-        elif "lora_B" in key:
-            cat = "lora_B"
-        else:
+
+def parse_loss_from_logs(output_dir: Path) -> tuple:
+    """Parse loss values from training logs.
+
+    Returns:
+        Tuple of (steps, losses) arrays
+    """
+    # Try to find log files
+    log_patterns = [
+        Path("logs") / "sad_irt_long_*.out",
+        output_dir.parent.parent / "logs" / "sad_irt_long_*.out",
+    ]
+
+    steps = []
+    losses = []
+
+    for pattern in log_patterns:
+        if not pattern.parent.exists():
+            continue
+        log_files = sorted(pattern.parent.glob(pattern.name))
+        if not log_files:
             continue
 
-        param_np = param.cpu().numpy().flatten()
-        lora_stats[cat]["count"] += 1
-        lora_stats[cat]["total_params"] += len(param_np)
-        lora_stats[cat]["nonzero"] += np.count_nonzero(param_np)
-        lora_stats[cat]["norm"] += np.sum(param_np ** 2)
-        lora_stats[cat]["max_abs"] = max(lora_stats[cat]["max_abs"], np.max(np.abs(param_np)))
+        # Use the most recent log file
+        log_file = log_files[-1]
 
-    # Finalize norm
-    for cat in lora_stats:
-        lora_stats[cat]["norm"] = np.sqrt(lora_stats[cat]["norm"])
+        with open(log_file, "r") as f:
+            content = f.read()
 
-    return lora_stats
+        # Pattern: "Step 123/456 | Loss: 0.6789"
+        pattern_re = r"Step\s+(\d+)/\d+.*?Loss:\s*([\d.]+)"
+        for match in re.finditer(pattern_re, content):
+            steps.append(int(match.group(1)))
+            losses.append(float(match.group(2)))
 
+        if steps:
+            break
 
-def analyze_embeddings(state_dict: dict) -> dict:
-    """Analyze θ and β embeddings."""
-    stats = {}
-
-    for key in ["theta_embedding.weight", "beta_embedding.weight"]:
-        if key in state_dict:
-            param = state_dict[key].cpu().numpy()
-            stats[key] = {
-                "shape": param.shape,
-                "mean": float(np.mean(param)),
-                "std": float(np.std(param)),
-                "min": float(np.min(param)),
-                "max": float(np.max(param)),
-                "norm": float(np.linalg.norm(param)),
-            }
-
-    return stats
+    return np.array(steps), np.array(losses)
 
 
-def analyze_psi_head(state_dict: dict) -> dict:
-    """Analyze ψ head parameters."""
-    stats = {}
-
-    for suffix in ["weight", "bias"]:
-        key = f"psi_head.{suffix}"
-        if key in state_dict:
-            param = state_dict[key].cpu().numpy()
-            stats[key] = {
-                "shape": param.shape,
-                "mean": float(np.mean(param)),
-                "std": float(np.std(param)),
-                "min": float(np.min(param)),
-                "max": float(np.max(param)),
-                "norm": float(np.linalg.norm(param)),
-                "nonzero_frac": float(np.count_nonzero(param) / param.size),
-            }
-
-    return stats
-
-
-def compare_checkpoints(checkpoint1: dict, checkpoint2: dict, label1: str, label2: str) -> dict:
-    """Compare two checkpoints to see what changed."""
-    changes = {}
-
+def compute_param_changes(checkpoint1: dict, checkpoint2: dict) -> dict:
+    """Compute parameter changes between two checkpoints."""
     sd1 = checkpoint1.get("model_state_dict", checkpoint1)
     sd2 = checkpoint2.get("model_state_dict", checkpoint2)
 
-    # Find common keys
-    common_keys = set(sd1.keys()) & set(sd2.keys())
+    changes = {
+        "lora": {"changed": False, "total_diff": 0.0, "num_params": 0},
+        "irt": {"changed": False, "total_diff": 0.0, "num_params": 0},  # theta + beta
+        "psi_head": {"changed": False, "total_diff": 0.0, "num_params": 0},
+    }
 
-    for key in sorted(common_keys):
+    for key in sd1.keys():
+        if key not in sd2:
+            continue
+
         p1 = sd1[key].cpu().numpy()
         p2 = sd2[key].cpu().numpy()
+        diff_norm = np.linalg.norm(p2 - p1)
+        num_params = p1.size
 
-        diff = p2 - p1
-        diff_norm = np.linalg.norm(diff)
-        p1_norm = np.linalg.norm(p1)
+        if "lora" in key.lower():
+            category = "lora"
+        elif "embedding" in key.lower() or "theta" in key.lower() or "beta" in key.lower():
+            category = "irt"
+        elif "psi" in key.lower():
+            category = "psi_head"
+        else:
+            continue
 
-        if diff_norm > 1e-10:  # Only report if actually changed
-            changes[key] = {
-                "diff_norm": float(diff_norm),
-                "relative_change": float(diff_norm / (p1_norm + 1e-10)),
-                "max_abs_diff": float(np.max(np.abs(diff))),
-            }
+        changes[category]["total_diff"] += diff_norm
+        changes[category]["num_params"] += num_params
+        if diff_norm > 1e-10:
+            changes[category]["changed"] = True
 
     return changes
 
 
-def parse_gradient_logs(log_path: Path) -> list:
-    """Parse gradient information from training log."""
-    gradients = []
-
-    if not log_path.exists():
-        return gradients
-
-    with open(log_path, "r") as f:
-        content = f.read()
-
-    # Pattern for gradient debug output
-    # Looking for patterns like: "lora grad norm: 0.0000"
-    pattern = r"Gradient norms.*?lora.*?:\s*([\d.e+-]+)"
-
-    for match in re.finditer(pattern, content, re.IGNORECASE | re.DOTALL):
-        try:
-            gradients.append(float(match.group(1)))
-        except ValueError:
-            pass
-
-    # Also look for detailed gradient logs
-    detail_pattern = r"lora_[AB].*?grad.*?norm.*?:\s*([\d.e+-]+)"
-    for match in re.finditer(detail_pattern, content, re.IGNORECASE):
-        try:
-            val = float(match.group(1))
-            if val not in gradients:
-                gradients.append(val)
-        except ValueError:
-            pass
-
-    return gradients
-
-
-def analyze_checkpoint_dir(output_dir: Path) -> None:
-    """Analyze all checkpoints in a directory."""
+def analyze_experiment(output_dir: Path) -> dict:
+    """Analyze a single experiment directory."""
     output_dir = Path(output_dir)
 
-    print(f"\n{'='*70}")
-    print(f"Analyzing: {output_dir}")
-    print(f"{'='*70}")
+    # Load results
+    results = load_results(output_dir)
 
-    # Find all checkpoints
+    # Find checkpoints
     checkpoints = sorted(output_dir.glob("checkpoint_*.pt"))
 
-    if not checkpoints:
-        print("ERROR: No checkpoints found")
-        return
-
-    print(f"\nFound {len(checkpoints)} checkpoints:")
-    for cp in checkpoints:
-        print(f"  - {cp.name}")
-
-    # Load and analyze each checkpoint
-    checkpoint_data = {}
-    for cp_path in checkpoints:
-        print(f"\n--- Analyzing {cp_path.name} ---")
-
-        checkpoint = torch.load(cp_path, map_location="cpu")
-        checkpoint_data[cp_path.name] = checkpoint
-
-        # Get state dict
-        if "model_state_dict" in checkpoint:
-            state_dict = checkpoint["model_state_dict"]
-        else:
-            state_dict = checkpoint
-
-        # Analyze LoRA parameters
-        lora_stats = analyze_lora_params(state_dict)
-        print(f"\nLoRA Parameters:")
-        for cat, stats in lora_stats.items():
-            if stats["count"] > 0:
-                print(f"  {cat}:")
-                print(f"    Layers: {stats['count']}")
-                print(f"    Total params: {stats['total_params']}")
-                print(f"    Nonzero params: {stats['nonzero']} ({100*stats['nonzero']/max(1,stats['total_params']):.2f}%)")
-                print(f"    L2 norm: {stats['norm']:.6f}")
-                print(f"    Max |value|: {stats['max_abs']:.6f}")
-
-        # Analyze embeddings
-        emb_stats = analyze_embeddings(state_dict)
-        if emb_stats:
-            print(f"\nEmbeddings:")
-            for key, stats in emb_stats.items():
-                print(f"  {key}: mean={stats['mean']:.4f}, std={stats['std']:.4f}, norm={stats['norm']:.4f}")
-
-        # Analyze ψ head
-        psi_stats = analyze_psi_head(state_dict)
-        if psi_stats:
-            print(f"\nψ Head:")
-            for key, stats in psi_stats.items():
-                print(f"  {key}: norm={stats['norm']:.6f}, nonzero={stats['nonzero_frac']*100:.1f}%")
-
-        # Print checkpoint metadata
-        if "epoch" in checkpoint:
-            print(f"\nMetadata:")
-            print(f"  Epoch: {checkpoint.get('epoch', 'N/A')}")
-            print(f"  Global step: {checkpoint.get('global_step', 'N/A')}")
-            if "best_spearman_rho" in checkpoint:
-                print(f"  Best Spearman ρ: {checkpoint['best_spearman_rho']:.4f}")
-
-    # Compare first and last checkpoints
+    # Load first and last checkpoints for comparison
+    param_changes = None
     if len(checkpoints) >= 2:
-        first_cp = checkpoint_data[checkpoints[0].name]
-        last_cp = checkpoint_data[checkpoints[-1].name]
+        first_cp = torch.load(checkpoints[0], map_location="cpu", weights_only=False)
+        last_cp = torch.load(checkpoints[-1], map_location="cpu", weights_only=False)
+        param_changes = compute_param_changes(first_cp, last_cp)
+    elif len(checkpoints) == 1:
+        # Only one checkpoint - can't compare
+        param_changes = {
+            "lora": {"changed": "N/A (single checkpoint)", "total_diff": 0.0, "num_params": 0},
+            "irt": {"changed": "N/A (single checkpoint)", "total_diff": 0.0, "num_params": 0},
+            "psi_head": {"changed": "N/A (single checkpoint)", "total_diff": 0.0, "num_params": 0},
+        }
 
-        print(f"\n{'='*70}")
-        print(f"COMPARISON: {checkpoints[0].name} → {checkpoints[-1].name}")
-        print(f"{'='*70}")
+    # Parse loss curve
+    steps, losses = parse_loss_from_logs(output_dir)
 
-        changes = compare_checkpoints(first_cp, last_cp, checkpoints[0].name, checkpoints[-1].name)
+    return {
+        "dir": output_dir,
+        "results": results,
+        "param_changes": param_changes,
+        "loss_steps": steps,
+        "loss_values": losses,
+        "num_checkpoints": len(checkpoints),
+    }
 
-        if not changes:
-            print("\nWARNING: No parameters changed between checkpoints!")
+
+def print_summary(experiments: list) -> None:
+    """Print clean summary of experiments."""
+    print("\n" + "=" * 70)
+    print("SAD-IRT EXPERIMENT ANALYSIS")
+    print("=" * 70)
+
+    for exp in experiments:
+        output_dir = exp["dir"]
+        results = exp["results"]
+        param_changes = exp["param_changes"]
+
+        print(f"\n{'─' * 70}")
+        print(f"Experiment: {output_dir.name}")
+        print(f"{'─' * 70}")
+
+        # Spearman ρ comparison
+        if results:
+            sad_irt_rho = results.get("frontier_metrics", {}).get("frontier_spearman_rho", float("nan"))
+            baseline_rho = results.get("baseline_frontier_metrics", {}).get("baseline_frontier_spearman_rho", float("nan"))
+            improvement = results.get("improvement", float("nan"))
+
+            print(f"\n📊 SPEARMAN ρ (correlation with oracle difficulty)")
+            print(f"   Baseline (IRT only):     {baseline_rho:+.4f}")
+            print(f"   SAD-IRT (+ trajectories): {sad_irt_rho:+.4f}")
+            print(f"   Improvement:              {improvement:+.4f}")
+
+            # Statistical significance
+            sad_irt_p = results.get("frontier_metrics", {}).get("frontier_spearman_p", float("nan"))
+            if not np.isnan(sad_irt_p):
+                print(f"   p-value:                  {sad_irt_p:.4e}")
         else:
-            # Categorize changes
-            lora_changes = {k: v for k, v in changes.items() if "lora" in k.lower()}
-            emb_changes = {k: v for k, v in changes.items() if "embedding" in k.lower()}
-            psi_changes = {k: v for k, v in changes.items() if "psi" in k.lower()}
-            other_changes = {k: v for k, v in changes.items()
-                           if k not in lora_changes and k not in emb_changes and k not in psi_changes}
+            print("\n⚠️  No results.json found")
 
-            print(f"\nLoRA parameter changes: {len(lora_changes)}")
-            if lora_changes:
-                total_lora_diff = sum(v["diff_norm"] for v in lora_changes.values())
-                max_lora_diff = max(v["diff_norm"] for v in lora_changes.values())
-                print(f"  Total L2 change: {total_lora_diff:.6f}")
-                print(f"  Max single param change: {max_lora_diff:.6f}")
-                # Show top 5 changes
-                sorted_lora = sorted(lora_changes.items(), key=lambda x: x[1]["diff_norm"], reverse=True)[:5]
-                for key, stats in sorted_lora:
-                    short_key = key.split(".")[-3] + "." + key.split(".")[-2] + "." + key.split(".")[-1]
-                    print(f"    {short_key}: Δ={stats['diff_norm']:.6f}")
+        # Parameter changes
+        if param_changes:
+            print(f"\n🔧 PARAMETER CHANGES (first → last checkpoint)")
+
+            # LoRA
+            lora = param_changes["lora"]
+            if isinstance(lora["changed"], str):
+                print(f"   LoRA:     {lora['changed']}")
+            elif lora["changed"]:
+                print(f"   LoRA:     ✅ CHANGED (Δ = {lora['total_diff']:.6f})")
             else:
-                print("  *** NO LORA PARAMETERS CHANGED ***")
+                print(f"   LoRA:     ❌ NO CHANGE")
 
-            print(f"\nEmbedding changes: {len(emb_changes)}")
-            for key, stats in emb_changes.items():
-                print(f"  {key}: Δ={stats['diff_norm']:.4f} ({stats['relative_change']*100:.2f}%)")
+            # IRT (θ/β)
+            irt = param_changes["irt"]
+            if isinstance(irt["changed"], str):
+                print(f"   IRT (θ/β): {irt['changed']}")
+            elif irt["changed"]:
+                print(f"   IRT (θ/β): ✅ CHANGED (Δ = {irt['total_diff']:.4f})")
+            else:
+                print(f"   IRT (θ/β): ❌ NO CHANGE")
 
-            print(f"\nψ head changes: {len(psi_changes)}")
-            for key, stats in psi_changes.items():
-                print(f"  {key}: Δ={stats['diff_norm']:.6f}")
+            # ψ head
+            psi = param_changes["psi_head"]
+            if isinstance(psi["changed"], str):
+                print(f"   ψ head:   {psi['changed']}")
+            elif psi["changed"]:
+                print(f"   ψ head:   ✅ CHANGED (Δ = {psi['total_diff']:.6f})")
+            else:
+                print(f"   ψ head:   ❌ NO CHANGE")
 
-            if other_changes:
-                print(f"\nOther changes: {len(other_changes)}")
+        # Config info
+        if results:
+            config = results.get("config", {})
+            print(f"\n⚙️  CONFIG")
+            print(f"   Freeze IRT: {config.get('freeze_irt', False)}")
+            print(f"   ψ norm:     {config.get('psi_normalization', 'N/A')}")
+            print(f"   Epochs:     {config.get('epochs', 'N/A')}")
 
-    # Try to parse gradient logs
-    log_patterns = [
-        output_dir.parent / f"logs/sad_irt_long_*.out",
-        Path("logs") / f"sad_irt_long_*.out",
-    ]
 
-    for pattern in log_patterns:
-        log_files = list(pattern.parent.glob(pattern.name)) if pattern.parent.exists() else []
-        if log_files:
-            print(f"\n{'='*70}")
-            print("GRADIENT LOG ANALYSIS")
-            print(f"{'='*70}")
+def plot_loss_curves(experiments: list, output_path: Path) -> None:
+    """Plot loss curves for all experiments."""
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-            for log_file in log_files:
-                print(f"\nParsing: {log_file}")
-                gradients = parse_gradient_logs(log_file)
-                if gradients:
-                    print(f"  Found {len(gradients)} LoRA gradient values")
-                    print(f"  Min: {min(gradients):.6e}")
-                    print(f"  Max: {max(gradients):.6e}")
-                    print(f"  Nonzero: {sum(1 for g in gradients if g > 1e-10)}/{len(gradients)}")
-                else:
-                    print("  No gradient values found in log")
-            break
+    has_data = False
+    for exp in experiments:
+        steps = exp["loss_steps"]
+        losses = exp["loss_values"]
+
+        if len(steps) > 0:
+            has_data = True
+            label = exp["dir"].name
+            ax.plot(steps, losses, label=label, alpha=0.8)
+
+    if has_data:
+        ax.set_xlabel("Step")
+        ax.set_ylabel("Loss")
+        ax.set_title("SAD-IRT Training Loss")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plt.savefig(output_path, dpi=150)
+        print(f"\n📈 Loss curve saved to: {output_path}")
+    else:
+        print("\n⚠️  No loss data found in logs - skipping plot")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Analyze SAD-IRT checkpoints")
+    parser = argparse.ArgumentParser(description="Analyze SAD-IRT experiment results")
     parser.add_argument("output_dirs", nargs="+", help="Output directories to analyze")
+    parser.add_argument("--plot", type=str, default="loss_curve.png", help="Output path for loss curve plot")
     args = parser.parse_args()
 
+    # Analyze all experiments
+    experiments = []
     for d in args.output_dirs:
-        analyze_checkpoint_dir(Path(d))
+        exp = analyze_experiment(Path(d))
+        experiments.append(exp)
+
+    # Print summary
+    print_summary(experiments)
+
+    # Plot loss curves
+    plot_loss_curves(experiments, Path(args.plot))
+
+    print("\n" + "=" * 70)
 
 
 if __name__ == "__main__":
