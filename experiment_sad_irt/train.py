@@ -264,6 +264,9 @@ class Trainer:
                     current_loss = loss.item() * self.config.gradient_accumulation_steps
                     pbar.set_postfix({"loss": current_loss, "lr": f"{lr:.2e}"})
 
+                    # Log loss explicitly (tqdm doesn't always capture to log files)
+                    logger.info(f"Step {self.global_step}: loss={current_loss:.6f}, lr={lr:.2e}")
+
                     # Log gradient norms (after clipping now, for comparison)
                     grad_norms = compute_gradient_norms(self.model)
                     logger.debug(f"Step {self.global_step} gradients (post-clip): {grad_norms}")

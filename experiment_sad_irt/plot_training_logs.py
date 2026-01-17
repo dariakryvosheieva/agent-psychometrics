@@ -43,7 +43,10 @@ def parse_log_file(log_path: str) -> dict:
     lora_top_grads = []
 
     # Patterns
-    # Progress bar: loss=0.255, lr=6.94e-05
+    # Explicit log: Step 10: loss=0.123456, lr=1.00e-04
+    step_loss_pattern = re.compile(r'Step (\d+): loss=([\d.]+), lr=([\d.e+-]+)')
+
+    # Progress bar fallback: loss=0.255, lr=6.94e-05
     pbar_pattern = re.compile(r'loss=([\d.]+),\s*lr=([\d.e+-]+)')
 
     # Step gradients: Step 10 gradients (pre-clip): total=2.246549, embedding=0.062246, encoder=1.121982, head=1.945319
@@ -66,7 +69,18 @@ def parse_log_file(log_path: str) -> dict:
 
     with open(log_path, 'r') as f:
         for line in f:
-            # Progress bar loss
+            # Explicit step loss log (preferred)
+            step_loss_match = step_loss_pattern.search(line)
+            if step_loss_match:
+                step = int(step_loss_match.group(1))
+                loss = float(step_loss_match.group(2))
+                lr = float(step_loss_match.group(3))
+                steps.append(step)
+                losses.append(loss)
+                lrs.append(lr)
+                continue  # Don't double-count
+
+            # Progress bar loss (fallback)
             pbar_match = pbar_pattern.search(line)
             if pbar_match:
                 loss = float(pbar_match.group(1))
