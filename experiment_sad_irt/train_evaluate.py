@@ -59,6 +59,10 @@ def parse_args() -> SADIRTConfig:
     parser.add_argument("--learning_rate_encoder", type=float, default=1e-4)
     parser.add_argument("--learning_rate_embeddings", type=float, default=1e-3)
 
+    # Evaluation/Logging
+    parser.add_argument("--eval_steps", type=int, default=100, help="Evaluate every N optimizer steps")
+    parser.add_argument("--logging_steps", type=int, default=10, help="Log every N optimizer steps")
+
     # Output
     parser.add_argument("--output_dir", type=str, default="chris_output/sad_irt")
     parser.add_argument("--seed", type=int, default=42)
@@ -96,6 +100,8 @@ def parse_args() -> SADIRTConfig:
         epochs=args.epochs,
         learning_rate_encoder=args.learning_rate_encoder,
         learning_rate_embeddings=args.learning_rate_embeddings,
+        eval_steps=args.eval_steps,
+        logging_steps=args.logging_steps,
         output_dir=args.output_dir,
         seed=args.seed,
         freeze_irt=args.freeze_irt,

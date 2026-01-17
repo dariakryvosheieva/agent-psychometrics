@@ -18,7 +18,7 @@ from .evaluate import compute_metrics
 logger = logging.getLogger(__name__)
 
 
-def compute_gradient_norms(model: nn.Module) -> Dict[str, float]:
+def compute_gradient_norms(model: nn.Module, detailed: bool = False) -> Dict[str, float]:
     """Compute gradient norms for each parameter group.
 
     Returns dict with:
@@ -26,14 +26,22 @@ def compute_gradient_norms(model: nn.Module) -> Dict[str, float]:
     - embedding_norm: Gradient norm for theta/beta embeddings
     - encoder_norm: Gradient norm for encoder (LoRA) params
     - head_norm: Gradient norm for psi_head MLP
+
+    If detailed=True, also includes per-layer norms for debugging.
     """
     norms = {"embedding": 0.0, "encoder": 0.0, "head": 0.0, "other": 0.0}
     counts = {"embedding": 0, "encoder": 0, "head": 0, "other": 0}
+
+    # For detailed logging
+    detailed_norms = {}
 
     for name, param in model.named_parameters():
         if param.grad is None:
             continue
         grad_norm = param.grad.data.norm(2).item() ** 2
+
+        if detailed:
+            detailed_norms[name] = param.grad.data.norm(2).item()
 
         if "theta" in name or "beta" in name:
             norms["embedding"] += grad_norm
@@ -56,6 +64,9 @@ def compute_gradient_norms(model: nn.Module) -> Dict[str, float]:
             result[f"{key}_norm"] = norms[key] ** 0.5
             total += norms[key]
     result["total_norm"] = total ** 0.5
+
+    if detailed:
+        result["detailed"] = detailed_norms
 
     return result
 
@@ -172,6 +183,9 @@ class Trainer:
         total_loss = 0.0
         num_batches = 0
 
+        # For tracking ψ statistics across epoch
+        psi_values_epoch = []
+
         pbar = tqdm(self.train_loader, desc=f"Epoch {epoch + 1}")
 
         self.optimizer.zero_grad()
@@ -180,13 +194,17 @@ class Trainer:
             # Move batch to device
             batch = {k: v.to(self.device) for k, v in batch.items()}
 
-            # Forward pass
-            logits = self.model(
-                agent_idx=batch["agent_idx"],
-                task_idx=batch["task_idx"],
-                input_ids=batch["input_ids"],
-                attention_mask=batch["attention_mask"],
-            )
+            # Forward pass with ψ tracking if debug mode
+            if self.config.debug_gradients and self.is_sad_irt:
+                logits, psi_raw = self._forward_with_psi_tracking(batch)
+                psi_values_epoch.append(psi_raw.detach())
+            else:
+                logits = self.model(
+                    agent_idx=batch["agent_idx"],
+                    task_idx=batch["task_idx"],
+                    input_ids=batch["input_ids"],
+                    attention_mask=batch["attention_mask"],
+                )
 
             # Compute loss
             loss = self.criterion(logits, batch["response"])
@@ -197,6 +215,10 @@ class Trainer:
 
             # Gradient accumulation
             if (batch_idx + 1) % self.config.gradient_accumulation_steps == 0:
+                # Log gradients BEFORE clipping for debugging
+                if self.config.debug_gradients and self.global_step % self.config.logging_steps == 0:
+                    self._log_detailed_gradients()
+
                 # Gradient clipping
                 torch.nn.utils.clip_grad_norm_(
                     self.model.parameters(), self.config.max_grad_norm
@@ -215,10 +237,9 @@ class Trainer:
                     current_loss = loss.item() * self.config.gradient_accumulation_steps
                     pbar.set_postfix({"loss": current_loss, "lr": f"{lr:.2e}"})
 
-                    # Log gradient norms (before clipping, so compute before step)
-                    # Note: gradients are already accumulated at this point
+                    # Log gradient norms (after clipping now, for comparison)
                     grad_norms = compute_gradient_norms(self.model)
-                    logger.debug(f"Step {self.global_step} gradients: {grad_norms}")
+                    logger.debug(f"Step {self.global_step} gradients (post-clip): {grad_norms}")
 
                     # Log ψ stats if SAD-IRT
                     if self.is_sad_irt and hasattr(self.model, "get_psi_stats"):
@@ -240,7 +261,91 @@ class Trainer:
             total_loss += loss.item() * self.config.gradient_accumulation_steps
             num_batches += 1
 
+        # End of epoch: log ψ statistics summary
+        if self.config.debug_gradients and self.is_sad_irt and psi_values_epoch:
+            all_psi = torch.cat(psi_values_epoch)
+            logger.info(
+                f"Epoch {epoch + 1} ψ summary: "
+                f"mean={all_psi.mean().item():.6f}, "
+                f"std={all_psi.std().item():.6f}, "
+                f"min={all_psi.min().item():.6f}, "
+                f"max={all_psi.max().item():.6f}"
+            )
+
         return {"train_loss": total_loss / num_batches}
+
+    def _forward_with_psi_tracking(self, batch: Dict[str, torch.Tensor]):
+        """Forward pass that also returns raw ψ values for debugging."""
+        # We need to manually extract ψ values during forward
+        # This duplicates some model code but allows tracking
+        model = self.model
+
+        # Get IRT parameters
+        theta = model.theta(batch["agent_idx"])
+        beta = model.beta(batch["task_idx"])
+
+        # Encode trajectory
+        outputs = model.encoder(
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+            output_hidden_states=True,
+        )
+
+        # Get last hidden state
+        hidden_states = outputs.last_hidden_state
+        seq_lengths = batch["attention_mask"].sum(dim=1) - 1
+        batch_indices = torch.arange(hidden_states.size(0), device=hidden_states.device)
+        last_token_hidden = hidden_states[batch_indices, seq_lengths]
+
+        # Predict ψ (raw, before normalization)
+        psi_raw = model.psi_head(last_token_hidden.float())
+
+        # Apply normalization
+        if model.psi_normalization == "batchnorm" and model.psi_bn is not None:
+            if model.training and psi_raw.size(0) > 1:
+                psi = model.psi_bn(psi_raw)
+            else:
+                model.psi_bn.eval()
+                psi = model.psi_bn(psi_raw)
+                if model.training:
+                    model.psi_bn.train()
+        elif model.psi_normalization == "center":
+            psi = psi_raw - psi_raw.mean()
+        else:
+            psi = psi_raw
+
+        # IRT formula
+        logits = theta - (beta + psi)
+
+        return logits.squeeze(-1), psi_raw.squeeze(-1)
+
+    def _log_detailed_gradients(self):
+        """Log detailed gradient information for debugging."""
+        grad_norms = compute_gradient_norms(self.model, detailed=True)
+
+        # Summary
+        logger.info(
+            f"Step {self.global_step} gradients (pre-clip): "
+            f"total={grad_norms['total_norm']:.6f}, "
+            f"embedding={grad_norms.get('embedding_norm', 0):.6f}, "
+            f"encoder={grad_norms.get('encoder_norm', 0):.6f}, "
+            f"head={grad_norms.get('head_norm', 0):.6f}"
+        )
+
+        # Key parameter gradients
+        detailed = grad_norms.get("detailed", {})
+        key_params = ["psi_head.weight", "psi_head.bias", "theta.weight", "beta.weight"]
+        for param_name in key_params:
+            for full_name, norm in detailed.items():
+                if param_name in full_name:
+                    logger.info(f"  {param_name}: grad_norm={norm:.8f}")
+                    break
+
+        # Sample of LoRA gradients (just first few)
+        lora_grads = [(k, v) for k, v in detailed.items() if "lora" in k]
+        if lora_grads:
+            lora_grads.sort(key=lambda x: -x[1])  # Sort by magnitude
+            logger.info(f"  Top 3 LoRA grads: {lora_grads[:3]}")
 
     @torch.no_grad()
     def evaluate(self) -> Dict[str, float]:
