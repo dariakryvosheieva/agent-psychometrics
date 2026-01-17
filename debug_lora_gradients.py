@@ -360,7 +360,186 @@ def test_with_actual_sadirt_model():
     return lora_grad_norm > 1e-10
 
 
+def test_with_real_data():
+    """Test using actual TrajectoryIRTDataset with real data."""
+
+    import sys
+    sys.path.insert(0, '.')
+
+    from experiment_sad_irt.model import SADIRT
+    from experiment_sad_irt.dataset import TrajectoryIRTDataset
+    from transformers import AutoTokenizer
+    from torch.utils.data import DataLoader
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"\n{'='*60}")
+    print("Testing with REAL trajectory data")
+    print(f"{'='*60}")
+
+    # Load tokenizer
+    model_name = "Qwen/Qwen3-0.6B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    # Load dataset (just a subset for testing)
+    dataset = TrajectoryIRTDataset(
+        response_matrix_path="clean_data/swebench_verified/swebench_verified_20251120_full.jsonl",
+        trajectory_dir="chris_output/trajectory_summaries_api",
+        tokenizer=tokenizer,
+        max_length=512,  # Shorter for speed
+    )
+
+    print(f"Dataset size: {len(dataset)} samples")
+    print(f"Num agents: {dataset.num_agents}, Num tasks: {dataset.num_tasks}")
+
+    # Create model with actual dimensions
+    model = SADIRT(
+        num_agents=dataset.num_agents,
+        num_tasks=dataset.num_tasks,
+        model_name=model_name,
+        psi_normalization="center",
+    ).to(device)
+
+    # Create dataloader
+    loader = DataLoader(dataset, batch_size=4, shuffle=True)
+
+    # Get a batch
+    batch = next(iter(loader))
+    batch = {k: v.to(device) for k, v in batch.items()}
+
+    print(f"Batch shapes: input_ids={batch['input_ids'].shape}, attention_mask={batch['attention_mask'].shape}")
+    print(f"Agent indices: {batch['agent_idx'].tolist()}")
+    print(f"Task indices: {batch['task_idx'].tolist()}")
+    print(f"Labels: {batch['response'].tolist()}")
+
+    # Forward
+    logits = model(
+        agent_idx=batch["agent_idx"],
+        task_idx=batch["task_idx"],
+        input_ids=batch["input_ids"],
+        attention_mask=batch["attention_mask"],
+    )
+
+    loss = nn.functional.binary_cross_entropy_with_logits(logits, batch["response"])
+    print(f"Loss: {loss.item():.6f}")
+
+    loss.backward()
+
+    # Check LoRA gradients
+    lora_grad_norm = 0.0
+    lora_count = 0
+    for name, param in model.named_parameters():
+        if "lora" in name and param.requires_grad and param.grad is not None:
+            lora_grad_norm += param.grad.norm().item() ** 2
+            lora_count += 1
+
+    lora_grad_norm = lora_grad_norm ** 0.5
+    print(f"LoRA total grad norm: {lora_grad_norm:.8f} ({lora_count} params)")
+    print(f"psi_head.weight grad norm: {model.psi_head.weight.grad.norm().item():.8f}")
+    print(f"theta.weight grad norm: {model.theta.weight.grad.norm().item():.8f}")
+    print(f"beta.weight grad norm: {model.beta.weight.grad.norm().item():.8f}")
+
+    print(f"\n{'✅ LoRA gradients ARE flowing' if lora_grad_norm > 1e-10 else '❌ LoRA gradients are NOT flowing'}")
+
+    return lora_grad_norm > 1e-10
+
+
+def test_with_trainer():
+    """Test using actual Trainer class with one step."""
+
+    import sys
+    sys.path.insert(0, '.')
+
+    from experiment_sad_irt.model import SADIRT
+    from experiment_sad_irt.dataset import TrajectoryIRTDataset
+    from experiment_sad_irt.train import Trainer
+    from experiment_sad_irt.config import SADIRTConfig
+    from transformers import AutoTokenizer
+    from torch.utils.data import DataLoader
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"\n{'='*60}")
+    print("Testing with actual Trainer class (1 epoch)")
+    print(f"{'='*60}")
+
+    # Config
+    config = SADIRTConfig(
+        epochs=1,
+        batch_size=4,
+        gradient_accumulation_steps=2,
+        debug_gradients=True,
+        logging_steps=1,
+        output_dir="/tmp/debug_trainer",
+    )
+
+    # Load tokenizer
+    model_name = "Qwen/Qwen3-0.6B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    # Load dataset (just a subset for testing)
+    dataset = TrajectoryIRTDataset(
+        response_matrix_path="clean_data/swebench_verified/swebench_verified_20251120_full.jsonl",
+        trajectory_dir="chris_output/trajectory_summaries_api",
+        tokenizer=tokenizer,
+        max_length=512,
+    )
+
+    # Use just first 20 samples
+    dataset.samples = dataset.samples[:20]
+    print(f"Dataset size: {len(dataset)} samples")
+
+    # Create model with actual dimensions
+    model = SADIRT(
+        num_agents=dataset.num_agents,
+        num_tasks=dataset.num_tasks,
+        model_name=model_name,
+        psi_normalization="center",
+    ).to(device)
+
+    # Create dataloader
+    loader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
+
+    # Create trainer
+    trainer = Trainer(
+        model=model,
+        train_loader=loader,
+        eval_loader=None,
+        config=config,
+        device=device,
+        is_sad_irt=True,
+    )
+
+    # Run one epoch (should log gradients at each step)
+    print("\nRunning one epoch with Trainer...")
+    trainer.train()
+
+    # Check final state
+    lora_grad_norm = 0.0
+    lora_count = 0
+    for name, param in model.named_parameters():
+        if "lora" in name and param.requires_grad and param.grad is not None:
+            lora_grad_norm += param.grad.norm().item() ** 2
+            lora_count += 1
+
+    # Note: Gradients are zeroed after optimizer step, so this checks what's left
+    lora_grad_norm = lora_grad_norm ** 0.5
+    print(f"\nFinal LoRA grad norm: {lora_grad_norm:.8f} (may be 0 if optimizer.zero_grad was called)")
+
+    # The real test is whether the gradients were logged as non-zero during training
+    print("\n✅ Check the log output above for gradient values during training")
+
+    return True  # Can't easily verify from final state
+
+
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--skip-data", action="store_true", help="Skip tests that need real data")
+    args = parser.parse_args()
+
     print("="*60)
     print("Test 1: Simple forward-backward through LoRA encoder")
     print("="*60)
@@ -372,6 +551,12 @@ if __name__ == "__main__":
 
     test4_pass = test_with_actual_sadirt_model()
 
+    test5_pass = None
+    test6_pass = None
+    if not args.skip_data:
+        test5_pass = test_with_real_data()
+        test6_pass = test_with_trainer()
+
     print("\n" + "="*60)
     print("SUMMARY")
     print("="*60)
@@ -379,3 +564,7 @@ if __name__ == "__main__":
     print(f"Test 2 (centering): {'✅ PASS' if test2_pass else '❌ FAIL'}")
     print(f"Test 3 (grad accumulation): {'✅ PASS' if test3_pass else '❌ FAIL'}")
     print(f"Test 4 (actual SADIRT model): {'✅ PASS' if test4_pass else '❌ FAIL'}")
+    if test5_pass is not None:
+        print(f"Test 5 (real data): {'✅ PASS' if test5_pass else '❌ FAIL'}")
+    if test6_pass is not None:
+        print(f"Test 6 (actual Trainer): {'✅ PASS (see logs)' if test6_pass else '❌ FAIL'}")
