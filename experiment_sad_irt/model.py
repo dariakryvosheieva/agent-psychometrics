@@ -33,7 +33,7 @@ class SADIRT(nn.Module):
         lora_alpha: int = 32,
         lora_dropout: float = 0.1,
         lora_target_modules: Optional[list] = None,
-        use_gradient_checkpointing: bool = True,
+        use_gradient_checkpointing: bool = False,  # Disabled: was causing LoRA gradients to be zero
         psi_normalization: str = "batchnorm",
     ):
         """Initialize SAD-IRT model.
@@ -75,7 +75,7 @@ class SADIRT(nn.Module):
             torch_dtype=torch.bfloat16,
         )
 
-        # Enable gradient checkpointing for memory efficiency
+        # Enable gradient checkpointing for memory efficiency (disabled by default)
         if use_gradient_checkpointing:
             self.encoder.gradient_checkpointing_enable()
 
