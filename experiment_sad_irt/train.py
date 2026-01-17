@@ -436,13 +436,17 @@ class Trainer:
         else:
             state_dict = self.model.state_dict()
 
+        # Convert config to dict for serialization (avoids PyTorch 2.6 weights_only issues)
+        from dataclasses import asdict
+        config_dict = asdict(self.config)
+
         checkpoint_data = {
             "model_state_dict": state_dict,
             "optimizer_state_dict": self.optimizer.state_dict(),
             "scheduler_state_dict": self.scheduler.state_dict(),
             "global_step": self.global_step,
             "best_auc": self.best_auc,
-            "config": self.config,
+            "config": config_dict,  # Save as dict, not object
             "epoch": getattr(self, "_current_epoch", 0),
             "timestamp": timestamp,
         }
@@ -461,7 +465,8 @@ class Trainer:
                 progress (global_step, epoch, best_auc).
         """
         logger.info(f"Loading checkpoint from {checkpoint_path}")
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        # Use weights_only=False since we save config as dict (safe for our own checkpoints)
+        checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
 
         # Load model state
         self.model.load_state_dict(checkpoint["model_state_dict"], strict=False)
