@@ -671,6 +671,132 @@ def test_with_trainer():
     return True  # Can't easily verify from final state
 
 
+def test_forward_with_psi_tracking():
+    """Test the exact _forward_with_psi_tracking code path used when debug_gradients=True.
+
+    This directly tests the code in train.py that is used during training with debug_gradients=True,
+    to ensure gradients flow correctly through that specific code path.
+    """
+    import sys
+    sys.path.insert(0, '.')
+
+    from experiment_sad_irt.model import SADIRT
+    from experiment_sad_irt.dataset import TrajectoryIRTDataset
+    from transformers import AutoTokenizer
+    from torch.utils.data import DataLoader
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"\n{'='*60}")
+    print("Test 8: Direct test of _forward_with_psi_tracking code path")
+    print(f"{'='*60}")
+
+    # Load tokenizer
+    model_name = "Qwen/Qwen3-0.6B"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    # Load dataset - use same paths as cluster training
+    dataset = TrajectoryIRTDataset(
+        response_matrix_path="clean_data/swebench_verified/swebench_verified_20251120_full.jsonl",
+        trajectory_dir="chris_output/trajectory_summaries_api",
+        tokenizer=tokenizer,
+        max_length=1024,  # Same as cluster training
+    )
+
+    # Create model
+    model = SADIRT(
+        num_agents=dataset.num_agents,
+        num_tasks=dataset.num_tasks,
+        model_name=model_name,
+        psi_normalization="center",
+    ).to(device)
+
+    # Get a batch
+    loader = DataLoader(dataset, batch_size=32, shuffle=True)  # Same batch size as cluster
+    batch = next(iter(loader))
+    batch = {k: v.to(device) for k, v in batch.items()}
+
+    print(f"Batch size: {batch['input_ids'].shape[0]}")
+    print(f"Sequence length: {batch['input_ids'].shape[1]}")
+
+    # ========================================
+    # EXACT COPY of _forward_with_psi_tracking from train.py
+    # This is the code path used when debug_gradients=True
+    # ========================================
+    print("\nRunning _forward_with_psi_tracking code path...")
+
+    # Get IRT parameters
+    theta = model.theta(batch["agent_idx"])
+    beta = model.beta(batch["task_idx"])
+
+    # Encode trajectory
+    outputs = model.encoder(
+        input_ids=batch["input_ids"],
+        attention_mask=batch["attention_mask"],
+        output_hidden_states=True,
+    )
+
+    # Get last hidden state
+    hidden_states = outputs.last_hidden_state
+
+    # IMPORTANT: Dataset uses LEFT padding (pad tokens at beginning, real tokens at end)
+    batch_size = hidden_states.size(0)
+    seq_len = hidden_states.size(1)
+
+    # Find index of last non-padding token for each sequence
+    positions = torch.arange(seq_len, device=hidden_states.device).unsqueeze(0).expand(batch_size, -1)
+    attention_mask = batch["attention_mask"]
+    masked_positions = positions * attention_mask.long() - (1 - attention_mask.long())
+    last_token_positions = masked_positions.argmax(dim=1)
+
+    batch_indices = torch.arange(batch_size, device=hidden_states.device)
+    last_token_hidden = hidden_states[batch_indices, last_token_positions]
+
+    # Predict ψ (raw, before normalization)
+    psi_raw = model.psi_head(last_token_hidden.float())
+
+    # Apply centering normalization
+    psi = psi_raw - psi_raw.mean()
+
+    # IRT formula
+    logits = theta - (beta + psi)
+    logits = logits.squeeze(-1)
+
+    # Compute loss
+    loss = nn.functional.binary_cross_entropy_with_logits(logits, batch["response"])
+    print(f"Loss: {loss.item():.6f}")
+
+    # Backward
+    loss.backward()
+
+    # Check gradients
+    lora_grad_norm = 0.0
+    lora_count = 0
+    for name, param in model.named_parameters():
+        if "lora" in name and param.requires_grad and param.grad is not None:
+            lora_grad_norm += param.grad.norm().item() ** 2
+            lora_count += 1
+
+    lora_grad_norm = lora_grad_norm ** 0.5
+    print(f"LoRA total grad norm: {lora_grad_norm:.8f} ({lora_count} params)")
+    print(f"psi_head.weight grad norm: {model.psi_head.weight.grad.norm().item():.8f}")
+    print(f"theta.weight grad norm: {model.theta.weight.grad.norm().item():.8f}")
+    print(f"beta.weight grad norm: {model.beta.weight.grad.norm().item():.8f}")
+
+    # Also check hidden states info
+    print(f"\nHidden states dtype: {hidden_states.dtype}")
+    print(f"last_token_hidden dtype: {last_token_hidden.dtype}")
+    print(f"psi_raw stats: mean={psi_raw.mean().item():.6f}, std={psi_raw.std().item():.6f}")
+
+    if lora_grad_norm < 1e-10:
+        print(f"\n❌ LoRA gradients are NOT flowing through _forward_with_psi_tracking")
+        return False
+    else:
+        print(f"\n✅ LoRA gradients ARE flowing through _forward_with_psi_tracking")
+        return True
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -699,6 +825,11 @@ if __name__ == "__main__":
     if not args.skip_data:
         test7_pass = test_debug_token_positions()
 
+    # Test 8: Direct test of _forward_with_psi_tracking code path
+    test8_pass = None
+    if not args.skip_data:
+        test8_pass = test_forward_with_psi_tracking()
+
     print("\n" + "="*60)
     print("SUMMARY")
     print("="*60)
@@ -712,3 +843,5 @@ if __name__ == "__main__":
         print(f"Test 6 (actual Trainer): {'✅ PASS (see logs)' if test6_pass else '❌ FAIL'}")
     if test7_pass is not None:
         print(f"Test 7 (token positions): {'✅ PASS' if test7_pass else '❌ FAIL'}")
+    if test8_pass is not None:
+        print(f"Test 8 (_forward_with_psi_tracking): {'✅ PASS' if test8_pass else '❌ FAIL'}")
