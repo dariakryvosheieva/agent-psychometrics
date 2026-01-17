@@ -112,6 +112,26 @@ def parse_args():
         help="Specific task IDs to process",
     )
 
+    # Optimization arguments
+    parser.add_argument(
+        "--sort_by_task",
+        action="store_true",
+        help="Sort by task_id first (instead of agent) to maximize prompt caching",
+    )
+    parser.add_argument(
+        "--max_trajectory_chars",
+        type=int,
+        default=800_000,
+        help="Max characters for trajectory text (default: 800K = ~200K tokens)",
+    )
+
+    # Retry arguments
+    parser.add_argument(
+        "--retry_failures",
+        action="store_true",
+        help="Only retry trajectories that failed in previous run (from checkpoint)",
+    )
+
     # Debug arguments
     parser.add_argument(
         "--dry_run",
@@ -234,6 +254,7 @@ def main():
     config = SummarizationConfig(
         model=args.model,
         max_output_tokens=args.max_output_tokens,
+        max_trajectory_chars=args.max_trajectory_chars,
         trajectory_dir=args.trajectory_dir,
         output_dir=args.output_dir,
         checkpoint_file=args.output_dir / ".checkpoint.json",
@@ -253,6 +274,7 @@ def main():
     logger.info("=" * 60)
     logger.info(f"Model: {config.model}")
     logger.info(f"Max output tokens: {config.max_output_tokens}")
+    logger.info(f"Max trajectory chars: {config.max_trajectory_chars:,}")
     logger.info(f"Trajectory dir: {config.trajectory_dir}")
     logger.info(f"Output dir: {config.output_dir}")
     logger.info(f"Max concurrent: {config.max_concurrent_requests}")
@@ -277,6 +299,39 @@ def main():
         task_ids=config.task_ids,
     )
     logger.info(f"Found {len(all_trajectories)} trajectories")
+
+    # Filter to only retry failures if requested
+    if args.retry_failures:
+        # Load checkpoint and get api_failures
+        checkpoint_file = config.output_dir / ".checkpoint.json"
+        if checkpoint_file.exists():
+            with open(checkpoint_file) as f:
+                checkpoint_data = json.load(f)
+            api_failures = set(checkpoint_data.get("api_failures", []))
+            logger.info(f"Found {len(api_failures)} API failures in checkpoint")
+
+            # Filter trajectories to only those that failed
+            all_trajectories = [
+                (agent, task_id, filepath)
+                for agent, task_id, filepath in all_trajectories
+                if f"{agent}/{task_id}" in api_failures
+            ]
+            logger.info(f"Retrying {len(all_trajectories)} failed trajectories")
+
+            # Clear api_failures from checkpoint so we can track new ones
+            # (only if not dry_run - don't modify checkpoint in dry_run mode)
+            if not config.dry_run:
+                checkpoint_data["api_failures"] = []
+                with open(checkpoint_file, "w") as f:
+                    json.dump(checkpoint_data, f, indent=2)
+        else:
+            logger.warning("No checkpoint file found - nothing to retry")
+            return
+
+    # Sort by task_id for prompt caching if requested
+    if args.sort_by_task:
+        all_trajectories = sorted(all_trajectories, key=lambda x: (x[1], x[0]))  # (task_id, agent_id)
+        logger.info("Sorted by task_id for prompt caching optimization")
 
     if config.limit:
         all_trajectories = all_trajectories[: config.limit]

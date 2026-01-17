@@ -16,8 +16,9 @@ class SummarizationConfig:
 
     # GPT-5-mini input limit: 272K tokens (~1.088M chars at 4 chars/token)
     # Reserve: ~2K for prompt template, ~30K for problem statement (99th pctl + buffer),
-    #          ~10K safety margin = ~42K reserved, leaving ~1.046M for trajectory
-    max_trajectory_chars: int = 1_040_000  # Truncate trajectories beyond this
+    #          ~10K safety margin = ~42K reserved, leaving ~230K tokens for trajectory
+    # Use conservative 200K tokens = 800K chars to avoid context limit errors
+    max_trajectory_chars: int = 800_000  # Truncate trajectories beyond this
 
     # Parallelization - Tier 5 has 180M TPM for gpt-5-mini
     max_concurrent_requests: int = 200  # High concurrency for Tier 5
