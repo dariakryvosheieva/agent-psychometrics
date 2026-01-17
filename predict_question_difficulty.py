@@ -168,6 +168,75 @@ def load_zero_success_task_ids_from_subject_responses_jsonl(path: str) -> List[s
     return sorted([tid for tid in all_ids if counts.get(tid, 0) == 0])
 
 
+def _split_multi_arg(values: object) -> List[str]:
+    """
+    Parse "multi-value" CLI args that may be provided as:
+    - a single string "a,b,c"
+    - a list/tuple of strings ["a", "b,c"]
+    - repeated flags collected by argparse into a list
+    Returns a flat list of non-empty strings.
+    """
+    if values is None:
+        return []
+    if isinstance(values, str):
+        s = values.strip()
+        if not s:
+            return []
+        # Support comma-separated within a single shell token.
+        return [p.strip() for p in s.split(",") if p.strip()]
+    if isinstance(values, (list, tuple)):
+        out: List[str] = []
+        for v in values:
+            out.extend(_split_multi_arg(v))
+        return out
+    s = str(values).strip()
+    return [s] if s else []
+
+
+def _dataset_sources_signature(*, dataset_names: Sequence[str], dataset_paths: Sequence[str]) -> str:
+    """
+    Build a stable, filename-friendly-ish signature for the union of sources.
+
+    Why: we want embeddings caches to differ across different local JSONLs, without
+    leaking long absolute paths into filenames.
+    """
+    toks: List[str] = []
+    for name in list(dataset_names or []):
+        s = str(name).strip()
+        if s:
+            toks.append(s)
+    for p in list(dataset_paths or []):
+        sp = str(p).strip()
+        if not sp:
+            continue
+        base = os.path.basename(sp) or "dataset.jsonl"
+        try:
+            absp = os.path.abspath(sp)
+        except Exception:
+            absp = sp
+        h = hashlib.md5(absp.encode("utf-8")).hexdigest()[:10]
+        toks.append(f"json:{base}:{h}")
+    return ",".join(toks)
+
+
+def load_zero_success_task_ids_from_subject_responses_jsonls(paths: Sequence[str]) -> List[str]:
+    """
+    Like load_zero_success_task_ids_from_subject_responses_jsonl, but aggregates across multiple JSONLs.
+
+    IMPORTANT: assumes tasks in different JSONLs are distinct (no overlap).
+
+    Returns the union of per-file zero-success ids, i.e. an id is considered "zero-success"
+    if it had zero successes within its own JSONL.
+    """
+    out: Set[str] = set()
+    for path in list(paths):
+        p = str(path or "").strip()
+        if not p:
+            continue
+        out.update(load_zero_success_task_ids_from_subject_responses_jsonl(p))
+    return sorted(out)
+
+
 def last_token_pool(last_hidden_state: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
     # last_hidden_state: [B, T, H], attention_mask: [B, T]
     lengths = attention_mask.sum(dim=1).clamp(min=1)  # [B]
@@ -315,9 +384,9 @@ def iter_swebench_verified_items(
 
 def iter_swebench_items(
     *,
-    dataset_name: str,
+    dataset_names: Sequence[str],
     split: str,
-    dataset_path: str,
+    dataset_paths: Sequence[str],
     n_inputs: int,
     seed: int,
     shuffle: bool,
@@ -326,43 +395,47 @@ def iter_swebench_items(
     Load SWE-bench-style tasks and yield ItemRecords.
 
     Supports:
-    - HuggingFace dataset hub: pass --dataset_name <org/name> and --dataset_path "".
-    - Local JSON/JSONL via datasets: pass --dataset_path /path/to/file.jsonl (and dataset_name is ignored).
+    - HuggingFace dataset hub: pass --dataset_name <org/name> (or multiple).
+    - Local JSON/JSONL via datasets: pass --dataset_path /path/to/file.jsonl (or multiple).
+    - Mixed sources: you may provide BOTH HF repos and local JSON/JSONL; all are treated as one pool.
 
     Field extraction is best-effort:
     - item_id: instance_id | task_id | id
     - question_statement: problem_statement | statement | description
     - solution/patch: patch | gold_patch | resolved_patch | solution | diff | fix_patch
     """
-    ds = None
-    ds_path = str(dataset_path or "").strip()
-    if ds_path:
-        # Local dataset file(s). JSONL is treated as a "train" split.
-        ds = load_dataset("json", data_files=str(ds_path), split="train")
-        ds_name = f"json:{ds_path}"
-        ds_split = "train"
-    else:
-        ds = load_dataset(str(dataset_name), split=str(split))
-        ds_name = str(dataset_name)
-        ds_split = str(split)
+    dss: List[Tuple[str, object, str]] = []
+    # Local dataset file(s). JSONL is treated as a "train" split.
+    for ds_path in [str(x).strip() for x in list(dataset_paths or []) if str(x).strip()]:
+        dss.append((f"json:{ds_path}", load_dataset("json", data_files=str(ds_path), split="train"), "train"))
+    # HuggingFace dataset hub repos.
+    names = [str(x).strip() for x in list(dataset_names or []) if str(x).strip()]
+    for name in names:
+        dss.append((str(name), load_dataset(str(name), split=str(split)), str(split)))
+    if not dss:
+        raise ValueError("No datasets provided (set --dataset_name and/or --dataset_path).")
 
-    n_total = len(ds)
-    if n_total == 0:
-        raise RuntimeError(f"Loaded empty dataset: {ds_name} split={ds_split}")
-
-    idxs = list(range(n_total))
+    # Build a unified index space across all datasets so shuffle/n_inputs apply globally.
+    pairs: List[Tuple[int, int]] = []
+    for di, (src_name, d, src_split) in enumerate(dss):
+        n_total = int(len(d))
+        if n_total == 0:
+            raise RuntimeError(f"Loaded empty dataset: {src_name} split={src_split}")
+        for i in range(n_total):
+            pairs.append((di, i))
     if shuffle:
         rng = random.Random(int(seed))
-        rng.shuffle(idxs)
+        rng.shuffle(pairs)
     if n_inputs > 0:
-        idxs = idxs[: int(n_inputs)]
+        pairs = pairs[: int(n_inputs)]
 
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
     id_keys = ["instance_id", "task_id", "id"]
     qs_keys = ["problem_statement", "statement", "description"]
 
-    for i in idxs:
-        row = ds[int(i)]
+    for di, i in pairs:
+        _, d, _ = dss[int(di)]
+        row = d[int(i)]
         item_id = ""
         for k in id_keys:
             v = row.get(k, None)
@@ -391,15 +464,16 @@ def iter_swebench_items(
                 sol = s
                 break
         if not item_id:
-            item_id = f"row_{int(i)}"
+            # If missing id, fall back to a stable synthetic id within the (possibly multi-)dataset.
+            item_id = f"row_ds{int(di)}_{int(i)}"
         yield ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
 
 
 def load_items_by_ids(
     *,
-    dataset_name: str,
+    dataset_names: Sequence[str],
     split: str,
-    dataset_path: str,
+    dataset_paths: Sequence[str],
     item_ids: Sequence[str],
 ) -> Tuple[List[ItemRecord], List[str]]:
     """
@@ -414,19 +488,19 @@ def load_items_by_ids(
     if not want:
         return [], []
 
-    ds_path = str(dataset_path or "").strip()
-    if ds_path:
-        ds = load_dataset("json", data_files=str(ds_path), split="train")
-        ds_name = f"json:{ds_path}"
-        ds_split = "train"
-    else:
-        ds = load_dataset(str(dataset_name), split=str(split))
-        ds_name = str(dataset_name)
-        ds_split = str(split)
+    dss: List[Tuple[str, object, str]] = []
+    for ds_path in [str(x).strip() for x in list(dataset_paths or []) if str(x).strip()]:
+        dss.append((f"json:{ds_path}", load_dataset("json", data_files=str(ds_path), split="train"), "train"))
+    names = [str(x).strip() for x in list(dataset_names or []) if str(x).strip()]
+    for name in names:
+        dss.append((str(name), load_dataset(str(name), split=str(split)), str(split)))
+    if not dss:
+        raise ValueError("No datasets provided (set --dataset_name and/or --dataset_path).")
 
-    n_total = len(ds)
-    if n_total == 0:
-        raise RuntimeError(f"Loaded empty dataset: {ds_name} split={ds_split}")
+    for name, ds, ds_split in dss:
+        n_total = len(ds)
+        if n_total == 0:
+            raise RuntimeError(f"Loaded empty dataset: {name} split={ds_split}")
 
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
     id_keys = ["instance_id", "task_id", "id"]
@@ -434,40 +508,44 @@ def load_items_by_ids(
 
     found: Dict[str, ItemRecord] = {}
     # Scan dataset once; stop early when all requested ids have been found.
-    for i in range(n_total):
-        row = ds[int(i)]
-        item_id = ""
-        for k in id_keys:
-            v = row.get(k, None)
-            if v is None:
+    for name, ds, _ in dss:
+        n_total = int(len(ds))
+        for i in range(n_total):
+            row = ds[int(i)]
+            item_id = ""
+            for k in id_keys:
+                v = row.get(k, None)
+                if v is None:
+                    continue
+                s = str(v).strip()
+                if s:
+                    item_id = normalize_swebench_item_id(s)
+                    break
+            if not item_id or item_id not in want_set or item_id in found:
                 continue
-            s = str(v).strip()
-            if s:
-                item_id = normalize_swebench_item_id(s)
-                break
-        if not item_id or item_id not in want_set or item_id in found:
-            continue
 
-        qs = ""
-        for k in qs_keys:
-            v = row.get(k, None)
-            if v is None:
-                continue
-            s = str(v)
-            if str(s).strip():
-                qs = s
-                break
-        sol = ""
-        for k in solution_keys:
-            v = row.get(k, None)
-            if v is None:
-                continue
-            s = str(v)
-            if s.strip():
-                sol = s
-                break
+            qs = ""
+            for k in qs_keys:
+                v = row.get(k, None)
+                if v is None:
+                    continue
+                s = str(v)
+                if str(s).strip():
+                    qs = s
+                    break
+            sol = ""
+            for k in solution_keys:
+                v = row.get(k, None)
+                if v is None:
+                    continue
+                s = str(v)
+                if s.strip():
+                    sol = s
+                    break
 
-        found[item_id] = ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
+            found[item_id] = ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
+            if len(found) >= len(want_set):
+                break
         if len(found) >= len(want_set):
             break
 
@@ -883,13 +961,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
 
-    p.add_argument("--dataset_name", type=str, default="princeton-nlp/SWE-bench_Verified")
+    p.add_argument(
+        "--dataset_name",
+        type=str,
+        nargs="+",
+        default=["princeton-nlp/SWE-bench_Verified"],
+        help=(
+            "One or more HF dataset repos to load (space-separated). "
+            "Also supports comma-separated values within a token, e.g. "
+            "'princeton-nlp/SWE-bench_Verified,scaleAI/SWE-bench_Pro'."
+        ),
+    )
     p.add_argument("--split", type=str, default="test")
     p.add_argument(
         "--dataset_path",
         type=str,
         default="",
-        help="Optional local JSON/JSONL path. If set, loads via datasets('json', data_files=...) and ignores --dataset_name/--split.",
+        help=(
+            "Optional local JSON/JSONL path(s). If set, loads via datasets('json', data_files=...). "
+            "You may provide multiple paths as a comma-separated string. If both --dataset_name and "
+            "--dataset_path are provided, all sources are pooled together."
+        ),
     )
     p.add_argument("--n_inputs", type=int, default=500, help="Number of dataset items to embed (0 means all).")
     p.add_argument("--shuffle", action="store_true", help="Shuffle dataset rows before taking the first --n_inputs.")
@@ -919,9 +1011,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument(
         "--agent_results",
         type=str,
-        default="",
+        nargs="*",
+        default=[],
         help=(
-            "Optional path to a JSONL file with per-subject responses of the form "
+            "Optional path(s) to JSONL file(s) with per-subject responses of the form "
             "{'subject_id': ..., 'responses': {'task_id': 0/1, ...}}. Any task_id with "
             "zero successes across all subjects will be excluded from both train and test; "
             "after training/evaluating on the remaining items, predictions for these zero-success "
@@ -942,9 +1035,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(argv)
     ensure_dir(args.out_dir)
 
+    dataset_names = _split_multi_arg(args.dataset_name)
+    dataset_paths = _split_multi_arg(args.dataset_path)
+    dataset_sources_str = _dataset_sources_signature(dataset_names=dataset_names, dataset_paths=dataset_paths) or (
+        "princeton-nlp/SWE-bench_Verified"
+    )
+
     # Cache path derived from key settings.
     safe_backbone = str(args.backbone).replace("/", "__")
-    ds_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(args.dataset_name))[:64]
+    ds_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(dataset_sources_str))[:64]
     split_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(args.split))[:32]
     instr_sig = prompt_signature(str(args.instruction))
     layer_flag = "" if int(args.embedding_layer) == -1 else f"__layer{int(args.embedding_layer)}"
@@ -989,16 +1088,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Collect items to embed.
         items = list(
             iter_swebench_items(
-                dataset_name=str(args.dataset_name),
+                dataset_names=list(dataset_names),
                 split=str(args.split),
-                dataset_path=str(args.dataset_path),
+                dataset_paths=list(dataset_paths),
                 n_inputs=int(args.n_inputs),
                 seed=int(args.seed),
                 shuffle=bool(args.shuffle),
             )
         )
-        src = (f"json:{args.dataset_path}" if str(args.dataset_path).strip() else f"{args.dataset_name} split={args.split}")
-        print(f"Loaded dataset items: {len(items)} ({src})")
+        src = dataset_sources_str
+        print(f"Loaded dataset items: {len(items)} (sources={src}, hf_split={args.split}, json_split=train)")
 
         ids_sorted, emb_by_id, counts_by_id, emb_dim = embed_items(
             items=items,
@@ -1024,8 +1123,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             X=X,
             counts_kind=np.array(["text_len_chars"], dtype=object),
             counts=counts_arr,
-            dataset_name=np.array([str(args.dataset_name)], dtype=object),
+            dataset_name=np.array([str(dataset_sources_str)], dtype=object),
             split=np.array([str(args.split)], dtype=object),
+            dataset_path=np.array([";".join([str(x) for x in dataset_paths])], dtype=object),
             n_inputs=np.array([int(len(ids_sorted))], dtype=np.int64),
             instruction=np.array([str(args.instruction)], dtype=object),
             instruction_signature=np.array([str(instr_sig)], dtype=object),
@@ -1049,15 +1149,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not labeled_ids:
         raise RuntimeError("No overlap between embedded ids and difficulty CSV item_id values.")
 
-    zero_success_source = str(args.agent_results or "").strip()
+    agent_results_paths = _split_multi_arg(args.agent_results)
+    zero_success_source = ",".join(agent_results_paths)
     zero_success_ids: List[str] = []
-    if zero_success_source:
-        zero_success_ids = load_zero_success_task_ids_from_subject_responses_jsonl(zero_success_source)
+    if agent_results_paths:
+        zero_success_ids = load_zero_success_task_ids_from_subject_responses_jsonls(agent_results_paths)
     zero_success_set = set(zero_success_ids)
 
     # Items used for train/test evaluation: labeled AND not zero-success.
     eligible = [tid for tid in labeled_ids if tid not in zero_success_set]
-    if zero_success_source:
+    if agent_results_paths:
         print(
             f"Excluding zero-success items from train/test: {len(labeled_ids) - len(eligible)}/{len(labeled_ids)} labeled items "
             f"(source={zero_success_source})"
@@ -1137,7 +1238,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "pooling": "last_token_of_hidden_state",
         "embedding_layer": int(args.embedding_layer),
         "max_length": int(args.max_length),
-        "dataset_name": str(args.dataset_name),
+        "dataset_sources": str(dataset_sources_str),
+        "dataset_names": list(dataset_names),
+        "dataset_paths": list(dataset_paths),
         "split": str(args.split),
         "n_inputs_requested": int(args.n_inputs),
         "shuffle": bool(args.shuffle),
@@ -1165,7 +1268,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "device_map": str(args.device_map),
         "torch_dtype": str(args.torch_dtype),
         "attn_implementation": str(args.attn_implementation),
-        "dataset_name": str(args.dataset_name),
+        "dataset_sources": str(dataset_sources_str),
+        "dataset_names": list(dataset_names),
+        "dataset_paths": list(dataset_paths),
         "split": str(args.split),
         "dataset_path": str(args.dataset_path),
         "id_normalization": "strip instance_ prefix; strip -v.* suffix",

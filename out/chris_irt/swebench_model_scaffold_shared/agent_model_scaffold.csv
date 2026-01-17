@@ -1,0 +1,178 @@
+agent,model,scaffold
+20231010_rag_claude2,Claude 2,RAG
+20231010_rag_gpt35,GPT-3.5,RAG
+20231010_rag_swellama13b,swellama13b,RAG
+20231010_rag_swellama7b,swellama7b,RAG
+20240402_rag_claude3opus,Claude 3 Opus,RAG
+20240402_rag_gpt4,GPT-4,RAG
+20240402_sweagent_claude3opus,Claude 3 Opus,SWE-agent
+20240402_sweagent_gpt4,GPT-4,SWE-agent
+20240612_MASAI_gpt4o,GPT-4o,MASAI
+20240615_appmap-navie_gpt4o,GPT-4o,appmap-navie
+20240620_sweagent_claude3.5sonnet,Claude 3.5 Sonnet,SWE-agent
+20240628_autocoderover-v20240620,GPT-4,autocoderover-v20240620
+20240728_sweagent_gpt4o,GPT-4o,SWE-agent
+20240820_epam-ai-run-gpt-4o,GPT-4o,epam-ai-run
+20240918_lingma-agent_lingma-swe-gpt-72b,lingma-swe-gpt-72b,lingma-agent
+20240918_lingma-agent_lingma-swe-gpt-7b,lingma-swe-gpt-7b,lingma-agent
+20241002_lingma-agent_lingma-swe-gpt-72b,lingma-swe-gpt-72b,lingma-agent
+20241002_lingma-agent_lingma-swe-gpt-7b,lingma-swe-gpt-7b,lingma-agent
+20241016_composio_swekit,Claude 3.5 Sonnet,20241016_composio_swekit
+20241016_epam-ai-run-gpt-4o,GPT-4o,epam-ai-run
+20241022_tools_claude-3-5-haiku,claude-3-5-haiku,Tools
+20241022_tools_claude-3-5-sonnet-updated,Claude 3.5 Sonnet,Tools
+20241028_agentless-1.5_gpt4o,GPT-4o,agentless-1.5
+20241029_OpenHands-CodeAct-2.1-sonnet-20241022,Claude 3.5 Sonnet,OpenHands-CodeAct-2.1
+20241029_epam-ai-run-claude-3-5-sonnet,Claude 3.5 Sonnet,epam-ai-run
+20241108_autocoderover-v2.0-claude-3-5-sonnet-20241022,Claude 3.5 Sonnet,autocoderover-v2.0
+20241108_devlo,Claude 3.5 Sonnet,20241108_devlo
+20241120_artemis_agent,Claude 3.5 Sonnet,Artemis Agent v1
+20241125_enginelabs,Claude 3.5 Sonnet,enginelabs
+20241128_SWE-Fixer_Qwen2.5-7b-retriever_Qwen2.5-72b-editor_20241128,Qwen2.5-72b-editor,SWE-Fixer_Qwen2.5-7b-retriever
+20241202_agentless-1.5_claude-3.5-sonnet-20241022,Claude 3.5 Sonnet,agentless-1.5
+20241212_epam-ai-run-claude-3-5-sonnet,Claude 3.5 Sonnet,epam-ai-run
+20241212_google_jules_gemini_2.0_flash_experimental,gemini_2.0_flash_experimental,google_jules
+20241221_codestory_midwit_claude-3-5-sonnet_swe-search,claude-3-5-sonnet_swe-search,codestory_midwit
+20250110_learn_by_interact_claude3.5,Claude 3.5 Sonnet,learn_by_interact
+20250112_ugaiforge,Claude 3.5 Sonnet,ugaiforge
+20250117_wandb_programmer_o1_crosscheck5,o1_crosscheck5,wandb_programmer
+20250118_codeshellagent_gemini_2.0_flash_experimental,gemini_2.0_flash_experimental,codeshellagent
+20250120_Bracket,GPT-4o-mini,Bracket
+20250122_autocoderover-v2.1-claude-3-5-sonnet-20241022,Claude 3.5 Sonnet,autocoderover-v2.1
+20250206_agentscope,Claude 3.5 Sonnet,agentscope
+20250214_agentless_lite_o3_mini,o3_mini,agentless_lite
+20250224_tools_claude-3-7-sonnet,Claude 3.7 Sonnet,Tools
+20250225_sweagent_claude-3-7-sonnet,Claude 3.7 Sonnet,SWE-agent 1.0
+20250226_swerl_llama3_70b,llama3_70b,swerl
+20250228_epam-ai-run-claude-3-5-sonnet,Claude 3.5 Sonnet,epam-ai-run
+20250306_SWE-Fixer_Qwen2.5-7b-retriever_Qwen2.5-72b-editor,Qwen2.5-72b-editor,SWE-Fixer_Qwen2.5-7b-retriever
+20250405_swe-rizzo_claude37,Claude 3.7 Sonnet,swe-rizzo
+20250503_patchpilot-v1.1-o4-mini,o4-mini,patchpilot-v1.1
+20250511_sweagent_lm_32b,SWE-agent-LM-32B,SWE-agent 1.0
+20250514_aime_coder,Claude 3.7 Sonnet,aime-coder
+20250516_cortexa_o3,o3,cortexa
+20250520_openhands_devstral_small,devstral_small,OpenHands
+20250522_sweagent_claude-4-sonnet-20250514,Claude 4 Sonnet,SWE-agent 1.0
+20250522_tools_claude-4-opus,claude-4-opus,Tools
+20250522_tools_claude-4-sonnet,Claude 4 Sonnet,Tools
+20250524_openhands_claude_4_sonnet,Claude 4 Sonnet,OpenHands
+20250527_amazon.nova-premier-v1.0,Amazon Nova Premier 1.0,NoScaffold
+20250603_Refact_Agent_claude-4-sonnet,Claude 4 Sonnet,Refact_Agent
+20250611_moatless_claude-4-sonnet-20250514,Claude 4 Sonnet,moatless
+20250616_Skywork-SWE-32B,Skywork-SWE-32B,OpenHands
+20250627_agentless_MCTS-Refine-7B,MCTS-Refine-7B,agentless
+20250629_deepswerl_r2eagent,DeepSWE-Preview,R2E-Gym
+20250710_bloop,Claude 4 Sonnet,bloop
+20250716_openhands_kimi_k2,Kimi K2,OpenHands
+20250720_Lingxi-v1.5_claude-4-sonnet-20250514,Claude 4 Sonnet,Lingxi-v1.5
+20250725_sweagent_devstral_small_2507,devstral_small_2507,SWE-agent 1.0
+20250728_zai_glm4-5,GLM-4.5,OpenHands
+20250731_harness_ai,Claude 4 Sonnet,Harness
+20250804_codesweep_sweagent_kimi_k2_instruct,kimi_k2_instruct,SWE-agent 1.0
+20250804_epam-ai-run-claude-4-sonnet,Claude 4 Sonnet,epam-ai-run
+20250805_openhands-Qwen3-Coder-30B-A3B-Instruct,Qwen3-Coder-30B-A3B-Instruct,OpenHands
+20250805_openhands-Qwen3-Coder-480B-A35B-Instruct,Qwen3-Coder-480B-A35B-Instruct,OpenHands
+20250806_SWE-Exp_DeepSeek-V3,DeepSeek-V3,SWE-Exp
+20250807_openhands_gpt5,GPT-5,OpenHands
+20250901_entroPO_R2E_QwenCoder30BA3B,Qwen3-Coder-30B-A3B-Instruct,entroPO_R2E
+20250901_entroPO_R2E_QwenCoder30BA3B_tts,QwenCoder30BA3B_tts,entroPO_R2E
+20250924_artemis_agent_v2,Claude 4 Sonnet,Artemis Agent v2
+20250929_Prometheus_v1.2_gpt5,GPT-5,Prometheus_v1.2
+20250930_zai_glm4-6,glm4-6,zai
+20251014_Lingxi_kimi_k2,Kimi K2,Lingxi
+20251015_Prometheus_v1.2.1_gpt5,GPT-5,Prometheus_v1.2.1
+20251103_sonar-foundation-agent_claude-sonnet-4-5,claude-sonnet-4-5,sonar-foundation-agent
+20251110_frogboss-32b,FrogBoss-32B,R2E-Gym
+20251110_frogmini-14b,FrogMini-14B,R2E-Gym
+20251120_livesweagent_gemini-3-pro-preview,gemini-3-pro-preview,livesweagent
+Claude 4.5 Haiku -- 10222025,Claude 4.5 Haiku,SWE-agent 1.0
+Claude 4.5 Sonnet - 10132025,claude-sonnet-4-5,SWE-agent 1.0
+Claude Opus 4.1 - paper,Claude Opus 4.1,SWE-agent 1.0
+Claude Sonnet 4 - paper,Claude 4 Sonnet,SWE-agent 1.0
+GLM-4.5 -- 10222025,GLM-4.5,SWE-agent 1.0
+GPT OSS - paper,GPT OSS 120B,SWE-agent 1.0
+GPT-4o - paper,GPT-4o,SWE-agent 1.0
+GPT-5 - 10132025,GPT-5,SWE-agent 1.0
+GPT-5 Codex -- debug-oct22,GPT-5 Codex,SWE-agent 1.0
+GPT-5 High - paper,GPT-5 High,SWE-agent 1.0
+Gemini 2.5 Pro Preview - paper,Gemini 2.5 Pro Preview,SWE-agent 1.0
+Kimi - paper,kimi_k2_instruct,SWE-agent 1.0
+ante_gemini-3-pro-preview_at_google,gemini-3-pro-preview,ante
+aone-agent_qwen/qwen3-coder-480b-a35b-instruct-fp8_at_modelscope,Qwen3-Coder-480B-A35B-Instruct-FP8,aone-agent
+claude-code_claude-haiku-4-5-20251001_at_anthropic,Claude 4.5 Haiku,claude-code
+claude-code_claude-opus-4-1-20250805_at_anthropic,Claude Opus 4.1,claude-code
+claude-code_claude-opus-4-5-20251101_at_anthropic,claude-4-opus,claude-code
+claude-code_claude-sonnet-4-5-20250929_at_anthropic,claude-sonnet-4-5,claude-code
+claude-code_minimax-m2_1_at_minimax,minimax-m2_1,claude-code
+codex_gpt-5-codex_at_openai,GPT-5 Codex,codex
+codex_gpt-5-mini_at_openai,GPT-5-mini,codex
+codex_gpt-5-nano_at_openai,GPT-5-nano,codex
+codex_gpt-5_1-codex-max_at_openai,GPT-5.1 Codex Max,codex
+codex_gpt-5_1-codex-mini_at_openai,GPT-5.1 Codex Mini,codex
+codex_gpt-5_1-codex_at_openai,GPT-5.1 Codex,codex
+codex_gpt-5_2_at_openai,GPT-5.2,codex
+factory_droid_claude-opus-4-5-20251101_at_anthropic,claude-4-opus,factory_droid
+factory_droid_gemini-3-pro-preview_at_google,gemini-3-pro-preview,factory_droid
+factory_droid_gpt-5_2_at_openai,GPT-5.2,factory_droid
+final_claude-4_5-sonnet_at_anthropic,claude-sonnet-4-5,final
+gemini-cli_gemini-2_5-flash_at_gemini,gemini-2_5-flash,gemini-cli
+gemini-cli_gemini-2_5-pro_at_gemini,Gemini 2.5 Pro Preview,gemini-cli
+gemini-cli_gemini-3-flash-preview_at_google,gemini-3-flash-preview,gemini-cli
+goose_claude-haiku-4-5_at_anthropic,Claude 4.5 Haiku,goose
+goose_claude-opus-4-5_at_anthropic,claude-4-opus,goose
+goose_claude-sonnet-4-5_at_anthropic,claude-sonnet-4-5,goose
+ii-agent-simple_gemini-3-pro-preview_at_gemini,gemini-3-pro-preview,ii-agent-simple
+junie_gemini-3-flash-preview_at_gemini,gemini-3-flash-preview,junie
+letta-code_claude-opus-4-5_at_anthropic,claude-4-opus,letta-code
+letta-code_gemini-3-pro-preview_at_google,gemini-3-pro-preview,letta-code
+letta-code_gpt-5_1-codex_at_openai,GPT-5.1 Codex,letta-code
+mini-swe-agent_claude-haiku-4-5-20251001_at_anthropic,Claude 4.5 Haiku,mini-swe-agent
+mini-swe-agent_claude-opus-4-1-20250805_at_anthropic,Claude Opus 4.1,mini-swe-agent
+mini-swe-agent_claude-sonnet-4-5-20250929_at_anthropic,claude-sonnet-4-5,mini-swe-agent
+mini-swe-agent_gemini-2_5-flash_at_gemini,gemini-2_5-flash,mini-swe-agent
+mini-swe-agent_gemini-2_5-pro_at_gemini,Gemini 2.5 Pro Preview,mini-swe-agent
+mini-swe-agent_gpt-5-codex_at_openai,GPT-5 Codex,mini-swe-agent
+mini-swe-agent_gpt-5-mini_at_openai,GPT-5-mini,mini-swe-agent
+mini-swe-agent_gpt-5-nano_at_openai,GPT-5-nano,mini-swe-agent
+mini-swe-agent_gpt-5_at_openai,GPT-5,mini-swe-agent
+mini-swe-agent_grok-4-0709_at_xai,grok-4-0709,mini-swe-agent
+mini-swe-agent_grok-code-fast-1_at_xai,grok-code-fast-1,mini-swe-agent
+mini-swe-agent_openai/gpt-oss-120b_at_together_ai,GPT OSS 120B,mini-swe-agent
+mini-swe-agent_openai/gpt-oss-20b_at_together_ai,GPT OSS 20B,mini-swe-agent
+openhands_claude-haiku-4-5-20251001_at_anthropic,Claude 4.5 Haiku,OpenHands
+openhands_claude-opus-4-1-20250805_at_anthropic,Claude Opus 4.1,OpenHands
+openhands_claude-opus-4-5-20251101_at_anthropic,claude-4-opus,OpenHands
+openhands_claude-sonnet-4-5-20250929_at_anthropic,claude-sonnet-4-5,OpenHands
+openhands_gemini-2_5-flash_at_gemini,gemini-2_5-flash,OpenHands
+openhands_gemini-2_5-pro_at_gemini,Gemini 2.5 Pro Preview,OpenHands
+openhands_gpt-5-mini_at_openai,GPT-5-mini,OpenHands
+openhands_gpt-5-nano_at_openai,GPT-5-nano,OpenHands
+openhands_gpt-5_at_openai,GPT-5,OpenHands
+openhands_grok-4-0709_at_xai,grok-4-0709,OpenHands
+openhands_moonshotai/kimi-k2-instruct-0905_at_together_ai,kimi-k2-instruct-0905,OpenHands
+openhands_qwen/qwen3-coder-480b-a35b-instruct-fp8_at_together_ai,Qwen3-Coder-480B-A35B-Instruct-FP8,OpenHands
+spoox-m_gpt-5-mini_at_openai,GPT-5-mini,spoox-m
+terminalbenchagent_claude-sonnet-4-5_at_anthropic,claude-sonnet-4-5,terminalbenchagent
+terminus-2_accounts/fireworks/models/glm-4p6_at_fireworks_ai,glm4-6,terminus-2
+terminus-2_accounts/fireworks/models/minimax-m2_at_fireworks_ai,minimax-m2,terminus-2
+terminus-2_claude-haiku-4-5-20251001_at_anthropic,Claude 4.5 Haiku,terminus-2
+terminus-2_claude-opus-4-5-20251101_at_anthropic,claude-4-opus,terminus-2
+terminus-2_claude-sonnet-4-5-20250929_at_anthropic,claude-sonnet-4-5,terminus-2
+terminus-2_gemini-2_5-flash_at_gemini,gemini-2_5-flash,terminus-2
+terminus-2_gemini-2_5-pro_at_gemini,Gemini 2.5 Pro Preview,terminus-2
+terminus-2_gemini-3-pro-preview_at_gemini,gemini-3-pro-preview,terminus-2
+terminus-2_gpt-5-codex_at_openai,GPT-5 Codex,terminus-2
+terminus-2_gpt-5-mini_at_openai,GPT-5-mini,terminus-2
+terminus-2_gpt-5-nano_at_openai,GPT-5-nano,terminus-2
+terminus-2_gpt-5_1-codex_at_openai,GPT-5.1 Codex,terminus-2
+terminus-2_gpt-5_1_at_openai,GPT-5.1,terminus-2
+terminus-2_gpt-5_2_at_openai,GPT-5.2,terminus-2
+terminus-2_gpt-5_at_openai,GPT-5,terminus-2
+terminus-2_grok-4-0709_at_xai,grok-4-0709,terminus-2
+terminus-2_grok-code-fast-1_at_xai,grok-code-fast-1,terminus-2
+terminus-2_minimax-m2_1_at_openai,minimax-m2_1,terminus-2
+terminus-2_moonshotai/kimi-k2-instruct-0905_at_together_ai,kimi-k2-instruct-0905,terminus-2
+terminus-2_moonshotai/kimi-k2-thinking_at_together_ai,kimi-k2-thinking,terminus-2
+terminus-2_openai/gpt-oss-120b_at_together_ai,GPT OSS 120B,terminus-2
+terminus-2_openai/gpt-oss-20b_at_together_ai,GPT OSS 20B,terminus-2
+terminus-2_qwen/qwen3-coder-480b-a35b-instruct-fp8_at_together_ai,Qwen3-Coder-480B-A35B-Instruct-FP8,terminus-2

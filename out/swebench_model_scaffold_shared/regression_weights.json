@@ -1,0 +1,45 @@
+{
+  "attn_implementation": "auto",
+  "backbone": "Qwen/Qwen3-VL-8B-Instruct",
+  "cv_folds": 5,
+  "dataset_names": [
+    "princeton-nlp/SWE-bench_Verified",
+    "scaleAI/SWE-bench_Pro"
+  ],
+  "dataset_path": "/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/terminal_bench_tasks.jsonl",
+  "dataset_paths": [
+    "/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/terminal_bench_tasks.jsonl"
+  ],
+  "dataset_sources": "princeton-nlp/SWE-bench_Verified,scaleAI/SWE-bench_Pro,json:terminal_bench_tasks.jsonl:e9ead5030c",
+  "device_map": "auto",
+  "embedding_layer": -1,
+  "feature_dim": 4096,
+  "id_normalization": "strip instance_ prefix; strip -v.* suffix",
+  "instruction": "How difficult is the above task for a coding agent? Please output one floating-point number from 0 (very easy) to 1 (very hard). Your difficulty score:\n",
+  "instruction_signature": "qs_sol_instr_b7008f2d",
+  "max_length": 8192,
+  "pooling": "last_token_of_hidden_state",
+  "regressor": "ridge_cv",
+  "ridge_alpha": 10000.0,
+  "ridge_alphas_searched": [
+    1e-06,
+    1e-05,
+    0.0001,
+    0.001,
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0,
+    1000.0,
+    10000.0
+  ],
+  "script": "/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/predict_question_difficulty.py",
+  "seed": 0,
+  "split": "test",
+  "test_fraction": 0.2,
+  "torch_dtype": "bfloat16",
+  "trust_remote_code": true,
+  "uses_scaler": true,
+  "weights_npz": "/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/swebench_model_scaffold_shared/regression_weights.npz"
+}
