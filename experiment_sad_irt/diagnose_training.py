@@ -37,8 +37,9 @@ def load_oracle_beta(oracle_dir: str = "clean_data/swebench_verified_20251120_fu
     if not items_path.exists():
         raise FileNotFoundError(f"Oracle items not found at {items_path}")
 
-    df = pd.read_csv(items_path)
-    return dict(zip(df["item_id"], df["diff"]))
+    df = pd.read_csv(items_path, index_col=0)
+    # Column 'b' is the difficulty parameter in IRT
+    return dict(zip(df.index, df["b"]))
 
 
 def load_training_history(output_dir: str) -> Dict[str, List]:
