@@ -36,6 +36,7 @@ class SADIRT(nn.Module):
         use_gradient_checkpointing: bool = False,  # Disable: breaks LoRA gradients
         psi_normalization: str = "batchnorm",
         freeze_encoder: bool = False,  # If True, don't use LoRA, freeze encoder entirely
+        bn_eps: float = 1e-3,  # BatchNorm epsilon (higher = more stable gradients)
     ):
         """Initialize SAD-IRT model.
 
@@ -128,8 +129,9 @@ class SADIRT(nn.Module):
         self.psi_normalization = psi_normalization
         if psi_normalization == "batchnorm":
             # Full BatchNorm: zero-mean + unit variance
-            self.psi_bn = nn.BatchNorm1d(1, affine=False, momentum=0.1)
-            logger.info("Using BatchNorm for ψ (zero-mean + unit variance)")
+            # Higher eps prevents gradient explosion when variance is small
+            self.psi_bn = nn.BatchNorm1d(1, affine=False, momentum=0.1, eps=bn_eps)
+            logger.info(f"Using BatchNorm for ψ (zero-mean + unit variance, eps={bn_eps})")
         elif psi_normalization == "center":
             # Just centering: zero-mean only (no variance scaling)
             self.psi_bn = None

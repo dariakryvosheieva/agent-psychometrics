@@ -203,6 +203,8 @@ def parse_args() -> SADIRTConfig:
     # Model
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen3-0.6B")
     parser.add_argument("--lora_r", type=int, default=16)
+    parser.add_argument("--bn_eps", type=float, default=1e-3,
+                        help="BatchNorm epsilon (higher = more stable gradients)")
 
     # Data
     parser.add_argument("--response_matrix_path", type=str, default="clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
@@ -251,6 +253,7 @@ def parse_args() -> SADIRTConfig:
         post_frontier_threshold=args.post_frontier_threshold,
         model_name=args.model_name,
         lora_r=args.lora_r,
+        bn_eps=args.bn_eps,
         response_matrix_path=args.response_matrix_path,
         trajectory_dir=args.trajectory_dir,
         max_length=args.max_length,
@@ -733,6 +736,7 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
         lora_dropout=config.lora_dropout,
         psi_normalization=psi_normalization,
         freeze_encoder=config.freeze_encoder,
+        bn_eps=config.bn_eps,
     ).to(device)
 
     # Initialize θ/β from accuracy-based estimates (pre-frontier data only)

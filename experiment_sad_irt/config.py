@@ -23,6 +23,7 @@ class SADIRTConfig:
         default_factory=lambda: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
     )
     freeze_encoder: bool = False  # If True, don't use LoRA, freeze encoder entirely
+    bn_eps: float = 1e-3  # BatchNorm epsilon (higher = more stable gradients)
 
     # Data
     response_matrix_path: str = "clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"
