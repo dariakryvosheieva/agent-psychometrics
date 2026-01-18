@@ -310,10 +310,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             n_zero_success_excluded = 0
 
     # Load only the tasks we need, in requested order.
+    #
+    # Note: `pqd.load_items_by_ids` accepts *lists* of dataset names/paths so we can
+    # search multiple sources (e.g. local JSON plus HF hub). Here we expose a
+    # single `--dataset_name` / `--dataset_path` flag and adapt it to the API.
+    dataset_names = [str(dataset_name)] if str(dataset_name).strip() else []
+    dataset_paths = [str(dataset_path)] if str(dataset_path).strip() else []
     items, missing = pqd.load_items_by_ids(
-        dataset_name=str(dataset_name),
+        dataset_names=dataset_names,
         split=str(hf_split),
-        dataset_path=str(dataset_path),
+        dataset_paths=dataset_paths,
         item_ids=requested_ids,
     )
     if missing:

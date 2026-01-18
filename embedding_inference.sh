@@ -23,9 +23,9 @@ export HF_HOME="/orcd/scratch/orcd/001/daria_k/.cache/huggingface"
 export HF_HUB_ENABLE_HF_TRANSFER=1
 
 "${VENV_PY}" embedding_inference.py \
-             --weights_dir out/swebench_verified \
+             --weights_dir out/swebench_pro \
              --items_csv out/swebench_verified/predictions.csv \
              --items_splits test \
              --dataset_name princeton-nlp/SWE-bench_Verified \
              --hf_split test \
-             --out_dir out/swebench_verified_inference_test
+             --out_dir out/swebench_pro_to_verified
