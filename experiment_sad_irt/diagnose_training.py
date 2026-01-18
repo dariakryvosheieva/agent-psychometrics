@@ -365,7 +365,7 @@ def generate_report(
         issues.append("Low β-oracle correlation: learned β doesn't match oracle ranking")
         recommendations.append("Consider longer training or different architecture")
 
-    if psi_analysis.get("bn_running_std", 0) > 2.0:
+    if (psi_analysis.get("bn_running_std") or 0) > 2.0:
         issues.append("High ψ variance: trajectory encoder producing large ψ values")
         recommendations.append("ψ may be dominating predictions over β")
 
