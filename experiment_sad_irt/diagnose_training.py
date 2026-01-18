@@ -429,7 +429,7 @@ def get_agent_ids_from_checkpoint_dir(checkpoint_path: str) -> List[str]:
         with open(response_matrix_path) as f:
             for line in f:
                 data = json.loads(line)
-                agent_ids.append(data["agent"])
+                agent_ids.append(data["subject_id"])
         return agent_ids
 
     raise FileNotFoundError("Could not determine agent_ids - no response matrix found")
