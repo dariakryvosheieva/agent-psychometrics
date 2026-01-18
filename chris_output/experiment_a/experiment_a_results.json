@@ -7,9 +7,24 @@
     "test_fraction": 0.2,
     "split_seed": 0,
     "embeddings_path": "out/prior_qwen3vl8b/embeddings__Qwen__Qwen3-VL-8B-Instruct__pool-lasttoken__qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_instance-v1__princeton-nlp_SWE-bench_Verified__test__n500__maxlen8192__seed0.npz",
-    "ridge_alpha": 10000.0,
+    "ridge_alphas": [
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0,
+      10000.0,
+      100000.0
+    ],
     "llm_judge_features_path": null,
-    "llm_judge_ridge_alpha": 1.0,
+    "llm_judge_ridge_alphas": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0
+    ],
     "llm_judge_max_features": null
   },
   "data_summary": {
@@ -39,7 +54,15 @@
     "n_embeddings": 500,
     "embedding_dim": 4096,
     "embeddings_path": "/Users/chrisge/Downloads/model_irt/out/prior_qwen3vl8b/embeddings__Qwen__Qwen3-VL-8B-Instruct__pool-lasttoken__qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_instance-v1__princeton-nlp_SWE-bench_Verified__test__n500__maxlen8192__seed0.npz",
-    "ridge_alpha": 10000.0
+    "ridge_alphas": [
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0,
+      10000.0,
+      100000.0
+    ]
   },
   "difficulty_predictions": {
     "constant_baseline": {

@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from scipy import stats as scipy_stats
-from sklearn.linear_model import Ridge, LassoCV
+from sklearn.linear_model import Ridge, RidgeCV, LassoCV
 from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -62,19 +62,23 @@ class EmbeddingPredictor(DifficultyPredictorBase):
     def __init__(
         self,
         embeddings_path: Path,
-        ridge_alpha: float = 10000.0,
+        ridge_alpha: Optional[float] = None,
+        ridge_alphas: Optional[List[float]] = None,
     ):
         """Initialize embedding predictor.
 
         Args:
             embeddings_path: Path to pre-computed embeddings .npz file
-            ridge_alpha: Ridge regression regularization parameter
+            ridge_alpha: Fixed Ridge alpha (if provided, skips CV)
+            ridge_alphas: List of alphas for RidgeCV (default: use CV with standard alphas)
         """
         self.embeddings_path = embeddings_path
         self.ridge_alpha = ridge_alpha
+        self.ridge_alphas = ridge_alphas or [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
         self._model: Optional[Pipeline] = None
         self._embeddings: Optional[Dict[str, np.ndarray]] = None
         self._embedding_dim: Optional[int] = None
+        self._best_alpha: Optional[float] = None
 
         # Load embeddings immediately
         self._load_embeddings()
@@ -115,12 +119,22 @@ class EmbeddingPredictor(DifficultyPredictorBase):
         X = np.stack([self._embeddings[t] for t in available_tasks])
         y = np.array([ground_truth_b[task_ids.index(t)] for t in available_tasks])
 
-        # Fit StandardScaler + Ridge
+        # Fit StandardScaler + Ridge (with CV or fixed alpha)
+        if self.ridge_alpha is not None:
+            ridge = Ridge(alpha=self.ridge_alpha)
+            self._best_alpha = self.ridge_alpha
+        else:
+            ridge = RidgeCV(alphas=self.ridge_alphas, cv=5)
+
         self._model = Pipeline([
             ("scaler", StandardScaler(with_mean=True, with_std=True)),
-            ("ridge", Ridge(alpha=self.ridge_alpha)),
+            ("ridge", ridge),
         ])
         self._model.fit(X, y)
+
+        # Store best alpha if using CV
+        if hasattr(self._model.named_steps["ridge"], "alpha_"):
+            self._best_alpha = float(self._model.named_steps["ridge"].alpha_)
 
     def predict(self, task_ids: List[str]) -> Dict[str, float]:
         """Predict difficulty for tasks.
@@ -156,6 +170,11 @@ class EmbeddingPredictor(DifficultyPredictorBase):
     def n_embeddings(self) -> int:
         """Return number of loaded embeddings."""
         return len(self._embeddings) if self._embeddings else 0
+
+    @property
+    def best_alpha(self) -> Optional[float]:
+        """Return the best alpha (from CV or fixed)."""
+        return self._best_alpha
 
 
 class MLEEmbeddingPredictor(DifficultyPredictorBase):
@@ -813,7 +832,8 @@ class LunettePredictor(DifficultyPredictorBase):
     def __init__(
         self,
         features_path: Path,
-        ridge_alpha: float = 1.0,
+        ridge_alpha: Optional[float] = None,
+        ridge_alphas: Optional[List[float]] = None,
         feature_selection: str = "lasso_cv",
         max_features: Optional[int] = 10,
         feature_cols: Optional[List[str]] = None,
@@ -822,18 +842,21 @@ class LunettePredictor(DifficultyPredictorBase):
 
         Args:
             features_path: Path to CSV file with Lunette features
-            ridge_alpha: Ridge regression regularization parameter
+            ridge_alpha: Fixed Ridge alpha (if provided, skips CV)
+            ridge_alphas: List of alphas for RidgeCV (default: use CV with standard alphas)
             feature_selection: Method for feature selection ("lasso_cv" or "select_k_best")
             max_features: Maximum number of features to select (None = no limit)
             feature_cols: List of feature columns to use (None = use defaults)
         """
         self.features_path = Path(features_path)
         self.ridge_alpha = ridge_alpha
+        self.ridge_alphas = ridge_alphas or [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
         self.feature_selection = feature_selection
         self.max_features = max_features
         self.feature_cols = feature_cols or self.DEFAULT_FEATURE_COLS
 
         self._model: Optional[Ridge] = None
+        self._best_alpha: Optional[float] = None
         self._scaler: Optional[StandardScaler] = None
         self._features_df: Optional[pd.DataFrame] = None
         self._selected_features: Optional[List[str]] = None
@@ -955,10 +978,18 @@ class LunettePredictor(DifficultyPredictorBase):
             self.feature_cols[i] for i in range(len(self.feature_cols)) if selected_mask[i]
         ]
 
-        # Fit Ridge on selected features
+        # Fit Ridge on selected features (with CV or fixed alpha)
         X_selected = X_scaled[:, selected_mask]
-        self._model = Ridge(alpha=self.ridge_alpha)
+        if self.ridge_alpha is not None:
+            self._model = Ridge(alpha=self.ridge_alpha)
+            self._best_alpha = self.ridge_alpha
+        else:
+            self._model = RidgeCV(alphas=self.ridge_alphas, cv=5)
         self._model.fit(X_selected, y)
+
+        # Store best alpha if using CV
+        if hasattr(self._model, "alpha_"):
+            self._best_alpha = float(self._model.alpha_)
 
         # Store coefficients for reporting
         self._feature_coefficients = dict(
@@ -1039,6 +1070,11 @@ class LunettePredictor(DifficultyPredictorBase):
         """Return number of tasks with features."""
         return len(self._features_df) if self._features_df is not None else 0
 
+    @property
+    def best_alpha(self) -> Optional[float]:
+        """Return the best alpha (from CV or fixed)."""
+        return self._best_alpha
+
     def print_selected_features(self) -> None:
         """Print selected features and their coefficients."""
         if self._feature_coefficients is None:
@@ -1081,7 +1117,8 @@ class LLMJudgePredictor(DifficultyPredictorBase):
     def __init__(
         self,
         features_path: Path,
-        ridge_alpha: float = 1.0,
+        ridge_alpha: Optional[float] = None,
+        ridge_alphas: Optional[List[float]] = None,
         max_features: Optional[int] = None,  # None = use all 9
         feature_cols: Optional[List[str]] = None,
     ):
@@ -1089,16 +1126,19 @@ class LLMJudgePredictor(DifficultyPredictorBase):
 
         Args:
             features_path: Path to CSV file with LLM judge features
-            ridge_alpha: Ridge regression regularization parameter for final fit
+            ridge_alpha: Fixed Ridge alpha (if provided, skips CV)
+            ridge_alphas: List of alphas for RidgeCV (default: use CV with standard alphas)
             max_features: Maximum number of features to select (None = no limit)
             feature_cols: List of feature columns to use (None = use defaults)
         """
         self.features_path = Path(features_path)
         self.ridge_alpha = ridge_alpha
+        self.ridge_alphas = ridge_alphas or [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
         self.max_features = max_features
         self.feature_cols = feature_cols or self.DEFAULT_FEATURE_COLS
 
         self._model: Optional[Ridge] = None
+        self._best_alpha: Optional[float] = None
         self._scaler: Optional[StandardScaler] = None
         self._features_df: Optional[pd.DataFrame] = None
         self._selected_features: Optional[List[str]] = None
@@ -1211,10 +1251,18 @@ class LLMJudgePredictor(DifficultyPredictorBase):
             self.feature_cols[i] for i in range(len(self.feature_cols)) if selected_mask[i]
         ]
 
-        # Fit Ridge on selected features
+        # Fit Ridge on selected features (with CV or fixed alpha)
         X_selected = X_scaled[:, selected_mask]
-        self._model = Ridge(alpha=self.ridge_alpha)
+        if self.ridge_alpha is not None:
+            self._model = Ridge(alpha=self.ridge_alpha)
+            self._best_alpha = self.ridge_alpha
+        else:
+            self._model = RidgeCV(alphas=self.ridge_alphas, cv=5)
         self._model.fit(X_selected, y)
+
+        # Store best alpha if using CV
+        if hasattr(self._model, "alpha_"):
+            self._best_alpha = float(self._model.alpha_)
 
         # Store coefficients for reporting
         self._feature_coefficients = dict(
@@ -1268,6 +1316,11 @@ class LLMJudgePredictor(DifficultyPredictorBase):
     def n_tasks(self) -> int:
         """Return number of tasks with features."""
         return len(self._features_df) if self._features_df is not None else 0
+
+    @property
+    def best_alpha(self) -> Optional[float]:
+        """Return the best alpha (from CV or fixed)."""
+        return self._best_alpha
 
     def print_selected_features(self) -> None:
         """Print selected features and their coefficients."""

@@ -1,8 +1,8 @@
 """Configuration for Experiment A."""
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -35,11 +35,15 @@ class ExperimentAConfig:
 
     # Embedding predictor config
     embeddings_path: Optional[Path] = None  # Required for EmbeddingPredictor
-    ridge_alpha: float = 10000.0
+    ridge_alphas: List[float] = field(
+        default_factory=lambda: [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
+    )
 
     # LLM Judge predictor config
     llm_judge_features_path: Optional[Path] = None  # Required for LLMJudgePredictor
-    llm_judge_ridge_alpha: float = 1.0
+    llm_judge_ridge_alphas: List[float] = field(
+        default_factory=lambda: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+    )
     llm_judge_max_features: Optional[int] = None  # None = use all features
 
     def to_dict(self) -> Dict[str, Any]:

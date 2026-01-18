@@ -52,7 +52,7 @@ def build_predictor_configs(config: TerminalBenchConfig) -> List[PredictorConfig
                 display_name="Embedding",
                 kwargs={
                     "embeddings_path": embeddings_path,
-                    "ridge_alpha": config.ridge_alphas[3],  # Default to 100.0
+                    "ridge_alphas": config.ridge_alphas,  # Use CV to find best alpha
                 },
             ))
 
@@ -77,7 +77,7 @@ def build_predictor_configs(config: TerminalBenchConfig) -> List[PredictorConfig
                 display_name="LLM Judge",
                 kwargs={
                     "features_path": llm_judge_path,
-                    "ridge_alpha": config.llm_judge_ridge_alphas[2],  # Default to 1.0
+                    "ridge_alphas": config.llm_judge_ridge_alphas,  # Use CV to find best alpha
                     "max_features": config.llm_judge_max_features,
                     "feature_cols": TERMINALBENCH_LLM_JUDGE_FEATURES,
                 },

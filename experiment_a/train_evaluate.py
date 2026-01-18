@@ -51,7 +51,7 @@ def build_predictor_configs(config: ExperimentAConfig) -> List[PredictorConfig]:
                 display_name="Embedding",
                 kwargs={
                     "embeddings_path": embeddings_path,
-                    "ridge_alpha": config.ridge_alpha,
+                    "ridge_alphas": config.ridge_alphas,  # Use CV to find best alpha
                 },
             ))
 
@@ -65,7 +65,7 @@ def build_predictor_configs(config: ExperimentAConfig) -> List[PredictorConfig]:
                 display_name="LLM Judge",
                 kwargs={
                     "features_path": llm_judge_path,
-                    "ridge_alpha": config.llm_judge_ridge_alpha,
+                    "ridge_alphas": config.llm_judge_ridge_alphas,  # Use CV to find best alpha
                     "max_features": config.llm_judge_max_features,
                 },
             ))
@@ -199,12 +199,6 @@ def main():
         help="Path to pre-computed embeddings .npz file",
     )
     parser.add_argument(
-        "--ridge_alpha",
-        type=float,
-        default=10000.0,
-        help="Ridge regression alpha (default: 10000.0)",
-    )
-    parser.add_argument(
         "--output_dir",
         type=str,
         default="chris_output/experiment_a",
@@ -216,12 +210,6 @@ def main():
         type=str,
         default=None,
         help="Path to LLM judge features CSV file",
-    )
-    parser.add_argument(
-        "--llm_judge_ridge_alpha",
-        type=float,
-        default=1.0,
-        help="Ridge alpha for LLM Judge predictor (default: 1.0)",
     )
     parser.add_argument(
         "--llm_judge_max_features",
@@ -252,11 +240,9 @@ def main():
         test_fraction=args.test_fraction,
         split_seed=args.split_seed,
         embeddings_path=Path(args.embeddings_path) if args.embeddings_path else None,
-        ridge_alpha=args.ridge_alpha,
         output_dir=Path(args.output_dir),
         # LLM Judge config
         llm_judge_features_path=Path(args.llm_judge_features_path) if args.llm_judge_features_path else None,
-        llm_judge_ridge_alpha=args.llm_judge_ridge_alpha,
         llm_judge_max_features=args.llm_judge_max_features,
     )
     if args.items_path:
