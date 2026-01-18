@@ -246,6 +246,12 @@ class Trainer:
                 if self.config.debug_gradients and self.global_step % self.config.logging_steps == 0:
                     self._log_detailed_gradients()
 
+                # Capture gradient norms BEFORE clipping (for history tracking)
+                # Must be done before zero_grad() clears them
+                should_log = (self.global_step + 1) % self.config.logging_steps == 0
+                if should_log:
+                    grad_norms_pre_clip = compute_gradient_norms(self.model)
+
                 # Gradient clipping
                 torch.nn.utils.clip_grad_norm_(
                     self.model.parameters(), self.config.max_grad_norm
@@ -267,9 +273,9 @@ class Trainer:
                     # Log loss explicitly (tqdm doesn't always capture to log files)
                     logger.info(f"Step {self.global_step}: loss={current_loss:.6f}, lr={lr:.2e}")
 
-                    # Log gradient norms (after clipping now, for comparison)
-                    grad_norms = compute_gradient_norms(self.model)
-                    logger.debug(f"Step {self.global_step} gradients (post-clip): {grad_norms}")
+                    # Use pre-clip gradient norms (captured before zero_grad)
+                    grad_norms = grad_norms_pre_clip
+                    logger.debug(f"Step {self.global_step} gradients (pre-clip): {grad_norms}")
 
                     # Track history for plotting
                     self.history["step"].append(self.global_step)
