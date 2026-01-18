@@ -219,8 +219,7 @@ def parse_args() -> SADIRTConfig:
     parser.add_argument("--learning_rate_encoder", type=float, default=1e-4)
     parser.add_argument("--learning_rate_embeddings", type=float, default=1e-3)
 
-    # Evaluation/Logging
-    parser.add_argument("--eval_steps", type=int, default=100, help="Evaluate every N optimizer steps")
+    # Logging
     parser.add_argument("--logging_steps", type=int, default=10, help="Log every N optimizer steps")
 
     # Output
@@ -235,8 +234,7 @@ def parse_args() -> SADIRTConfig:
                         help="How to normalize ψ (default: center if frozen, batchnorm otherwise)")
 
     # Debug
-    parser.add_argument("--dry_run", action="store_true")
-    parser.add_argument("--max_samples", type=int, default=None)
+    parser.add_argument("--max_samples", type=int, default=None, help="Limit training samples (for quick testing)")
     parser.add_argument("--smoke_test", action="store_true", help="Quick test: load model, run 1 batch, exit")
     parser.add_argument("--overfit_test", action="store_true", help="Test overfitting on small batch (sanity check)")
     parser.add_argument("--debug_gradients", action="store_true", help="Enable verbose gradient logging")
@@ -263,14 +261,12 @@ def parse_args() -> SADIRTConfig:
         epochs=args.epochs,
         learning_rate_encoder=args.learning_rate_encoder,
         learning_rate_embeddings=args.learning_rate_embeddings,
-        eval_steps=args.eval_steps,
         logging_steps=args.logging_steps,
         output_dir=args.output_dir,
         seed=args.seed,
         freeze_irt=args.freeze_irt,
         freeze_encoder=args.freeze_encoder,
         psi_normalization=args.psi_normalization,
-        dry_run=args.dry_run,
         max_samples=args.max_samples,
         smoke_test=args.smoke_test,
         overfit_test=args.overfit_test,
@@ -687,9 +683,9 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
     logger.info(f"Training dataset: {len(train_dataset)} samples")
     logger.info(f"Agents: {train_dataset.num_agents}, Tasks: {train_dataset.num_tasks}")
 
-    # Limit samples if dry run
-    if config.dry_run or config.max_samples:
-        max_samples = config.max_samples or 100
+    # Limit samples for quick testing
+    if config.max_samples:
+        max_samples = config.max_samples
         # Create a limited subset of pairs
         limited_pairs = [(s[0], s[1]) for s in train_dataset.samples[:max_samples]]
         train_dataset = TrajectoryIRTDataset(
@@ -764,7 +760,6 @@ def run_frontier_difficulty_evaluation(config: SADIRTConfig):
     sad_irt_trainer = Trainer(
         model=sad_irt_model,
         train_loader=train_loader,
-        eval_loader=None,
         config=config,
         device=device,
         is_sad_irt=True,

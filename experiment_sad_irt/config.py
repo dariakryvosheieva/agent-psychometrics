@@ -43,9 +43,7 @@ class SADIRTConfig:
     warmup_ratio: float = 0.1
     max_grad_norm: float = 1.0
 
-    # Evaluation
-    eval_steps: int = 100
-    save_steps: int = 500
+    # Logging
     logging_steps: int = 10
 
     # Output
@@ -57,7 +55,6 @@ class SADIRTConfig:
     psi_normalization: Optional[str] = None  # "batchnorm", "center", or "none" (None = auto)
 
     # Debug
-    dry_run: bool = False
     max_samples: Optional[int] = None  # Limit samples for testing
     smoke_test: bool = False  # Just check code paths, no real training
     overfit_test: bool = False  # Test overfitting on small batch

@@ -14,7 +14,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from .config import SADIRTConfig
-from .evaluate import compute_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +78,6 @@ class Trainer:
         self,
         model: nn.Module,
         train_loader: DataLoader,
-        eval_loader: Optional[DataLoader],
         config: SADIRTConfig,
         device: torch.device,
         is_sad_irt: bool = True,
@@ -93,7 +91,6 @@ class Trainer:
         Args:
             model: SAD-IRT or StandardIRT model
             train_loader: Training data loader
-            eval_loader: Evaluation data loader (optional)
             config: Training configuration
             device: Device to train on
             is_sad_irt: Whether model is SAD-IRT (affects optimizer setup)
@@ -103,7 +100,6 @@ class Trainer:
         """
         self.model = model
         self.train_loader = train_loader
-        self.eval_loader = eval_loader
         self.config = config
         self.device = device
         self.is_sad_irt = is_sad_irt
@@ -291,18 +287,6 @@ class Trainer:
                         psi_stats = self.model.get_psi_stats()
                         logger.debug(f"Step {self.global_step} ψ stats: {psi_stats}")
 
-                # Evaluation
-                if self.eval_loader is not None and self.global_step % self.config.eval_steps == 0:
-                    metrics = self.evaluate()
-                    logger.info(f"Step {self.global_step}: {metrics}")
-
-                    # Save best model (with metrics for easy identification)
-                    if metrics["auc"] > self.best_auc:
-                        self.best_auc = metrics["auc"]
-                        self.save_checkpoint("best", metrics=metrics)
-
-                    self.model.train()
-
             total_loss += loss.item() * self.config.gradient_accumulation_steps
             num_batches += 1
 
@@ -404,35 +388,6 @@ class Trainer:
         if lora_grads:
             lora_grads.sort(key=lambda x: -x[1])  # Sort by magnitude
             logger.info(f"  Top 3 LoRA grads: {lora_grads[:3]}")
-
-    @torch.no_grad()
-    def evaluate(self) -> Dict[str, float]:
-        """Evaluate model on eval set."""
-        if self.eval_loader is None:
-            return {}
-
-        self.model.eval()
-
-        all_logits = []
-        all_responses = []
-
-        for batch in tqdm(self.eval_loader, desc="Evaluating", leave=False):
-            batch = {k: v.to(self.device) for k, v in batch.items()}
-
-            logits = self.model(
-                agent_idx=batch["agent_idx"],
-                task_idx=batch["task_idx"],
-                input_ids=batch["input_ids"],
-                attention_mask=batch["attention_mask"],
-            )
-
-            all_logits.append(logits.cpu())
-            all_responses.append(batch["response"].cpu())
-
-        all_logits = torch.cat(all_logits)
-        all_responses = torch.cat(all_responses)
-
-        return compute_metrics(all_logits, all_responses)
 
     @torch.no_grad()
     def evaluate_frontier(self) -> Dict[str, float]:
