@@ -30,6 +30,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import List, Optional
 
 import pandas as pd
 
@@ -47,6 +48,8 @@ def get_split_cache_dir(
     split_seed: int,
     model_type: str = "1pl",
     is_binomial: bool = False,
+    fold_idx: Optional[int] = None,
+    k_folds: Optional[int] = None,
 ) -> Path:
     """Get the cache directory for a specific split configuration.
 
@@ -56,12 +59,19 @@ def get_split_cache_dir(
         split_seed: Split random seed
         model_type: IRT model type
         is_binomial: Whether this is binomial (TerminalBench) or Bernoulli (SWE-bench)
+        fold_idx: For k-fold CV, the fold index (0 to k-1)
+        k_folds: For k-fold CV, the total number of folds
 
     Returns:
         Path to cache directory for this configuration
     """
     suffix = "_binomial" if is_binomial else ""
-    split_name = f"seed{split_seed}_test{int(test_fraction*100)}pct_{model_type}{suffix}"
+    if fold_idx is not None and k_folds is not None:
+        # k-fold cross-validation naming
+        split_name = f"seed{split_seed}_fold{fold_idx}of{k_folds}_{model_type}{suffix}"
+    else:
+        # Single holdout naming (legacy)
+        split_name = f"seed{split_seed}_test{int(test_fraction*100)}pct_{model_type}{suffix}"
     return output_base / split_name / "1d"
 
 
@@ -188,26 +198,38 @@ def get_or_train_split_irt(
     force_retrain: bool = False,
     dry_run: bool = False,
     is_binomial: bool = False,
+    train_tasks: Optional[List[str]] = None,
+    fold_idx: Optional[int] = None,
+    k_folds: Optional[int] = None,
 ) -> Path:
     """Get cached IRT model or train a new one for the specified split.
 
     Works for both Bernoulli (SWE-bench) and Binomial (TerminalBench) data.
 
+    For k-fold cross-validation, provide train_tasks, fold_idx, and k_folds.
+    For single holdout (legacy), omit these parameters.
+
     Args:
         responses_path: Path to full response matrix JSONL
         output_base: Base directory for cached IRT models
-        test_fraction: Fraction of tasks to hold out
+        test_fraction: Fraction of tasks to hold out (ignored if train_tasks provided)
         split_seed: Random seed for split
         model_type: IRT model type ("1pl" or "2pl")
         epochs: Training epochs
         force_retrain: If True, retrain even if cached
         dry_run: If True, just print what would be done
         is_binomial: If True, use binomial IRT (for TerminalBench)
+        train_tasks: For k-fold CV, the explicit list of train task IDs
+        fold_idx: For k-fold CV, the fold index (0 to k-1)
+        k_folds: For k-fold CV, the total number of folds
 
     Returns:
         Path to IRT output directory (contains abilities.csv, items.csv, split_info.json)
     """
-    cache_dir = get_split_cache_dir(output_base, test_fraction, split_seed, model_type, is_binomial)
+    cache_dir = get_split_cache_dir(
+        output_base, test_fraction, split_seed, model_type, is_binomial,
+        fold_idx=fold_idx, k_folds=k_folds
+    )
 
     # Check for cached model
     if not force_retrain and check_cached_irt(cache_dir):
@@ -237,11 +259,19 @@ def get_or_train_split_irt(
     all_tasks = sorted(all_tasks)
     print(f"   Found {len(all_tasks)} tasks")
 
-    # Split tasks
-    print(f"\n2. Splitting tasks (test_fraction={test_fraction}, seed={split_seed})...")
-    train_tasks, test_tasks = stable_split_tasks(all_tasks, test_fraction, split_seed)
-    print(f"   Train tasks: {len(train_tasks)}")
-    print(f"   Test tasks: {len(test_tasks)}")
+    # Determine train/test split
+    if train_tasks is not None:
+        # For k-fold CV: use explicitly provided train tasks
+        print(f"\n2. Using provided train tasks (fold {fold_idx + 1}/{k_folds})...")
+        test_tasks = [t for t in all_tasks if t not in set(train_tasks)]
+        print(f"   Train tasks: {len(train_tasks)}")
+        print(f"   Test tasks: {len(test_tasks)}")
+    else:
+        # Legacy: compute split from test_fraction
+        print(f"\n2. Splitting tasks (test_fraction={test_fraction}, seed={split_seed})...")
+        train_tasks, test_tasks = stable_split_tasks(all_tasks, test_fraction, split_seed)
+        print(f"   Train tasks: {len(train_tasks)}")
+        print(f"   Test tasks: {len(test_tasks)}")
 
     # Filter responses to train tasks only
     print("\n3. Filtering responses to train tasks...")

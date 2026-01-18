@@ -3,10 +3,12 @@
 import argparse
 import json
 import sys
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List
 
 import numpy as np
+import pandas as pd
 
 # Add parent to path for imports
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,11 +24,18 @@ from experiment_a.difficulty_predictor import (
 )
 from experiment_a_common import (
     load_dataset,
+    load_dataset_for_fold,
     compute_auc,
     run_evaluation_pipeline,
     PredictorConfig,
     agent_only_baseline,
     convert_numpy,
+)
+from experiment_a_common.cross_validation import (
+    k_fold_split_tasks,
+    run_cv_for_predictor,
+    run_cv_for_baseline,
+    CrossValidationResult,
 )
 
 
@@ -178,8 +187,143 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
     return results
 
 
+def run_experiment_a_cv(config: ExperimentAConfig, k: int = 5) -> Dict[str, Any]:
+    """Run Experiment A with k-fold cross-validation.
+
+    Instead of a single holdout, runs k-fold CV where each fold uses
+    a different 20% of tasks for testing. Reports mean ± std AUC.
+
+    Args:
+        config: Experiment configuration
+        k: Number of folds (default: 5)
+
+    Returns:
+        Dict with CV results for each method
+    """
+    print("=" * 60)
+    print(f"EXPERIMENT A: {k}-FOLD CROSS-VALIDATION - SWE-bench")
+    print("=" * 60)
+
+    # Resolve paths relative to ROOT
+    abilities_path = ROOT / config.abilities_path
+    items_path = ROOT / config.items_path
+    responses_path = ROOT / config.responses_path
+    irt_cache_dir = ROOT / "chris_output" / "experiment_a" / "irt_splits"
+
+    # Load full items to get all task IDs
+    full_items = pd.read_csv(items_path, index_col=0)
+    all_task_ids = list(full_items.index)
+
+    print(f"\nTotal tasks: {len(all_task_ids)}")
+    print(f"Tasks per fold (test): ~{len(all_task_ids) // k}")
+
+    # Generate k folds
+    folds = k_fold_split_tasks(all_task_ids, k=k, seed=config.split_seed)
+
+    # Create a fold data loader function
+    def load_fold_data(train_tasks: List[str], test_tasks: List[str], fold_idx: int):
+        return load_dataset_for_fold(
+            abilities_path=abilities_path,
+            items_path=items_path,
+            responses_path=responses_path,
+            train_tasks=train_tasks,
+            test_tasks=test_tasks,
+            fold_idx=fold_idx,
+            k_folds=k,
+            split_seed=config.split_seed,
+            is_binomial=False,
+            irt_cache_dir=irt_cache_dir,
+        )
+
+    # Build predictor configs
+    predictor_configs = build_predictor_configs(config)
+
+    # Results dict
+    cv_results: Dict[str, CrossValidationResult] = {}
+
+    # Add oracle as a predictor config
+    # Oracle uses GroundTruthPredictor with full_items
+    oracle_config = PredictorConfig(
+        predictor_class=GroundTruthPredictor,
+        name="oracle",
+        display_name="Oracle (true b)",
+        kwargs={"items_df": full_items},
+        use_full_abilities=True,
+    )
+
+    # Run CV for oracle
+    print("\n1. Oracle (ground truth b from full IRT):")
+    cv_results["oracle"] = run_cv_for_predictor(
+        oracle_config, folds, load_fold_data, verbose=True
+    )
+    print(f"   Mean AUC: {cv_results['oracle'].mean_auc:.4f} ± {cv_results['oracle'].std_auc:.4f}")
+
+    # Run CV for each predictor
+    for i, pc in enumerate(predictor_configs, 2):
+        print(f"\n{i}. {pc.display_name}:")
+        cv_results[pc.name] = run_cv_for_predictor(pc, folds, load_fold_data, verbose=True)
+        result = cv_results[pc.name]
+        if result.mean_auc is not None:
+            print(f"   Mean AUC: {result.mean_auc:.4f} ± {result.std_auc:.4f}")
+        else:
+            print("   Mean AUC: N/A")
+
+    # Run CV for agent-only baseline
+    print(f"\n{len(predictor_configs) + 2}. Agent-only baseline:")
+    cv_results["agent_only_baseline"] = run_cv_for_baseline(
+        agent_only_baseline, folds, load_fold_data, verbose=True
+    )
+    agent_result = cv_results["agent_only_baseline"]
+    if agent_result.mean_auc is not None:
+        print(f"   Mean AUC: {agent_result.mean_auc:.4f} ± {agent_result.std_auc:.4f}")
+    else:
+        print("   Mean AUC: N/A")
+
+    # Print summary
+    print("\n" + "=" * 60)
+    print(f"SUMMARY ({k}-FOLD CROSS-VALIDATION)")
+    print("=" * 60)
+    print(f"\n{'Method':<30} {'Mean AUC':>10} {'Std':>8}")
+    print("-" * 50)
+
+    # Define display order
+    display_order = [
+        ("Oracle (true b)", "oracle"),
+        ("Embedding", "embedding_predictor"),
+        ("LLM Judge", "llm_judge_predictor"),
+        ("Constant (mean b)", "constant_baseline"),
+        ("Agent-only", "agent_only_baseline"),
+    ]
+
+    for name, key in display_order:
+        if key in cv_results:
+            result = cv_results[key]
+            if result.mean_auc is not None:
+                print(f"{name:<30} {result.mean_auc:>10.4f} {result.std_auc:>8.4f}")
+            else:
+                print(f"{name:<30} {'N/A':>10} {'N/A':>8}")
+
+    # Return results as dict
+    return {
+        "config": config.to_dict(),
+        "k_folds": k,
+        "cv_results": {name: asdict(result) for name, result in cv_results.items()},
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run Experiment A: Prior Validation (IRT AUC)")
+    parser.add_argument(
+        "--k_folds",
+        type=int,
+        default=5,
+        help="Number of folds for cross-validation (default: 5)",
+    )
+    parser.add_argument(
+        "--single_holdout",
+        action="store_true",
+        help="Use single 20%% holdout instead of cross-validation (legacy behavior)",
+    )
     parser.add_argument(
         "--test_fraction",
         type=float,
@@ -256,12 +400,18 @@ def main():
         print(json.dumps(config.to_dict(), indent=2))
         return
 
-    results = run_experiment_a(config)
+    # Run experiment - CV is the default, single holdout is legacy
+    if args.single_holdout:
+        results = run_experiment_a(config)
+        output_filename = "experiment_a_results.json"
+    else:
+        results = run_experiment_a_cv(config, k=args.k_folds)
+        output_filename = f"experiment_a_cv{args.k_folds}_results.json"
 
     # Save results
     output_dir = ROOT / config.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "experiment_a_results.json"
+    output_path = output_dir / output_filename
 
     results = convert_numpy(results)
 

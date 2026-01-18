@@ -289,3 +289,102 @@ def load_dataset(
             test_tasks=test_tasks,
             metadata=metadata,
         )
+
+
+def load_dataset_for_fold(
+    abilities_path: Path,
+    items_path: Path,
+    responses_path: Path,
+    train_tasks: List[str],
+    test_tasks: List[str],
+    fold_idx: int,
+    k_folds: int,
+    split_seed: int,
+    is_binomial: bool = False,
+    irt_cache_dir: Optional[Path] = None,
+    force_retrain: bool = False,
+    metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
+) -> ExperimentData:
+    """Load a dataset for a specific cross-validation fold.
+
+    Unlike load_dataset(), this takes explicit train/test task lists
+    instead of computing them from test_fraction. Used for k-fold CV.
+
+    Args:
+        abilities_path: Path to full IRT abilities.csv (for oracle only)
+        items_path: Path to full IRT items.csv (for oracle only)
+        responses_path: Path to response matrix JSONL
+        train_tasks: List of task IDs for training this fold
+        test_tasks: List of task IDs for testing this fold
+        fold_idx: Index of this fold (0 to k_folds-1)
+        k_folds: Total number of folds
+        split_seed: Random seed (used for cache naming)
+        is_binomial: If True, use binomial IRT and BinomialExperimentData
+        irt_cache_dir: Directory for cached split IRT models
+        force_retrain: If True, retrain IRT even if cached
+        metadata_loader: Optional function to load task metadata
+
+    Returns:
+        BinaryExperimentData or BinomialExperimentData
+    """
+    from experiment_a.train_irt_split import get_or_train_split_irt
+
+    # Load full IRT parameters (ONLY for oracle baseline)
+    full_abilities = _load_abilities(abilities_path)
+    full_items = _load_items(items_path)
+
+    # Load responses (binary or binomial)
+    if is_binomial:
+        responses = _load_binomial_responses(responses_path)
+    else:
+        responses = _load_binary_responses(responses_path)
+
+    # Get or train fold-specific IRT model
+    if irt_cache_dir is None:
+        raise ValueError("irt_cache_dir must be provided")
+
+    split_irt_dir = get_or_train_split_irt(
+        responses_path=responses_path,
+        output_base=irt_cache_dir,
+        split_seed=split_seed,
+        model_type="1pl",
+        force_retrain=force_retrain,
+        is_binomial=is_binomial,
+        train_tasks=train_tasks,
+        fold_idx=fold_idx,
+        k_folds=k_folds,
+    )
+
+    # Load train-only IRT parameters
+    train_abilities = _load_abilities(split_irt_dir / "abilities.csv")
+    train_items = _load_items(split_irt_dir / "items.csv")
+
+    # Load optional metadata
+    all_task_ids = list(full_items.index)
+    metadata = {}
+    if metadata_loader is not None:
+        metadata = metadata_loader(all_task_ids)
+
+    # Create appropriate dataset type
+    if is_binomial:
+        return BinomialExperimentData(
+            responses=responses,
+            train_abilities=train_abilities,
+            train_items=train_items,
+            full_abilities=full_abilities,
+            full_items=full_items,
+            train_tasks=train_tasks,
+            test_tasks=test_tasks,
+            metadata=metadata,
+        )
+    else:
+        return BinaryExperimentData(
+            responses=responses,
+            train_abilities=train_abilities,
+            train_items=train_items,
+            full_abilities=full_abilities,
+            full_items=full_items,
+            train_tasks=train_tasks,
+            test_tasks=test_tasks,
+            metadata=metadata,
+        )
