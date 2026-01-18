@@ -271,7 +271,18 @@ class Trainer:
 
                     # Use pre-clip gradient norms (captured before zero_grad)
                     grad_norms = grad_norms_pre_clip
-                    logger.debug(f"Step {self.global_step} gradients (pre-clip): {grad_norms}")
+
+                    # Log gradients at INFO level every 100 steps (or always if debug_gradients)
+                    if self.config.debug_gradients or self.global_step % 100 == 0:
+                        logger.info(
+                            f"Step {self.global_step} gradients: "
+                            f"total={grad_norms.get('total_norm', 0):.4f}, "
+                            f"encoder={grad_norms.get('encoder_norm', 0):.4f}, "
+                            f"head={grad_norms.get('head_norm', 0):.4f}, "
+                            f"embedding={grad_norms.get('embedding_norm', 0):.4f}"
+                        )
+                    else:
+                        logger.debug(f"Step {self.global_step} gradients (pre-clip): {grad_norms}")
 
                     # Track history for plotting
                     self.history["step"].append(self.global_step)

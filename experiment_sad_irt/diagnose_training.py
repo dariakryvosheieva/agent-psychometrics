@@ -591,6 +591,7 @@ def generate_report(
     dynamics_analysis: Dict,
     output_dir: Path,
     logit_analysis: Optional[Dict] = None,
+    checkpoint: Optional[Dict] = None,
 ):
     """Generate diagnostic report."""
     lines = []
@@ -727,7 +728,9 @@ def generate_report(
         issues.append("Low β-oracle correlation: learned β doesn't match oracle ranking")
         recommendations.append("Consider longer training or different architecture")
 
-    if (psi_analysis.get("bn_running_std") or 0) > 2.0:
+    # Only flag high raw ψ variance if NOT using batchnorm (batchnorm normalizes to unit variance)
+    psi_norm_mode = checkpoint.get("config", {}).get("psi_normalization", "batchnorm")
+    if psi_norm_mode != "batchnorm" and (psi_analysis.get("bn_running_std") or 0) > 2.0:
         issues.append("High ψ variance: trajectory encoder producing large ψ values")
         recommendations.append("ψ may be dominating predictions over β")
 
@@ -884,6 +887,7 @@ def main():
         dynamics_analysis,
         output_dir,
         logit_analysis=logit_analysis,
+        checkpoint=checkpoint,
     )
 
     # Generate plots
