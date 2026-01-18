@@ -47,10 +47,18 @@ python -m experiment_a.train_evaluate --dry_run
 
 The IRT model provides ground truth difficulties (β) used as training targets. To avoid data leakage, we train **two separate IRT models**:
 
-1. **Train-only IRT**: Trained on train tasks only → provides uncontaminated ground truth for training the difficulty predictor
-2. **Full IRT**: Trained on all tasks → used for oracle baseline and final evaluation
+1. **IRT^train (Train-only IRT)**: Trained on train tasks (T1) only
+   - Provides uncontaminated ground truth for training difficulty predictors
+   - **Must be used for all actual methods** (embedding, constant, LLM judge, etc.)
+   - Agent abilities θ and task difficulties β are both on the "train scale"
 
-This ensures the difficulty predictor's training targets are not influenced by test task information. The split IRT models are cached in `chris_output/experiment_a/irt_splits/` and automatically reused when the split parameters match.
+2. **IRT^full (Full IRT)**: Trained on all tasks (T1 ∪ T2)
+   - **Used ONLY for oracle baseline** - shows theoretical best performance
+   - The oracle is NOT a valid method - it's just a reference point for comparison
+
+**Critical**: When computing AUC for any method, we use abilities from IRT^train. This ensures the abilities (θ) and predicted difficulties (β̂) are on the **same IRT scale**. The difficulty predictor is trained to predict β values on the train scale, so evaluation must also use abilities from that same scale. Using full IRT abilities would mix incompatible scales and leak test task information.
+
+The split IRT models are cached in `chris_output/experiment_a/irt_splits/` and automatically reused when the split parameters match.
 
 ```bash
 # To manually train split IRT model
@@ -207,12 +215,14 @@ Results saved to `chris_output/experiment_a/experiment_a_results.json`:
   "config": {...},
   "data_summary": {"n_agents": 130, "n_tasks_total": 500, "n_train": 400, "n_test": 100},
   "oracle": {"auc": 0.9447},
-  "embedding_predictor": {"auc_result": {"auc": 0.XX}, "difficulty_metrics": {...}},
+  "embedding_predictor": {"auc_result": {"auc": 0.XX}},
   "constant_baseline": {"auc": 0.7176},
   "agent_only_baseline": {"auc": 0.7178},
   "task_only_baseline": {"auc": 0.5000}
 }
 ```
+
+**Note**: The oracle uses full IRT (reference only). All other methods use IRT^train abilities.
 
 ## Command Line Options
 

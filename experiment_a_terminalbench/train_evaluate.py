@@ -22,10 +22,7 @@ from experiment_a_terminalbench.baselines import (
 )
 from experiment_a_terminalbench.config import TerminalBenchConfig
 from experiment_a_terminalbench.data_loader import load_terminalbench_data
-from experiment_a_terminalbench.irt_evaluation import (
-    compute_binomial_auc,
-    compute_difficulty_prediction_metrics,
-)
+from experiment_a_terminalbench.irt_evaluation import compute_binomial_auc
 
 # Reuse difficulty predictors from experiment_a
 from experiment_a.difficulty_predictor import (
@@ -86,20 +83,23 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
         },
     }
 
-    # 4. Oracle baseline (ground truth difficulties)
-    print("\n2. Computing oracle baseline (ground truth b)...")
-    oracle_predictor = GroundTruthPredictor(data.items)
+    # 4. Oracle baseline (ground truth difficulties from FULL IRT - reference only)
+    # NOTE: Oracle uses full IRT (trained on all tasks) as a reference point.
+    # This is NOT a valid method - it's just to show theoretical best performance.
+    print("\n2. Computing oracle baseline (ground truth b from full IRT)...")
+    oracle_predictor = GroundTruthPredictor(data.full_items)
     oracle_preds = oracle_predictor.predict(data.test_tasks)
     oracle_result = compute_binomial_auc(
-        oracle_preds, data.abilities, data.responses, data.test_tasks
+        oracle_preds, data.full_abilities, data.responses, data.test_tasks
     )
     print(f"   Oracle AUC: {oracle_result.get('auc', 'N/A'):.4f}")
     results["oracle"] = oracle_result
 
     # 5. Constant baseline (mean difficulty from training)
+    # Uses train_abilities to avoid data leakage
     print("\n3. Computing constant baseline (mean b from training)...")
     const_result = constant_baseline_binomial(
-        data.items, data.abilities, data.responses,
+        data.train_items, data.train_abilities, data.responses,
         data.train_tasks, data.test_tasks
     )
     print(f"   Constant AUC: {const_result.get('auc', 'N/A'):.4f}")
@@ -107,9 +107,10 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
     results["constant_baseline"] = const_result
 
     # 6. Agent-only baseline
+    # Note: This baseline uses raw success rates from training tasks, not IRT abilities
     print("\n4. Computing agent-only baseline...")
     agent_result = agent_only_baseline_binomial(
-        data.abilities, data.responses, data.train_tasks, data.test_tasks
+        data.train_abilities, data.responses, data.train_tasks, data.test_tasks
     )
     print(f"   Agent-only AUC: {agent_result.get('auc', 'N/A'):.4f}")
     results["agent_only_baseline"] = agent_result
@@ -174,21 +175,14 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
                 preds = model.predict(X_test)
                 embedding_preds = dict(zip(test_available, preds.tolist()))
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 embedding_result = compute_binomial_auc(
-                    embedding_preds, data.abilities, data.responses, data.test_tasks
+                    embedding_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"   Embedding AUC: {embedding_result.get('auc', 'N/A'):.4f}")
 
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    embedding_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
-
                 results["embedding_predictor"] = {
                     "auc_result": embedding_result,
-                    "difficulty_metrics": diff_metrics,
                     "embeddings_path": str(embeddings_path),
                     "best_alpha": float(best_alpha),
                     "n_embeddings": len(embeddings),
@@ -200,7 +194,6 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
                 # Store predictions for analysis
                 results["difficulty_predictions"] = {
                     "embedding": embedding_preds,
-                    "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
                 }
 
             except Exception as e:
@@ -285,17 +278,11 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
                 preds = ridge.predict(X_test_selected)
                 llm_judge_preds = dict(zip(test_available, preds.tolist()))
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 llm_judge_result = compute_binomial_auc(
-                    llm_judge_preds, data.abilities, data.responses, data.test_tasks
+                    llm_judge_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"   LLM Judge AUC: {llm_judge_result.get('auc', 'N/A'):.4f}")
-
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    llm_judge_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
 
                 # Feature coefficients
                 feature_coefficients = dict(zip(selected_features, ridge.coef_.tolist()))
@@ -306,7 +293,6 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
 
                 results["llm_judge_predictor"] = {
                     "auc_result": llm_judge_result,
-                    "difficulty_metrics": diff_metrics,
                     "features_path": str(llm_judge_path),
                     "best_alpha": float(best_alpha),
                     "n_tasks": len(features_df),
@@ -319,9 +305,7 @@ def run_experiment_a_terminalbench(config: TerminalBenchConfig) -> Dict[str, Any
 
                 # Store predictions for analysis
                 if "difficulty_predictions" not in results:
-                    results["difficulty_predictions"] = {
-                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
-                    }
+                    results["difficulty_predictions"] = {}
                 results["difficulty_predictions"]["llm_judge"] = llm_judge_preds
 
             except Exception as e:

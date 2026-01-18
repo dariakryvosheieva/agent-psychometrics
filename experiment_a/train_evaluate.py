@@ -24,7 +24,7 @@ from experiment_a.difficulty_predictor import (
     LunettePredictor,
     LLMJudgePredictor,
 )
-from experiment_a.irt_evaluation import compute_auc, compute_difficulty_prediction_metrics
+from experiment_a.irt_evaluation import compute_auc
 from experiment_a.baselines import agent_only_baseline, task_only_baseline
 
 
@@ -75,31 +75,35 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
         },
     }
 
-    # 4. Oracle baseline (ground truth difficulties)
-    print("\n2. Computing oracle baseline (ground truth b)...")
-    oracle_predictor = GroundTruthPredictor(data.items)
+    # 4. Oracle baseline (ground truth difficulties from FULL IRT - reference only)
+    # NOTE: Oracle uses full IRT (trained on all tasks) as a reference point.
+    # This is NOT a valid method - it's just to show theoretical best performance.
+    print("\n2. Computing oracle baseline (ground truth b from full IRT)...")
+    oracle_predictor = GroundTruthPredictor(data.full_items)
     oracle_preds = oracle_predictor.predict(data.test_tasks)
     oracle_result = compute_auc(
-        oracle_preds, data.abilities, data.responses, data.test_tasks
+        oracle_preds, data.full_abilities, data.responses, data.test_tasks
     )
     print(f"   Oracle AUC: {oracle_result.get('auc', 'N/A'):.4f}")
     results["oracle"] = oracle_result
 
     # 5. Constant baseline (mean difficulty)
+    # Uses train_abilities to avoid data leakage
     print("\n3. Computing constant baseline (mean b)...")
     const_predictor = ConstantPredictor()
     const_predictor.fit(data.train_tasks, train_b)
     const_preds = const_predictor.predict(data.test_tasks)
     const_result = compute_auc(
-        const_preds, data.abilities, data.responses, data.test_tasks
+        const_preds, data.train_abilities, data.responses, data.test_tasks
     )
     print(f"   Constant AUC: {const_result.get('auc', 'N/A'):.4f}")
     results["constant_baseline"] = const_result
 
     # 6. Agent-only baseline
+    # Note: This baseline uses raw success rates from training tasks, not IRT abilities
     print("\n4. Computing agent-only baseline...")
     agent_baseline = agent_only_baseline(
-        data.abilities, data.responses, data.train_tasks, data.test_tasks
+        data.train_abilities, data.responses, data.train_tasks, data.test_tasks
     )
     print(f"   Agent-only AUC: {agent_baseline.get('auc', 'N/A'):.4f}")
     results["agent_only_baseline"] = agent_baseline
@@ -130,21 +134,14 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
                 embedding_predictor.fit(data.train_tasks, train_b)
                 embedding_preds = embedding_predictor.predict(data.test_tasks)
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 embedding_result = compute_auc(
-                    embedding_preds, data.abilities, data.responses, data.test_tasks
+                    embedding_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"   Embedding AUC: {embedding_result.get('auc', 'N/A'):.4f}")
 
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    embedding_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
-
                 results["embedding_predictor"] = {
                     "auc_result": embedding_result,
-                    "difficulty_metrics": diff_metrics,
                     "embeddings_path": str(embeddings_path),
                     "ridge_alpha": config.ridge_alpha,
                     "n_embeddings": embedding_predictor.n_embeddings,
@@ -154,7 +151,6 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
                 # Store predictions for analysis
                 results["difficulty_predictions"] = {
                     "embedding": embedding_preds,
-                    "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
                 }
 
             except Exception as e:
@@ -185,24 +181,17 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
                 sim_predictor.fit(data.train_tasks, train_b)
                 sim_preds = sim_predictor.predict(data.test_tasks)
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 sim_result = compute_auc(
-                    sim_preds, data.abilities, data.responses, data.test_tasks
+                    sim_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"   Embedding Similarity AUC: {sim_result.get('auc', 'N/A'):.4f}")
-
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    sim_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
 
                 # Print feature coefficients for interpretability
                 sim_predictor.print_feature_coefficients()
 
                 results["embedding_similarity_predictor"] = {
                     "auc_result": sim_result,
-                    "difficulty_metrics": diff_metrics,
                     "embeddings_path": str(embeddings_path),
                     "ridge_alpha": config.embedding_similarity_ridge_alpha,
                     "n_embeddings": sim_predictor.n_embeddings,
@@ -214,9 +203,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
                 # Store predictions for analysis
                 if "difficulty_predictions" not in results:
-                    results["difficulty_predictions"] = {
-                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
-                    }
+                    results["difficulty_predictions"] = {}
                 results["difficulty_predictions"]["embedding_similarity"] = sim_preds
 
             except Exception as e:
@@ -248,30 +235,23 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
                 print(f"   Embeddings loaded: {mle_predictor.n_embeddings} tasks")
                 print(f"   Embedding dim: {mle_predictor.embedding_dim}")
 
-                # MLE fit requires abilities and responses
+                # MLE fit requires abilities and responses (using train_abilities)
                 mle_predictor.fit(
                     data.train_tasks,
                     train_b,
-                    abilities=data.abilities,
+                    abilities=data.train_abilities,
                     responses=data.responses,
                 )
                 mle_preds = mle_predictor.predict(data.test_tasks)
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 mle_result = compute_auc(
-                    mle_preds, data.abilities, data.responses, data.test_tasks
+                    mle_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"   MLE Embedding AUC: {mle_result.get('auc', 'N/A'):.4f}")
 
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    mle_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
-
                 results["mle_embedding_predictor"] = {
                     "auc_result": mle_result,
-                    "difficulty_metrics": diff_metrics,
                     "embeddings_path": str(embeddings_path),
                     "mle_lr": config.mle_lr,
                     "mle_max_iter": config.mle_max_iter,
@@ -285,9 +265,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
                 # Store predictions for analysis
                 if "difficulty_predictions" not in results:
-                    results["difficulty_predictions"] = {
-                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
-                    }
+                    results["difficulty_predictions"] = {}
                 results["difficulty_predictions"]["mle_embedding"] = mle_preds
 
             except Exception as e:
@@ -326,21 +304,14 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
                 lunette_preds = lunette_predictor.predict(data.test_tasks)
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 lunette_result = compute_auc(
-                    lunette_preds, data.abilities, data.responses, data.test_tasks
+                    lunette_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"\n   Lunette AUC: {lunette_result.get('auc', 'N/A'):.4f}")
 
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    lunette_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
-
                 results["lunette_predictor"] = {
                     "auc_result": lunette_result,
-                    "difficulty_metrics": diff_metrics,
                     "features_path": str(lunette_path),
                     "ridge_alpha": config.lunette_ridge_alpha,
                     "feature_selection": config.lunette_feature_selection,
@@ -353,9 +324,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
                 # Store predictions for analysis
                 if "difficulty_predictions" not in results:
-                    results["difficulty_predictions"] = {
-                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
-                    }
+                    results["difficulty_predictions"] = {}
                 results["difficulty_predictions"]["lunette"] = lunette_preds
 
             except Exception as e:
@@ -393,21 +362,14 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
                 llm_judge_preds = llm_judge_predictor.predict(data.test_tasks)
 
-                # IRT-based AUC
+                # IRT-based AUC (using train_abilities to avoid leakage)
                 llm_judge_result = compute_auc(
-                    llm_judge_preds, data.abilities, data.responses, data.test_tasks
+                    llm_judge_preds, data.train_abilities, data.responses, data.test_tasks
                 )
                 print(f"\n   LLM Judge AUC: {llm_judge_result.get('auc', 'N/A'):.4f}")
 
-                # Difficulty prediction metrics
-                diff_metrics = compute_difficulty_prediction_metrics(
-                    llm_judge_preds, data.items, data.test_tasks
-                )
-                print(f"   Difficulty prediction Pearson r: {diff_metrics.get('pearson_r', 'N/A'):.4f}")
-
                 results["llm_judge_predictor"] = {
                     "auc_result": llm_judge_result,
-                    "difficulty_metrics": diff_metrics,
                     "features_path": str(llm_judge_path),
                     "ridge_alpha": config.llm_judge_ridge_alpha,
                     "max_features": config.llm_judge_max_features,
@@ -419,9 +381,7 @@ def run_experiment_a(config: ExperimentAConfig) -> Dict[str, Any]:
 
                 # Store predictions for analysis
                 if "difficulty_predictions" not in results:
-                    results["difficulty_predictions"] = {
-                        "ground_truth": {t: float(data.items.loc[t, "b"]) for t in data.test_tasks},
-                    }
+                    results["difficulty_predictions"] = {}
                 results["difficulty_predictions"]["llm_judge"] = llm_judge_preds
 
             except Exception as e:

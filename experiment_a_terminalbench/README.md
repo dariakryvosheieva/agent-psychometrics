@@ -52,21 +52,22 @@ python -m experiment_a_terminalbench.train_evaluate --dry_run
 
 ## Results (2026-01-17)
 
-| Method | AUC | Δ vs Constant | Pearson r |
-|--------|-----|---------------|-----------|
-| **Oracle** (true β) | **0.9076** | +0.2049 | — |
-| **LLM Judge** (GPT-5.2) | **0.7896** | +0.0869 | 0.562 |
-| **Embedding** (Qwen3-VL-8B) | **0.7824** | +0.0797 | 0.489 |
-| Constant baseline | 0.7027 | — | — |
-| Agent-only baseline | 0.6989 | -0.0038 | — |
-| Task-only baseline | 0.5000 | -0.2027 | — |
+| Method | AUC | Δ vs Constant |
+|--------|-----|---------------|
+| **Oracle** (true β) | **0.9076** | +0.2049 |
+| **LLM Judge** (GPT-5.2) | **0.7896** | +0.0869 |
+| **Embedding** (Qwen3-VL-8B) | **0.7824** | +0.0797 |
+| Constant baseline | 0.7027 | — |
+| Agent-only baseline | 0.6989 | -0.0038 |
+| Task-only baseline | 0.5000 | -0.2027 |
+
+**Note**: Oracle uses full IRT (reference only). All other methods use IRT^train abilities.
 
 ### Key Findings
 
 1. **LLM Judge slightly outperforms Embeddings** (0.7896 vs 0.7824 AUC)
 2. Both methods provide ~8-9% improvement over the constant baseline
-3. LLM Judge has better difficulty correlation (r=0.562 vs r=0.489)
-4. Results follow similar pattern to SWE-bench, validating the approach generalizes
+3. Results follow similar pattern to SWE-bench, validating the approach generalizes
 
 ### LLM Judge Feature Coefficients
 
@@ -137,10 +138,18 @@ This properly weights agent-task pairs by trial count.
 
 The IRT model provides ground truth difficulties (β) used as training targets. To avoid data leakage, we train **two separate IRT models**:
 
-1. **Train-only IRT**: Trained on train tasks only → provides uncontaminated ground truth for training the difficulty predictor
-2. **Full IRT**: Trained on all tasks → used for oracle baseline and final evaluation
+1. **IRT^train (Train-only IRT)**: Trained on train tasks (T1) only
+   - Provides uncontaminated ground truth for training difficulty predictors
+   - **Must be used for all actual methods** (embedding, constant, LLM judge, etc.)
+   - Agent abilities θ and task difficulties β are both on the "train scale"
 
-This ensures the difficulty predictor's training targets are not influenced by test task information. The split IRT models are cached in `chris_output/experiment_a_terminalbench/irt_splits/` and automatically reused when the split parameters match.
+2. **IRT^full (Full IRT)**: Trained on all tasks (T1 ∪ T2)
+   - **Used ONLY for oracle baseline** - shows theoretical best performance
+   - The oracle is NOT a valid method - it's just a reference point for comparison
+
+**Critical**: When computing AUC for any method, we use abilities from IRT^train. This ensures the abilities (θ) and predicted difficulties (β̂) are on the **same IRT scale**. The difficulty predictor is trained to predict β values on the train scale, so evaluation must also use abilities from that same scale. Using full IRT abilities would mix incompatible scales and leak test task information.
+
+The split IRT models are cached in `chris_output/experiment_a_terminalbench/irt_splits/` and automatically reused when the split parameters match.
 
 The IRT training uses **binomial IRT** to properly model the (k successes / n trials) data format:
 
@@ -237,12 +246,10 @@ Results saved to `chris_output/experiment_a_terminalbench/experiment_a_results.j
   "oracle": {"auc": 0.9076},
   "embedding_predictor": {
     "auc_result": {"auc": 0.7824},
-    "difficulty_metrics": {"pearson_r": 0.489},
     "best_alpha": 1000.0
   },
   "llm_judge_predictor": {
     "auc_result": {"auc": 0.7896},
-    "difficulty_metrics": {"pearson_r": 0.562},
     "selected_features": ["task_complexity", "atypicality", ...],
     "feature_coefficients": {...}
   },

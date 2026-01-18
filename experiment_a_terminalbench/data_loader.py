@@ -153,42 +153,38 @@ def load_task_list_from_items(
 class TerminalBenchData:
     """Container for all loaded TerminalBench data.
 
-    Uses IRT parameters trained only on train tasks to avoid data leakage.
-    The ground truth difficulties (train_items) are not contaminated by
-    test task information.
+    To avoid data leakage, we maintain two separate IRT models:
+
+    - train_abilities, train_items: From IRT trained ONLY on train tasks (T1).
+      These must be used for all actual methods (embedding, constant, etc.)
+      to ensure no information from test tasks (T2) leaks into evaluation.
+
+    - full_abilities, full_items: From IRT trained on ALL tasks (T1 ∪ T2).
+      These are used ONLY for the oracle baseline, which serves as a
+      reference point showing theoretical best performance. The oracle
+      is not a valid method - it's just for comparison.
 
     Attributes:
-        train_abilities: Agent abilities from IRT trained on train tasks only
-        train_items: Task difficulties from IRT trained on train tasks only
-        full_abilities: Agent abilities from IRT trained on all tasks (for eval)
-        full_items: Task difficulties from IRT trained on all tasks (for oracle)
+        train_abilities: Agent abilities from IRT^train (use for all methods)
+        train_items: Task difficulties from IRT^train (use for training predictors)
+        full_abilities: Agent abilities from IRT^full (ONLY for oracle)
+        full_items: Task difficulties from IRT^full (ONLY for oracle)
         responses: Full binomial response matrix
         task_data: Task metadata (instruction, solution, etc.)
-        train_tasks: List of train task IDs
-        test_tasks: List of test task IDs
+        train_tasks: List of train task IDs (T1)
+        test_tasks: List of test task IDs (T2)
         all_agents: List of all agent IDs
     """
 
-    train_abilities: pd.DataFrame  # From train-only IRT
-    train_items: pd.DataFrame  # From train-only IRT (ground truth for training)
-    full_abilities: pd.DataFrame  # From full IRT (for evaluation)
-    full_items: pd.DataFrame  # From full IRT (for oracle baseline)
+    train_abilities: pd.DataFrame  # From IRT^train - USE FOR ALL METHODS
+    train_items: pd.DataFrame  # From IRT^train - ground truth for training predictors
+    full_abilities: pd.DataFrame  # From IRT^full - ONLY for oracle baseline
+    full_items: pd.DataFrame  # From IRT^full - ONLY for oracle baseline
     responses: Dict[str, Dict[str, Dict[str, int]]]  # agent_id -> {task_id -> {successes, trials}}
     task_data: Dict[str, Dict[str, Any]]  # task_id -> {instruction, solution, ...}
     train_tasks: List[str]
     test_tasks: List[str]
     all_agents: List[str]
-
-    # Convenience aliases for backward compatibility
-    @property
-    def abilities(self) -> pd.DataFrame:
-        """Alias for full_abilities (used in evaluation)."""
-        return self.full_abilities
-
-    @property
-    def items(self) -> pd.DataFrame:
-        """Alias for full_items (used in oracle baseline)."""
-        return self.full_items
 
     @property
     def n_agents(self) -> int:
@@ -217,17 +213,20 @@ def load_terminalbench_data(
     irt_cache_dir: Optional[Path] = None,
     force_retrain: bool = False,
 ) -> TerminalBenchData:
-    """Load all TerminalBench data with IRT trained only on train tasks (no data leakage).
+    """Load all TerminalBench data with separate IRT models for methods vs oracle.
 
     This function:
-    1. Loads full IRT parameters (for evaluation and oracle)
+    1. Loads full IRT parameters (ONLY for oracle baseline comparison)
     2. Splits tasks into train/test
     3. Trains (or loads cached) binomial IRT model on train tasks only
-    4. Returns data with separate IRT parameters for training and evaluation
+    4. Returns data with both IRT models clearly separated
+
+    IMPORTANT: All actual methods must use train_abilities and train_items.
+    The full_abilities and full_items are ONLY for the oracle baseline.
 
     Args:
-        abilities_path: Path to full IRT abilities.csv (for evaluation)
-        items_path: Path to full IRT items.csv (for oracle)
+        abilities_path: Path to full IRT abilities.csv (for oracle only)
+        items_path: Path to full IRT items.csv (for oracle only)
         responses_path: Path to binomial response matrix JSONL
         repo_path: Path to cloned terminal-bench repo
         test_fraction: Fraction of tasks for test set
@@ -240,7 +239,7 @@ def load_terminalbench_data(
     """
     from experiment_a.train_irt_split import get_or_train_split_irt
 
-    # Load full IRT parameters (for evaluation and oracle)
+    # Load full IRT parameters (ONLY for oracle baseline - not for actual methods!)
     full_abilities = load_abilities(abilities_path)
     full_items = load_items(items_path)
     responses = load_binomial_responses(responses_path)
