@@ -46,6 +46,9 @@ class ExperimentAConfig:
     )
     llm_judge_max_features: Optional[int] = None  # None = use all features
 
+    # Task filtering
+    exclude_unsolved: bool = False  # Exclude tasks no agent solved
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""
         d = asdict(self)

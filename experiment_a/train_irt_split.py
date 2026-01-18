@@ -50,6 +50,7 @@ def get_split_cache_dir(
     is_binomial: bool = False,
     fold_idx: Optional[int] = None,
     k_folds: Optional[int] = None,
+    exclude_unsolved: bool = False,
 ) -> Path:
     """Get the cache directory for a specific split configuration.
 
@@ -61,11 +62,14 @@ def get_split_cache_dir(
         is_binomial: Whether this is binomial (TerminalBench) or Bernoulli (SWE-bench)
         fold_idx: For k-fold CV, the fold index (0 to k-1)
         k_folds: For k-fold CV, the total number of folds
+        exclude_unsolved: Whether unsolved tasks were filtered out
 
     Returns:
         Path to cache directory for this configuration
     """
     suffix = "_binomial" if is_binomial else ""
+    if exclude_unsolved:
+        suffix += "_filtered"
     if fold_idx is not None and k_folds is not None:
         # k-fold cross-validation naming
         split_name = f"seed{split_seed}_fold{fold_idx}of{k_folds}_{model_type}{suffix}"
@@ -201,6 +205,7 @@ def get_or_train_split_irt(
     train_tasks: Optional[List[str]] = None,
     fold_idx: Optional[int] = None,
     k_folds: Optional[int] = None,
+    exclude_unsolved: bool = False,
 ) -> Path:
     """Get cached IRT model or train a new one for the specified split.
 
@@ -222,13 +227,14 @@ def get_or_train_split_irt(
         train_tasks: For k-fold CV, the explicit list of train task IDs
         fold_idx: For k-fold CV, the fold index (0 to k-1)
         k_folds: For k-fold CV, the total number of folds
+        exclude_unsolved: If True, unsolved tasks were filtered out (affects cache key)
 
     Returns:
         Path to IRT output directory (contains abilities.csv, items.csv, split_info.json)
     """
     cache_dir = get_split_cache_dir(
         output_base, test_fraction, split_seed, model_type, is_binomial,
-        fold_idx=fold_idx, k_folds=k_folds
+        fold_idx=fold_idx, k_folds=k_folds, exclude_unsolved=exclude_unsolved
     )
 
     # Check for cached model

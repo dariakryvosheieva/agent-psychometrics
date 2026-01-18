@@ -15,6 +15,7 @@ from experiment_a_common.dataset import (
     load_dataset,
     load_dataset_for_fold,
     stable_split_tasks,
+    filter_unsolved_tasks,
 )
 from experiment_a_common.evaluator import (
     compute_auc,
@@ -53,6 +54,7 @@ __all__ = [
     "load_dataset",
     "load_dataset_for_fold",
     "stable_split_tasks",
+    "filter_unsolved_tasks",
     # Evaluator
     "compute_auc",
     "compute_irt_probability",

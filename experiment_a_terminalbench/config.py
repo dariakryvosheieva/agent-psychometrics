@@ -44,6 +44,9 @@ class TerminalBenchConfig:
     llm_judge_ridge_alphas: tuple = (0.01, 0.1, 1.0, 10.0, 100.0, 1000.0)
     llm_judge_max_features: Optional[int] = None  # None = use all features
 
+    # Task filtering
+    exclude_unsolved: bool = False  # Exclude tasks no agent solved
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""
         d = asdict(self)

@@ -21,6 +21,44 @@ import pandas as pd
 ResponseT = TypeVar("ResponseT")
 
 
+def filter_unsolved_tasks(
+    task_ids: List[str],
+    responses: Dict[str, Dict[str, Any]],
+    is_binomial: bool = False,
+) -> Tuple[List[str], int]:
+    """Filter out tasks where no agent achieved any success.
+
+    Args:
+        task_ids: List of all task IDs to filter
+        responses: Response matrix {agent_id: {task_id: response}}
+        is_binomial: If True, responses are {successes: k, trials: n}
+                     If False, responses are binary 0/1
+
+    Returns:
+        Tuple of (filtered_task_ids, n_excluded)
+    """
+    solved_tasks = []
+    for task_id in task_ids:
+        task_solved = False
+        for agent_responses in responses.values():
+            if task_id not in agent_responses:
+                continue
+            response = agent_responses[task_id]
+            if is_binomial:
+                if response.get("successes", 0) > 0:
+                    task_solved = True
+                    break
+            else:
+                if response == 1:
+                    task_solved = True
+                    break
+        if task_solved:
+            solved_tasks.append(task_id)
+
+    n_excluded = len(task_ids) - len(solved_tasks)
+    return solved_tasks, n_excluded
+
+
 def stable_split_tasks(
     task_ids: List[str],
     test_fraction: float,
@@ -207,6 +245,7 @@ def load_dataset(
     irt_cache_dir: Optional[Path] = None,
     force_retrain: bool = False,
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
+    exclude_unsolved: bool = False,
 ) -> ExperimentData:
     """Load a dataset with proper train/test split and IRT models.
 
@@ -223,6 +262,7 @@ def load_dataset(
         irt_cache_dir: Directory for cached split IRT models
         force_retrain: If True, retrain IRT even if cached
         metadata_loader: Optional function to load task metadata (task_ids -> metadata dict)
+        exclude_unsolved: If True, filter out tasks no agent solved before splitting
 
     Returns:
         BinaryExperimentData or BinomialExperimentData
@@ -239,8 +279,16 @@ def load_dataset(
     else:
         responses = _load_binary_responses(responses_path)
 
-    # Get all task IDs and create train/test split
+    # Get all task IDs
     all_task_ids = list(full_items.index)
+
+    # Optionally filter unsolved tasks before splitting
+    n_excluded = 0
+    if exclude_unsolved:
+        all_task_ids, n_excluded = filter_unsolved_tasks(all_task_ids, responses, is_binomial)
+        print(f"   Excluded {n_excluded} unsolved tasks ({len(all_task_ids)} remaining)")
+
+    # Create train/test split
     train_tasks, test_tasks = stable_split_tasks(all_task_ids, test_fraction, split_seed)
 
     # Get or train split IRT model
@@ -255,6 +303,7 @@ def load_dataset(
         model_type="1pl",
         force_retrain=force_retrain,
         is_binomial=is_binomial,
+        exclude_unsolved=exclude_unsolved,
     )
 
     # Load train-only IRT parameters
@@ -304,6 +353,7 @@ def load_dataset_for_fold(
     irt_cache_dir: Optional[Path] = None,
     force_retrain: bool = False,
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
+    exclude_unsolved: bool = False,
 ) -> ExperimentData:
     """Load a dataset for a specific cross-validation fold.
 
@@ -323,6 +373,7 @@ def load_dataset_for_fold(
         irt_cache_dir: Directory for cached split IRT models
         force_retrain: If True, retrain IRT even if cached
         metadata_loader: Optional function to load task metadata
+        exclude_unsolved: If True, unsolved tasks were filtered (affects cache key)
 
     Returns:
         BinaryExperimentData or BinomialExperimentData
@@ -353,6 +404,7 @@ def load_dataset_for_fold(
         train_tasks=train_tasks,
         fold_idx=fold_idx,
         k_folds=k_folds,
+        exclude_unsolved=exclude_unsolved,
     )
 
     # Load train-only IRT parameters

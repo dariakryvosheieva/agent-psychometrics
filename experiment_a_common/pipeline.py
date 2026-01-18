@@ -33,6 +33,11 @@ from experiment_a_common import (
     PredictorConfig,
     agent_only_baseline,
     convert_numpy,
+    filter_unsolved_tasks,
+)
+from experiment_a_common.dataset import (
+    _load_binary_responses,
+    _load_binomial_responses,
 )
 from experiment_a_common.cross_validation import (
     k_fold_split_tasks,
@@ -166,6 +171,7 @@ def run_single_holdout(
         is_binomial=spec.is_binomial,
         irt_cache_dir=spec.irt_cache_dir,
         metadata_loader=metadata_loader,
+        exclude_unsolved=config.exclude_unsolved,
     )
     print(f"   Agents: {data.n_agents}")
     print(f"   Tasks: {data.n_tasks}")
@@ -279,6 +285,18 @@ def run_cross_validation(
     full_items = pd.read_csv(items_path, index_col=0)
     all_task_ids = list(full_items.index)
 
+    # Optionally filter unsolved tasks before generating folds
+    n_excluded = 0
+    if config.exclude_unsolved:
+        if spec.is_binomial:
+            responses = _load_binomial_responses(responses_path)
+        else:
+            responses = _load_binary_responses(responses_path)
+        all_task_ids, n_excluded = filter_unsolved_tasks(
+            all_task_ids, responses, spec.is_binomial
+        )
+        print(f"\nExcluded {n_excluded} unsolved tasks ({len(all_task_ids)} remaining)")
+
     print(f"\nTotal tasks: {len(all_task_ids)}")
     print(f"Tasks per fold (test): ~{len(all_task_ids) // k}")
 
@@ -299,6 +317,7 @@ def run_cross_validation(
             is_binomial=spec.is_binomial,
             irt_cache_dir=spec.irt_cache_dir,
             metadata_loader=metadata_loader,
+            exclude_unsolved=config.exclude_unsolved,
         )
 
     # Build predictor configs
@@ -457,6 +476,11 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         action="store_true",
         help="Show configuration without running",
     )
+    parser.add_argument(
+        "--exclude_unsolved",
+        action="store_true",
+        help="Exclude tasks that no agent has solved from both train and test sets",
+    )
     return parser
 
 
@@ -488,6 +512,7 @@ def run_experiment_main(
             Path(args.llm_judge_features_path) if args.llm_judge_features_path else None
         ),
         llm_judge_max_features=args.llm_judge_max_features,
+        exclude_unsolved=args.exclude_unsolved,
     )
     if args.items_path:
         config_kwargs["items_path"] = Path(args.items_path)
