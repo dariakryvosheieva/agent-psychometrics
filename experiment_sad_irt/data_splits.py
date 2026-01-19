@@ -204,7 +204,7 @@ def get_pre_frontier_agents(
 if __name__ == "__main__":
     # Test the splitting logic
     responses_path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
-    trajectories_dir = Path("trajectory_data/unified_trajs")
+    trajectories_dir = Path("chris_output/trajectory_summaries_api")
 
     # Get all agents
     all_agents = get_all_agents_from_responses(responses_path)
