@@ -133,6 +133,7 @@ python -m experiment_sad_irt.train_evaluate \
 | `train.py` | Trainer class with gradient accumulation, scheduling |
 | `evaluate.py` | Metrics computation (Spearman ρ, accuracy, etc.) |
 | `train_evaluate.py` | Main entry point |
+| `compare_methods.py` | Compare all methods (SAD-IRT, baseline IRT, Embedding, LLM Judge) |
 
 ## Key Configuration
 
@@ -263,3 +264,35 @@ Plot loss curves from SLURM logs:
 ```bash
 python -m experiment_sad_irt.plot_training_logs logs/sad_irt_JOBID.out
 ```
+
+### Compare All Methods
+
+Compare SAD-IRT runs against baselines (IRT, Embedding+Ridge, LLM Judge):
+```bash
+python -m experiment_sad_irt.compare_methods
+python -m experiment_sad_irt.compare_methods --output_csv chris_output/method_comparison.csv
+```
+
+## Method Comparison Results
+
+We compared multiple approaches for predicting frontier task difficulty:
+
+| Method | Spearman ρ | p-value | n |
+|--------|------------|---------|---|
+| **SAD-IRT (lora_r64)** | **0.3513** | 0.0450 | 33 |
+| SAD-IRT (freeze_encoder) | 0.3366 | 0.0690 | 33 |
+| Baseline IRT (pre-frontier only) | 0.3336 | 0.0354 | 40 |
+| SAD-IRT (psi_batchnorm) | 0.3148 | 0.1176 | 33 |
+| SAD-IRT (full_20260117) | 0.3145 | 0.0747 | 33 |
+| LLM Judge + Lasso/Ridge | -0.0921 | 0.5718 | 40 |
+| Embedding + Ridge | -0.0968 | 0.5523 | 40 |
+
+### Key Findings
+
+1. **Frontier tasks**: 40 tasks with ≤10% pre-frontier pass rate and >10% post-frontier pass rate
+
+2. **SAD-IRT shows marginal improvement**: Best SAD-IRT run (lora_r64) achieves ρ=0.35 vs baseline ρ=0.33 (~5% relative improvement), though this is within the baseline variance range
+
+3. **Static feature predictors fail on frontier tasks**: Both Embedding+Ridge (train ρ=0.74) and LLM Judge (train ρ=0.65) learn well on non-frontier tasks but have **negative** correlation on frontier tasks. This suggests frontier tasks have fundamentally different characteristics that static features cannot capture.
+
+4. **Trajectory information may help**: The slight improvement of SAD-IRT over baseline suggests that trajectory-based features may capture information about frontier task difficulty that static features miss
