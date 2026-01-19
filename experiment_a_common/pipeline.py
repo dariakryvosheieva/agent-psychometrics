@@ -210,7 +210,7 @@ def run_single_holdout(
         if isinstance(data, BinomialExperimentData):
             binom_result = compute_binomial_metrics(data, oracle_preds, use_full_abilities=True)
             oracle_result["binomial_metrics"] = binom_result.to_dict()
-            print(f"   Oracle MAE: {binom_result.mae:.4f}, MSE: {binom_result.pass5_mse:.4f}")
+            print(f"   Oracle Pass Rate MSE: {binom_result.pass5_mse:.4f}")
 
     results["oracle"] = oracle_result
 
@@ -229,7 +229,7 @@ def run_single_holdout(
     print(f"   Agent-only AUC: {agent_result.get('auc', 'N/A'):.4f}")
     if compute_binomial and "binomial_metrics" in agent_result:
         bm = agent_result["binomial_metrics"]
-        print(f"   Agent-only MAE: {bm['mae']:.4f}, MSE: {bm['pass5_mse']:.4f}")
+        print(f"   Agent-only Pass Rate MSE: {bm['pass5_mse']:.4f}")
     results["agent_only_baseline"] = agent_result
 
     # 6. Print summary
@@ -248,8 +248,8 @@ def run_single_holdout(
     ]
 
     if compute_binomial:
-        print(f"\n{'Method':<25} {'AUC':>10} {'MAE':>10} {'MSE':>10}")
-        print("-" * 60)
+        print(f"\n{'Method':<25} {'AUC':>10} {'Pass Rate MSE':>14}")
+        print("-" * 52)
 
         for name, key in display_order:
             result = results.get(key, {})
@@ -259,21 +259,19 @@ def run_single_holdout(
                 auc = result.get("auc")
 
             bm = result.get("binomial_metrics", {})
-            mae = bm.get("mae")
             mse = bm.get("pass5_mse")
 
             if auc is not None:
-                mae_str = f"{mae:.4f}" if mae is not None else "N/A"
                 mse_str = f"{mse:.4f}" if mse is not None else "N/A"
-                print(f"{name:<25} {auc:>10.4f} {mae_str:>10} {mse_str:>10}")
+                print(f"{name:<25} {auc:>10.4f} {mse_str:>14}")
             elif "error" in result:
-                print(f"{name:<25} {'ERROR':>10} {'N/A':>10} {'N/A':>10}")
+                print(f"{name:<25} {'ERROR':>10} {'N/A':>14}")
             elif "skipped" in result:
                 continue
             elif key not in results:
                 continue
             else:
-                print(f"{name:<25} {'N/A':>10} {'N/A':>10} {'N/A':>10}")
+                print(f"{name:<25} {'N/A':>10} {'N/A':>14}")
     else:
         print(f"\n{'Method':<30} {'AUC':>10}")
         print("-" * 42)
@@ -437,18 +435,17 @@ def run_cross_validation(
     ]
 
     if compute_binomial:
-        print(f"\n{'Method':<25} {'Mean AUC':>10} {'Std':>8} {'Mean MAE':>10} {'MSE':>10}")
-        print("-" * 70)
+        print(f"\n{'Method':<25} {'Mean AUC':>10} {'Std':>8} {'Pass Rate MSE':>14}")
+        print("-" * 62)
 
         for name, key in display_order:
             if key in cv_results:
                 result = cv_results[key]
                 if result.mean_auc is not None:
-                    mae_str = f"{result.mean_mae:.4f}" if result.mean_mae is not None else "N/A"
                     mse_str = f"{result.mean_pass5_mse:.4f}" if result.mean_pass5_mse is not None else "N/A"
-                    print(f"{name:<25} {result.mean_auc:>10.4f} {result.std_auc:>8.4f} {mae_str:>10} {mse_str:>10}")
+                    print(f"{name:<25} {result.mean_auc:>10.4f} {result.std_auc:>8.4f} {mse_str:>14}")
                 else:
-                    print(f"{name:<25} {'N/A':>10} {'N/A':>8} {'N/A':>10} {'N/A':>10}")
+                    print(f"{name:<25} {'N/A':>10} {'N/A':>8} {'N/A':>14}")
     else:
         print(f"\n{'Method':<30} {'Mean AUC':>10} {'Std':>8}")
         print("-" * 50)

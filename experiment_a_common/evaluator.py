@@ -266,8 +266,7 @@ def run_evaluation_pipeline(
                     )
                     result_dict["binomial_metrics"] = binom_result.to_dict()
                     if verbose:
-                        print(f"   {config.display_name} MAE: {binom_result.mae:.4f}, "
-                              f"MSE: {binom_result.pass5_mse:.4f}")
+                        print(f"   {config.display_name} Pass Rate MSE: {binom_result.pass5_mse:.4f}")
 
             results[config.name] = result_dict
 
