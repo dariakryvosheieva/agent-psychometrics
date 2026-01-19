@@ -6,6 +6,7 @@ This module provides:
 - Common AUC computation with proper IRT formulas
 - Generic baselines that work with any dataset type
 - Cross-validation utilities for k-fold CV
+- Binomial metrics for pass rate prediction evaluation
 """
 
 from experiment_a_common.dataset import (
@@ -45,6 +46,10 @@ from experiment_a_common.pipeline import (
     create_main_parser,
     run_experiment_main,
 )
+from experiment_a_common.binomial_metrics import (
+    BinomialMetricsResult,
+    compute_binomial_metrics,
+)
 
 __all__ = [
     # Dataset
@@ -79,4 +84,7 @@ __all__ = [
     "run_cross_validation",
     "create_main_parser",
     "run_experiment_main",
+    # Binomial metrics
+    "BinomialMetricsResult",
+    "compute_binomial_metrics",
 ]

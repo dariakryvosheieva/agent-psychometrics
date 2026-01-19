@@ -35,6 +35,18 @@ class CrossValidationResult:
     fold_aucs: List[Optional[float]]
     k: int
 
+    # Optional binomial metrics (only for BinomialExperimentData)
+    mean_mae: Optional[float] = None
+    std_mae: Optional[float] = None
+    fold_maes: Optional[List[Optional[float]]] = None
+
+    mean_pass5_accuracy: Optional[float] = None
+    std_pass5_accuracy: Optional[float] = None
+    fold_pass5_accuracies: Optional[List[Optional[float]]] = None
+
+    # Aggregated confusion matrix across all folds (5-trial responses only)
+    pass5_confusion_matrix: Optional[List[List[int]]] = None
+
 
 def k_fold_split_tasks(
     task_ids: List[str],
@@ -94,6 +106,7 @@ def run_cv_for_predictor(
     folds: List[Tuple[List[str], List[str]]],
     load_fold_data: Callable[[List[str], List[str], int], ExperimentData],
     verbose: bool = True,
+    compute_binomial: bool = False,
 ) -> CrossValidationResult:
     """Run cross-validation for a single predictor.
 
@@ -112,6 +125,7 @@ def run_cv_for_predictor(
                         - test_tasks: The held-out test task IDs for this fold
                         - responses: Full response matrix (agent -> task -> outcome)
         verbose: Print per-fold AUC results
+        compute_binomial: If True and data is binomial, compute MAE/accuracy metrics
 
     Returns:
         CrossValidationResult with mean/std AUC across folds
@@ -135,6 +149,10 @@ def run_cv_for_predictor(
     predictor = predictor_config.predictor_class(**predictor_config.kwargs)
 
     fold_aucs: List[Optional[float]] = []
+    fold_maes: List[Optional[float]] = []
+    fold_pass5_accuracies: List[Optional[float]] = []
+    # Aggregate confusion matrix across folds
+    total_confusion: Optional[List[List[int]]] = None
 
     for fold_idx, (train_tasks, test_tasks) in enumerate(folds):
         # Load fold-specific data:
@@ -163,6 +181,29 @@ def run_cv_for_predictor(
         auc = auc_result.get("auc")
         fold_aucs.append(auc)
 
+        # Optionally compute binomial metrics
+        if compute_binomial:
+            from experiment_a_common.binomial_metrics import compute_binomial_metrics
+            from experiment_a_common.dataset import BinomialExperimentData
+
+            if isinstance(data, BinomialExperimentData):
+                binom_result = compute_binomial_metrics(
+                    data, predictions, use_full_abilities=predictor_config.use_full_abilities
+                )
+                fold_maes.append(binom_result.mae if not np.isnan(binom_result.mae) else None)
+                fold_pass5_accuracies.append(
+                    binom_result.pass5_accuracy
+                    if not np.isnan(binom_result.pass5_accuracy)
+                    else None
+                )
+
+                # Aggregate confusion matrix
+                if total_confusion is None:
+                    total_confusion = [[0] * 6 for _ in range(6)]
+                for i in range(6):
+                    for j in range(6):
+                        total_confusion[i][j] += binom_result.pass5_confusion_matrix[i][j]
+
         if verbose:
             if auc is not None:
                 print(f"      Fold {fold_idx + 1}: AUC = {auc:.4f}")
@@ -171,11 +212,21 @@ def run_cv_for_predictor(
 
     # Aggregate results across folds
     valid_aucs = [a for a in fold_aucs if a is not None]
+    valid_maes = [m for m in fold_maes if m is not None]
+    valid_accs = [a for a in fold_pass5_accuracies if a is not None]
+
     return CrossValidationResult(
         mean_auc=float(np.mean(valid_aucs)) if valid_aucs else None,
         std_auc=float(np.std(valid_aucs)) if valid_aucs else None,
         fold_aucs=fold_aucs,
         k=len(folds),
+        mean_mae=float(np.mean(valid_maes)) if valid_maes else None,
+        std_mae=float(np.std(valid_maes)) if valid_maes else None,
+        fold_maes=fold_maes if compute_binomial else None,
+        mean_pass5_accuracy=float(np.mean(valid_accs)) if valid_accs else None,
+        std_pass5_accuracy=float(np.std(valid_accs)) if valid_accs else None,
+        fold_pass5_accuracies=fold_pass5_accuracies if compute_binomial else None,
+        pass5_confusion_matrix=total_confusion,
     )
 
 
@@ -184,6 +235,7 @@ def run_cv_for_baseline(
     folds: List[Tuple[List[str], List[str]]],
     load_fold_data: Callable[[List[str], List[str], int], ExperimentData],
     verbose: bool = True,
+    compute_binomial: bool = False,
 ) -> CrossValidationResult:
     """Run cross-validation for a baseline method (like agent-only).
 
@@ -192,17 +244,41 @@ def run_cv_for_baseline(
         folds: List of (train_tasks, test_tasks) tuples
         load_fold_data: Function that loads ExperimentData for a specific fold
         verbose: Print per-fold AUC results
+        compute_binomial: If True and data is binomial, compute MAE/accuracy metrics
 
     Returns:
         CrossValidationResult with mean/std AUC across folds
     """
     fold_aucs: List[Optional[float]] = []
+    fold_maes: List[Optional[float]] = []
+    fold_pass5_accuracies: List[Optional[float]] = []
+    total_confusion: Optional[List[List[int]]] = None
 
     for fold_idx, (train_tasks, test_tasks) in enumerate(folds):
         data = load_fold_data(train_tasks, test_tasks, fold_idx)
         result = baseline_fn(data)
         auc = result.get("auc")
         fold_aucs.append(auc)
+
+        # Optionally compute binomial metrics for baseline
+        if compute_binomial:
+            binom_result = result.get("binomial_metrics")
+            if binom_result is not None:
+                fold_maes.append(
+                    binom_result["mae"] if not np.isnan(binom_result["mae"]) else None
+                )
+                fold_pass5_accuracies.append(
+                    binom_result["pass5_accuracy"]
+                    if not np.isnan(binom_result["pass5_accuracy"])
+                    else None
+                )
+
+                # Aggregate confusion matrix
+                if total_confusion is None:
+                    total_confusion = [[0] * 6 for _ in range(6)]
+                for i in range(6):
+                    for j in range(6):
+                        total_confusion[i][j] += binom_result["pass5_confusion_matrix"][i][j]
 
         if verbose:
             if auc is not None:
@@ -211,9 +287,19 @@ def run_cv_for_baseline(
                 print(f"      Fold {fold_idx + 1}: AUC = N/A")
 
     valid_aucs = [a for a in fold_aucs if a is not None]
+    valid_maes = [m for m in fold_maes if m is not None]
+    valid_accs = [a for a in fold_pass5_accuracies if a is not None]
+
     return CrossValidationResult(
         mean_auc=float(np.mean(valid_aucs)) if valid_aucs else None,
         std_auc=float(np.std(valid_aucs)) if valid_aucs else None,
         fold_aucs=fold_aucs,
         k=len(folds),
+        mean_mae=float(np.mean(valid_maes)) if valid_maes else None,
+        std_mae=float(np.std(valid_maes)) if valid_maes else None,
+        fold_maes=fold_maes if compute_binomial else None,
+        mean_pass5_accuracy=float(np.mean(valid_accs)) if valid_accs else None,
+        std_pass5_accuracy=float(np.std(valid_accs)) if valid_accs else None,
+        fold_pass5_accuracies=fold_pass5_accuracies if compute_binomial else None,
+        pass5_confusion_matrix=total_confusion,
     )

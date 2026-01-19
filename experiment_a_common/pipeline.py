@@ -193,25 +193,43 @@ def run_single_holdout(
         },
     }
 
+    # Determine if we should compute binomial metrics
+    compute_binomial = spec.is_binomial
+
     # 3. Oracle baseline (handled specially - needs full_items)
     print("\n2. Computing oracle baseline (ground truth b from full IRT)...")
     oracle_predictor = GroundTruthPredictor(data.full_items)
     oracle_preds = oracle_predictor.predict(data.test_tasks)
     oracle_result = compute_auc(data, oracle_preds, use_full_abilities=True)
     print(f"   Oracle AUC: {oracle_result.get('auc', 'N/A'):.4f}")
+
+    # Add binomial metrics to oracle if applicable
+    if compute_binomial:
+        from experiment_a_common.binomial_metrics import compute_binomial_metrics
+        from experiment_a_common.dataset import BinomialExperimentData
+        if isinstance(data, BinomialExperimentData):
+            binom_result = compute_binomial_metrics(data, oracle_preds, use_full_abilities=True)
+            oracle_result["binomial_metrics"] = binom_result.to_dict()
+            print(f"   Oracle MAE: {binom_result.mae:.4f}, Accuracy: {binom_result.pass5_accuracy:.4f}")
+
     results["oracle"] = oracle_result
 
     # 4. Build predictor configs and run evaluation pipeline
     predictor_configs = build_predictor_configs(
         config, root, llm_judge_features=spec.llm_judge_features
     )
-    pipeline_results = run_evaluation_pipeline(data, predictor_configs, verbose=True)
+    pipeline_results = run_evaluation_pipeline(
+        data, predictor_configs, verbose=True, compute_binomial=compute_binomial
+    )
     results.update(pipeline_results)
 
     # 5. Agent-only baseline (uses common implementation)
     print("\nComputing agent-only baseline...")
-    agent_result = agent_only_baseline(data)
+    agent_result = agent_only_baseline(data, compute_binomial=compute_binomial)
     print(f"   Agent-only AUC: {agent_result.get('auc', 'N/A'):.4f}")
+    if compute_binomial and "binomial_metrics" in agent_result:
+        bm = agent_result["binomial_metrics"]
+        print(f"   Agent-only MAE: {bm['mae']:.4f}, Accuracy: {bm['pass5_accuracy']:.4f}")
     results["agent_only_baseline"] = agent_result
 
     # 6. Print summary
@@ -219,8 +237,6 @@ def run_single_holdout(
     print("SUMMARY")
     print("=" * 60)
     print(f"\nTest set: {data.n_test_tasks} tasks")
-    print(f"\n{'Method':<30} {'AUC':>10}")
-    print("-" * 42)
 
     # Define display order
     display_order = [
@@ -231,24 +247,54 @@ def run_single_holdout(
         ("Agent-only", "agent_only_baseline"),
     ]
 
-    for name, key in display_order:
-        result = results.get(key, {})
-        # Handle nested auc_result structure
-        if "auc_result" in result:
-            auc = result["auc_result"].get("auc")
-        else:
-            auc = result.get("auc")
+    if compute_binomial:
+        print(f"\n{'Method':<25} {'AUC':>10} {'MAE':>10} {'Accuracy':>10}")
+        print("-" * 60)
 
-        if auc is not None:
-            print(f"{name:<30} {auc:>10.4f}")
-        elif "error" in result:
-            print(f"{name:<30} {'ERROR':>10}")
-        elif "skipped" in result:
-            continue
-        elif key not in results:
-            continue
-        else:
-            print(f"{name:<30} {'N/A':>10}")
+        for name, key in display_order:
+            result = results.get(key, {})
+            if "auc_result" in result:
+                auc = result["auc_result"].get("auc")
+            else:
+                auc = result.get("auc")
+
+            bm = result.get("binomial_metrics", {})
+            mae = bm.get("mae")
+            acc = bm.get("pass5_accuracy")
+
+            if auc is not None:
+                mae_str = f"{mae:.4f}" if mae is not None else "N/A"
+                acc_str = f"{acc:.4f}" if acc is not None else "N/A"
+                print(f"{name:<25} {auc:>10.4f} {mae_str:>10} {acc_str:>10}")
+            elif "error" in result:
+                print(f"{name:<25} {'ERROR':>10} {'N/A':>10} {'N/A':>10}")
+            elif "skipped" in result:
+                continue
+            elif key not in results:
+                continue
+            else:
+                print(f"{name:<25} {'N/A':>10} {'N/A':>10} {'N/A':>10}")
+    else:
+        print(f"\n{'Method':<30} {'AUC':>10}")
+        print("-" * 42)
+
+        for name, key in display_order:
+            result = results.get(key, {})
+            if "auc_result" in result:
+                auc = result["auc_result"].get("auc")
+            else:
+                auc = result.get("auc")
+
+            if auc is not None:
+                print(f"{name:<30} {auc:>10.4f}")
+            elif "error" in result:
+                print(f"{name:<30} {'ERROR':>10}")
+            elif "skipped" in result:
+                continue
+            elif key not in results:
+                continue
+            else:
+                print(f"{name:<30} {'N/A':>10}")
 
     return results
 
@@ -337,10 +383,13 @@ def run_cross_validation(
         use_full_abilities=True,
     )
 
+    # Determine if we should compute binomial metrics
+    compute_binomial = spec.is_binomial
+
     # Run CV for oracle
     print("\n1. Oracle (ground truth b from full IRT):")
     cv_results["oracle"] = run_cv_for_predictor(
-        oracle_config, folds, load_fold_data, verbose=True
+        oracle_config, folds, load_fold_data, verbose=True, compute_binomial=compute_binomial
     )
     print(
         f"   Mean AUC: {cv_results['oracle'].mean_auc:.4f} ± {cv_results['oracle'].std_auc:.4f}"
@@ -349,17 +398,23 @@ def run_cross_validation(
     # Run CV for each predictor
     for i, pc in enumerate(predictor_configs, 2):
         print(f"\n{i}. {pc.display_name}:")
-        cv_results[pc.name] = run_cv_for_predictor(pc, folds, load_fold_data, verbose=True)
+        cv_results[pc.name] = run_cv_for_predictor(
+            pc, folds, load_fold_data, verbose=True, compute_binomial=compute_binomial
+        )
         result = cv_results[pc.name]
         if result.mean_auc is not None:
             print(f"   Mean AUC: {result.mean_auc:.4f} ± {result.std_auc:.4f}")
         else:
             print("   Mean AUC: N/A")
 
-    # Run CV for agent-only baseline
+    # Run CV for agent-only baseline with binomial support
     print(f"\n{len(predictor_configs) + 2}. Agent-only baseline:")
+
+    def agent_only_with_binomial(data):
+        return agent_only_baseline(data, compute_binomial=compute_binomial)
+
     cv_results["agent_only_baseline"] = run_cv_for_baseline(
-        agent_only_baseline, folds, load_fold_data, verbose=True
+        agent_only_with_binomial, folds, load_fold_data, verbose=True, compute_binomial=compute_binomial
     )
     agent_result = cv_results["agent_only_baseline"]
     if agent_result.mean_auc is not None:
@@ -371,8 +426,6 @@ def run_cross_validation(
     print("\n" + "=" * 60)
     print(f"SUMMARY ({k}-FOLD CROSS-VALIDATION)")
     print("=" * 60)
-    print(f"\n{'Method':<30} {'Mean AUC':>10} {'Std':>8}")
-    print("-" * 50)
 
     # Define display order
     display_order = [
@@ -383,13 +436,30 @@ def run_cross_validation(
         ("Agent-only", "agent_only_baseline"),
     ]
 
-    for name, key in display_order:
-        if key in cv_results:
-            result = cv_results[key]
-            if result.mean_auc is not None:
-                print(f"{name:<30} {result.mean_auc:>10.4f} {result.std_auc:>8.4f}")
-            else:
-                print(f"{name:<30} {'N/A':>10} {'N/A':>8}")
+    if compute_binomial:
+        print(f"\n{'Method':<25} {'Mean AUC':>10} {'Std':>8} {'Mean MAE':>10} {'Accuracy':>10}")
+        print("-" * 70)
+
+        for name, key in display_order:
+            if key in cv_results:
+                result = cv_results[key]
+                if result.mean_auc is not None:
+                    mae_str = f"{result.mean_mae:.4f}" if result.mean_mae is not None else "N/A"
+                    acc_str = f"{result.mean_pass5_accuracy:.4f}" if result.mean_pass5_accuracy is not None else "N/A"
+                    print(f"{name:<25} {result.mean_auc:>10.4f} {result.std_auc:>8.4f} {mae_str:>10} {acc_str:>10}")
+                else:
+                    print(f"{name:<25} {'N/A':>10} {'N/A':>8} {'N/A':>10} {'N/A':>10}")
+    else:
+        print(f"\n{'Method':<30} {'Mean AUC':>10} {'Std':>8}")
+        print("-" * 50)
+
+        for name, key in display_order:
+            if key in cv_results:
+                result = cv_results[key]
+                if result.mean_auc is not None:
+                    print(f"{name:<30} {result.mean_auc:>10.4f} {result.std_auc:>8.4f}")
+                else:
+                    print(f"{name:<30} {'N/A':>10} {'N/A':>8}")
 
     # Return results as dict
     return {

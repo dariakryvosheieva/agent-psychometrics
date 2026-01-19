@@ -12,7 +12,9 @@ from sklearn.metrics import roc_auc_score
 from experiment_a_common.dataset import ExperimentData
 
 
-def agent_only_baseline(data: ExperimentData) -> Dict[str, Any]:
+def agent_only_baseline(
+    data: ExperimentData, compute_binomial: bool = False
+) -> Dict[str, Any]:
     """Baseline: P(success) = agent's success rate on TRAINING tasks only.
 
     This baseline ignores task difficulty entirely and uses each agent's
@@ -20,6 +22,7 @@ def agent_only_baseline(data: ExperimentData) -> Dict[str, Any]:
 
     Args:
         data: ExperimentData with responses and train/test splits
+        compute_binomial: If True and data is binomial, compute MAE/accuracy metrics
 
     Returns:
         Dict with 'auc', 'n_pairs', 'n_observations', 'method'
@@ -72,11 +75,103 @@ def agent_only_baseline(data: ExperimentData) -> Dict[str, Any]:
         }
 
     auc = roc_auc_score(y_true, y_scores)
-    return {
+    result = {
         "auc": float(auc),
         "n_pairs": n_pairs,
         "n_observations": len(y_true),
         "method": "agent_only",
+    }
+
+    # Optionally compute binomial metrics for agent-only baseline
+    if compute_binomial:
+        from experiment_a_common.dataset import BinomialExperimentData
+
+        if isinstance(data, BinomialExperimentData):
+            # Compute binomial metrics using agent success rates as predicted probs
+            binom_result = _compute_agent_only_binomial_metrics(data, agent_success_rates)
+            result["binomial_metrics"] = binom_result
+
+    return result
+
+
+def _compute_agent_only_binomial_metrics(
+    data: "ExperimentData", agent_success_rates: Dict[str, float]
+) -> Dict[str, Any]:
+    """Compute binomial metrics for agent-only baseline.
+
+    Args:
+        data: BinomialExperimentData with responses
+        agent_success_rates: Mapping of agent_id -> predicted probability
+
+    Returns:
+        Dict with mae, rmse, pass5_accuracy, pass5_confusion_matrix, etc.
+    """
+    all_predicted: List[float] = []
+    all_actual: List[int] = []
+    pass5_pred_class: List[int] = []
+    pass5_actual_class: List[int] = []
+
+    for task_id in data.test_tasks:
+        for agent_id in data.train_abilities.index:
+            if agent_id not in data.responses:
+                continue
+            if task_id not in data.responses[agent_id]:
+                continue
+
+            resp = data.responses[agent_id][task_id]
+            k = resp["successes"]
+            n = resp["trials"]
+
+            prob = agent_success_rates.get(agent_id, 0.5)
+            expected = prob * n
+            all_predicted.append(expected)
+            all_actual.append(k)
+
+            if n == 5:
+                predicted_class = int(round(prob * 5))
+                predicted_class = max(0, min(5, predicted_class))
+                pass5_pred_class.append(predicted_class)
+                pass5_actual_class.append(k)
+
+    if len(all_predicted) == 0:
+        return {
+            "mae": float("nan"),
+            "rmse": float("nan"),
+            "mean_predicted": float("nan"),
+            "mean_actual": float("nan"),
+            "n_pairs": 0,
+            "pass5_accuracy": float("nan"),
+            "pass5_confusion_matrix": [[0] * 6 for _ in range(6)],
+            "n_pass5_pairs": 0,
+        }
+
+    pred_arr = np.array(all_predicted)
+    actual_arr = np.array(all_actual)
+    errors = pred_arr - actual_arr
+    mae = float(np.mean(np.abs(errors)))
+    rmse = float(np.sqrt(np.mean(errors**2)))
+
+    if len(pass5_pred_class) > 0:
+        pass5_pred_arr = np.array(pass5_pred_class)
+        pass5_actual_arr = np.array(pass5_actual_class)
+        pass5_accuracy = float(np.mean(pass5_pred_arr == pass5_actual_arr))
+
+        confusion = [[0] * 6 for _ in range(6)]
+        for actual, pred in zip(pass5_actual_class, pass5_pred_class):
+            confusion[actual][pred] += 1
+    else:
+        pass5_accuracy = float("nan")
+        confusion = [[0] * 6 for _ in range(6)]
+
+    return {
+        "mae": mae,
+        "rmse": rmse,
+        "mean_predicted": float(np.mean(pred_arr)),
+        "mean_actual": float(np.mean(actual_arr)),
+        "n_pairs": len(all_predicted),
+        "pass5_accuracy": pass5_accuracy,
+        "pass5_confusion_matrix": confusion,
+        "n_pass5_pairs": len(pass5_pred_class),
     }
 
 

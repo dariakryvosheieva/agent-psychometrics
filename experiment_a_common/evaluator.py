@@ -213,6 +213,7 @@ def run_evaluation_pipeline(
     data: ExperimentData,
     predictor_configs: List[PredictorConfig],
     verbose: bool = True,
+    compute_binomial: bool = False,
 ) -> Dict[str, Any]:
     """Run all configured predictors and compute AUC for each.
 
@@ -220,6 +221,7 @@ def run_evaluation_pipeline(
         data: The experiment dataset
         predictor_configs: List of predictor configurations
         verbose: Whether to print progress
+        compute_binomial: If True and data is binomial, compute MAE/accuracy metrics
 
     Returns:
         Dict with results for each predictor
@@ -253,6 +255,19 @@ def run_evaluation_pipeline(
             for key, val in config.kwargs.items():
                 if key not in result_dict:
                     result_dict[key] = str(val) if hasattr(val, "__fspath__") else val
+
+            # Compute binomial metrics if requested
+            if compute_binomial and result.predictions:
+                from experiment_a_common.binomial_metrics import compute_binomial_metrics
+                from experiment_a_common.dataset import BinomialExperimentData
+                if isinstance(data, BinomialExperimentData):
+                    binom_result = compute_binomial_metrics(
+                        data, result.predictions, use_full_abilities=config.use_full_abilities
+                    )
+                    result_dict["binomial_metrics"] = binom_result.to_dict()
+                    if verbose:
+                        print(f"   {config.display_name} MAE: {binom_result.mae:.4f}, "
+                              f"Accuracy: {binom_result.pass5_accuracy:.4f}")
 
             results[config.name] = result_dict
 
