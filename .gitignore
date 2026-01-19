@@ -154,3 +154,19 @@ chris_output/experiment_pass_at_k/
 # Trajectory summaries (large, generated on cluster or via API)
 chris_output/trajectory_summaries/
 chris_output/trajectory_summaries_api/
+
+# Iterative refinement outputs (regenerable)
+chris_output/iterative_refinement/
+chris_output/iterative_refinement_n100/
+
+# SAD IRT outputs (regenerable)
+chris_output/sad_irt_long/
+
+# IRT fold splits (regenerable)
+chris_output/experiment_a/irt_splits/
+
+# CV results
+chris_output/experiment_a/experiment_a_cv*_results.json
+
+# Generated plots
+training_curves.png
