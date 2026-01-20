@@ -17,7 +17,9 @@ See [chris proposal.md](chris%20proposal.md) for full research motivation.
 ```
 model_irt/
 ├── experiment_a/           # Prior validation (IRT AUC)
-├── experiment_b/           # Posterior difficulty prediction
+├── experiment_b/           # Frontier task difficulty prediction
+├── experiment_b_old/       # [ARCHIVED] Old posterior prediction approach
+├── experiment_sad_irt/     # SAD-IRT model for frontier difficulty
 ├── swebench_irt/           # IRT model training
 ├── llm_judge/              # LLM-as-judge for difficulty prediction
 ├── lunette_utils/          # Lunette integration utilities
@@ -40,8 +42,8 @@ source .venv/bin/activate
 # Run Experiment A (prior validation)
 python -m experiment_a.train_evaluate --dry_run
 
-# Run Experiment B (posterior prediction)
-python -m experiment_b.train_evaluate --dry_run
+# Run Experiment B (frontier task difficulty prediction)
+python -m experiment_b.compare_methods
 
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
@@ -88,9 +90,16 @@ pytest tests/test_irt_pipeline.py -v
 | Lunette features | 0.7522 |
 | Baselines | ~0.72 |
 
-### Experiment B: Posterior Prediction
+### Experiment B: Frontier Task Difficulty Prediction
 
-Simple trajectory features provide +0.6% AUC improvement over prior alone.
+Predicts difficulty of frontier tasks (tasks only solvable by newer models) using various methods. Evaluation uses ROC-AUC after projecting to oracle IRT scale.
+
+| Method | ROC-AUC |
+|--------|---------|
+| Oracle | Upper bound |
+| Baseline IRT | Pre-frontier only |
+| Embedding + Ridge | Task embeddings |
+| LLM Judge + Ridge | Semantic features |
 
 ### Experiment D: Time Horizon
 
@@ -101,7 +110,7 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 | File | Purpose |
 |------|---------|
 | `experiment_a/train_evaluate.py` | Run Experiment A |
-| `experiment_b/train_evaluate.py` | Run Experiment B |
+| `experiment_b/compare_methods.py` | Run Experiment B |
 | `swebench_irt/train.py` | Train IRT models |
 | `swebench_irt/prep_swebench.py` | Build response matrix |
 | `llm_judge/llm_judge.py` | LLM feature extraction |
