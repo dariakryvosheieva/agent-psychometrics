@@ -1,42 +1,31 @@
 """Data splitting utilities for frontier task difficulty evaluation.
 
 This module provides functions for:
-- Splitting agents by date cutoff (pre-frontier vs post-frontier)
+- Splitting agents by date (generic, works with any date source)
 - Computing pass rates per task for different agent groups
 - Identifying frontier tasks (hard for pre-frontier, easier for post-frontier)
 - Identifying nontrivial anchor tasks for scale alignment
 """
 
 import json
-import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 
-def extract_date_prefix(agent_name: str) -> str:
-    """Extract YYYYMMDD date prefix from agent name.
-
-    Args:
-        agent_name: Agent name like '20240620_sweagent_claude3.5sonnet'
-
-    Returns:
-        Date string like '20240620' or empty string if no valid prefix
-    """
-    match = re.match(r"^(\d{8})_", agent_name)
-    if match:
-        return match.group(1)
-    return ""
-
-
-def split_agents_by_cutoff(
+def split_agents_by_dates(
     agents: List[str],
-    cutoff_date: str = "20250807",
+    agent_dates: Dict[str, str],
+    cutoff_date: str,
 ) -> Tuple[List[str], List[str]]:
     """Split agents into pre-frontier and post-frontier by date cutoff.
 
+    This is a generic function that works with any source of agent dates
+    (e.g., from agent name prefix for SWE-bench, or from metadata for TerminalBench).
+
     Args:
         agents: List of agent names
+        agent_dates: Dict mapping agent_id -> date string (YYYYMMDD format)
         cutoff_date: Date string in YYYYMMDD format. Agents with date >= cutoff
                      are post-frontier, agents with date < cutoff are pre-frontier.
 
@@ -47,12 +36,12 @@ def split_agents_by_cutoff(
     post_frontier = []
 
     for agent in agents:
-        date_prefix = extract_date_prefix(agent)
-        if not date_prefix:
-            # No valid date prefix, skip this agent
+        date = agent_dates.get(agent)
+        if not date:
+            # No valid date, skip this agent
             continue
 
-        if date_prefix >= cutoff_date:
+        if date >= cutoff_date:
             post_frontier.append(agent)
         else:
             pre_frontier.append(agent)
@@ -214,6 +203,10 @@ def get_pre_frontier_agents(
     2. Filtering to agents with trajectories
     3. Splitting by cutoff date
 
+    NOTE: This function is specific to SWE-bench agents that have date prefixes
+    in their names. For other datasets, use split_agents_by_dates() directly
+    with agent dates from the dataset config.
+
     Args:
         responses_path: Path to JSONL response matrix
         trajectories_dir: Path to trajectory directory
@@ -229,6 +222,9 @@ def get_pre_frontier_agents(
         ... )
         >>> print(f"Pre-frontier: {len(pre_frontier)} agents")
     """
+    # Import here to avoid circular imports
+    from experiment_b.datasets.swebench import extract_date_prefix
+
     # Get all agents in response matrix order (this order is preserved!)
     all_agents = get_all_agents_from_responses(responses_path)
 
@@ -238,15 +234,24 @@ def get_pre_frontier_agents(
     # Filter to agents with both (preserving response matrix order)
     agents_with_both = [a for a in all_agents if a in traj_agents]
 
+    # Build agent_dates dict from name prefixes
+    agent_dates = {
+        agent: extract_date_prefix(agent)
+        for agent in agents_with_both
+    }
+
     # Split by cutoff date
-    pre_frontier, post_frontier = split_agents_by_cutoff(
-        agents_with_both, cutoff_date=cutoff_date
+    pre_frontier, post_frontier = split_agents_by_dates(
+        agents_with_both, agent_dates, cutoff_date=cutoff_date
     )
 
     return pre_frontier, post_frontier
 
 
 if __name__ == "__main__":
+    # Import here since this is just for testing
+    from experiment_b.datasets.swebench import extract_date_prefix
+
     # Test the splitting logic
     responses_path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
 
@@ -254,8 +259,13 @@ if __name__ == "__main__":
     all_agents = get_all_agents_from_responses(responses_path)
     print(f"Total agents in response matrix: {len(all_agents)}")
 
+    # Build agent_dates dict from name prefixes
+    agent_dates = {agent: extract_date_prefix(agent) for agent in all_agents}
+
     # Split by cutoff date
-    pre_frontier, post_frontier = split_agents_by_cutoff(all_agents, cutoff_date="20250807")
+    pre_frontier, post_frontier = split_agents_by_dates(
+        all_agents, agent_dates, cutoff_date="20250807"
+    )
     print(f"\nPre-frontier (< 20250807): {len(pre_frontier)} agents")
     print(f"Post-frontier (>= 20250807): {len(post_frontier)} agents")
 

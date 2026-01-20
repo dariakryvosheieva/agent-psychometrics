@@ -24,8 +24,9 @@ source .venv/bin/activate
 # Run with baselines only (no embeddings required)
 python -m experiment_a.train_evaluate
 
-# Run with pre-computed embeddings
-python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz
+# Run with pre-computed embeddings (DeepSeek-R1-Distill-Qwen-32B recommended)
+python -m experiment_a.train_evaluate \
+    --embeddings_path chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz
 
 # Run with Lunette features
 python -m experiment_a.train_evaluate --lunette_features_path chris_output/experiment_a/sandbox_features/lunette_features.csv
@@ -107,18 +108,14 @@ python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz 
 
 ### 1. Embeddings (Best Performance)
 
-Run Daria's pipeline on the Engaging cluster:
+Pre-computed embeddings are available at:
+```
+chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz
+```
 
+To generate new embeddings with a different backbone:
 ```bash
-sbatch predict_question_difficulty_engaging.sh
-```
-
-This produces:
-```
-out/prior_qwen3vl8b/
-├── embeddings__Qwen__Qwen3-VL-8B-Instruct__*.npz  # Input for experiment_a
-├── predictions.csv     # Per-task predictions
-└── metrics.json        # Train/test R², Pearson r
+python -m experiment_a.generate_embeddings --backbone "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 ```
 
 ### 2. Lunette Features (with Sandbox Access)

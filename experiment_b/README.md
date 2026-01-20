@@ -22,9 +22,8 @@ python -m experiment_b.compare_methods
 # Compare training on pre-frontier tasks only vs all tasks
 python -m experiment_b.compare_methods --train_on_all_tasks
 
-# With custom embeddings (e.g., different backbone)
-python -m experiment_b.compare_methods \
-    --embeddings_path chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__maxlen8192.npz
+# Run on TerminalBench
+python -m experiment_b.compare_methods --dataset terminalbench
 
 # Save results to CSV
 python -m experiment_b.compare_methods --output_csv chris_output/experiment_b_results.csv
@@ -88,7 +87,12 @@ experiment_b/
 ├── config.py             # ExperimentBConfig dataclass
 ├── data_splits.py        # Agent/task splitting utilities
 ├── evaluate.py           # Evaluation metrics (Spearman, AUC, alignment)
-└── compare_methods.py    # Main entry point for comparing methods
+├── compare_methods.py    # Main entry point for comparing methods
+└── datasets/             # Dataset-specific configurations
+    ├── __init__.py       # Dataset registry and factory
+    ├── base.py           # DatasetConfig base class
+    ├── swebench.py       # SWE-bench Verified config
+    └── terminalbench.py  # TerminalBench config
 ```
 
 ## Configuration
@@ -114,18 +118,21 @@ class ExperimentBConfig:
     alignment_method: str = "affine"  # or "constant"
 ```
 
-## Multi-Backbone Embeddings
+## Multi-Dataset Support
 
-This experiment supports embeddings from different backbone models:
+This experiment supports multiple datasets via the `--dataset` flag:
 
 ```bash
-# Generate embeddings with any backbone (in experiment_a)
-python -m experiment_a.generate_embeddings --backbone "Qwen/Qwen3-VL-8B-Instruct"
-python -m experiment_a.generate_embeddings --backbone "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+# SWE-bench Verified (default)
+python -m experiment_b.compare_methods --dataset swebench
 
-# Use in experiment_b
-python -m experiment_b.compare_methods --embeddings_path path/to/embeddings.npz
+# TerminalBench
+python -m experiment_b.compare_methods --dataset terminalbench
 ```
+
+Default embeddings (DeepSeek-R1-Distill-Qwen-32B):
+- SWE-bench: `chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz`
+- TerminalBench: `chris_output/experiment_a_terminalbench/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__maxlen8192.npz`
 
 ## Results: SWE-bench Verified
 

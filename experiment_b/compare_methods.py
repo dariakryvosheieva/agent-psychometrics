@@ -35,8 +35,9 @@ from experiment_b.data_splits import (
     get_all_agents_from_responses,
     identify_frontier_tasks,
     identify_nontrivial_tasks,
-    split_agents_by_cutoff,
+    split_agents_by_dates,
 )
+from experiment_b.datasets import get_dataset_config, list_datasets
 from experiment_b.evaluate import (
     compute_frontier_difficulty_metrics,
     compute_scale_offset,
@@ -180,6 +181,7 @@ def print_comparison_table(
     post_frontier_count: int,
     anchor_task_count: int = 0,
     alignment_method: str = "affine",
+    cutoff_date: str = "20250807",
     verbose: bool = False,
 ) -> None:
     """Print formatted comparison table."""
@@ -190,7 +192,7 @@ def print_comparison_table(
     print("Frontier Task Definition:")
     print("  - Pre-frontier pass rate <= 10%")
     print("  - Post-frontier pass rate > 10%")
-    print("  - Cutoff date: 20250807 (gpt-5-mini release)")
+    print(f"  - Cutoff date: {cutoff_date}")
     print()
     print("Data Summary:")
     print(f"  - Pre-frontier agents: {pre_frontier_count}")
@@ -299,44 +301,47 @@ def main():
         description="Compare methods for frontier task difficulty prediction"
     )
     parser.add_argument(
+        "--dataset",
+        type=str,
+        default="swebench",
+        choices=list_datasets(),
+        help="Dataset to run experiment on (default: swebench)",
+    )
+    parser.add_argument(
         "--responses_path",
         type=Path,
-        default=Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"),
-        help="Path to response matrix JSONL",
+        default=None,
+        help="Path to response matrix JSONL (overrides dataset default)",
     )
     parser.add_argument(
         "--baseline_irt_path",
         type=Path,
-        default=Path("chris_output/sad_irt/baseline_irt/items.csv"),
-        help="Path to baseline IRT items CSV (pre-frontier only)",
+        default=None,
+        help="Path to baseline IRT items CSV (overrides dataset default)",
     )
     parser.add_argument(
         "--oracle_irt_path",
         type=Path,
-        default=Path("clean_data/swebench_verified_20251120_full/1d/items.csv"),
-        help="Path to oracle IRT items CSV (all agents)",
+        default=None,
+        help="Path to oracle IRT items CSV (overrides dataset default)",
     )
     parser.add_argument(
         "--oracle_abilities_path",
         type=Path,
-        default=Path("clean_data/swebench_verified_20251120_full/1d/abilities.csv"),
-        help="Path to oracle IRT abilities CSV (all agents)",
+        default=None,
+        help="Path to oracle IRT abilities CSV (overrides dataset default)",
     )
     parser.add_argument(
         "--embeddings_path",
         type=Path,
-        default=Path(
-            "out/prior_qwen3vl8b/embeddings__Qwen__Qwen3-VL-8B-Instruct__pool-lasttoken__"
-            "qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_instance-v1__"
-            "princeton-nlp_SWE-bench_Verified__test__n500__maxlen8192__seed0.npz"
-        ),
-        help="Path to embeddings .npz file (any backbone)",
+        default=None,
+        help="Path to embeddings .npz file (overrides dataset default)",
     )
     parser.add_argument(
         "--llm_judge_path",
         type=Path,
-        default=Path("chris_output/experiment_a/llm_judge_features/llm_judge_features.csv"),
-        help="Path to LLM judge features CSV",
+        default=None,
+        help="Path to LLM judge features CSV (overrides dataset default)",
     )
     parser.add_argument(
         "--sad_irt_beta_dir",
@@ -347,20 +352,20 @@ def main():
     parser.add_argument(
         "--cutoff_date",
         type=str,
-        default="20250807",
-        help="Frontier cutoff date (YYYYMMDD)",
+        default=None,
+        help="Frontier cutoff date YYYYMMDD (overrides dataset default)",
     )
     parser.add_argument(
         "--pre_threshold",
         type=float,
-        default=0.1,
-        help="Max pre-frontier pass rate for frontier tasks",
+        default=None,
+        help="Max pre-frontier pass rate for frontier tasks (overrides dataset default)",
     )
     parser.add_argument(
         "--post_threshold",
         type=float,
-        default=0.1,
-        help="Min post-frontier pass rate for frontier tasks",
+        default=None,
+        help="Min post-frontier pass rate for frontier tasks (overrides dataset default)",
     )
     parser.add_argument(
         "--alignment_method",
@@ -387,12 +392,30 @@ def main():
     )
     args = parser.parse_args()
 
+    # Load dataset configuration
+    print(f"Loading dataset configuration: {args.dataset}")
+    dataset_config = get_dataset_config(args.dataset)
+
+    # Override paths from CLI args if provided
+    responses_path = args.responses_path or dataset_config.responses_path
+    oracle_irt_path = args.oracle_irt_path or dataset_config.oracle_irt_path
+    oracle_abilities_path = args.oracle_abilities_path or dataset_config.oracle_abilities_path
+    baseline_irt_path = args.baseline_irt_path or dataset_config.baseline_irt_path
+    embeddings_path = args.embeddings_path or dataset_config.embeddings_path
+    llm_judge_path = args.llm_judge_path or dataset_config.llm_judge_path
+    cutoff_date = args.cutoff_date or dataset_config.cutoff_date
+    pre_threshold = args.pre_threshold if args.pre_threshold is not None else dataset_config.pre_threshold
+    post_threshold = args.post_threshold if args.post_threshold is not None else dataset_config.post_threshold
+    output_dir = dataset_config.output_dir
+
+    print(f"  Dataset: {dataset_config.name}")
+    print(f"  Cutoff date: {cutoff_date}")
+
     # Validate required files exist
     required_files = [
-        (args.responses_path, "Response matrix"),
-        (args.baseline_irt_path, "Baseline IRT"),
-        (args.oracle_irt_path, "Oracle IRT"),
-        (args.oracle_abilities_path, "Oracle abilities"),
+        (responses_path, "Response matrix"),
+        (oracle_irt_path, "Oracle IRT"),
+        (oracle_abilities_path, "Oracle abilities"),
     ]
     for path, name in required_files:
         if not path.exists():
@@ -400,39 +423,57 @@ def main():
             sys.exit(1)
 
     # Load IRT models and abilities
-    print("Loading IRT models...")
-    baseline_items = pd.read_csv(args.baseline_irt_path, index_col=0)
-    oracle_items = pd.read_csv(args.oracle_irt_path, index_col=0)
-    oracle_abilities = pd.read_csv(args.oracle_abilities_path, index_col=0)
-    print(f"  Baseline IRT: {len(baseline_items)} tasks")
+    print("\nLoading IRT models...")
+    oracle_items = pd.read_csv(oracle_irt_path, index_col=0)
+    oracle_abilities = pd.read_csv(oracle_abilities_path, index_col=0)
     print(f"  Oracle IRT: {len(oracle_items)} tasks")
     print(f"  Oracle abilities: {len(oracle_abilities)} agents")
 
     # Load response matrix for AUC computation
     print("\nLoading response matrix...")
-    responses = load_responses_dict(args.responses_path)
+    responses = load_responses_dict(responses_path)
     print(f"  Loaded responses for {len(responses)} agents")
 
-    # Identify frontier tasks
+    # Get agent dates from dataset config and split by cutoff
     print("\nIdentifying frontier tasks...")
-    all_agents = get_all_agents_from_responses(args.responses_path)
-    pre_frontier, post_frontier = split_agents_by_cutoff(all_agents, args.cutoff_date)
-    print(f"  Pre-frontier agents (< {args.cutoff_date}): {len(pre_frontier)}")
-    print(f"  Post-frontier agents (>= {args.cutoff_date}): {len(post_frontier)}")
+    all_agents = get_all_agents_from_responses(responses_path)
+    agent_dates = dataset_config.get_agent_dates(all_agents)
+    print(f"  Agents with dates: {len(agent_dates)} / {len(all_agents)}")
+
+    pre_frontier, post_frontier = split_agents_by_dates(all_agents, agent_dates, cutoff_date)
+    print(f"  Pre-frontier agents (< {cutoff_date}): {len(pre_frontier)}")
+    print(f"  Post-frontier agents (>= {cutoff_date}): {len(post_frontier)}")
+
+    # Load or train baseline IRT (pre-frontier agents only)
+    if baseline_irt_path and baseline_irt_path.exists():
+        baseline_items = pd.read_csv(baseline_irt_path, index_col=0)
+        print(f"  Baseline IRT: {len(baseline_items)} tasks (loaded from cache)")
+    else:
+        # Train baseline IRT on pre-frontier agents
+        print("\n  Training baseline IRT on pre-frontier agents...")
+        from experiment_sad_irt.train_evaluate import train_baseline_irt_on_prefrontier
+        baseline_irt_output_dir = output_dir / "baseline_irt"
+        baseline_beta = train_baseline_irt_on_prefrontier(
+            responses_path=responses_path,
+            pre_frontier_agents=pre_frontier,
+            output_dir=baseline_irt_output_dir,
+        )
+        baseline_items = pd.read_csv(baseline_irt_output_dir / "items.csv", index_col=0)
+        print(f"  Baseline IRT: {len(baseline_items)} tasks (newly trained)")
 
     frontier_task_ids = identify_frontier_tasks(
-        args.responses_path,
+        responses_path,
         pre_frontier,
         post_frontier,
-        args.pre_threshold,
-        args.post_threshold,
+        pre_threshold,
+        post_threshold,
     )
     print(f"  Frontier tasks: {len(frontier_task_ids)}")
 
     # Identify nontrivial anchor tasks for scale alignment
     print("\nIdentifying nontrivial anchor tasks...")
     anchor_task_ids, _, _ = identify_nontrivial_tasks(
-        args.responses_path,
+        responses_path,
         pre_frontier,
         post_frontier,
         min_pass_rate=0.10,
@@ -542,13 +583,13 @@ def main():
         })
 
     # 3. Embedding predictor
-    if args.embeddings_path.exists():
+    if embeddings_path.exists():
         for config in training_configs:
             method_name = f"Embedding + Ridge{config['suffix']}"
             print(f"\nEvaluating {method_name}...")
             print(f"  Training on {len(config['train_task_ids'])} tasks")
             try:
-                predictor = EmbeddingPredictor(embeddings_path=args.embeddings_path)
+                predictor = EmbeddingPredictor(embeddings_path=embeddings_path)
                 embedding_metrics = evaluate_predictor(
                     predictor=predictor,
                     baseline_items=baseline_items,
@@ -577,16 +618,19 @@ def main():
                     "num_frontier_tasks": 0,
                 }
     else:
-        print(f"\nEmbeddings not found: {args.embeddings_path}")
+        print(f"\nEmbeddings not found: {embeddings_path}")
 
     # 4. LLM Judge predictor
-    if args.llm_judge_path.exists():
+    if llm_judge_path.exists():
         for config in training_configs:
             method_name = f"LLM Judge + Lasso/Ridge{config['suffix']}"
             print(f"\nEvaluating {method_name}...")
             print(f"  Training on {len(config['train_task_ids'])} tasks")
             try:
-                predictor = LLMJudgePredictor(features_path=args.llm_judge_path)
+                predictor = LLMJudgePredictor(
+                    features_path=llm_judge_path,
+                    feature_cols=dataset_config.llm_judge_feature_cols,
+                )
                 llm_judge_metrics = evaluate_predictor(
                     predictor=predictor,
                     baseline_items=baseline_items,
@@ -615,7 +659,7 @@ def main():
                     "num_frontier_tasks": 0,
                 }
     else:
-        print(f"\nLLM Judge features not found: {args.llm_judge_path}")
+        print(f"\nLLM Judge features not found: {llm_judge_path}")
 
     # Print comparison table
     print()
@@ -626,6 +670,7 @@ def main():
         len(post_frontier),
         anchor_task_count=len(anchor_task_ids),
         alignment_method=args.alignment_method,
+        cutoff_date=cutoff_date,
         verbose=args.verbose,
     )
 
