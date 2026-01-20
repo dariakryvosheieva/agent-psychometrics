@@ -14,261 +14,184 @@ P(success) = sigmoid(θ_j - β̂_i)
 
 Then measure AUC by comparing these predicted probabilities to actual binary outcomes.
 
-This corresponds to **Section 3.1** in the [research proposal](../chris%20proposal.md).
-
 ## Quick Start
 
 ```bash
 source .venv/bin/activate
 
-# Run with baselines only (no embeddings required)
+# Run with default settings (uses pre-configured embeddings and LLM judge features)
 python -m experiment_a.train_evaluate
 
-# Run with pre-computed embeddings (DeepSeek-R1-Distill-Qwen-32B recommended)
-python -m experiment_a.train_evaluate \
-    --embeddings_path chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz
-
-# Run with Lunette features
-python -m experiment_a.train_evaluate --lunette_features_path chris_output/experiment_a/sandbox_features/lunette_features.csv
+# Run on TerminalBench (binomial responses)
+python -m experiment_a_terminalbench.train_evaluate
 
 # Dry run to check config
 python -m experiment_a.train_evaluate --dry_run
 ```
 
+## Results (2026-01-20)
+
+### SWE-bench Verified (5-Fold Cross-Validation)
+
+**Data**: 500 tasks, 130 agents
+
+| Method | Mean AUC | Std |
+|--------|----------|-----|
+| Oracle (true b) | 0.9441 | 0.0045 |
+| Embedding | 0.8269 | 0.0070 |
+| LLM Judge | 0.8227 | 0.0118 |
+| Constant (mean b) | 0.7149 | 0.0108 |
+| Agent-only | 0.7150 | 0.0109 |
+
+### TerminalBench (5-Fold Cross-Validation)
+
+**Data**: 89 tasks, 83 agents (binomial responses)
+
+| Method | Mean AUC | Std | Pass Rate MSE |
+|--------|----------|-----|---------------|
+| Oracle (true b) | 0.9037 | 0.0109 | 0.0540 |
+| LLM Judge | 0.7841 | 0.0278 | 0.1212 |
+| Embedding | 0.7829 | 0.0402 | 0.1240 |
+| Constant (mean b) | 0.7036 | 0.0123 | 0.1490 |
+| Agent-only | 0.7039 | 0.0125 | 0.1404 |
+
 ## Evaluation Protocol
 
 1. **Split tasks** (not agents) into train/test sets using deterministic hash-based splitting
-2. **Train IRT on train tasks only** to get uncontaminated ground truth difficulties (avoids data leakage)
+2. **Train IRT on train tasks only** to get uncontaminated ground truth difficulties
 3. **Train difficulty predictor** on train tasks using train-only IRT difficulties as targets
 4. **Predict difficulty** for test tasks
 5. **Compute IRT probabilities**: For each (agent, task) pair, compute P(success) = sigmoid(θ - β̂)
-6. **Calculate AUC**: Compare predicted probabilities to actual 0/1 outcomes
+6. **Calculate AUC**: Compare predicted probabilities to actual outcomes
 
 ### Data Leakage Prevention
 
 The IRT model provides ground truth difficulties (β) used as training targets. To avoid data leakage, we train **two separate IRT models**:
 
-1. **IRT^train (Train-only IRT)**: Trained on train tasks (T1) only
-   - Provides uncontaminated ground truth for training difficulty predictors
-   - **Must be used for all actual methods** (embedding, constant, LLM judge, etc.)
-   - Agent abilities θ and task difficulties β are both on the "train scale"
+1. **IRT^train (Train-only IRT)**: Trained on train tasks only - provides uncontaminated ground truth
+2. **IRT^full (Full IRT)**: Trained on all tasks - **used ONLY for oracle baseline**
 
-2. **IRT^full (Full IRT)**: Trained on all tasks (T1 ∪ T2)
-   - **Used ONLY for oracle baseline** - shows theoretical best performance
-   - The oracle is NOT a valid method - it's just a reference point for comparison
+## Architecture
 
-**Critical**: When computing AUC for any method, we use abilities from IRT^train. This ensures the abilities (θ) and predicted difficulties (β̂) are on the **same IRT scale**. The difficulty predictor is trained to predict β values on the train scale, so evaluation must also use abilities from that same scale. Using full IRT abilities would mix incompatible scales and leak test task information.
+The experiment uses a unified framework in `experiment_a_common/` that supports both SWE-bench (binary) and TerminalBench (binomial) datasets.
 
-The split IRT models are cached in `chris_output/experiment_a/irt_splits/` and automatically reused when the split parameters match.
+### Shared Infrastructure (`experiment_a_common/`)
 
-```bash
-# To manually train split IRT model
-python -m experiment_a.train_irt_split --dry_run  # See what would happen
-python -m experiment_a.train_irt_split            # Train on train tasks only
-python -m experiment_a.train_irt_split --force    # Force retrain even if cached
-```
+| File | Purpose |
+|------|---------|
+| `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource` |
+| `feature_predictor.py` | `FeatureBasedPredictor` (StandardScaler → RidgeCV) |
+| `predictor_base.py` | `DifficultyPredictorBase` ABC, `ConstantPredictor`, `GroundTruthPredictor` |
+| `dataset.py` | `ExperimentData` ABC with `BinaryExperimentData`, `BinomialExperimentData` |
+| `evaluator.py` | `compute_auc()`, `PredictorConfig`, evaluation pipeline |
+| `cross_validation.py` | k-fold CV utilities |
+| `pipeline.py` | `ExperimentSpec`, `run_experiment_main()` orchestration |
 
-## Results (2026-01-13)
+### SWE-bench Specific (`experiment_a/`)
 
-| Method | AUC | Description |
-|--------|-----|-------------|
-| Oracle (true b) | 0.9447 | Upper bound using ground truth IRT difficulty |
-| **Embedding (MLE)** | **0.8337** | Direct MLE training (Truong et al. 2025) |
-| **Embedding** | **0.8333** | Qwen3-VL-8B embeddings + Ridge (plug-in) |
-| **LLM Judge** | **0.8071** | 9 semantic features with Lasso selection |
-| **Lunette v2** | **0.7522** | 24 features with Lasso selection |
-| Constant baseline | 0.7176 | Predict mean difficulty for all tasks |
-| Agent-only | 0.7178 | Use agent's overall success rate |
+| File | Purpose |
+|------|---------|
+| `train_evaluate.py` | Main entry point (thin wrapper, ~40 LOC) |
+| `config.py` | `ExperimentAConfig` with default paths |
+| `generate_embeddings.py` | Generate task embeddings |
+| `compute_llm_judge_features.py` | Extract LLM semantic features |
 
-### MLE vs Plug-in Training
+### TerminalBench Specific (`experiment_a_terminalbench/`)
 
-Two approaches for training the embedding→difficulty mapping:
-
-1. **Plug-in (default)**: Fit Ridge regression on ground-truth IRT difficulties as targets
-2. **MLE**: Directly maximize the IRT log-likelihood of agent responses
-
-The MLE approach (Truong et al. 2025) achieves slightly better AUC (0.8337 vs 0.8333), but the improvement is minimal on our dataset. This may be due to:
-- Smaller dataset (500 tasks vs 78K items in their paper)
-- Already well-tuned Ridge regularization (α=10000)
-
-**MC ability marginalization**: The paper uses Monte Carlo sampling from N(0,1) to marginalize over abilities. We tested this approach (`--mle_use_mc_abilities`) but it performs worse (0.8258 AUC) because:
-- We have reliable IRT-estimated abilities for all 130 agents
-- MC marginalization ignores agent-specific information
-
-To enable MLE training:
-```bash
-# With fixed abilities (recommended)
-python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz --use_mle_embedding
-
-# With MC ability marginalization (not recommended for our setting)
-python -m experiment_a.train_evaluate --embeddings_path /path/to/embeddings.npz --use_mle_embedding --mle_use_mc_abilities
-```
+| File | Purpose |
+|------|---------|
+| `train_evaluate.py` | Main entry with `is_binomial=True` |
+| `config.py` | `TerminalBenchConfig` with TerminalBench paths |
+| `data_loader.py` | Load task data from terminal-bench repo |
 
 ## Feature Sources
 
-### 1. Embeddings (Best Performance)
+### 1. Embeddings (DeepSeek-R1-Distill-Qwen-32B)
 
-Pre-computed embeddings are available at:
-```
-chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz
-```
+Pre-computed embeddings are configured by default:
+- SWE-bench: `chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz`
+- TerminalBench: `chris_output/experiment_a_terminalbench/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__maxlen8192.npz`
 
-To generate new embeddings with a different backbone:
+To generate new embeddings:
 ```bash
 python -m experiment_a.generate_embeddings --backbone "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 ```
 
-### 2. Lunette Features (with Sandbox Access)
+### 2. LLM Judge Features
 
-Lunette feature extraction uses a **two-step process** to ensure the grading judge has sandbox access:
+Semantic features extracted via LLM structured output:
 
-#### Step 1: Create Sandbox Runs
+**SWE-bench (9 features)**:
+- fix_in_description, problem_clarity, error_message_provided, reproduction_steps
+- fix_locality, domain_knowledge_required, fix_complexity, logical_reasoning_required, atypicality
 
-Run a dummy solver through Inspect with `--sandbox lunette` to provision Docker containers:
+**TerminalBench (4 pre-selected features)**:
+- task_clarity, domain_knowledge_required, task_complexity, atypicality
 
-```bash
-# Dry run to see execution plan
-python -m experiment_a.run_dummy_sandbox --dry_run
-
-# Run with batching (25 tasks per Inspect invocation)
-python -m experiment_a.run_dummy_sandbox --batch_size 25
-
-# Resume after interruption
-python -m experiment_a.run_dummy_sandbox --resume
-
-# Monitor progress
-cat chris_output/experiment_a/sandbox_runs/tracking.json | python -c "import json,sys; d=json.load(sys.stdin); print(f\"Progress: {d['stats']['completed']}/{d['stats']['total']}\")"
-```
-
-This creates sandboxes with the actual repo checkout at the correct commit for each task.
-
-#### Step 2: Grade Sandbox Runs
-
-Extract features using Lunette's investigate() API:
-
-```bash
-# Dry run
-python -m experiment_a.grade_sandbox_runs --dry_run
-
-# Grade all completed sandbox runs
-python -m experiment_a.grade_sandbox_runs --skip_existing
-
-# Grade specific tasks
-python -m experiment_a.grade_sandbox_runs --task_ids "django__django-12345,astropy__astropy-12907"
-```
-
-**Important limitations:**
-- Each investigation takes ~55 seconds
-- Batch grading (limit > 1) causes 504 Gateway Timeout errors
-- Tasks must be graded one at a time
-
-**Output:** `chris_output/experiment_a/sandbox_features/lunette_features.csv`
-
-#### Feature Schema (25 features)
-
-**Environment-based (15)**: repo_file_count, repo_line_count, patch_file_count, patch_line_count, test_file_count, related_file_count, import_count, class_count_in_file, function_count_in_file, test_count_fail_to_pass, test_count_pass_to_pass, git_commit_count, directory_depth, has_conftest, has_init
-
-**Semantic (10)**: fix_in_description (0-3), problem_clarity (1-5), error_message_provided (0/1), reproduction_steps (0/1), fix_locality (1-3), domain_knowledge_required (1-5), fix_complexity (1-5), logical_reasoning_required (1-5), atypicality (1-5), reasoning (text)
-
-**Note:** The Lunette API currently returns a simplified `{name, score, explanation}` format instead of the full structured schema. Check with Fulcrum team about `result_schema` support.
-
-### 3. LLM Judge Features (Alternative)
-
-For feature extraction without sandbox access, use the direct LLM judge approach:
-
+To extract features:
 ```bash
 python -m experiment_a.compute_llm_judge_features --dry_run
-python -m experiment_a.compute_llm_judge_features --limit 100
+python -m experiment_a.compute_llm_judge_features
 ```
 
-This uses Claude directly with structured output but cannot run shell commands in the repo.
+## Data Paths
 
-## Module Structure
+### SWE-bench
 
-```
-experiment_a_common/               # Shared framework (used by both SWE-bench and TerminalBench)
-├── __init__.py                    # Module exports
-├── dataset.py                     # ExperimentData ABC, Binary/Binomial implementations, load_dataset()
-├── evaluator.py                   # compute_auc(), PredictorConfig, run_evaluation_pipeline()
-└── baselines.py                   # Generic baselines (agent_only, random)
+| File | Purpose |
+|------|---------|
+| `clean_data/swebench_verified_20251120_full/1d_1pl/abilities.csv` | Oracle IRT abilities |
+| `clean_data/swebench_verified_20251120_full/1d_1pl/items.csv` | Oracle IRT difficulties |
+| `clean_data/swebench_verified/swebench_verified_20251120_full.jsonl` | Response matrix |
+| `chris_output/experiment_a/irt_splits/` | Fold-specific IRT models (cached) |
 
-experiment_a/                      # SWE-bench specific
-├── __init__.py                    # Module exports
-├── config.py                      # ExperimentAConfig dataclass
-├── data_loader.py                 # Load IRT params, responses; create splits
-├── train_irt_split.py             # Train IRT on train tasks only (avoids leakage)
-├── difficulty_predictor.py        # DifficultyPredictor protocol + implementations
-├── train_evaluate.py              # Main evaluation pipeline (uses common framework)
-├── run_dummy_sandbox.py           # Step 1: Create sandbox runs via Inspect
-├── grade_sandbox_runs.py          # Step 2: Grade runs with Lunette investigate()
-├── lunette_structured_output.py   # Pydantic schemas for structured output
-├── compute_llm_judge_features.py  # Alternative: Direct LLM feature extraction
-└── llm_judge_prompt.py            # Prompts for LLM judge
-```
+### TerminalBench
 
-## Output
-
-Results saved to `chris_output/experiment_a/experiment_a_results.json`:
-
-```json
-{
-  "config": {...},
-  "data_summary": {"n_agents": 130, "n_tasks_total": 500, "n_train": 400, "n_test": 100},
-  "oracle": {"auc": 0.9447},
-  "embedding_predictor": {"auc_result": {"auc": 0.XX}},
-  "constant_baseline": {"auc": 0.7176},
-  "agent_only_baseline": {"auc": 0.7178}
-}
-```
-
-**Note**: The oracle uses full IRT (reference only). All other methods use IRT^train abilities.
+| File | Purpose |
+|------|---------|
+| `chris_output/terminal_bench_2.0_binomial_1pl/1d/abilities.csv` | Oracle IRT abilities |
+| `chris_output/terminal_bench_2.0_binomial_1pl/1d/items.csv` | Oracle IRT difficulties |
+| `data/terminal_bench/terminal_bench_2.0_raw.jsonl` | Response matrix (binomial) |
+| `terminal-bench/tasks/{task_id}/` | Task instructions and solutions |
 
 ## Command Line Options
 
 ```
+--k_folds             Number of folds for cross-validation (default: 5)
+--single_holdout      Use single 20% holdout instead of CV
 --test_fraction       Fraction of tasks for test set (default: 0.2)
 --split_seed          Random seed for train/test split (default: 0)
---embeddings_path     Path to pre-computed embeddings .npz file
---lunette_features_path  Path to Lunette features CSV
---llm_judge_features_path  Path to LLM judge features CSV
---ridge_alpha         Ridge regression alpha (default: 10000.0)
---output_dir          Output directory (default: chris_output/experiment_a)
---use_mle_embedding   Enable MLE embedding predictor (Truong et al. 2025)
---mle_l2_lambda       L2 regularization for MLE weights (default: 0.15)
+--embeddings_path     Override default embeddings path
+--llm_judge_features_path  Override default LLM features path
+--output_dir          Output directory
 --dry_run             Show configuration without running
+--exclude_unsolved    Exclude tasks no agent solved
+```
+
+## Output
+
+Results saved to `chris_output/experiment_a/experiment_a_cv5_results.json`:
+
+```json
+{
+  "config": {...},
+  "data_summary": {"n_agents": 130, "n_tasks_total": 500},
+  "oracle": {"mean_auc": 0.9441, "std": 0.0045},
+  "embedding_predictor": {"mean_auc": 0.8269, "std": 0.0070},
+  "llm_judge_predictor": {"mean_auc": 0.8227, "std": 0.0118},
+  ...
+}
 ```
 
 ## Caches
 
-Experiment A uses several cached files to avoid recomputation. Clear these when changing data or parameters:
-
 | Cache | Location | When to Clear |
 |-------|----------|---------------|
-| **IRT Split Models** | `chris_output/experiment_a/irt_splits/` | When changing split parameters (`test_fraction`, `split_seed`) or response matrix |
-| **Pre-computed Embeddings** | `chris_output/experiment_a/embeddings/*.npz` | When changing embedding backbone or task set |
-| **Lunette Features** | `chris_output/experiment_a/sandbox_features/lunette_features.csv` | When re-extracting features |
-| **LLM Judge Features** | `chris_output/experiment_a/llm_judge_features/` | When changing prompts or re-running extraction |
-
-To clear all caches and force recomputation:
-```bash
-rm -rf chris_output/experiment_a/irt_splits/
-# Then re-run the pipeline
-python -m experiment_a.train_evaluate
-```
-
-## Known Issues
-
-**Train/Test Split Bias:** The hash-based split has statistically significant bias (p=0.025):
-- Train tasks: mean b = +0.61
-- Test tasks: mean b = -0.27
-- Effect size: Cohen's d = 0.25 (small)
-
-For fully reliable results, run feature extraction on all 500 tasks.
-
-**Lunette Structured Output:** The Lunette API currently ignores custom `result_schema` and returns a hardcoded `{name, score, explanation}` format. The features need to be parsed from the explanation text or use the LLM Judge alternative.
+| **IRT Split Models** | `chris_output/experiment_a/irt_splits/` | When changing split parameters |
+| **Embeddings** | `chris_output/experiment_a/embeddings/` | When changing backbone |
+| **LLM Judge Features** | `chris_output/experiment_a/llm_judge_features/` | When re-extracting |
 
 ## References
 
-- [Truong et al. (2025)](https://arxiv.org/pdf/2503.13335) - Amortized model-based evaluation
 - IRT formula: `P = sigmoid(theta - beta)` matches py_irt's 1PL implementation
-- [Lunette documentation](../lunette_utils/LUNETTE.md) - Detailed Lunette integration guide
+- [Research Proposal](../chris%20proposal.md) - Section 3.1

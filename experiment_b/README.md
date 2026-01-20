@@ -1,13 +1,13 @@
 # Experiment B: Frontier Task Difficulty Prediction
 
-Predict difficulty of **frontier tasks** (tasks only solvable by newer models) using any method WITHOUT access to held-out post-frontier agents. Evaluate using ROC-AUC after projecting predicted difficulties onto the oracle IRT scale.
+Predict difficulty of **frontier tasks** (tasks only solvable by newer models) using methods that do NOT have access to post-frontier agents. Evaluate using ROC-AUC after projecting predicted difficulties onto the oracle IRT scale.
 
 ## Overview
 
 **Research Question**: Can we predict the difficulty of tasks that are currently beyond the capability of existing models, using only information available before those models were released?
 
 **Setting**:
-- **Date-based split**: Pre-frontier (< 2025-08-07) vs Post-frontier (>= 2025-08-07)
+- **Date-based split**: Pre-frontier vs Post-frontier agents (by release date)
 - **Frontier tasks**: Tasks with ≤10% pass rate among pre-frontier agents, but >10% among post-frontier agents
 - **No data leakage**: Predictions made using only pre-frontier information; post-frontier agents only used for evaluation
 
@@ -16,21 +16,46 @@ Predict difficulty of **frontier tasks** (tasks only solvable by newer models) u
 ```bash
 source .venv/bin/activate
 
-# Run comparison with default settings
+# Run on SWE-bench (default)
 python -m experiment_b.compare_methods
-
-# Compare training on pre-frontier tasks only vs all tasks
-python -m experiment_b.compare_methods --train_on_all_tasks
 
 # Run on TerminalBench
 python -m experiment_b.compare_methods --dataset terminalbench
 
 # Save results to CSV
-python -m experiment_b.compare_methods --output_csv chris_output/experiment_b_results.csv
-
-# Show alignment parameters
-python -m experiment_b.compare_methods --verbose
+python -m experiment_b.compare_methods --output_csv results.csv
 ```
+
+## Results (2026-01-20)
+
+### SWE-bench Verified
+
+**Data**: 40 frontier tasks, 19 post-frontier eval agents
+**Cutoff**: 2025-08-07 (gpt-5-mini release)
+
+| Method | ROC-AUC | Spearman ρ | p-value |
+|--------|---------|------------|---------|
+| Oracle (upper bound) | 0.7716 | 1.0000 | <0.0001 |
+| Baseline IRT | 0.6978 | 0.3336 | 0.0354 |
+| LLM Judge + Ridge | 0.6835 | -0.0921 | 0.5718 |
+| Embedding + Ridge | 0.6655 | -0.1629 | 0.3154 |
+
+### TerminalBench
+
+**Data**: 18 frontier tasks, 31 post-frontier eval agents
+**Cutoff**: 2025-11-17
+
+| Method | ROC-AUC | Spearman ρ | p-value |
+|--------|---------|------------|---------|
+| Oracle (upper bound) | 0.8130 | 1.0000 | <0.0001 |
+| LLM Judge + Ridge | 0.7320 | -0.1547 | 0.5399 |
+| Baseline IRT | 0.6988 | 0.5253 | 0.0252 |
+| Embedding + Ridge | 0.6007 | -0.2632 | 0.2914 |
+
+**Key observations**:
+- Baseline IRT (pre-frontier agents only) achieves reasonable AUC
+- Feature-based predictors (Embedding, LLM Judge) have poor Spearman correlation on frontier tasks
+- LLM Judge outperforms Embedding on TerminalBench
 
 ## Methods Compared
 
@@ -38,8 +63,8 @@ python -m experiment_b.compare_methods --verbose
 |--------|-------------|---------------|
 | **Oracle** | True IRT difficulties (upper bound) | All agents |
 | **Baseline IRT** | IRT trained on pre-frontier agents only | Pre-frontier responses |
-| **Embedding** | Task embeddings → difficulty via Ridge | Non-frontier tasks + baseline IRT β |
-| **LLM Judge** | LLM-extracted semantic features via Lasso/Ridge | Non-frontier tasks + baseline IRT β |
+| **Embedding + Ridge** | Task embeddings → Ridge regression | Non-frontier tasks + baseline IRT β |
+| **LLM Judge + Ridge** | LLM semantic features → Ridge regression | Non-frontier tasks + baseline IRT β |
 
 ## Evaluation Methodology
 
@@ -50,158 +75,121 @@ python -m experiment_b.compare_methods --verbose
 ### 2. ROC-AUC with Scale Alignment
 1. **Identify anchor tasks**: Tasks with 10-90% pass rate in BOTH pre- and post-frontier groups
 2. **Fit affine transformation**: `oracle_β = slope × predicted_β + intercept` on anchors
-3. **Compute probabilities**: For each (post-frontier agent, frontier task) pair:
-   - `P(success) = sigmoid(θ_oracle - β_shifted)`
+3. **Compute probabilities**: For each (post-frontier agent, frontier task): `P(success) = sigmoid(θ_oracle - β_shifted)`
 4. **Calculate ROC-AUC**: Compare predicted probabilities to actual responses
-
-**Note**: Scale alignment uses oracle information and is ONLY for evaluation. In production, you would not have access to oracle difficulties.
 
 ## Data Leakage Constraints
 
-**Critical**: Oracle data and held-out (post-frontier) agent data must NEVER be exposed during training.
+**Critical**: Oracle data and post-frontier agent data must NEVER be exposed during training.
 
 - **Training ground truth**: Always from baseline IRT (pre-frontier agents only)
 - **Oracle IRT**: Used ONLY for evaluation metrics
-- **`--train_on_all_tasks` flag**: Includes frontier tasks in training but still uses baseline IRT difficulties as ground truth (these are poorly calibrated for frontier tasks since pre-frontier agents rarely solve them)
+- **`--train_on_all_tasks` flag**: Includes frontier tasks in training but still uses baseline IRT difficulties as ground truth (poorly calibrated for frontier tasks since pre-frontier agents rarely solve them)
 
-This constraint ensures a realistic simulation of predicting difficulty for tasks that are beyond current model capabilities.
+This constraint ensures a realistic simulation of predicting difficulty for tasks beyond current model capabilities.
 
-## Data Splits
+## Architecture
 
+Uses the shared `experiment_a_common/` infrastructure for predictors:
+
+```python
+from experiment_a_common.feature_source import EmbeddingFeatureSource, CSVFeatureSource
+from experiment_a_common.feature_predictor import FeatureBasedPredictor
+
+# Build predictors
+source = EmbeddingFeatureSource(embeddings_path)
+predictor = FeatureBasedPredictor(source)
 ```
-Pre-frontier agents (< 2025-08-07):  ~107 agents
-Post-frontier agents (>= 2025-08-07): ~24 agents
-Frontier tasks:                       ~40 tasks
-Anchor tasks (10-90% pass rate):      ~200 tasks
-```
 
-The cutoff date (2025-08-07) corresponds to the gpt-5-mini release, which significantly improved agent capabilities.
-
-## Directory Structure
+### Directory Structure
 
 ```
 experiment_b/
-├── __init__.py           # Module docstring
-├── README.md             # This file
-├── config.py             # ExperimentBConfig dataclass
+├── compare_methods.py    # Main entry point
 ├── data_splits.py        # Agent/task splitting utilities
 ├── evaluate.py           # Evaluation metrics (Spearman, AUC, alignment)
-├── compare_methods.py    # Main entry point for comparing methods
 └── datasets/             # Dataset-specific configurations
-    ├── __init__.py       # Dataset registry and factory
     ├── base.py           # DatasetConfig base class
-    ├── swebench.py       # SWE-bench Verified config
+    ├── swebench.py       # SWE-bench config
     └── terminalbench.py  # TerminalBench config
 ```
 
+### Key Functions
+
+**Data Splitting** (`data_splits.py`):
+- `split_agents_by_dates()`: Split by date cutoff
+- `identify_frontier_tasks()`: Tasks hard for pre-frontier, solved by post-frontier
+- `identify_nontrivial_tasks()`: Anchor tasks (10-90% pass rate)
+
+**Evaluation** (`evaluate.py`):
+- `compute_frontier_difficulty_metrics()`: Spearman correlation
+- `compute_scale_offset()`: Fit alignment transformation
+- `compute_frontier_auc()`: ROC-AUC on frontier tasks
+
+## Data Paths
+
+### SWE-bench
+
+| File | Purpose |
+|------|---------|
+| `clean_data/swebench_verified_20251120_full/1d_1pl/items.csv` | Oracle IRT difficulties |
+| `clean_data/swebench_verified/swebench_verified_20251120_full.jsonl` | Response matrix |
+| `chris_output/experiment_a/embeddings/` | Task embeddings |
+| `chris_output/experiment_a/llm_judge_features/` | LLM judge features |
+
+### TerminalBench
+
+| File | Purpose |
+|------|---------|
+| `chris_output/terminal_bench_2.0/1d/items.csv` | Oracle IRT difficulties |
+| `data/terminal_bench/terminal_bench_2.0.jsonl` | Response matrix |
+| `chris_output/experiment_a_terminalbench/embeddings/` | Task embeddings |
+| `chris_output/experiment_a_terminalbench/llm_judge_features/` | LLM judge features (4 pre-selected) |
+
 ## Configuration
 
-All settings in `config.py`:
+Dataset configs in `datasets/`:
 
 ```python
 @dataclass
-class ExperimentBConfig:
-    # Data paths
-    responses_path: Path = "clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"
-    oracle_irt_path: Path = "clean_data/swebench_verified_20251120_full/1d/items.csv"
-    baseline_irt_path: Path = "chris_output/sad_irt/baseline_irt/items.csv"
-    embeddings_path: Path = "..."  # Any backbone's embeddings
-    llm_judge_path: Path = "..."   # LLM judge features CSV
-
-    # Frontier split
-    cutoff_date: str = "20250807"
+class DatasetConfig:
+    responses_path: Path
+    oracle_irt_path: Path
+    embeddings_path: Path
+    llm_judge_path: Path
+    cutoff_date: str
     pre_threshold: float = 0.1   # Max pass rate for pre-frontier
     post_threshold: float = 0.1  # Min pass rate for post-frontier
 
-    # Alignment
-    alignment_method: str = "affine"  # or "constant"
+    @property
+    def llm_judge_feature_cols(self) -> List[str]:
+        # SWE-bench: 9 features
+        # TerminalBench: 4 pre-selected features
 ```
 
-## Multi-Dataset Support
+## Command Line Options
 
-This experiment supports multiple datasets via the `--dataset` flag:
-
-```bash
-# SWE-bench Verified (default)
-python -m experiment_b.compare_methods --dataset swebench
-
-# TerminalBench
-python -m experiment_b.compare_methods --dataset terminalbench
 ```
-
-Default embeddings (DeepSeek-R1-Distill-Qwen-32B):
-- SWE-bench: `chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz`
-- TerminalBench: `chris_output/experiment_a_terminalbench/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__maxlen8192.npz`
-
-## Results: SWE-bench Verified
-
-**Data**: 40 frontier tasks, 19 post-frontier eval agents
-
-| Method | ROC-AUC | Spearman ρ | p-value |
-|--------|---------|------------|---------|
-| Oracle | 0.7716 | 1.0000 | <0.0001 |
-| Baseline IRT | 0.6978 | 0.3336 | 0.0354 |
-| LLM Judge | 0.6835 | -0.0921 | 0.5718 |
-| Embedding | 0.6655 | -0.1629 | 0.3154 |
-
-## Results: TerminalBench
-
-**Data**: 19 frontier tasks, 28 post-frontier eval agents
-
-| Method | ROC-AUC | Spearman ρ | p-value |
-|--------|---------|------------|---------|
-| Oracle | 0.8186 | 1.0000 | <0.0001 |
-| Baseline IRT | 0.7254 | 0.5491 | 0.0149 |
-| LLM Judge | 0.6986 | -0.2414 | 0.3193 |
-| Embedding | 0.6090 | -0.2842 | 0.2383 |
-
-**Key observations**:
-- Baseline IRT (trained only on pre-frontier agents) already achieves reasonable AUC
-- Embedding and LLM Judge predictors underperform baseline IRT on frontier tasks
-- Spearman correlation is significant for IRT-based methods but not for feature-based predictors
+--dataset             Dataset to use: swebench (default) or terminalbench
+--output_csv          Save results to CSV file
+--train_on_all_tasks  Include frontier tasks in training (still uses baseline IRT)
+--verbose             Show alignment parameters
+```
 
 ## Caches
 
-Experiment B uses cached data from other experiments. Clear these when changing data or parameters:
-
 | Cache | Location | When to Clear |
 |-------|----------|---------------|
-| **Oracle IRT** | `clean_data/swebench_verified_*/1d/` or `chris_output/terminal_bench_*/1d/` | When retraining IRT on full data |
-| **Baseline IRT (SWE-bench)** | `chris_output/sad_irt/baseline_irt/` | When changing pre-frontier agent set |
-| **Baseline IRT (TerminalBench)** | `chris_output/experiment_b/terminalbench/baseline_irt/cache_*/` | Auto-invalidated when training data changes |
-| **Pre-computed Embeddings** | `chris_output/experiment_a/embeddings/` | When changing embedding backbone or task set |
-| **LLM Judge Features** | `chris_output/experiment_a/llm_judge_features/` | When re-extracting features |
-| **TerminalBench Embeddings** | `chris_output/experiment_a_terminalbench/embeddings/` | When changing TerminalBench task set |
-| **TerminalBench LLM Judge** | `chris_output/experiment_a_terminalbench/llm_judge_features/` | When re-extracting TerminalBench features |
-
-### Baseline IRT Caching
-
-For datasets without a pre-computed baseline IRT path (e.g., TerminalBench), the baseline IRT model is cached automatically. The cache key is computed from:
-- Response matrix file name
-- Sorted list of pre-frontier agents
-- Cutoff date
-
-If any of these change, the cache is automatically invalidated and the baseline IRT is retrained. Each cache is stored in a directory named `cache_{hash}` where `{hash}` is the first 12 characters of a SHA256 hash of the cache key components.
-
-To force recomputation from scratch:
-```bash
-# Clear SWE-bench baseline (pre-computed, rarely needs regeneration)
-rm -rf chris_output/sad_irt/baseline_irt/
-
-# Clear TerminalBench baseline caches (auto-managed, rarely needed)
-rm -rf chris_output/experiment_b/terminalbench/baseline_irt/
-
-# Then re-run
-python -m experiment_b.compare_methods --dataset terminalbench
-```
+| **Baseline IRT** | `chris_output/experiment_b/{dataset}/baseline_irt/` | Auto-invalidated when training data changes |
+| **Embeddings** | `chris_output/experiment_a{_terminalbench}/embeddings/` | When changing backbone |
+| **LLM Features** | `chris_output/experiment_a{_terminalbench}/llm_judge_features/` | When re-extracting |
 
 ## Related Experiments
 
-- **Experiment A**: Prior validation - tests how well static task features predict difficulty
-- **Experiment SAD-IRT**: SAD-IRT model for frontier difficulty prediction using trajectory information
+- **Experiment A**: Prior validation - tests how well static task features predict difficulty on held-out tasks
+- **Experiment SAD-IRT**: Uses trajectory information for frontier difficulty prediction
 
 ## References
 
 - [IRT Models Documentation](../docs/IRT_MODELS.md)
-- [Data Pipeline](../docs/DATA_PIPELINE.md)
 - [Research Proposal](../chris%20proposal.md) - Section 3.2
