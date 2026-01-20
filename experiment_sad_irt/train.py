@@ -623,6 +623,8 @@ class Trainer:
             "config": config_dict,  # Save as dict, not object
             "epoch": getattr(self, "_current_epoch", 0),
             "timestamp": timestamp,
+            # Save task_ids for beta extraction (see extract_sad_irt_beta.py)
+            "task_ids": self.task_ids,
         }
         if metrics:
             checkpoint_data["metrics"] = metrics

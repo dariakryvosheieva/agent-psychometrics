@@ -223,6 +223,19 @@ Where `type` is:
 - `best`: Best Spearman ρ on frontier tasks
 - `epoch_N`: End of epoch N
 
+### Checkpoint Contents
+
+Checkpoints contain:
+- `model_state_dict`: Model weights (LoRA, embeddings, MLP head)
+- `optimizer_state_dict`: Optimizer state for resumption
+- `scheduler_state_dict`: LR scheduler state
+- `config`: Training configuration as dict
+- `global_step`, `epoch`, `best_spearman`: Training progress
+- `task_ids`: List of task IDs matching beta embedding order (added 2026-01-19)
+- `metrics`: Optional evaluation metrics
+
+**Note for beta extraction**: Checkpoints created after 2026-01-19 include `task_ids` directly. For older checkpoints, `extract_sad_irt_beta.py` falls back to reconstructing task IDs from the response matrix specified in the config.
+
 ## Analysis Scripts
 
 ### Analyze Results

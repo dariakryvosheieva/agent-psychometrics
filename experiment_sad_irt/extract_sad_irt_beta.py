@@ -42,19 +42,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_task_ids_from_config(config: Dict) -> List[str]:
-    """Get task IDs from checkpoint config by reading the response matrix.
+def get_task_ids_from_checkpoint(checkpoint: Dict) -> List[str]:
+    """Get task IDs from checkpoint.
 
-    The task IDs come from the response matrix, which is the same source
-    the TrajectoryIRTDataset uses.
+    Newer checkpoints (after 2026-01-19) store task_ids directly.
+    For older checkpoints, we fall back to reading from the response matrix.
 
     Args:
-        config: Checkpoint config dictionary
+        checkpoint: Loaded checkpoint dictionary
 
     Returns:
         List of task IDs in the same order as the beta embedding
     """
-    # Get response matrix path from config
+    # Newer checkpoints store task_ids directly
+    if "task_ids" in checkpoint and checkpoint["task_ids"] is not None:
+        logger.info("Using task_ids from checkpoint")
+        return checkpoint["task_ids"]
+
+    # Fallback for older checkpoints: read from response matrix
+    logger.info("Checkpoint missing task_ids, falling back to response matrix")
+    config = checkpoint.get("config", {})
     response_matrix_path = Path(
         config.get(
             "response_matrix_path",
@@ -93,9 +100,8 @@ def extract_beta_from_checkpoint(
     beta_values = beta_weight.squeeze(-1).numpy()
     logger.info(f"Extracted {len(beta_values)} beta values")
 
-    # Get task IDs from config
-    config = checkpoint.get("config", {})
-    task_ids = get_task_ids_from_config(config)
+    # Get task IDs from checkpoint
+    task_ids = get_task_ids_from_checkpoint(checkpoint)
 
     if len(task_ids) != len(beta_values):
         logger.warning(
