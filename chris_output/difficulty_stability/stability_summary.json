@@ -1,0 +1,26 @@
+{
+  "config": {
+    "response_matrix_path": "clean_data/swebench_verified/swebench_verified_20251120_full.jsonl",
+    "frontier_cutoff_date": "20250807",
+    "min_pass_rate": 0.1,
+    "max_pass_rate": 0.9,
+    "seed": 42,
+    "epochs": 2000,
+    "output_dir": "chris_output/difficulty_stability"
+  },
+  "n_pre_frontier_agents": 112,
+  "n_post_frontier_agents": 19,
+  "n_tasks": 203,
+  "n_pairs": 20503,
+  "spearman_pairwise": 0.988323308306041,
+  "spearman_pvalue": 0.0,
+  "pearson_pairwise": 0.9883200807328218,
+  "pearson_pvalue": 0.0,
+  "order_preservation_rate": 0.9571769984880262,
+  "n_order_flips": 878,
+  "mean_abs_change": 0.23797579365840354,
+  "median_abs_change": 0.19883695244789124,
+  "std_abs_change": 0.1833417422015723,
+  "max_abs_change": 1.4726113379001617,
+  "mean_change": 0.014743159431841514
+}

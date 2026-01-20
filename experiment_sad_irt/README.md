@@ -296,3 +296,33 @@ We compared multiple approaches for predicting frontier task difficulty:
 3. **Static feature predictors fail on frontier tasks**: Both Embedding+Ridge (train ρ=0.74) and LLM Judge (train ρ=0.65) learn well on non-frontier tasks but have **negative** correlation on frontier tasks. This suggests frontier tasks have fundamentally different characteristics that static features cannot capture.
 
 4. **Trajectory information may help**: The slight improvement of SAD-IRT over baseline suggests that trajectory-based features may capture information about frontier task difficulty that static features miss
+
+## Difficulty Scale Stability Analysis
+
+We analyzed whether relative task difficulties remain stable when adding post-frontier agents to IRT training. This addresses the question: "If problem A was harder than problem B using pre-frontier IRT, does this hold when frontier agents are added?"
+
+### Setup
+
+- **Non-trivial tasks**: Tasks with 10-90% pass rate in BOTH pre-frontier and post-frontier agent groups (203 tasks)
+- **Comparison**: Train 1PL IRT on pre-frontier agents only vs all agents, then compare pairwise difficulty differences
+
+### Results
+
+| Metric | Value |
+|--------|-------|
+| Spearman ρ (pairwise) | **0.988** |
+| Order preservation rate | **95.7%** |
+| Mean \|change\| | 0.238 |
+
+### Interpretation
+
+Relative task difficulties are highly stable. For tasks with non-trivial solve rates in both agent groups, if one task was harder than another in pre-frontier IRT, this relationship is preserved 95.7% of the time when post-frontier agents are added.
+
+### Usage
+
+```bash
+python -m experiment_sad_irt.analyze_difficulty_stability
+python -m experiment_sad_irt.analyze_difficulty_stability --min_pass_rate 0.15
+```
+
+Results saved to `chris_output/difficulty_stability/`
