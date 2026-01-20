@@ -38,9 +38,8 @@ python -m experiment_b.compare_methods --verbose
 |--------|-------------|---------------|
 | **Oracle** | True IRT difficulties (upper bound) | All agents |
 | **Baseline IRT** | IRT trained on pre-frontier agents only | Pre-frontier responses |
-| **Embedding + Ridge** | Task embeddings → difficulty | Non-frontier tasks + baseline IRT β |
-| **LLM Judge + Ridge** | LLM-extracted semantic features | Non-frontier tasks + baseline IRT β |
-| **SAD-IRT** | State-aware deep IRT (from experiment_sad_irt) | Pre-frontier responses + trajectories |
+| **Embedding** | Task embeddings → difficulty via Ridge | Non-frontier tasks + baseline IRT β |
+| **LLM Judge** | LLM-extracted semantic features via Lasso/Ridge | Non-frontier tasks + baseline IRT β |
 
 ## Evaluation Methodology
 
@@ -140,15 +139,13 @@ Default embeddings (DeepSeek-R1-Distill-Qwen-32B):
 
 | Method | ROC-AUC | Spearman ρ | p-value |
 |--------|---------|------------|---------|
-| Oracle (upper bound) | 0.7716 | 1.0000 | <0.0001 |
-| Baseline IRT (pre-frontier only) | 0.6978 | 0.3336 | 0.0354 |
-| LLM Judge + Lasso/Ridge | 0.6835 | -0.0921 | 0.5718 |
-| SAD-IRT (best run) | 0.6718 | 0.3315 | 0.0366 |
-| Embedding + Ridge (DeepSeek-R1-32B) | 0.6655 | -0.1629 | 0.3154 |
+| Oracle | 0.7716 | 1.0000 | <0.0001 |
+| Baseline IRT | 0.6978 | 0.3336 | 0.0354 |
+| LLM Judge | 0.6835 | -0.0921 | 0.5718 |
+| Embedding | 0.6655 | -0.1629 | 0.3154 |
 
 **Key observations**:
 - Baseline IRT (trained only on pre-frontier agents) already achieves reasonable AUC
-- SAD-IRT provides marginal improvement over baseline IRT
 - Embedding and LLM Judge predictors underperform baseline IRT on frontier tasks
 - Spearman correlation is significant for IRT-based methods but not for feature-based predictors
 
