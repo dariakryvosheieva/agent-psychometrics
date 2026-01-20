@@ -16,12 +16,19 @@ def parse_detail_url_to_subject_id(detail_url: str) -> str:
     The detail_url has format:
         https://www.tbench.ai/leaderboard/terminal-bench/2.0/{Agent}/{variant}/{model}@{provider}
 
+    For multi-model ensembles:
+        https://www.tbench.ai/leaderboard/terminal-bench/2.0/{Agent}/{variant}/{model1}@{provider1},{model2}@{provider2}
+
     The subject_id format is:
         {agent}_{model}_at_{provider}
+
+    For multi-model ensembles:
+        {agent}_{model1}_at_{provider1},{model2}_at_{provider2}
 
     Examples:
         "Factory%20Droid/unknown/gpt-5.2@openai" -> "factory_droid_gpt-5_2_at_openai"
         "ante/unknown/gemini-3-pro-preview@Google" -> "ante_gemini-3-pro-preview_at_google"
+        "warp/unknown/claude-haiku-4-5@anthropic,gpt-5.2@openai" -> "warp_claude-haiku-4-5_at_anthropic,gpt-5_2_at_openai"
 
     Args:
         detail_url: Full URL from metadata
@@ -45,21 +52,42 @@ def parse_detail_url_to_subject_id(detail_url: str) -> str:
     # variant = path_parts[1]  # "unknown" (not used in subject_id)
     model_provider = unquote(path_parts[2])  # "gpt-5.2%40openai" -> "gpt-5.2@openai"
 
-    # Parse model@provider
+    # Parse model@provider - handle multi-model ensembles (comma-separated)
     if "@" not in model_provider:
         return ""
-    model, provider = model_provider.rsplit("@", 1)
 
-    # Convert to subject_id format:
-    # - Lowercase
-    # - Spaces to underscores
-    # - Dots to underscores
-    # - @ to _at_
-    agent_clean = agent.lower().replace(" ", "_")
-    model_clean = model.lower().replace(".", "_")
-    provider_clean = provider.lower()
+    # Check if this is a multi-model ensemble (contains commas)
+    if "," in model_provider:
+        # Multi-model format: model1@provider1,model2@provider2,...
+        model_parts = []
+        for mp in model_provider.split(","):
+            if "@" not in mp:
+                continue
+            model, provider = mp.rsplit("@", 1)
+            model_clean = model.lower().replace(".", "_")
+            provider_clean = provider.lower()
+            model_parts.append(f"{model_clean}_at_{provider_clean}")
 
-    subject_id = f"{agent_clean}_{model_clean}_at_{provider_clean}"
+        if not model_parts:
+            return ""
+
+        agent_clean = agent.lower().replace(" ", "_")
+        subject_id = f"{agent_clean}_{','.join(model_parts)}"
+    else:
+        # Single model format: model@provider
+        model, provider = model_provider.rsplit("@", 1)
+
+        # Convert to subject_id format:
+        # - Lowercase
+        # - Spaces to underscores
+        # - Dots to underscores
+        # - @ to _at_
+        agent_clean = agent.lower().replace(" ", "_")
+        model_clean = model.lower().replace(".", "_")
+        provider_clean = provider.lower()
+
+        subject_id = f"{agent_clean}_{model_clean}_at_{provider_clean}"
+
     return subject_id
 
 
