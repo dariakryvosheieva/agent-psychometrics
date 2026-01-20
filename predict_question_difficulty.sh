@@ -55,7 +55,7 @@ run_irt_model_scaffold_shared() {
   TERMINAL_BENCH_JSONL="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/terminal_bench_2.0.jsonl"
 
   # Train options
-  IRT_MODEL="2d_1pl"     # keep it Rasch-style (no discrimination)
+  IRT_MODEL="1pl"     # keep it Rasch-style (no discrimination)
   EPOCHS=5000
   LR=0.01
 
@@ -140,6 +140,30 @@ if [[ "${ENABLE_IRT_MODEL_SCAFFOLD_SHARED_TRAINING:-0}" == "1" ]]; then
 
   run_irt_model_scaffold_shared
   AGENT_RESULTS_OVERRIDE=(--agent_results "$VERIFIED_JSONL_FILTERED")
+
+  # Feed precomputed IRT scores into difficulty prediction (skip per-fold IRT).
+  # NOTE: `train_model_scaffold_shared.py` writes outputs to historical subdir names.
+  # Keep this mapping in sync with `swebench_irt/train_model_scaffold_shared.py`.
+  case "${IRT_MODEL}" in
+    1pl)    IRT_SUBDIR="1d_1pl" ;;
+    2pl)    IRT_SUBDIR="1d_2pl" ;;
+    2d_1pl) IRT_SUBDIR="2d_1pl" ;;
+    *)
+      echo "Unknown IRT_MODEL=${IRT_MODEL}. Expected one of: 1pl, 2pl, 2d_1pl" >&2
+      exit 2
+      ;;
+  esac
+  IRT_ITEMS_CSV="$OUT_DIR/${IRT_SUBDIR}/items_verified.csv"
+  IRT_AGENT_MAP_CSV="$OUT_DIR/agent_model_scaffold.csv"
+  IRT_MODEL_THETAS_CSV="$OUT_DIR/${IRT_SUBDIR}/model_abilities.csv"
+  IRT_SCAFFOLD_THETAS_CSV="$OUT_DIR/${IRT_SUBDIR}/scaffold_abilities.csv"
+
+  PRECOMPUTED_IRT_ARGS=(
+    --irt_items_csv "$IRT_ITEMS_CSV"
+    --irt_agent_map_csv "$IRT_AGENT_MAP_CSV"
+    --irt_model_thetas_csv "$IRT_MODEL_THETAS_CSV"
+    --irt_scaffold_thetas_csv "$IRT_SCAFFOLD_THETAS_CSV"
+  )
 fi
 
 "${VENV_PY}" /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/predict_question_difficulty_irt.py \
@@ -149,6 +173,7 @@ fi
   --overwrite \
   --seed "$SEED" \
   --backbone "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" \
-  "${AGENT_RESULTS_OVERRIDE[@]}"
+  "${AGENT_RESULTS_OVERRIDE[@]}" \
+  ${PRECOMPUTED_IRT_ARGS:+${PRECOMPUTED_IRT_ARGS[@]}}
 
 

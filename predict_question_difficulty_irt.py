@@ -238,6 +238,104 @@ def train_irt_1pl(
     return theta_by_subject, diff_by_item
 
 
+def _read_indexed_csv_numeric(path: str) -> Tuple[List[str], Dict[str, Dict[str, float]]]:
+    """
+    Read a CSV where the first column is an index.
+
+    Example (pandas to_csv default with index):
+      ,b,b_std
+      astropy__astropy-12907,1.23,0.45
+
+    Returns:
+      - cols: column names excluding the index column
+      - rows: mapping index -> {col -> float}
+    """
+    rows: Dict[str, Dict[str, float]] = {}
+    with open(path, "r", newline="", encoding="utf-8") as f:
+        r = csv.reader(f)
+        header = next(r, None)
+        if header is None or len(header) < 2:
+            raise ValueError(f"CSV {path!r} appears empty or has no columns.")
+        cols = [str(x) for x in header[1:]]
+        for row in r:
+            if not row:
+                continue
+            idx = str(row[0] or "").strip()
+            if not idx:
+                continue
+            d: Dict[str, float] = {}
+            for j, col in enumerate(cols, start=1):
+                if j >= len(row):
+                    continue
+                s = str(row[j]).strip()
+                if not s:
+                    continue
+                try:
+                    d[str(col)] = float(s)
+                except Exception:
+                    continue
+            rows[idx] = d
+    return cols, rows
+
+
+def load_precomputed_item_difficulties(*, items_csv: str, diff_col: str = "") -> Dict[str, float]:
+    cols, rows = _read_indexed_csv_numeric(items_csv)
+    diff_col = str(diff_col or "").strip()
+    if not diff_col:
+        # Prefer 1D b; otherwise use 2D b_sum.
+        if "b" in cols:
+            diff_col = "b"
+        elif "b_sum" in cols:
+            diff_col = "b_sum"
+        else:
+            raise ValueError(f"Could not infer difficulty column from {items_csv!r}. Columns={cols}")
+
+    out: Dict[str, float] = {}
+    for raw_item_id, row in rows.items():
+        tid = normalize_swebench_item_id(str(raw_item_id))
+        if not tid:
+            continue
+        if diff_col not in row:
+            continue
+        out[tid] = float(row[diff_col])
+    return out
+
+
+def load_precomputed_thetas(*, thetas_csv: str) -> Dict[str, float]:
+    cols, rows = _read_indexed_csv_numeric(thetas_csv)
+    # Prefer 1D theta; for 2D use theta_sum (since the model uses summed dims in the logit).
+    if "theta" in cols:
+        prefer = "theta"
+    elif "theta_sum" in cols:
+        prefer = "theta_sum"
+    else:
+        raise ValueError(f"Could not infer theta column from {thetas_csv!r}. Columns={cols}")
+
+    out: Dict[str, float] = {}
+    for raw_id, row in rows.items():
+        k = str(raw_id or "").strip()
+        if not k:
+            continue
+        if prefer not in row:
+            continue
+        out[k] = float(row[prefer])
+    return out
+
+
+def load_agent_model_scaffold_map(agent_map_csv: str) -> Dict[str, Tuple[str, str]]:
+    out: Dict[str, Tuple[str, str]] = {}
+    with open(agent_map_csv, "r", newline="", encoding="utf-8") as f:
+        r = csv.DictReader(f)
+        for row in r:
+            agent = str((row or {}).get("agent", "") or "").strip()
+            model = str((row or {}).get("model", "") or "").strip()
+            scaffold = str((row or {}).get("scaffold", "") or "").strip()
+            if not agent or not model or not scaffold:
+                continue
+            out[agent] = (model, scaffold)
+    return out
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -285,6 +383,39 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     ap.add_argument("--irt_epochs", type=int, default=5000)
     ap.add_argument("--irt_device", type=str, default="cuda")
+
+    # If set, we will NOT train per-fold IRT; instead we will load item difficulties + thetas
+    # from a precomputed IRT run (e.g., swebench_irt/train_model_scaffold_shared.py outputs).
+    ap.add_argument(
+        "--irt_items_csv",
+        type=str,
+        default="",
+        help="Precomputed IRT items CSV (e.g., .../2d_1pl/items_verified.csv or .../1d_1pl/items_verified.csv).",
+    )
+    ap.add_argument(
+        "--irt_items_diff_col",
+        type=str,
+        default="",
+        help="Column to use as item difficulty from --irt_items_csv (default auto: b, else b_sum).",
+    )
+    ap.add_argument(
+        "--irt_agent_map_csv",
+        type=str,
+        default="",
+        help="Agent->(model,scaffold) CSV (e.g., .../agent_model_scaffold.csv). Required with --irt_items_csv.",
+    )
+    ap.add_argument(
+        "--irt_model_thetas_csv",
+        type=str,
+        default="",
+        help="Model abilities CSV (e.g., .../2d_1pl/model_abilities.csv). Required with --irt_items_csv.",
+    )
+    ap.add_argument(
+        "--irt_scaffold_thetas_csv",
+        type=str,
+        default="",
+        help="Scaffold abilities CSV (e.g., .../2d_1pl/scaffold_abilities.csv). Required with --irt_items_csv.",
+    )
 
     ap.add_argument("--regressor", type=str, default="ridge_cv", choices=["linear", "ridge", "ridge_cv"])
     ap.add_argument("--ridge_alpha", type=float, default=10000.0)
@@ -453,6 +584,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     best_model = None
     best_fold_auc_pairs = 0
     best_fold_theta_by_subject: Dict[str, float] = {}
+    using_precomputed_irt = bool(str(args.irt_items_csv or "").strip())
+
+    precomputed_diff_by_item: Dict[str, float] = {}
+    precomputed_theta_by_subject: Dict[str, float] = {}
+    if using_precomputed_irt:
+        if not str(args.irt_agent_map_csv or "").strip():
+            raise ValueError("--irt_agent_map_csv is required when --irt_items_csv is set")
+        if not str(args.irt_model_thetas_csv or "").strip():
+            raise ValueError("--irt_model_thetas_csv is required when --irt_items_csv is set")
+        if not str(args.irt_scaffold_thetas_csv or "").strip():
+            raise ValueError("--irt_scaffold_thetas_csv is required when --irt_items_csv is set")
+
+        precomputed_diff_by_item = load_precomputed_item_difficulties(
+            items_csv=str(args.irt_items_csv), diff_col=str(args.irt_items_diff_col or "")
+        )
+        if not precomputed_diff_by_item:
+            raise RuntimeError(f"Loaded 0 precomputed item difficulties from --irt_items_csv={args.irt_items_csv!r}")
+
+        agent_map = load_agent_model_scaffold_map(str(args.irt_agent_map_csv))
+        theta_by_model = load_precomputed_thetas(thetas_csv=str(args.irt_model_thetas_csv))
+        theta_by_scaffold = load_precomputed_thetas(thetas_csv=str(args.irt_scaffold_thetas_csv))
+        for sid, _ in all_responses:
+            pair = agent_map.get(str(sid), None)
+            if pair is None:
+                continue
+            model, scaffold = pair
+            tm = theta_by_model.get(model, None)
+            ts = theta_by_scaffold.get(scaffold, None)
+            if tm is None or ts is None:
+                continue
+            precomputed_theta_by_subject[str(sid)] = float(tm) + float(ts)
+        if not precomputed_theta_by_subject:
+            raise RuntimeError(
+                "Loaded 0 precomputed subject thetas from the provided IRT CSVs/maps. "
+                "Check that --agent_results subject_ids match --irt_agent_map_csv agent names."
+            )
 
     eligible_idx = np.array([id_to_row[tid] for tid in eligible], dtype=np.int64)
     X_elig = X[eligible_idx]
@@ -470,21 +637,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ensure_dir(str(irt_dir))
         ensure_dir(str(reg_dir))
 
-        # 1) Train IRT on training fold items only.
-        train_jsonl = irt_dir / "train_responses.jsonl"
-        n_subj, n_items = write_filtered_responses_jsonl(all_responses=all_responses, item_ids=train_items, out_path=train_jsonl)
-        if n_subj == 0 or n_items == 0:
-            raise RuntimeError(f"Fold {fold}: empty filtered response matrix (subjects={n_subj}, items={n_items}).")
+        theta_by_subject: Dict[str, float] = {}
+        diff_by_item: Dict[str, float] = {}
+        if using_precomputed_irt:
+            # Use the full precomputed dict; we still subset to train_items below for regression supervision.
+            diff_by_item = precomputed_diff_by_item
+            theta_by_subject = precomputed_theta_by_subject
+        else:
+            # 1) Train IRT on training fold items only.
+            train_jsonl = irt_dir / "train_responses.jsonl"
+            n_subj, n_items = write_filtered_responses_jsonl(
+                all_responses=all_responses, item_ids=train_items, out_path=train_jsonl
+            )
+            if n_subj == 0 or n_items == 0:
+                raise RuntimeError(f"Fold {fold}: empty filtered response matrix (subjects={n_subj}, items={n_items}).")
 
-        theta_by_subject, diff_by_item = train_irt_1pl(
-            responses_jsonl=train_jsonl,
-            epochs=int(args.irt_epochs),
-            device=str(args.irt_device),
-            seed=int(args.seed) + int(fold),
-            out_dir=irt_dir,
-        )
-        if not diff_by_item:
-            raise RuntimeError(f"Fold {fold}: IRT training produced 0 item difficulties.")
+            theta_by_subject, diff_by_item = train_irt_1pl(
+                responses_jsonl=train_jsonl,
+                epochs=int(args.irt_epochs),
+                device=str(args.irt_device),
+                seed=int(args.seed) + int(fold),
+                out_dir=irt_dir,
+            )
+            if not diff_by_item:
+                raise RuntimeError(f"Fold {fold}: IRT training produced 0 item difficulties.")
 
         # 2) Train regression on (embedding -> IRT difficulty) for training items.
         tr_rows = [id_to_row[tid] for tid in train_items if tid in diff_by_item]
@@ -532,6 +708,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "n_irt_items": int(len(diff_by_item)),
                 "test_auc": float(auc),
                 "test_pairs": int(len(labels)),
+                "using_precomputed_irt": bool(using_precomputed_irt),
             },
         )
 
@@ -575,8 +752,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "agent_results": list(agent_results_paths),
         "exclude_zero_success": bool(args.exclude_zero_success),
         "zero_success_count": int(len(zero_success_ids)),
-        "irt_epochs": int(args.irt_epochs),
-        "irt_device": str(args.irt_device),
+        "using_precomputed_irt": bool(using_precomputed_irt),
+        "irt_items_csv": str(args.irt_items_csv),
+        "irt_items_diff_col": str(args.irt_items_diff_col),
+        "irt_agent_map_csv": str(args.irt_agent_map_csv),
+        "irt_model_thetas_csv": str(args.irt_model_thetas_csv),
+        "irt_scaffold_thetas_csv": str(args.irt_scaffold_thetas_csv),
+        "irt_epochs": (None if using_precomputed_irt else int(args.irt_epochs)),
+        "irt_device": (None if using_precomputed_irt else str(args.irt_device)),
     }
     weights_json, weights_npz = save_regression_weights(
         out_dir=str(args.out_dir),
