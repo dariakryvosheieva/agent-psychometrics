@@ -144,6 +144,17 @@ Default embeddings (DeepSeek-R1-Distill-Qwen-32B):
 | LLM Judge | 0.6835 | -0.0921 | 0.5718 |
 | Embedding | 0.6655 | -0.1629 | 0.3154 |
 
+## Results: TerminalBench
+
+**Data**: 19 frontier tasks, 28 post-frontier eval agents
+
+| Method | ROC-AUC | Spearman ρ | p-value |
+|--------|---------|------------|---------|
+| Oracle | 0.8186 | 1.0000 | <0.0001 |
+| Baseline IRT | 0.7254 | 0.5491 | 0.0149 |
+| LLM Judge | 0.6986 | -0.2414 | 0.3193 |
+| Embedding | 0.6090 | -0.2842 | 0.2383 |
+
 **Key observations**:
 - Baseline IRT (trained only on pre-frontier agents) already achieves reasonable AUC
 - Embedding and LLM Judge predictors underperform baseline IRT on frontier tasks
