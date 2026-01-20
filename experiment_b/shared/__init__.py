@@ -18,6 +18,7 @@ from experiment_b.shared.evaluate import (
     load_responses_dict,
     shift_to_oracle_scale,
 )
+from experiment_b.shared.feature_irt_predictor import FeatureIRTPredictor
 
 __all__ = [
     # baseline_irt
@@ -36,4 +37,6 @@ __all__ = [
     "compute_scale_offset",
     "load_responses_dict",
     "shift_to_oracle_scale",
+    # feature_irt_predictor
+    "FeatureIRTPredictor",
 ]

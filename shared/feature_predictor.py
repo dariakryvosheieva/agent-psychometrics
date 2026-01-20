@@ -52,7 +52,10 @@ class FeatureBasedPredictor:
     """
 
     # Default Ridge alphas spanning 5 orders of magnitude
-    DEFAULT_RIDGE_ALPHAS = [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+    # Note: Starting from 0.1 (not 0.01) to avoid ill-conditioned matrices
+    # with high-dimensional embeddings. With 5120-dim embeddings and 500 samples,
+    # alpha=0.01 results in rcond~2e-8 which triggers scipy warnings.
+    DEFAULT_RIDGE_ALPHAS = [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
 
     def __init__(
         self,
@@ -64,7 +67,7 @@ class FeatureBasedPredictor:
         Args:
             source: TaskFeatureSource that provides features for tasks.
             ridge_alphas: List of alpha values for RidgeCV cross-validation.
-                Defaults to [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0].
+                Defaults to [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0].
         """
         self.source = source
         self.ridge_alphas = ridge_alphas or self.DEFAULT_RIDGE_ALPHAS

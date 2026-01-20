@@ -36,7 +36,9 @@ python -m experiment_b.compare_methods --output_csv results.csv
 | Method | ROC-AUC | Spearman ρ | p-value |
 |--------|---------|------------|---------|
 | Oracle (upper bound) | 0.7716 | 1.0000 | <0.0001 |
+| **Feature-IRT (Embedding)** | **0.7074** | 0.1850 | 0.2531 |
 | Baseline IRT | 0.6978 | 0.3336 | 0.0354 |
+| Feature-IRT (LLM Judge) | 0.6841 | -0.1236 | 0.4472 |
 | LLM Judge + Ridge | 0.6835 | -0.0921 | 0.5718 |
 | Embedding + Ridge | 0.6655 | -0.1629 | 0.3154 |
 
@@ -48,14 +50,18 @@ python -m experiment_b.compare_methods --output_csv results.csv
 | Method | ROC-AUC | Spearman ρ | p-value |
 |--------|---------|------------|---------|
 | Oracle (upper bound) | 0.8130 | 1.0000 | <0.0001 |
+| **Feature-IRT (Embedding)** | **0.7378** | **0.5397** | 0.0208 |
 | LLM Judge + Ridge | 0.7320 | -0.1547 | 0.5399 |
+| Feature-IRT (LLM Judge) | 0.7314 | 0.0630 | 0.8040 |
 | Baseline IRT | 0.6988 | 0.5253 | 0.0252 |
 | Embedding + Ridge | 0.6007 | -0.2632 | 0.2914 |
 
 **Key observations**:
-- Baseline IRT (pre-frontier agents only) achieves reasonable AUC
-- Feature-based predictors (Embedding, LLM Judge) have poor Spearman correlation on frontier tasks
-- LLM Judge outperforms Embedding on TerminalBench
+- **Feature-IRT (Embedding) is the best method** on both benchmarks
+- On SWE-bench: +1% AUC over Baseline IRT (0.7074 vs 0.6978)
+- On TerminalBench: +4% AUC over Baseline IRT (0.7378 vs 0.6988) with best Spearman correlation (0.54)
+- Ridge-based predictors have poor Spearman correlation on frontier tasks, suggesting they don't generalize well
+- Feature-IRT learns task difficulties jointly with agent abilities, leveraging response patterns
 
 ## Methods Compared
 
@@ -63,8 +69,30 @@ python -m experiment_b.compare_methods --output_csv results.csv
 |--------|-------------|---------------|
 | **Oracle** | True IRT difficulties (upper bound) | All agents |
 | **Baseline IRT** | IRT trained on pre-frontier agents only | Pre-frontier responses |
+| **Feature-IRT** | Joint IRT + feature learning (see below) | All tasks + pre-frontier responses |
 | **Embedding + Ridge** | Task embeddings → Ridge regression | Non-frontier tasks + baseline IRT β |
 | **LLM Judge + Ridge** | LLM semantic features → Ridge regression | Non-frontier tasks + baseline IRT β |
+
+### Feature-IRT (New)
+
+Feature-IRT learns task difficulties as a linear function of features, jointly with agent abilities:
+
+```
+b_i = w^T f_i + bias + r_i    (task difficulty)
+θ_j learned jointly           (agent ability)
+P(success) = sigmoid(θ_j - b_i)
+```
+
+**Key differences from Ridge predictors**:
+- Learns from response patterns (IRT likelihood), not just baseline IRT difficulties
+- Trains on ALL tasks (including frontier), since it uses pre-frontier agent responses
+- Per-task residuals (r_i) with strong L2 regularization encourage feature-based predictions
+- Ridge warm-start initialization for feature weights
+
+**Hyperparameters** (grid search available via `--grid_search`):
+- `l2_weight`: Regularization on feature weights (default: 0.01)
+- `l2_residual`: Regularization on per-task residuals (default: 10.0)
+- `use_residuals`: Whether to include per-task residuals (default: True)
 
 ## Evaluation Methodology
 
@@ -95,23 +123,31 @@ Uses the shared `shared/` infrastructure for predictors:
 ```python
 from shared.feature_source import EmbeddingFeatureSource, CSVFeatureSource
 from shared.feature_predictor import FeatureBasedPredictor
+from experiment_b.shared.feature_irt_predictor import FeatureIRTPredictor
 
-# Build predictors
+# Ridge-based predictor
 source = EmbeddingFeatureSource(embeddings_path)
 predictor = FeatureBasedPredictor(source)
+
+# Feature-IRT predictor (joint learning)
+predictor = FeatureIRTPredictor(source, use_residuals=True)
+predictor.fit(task_ids, ground_truth_b, responses)  # responses = pre-frontier only
 ```
 
 ### Directory Structure
 
 ```
 experiment_b/
-├── compare_methods.py    # Main entry point
-├── data_splits.py        # Agent/task splitting utilities
-├── evaluate.py           # Evaluation metrics (Spearman, AUC, alignment)
-└── datasets/             # Dataset-specific configurations
-    ├── base.py           # DatasetConfig base class
-    ├── swebench.py       # SWE-bench config
-    └── terminalbench.py  # TerminalBench config
+├── compare_methods.py        # Main entry point
+├── shared/
+│   ├── data_splits.py        # Agent/task splitting utilities
+│   ├── evaluate.py           # Evaluation metrics (Spearman, AUC, alignment)
+│   ├── baseline_irt.py       # Baseline IRT training with caching
+│   └── feature_irt_predictor.py  # Feature-IRT predictor (NEW)
+└── datasets/                 # Dataset-specific configurations
+    ├── base.py               # DatasetConfig base class
+    ├── swebench.py           # SWE-bench config
+    └── terminalbench.py      # TerminalBench config
 ```
 
 ### Key Functions
@@ -173,7 +209,8 @@ class DatasetConfig:
 --dataset             Dataset to use: swebench (default) or terminalbench
 --output_csv          Save results to CSV file
 --train_on_all_tasks  Include frontier tasks in training (still uses baseline IRT)
---verbose             Show alignment parameters
+--grid_search         Run grid search over Feature-IRT hyperparameters
+--verbose             Show alignment parameters and training progress
 ```
 
 ## Caches

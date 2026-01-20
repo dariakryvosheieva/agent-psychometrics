@@ -54,6 +54,7 @@ from experiment_b.shared.baseline_irt import get_or_train_baseline_irt
 from shared.predictor_base import DifficultyPredictorBase
 from shared.feature_source import EmbeddingFeatureSource, CSVFeatureSource
 from shared.feature_predictor import FeatureBasedPredictor
+from experiment_b.shared.feature_irt_predictor import FeatureIRTPredictor
 
 
 def compute_method_metrics(
@@ -161,6 +162,90 @@ def evaluate_predictor(
 
     # Predict for all relevant tasks (frontier + anchor for alignment)
     all_tasks = list(set(frontier_task_ids + anchor_task_ids))
+    predictions = predictor.predict(all_tasks)
+
+    # Compute full metrics
+    return compute_method_metrics(
+        predicted_beta=predictions,
+        oracle_items=oracle_items,
+        oracle_abilities=oracle_abilities,
+        responses=responses,
+        frontier_task_ids=frontier_task_ids,
+        anchor_task_ids=anchor_task_ids,
+        eval_agents=eval_agents,
+        alignment_method=alignment_method,
+    )
+
+
+def evaluate_predictor_with_responses(
+    predictor,
+    baseline_items: pd.DataFrame,
+    oracle_items: pd.DataFrame,
+    oracle_abilities: pd.DataFrame,
+    responses: Dict[str, Dict[str, int]],
+    frontier_task_ids: List[str],
+    train_task_ids: List[str],
+    anchor_task_ids: List[str],
+    eval_agents: List[str],
+    train_agents: List[str],
+    alignment_method: str = "affine",
+    sanity_check: bool = True,
+) -> Dict[str, Any]:
+    """Evaluate predictor that requires response data for training.
+
+    CRITICAL: This function filters responses to only include train_agents
+    BEFORE passing to the predictor, ensuring no data leakage.
+
+    Args:
+        predictor: Predictor instance (e.g., FeatureIRTPredictor)
+        baseline_items: DataFrame with 'b' column (training targets)
+        oracle_items: DataFrame with 'b' column (oracle difficulties)
+        oracle_abilities: DataFrame with 'theta' column (oracle abilities)
+        responses: Response matrix as nested dict
+        frontier_task_ids: List of frontier task IDs (evaluation)
+        train_task_ids: List of training task IDs
+        anchor_task_ids: List of anchor task IDs (for scale alignment)
+        eval_agents: Agents to use for AUC (post-frontier)
+        train_agents: Pre-frontier agents for training (CRITICAL: no data leakage)
+        alignment_method: "constant" or "affine"
+        sanity_check: If True, print train set correlation
+
+    Returns:
+        Dict with spearman, pearson, auc metrics
+    """
+    # Get training data
+    train_tasks_available = [t for t in train_task_ids if t in baseline_items.index]
+    ground_truth_b = baseline_items.loc[train_tasks_available, "b"].values
+
+    # CRITICAL: Filter responses to ONLY include pre-frontier (train) agents
+    # This prevents any data leakage from post-frontier agents
+    train_responses = {
+        agent_id: agent_responses
+        for agent_id, agent_responses in responses.items()
+        if agent_id in train_agents
+    }
+    print(f"    Training with {len(train_responses)} pre-frontier agents")
+
+    # Fit with pre-filtered responses only
+    predictor.fit(
+        task_ids=train_tasks_available,
+        ground_truth_b=ground_truth_b,
+        responses=train_responses,
+    )
+
+    # Sanity check: evaluate on training tasks
+    if sanity_check:
+        train_predictions = predictor.predict(train_tasks_available)
+        baseline_dict = baseline_items["b"].to_dict()
+        train_metrics = compute_frontier_difficulty_metrics(
+            train_predictions, baseline_dict, train_tasks_available
+        )
+        print(f"    [Sanity check] Train set Spearman rho: {train_metrics['frontier_spearman_rho']:.4f}")
+
+    # Predict for all relevant tasks (frontier + anchor for alignment)
+    all_tasks = list(set(frontier_task_ids + anchor_task_ids))
+    # Filter to only tasks that were in training (FeatureIRTPredictor requires this)
+    all_tasks = [t for t in all_tasks if t in train_tasks_available]
     predictions = predictor.predict(all_tasks)
 
     # Compute full metrics
@@ -392,6 +477,11 @@ def main():
         action="store_true",
         help="Also train predictors on all tasks (still using baseline IRT difficulties) and compare",
     )
+    parser.add_argument(
+        "--grid_search",
+        action="store_true",
+        help="Run grid search over Feature-IRT hyperparameters",
+    )
     args = parser.parse_args()
 
     # Load dataset configuration
@@ -595,59 +685,34 @@ def main():
             "train_task_ids": all_task_ids_baseline,
         })
 
-    # 3. Embedding predictor
+    # Build list of available feature sources
+    feature_sources = []
     if embeddings_path.exists():
-        for config in training_configs:
-            method_name = f"Embedding + Ridge{config['suffix']}"
-            print(f"\nEvaluating {method_name}...")
-            print(f"  Training on {len(config['train_task_ids'])} tasks")
-            try:
-                source = EmbeddingFeatureSource(embeddings_path)
-                predictor = FeatureBasedPredictor(source)
-                embedding_metrics = evaluate_predictor(
-                    predictor=predictor,
-                    baseline_items=baseline_items,
-                    oracle_items=oracle_items,
-                    oracle_abilities=oracle_abilities,
-                    responses=responses,
-                    frontier_task_ids=frontier_task_ids,
-                    train_task_ids=config['train_task_ids'],
-                    anchor_task_ids=anchor_task_ids,
-                    eval_agents=post_frontier,
-                    alignment_method=args.alignment_method,
-                )
-                results[method_name] = embedding_metrics
-                auc = embedding_metrics.get('auc')
-                rho = embedding_metrics.get('frontier_spearman_rho')
-                print(f"  AUC: {auc:.4f}" if auc else "  AUC: N/A")
-                print(f"  Spearman rho: {rho:.4f}" if rho else "  Spearman rho: N/A")
-            except Exception as e:
-                print(f"  Error: {e}")
-                import traceback
-                traceback.print_exc()
-                results[method_name] = {
-                    "frontier_spearman_rho": float("nan"),
-                    "frontier_spearman_p": float("nan"),
-                    "auc": None,
-                    "num_frontier_tasks": 0,
-                }
+        feature_sources.append(("Embedding", EmbeddingFeatureSource(embeddings_path)))
     else:
         print(f"\nEmbeddings not found: {embeddings_path}")
 
-    # 4. LLM Judge predictor
     if llm_judge_path.exists():
+        feature_sources.append((
+            "LLM Judge",
+            CSVFeatureSource(
+                llm_judge_path,
+                feature_cols=dataset_config.llm_judge_feature_cols,
+                name="LLM Judge",
+            ),
+        ))
+    else:
+        print(f"\nLLM Judge features not found: {llm_judge_path}")
+
+    # 3-4. Feature + Ridge predictors (can generalize to unseen tasks)
+    for source_name, source in feature_sources:
         for config in training_configs:
-            method_name = f"LLM Judge + Ridge{config['suffix']}"
+            method_name = f"{source_name} + Ridge{config['suffix']}"
             print(f"\nEvaluating {method_name}...")
             print(f"  Training on {len(config['train_task_ids'])} tasks")
             try:
-                source = CSVFeatureSource(
-                    llm_judge_path,
-                    feature_cols=dataset_config.llm_judge_feature_cols,
-                    name="LLM Judge",
-                )
                 predictor = FeatureBasedPredictor(source)
-                llm_judge_metrics = evaluate_predictor(
+                metrics = evaluate_predictor(
                     predictor=predictor,
                     baseline_items=baseline_items,
                     oracle_items=oracle_items,
@@ -659,9 +724,9 @@ def main():
                     eval_agents=post_frontier,
                     alignment_method=args.alignment_method,
                 )
-                results[method_name] = llm_judge_metrics
-                auc = llm_judge_metrics.get('auc')
-                rho = llm_judge_metrics.get('frontier_spearman_rho')
+                results[method_name] = metrics
+                auc = metrics.get('auc')
+                rho = metrics.get('frontier_spearman_rho')
                 print(f"  AUC: {auc:.4f}" if auc else "  AUC: N/A")
                 print(f"  Spearman rho: {rho:.4f}" if rho else "  Spearman rho: N/A")
             except Exception as e:
@@ -674,8 +739,94 @@ def main():
                     "auc": None,
                     "num_frontier_tasks": 0,
                 }
+
+    # 5-6. Feature-IRT predictors (learns from response patterns, requires all tasks)
+    # Grid search over hyperparameters when --grid_search is enabled
+    all_task_ids_baseline = list(baseline_items.index)
+
+    if args.grid_search:
+        l2_weight_grid = [0.001, 0.01, 0.1]
+        l2_residual_grid = [1.0, 10.0, 100.0]
+        use_residuals_grid = [True, False]
     else:
-        print(f"\nLLM Judge features not found: {llm_judge_path}")
+        l2_weight_grid = [0.01]
+        l2_residual_grid = [10.0]
+        use_residuals_grid = [True]
+
+    for source_name, source in feature_sources:
+        method_name = f"Feature-IRT ({source_name})"
+        best_auc = -1
+        best_config = None
+        best_metrics = None
+
+        if args.grid_search:
+            print(f"\nRunning {method_name} grid search...")
+            print(f"  Training on {len(all_task_ids_baseline)} tasks")
+
+        for l2_w in l2_weight_grid:
+            for l2_r in l2_residual_grid:
+                for use_res in use_residuals_grid:
+                    if args.grid_search:
+                        print(f"    Testing: l2_w={l2_w}, l2_r={l2_r}, res={use_res}")
+
+                    try:
+                        predictor = FeatureIRTPredictor(
+                            source,
+                            use_residuals=use_res,
+                            l2_weight=l2_w,
+                            l2_residual=l2_r,
+                            verbose=args.verbose and not args.grid_search,
+                        )
+                        metrics = evaluate_predictor_with_responses(
+                            predictor=predictor,
+                            baseline_items=baseline_items,
+                            oracle_items=oracle_items,
+                            oracle_abilities=oracle_abilities,
+                            responses=responses,
+                            frontier_task_ids=frontier_task_ids,
+                            train_task_ids=all_task_ids_baseline,
+                            anchor_task_ids=anchor_task_ids,
+                            eval_agents=post_frontier,
+                            train_agents=pre_frontier,
+                            alignment_method=args.alignment_method,
+                            sanity_check=not args.grid_search,
+                        )
+                        auc = metrics.get('auc', 0) or 0
+                        if args.grid_search:
+                            rho = metrics.get('frontier_spearman_rho', 0) or 0
+                            print(f"      AUC: {auc:.4f}, Spearman: {rho:.4f}")
+
+                        if auc > best_auc:
+                            best_auc = auc
+                            best_config = (l2_w, l2_r, use_res)
+                            best_metrics = metrics
+                    except Exception as e:
+                        if args.grid_search:
+                            print(f"      Error: {e}")
+                        else:
+                            print(f"  Error: {e}")
+                            import traceback
+                            traceback.print_exc()
+
+        # Store best result
+        if best_metrics is not None:
+            if args.grid_search:
+                print(f"  Best: l2_w={best_config[0]}, l2_r={best_config[1]}, res={best_config[2]}")
+            if not args.grid_search:
+                print(f"\nEvaluating {method_name}...")
+                print(f"  Training on {len(all_task_ids_baseline)} tasks")
+            results[method_name] = best_metrics
+            auc = best_metrics.get('auc')
+            rho = best_metrics.get('frontier_spearman_rho')
+            print(f"  AUC: {auc:.4f}" if auc else "  AUC: N/A")
+            print(f"  Spearman rho: {rho:.4f}" if rho else "  Spearman rho: N/A")
+        else:
+            results[method_name] = {
+                "frontier_spearman_rho": float("nan"),
+                "frontier_spearman_p": float("nan"),
+                "auc": None,
+                "num_frontier_tasks": 0,
+            }
 
     # Print comparison table
     print()
