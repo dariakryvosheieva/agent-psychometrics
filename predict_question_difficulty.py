@@ -52,19 +52,71 @@ _require("transformers")
 _require("tqdm")
 _require("sklearn")
 _require("datasets")
+_require("huggingface_hub")
 
 import numpy as np
 import torch
 from datasets import load_dataset  # type: ignore
+from huggingface_hub import hf_hub_download
 from sklearn.linear_model import LinearRegression, Ridge, RidgeCV
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoConfig, AutoModel, AutoTokenizer, FineGrainedFP8Config, PreTrainedTokenizerFast
 import inspect
 from typing import Any
+import math
+
+
+def _load_tokenizer(backbone: str, *, trust_remote_code: bool) -> Any:
+    """
+    Load a tokenizer for `backbone`.
+
+    Some model repos publish a `tokenizer_config.json` with a legacy/removed
+    tokenizer class name (e.g. `"tokenizer_class": "TokenizersBackend"`), which
+    causes `AutoTokenizer.from_pretrained()` to fail even though a usable
+    `tokenizer.json` is present. In that case, fall back to loading the fast
+    tokenizer directly from `tokenizer.json`.
+    """
+    try:
+        return AutoTokenizer.from_pretrained(backbone, trust_remote_code=trust_remote_code)
+    except ValueError as e:
+        msg = str(e)
+        if "TokenizersBackend" not in msg:
+            raise
+
+        # Fallback: instantiate a fast tokenizer directly from tokenizer.json.
+        tok_json = hf_hub_download(repo_id=backbone, filename="tokenizer.json")
+        tok_cfg_path = None
+        try:
+            tok_cfg_path = hf_hub_download(repo_id=backbone, filename="tokenizer_config.json")
+        except Exception:
+            tok_cfg_path = None
+
+        tok_kwargs: Dict[str, Any] = {"tokenizer_file": tok_json}
+        extra_special_tokens: Optional[List[str]] = None
+        if tok_cfg_path is not None and os.path.exists(tok_cfg_path):
+            try:
+                with open(tok_cfg_path, "r") as f:
+                    cfg = json.load(f)
+                for k in ("bos_token", "eos_token", "unk_token", "pad_token"):
+                    if isinstance(cfg.get(k), str) and cfg.get(k):
+                        tok_kwargs[k] = cfg[k]
+                if isinstance(cfg.get("model_max_length"), int):
+                    tok_kwargs["model_max_length"] = cfg["model_max_length"]
+                if isinstance(cfg.get("extra_special_tokens"), list):
+                    extra_special_tokens = [str(x) for x in cfg["extra_special_tokens"]]
+            except Exception:
+                # If parsing fails, proceed with defaults from tokenizer.json.
+                pass
+
+        tok = PreTrainedTokenizerFast(**tok_kwargs)
+        if extra_special_tokens:
+            # Prefer marking existing tokens as special; if any are missing, HF will add them.
+            tok.additional_special_tokens = extra_special_tokens
+        return tok
 
 
 DIFFICULTY_INSTRUCTION = (
@@ -235,6 +287,88 @@ def load_zero_success_task_ids_from_subject_responses_jsonls(paths: Sequence[str
             continue
         out.update(load_zero_success_task_ids_from_subject_responses_jsonl(p))
     return sorted(out)
+
+
+def load_thetas_csv(path: str) -> Dict[str, float]:
+    """
+    Load per-subject abilities from an IRT-style abilities CSV.
+
+    Expected schema (same as `auroc.py`):
+      <first column: subject_id>, theta, theta_std (theta_std optional)
+    """
+    out: Dict[str, float] = {}
+    with open(path, newline="") as f:
+        r = csv.DictReader(f)
+        fns = list(r.fieldnames or [])
+        if not fns:
+            raise ValueError(f"Empty CSV or missing header row: {path}")
+        if "theta" not in fns:
+            raise ValueError(f"Expected column 'theta' in {path}, got columns={fns}")
+        id_col = fns[0]
+        for row in r:
+            sid = str(row.get(id_col, "") or "").strip()
+            if not sid:
+                continue
+            theta_s = str(row.get("theta", "") or "").strip()
+            if not theta_s:
+                continue
+            out[sid] = float(theta_s)
+    return out
+
+
+def iter_subject_responses_jsonls(paths: Sequence[str]) -> Iterator[Tuple[str, Dict[str, int]]]:
+    """
+    Yield (subject_id, responses) from one or more JSONL files with schema:
+      {"subject_id": "...", "responses": {"task_id": 0/1, ...}}
+
+    Normalizes item ids.
+    """
+    for path in list(paths or []):
+        p = str(path or "").strip()
+        if not p:
+            continue
+        with open(p, "r", encoding="utf-8") as f:
+            for line in f:
+                s = (line or "").strip()
+                if not s:
+                    continue
+                try:
+                    obj = json.loads(s)
+                except Exception:
+                    continue
+                sid = str(obj.get("subject_id", "") or "").strip()
+                resp = obj.get("responses", {}) or {}
+                if not sid or not isinstance(resp, dict):
+                    continue
+                out: Dict[str, int] = {}
+                for raw_id, v in resp.items():
+                    tid = normalize_swebench_item_id(str(raw_id))
+                    if not tid:
+                        continue
+                    try:
+                        out[tid] = int(v)
+                    except Exception:
+                        out[tid] = 1 if v else 0
+                yield sid, out
+
+
+def _compute_binary_auroc(scores: List[float], labels: List[int]) -> float:
+    """
+    ROC-AUC over binary labels. Returns NaN if undefined (e.g. only one class present).
+    Mirrors `auroc.py`'s behavior.
+    """
+    if len(scores) == 0:
+        return float("nan")
+    uniq = set(int(x) for x in labels)
+    if len(uniq) < 2:
+        return float("nan")
+    _require("torchmetrics")
+    from torchmetrics import AUROC  # type: ignore
+
+    auroc = AUROC(task="binary")
+    s = torch.tensor(scores, dtype=torch.float32)
+    y = torch.tensor(labels, dtype=torch.long)
+    return float(auroc(s, y).item())
 
 
 def last_token_pool(last_hidden_state: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
@@ -697,7 +831,7 @@ def embed_items(
       - embedding_dim
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tokenizer = AutoTokenizer.from_pretrained(backbone, trust_remote_code=trust_remote_code)
+    tokenizer = _load_tokenizer(backbone, trust_remote_code=trust_remote_code)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
@@ -713,12 +847,33 @@ def embed_items(
     else:
         raise ValueError(f"Unknown torch_dtype: {torch_dtype}")
 
-    # NOTE: transformers uses `torch_dtype`, not `dtype`.
-    model_kwargs = {"torch_dtype": dtype_arg}
+    # transformers v5 prefers `dtype`; older versions used `torch_dtype`.
+    # Use the signature to stay compatible across versions.
+    fp_params = inspect.signature(AutoModel.from_pretrained).parameters
+    if "dtype" in fp_params:
+        model_kwargs = {"dtype": dtype_arg}
+    else:
+        model_kwargs = {"torch_dtype": dtype_arg}
     if device_map and device_map != "none":
         model_kwargs["device_map"] = device_map
     if attn_implementation and attn_implementation != "auto":
         model_kwargs["attn_implementation"] = attn_implementation
+
+    # Some backbones (e.g. Devstral/Mistral3) ship pre-quantized FP8 weights.
+    # On many HPC clusters, Triton can't JIT-compile its small CUDA/Python helper
+    # because system Python headers aren't installed (missing `Python.h`), causing
+    # a crash at first FP8 matmul. If this model advertises FP8 quantization, we
+    # dequantize to bf16 during loading to avoid Triton entirely.
+    #
+    # Note: `quantization_config` is accepted via **kwargs in transformers, so it
+    # typically won't appear in the function signature.
+    try:
+        cfg = AutoConfig.from_pretrained(backbone, trust_remote_code=trust_remote_code)
+        qc = getattr(cfg, "quantization_config", None)
+        if isinstance(qc, dict) and str(qc.get("quant_method", "")).lower() == "fp8":
+            model_kwargs["quantization_config"] = FineGrainedFP8Config(dequantize=True)
+    except Exception:
+        pass
 
     model = _try_load_model_class(backbone, trust_remote_code=trust_remote_code, model_kwargs=model_kwargs)
     model.eval()
@@ -1007,7 +1162,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--embeddings_cache", type=str, default="", help="Optional path to existing embeddings cache (.npz).")
     p.add_argument("--overwrite", action="store_true")
 
-    p.add_argument("--test_fraction", type=float, default=0.2)
     p.add_argument(
         "--agent_results",
         type=str,
@@ -1019,6 +1173,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "zero successes across all subjects will be excluded from both train and test; "
             "after training/evaluating on the remaining items, predictions for these zero-success "
             "items will be printed (sorted) to stdout."
+        ),
+    )
+    p.add_argument(
+        "--auroc_thetas",
+        type=str,
+        default="",
+        help=(
+            "Optional path to an IRT abilities CSV (expects columns: <index>,theta,theta_std). "
+            "If provided (and --agent_results is provided), we compute held-out ROC-AUC per CV fold "
+            "using probs = sigmoid(theta - diff_pred), mirroring `auroc.py`."
         ),
     )
     p.add_argument(
@@ -1169,40 +1333,133 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     Xy = np.stack([X[id_to_row[tid]] for tid in eligible], axis=0).astype(np.float32)
     y = np.array([diffs[tid] for tid in eligible], dtype=np.float32)
 
-    # Deterministic split on eligible items only.
-    train_idx, test_idx = stable_split_ids(eligible, test_fraction=float(args.test_fraction), seed=int(args.seed))
-    X_train, y_train = Xy[train_idx], y[train_idx]
-    X_test, y_test = Xy[test_idx], y[test_idx]
-
     regressor_name = str(args.regressor)
     alphas: np.ndarray = np.array([], dtype=np.float64)
-    if regressor_name == "linear":
-        model = LinearRegression()
-        model.fit(X_train, y_train)
-    elif regressor_name == "ridge":
-        alpha = float(args.ridge_alpha)
-        if not (alpha > 0):
-            raise ValueError("--ridge_alpha must be > 0")
-        model = Pipeline(steps=[("scaler", StandardScaler(with_mean=True, with_std=True)), ("ridge", Ridge(alpha=alpha))])
-        model.fit(X_train, y_train)
-    elif regressor_name == "ridge_cv":
-        try:
-            alphas = np.array([float(x.strip()) for x in str(args.ridge_alphas).split(",") if x.strip()], dtype=np.float64)
-        except Exception as e:
-            raise ValueError(f"Failed to parse --ridge_alphas={args.ridge_alphas!r}: {e}") from e
-        if alphas.size == 0:
-            raise ValueError("Expected at least one alpha in --ridge_alphas")
-        cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
-        model = Pipeline(
-            steps=[("scaler", StandardScaler(with_mean=True, with_std=True)), ("ridge", RidgeCV(alphas=alphas, cv=cv))]
-        )
-        model.fit(X_train, y_train)
-    else:
+
+    def _make_model():
+        nonlocal alphas
+        if regressor_name == "linear":
+            return LinearRegression()
+        if regressor_name == "ridge":
+            alpha = float(args.ridge_alpha)
+            if not (alpha > 0):
+                raise ValueError("--ridge_alpha must be > 0")
+            return Pipeline(
+                steps=[("scaler", StandardScaler(with_mean=True, with_std=True)), ("ridge", Ridge(alpha=alpha))]
+            )
+        if regressor_name == "ridge_cv":
+            try:
+                alphas = np.array(
+                    [float(x.strip()) for x in str(args.ridge_alphas).split(",") if x.strip()],
+                    dtype=np.float64,
+                )
+            except Exception as e:
+                raise ValueError(f"Failed to parse --ridge_alphas={args.ridge_alphas!r}: {e}") from e
+            if alphas.size == 0:
+                raise ValueError("Expected at least one alpha in --ridge_alphas")
+            inner_cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+            return Pipeline(
+                steps=[
+                    ("scaler", StandardScaler(with_mean=True, with_std=True)),
+                    ("ridge", RidgeCV(alphas=alphas, cv=inner_cv)),
+                ]
+            )
         raise AssertionError(f"Unhandled regressor: {regressor_name}")
 
-    yhat_train = model.predict(X_train).astype(np.float64)
-    yhat_test = model.predict(X_test).astype(np.float64)
-    yhat_all = model.predict(Xy).astype(np.float64)
+    # 5-fold CV evaluation on eligible items only.
+    outer_cv = KFold(n_splits=5, shuffle=True, random_state=int(args.seed))
+    cv_r2_folds: List[float] = []
+    cv_rmse_folds: List[float] = []
+    cv_pearson_folds: List[float] = []
+    cv_test_auc_folds: List[float] = []
+    yhat_oof = np.full((int(len(eligible)),), np.nan, dtype=np.float64)
+    fold_of_item = np.full((int(len(eligible)),), -1, dtype=np.int32)
+
+    # Optional AUROC inputs (abilities + response JSONLs).
+    thetas: Dict[str, float] = {}
+    compute_auroc = False
+    auroc_thetas_path = str(args.auroc_thetas or "").strip()
+    if auroc_thetas_path and agent_results_paths:
+        thetas = load_thetas_csv(auroc_thetas_path)
+        compute_auroc = bool(thetas)
+        if not compute_auroc:
+            print(f"WARNING: Loaded 0 thetas from {auroc_thetas_path}; skipping AUROC.")
+    elif auroc_thetas_path and not agent_results_paths:
+        print("WARNING: --auroc_thetas was set but --agent_results was not provided; skipping AUROC.")
+
+    # Preload responses once if we will compute AUROC.
+    responses_by_subject: List[Tuple[str, Dict[str, int]]] = []
+    if compute_auroc:
+        eligible_set = set(eligible)
+        for sid, resp in iter_subject_responses_jsonls(agent_results_paths):
+            if sid not in thetas:
+                continue
+            # Keep only items we might evaluate (eligible only; excludes zero-success + unlabeled).
+            filt = {k: int(v) for k, v in resp.items() if k in eligible_set}
+            if not filt:
+                continue
+            responses_by_subject.append((sid, filt))
+        if not responses_by_subject:
+            print("WARNING: No usable (theta, responses) pairs found after filtering; skipping AUROC.")
+            compute_auroc = False
+
+    if not compute_auroc:
+        raise ValueError(
+            "Selecting the best saved model by ROC-AUC requires both --auroc_thetas and --agent_results "
+            "with usable overlapping subjects/items."
+        )
+
+    best_fold_auc = -float("inf")
+    best_fold_auc_r2 = float("nan")
+    best_fold = -1
+    best_model = None
+
+    for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
+        m = _make_model()
+        m.fit(Xy[tr], y[tr])
+        pred = m.predict(Xy[te]).astype(np.float64)
+        yhat_oof[te] = pred
+        fold_of_item[te] = int(fold)
+        fold_r2 = float(r2_score(y[te], pred))
+        cv_r2_folds.append(fold_r2)
+        cv_rmse_folds.append(float(_rmse(y[te], pred)))
+        cv_pearson_folds.append(float(_pearsonr(y[te], pred)))
+        te_items = [eligible[int(i)] for i in te.tolist()]
+        z_by_item = {tid: float(z) for tid, z in zip(te_items, pred.tolist())}
+        scores: List[float] = []
+        labels: List[int] = []
+        for sid, resp in responses_by_subject:
+            theta = float(thetas[sid])
+            for item_id, y_obs in resp.items():
+                z = z_by_item.get(item_id, None)
+                if z is None:
+                    continue
+                # Match `auroc.py` probability definition: sigmoid(theta - z)
+                scores.append(1.0 / (1.0 + math.exp(-(theta - float(z)))))
+                labels.append(int(y_obs))
+        fold_auc = float(_compute_binary_auroc(scores, labels))
+        cv_test_auc_folds.append(float(fold_auc))
+        if fold_auc == fold_auc and fold_auc > best_fold_auc:
+            best_fold_auc = float(fold_auc)
+            best_fold_auc_r2 = float(fold_r2)
+            best_fold = int(fold)
+            best_model = m
+
+    if np.isnan(yhat_oof).any() or (fold_of_item < 0).any():
+        raise RuntimeError("KFold CV produced incomplete out-of-fold predictions (unexpected).")
+    if best_model is None or best_fold < 1:
+        raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
+
+    cv_r2_mean = float(np.mean(cv_r2_folds)) if cv_r2_folds else float("nan")
+    print(f"5-fold CV R^2 (mean over folds): {cv_r2_mean:.6f}")
+    print("5-fold CV R^2 per fold: " + ", ".join([f"{x:.6f}" for x in cv_r2_folds]))
+    auc_mean = float(np.mean(cv_test_auc_folds)) if cv_test_auc_folds else float("nan")
+    print(f"5-fold CV test ROC-AUC (mean over folds): {auc_mean}")
+    print("5-fold CV test ROC-AUC per fold: " + ", ".join([str(x) for x in cv_test_auc_folds]))
+    print(f"Best CV fold by held-out ROC-AUC: fold={best_fold} auc={best_fold_auc} (r2={best_fold_auc_r2:.6f})")
+
+    # Use the best-fold model (highest held-out R^2) for saving weights + predicting zero-success items.
+    model = best_model
 
     ridge_alpha = None
     if regressor_name in ("ridge", "ridge_cv"):
@@ -1218,18 +1475,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "n_items_zero_success_labeled_excluded": int(len(labeled_ids) - len(eligible)),
         "zero_success_source": (zero_success_source or None),
         "embedding_dim": int(Xy.shape[1]),
-        "train_fraction": float(1.0 - args.test_fraction),
-        "test_fraction": float(args.test_fraction),
-        "test_fraction_actual": float(len(test_idx) / max(1, len(eligible))),
-        "n_test_target": int(round(len(eligible) * float(args.test_fraction))),
-        "n_test_actual": int(len(test_idx)),
         "seed": int(args.seed),
-        "train_r2": float(r2_score(y_train, yhat_train)),
-        "test_r2": float(r2_score(y_test, yhat_test)),
-        "train_rmse": float(_rmse(y_train, yhat_train)),
-        "test_rmse": float(_rmse(y_test, yhat_test)),
-        "train_pearson": float(_pearsonr(y_train, yhat_train)),
-        "test_pearson": float(_pearsonr(y_test, yhat_test)),
+        "cv_n_splits": 5,
+        "cv_r2_folds": [float(x) for x in cv_r2_folds],
+        "cv_r2_mean": float(cv_r2_mean),
+        "cv_best_auc_fold": int(best_fold),
+        "cv_best_auc": float(best_fold_auc),
+        "cv_best_auc_fold_r2": float(best_fold_auc_r2),
+        "cv_rmse_folds": [float(x) for x in cv_rmse_folds],
+        "cv_rmse_mean": float(np.mean(cv_rmse_folds)) if cv_rmse_folds else float("nan"),
+        "cv_pearson_folds": [float(x) for x in cv_pearson_folds],
+        "cv_pearson_mean": float(np.mean(cv_pearson_folds)) if cv_pearson_folds else float("nan"),
+        "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
+        "cv_test_auc_mean": float(np.mean(cv_test_auc_folds)) if cv_test_auc_folds else float("nan"),
+        "auroc_thetas_csv": (auroc_thetas_path or None),
         "regressor": regressor_name,
         "ridge_alpha": ridge_alpha,
         "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
@@ -1275,7 +1534,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "dataset_path": str(args.dataset_path),
         "id_normalization": "strip instance_ prefix; strip -v.* suffix",
         "seed": int(args.seed),
-        "test_fraction": float(args.test_fraction),
+        "cv_n_splits": 5,
+        "cv_best_auc_fold": int(best_fold),
+        "cv_best_auc": float(best_fold_auc),
+        "cv_best_auc_fold_r2": float(best_fold_auc_r2),
         "ridge_alpha": ridge_alpha,
         "cv_folds": (int(args.cv_folds) if regressor_name == "ridge_cv" else None),
         "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
@@ -1284,7 +1546,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         out_dir=str(args.out_dir),
         model=model,
         regressor_name=str(regressor_name),
-        feature_dim=int(X_train.shape[1]),
+        feature_dim=int(Xy.shape[1]),
         metadata=weights_meta,
     )
     metrics.update({"regression_weights_json": weights_json, "regression_weights_npz": weights_npz})
@@ -1307,21 +1569,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
-    # Write per-item predictions (train/test plus optional zero_success rows).
-    split_set = set(test_idx)
+    # Write per-item predictions (OOF CV + optional zero_success rows).
     pred_path = os.path.join(args.out_dir, "predictions.csv")
     with open(pred_path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["item_id", "diff_true", "diff_pred", "split"])
+        w = csv.DictWriter(f, fieldnames=["item_id", "diff_true", "diff_pred", "split", "fold"])
         w.writeheader()
 
-        # Train/test rows (eligible only).
+        # Eligible rows: one per item with out-of-fold prediction.
         for i, tid in enumerate(eligible):
             w.writerow(
                 {
                     "item_id": tid,
                     "diff_true": float(y[i]),
-                    "diff_pred": float(yhat_all[i]),
-                    "split": "test" if i in split_set else "train",
+                    "diff_pred": float(yhat_oof[i]),
+                    "split": "cv_val",
+                    "fold": int(fold_of_item[i]),
                 }
             )
 
@@ -1336,6 +1598,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         "diff_true": "" if diff_true is None else float(diff_true),
                         "diff_pred": float(score),
                         "split": "zero_success",
+                        "fold": "",
                     }
                 )
 
@@ -1343,7 +1606,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if yhat_zero is not None and zero_embedded:
         pairs = list(zip(zero_embedded, yhat_zero.tolist()))
         pairs.sort(key=lambda kv: float(kv[1]), reverse=True)
-        print("\n=== ZERO_SUCCESS_PREDICTIONS_SORTED (task_id, diff_pred) ===")
+        print(
+            f"\n=== ZERO_SUCCESS_PREDICTIONS_SORTED (task_id, diff_pred) "
+            f"[model=best_cv_fold_by_auc fold={best_fold} auc={best_fold_auc} r2={best_fold_auc_r2:.6f}] ==="
+        )
         for tid, score in pairs:
             print(f"{tid}\t{float(score):.6f}")
 

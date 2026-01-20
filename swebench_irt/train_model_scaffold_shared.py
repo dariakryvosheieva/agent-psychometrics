@@ -10,6 +10,9 @@ across multiple benchmarks (e.g., SWE-bench Verified, SWE-bench Pro, Terminal-Be
 Model:
   p(y=1 | m, s, i) = sigmoid( a_i * ( theta_model[m] + theta_scaffold[s] - b_i ) )
 
+2D 1PL:
+  p(y=1 | m, s, i) = sigmoid( sum_d ( theta_model[m, d] + theta_scaffold[s, d] - b_i[d] ) )
+
 where items i are identified by their task name / instance id. We assume the
 benchmarks provide distinct task names, so explicit benchmark prefixes are not needed.
 
@@ -527,6 +530,80 @@ class ModelScaffold2PL:
             pyro.sample("a", dist.LogNormal(loc_a, scale_a))
 
 
+class ModelScaffold2D1PL:
+    """2D 1PL (Rasch) with theta_model + theta_scaffold and 2D item difficulty."""
+
+    def __init__(self, num_models: int, num_scaffolds: int, num_items: int, dims: int = 2):
+        if dims != 2:
+            raise ValueError("ModelScaffold2D1PL currently supports dims=2 only.")
+        self.num_models = num_models
+        self.num_scaffolds = num_scaffolds
+        self.num_items = num_items
+        self.dims = dims
+
+    def model(self, m_idx, s_idx, items, y):
+        # Dimension-wise hierarchical scales (independent across dims).
+        sigma_theta_m = pyro.sample(
+            "sigma_theta_model", dist.HalfNormal(1.0).expand([self.dims]).to_event(1)
+        )
+        sigma_theta_s = pyro.sample(
+            "sigma_theta_scaffold", dist.HalfNormal(1.0).expand([self.dims]).to_event(1)
+        )
+        sigma_b = pyro.sample("sigma_b", dist.HalfNormal(1.0).expand([self.dims]).to_event(1))
+
+        zero = y.new_zeros(self.dims)
+        with pyro.plate("models", self.num_models):
+            theta_m_raw = pyro.sample("theta_model_raw", dist.Normal(zero, sigma_theta_m).to_event(1))
+        with pyro.plate("scaffolds", self.num_scaffolds):
+            theta_s_raw = pyro.sample("theta_scaffold_raw", dist.Normal(zero, sigma_theta_s).to_event(1))
+        with pyro.plate("items", self.num_items):
+            b = pyro.sample("b", dist.Normal(zero, sigma_b).to_event(1))
+
+        # Center each dimension for identifiability.
+        theta_m = theta_m_raw - theta_m_raw.mean(dim=0, keepdim=True)
+        theta_s = theta_s_raw - theta_s_raw.mean(dim=0, keepdim=True)
+
+        with pyro.plate("obs", y.size(0)):
+            # (N, D) -> (N,) logits via equal-weight sum across dims (no discrimination).
+            logits = ((theta_m[m_idx] + theta_s[s_idx]) - b[items]).sum(-1)
+            pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
+
+    def guide(self, m_idx, s_idx, items, y):
+        sigma_theta_m_q = pyro.param(
+            "sigma_theta_model_q", torch.ones(self.dims), constraint=constraints.positive
+        )
+        sigma_theta_s_q = pyro.param(
+            "sigma_theta_scaffold_q", torch.ones(self.dims), constraint=constraints.positive
+        )
+        sigma_b_q = pyro.param("sigma_b_q", torch.ones(self.dims), constraint=constraints.positive)
+
+        pyro.sample("sigma_theta_model", dist.Delta(sigma_theta_m_q).to_event(1))
+        pyro.sample("sigma_theta_scaffold", dist.Delta(sigma_theta_s_q).to_event(1))
+        pyro.sample("sigma_b", dist.Delta(sigma_b_q).to_event(1))
+
+        loc_theta_m = pyro.param("loc_theta_model_raw", torch.zeros(self.num_models, self.dims))
+        scale_theta_m = pyro.param(
+            "scale_theta_model_raw",
+            torch.ones(self.num_models, self.dims),
+            constraint=constraints.positive,
+        )
+        loc_theta_s = pyro.param("loc_theta_scaffold_raw", torch.zeros(self.num_scaffolds, self.dims))
+        scale_theta_s = pyro.param(
+            "scale_theta_scaffold_raw",
+            torch.ones(self.num_scaffolds, self.dims),
+            constraint=constraints.positive,
+        )
+        loc_b = pyro.param("loc_b", torch.zeros(self.num_items, self.dims))
+        scale_b = pyro.param("scale_b", torch.ones(self.num_items, self.dims), constraint=constraints.positive)
+
+        with pyro.plate("models", self.num_models):
+            pyro.sample("theta_model_raw", dist.Normal(loc_theta_m, scale_theta_m).to_event(1))
+        with pyro.plate("scaffolds", self.num_scaffolds):
+            pyro.sample("theta_scaffold_raw", dist.Normal(loc_theta_s, scale_theta_s).to_event(1))
+        with pyro.plate("items", self.num_items):
+            pyro.sample("b", dist.Normal(loc_b, scale_b).to_event(1))
+
+
 def train_svi(model_fn, guide_fn, obs: MultiBenchObs, epochs: int, lr: float = 0.01) -> list[float]:
     from pyro.infer import SVI, Trace_ELBO
     from pyro.optim import ClippedAdam
@@ -544,7 +621,11 @@ def train_svi(model_fn, guide_fn, obs: MultiBenchObs, epochs: int, lr: float = 0
 
 
 def _centered_loc(loc_raw: torch.Tensor) -> torch.Tensor:
-    return loc_raw - loc_raw.mean()
+    if loc_raw.ndim == 1:
+        return loc_raw - loc_raw.mean()
+    if loc_raw.ndim == 2:
+        return loc_raw - loc_raw.mean(dim=0, keepdim=True)
+    raise ValueError(f"Expected loc_raw ndim in {{1,2}}, got {loc_raw.ndim}")
 
 
 def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
@@ -553,7 +634,21 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
     b_loc = pyro.param("loc_b").detach().cpu().numpy()
     b_scale = pyro.param("scale_b").detach().cpu().numpy()
 
-    items_df = pd.DataFrame({"b": b_loc, "b_std": b_scale}, index=obs.item_ids)
+    if model_type == "2d_1pl":
+        if b_loc.ndim != 2 or b_loc.shape[1] != 2:
+            raise ValueError(f"Expected loc_b shape (num_items, 2) for 2d_1pl, got {b_loc.shape}")
+        items_df = pd.DataFrame(
+            {
+                "b1": b_loc[:, 0],
+                "b2": b_loc[:, 1],
+                "b1_std": b_scale[:, 0],
+                "b2_std": b_scale[:, 1],
+                "b_sum": b_loc[:, 0] + b_loc[:, 1],
+            },
+            index=obs.item_ids,
+        )
+    else:
+        items_df = pd.DataFrame({"b": b_loc, "b_std": b_scale}, index=obs.item_ids)
     if model_type == "2pl":
         a_loc = pyro.param("loc_log_a").detach().cpu().numpy()
         a_scale = pyro.param("scale_log_a").detach().cpu().numpy()
@@ -576,20 +671,58 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
     _write_items_subset(obs.terminal_bench_item_ids, "items_terminal_bench.csv")
 
     theta_m_loc_raw = pyro.param("loc_theta_model_raw").detach().cpu()
-    theta_m_scale = pyro.param("scale_theta_model_raw").detach().cpu().numpy()
-    theta_m_loc = _centered_loc(theta_m_loc_raw).numpy()
-    model_df = pd.DataFrame({"theta": theta_m_loc, "theta_std": theta_m_scale}, index=obs.model_ids).sort_values(
-        "theta", ascending=False
-    )
-    model_df.to_csv(out_dir / "model_abilities.csv")
+    theta_m_scale = pyro.param("scale_theta_model_raw").detach().cpu()
+    theta_m_loc = _centered_loc(theta_m_loc_raw)
+
+    if model_type == "2d_1pl":
+        if theta_m_loc.ndim != 2 or theta_m_loc.shape[1] != 2:
+            raise ValueError(
+                f"Expected loc_theta_model_raw shape (num_models, 2) for 2d_1pl, got {tuple(theta_m_loc.shape)}"
+            )
+        model_df = pd.DataFrame(
+            {
+                "theta1": theta_m_loc[:, 0].numpy(),
+                "theta2": theta_m_loc[:, 1].numpy(),
+                "theta1_std": theta_m_scale[:, 0].numpy(),
+                "theta2_std": theta_m_scale[:, 1].numpy(),
+            },
+            index=obs.model_ids,
+        )
+        model_df["theta_sum"] = model_df["theta1"] + model_df["theta2"]
+        model_df["theta_avg"] = 0.5 * model_df["theta_sum"]
+        model_df.sort_values("theta_avg", ascending=False).to_csv(out_dir / "model_abilities.csv")
+    else:
+        model_df = pd.DataFrame(
+            {"theta": theta_m_loc.numpy(), "theta_std": theta_m_scale.numpy()}, index=obs.model_ids
+        ).sort_values("theta", ascending=False)
+        model_df.to_csv(out_dir / "model_abilities.csv")
 
     theta_s_loc_raw = pyro.param("loc_theta_scaffold_raw").detach().cpu()
-    theta_s_scale = pyro.param("scale_theta_scaffold_raw").detach().cpu().numpy()
-    theta_s_loc = _centered_loc(theta_s_loc_raw).numpy()
-    scaffold_df = pd.DataFrame(
-        {"theta": theta_s_loc, "theta_std": theta_s_scale}, index=obs.scaffold_ids
-    ).sort_values("theta", ascending=False)
-    scaffold_df.to_csv(out_dir / "scaffold_abilities.csv")
+    theta_s_scale = pyro.param("scale_theta_scaffold_raw").detach().cpu()
+    theta_s_loc = _centered_loc(theta_s_loc_raw)
+
+    if model_type == "2d_1pl":
+        if theta_s_loc.ndim != 2 or theta_s_loc.shape[1] != 2:
+            raise ValueError(
+                f"Expected loc_theta_scaffold_raw shape (num_scaffolds, 2) for 2d_1pl, got {tuple(theta_s_loc.shape)}"
+            )
+        scaffold_df = pd.DataFrame(
+            {
+                "theta1": theta_s_loc[:, 0].numpy(),
+                "theta2": theta_s_loc[:, 1].numpy(),
+                "theta1_std": theta_s_scale[:, 0].numpy(),
+                "theta2_std": theta_s_scale[:, 1].numpy(),
+            },
+            index=obs.scaffold_ids,
+        )
+        scaffold_df["theta_sum"] = scaffold_df["theta1"] + scaffold_df["theta2"]
+        scaffold_df["theta_avg"] = 0.5 * scaffold_df["theta_sum"]
+        scaffold_df.sort_values("theta_avg", ascending=False).to_csv(out_dir / "scaffold_abilities.csv")
+    else:
+        scaffold_df = pd.DataFrame(
+            {"theta": theta_s_loc.numpy(), "theta_std": theta_s_scale.numpy()}, index=obs.scaffold_ids
+        ).sort_values("theta", ascending=False)
+        scaffold_df.to_csv(out_dir / "scaffold_abilities.csv")
     # NOTE: Intentionally do not write agent_splits.csv (contains per-agent metadata that
     # isn't needed for downstream analyses and can be large/noisy).
 
@@ -625,8 +758,8 @@ def main() -> None:
         "--model",
         type=str,
         default="2pl",
-        choices=["1pl", "2pl"],
-        help="IRT model type (1pl=Rasch, 2pl=discrimination+difficulty)",
+        choices=["1pl", "2pl", "2d_1pl"],
+        help="IRT model type (1pl=1D Rasch, 2pl=1D discrimination+difficulty, 2d_1pl=2D Rasch)",
     )
     parser.add_argument("--seed", type=int, default=None, help="Random seed")
     parser.add_argument(
@@ -669,9 +802,12 @@ def main() -> None:
     if args.model == "1pl":
         model_obj = ModelScaffold1PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids))
         subdir = "1d_1pl"
-    else:
+    elif args.model == "2pl":
         model_obj = ModelScaffold2PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids))
         subdir = "1d_2pl"
+    else:
+        model_obj = ModelScaffold2D1PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids), dims=2)
+        subdir = "2d_1pl"
 
     out_dir = out_root / subdir
     out_dir.mkdir(parents=True, exist_ok=True)
