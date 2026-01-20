@@ -1,314 +1,126 @@
-# Experiment B: Posterior Difficulty Prediction
+# Experiment B: Frontier Task Difficulty Prediction
 
-Uses failing agent trajectories to improve IRT difficulty prediction for hard tasks.
+Predict difficulty of **frontier tasks** (tasks only solvable by newer models) using any method WITHOUT access to held-out post-frontier agents. Evaluate using ROC-AUC after projecting predicted difficulties onto the oracle IRT scale.
 
 ## Overview
 
-**Goal**: Prove that failure trajectories from "weak" models contain signal about the solvability for "stronger" models.
+**Research Question**: Can we predict the difficulty of tasks that are currently beyond the capability of existing models, using only information available before those models were released?
 
-**Key Insight**: Trajectory features from weak models (that fail on a task) provide signal about task difficulty beyond what can be inferred from static task features alone.
-
-This corresponds to **Section 3.2** in the [research proposal](../chris%20proposal.md).
-
-## Model Architecture
-
-```
-posterior_difficulty_i = prior(x_i) + psi^T * avg_j[f(tau_ij)]
-
-Loss = MSE(predicted, ground_truth_b) + lambda * ||psi||^2
-```
-
-Where:
-- `prior(x_i)` = linear model on task features (from Experiment A)
-- `psi` = single set of learned weights (same for all trajectories)
-- `f(tau_ij)` = feature vector from trajectory of agent j on task i
-- `avg_j` = average across all weak model trajectories for task i
+**Setting**:
+- **Date-based split**: Pre-frontier (< 2025-08-07) vs Post-frontier (>= 2025-08-07)
+- **Frontier tasks**: Tasks with ≤10% pass rate among pre-frontier agents, but >10% among post-frontier agents
+- **No data leakage**: Predictions made using only pre-frontier information; post-frontier agents only used for evaluation
 
 ## Quick Start
 
 ```bash
 source .venv/bin/activate
 
-# Run with defaults (simple trajectory features)
-python -m experiment_b.train_evaluate
+# Run comparison with default settings
+python -m experiment_b.compare_methods
 
-# Run with LLM judge features
-python -m experiment_b.train_evaluate --feature_source llm_judge
+# With custom embeddings (e.g., different backbone)
+python -m experiment_b.compare_methods \
+    --embeddings_path chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__maxlen8192.npz
 
-# Adjust pass rate threshold
-python -m experiment_b.train_evaluate --weak_threshold 0.1
+# Save results to CSV
+python -m experiment_b.compare_methods --output_csv chris_output/experiment_b_results.csv
 
-# Dry run (show config without running)
-python -m experiment_b.train_evaluate --dry_run
+# Show alignment parameters
+python -m experiment_b.compare_methods --verbose
 ```
 
-## Data Splitting Strategy
+## Methods Compared
 
-### Agent Splitting (by submission date)
+| Method | Description | Training Data |
+|--------|-------------|---------------|
+| **Oracle** | True IRT difficulties (upper bound) | All agents |
+| **Baseline IRT** | IRT trained on pre-frontier agents only | Pre-frontier responses |
+| **Embedding + Ridge** | Task embeddings → difficulty | Non-frontier tasks + baseline IRT β |
+| **LLM Judge + Ridge** | LLM-extracted semantic features | Non-frontier tasks + baseline IRT β |
+| **SAD-IRT** | State-aware deep IRT (from experiment_sad_irt) | Pre-frontier responses + trajectories |
 
-- Parse YYYYMMDD prefix from agent names
-- **M1 (oldest 40%)**: Used for training posterior on D_train
-- **M2 (middle 40%)**: Used for evaluating posterior on D_valid
-- **M3 (newest 20%)**: Held out for future testing
+## Evaluation Methodology
 
-### Task Splitting (by empirical pass rate)
+### 1. Spearman Correlation
+- Compare predicted vs oracle difficulty ranking on frontier tasks
+- No scale alignment needed (rank-based metric)
 
-- **D_train**: Tasks with ≤20% pass rate among M1, but >30% among M2 (tasks that got easier)
-- **D_valid**: Tasks with ≤20% pass rate among M2, but >30% among M3 (disjoint from D_train)
-- Threshold (20%) is configurable via `--weak_threshold`
+### 2. ROC-AUC with Scale Alignment
+1. **Identify anchor tasks**: Tasks with 10-90% pass rate in BOTH pre- and post-frontier groups
+2. **Fit affine transformation**: `oracle_β = slope × predicted_β + intercept` on anchors
+3. **Compute probabilities**: For each (post-frontier agent, frontier task) pair:
+   - `P(success) = sigmoid(θ_oracle - β_shifted)`
+4. **Calculate ROC-AUC**: Compare predicted probabilities to actual responses
 
-## Results (2026-01-13)
+**Note**: Scale alignment uses oracle information and is ONLY for evaluation. In production, you would not have access to oracle difficulties.
 
-**Primary metric: AUC-ROC** - Uses IRT formula P(success) = sigmoid(θ - β) to predict agent-task outcomes.
+## Data Splits
 
-| Feature Source | D_train AUC | D_valid AUC | ΔAUC | Notes |
-|----------------|-------------|-------------|------|-------|
-| Prior only (embedding) | 0.6830 | 0.7383 | — | Baseline |
-| + Simple features | 0.7076 | **0.7444** | **+0.0062** | Best result |
-| + LLM judge features | 0.6929 | 0.7215 | -0.0168 | Overfits |
-| + Lunette features | 0.6846 | 0.7383 | +0.0000 | Too few |
-| + Trajectory embeddings | — | 0.7384 | +0.0002 | No improvement |
-
-**Key finding:** Simple trajectory features (message count, chars, resolve rate) provide a small but positive improvement. LLM judge features overfit and hurt validation. Trajectory embeddings provide no signal beyond the prior.
-
-### Embedding PCA Ablation (2026-01-13)
-
-Tested trajectory embeddings with PCA dimensionality reduction and varying ridge alphas. Key findings:
-
-| Aggregation | PCA Dims | Best Alpha | D_valid AUC | ΔAUC |
-|-------------|----------|------------|-------------|------|
-| mean_only | None | 1M | 0.7384 | +0.0001 |
-| mean_only | 25 | 1M | 0.7384 | +0.0002 |
-| mean_std | None | 1M | 0.7383 | 0.0000 |
-
-**Conclusion:** Embeddings contain no useful signal for difficulty residual prediction:
-- Only alpha=1M (extreme regularization) preserves prior performance
-- Lower alphas (100-100k) hurt AUC by -0.7% to -5%
-- PCA doesn't help—the correction term is zeroed out regardless of dimensionality
-- The feature/sample ratio (4096-8192 dims / 119 samples) is too extreme
-
-## Feature Sources
-
-### 1. Simple Features (Default)
-
-5 basic trajectory statistics averaged across agents:
-
-| Feature | Description |
-|---------|-------------|
-| `avg_message_count` | Average number of messages in trajectory |
-| `avg_total_chars` | Average total character count |
-| `avg_assistant_ratio` | Ratio of assistant messages to total |
-| `avg_message_length` | Average characters per message |
-| `resolved_rate` | Fraction of trajectories that resolved the task |
-
-### 2. LLM Judge Features
-
-Pre-compute with:
-```bash
-python -m experiment_b.llm_judge.compute_features_v1 --dry_run  # See what would be computed
-python -m experiment_b.llm_judge.compute_features_v7 --limit 50  # Compute v7 features
+```
+Pre-frontier agents (< 2025-08-07):  ~107 agents
+Post-frontier agents (>= 2025-08-07): ~24 agents
+Frontier tasks:                       ~40 tasks
+Anchor tasks (10-90% pass rate):      ~200 tasks
 ```
 
-**Important: Feature Version Coverage**
+The cutoff date (2025-08-07) corresponds to the gpt-5-mini release, which significantly improved agent capabilities.
 
-| Version | Tasks | Agents | Notes |
-|---------|-------|--------|-------|
-| v5_single | **143** | 1 | Best coverage, single agent (location_vs_fix_alignment) |
-| v4 | 143 | 5 | Multi-agent features |
-| v1 | 126 | 3 | Original features |
-| v7 | 26 | 31 | Most agents but fewest tasks - **insufficient for D_valid** |
-
-**Recommendation:** Use `--feature_source llm_judge_v5_single` for best task coverage. v7 only has 26 tasks with features, which means D_valid tasks likely have no features and fall back to prior-only predictions.
-
-Features (v7):
-- **Primary**: `llm_judge_difficulty_score` (0-1)
-- **Competencies (1-4)**: backtracking_exploration, task_decomposition, observation_reading, self_verification
-- **Failure modes (0-1)**: localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure
-- **Trajectory signals (0-1)**: agent_looping, agent_gave_up_early, agent_wrong_focus, context_overflow
-
-### 3. Lunette Features
-
-Uses Lunette API for grading. Requires trajectories to be uploaded first (see [LUNETTE.md](../lunette_utils/LUNETTE.md)).
-
-### 4. Embedding Features (Experimental)
-
-Uses VLM trajectory embeddings instead of hand-crafted features. See [embeddings/README.md](embeddings/README.md) for full documentation.
-
-```bash
-# Compute embeddings on cluster (GPU required)
-sbatch scripts/embedding/compute_embeddings_multi_gpu.sh
-
-# Train and evaluate (CPU)
-python -m experiment_b.embeddings.train_evaluate \
-    --embeddings_dir chris_output/experiment_b/trajectory_embeddings/full_difficulty
-```
-
-## Module Structure
+## Directory Structure
 
 ```
 experiment_b/
-├── __init__.py
-├── README.md                      # This file
-├── config.py                      # ExperimentConfig dataclass
-├── data_splits.py                 # Agent/task splitting logic
-├── prior_model.py                 # Prior models (heuristic + embedding)
-├── posterior_model.py             # Prior + trajectory correction
-├── train_evaluate.py              # Main training pipeline
-├── trajectory_features.py         # Simple 5-feature extraction
-├── trajectory_features_v2.py      # Extended simple features
-│
-├── embeddings/                    # VLM embedding approach
-│   ├── README.md                  # Embedding documentation
-│   ├── compute_embeddings.py      # GPU embedding extraction
-│   ├── aggregator.py              # Multi-trajectory aggregation
-│   ├── posterior_model.py         # Ridge regression on embeddings
-│   ├── train_evaluate.py          # Embedding training pipeline
-│   └── pca_ablation.py            # PCA ablation study
-│
-├── llm_judge/                     # LLM-as-judge approach
-│   ├── features_v1.py ... v7.py   # Feature extraction versions
-│   ├── compute_features_*.py      # Pre-compute scripts
-│   └── analyze_residuals.py       # Analysis scripts
-│
-└── lunette/                       # Lunette grading approach
-    ├── features.py                # Lunette feature extraction
-    ├── compute_features.py        # Pre-compute with Lunette API
-    └── structured_output.py       # Structured output utilities
+├── __init__.py           # Module docstring
+├── README.md             # This file
+├── config.py             # ExperimentBConfig dataclass
+├── data_splits.py        # Agent/task splitting utilities
+├── evaluate.py           # Evaluation metrics (Spearman, AUC, alignment)
+└── compare_methods.py    # Main entry point for comparing methods
 ```
-
-## Regression Modes
-
-Three approaches for combining trajectory features with the prior:
-
-```bash
-# Compare all modes
-python -m experiment_b.train_evaluate --feature_source llm_judge_v5_single --compare_modes
-
-# Run specific mode
-python -m experiment_b.train_evaluate --regression_mode direct_with_prior
-```
-
-| Mode | Formula | Features | Target |
-|------|---------|----------|--------|
-| `residual` (default) | `prior + psi * features` | trajectory only | ground_truth - prior |
-| `direct_with_prior` | `model(features, prior)` | trajectory + prior prediction | ground_truth |
-| `direct_with_prior_features` | `model(features, embeddings)` | trajectory + prior input features | ground_truth |
-
-**Results (llm_judge_v5_single, 2026-01-14, with RidgeCV alpha selection):**
-
-| Mode | Best Alpha | D_train AUC | D_valid AUC | ΔAUC vs Prior |
-|------|------------|-------------|-------------|---------------|
-| Prior only | — | 0.6823 | **0.7362** | — |
-| residual | 1e+06 | 0.6820 | **0.7362** | +0.0000 |
-| direct_with_prior | 1e+06 | 0.7350 | 0.6911 | -0.0451 |
-| direct_with_prior_features | 1e+06 | 0.7353 | 0.6880 | -0.0481 |
-
-**Key finding:** Even with RidgeCV selecting optimal regularization (alpha=1e+06), direct regression modes underperform. The residual mode perfectly preserves the prior's AUC. Direct modes fail because they try to predict absolute difficulty from scratch rather than learning a correction—with 117 training samples, they can't generalize even with strong regularization. **Use `residual` mode**.
-
-## Evaluation Baselines
-
-Always compare against these baselines when evaluating new features:
-
-| Baseline | D_train AUC | D_valid AUC | Description |
-|----------|-------------|-------------|-------------|
-| **Constant (mean)** | 0.7343 | 0.6873 | Predict mean training difficulty for all tasks |
-| **Prior (embedding)** | 0.6823 | **0.7362** | Task embeddings → difficulty (no trajectories) |
-
-**Why both baselines matter:**
-- **Constant baseline**: Lower bound. If your model doesn't beat this, it has learned nothing useful.
-- **Prior baseline**: Target to beat. The prior uses task information; trajectory features should add signal beyond this.
-
-Note: The constant baseline has higher *training* AUC but lower *validation* AUC than the prior. This is because predicting the mean overfits to the training distribution but doesn't generalize.
-
-## Interpreting Ridge Alpha
-
-RidgeCV selects regularization strength automatically. The selected alpha is diagnostic:
-
-| Alpha Selected | Interpretation |
-|----------------|----------------|
-| **Small (0.01-1)** | Features have strong signal; model can use them freely |
-| **Medium (10-1000)** | Features have some signal but need regularization |
-| **Large (1e5-1e6)** | Features have **no useful signal**; regularization zeros them out |
-
-**When alpha → 1e6:**
-- Coefficients shrink to ~0 (e.g., 1e-6)
-- Model outputs approximately the intercept (mean target) for all inputs
-- For `residual` mode: prediction ≈ `prior + mean_residual` (preserves prior ranking)
-- For `direct` modes: prediction ≈ `mean_difficulty` (constant, like baseline)
-
-**Example (llm_judge_v5_single with alpha=1e6):**
-```
-MODE: residual
-  Intercept: 0.2655, Coefficients: [4.97e-06]
-  → prediction ≈ prior + 0.27 (prior ranking preserved)
-
-MODE: direct_with_prior
-  Intercept: 1.5554, Coefficients: [4.95e-06, 1.40e-05]
-  → prediction ≈ 1.55 for all tasks (= mean difficulty)
-```
-
-This explains why direct modes with alpha=1e6 have D_valid AUC ≈ 0.69 (same as constant baseline) while residual mode has AUC ≈ 0.74 (same as prior)—the residual formulation degrades gracefully when features are uninformative.
 
 ## Configuration
 
+All settings in `config.py`:
+
 ```python
 @dataclass
-class ExperimentConfig:
-    # Data paths (use 1PL model for consistency with evaluation formula)
-    items_path: Path = Path("clean_data/swebench_verified_20251120_full/1d_1pl/items.csv")
-    responses_path: Path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
-    trajectories_dir: Path = Path("trajectory_data/unified_trajs")
-    output_dir: Path = Path("chris_output/experiment_b")
+class ExperimentBConfig:
+    # Data paths
+    responses_path: Path = "clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"
+    oracle_irt_path: Path = "clean_data/swebench_verified_20251120_full/1d/items.csv"
+    baseline_irt_path: Path = "chris_output/sad_irt/baseline_irt/items.csv"
+    embeddings_path: Path = "..."  # Any backbone's embeddings
+    llm_judge_path: Path = "..."   # LLM judge features CSV
 
-    # Agent splitting
-    m1_fraction: float = 0.4  # Oldest 40%
-    m2_fraction: float = 0.4  # Middle 40%
-    # M3 = remaining 20%
+    # Frontier split
+    cutoff_date: str = "20250807"
+    pre_threshold: float = 0.1   # Max pass rate for pre-frontier
+    post_threshold: float = 0.1  # Min pass rate for post-frontier
 
-    # Task selection
-    weak_threshold: float = 0.2  # Max pass rate for "hard" tasks
-    strong_min_improvement: float = 0.1  # Min improvement for strong group
-
-    # Model parameters
-    prior_alpha: float = 1.0  # Ridge alpha for prior
-    posterior_alpha: float = 1.0  # Ridge alpha for psi
+    # Alignment
+    alignment_method: str = "affine"  # or "constant"
 ```
 
-## Output
+## Multi-Backbone Embeddings
 
-Results saved to `chris_output/experiment_b/experiment_b_results.json`:
+This experiment supports embeddings from different backbone models:
 
-```json
-{
-  "split": {
-    "m1_agents": ["agent1", ...],
-    "m2_agents": ["agent2", ...],
-    "m3_agents": ["agent3", ...],
-    "d_train_tasks": ["task1", ...],
-    "d_valid_tasks": ["task2", ...]
-  },
-  "prior_train": {"pearson_r": 0.031, "mse": 1.23, "n": 45},
-  "posterior_train": {"pearson_r": 0.114, "mse": 1.18, "n": 45},
-  "prior_valid": {"pearson_r": -0.153, "mse": 1.45, "n": 38},
-  "posterior_valid": {"pearson_r": -0.087, "mse": 1.41, "n": 38},
-  "psi_coefficients": {...}
-}
+```bash
+# Generate embeddings with any backbone (in experiment_a)
+python -m experiment_a.generate_embeddings --backbone "Qwen/Qwen3-VL-8B-Instruct"
+python -m experiment_a.generate_embeddings --backbone "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+
+# Use in experiment_b
+python -m experiment_b.compare_methods --embeddings_path path/to/embeddings.npz
 ```
 
-## Restriction of Range Issue
+## Related Experiments
 
-**Important**: Low correlation on D_train/D_valid is misleading due to "restriction of range."
-
-D_train is a biased subset with much lower variance in difficulty:
-
-| Dataset | Mean b | Std b | Range |
-|---------|--------|-------|-------|
-| All 500 tasks | 0.21 | 2.13 | [-3.78, 5.16] |
-| D_train (119) | 0.91 | 0.81 | [-0.43, 3.58] |
-
-**Recommendation**: Use AUC-ROC instead of correlation/RMSE for evaluation.
+- **Experiment A**: Prior validation - tests how well static task features predict difficulty
+- **Experiment SAD-IRT**: SAD-IRT model for frontier difficulty prediction using trajectory information
 
 ## References
 
-- [SWE-Bench Failure Analysis](https://arxiv.org/pdf/2509.13941) - Taxonomy of failure modes
-- [AgentDiagnose](https://aclanthology.org/2025.emnlp-demos.15.pdf) - Trajectory quality judging
+- [IRT Models Documentation](../docs/IRT_MODELS.md)
+- [Data Pipeline](../docs/DATA_PIPELINE.md)
+- [Research Proposal](../chris%20proposal.md) - Section 3.2

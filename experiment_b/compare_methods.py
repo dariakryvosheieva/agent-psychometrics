@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Compare all SAD-IRT methods for frontier task difficulty prediction.
+"""Compare methods for frontier task difficulty prediction.
 
 This script compares:
-1. Baseline IRT (pre-frontier agents only, no trajectories)
-2. SAD-IRT runs (from experiment tracker or extracted beta CSV files)
-3. Embedding + Ridge (Experiment A style predictor)
-4. LLM Judge + Ridge (Experiment A style predictor)
+1. Oracle (upper bound): True IRT difficulties
+2. Baseline IRT: Train IRT on pre-frontier agents only
+3. Embedding + Ridge: Task embeddings with Ridge regression
+4. LLM Judge + Ridge: LLM-extracted semantic features with Ridge
+5. SAD-IRT (optional): From experiment_sad_irt extracted beta values
 
 Methods are evaluated by:
 - Spearman correlation with oracle IRT difficulties on frontier tasks
@@ -16,10 +17,10 @@ an affine transformation fitted on "nontrivial" anchor tasks (10-90% pass rate i
 both agent groups). This alignment uses oracle information and is ONLY for evaluation.
 
 Usage:
-    python -m experiment_sad_irt.compare_methods
-    python -m experiment_sad_irt.compare_methods --sad_irt_csv chris_output/sad_irt_experiments.csv
-    python -m experiment_sad_irt.compare_methods --output_csv chris_output/method_comparison.csv
-    python -m experiment_sad_irt.compare_methods --alignment_method affine
+    python -m experiment_b.compare_methods
+    python -m experiment_b.compare_methods --embeddings_path path/to/embeddings.npz
+    python -m experiment_b.compare_methods --output_csv chris_output/experiment_b_results.csv
+    python -m experiment_b.compare_methods --alignment_method affine
 """
 
 import argparse
@@ -30,7 +31,6 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-# Import from experiment_b (canonical location for frontier evaluation utilities)
 from experiment_b.data_splits import (
     get_all_agents_from_responses,
     identify_frontier_tasks,
@@ -45,7 +45,7 @@ from experiment_b.evaluate import (
     load_responses_dict,
 )
 
-# Import from experiment_a
+# Import predictors from experiment_a
 from experiment_a.difficulty_predictor import (
     DifficultyPredictorBase,
     EmbeddingPredictor,
@@ -173,13 +173,6 @@ def evaluate_predictor(
     )
 
 
-def load_sad_irt_experiments(csv_path: Path) -> pd.DataFrame:
-    """Load SAD-IRT experiment tracker results."""
-    if not csv_path.exists():
-        return pd.DataFrame()
-    return pd.read_csv(csv_path)
-
-
 def print_comparison_table(
     results: Dict[str, Dict],
     frontier_task_count: int,
@@ -191,7 +184,7 @@ def print_comparison_table(
 ) -> None:
     """Print formatted comparison table."""
     print("=" * 90)
-    print("SAD-IRT METHOD COMPARISON")
+    print("EXPERIMENT B: FRONTIER TASK DIFFICULTY PREDICTION")
     print("=" * 90)
     print()
     print("Frontier Task Definition:")
@@ -303,7 +296,7 @@ def save_results_csv(results: Dict[str, Dict], output_path: Path) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Compare SAD-IRT methods for frontier task difficulty prediction"
+        description="Compare methods for frontier task difficulty prediction"
     )
     parser.add_argument(
         "--responses_path",
@@ -337,19 +330,13 @@ def main():
             "qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_instance-v1__"
             "princeton-nlp_SWE-bench_Verified__test__n500__maxlen8192__seed0.npz"
         ),
-        help="Path to embeddings .npz file",
+        help="Path to embeddings .npz file (any backbone)",
     )
     parser.add_argument(
         "--llm_judge_path",
         type=Path,
         default=Path("chris_output/experiment_a/llm_judge_features/llm_judge_features.csv"),
         help="Path to LLM judge features CSV",
-    )
-    parser.add_argument(
-        "--sad_irt_csv",
-        type=Path,
-        default=Path("chris_output/sad_irt_experiments.csv"),
-        help="Path to SAD-IRT experiments CSV",
     )
     parser.add_argument(
         "--sad_irt_beta_dir",
@@ -528,9 +515,7 @@ def main():
             print(f"    Spearman rho: {rho:.4f}" if rho else "    Spearman rho: N/A")
     else:
         print(f"\nSAD-IRT beta directory not found: {args.sad_irt_beta_dir}")
-        print("  To include SAD-IRT results:")
-        print("  1. Run on cluster: sbatch slurm_scripts/extract_sad_irt_beta.sh")
-        print("  2. Copy results: scp -r <user>@engaging:~/model_irt/chris_output/sad_irt_beta_values chris_output/")
+        print("  To include SAD-IRT results, run experiment_sad_irt and extract beta values")
 
     # 3. Embedding predictor
     if args.embeddings_path.exists():

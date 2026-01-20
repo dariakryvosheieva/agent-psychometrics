@@ -1,90 +1,66 @@
-"""Split agents and tasks for Experiment B training/validation."""
+"""Data splitting utilities for frontier task difficulty evaluation.
+
+This module provides functions for:
+- Splitting agents by date cutoff (pre-frontier vs post-frontier)
+- Computing pass rates per task for different agent groups
+- Identifying frontier tasks (hard for pre-frontier, easier for post-frontier)
+- Identifying nontrivial anchor tasks for scale alignment
+"""
 
 import json
 import re
 from collections import defaultdict
-from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 
-@dataclass
-class ExperimentSplit:
-    """Container for experiment data splits."""
-
-    m1_agents: List[str]  # Oldest 40%
-    m2_agents: List[str]  # Middle 40%
-    m3_agents: List[str]  # Newest 20%
-    d_train_tasks: List[str]  # Tasks for training
-    d_valid_tasks: List[str]  # Tasks for validation (disjoint from d_train)
-    # Pass rates for debugging
-    m1_pass_rates: Dict[str, float]
-    m2_pass_rates: Dict[str, float]
-    m3_pass_rates: Dict[str, float]
-
-
-def extract_submission_date(agent_name: str) -> Optional[datetime]:
-    """Extract submission date from agent name prefix.
+def extract_date_prefix(agent_name: str) -> str:
+    """Extract YYYYMMDD date prefix from agent name.
 
     Args:
         agent_name: Agent name like '20240620_sweagent_claude3.5sonnet'
 
     Returns:
-        datetime object or None if no valid date prefix found
+        Date string like '20240620' or empty string if no valid prefix
     """
-    # Match YYYYMMDD at start of string
     match = re.match(r"^(\d{8})_", agent_name)
     if match:
-        date_str = match.group(1)
-        try:
-            return datetime.strptime(date_str, "%Y%m%d")
-        except ValueError:
-            return None
-    return None
+        return match.group(1)
+    return ""
 
 
-def split_agents_by_date(
+def split_agents_by_cutoff(
     agents: List[str],
-    m1_fraction: float = 0.4,
-    m2_fraction: float = 0.4,
-) -> Tuple[List[str], List[str], List[str], datetime, datetime]:
-    """Split agents into M1, M2, M3 groups by submission date.
+    cutoff_date: str = "20250807",
+) -> Tuple[List[str], List[str]]:
+    """Split agents into pre-frontier and post-frontier by date cutoff.
 
     Args:
         agents: List of agent names
-        m1_fraction: Fraction of oldest agents for M1 (default 40%)
-        m2_fraction: Fraction of middle agents for M2 (default 40%)
+        cutoff_date: Date string in YYYYMMDD format. Agents with date >= cutoff
+                     are post-frontier, agents with date < cutoff are pre-frontier.
 
     Returns:
-        Tuple of (m1_agents, m2_agents, m3_agents, t1_cutoff, t2_cutoff)
+        Tuple of (pre_frontier_agents, post_frontier_agents)
     """
-    # Extract dates and sort
-    agent_dates = []
+    pre_frontier = []
+    post_frontier = []
+
     for agent in agents:
-        date = extract_submission_date(agent)
-        if date:
-            agent_dates.append((agent, date))
+        date_prefix = extract_date_prefix(agent)
+        if not date_prefix:
+            # No valid date prefix, skip this agent
+            continue
 
-    # Sort by date (oldest first)
-    agent_dates.sort(key=lambda x: x[1])
+        if date_prefix >= cutoff_date:
+            post_frontier.append(agent)
+        else:
+            pre_frontier.append(agent)
 
-    n = len(agent_dates)
-    n_m1 = int(n * m1_fraction)
-    n_m2 = int(n * m2_fraction)
-
-    m1 = [a[0] for a in agent_dates[:n_m1]]
-    m2 = [a[0] for a in agent_dates[n_m1 : n_m1 + n_m2]]
-    m3 = [a[0] for a in agent_dates[n_m1 + n_m2 :]]
-
-    # Get cutoff dates
-    t1_cutoff = agent_dates[n_m1 - 1][1] if n_m1 > 0 else None
-    t2_cutoff = agent_dates[n_m1 + n_m2 - 1][1] if n_m1 + n_m2 > 0 else None
-
-    return m1, m2, m3, t1_cutoff, t2_cutoff
+    return pre_frontier, post_frontier
 
 
-def compute_empirical_pass_rates(
+def compute_pass_rates(
     responses_path: Path,
     agents: List[str],
 ) -> Dict[str, float]:
@@ -114,36 +90,110 @@ def compute_empirical_pass_rates(
     }
 
 
-def select_tasks_by_pass_rate(
-    pass_rates_weak: Dict[str, float],
-    pass_rates_strong: Dict[str, float],
-    weak_threshold: float = 0.2,
-    strong_min_improvement: float = 0.1,
+def identify_frontier_tasks(
+    responses_path: Path,
+    pre_frontier_agents: List[str],
+    post_frontier_agents: List[str],
+    pre_threshold: float = 0.1,
+    post_threshold: float = 0.1,
 ) -> List[str]:
-    """Select tasks where weak models struggle but strong models improve.
+    """Identify frontier tasks: hard for pre-frontier, easier for post-frontier.
+
+    Frontier tasks are those where:
+    - Pass rate among pre-frontier agents <= pre_threshold (e.g., 10%)
+    - Pass rate among post-frontier agents > post_threshold (e.g., 10%)
 
     Args:
-        pass_rates_weak: Pass rates for weak model group
-        pass_rates_strong: Pass rates for strong model group
-        weak_threshold: Max pass rate for weak group (default 20%)
-        strong_min_improvement: Min improvement for strong group
+        responses_path: Path to JSONL response matrix
+        pre_frontier_agents: List of pre-frontier agent names
+        post_frontier_agents: List of post-frontier agent names
+        pre_threshold: Maximum pass rate for pre-frontier (default 0.1 = 10%)
+        post_threshold: Minimum pass rate for post-frontier (default 0.1 = 10%)
 
     Returns:
-        List of task_ids meeting criteria
+        List of task_ids that are frontier tasks
     """
-    selected = []
-    for task_id in pass_rates_weak:
-        weak_rate = pass_rates_weak.get(task_id, 0)
-        strong_rate = pass_rates_strong.get(task_id, 0)
+    pre_pass_rates = compute_pass_rates(responses_path, pre_frontier_agents)
+    post_pass_rates = compute_pass_rates(responses_path, post_frontier_agents)
 
-        if weak_rate <= weak_threshold and strong_rate > weak_rate + strong_min_improvement:
-            selected.append(task_id)
+    frontier_tasks = []
+    for task_id in pre_pass_rates:
+        pre_rate = pre_pass_rates.get(task_id, 0.0)
+        post_rate = post_pass_rates.get(task_id, 0.0)
 
-    return selected
+        if pre_rate <= pre_threshold and post_rate > post_threshold:
+            frontier_tasks.append(task_id)
+
+    return frontier_tasks
+
+
+def identify_nontrivial_tasks(
+    responses_path: Path,
+    pre_frontier_agents: List[str],
+    post_frontier_agents: List[str],
+    min_pass_rate: float = 0.10,
+    max_pass_rate: float = 0.90,
+) -> Tuple[List[str], Dict[str, float], Dict[str, float]]:
+    """Identify tasks with non-trivial pass rates in BOTH agent groups.
+
+    Non-trivial tasks have meaningful variation - neither too easy nor too hard
+    for both pre-frontier and post-frontier agents. These are useful as anchor
+    tasks for aligning IRT scales.
+
+    Args:
+        responses_path: Path to JSONL response matrix
+        pre_frontier_agents: List of pre-frontier agent names
+        post_frontier_agents: List of post-frontier agent names
+        min_pass_rate: Minimum pass rate threshold (default 0.10 = 10%)
+        max_pass_rate: Maximum pass rate threshold (default 0.90 = 90%)
+
+    Returns:
+        Tuple of (nontrivial_task_ids, pre_pass_rates, post_pass_rates)
+    """
+    pre_pass_rates = compute_pass_rates(responses_path, pre_frontier_agents)
+    post_pass_rates = compute_pass_rates(responses_path, post_frontier_agents)
+
+    nontrivial_tasks = []
+    for task_id in pre_pass_rates:
+        pre_rate = pre_pass_rates.get(task_id, 0.0)
+        post_rate = post_pass_rates.get(task_id, 0.0)
+
+        # Both groups must have meaningful variation
+        pre_nontrivial = min_pass_rate <= pre_rate <= max_pass_rate
+        post_nontrivial = min_pass_rate <= post_rate <= max_pass_rate
+
+        if pre_nontrivial and post_nontrivial:
+            nontrivial_tasks.append(task_id)
+
+    return nontrivial_tasks, pre_pass_rates, post_pass_rates
+
+
+def get_all_agents_from_responses(responses_path: Path) -> List[str]:
+    """Get list of all agent IDs from response matrix.
+
+    Args:
+        responses_path: Path to JSONL response matrix
+
+    Returns:
+        List of agent IDs (subject_id values)
+    """
+    agents = []
+    with open(responses_path) as f:
+        for line in f:
+            data = json.loads(line)
+            agents.append(data["subject_id"])
+    return agents
 
 
 def get_agents_with_trajectories(trajectories_dir: Path) -> Set[str]:
-    """Get set of agents that have trajectory data."""
+    """Get set of agents that have trajectory data.
+
+    Args:
+        trajectories_dir: Path to trajectory directory
+
+    Returns:
+        Set of agent names that have trajectory subdirectories
+    """
     agents = set()
     for path in trajectories_dir.iterdir():
         if path.is_dir() and not path.name.startswith("_"):
@@ -151,87 +201,86 @@ def get_agents_with_trajectories(trajectories_dir: Path) -> Set[str]:
     return agents
 
 
-def create_experiment_split(
+def get_pre_frontier_agents(
     responses_path: Path,
     trajectories_dir: Path,
-    weak_threshold: float = 0.2,
-    strong_min_improvement: float = 0.1,
-    m1_fraction: float = 0.4,
-    m2_fraction: float = 0.4,
-) -> ExperimentSplit:
-    """Create the full experiment split.
+    cutoff_date: str = "20250807",
+) -> Tuple[List[str], List[str]]:
+    """Get pre-frontier and post-frontier agent lists for training/inference.
 
-    D_train: Tasks hard for M1 but easier for M2
-    D_valid: Tasks hard for M2 but easier for M3 (disjoint from D_train)
+    This is the canonical function for determining agent lists. It ensures
+    consistent ordering between training and inference by:
+    1. Reading agents from response matrix (preserves JSONL line order)
+    2. Filtering to agents with trajectories
+    3. Splitting by cutoff date
+
+    Args:
+        responses_path: Path to JSONL response matrix
+        trajectories_dir: Path to trajectory directory
+        cutoff_date: Date cutoff for pre/post frontier (YYYYMMDD format)
+
+    Returns:
+        Tuple of (pre_frontier_agents, post_frontier_agents)
+
+    Example:
+        >>> pre_frontier, post_frontier = get_pre_frontier_agents(
+        ...     Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl"),
+        ...     Path("chris_output/trajectory_summaries_api"),
+        ... )
+        >>> print(f"Pre-frontier: {len(pre_frontier)} agents")
     """
-    # Load all agents from responses
-    response_agents = set()
-    with open(responses_path) as f:
-        for line in f:
-            data = json.loads(line)
-            response_agents.add(data["subject_id"])
+    # Get all agents in response matrix order (this order is preserved!)
+    all_agents = get_all_agents_from_responses(responses_path)
 
     # Get agents with trajectories
     traj_agents = get_agents_with_trajectories(trajectories_dir)
 
-    # Use only agents in both
-    agents = list(response_agents & traj_agents)
-    print(f"Agents in response matrix: {len(response_agents)}")
-    print(f"Agents with trajectories: {len(traj_agents)}")
-    print(f"Agents in both: {len(agents)}")
+    # Filter to agents with both (preserving response matrix order)
+    agents_with_both = [a for a in all_agents if a in traj_agents]
 
-    # Split agents by date
-    m1, m2, m3, t1, t2 = split_agents_by_date(agents, m1_fraction, m2_fraction)
-    print(f"M1 (oldest): {len(m1)} agents, cutoff: {t1}")
-    print(f"M2 (middle): {len(m2)} agents, cutoff: {t2}")
-    print(f"M3 (newest): {len(m3)} agents")
-
-    # Compute pass rates
-    pr_m1 = compute_empirical_pass_rates(responses_path, m1)
-    pr_m2 = compute_empirical_pass_rates(responses_path, m2)
-    pr_m3 = compute_empirical_pass_rates(responses_path, m3)
-
-    # Select training tasks (hard for M1, easier for M2)
-    d_train = select_tasks_by_pass_rate(pr_m1, pr_m2, weak_threshold, strong_min_improvement)
-    print(f"D_train candidates (hard for M1, easier for M2): {len(d_train)}")
-
-    # Select validation tasks (hard for M2, easier for M3)
-    d_valid_candidates = select_tasks_by_pass_rate(pr_m2, pr_m3, weak_threshold, strong_min_improvement)
-    print(f"D_valid candidates (hard for M2, easier for M3): {len(d_valid_candidates)}")
-
-    # Ensure disjoint
-    d_train_set = set(d_train)
-    d_valid = [t for t in d_valid_candidates if t not in d_train_set]
-    print(f"D_valid (after removing overlap): {len(d_valid)}")
-
-    return ExperimentSplit(
-        m1_agents=m1,
-        m2_agents=m2,
-        m3_agents=m3,
-        d_train_tasks=d_train,
-        d_valid_tasks=d_valid,
-        m1_pass_rates=pr_m1,
-        m2_pass_rates=pr_m2,
-        m3_pass_rates=pr_m3,
+    # Split by cutoff date
+    pre_frontier, post_frontier = split_agents_by_cutoff(
+        agents_with_both, cutoff_date=cutoff_date
     )
+
+    return pre_frontier, post_frontier
 
 
 if __name__ == "__main__":
     # Test the splitting logic
-    from experiment_b.config import ExperimentConfig
+    responses_path = Path("clean_data/swebench_verified/swebench_verified_20251120_full.jsonl")
 
-    config = ExperimentConfig()
-    split = create_experiment_split(
-        responses_path=config.responses_path,
-        trajectories_dir=config.trajectories_dir,
-        weak_threshold=config.weak_threshold,
-        strong_min_improvement=config.strong_min_improvement,
-        m1_fraction=config.m1_fraction,
-        m2_fraction=config.m2_fraction,
+    # Get all agents
+    all_agents = get_all_agents_from_responses(responses_path)
+    print(f"Total agents in response matrix: {len(all_agents)}")
+
+    # Split by cutoff date
+    pre_frontier, post_frontier = split_agents_by_cutoff(all_agents, cutoff_date="20250807")
+    print(f"\nPre-frontier (< 20250807): {len(pre_frontier)} agents")
+    print(f"Post-frontier (>= 20250807): {len(post_frontier)} agents")
+
+    # Identify frontier tasks
+    frontier_tasks = identify_frontier_tasks(
+        responses_path,
+        pre_frontier,
+        post_frontier,
+        pre_threshold=0.1,
+        post_threshold=0.1,
     )
-    print(f"\nFinal split:")
-    print(f"  M1: {len(split.m1_agents)} agents")
-    print(f"  M2: {len(split.m2_agents)} agents")
-    print(f"  M3: {len(split.m3_agents)} agents")
-    print(f"  D_train: {len(split.d_train_tasks)} tasks")
-    print(f"  D_valid: {len(split.d_valid_tasks)} tasks")
+    print(f"\nFrontier tasks (<=10% pre, >10% post): {len(frontier_tasks)}")
+
+    # Identify nontrivial anchor tasks
+    nontrivial_tasks, pre_rates, post_rates = identify_nontrivial_tasks(
+        responses_path,
+        pre_frontier,
+        post_frontier,
+    )
+    print(f"Nontrivial anchor tasks (10-90% in both): {len(nontrivial_tasks)}")
+
+    # Show some examples
+    if frontier_tasks:
+        print("\nExample frontier tasks:")
+        for task_id in frontier_tasks[:5]:
+            pre_rate = pre_rates.get(task_id, 0.0)
+            post_rate = post_rates.get(task_id, 0.0)
+            print(f"  {task_id}: pre={pre_rate:.1%}, post={post_rate:.1%}")
