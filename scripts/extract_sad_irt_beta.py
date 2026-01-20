@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """Extract beta values from SAD-IRT checkpoints.
 
+This is a standalone script with minimal dependencies (torch, pandas, json).
+It does NOT import from experiment_sad_irt to avoid peft/transformers dependencies.
+
 This script extracts learned difficulty (beta) values from SAD-IRT checkpoints
 and saves them as simple CSV files that can be transferred and used for evaluation.
 
-This is designed to run on the cluster where checkpoints are stored, and output
-lightweight CSV files that can be easily transferred locally.
-
 Usage:
     # Extract from a single checkpoint
-    python -m experiment_sad_irt.extract_sad_irt_beta \
+    python scripts/extract_sad_irt_beta.py \
         --checkpoint chris_output/sad_irt_long/full_20260118_024625/checkpoint_best*.pt \
         --output_dir chris_output/sad_irt_beta_values
 
     # Extract from all checkpoints in a directory
-    python -m experiment_sad_irt.extract_sad_irt_beta \
+    python scripts/extract_sad_irt_beta.py \
         --checkpoint_dir chris_output/sad_irt_long \
         --output_dir chris_output/sad_irt_beta_values
 

@@ -48,8 +48,8 @@ echo "Checkpoint directory: $CHECKPOINT_DIR"
 echo "Output directory: $OUTPUT_DIR"
 echo ""
 
-# Run extraction
-python -m experiment_sad_irt.extract_sad_irt_beta \
+# Run extraction (using standalone script to avoid peft/transformers imports)
+python scripts/extract_sad_irt_beta.py \
     --checkpoint_dir "$CHECKPOINT_DIR" \
     --output_dir "$OUTPUT_DIR"
 
