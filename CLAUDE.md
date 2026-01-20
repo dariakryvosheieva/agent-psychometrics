@@ -122,6 +122,13 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 - Add any new experimental output files to `.gitignore` before committing
 - Goal: leave the repository in the same clean state you found it
 
+**Fail loudly on data issues:**
+- Never write code that silently skips or ignores missing data
+- Raise explicit errors when expected data is missing (tasks, agents, features, dates, etc.)
+- Use warnings for non-critical issues, but errors for data that should exist
+- Example: if a task is expected to have embeddings but doesn't, raise an error rather than silently excluding it
+- This makes debugging much easier by catching issues at their source
+
 **MIT Engaging Cluster:**
 - HuggingFace cache is stored on scratch to avoid home quota limits
 - Always set this in SLURM scripts: `export HF_HOME="$HOME/orcd/scratch/.cache/huggingface"`
