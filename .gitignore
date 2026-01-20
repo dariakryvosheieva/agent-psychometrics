@@ -171,3 +171,6 @@ chris_output/experiment_a/experiment_a_cv*_results.json
 # Generated plots
 training_curves.png
 chris_output/scale_alignment_analysis/
+
+# Experiment B TerminalBench outputs (regenerable)
+chris_output/experiment_b/terminalbench/
