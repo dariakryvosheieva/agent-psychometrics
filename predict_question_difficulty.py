@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
 """
-Embed SWE-bench Verified tasks using inputs of the form:
+Embed SWE-bench-style tasks using inputs of the form:
 
   question statement + solution + instruction
 
 and fit a regression model to predict per-question difficulty.
 
-This is a sibling of `predict_question_difficulty.py`, but it:
-- Loads tasks directly from the HF `datasets` hub (default: SWE-bench Verified test split).
-- Uses the dataset's solution patch (no trajectories).
-- Embeds ~500 inputs (SWE-bench Verified test size), rather than ~56k trajectories.
+This script trains an IRT model **per CV fold** (no leakage):
+
+For each of K folds over items/tasks:
+  - Train an IRT model (1PL) using ONLY responses for items in the K-1 training folds.
+  - Use the IRT-trained item difficulties (b) on the training items as supervision to fit a
+    regression model from embeddings -> difficulty.
+  - Predict difficulty for the held-out fold items (out-of-fold predictions).
+  - Evaluate held-out ROC-AUC on the held-out fold using:
+        p(success) = sigmoid(theta_subject - z_item_pred)
+    where theta_subject comes from the fold's IRT training (fit on train items only).
+
+We intentionally do NOT compute R^2 on held-out items since they do not have IRT-derived
+difficulty parameters from that fold's IRT training (no leakage).
 
 Example:
-  /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/.venv/bin/python \
-    /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/predict_question_difficulty_qs_solution_instruction.py \
-    --difficulties /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/question_difficulties.csv \
-    --backbone Qwen/Qwen2.5-Coder-14B \
-    --max_length 1024 \
-    --batch_size 1 \
-    --device_map auto \
-    --out_dir /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/qwen25coder14b_qs_sol_instr_lr
+  python /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/predict_question_difficulty.py \
+    --dataset_name princeton-nlp/SWE-bench_Verified --split test \
+    --agent_results /path/to/subject_responses.jsonl \
+    --cv_folds 5 \
+    --irt_epochs 5000 --irt_device cuda \
+    --backbone Qwen/Qwen2.5-Coder-14B --max_length 1024 --batch_size 1 --device_map auto \
+    --out_dir /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/qwen25coder14b_irt_cv
 """
 
 from __future__ import annotations
@@ -68,6 +76,71 @@ from transformers import AutoConfig, AutoModel, AutoTokenizer, FineGrainedFP8Con
 import inspect
 from typing import Any
 import math
+
+
+def seed_everything(seed: int, *, deterministic: bool) -> None:
+    """
+    Best-effort reproducibility across python/numpy/torch/transformers.
+
+    Notes:
+    - Some GPU kernels (e.g. flash attention) can be nondeterministic.
+    - PYTHONHASHSEED is set best-effort (it is most reliable when set before process start).
+    """
+    s = int(seed)
+    try:
+        os.environ.setdefault("PYTHONHASHSEED", str(s))
+    except Exception:
+        pass
+
+    random.seed(s)
+    np.random.seed(s)
+    torch.manual_seed(s)
+    if torch.cuda.is_available():
+        try:
+            torch.cuda.manual_seed_all(s)
+        except Exception:
+            pass
+
+    # Transformers helper (if available).
+    try:
+        from transformers import set_seed as _hf_set_seed  # type: ignore
+
+        _hf_set_seed(s)
+    except Exception:
+        pass
+
+    if deterministic:
+        set_torch_determinism(True)
+        # Reduce numeric drift from TF32 on Ampere+ GPUs.
+        try:
+            torch.backends.cuda.matmul.allow_tf32 = False
+        except Exception:
+            pass
+        try:
+            torch.backends.cudnn.allow_tf32 = False
+        except Exception:
+            pass
+
+
+def set_torch_determinism(enabled: bool) -> None:
+    """
+    Toggle PyTorch deterministic algorithm behavior (best-effort).
+    """
+    on = bool(enabled)
+    try:
+        torch.use_deterministic_algorithms(on, warn_only=True)
+    except TypeError:
+        try:
+            torch.use_deterministic_algorithms(on)
+        except Exception:
+            pass
+    except Exception:
+        pass
+    try:
+        torch.backends.cudnn.deterministic = on
+        torch.backends.cudnn.benchmark = (not on)
+    except Exception:
+        pass
 
 
 def _load_tokenizer(backbone: str, *, trust_remote_code: bool) -> Any:
@@ -188,168 +261,96 @@ def stable_split_ids(ids: Sequence[str], test_fraction: float, seed: int) -> Tup
     return train, test
 
 
-def load_zero_success_task_ids_from_subject_responses_jsonl(path: str) -> List[str]:
+def iter_subject_responses_jsonl(path: str) -> Iterator[Tuple[str, Dict[str, int]]]:
     """
-    Compute the set of task ids that no subject got correct from a JSONL file with schema:
-      {"subject_id": "...", "responses": {"task_id": 0/1, ...}}
-
-    Returns normalized ids.
-    """
-    counts: Dict[str, int] = defaultdict(int)
-    all_ids: Set[str] = set()
-
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            obj = json.loads(line)
-            resp = obj.get("responses", {}) or {}
-            if not isinstance(resp, dict):
-                continue
-            for raw_id, v in resp.items():
-                tid = normalize_swebench_item_id(str(raw_id))
-                if not tid:
-                    continue
-                all_ids.add(tid)
-                try:
-                    counts[tid] += int(v)
-                except Exception:
-                    counts[tid] += 1 if v else 0
-
-    return sorted([tid for tid in all_ids if counts.get(tid, 0) == 0])
-
-
-def _split_multi_arg(values: object) -> List[str]:
-    """
-    Parse "multi-value" CLI args that may be provided as:
-    - a single string "a,b,c"
-    - a list/tuple of strings ["a", "b,c"]
-    - repeated flags collected by argparse into a list
-    Returns a flat list of non-empty strings.
-    """
-    if values is None:
-        return []
-    if isinstance(values, str):
-        s = values.strip()
-        if not s:
-            return []
-        # Support comma-separated within a single shell token.
-        return [p.strip() for p in s.split(",") if p.strip()]
-    if isinstance(values, (list, tuple)):
-        out: List[str] = []
-        for v in values:
-            out.extend(_split_multi_arg(v))
-        return out
-    s = str(values).strip()
-    return [s] if s else []
-
-
-def _dataset_sources_signature(*, dataset_names: Sequence[str], dataset_paths: Sequence[str]) -> str:
-    """
-    Build a stable, filename-friendly-ish signature for the union of sources.
-
-    Why: we want embeddings caches to differ across different local JSONLs, without
-    leaking long absolute paths into filenames.
-    """
-    toks: List[str] = []
-    for name in list(dataset_names or []):
-        s = str(name).strip()
-        if s:
-            toks.append(s)
-    for p in list(dataset_paths or []):
-        sp = str(p).strip()
-        if not sp:
-            continue
-        base = os.path.basename(sp) or "dataset.jsonl"
-        try:
-            absp = os.path.abspath(sp)
-        except Exception:
-            absp = sp
-        h = hashlib.md5(absp.encode("utf-8")).hexdigest()[:10]
-        toks.append(f"json:{base}:{h}")
-    return ",".join(toks)
-
-
-def load_zero_success_task_ids_from_subject_responses_jsonls(paths: Sequence[str]) -> List[str]:
-    """
-    Like load_zero_success_task_ids_from_subject_responses_jsonl, but aggregates across multiple JSONLs.
-
-    IMPORTANT: assumes tasks in different JSONLs are distinct (no overlap).
-
-    Returns the union of per-file zero-success ids, i.e. an id is considered "zero-success"
-    if it had zero successes within its own JSONL.
-    """
-    out: Set[str] = set()
-    for path in list(paths):
-        p = str(path or "").strip()
-        if not p:
-            continue
-        out.update(load_zero_success_task_ids_from_subject_responses_jsonl(p))
-    return sorted(out)
-
-
-def load_thetas_csv(path: str) -> Dict[str, float]:
-    """
-    Load per-subject abilities from an IRT-style abilities CSV.
-
-    Expected schema (same as `auroc.py`):
-      <first column: subject_id>, theta, theta_std (theta_std optional)
-    """
-    out: Dict[str, float] = {}
-    with open(path, newline="") as f:
-        r = csv.DictReader(f)
-        fns = list(r.fieldnames or [])
-        if not fns:
-            raise ValueError(f"Empty CSV or missing header row: {path}")
-        if "theta" not in fns:
-            raise ValueError(f"Expected column 'theta' in {path}, got columns={fns}")
-        id_col = fns[0]
-        for row in r:
-            sid = str(row.get(id_col, "") or "").strip()
-            if not sid:
-                continue
-            theta_s = str(row.get("theta", "") or "").strip()
-            if not theta_s:
-                continue
-            out[sid] = float(theta_s)
-    return out
-
-
-def iter_subject_responses_jsonls(paths: Sequence[str]) -> Iterator[Tuple[str, Dict[str, int]]]:
-    """
-    Yield (subject_id, responses) from one or more JSONL files with schema:
+    Yield (subject_id, responses) from a JSONL file with schema:
       {"subject_id": "...", "responses": {"task_id": 0/1, ...}}
 
     Normalizes item ids.
     """
-    for path in list(paths or []):
-        p = str(path or "").strip()
-        if not p:
-            continue
-        with open(p, "r", encoding="utf-8") as f:
-            for line in f:
-                s = (line or "").strip()
-                if not s:
+    p = str(path or "").strip()
+    if not p:
+        return
+    with open(p, "r", encoding="utf-8") as f:
+        for line in f:
+            s = (line or "").strip()
+            if not s:
+                continue
+            try:
+                obj = json.loads(s)
+            except Exception:
+                continue
+            sid = str(obj.get("subject_id", "") or "").strip()
+            resp = obj.get("responses", {}) or {}
+            if not sid or not isinstance(resp, dict):
+                continue
+            out: Dict[str, int] = {}
+            for raw_id, v in resp.items():
+                tid = normalize_swebench_item_id(str(raw_id))
+                if not tid:
                     continue
                 try:
-                    obj = json.loads(s)
+                    out[tid] = int(v)
                 except Exception:
-                    continue
-                sid = str(obj.get("subject_id", "") or "").strip()
-                resp = obj.get("responses", {}) or {}
-                if not sid or not isinstance(resp, dict):
-                    continue
-                out: Dict[str, int] = {}
-                for raw_id, v in resp.items():
-                    tid = normalize_swebench_item_id(str(raw_id))
-                    if not tid:
-                        continue
-                    try:
-                        out[tid] = int(v)
-                    except Exception:
-                        out[tid] = 1 if v else 0
+                    out[tid] = 1 if v else 0
+            if out:
                 yield sid, out
+
+
+def load_all_responses(path: str) -> List[Tuple[str, Dict[str, int]]]:
+    """
+    Materialize all responses from a JSONL, normalizing item ids.
+    """
+    out: List[Tuple[str, Dict[str, int]]] = []
+    for sid, resp in iter_subject_responses_jsonl(path):
+        if resp:
+            out.append((sid, resp))
+    return out
+
+
+def compute_zero_success_items(all_responses: List[Tuple[str, Dict[str, int]]]) -> List[str]:
+    """
+    Items with 0 successes across all provided subjects.
+    """
+    counts: Dict[str, int] = {}
+    seen: Set[str] = set()
+    for _, resp in all_responses:
+        for tid, v in resp.items():
+            seen.add(tid)
+            counts[tid] = counts.get(tid, 0) + int(v)
+    return sorted([tid for tid in seen if counts.get(tid, 0) == 0])
+
+
+def write_filtered_responses_jsonl(
+    *,
+    all_responses: List[Tuple[str, Dict[str, int]]],
+    item_ids: Sequence[str],
+    out_path: str,
+) -> Tuple[int, int]:
+    """
+    Write a py_irt-compatible JSONL with responses restricted to `item_ids`.
+
+    Policy:
+    - Include only subjects with at least one observed response among `item_ids`.
+    - Write a complete response dict over `item_ids`, filling missing with 0.
+
+    Returns: (n_subjects_written, n_items)
+    """
+    ensure_dir(os.path.dirname(out_path) or ".")
+    items = [normalize_swebench_item_id(x) for x in list(item_ids)]
+    items = [x for x in items if x]
+    item_set = set(items)
+
+    n_written = 0
+    with open(out_path, "w", encoding="utf-8") as f:
+        for sid, resp in all_responses:
+            present = {k: int(v) for k, v in resp.items() if k in item_set}
+            if not present:
+                continue
+            complete = {tid: int(present.get(tid, 0)) for tid in items}
+            f.write(json.dumps({"subject_id": sid, "responses": complete}) + "\n")
+            n_written += 1
+    return n_written, len(items)
 
 
 def _compute_binary_auroc(scores: List[float], labels: List[int]) -> float:
@@ -377,70 +378,76 @@ def last_token_pool(last_hidden_state: torch.Tensor, attention_mask: torch.Tenso
     idx = (lengths - 1).view(-1, 1, 1).expand(-1, 1, last_hidden_state.size(-1))
     return last_hidden_state.gather(dim=1, index=idx).squeeze(1)  # [B, H]
 
-
-def load_ground_truth_csv(path: str) -> Dict[str, float]:
+def train_irt_1pl(
+    *,
+    responses_jsonl: str,
+    epochs: int,
+    device: str,
+    seed: int,
+    out_dir: str,
+) -> Tuple[Dict[str, float], Dict[str, float]]:
     """
-    Load ground-truth labels keyed by item_id.
+    Train a 1PL IRT model via `py_irt` on the provided response JSONL.
 
-    Supports two common formats:
-
-    1) Difficulty CSV (older):
-       columns include: item_id, diff
-       (may also include item_ix)
-
-    2) IRT items.csv (newer):
-       columns include: <blank header>, b, b_std
-       where the first column (blank header) holds the item_id and `b` is the difficulty parameter.
+    Returns:
+      - theta_by_subject
+      - diff_by_item (b)
     """
-    labels: Dict[str, float] = {}
-    with open(path, newline="") as f:
-        r = csv.DictReader(f)
-        fns = list(r.fieldnames or [])
-        if not fns:
-            raise ValueError(f"Empty CSV or missing header row: {path}")
+    _require("pyro")
+    import pyro  # type: ignore
 
-        # Determine id/label columns.
-        id_col: Optional[str] = None
-        y_col: Optional[str] = None
+    from py_irt.config import IrtConfig  # type: ignore
+    from py_irt.training import IrtModelTrainer  # type: ignore
 
-        # Prefer explicit schema.
-        if "item_id" in fns:
-            id_col = "item_id"
-        elif "instance_id" in fns:
-            id_col = "instance_id"
-        elif "id" in fns:
-            id_col = "id"
-        else:
-            # `items.csv` uses a blank header for the first column.
-            id_col = fns[0]
+    ensure_dir(str(out_dir))
+    pyro.clear_param_store()
 
-        if "diff" in fns:
-            y_col = "diff"
-        elif "b" in fns:
-            y_col = "b"
-        elif "difficulty" in fns:
-            y_col = "difficulty"
+    cfg = IrtConfig(
+        model_type="1pl",
+        epochs=int(epochs),
+        priors="hierarchical",
+        dims=1,
+        seed=int(seed),
+    )
+    trainer = IrtModelTrainer(data_path=str(responses_jsonl), config=cfg, verbose=False)
+    trainer.train(device=str(device))
 
-        if id_col is None or y_col is None:
-            raise ValueError(
-                "Unrecognized ground-truth CSV schema. Expected either columns "
-                "`item_id,diff` or `<blank>,b` (plus optional extras). "
-                f"Got {fns} in {path}"
-            )
+    trainer.save(os.path.join(out_dir, "parameters.json"))
+    best = trainer.best_params or {}
+    with open(os.path.join(out_dir, "best_parameters.json"), "w", encoding="utf-8") as f:
+        json.dump(best, f, indent=2, sort_keys=True)
 
-        for row in r:
-            raw_id = str(row.get(id_col, "") or "").strip()
-            if not raw_id:
-                continue
-            item_id = normalize_swebench_item_id(raw_id)
-            raw_y = row.get(y_col, None)
-            if raw_y is None:
-                continue
-            s = str(raw_y).strip()
-            if not s:
-                continue
-            labels[item_id] = float(s)
-    return labels
+    ability = best.get("ability", [])
+    diff = best.get("diff", [])
+    subj_map = best.get("subject_ids", {})
+    item_map = best.get("item_ids", {})
+
+    theta_by_subject: Dict[str, float] = {}
+    for i in range(len(ability)):
+        sid = str(subj_map.get(i, "")).strip()
+        if sid:
+            theta_by_subject[sid] = float(ability[i])
+
+    diff_by_item: Dict[str, float] = {}
+    for i in range(len(diff)):
+        tid = normalize_swebench_item_id(str(item_map.get(i, "")).strip())
+        if tid:
+            diff_by_item[tid] = float(diff[i])
+
+    # Also write abilities.csv / items.csv for inspection.
+    with open(os.path.join(out_dir, "abilities.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["subject_id", "theta"])
+        w.writeheader()
+        for sid, theta in sorted(theta_by_subject.items()):
+            w.writerow({"subject_id": sid, "theta": float(theta)})
+
+    with open(os.path.join(out_dir, "items.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["item_id", "b"])
+        w.writeheader()
+        for tid, b in sorted(diff_by_item.items()):
+            w.writerow({"item_id": tid, "b": float(b)})
+
+    return theta_by_subject, diff_by_item
 
 
 def prompt_signature(instruction: str) -> str:
@@ -475,29 +482,15 @@ class ItemRecord:
     solution: str
 
 
-def iter_swebench_verified_items(
-    *,
-    dataset_name: str,
-    split: str,
-    n_inputs: int,
-    seed: int,
-    shuffle: bool,
-) -> Iterator[ItemRecord]:
+def iter_swebench_verified_items(*, dataset_name: str, split: str) -> Iterator[ItemRecord]:
     ds = load_dataset(str(dataset_name), split=str(split))
     n_total = len(ds)
     if n_total == 0:
         raise RuntimeError(f"Loaded empty dataset: {dataset_name} split={split}")
 
-    idxs = list(range(n_total))
-    if shuffle:
-        rng = random.Random(int(seed))
-        rng.shuffle(idxs)
-    if n_inputs > 0:
-        idxs = idxs[: int(n_inputs)]
-
     # Try to extract the solution patch robustly across variants.
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
-    for i in idxs:
+    for i in range(int(n_total)):
         row = ds[int(i)]
         item_id = str(row.get("instance_id", "")).strip()
         qs = str(row.get("problem_statement", "") or "")
@@ -518,57 +511,47 @@ def iter_swebench_verified_items(
 
 def iter_swebench_items(
     *,
-    dataset_names: Sequence[str],
+    dataset_name: str,
     split: str,
-    dataset_paths: Sequence[str],
-    n_inputs: int,
-    seed: int,
-    shuffle: bool,
+    dataset_path: str,
 ) -> Iterator[ItemRecord]:
     """
     Load SWE-bench-style tasks and yield ItemRecords.
 
-    Supports:
-    - HuggingFace dataset hub: pass --dataset_name <org/name> (or multiple).
-    - Local JSON/JSONL via datasets: pass --dataset_path /path/to/file.jsonl (or multiple).
-    - Mixed sources: you may provide BOTH HF repos and local JSON/JSONL; all are treated as one pool.
+    Supports exactly one source:
+    - HuggingFace dataset hub: pass --dataset_name <org/name>
+    - Local JSON/JSONL via datasets: pass --dataset_path /path/to/file.jsonl
 
     Field extraction is best-effort:
     - item_id: instance_id | task_id | id
     - question_statement: problem_statement | statement | description
     - solution/patch: patch | gold_patch | resolved_patch | solution | diff | fix_patch
     """
-    dss: List[Tuple[str, object, str]] = []
-    # Local dataset file(s). JSONL is treated as a "train" split.
-    for ds_path in [str(x).strip() for x in list(dataset_paths or []) if str(x).strip()]:
-        dss.append((f"json:{ds_path}", load_dataset("json", data_files=str(ds_path), split="train"), "train"))
-    # HuggingFace dataset hub repos.
-    names = [str(x).strip() for x in list(dataset_names or []) if str(x).strip()]
-    for name in names:
-        dss.append((str(name), load_dataset(str(name), split=str(split)), str(split)))
-    if not dss:
-        raise ValueError("No datasets provided (set --dataset_name and/or --dataset_path).")
+    dataset_name = str(dataset_name or "").strip()
+    dataset_path = str(dataset_path or "").strip()
+    if bool(dataset_name) and bool(dataset_path):
+        raise ValueError("Provide only one of --dataset_name or --dataset_path (single-benchmark mode).")
+    if not dataset_name and not dataset_path:
+        raise ValueError("No dataset provided (set --dataset_name or --dataset_path).")
 
-    # Build a unified index space across all datasets so shuffle/n_inputs apply globally.
-    pairs: List[Tuple[int, int]] = []
-    for di, (src_name, d, src_split) in enumerate(dss):
-        n_total = int(len(d))
-        if n_total == 0:
-            raise RuntimeError(f"Loaded empty dataset: {src_name} split={src_split}")
-        for i in range(n_total):
-            pairs.append((di, i))
-    if shuffle:
-        rng = random.Random(int(seed))
-        rng.shuffle(pairs)
-    if n_inputs > 0:
-        pairs = pairs[: int(n_inputs)]
+    if dataset_path:
+        src_name = f"json:{dataset_path}"
+        d = load_dataset("json", data_files=str(dataset_path), split="train")
+        src_split = "train"
+    else:
+        src_name = str(dataset_name)
+        d = load_dataset(str(dataset_name), split=str(split))
+        src_split = str(split)
+
+    n_total = int(len(d))
+    if n_total == 0:
+        raise RuntimeError(f"Loaded empty dataset: {src_name} split={src_split}")
 
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
     id_keys = ["instance_id", "task_id", "id"]
     qs_keys = ["problem_statement", "statement", "description"]
 
-    for di, i in pairs:
-        _, d, _ = dss[int(di)]
+    for i in range(n_total):
         row = d[int(i)]
         item_id = ""
         for k in id_keys:
@@ -598,16 +581,16 @@ def iter_swebench_items(
                 sol = s
                 break
         if not item_id:
-            # If missing id, fall back to a stable synthetic id within the (possibly multi-)dataset.
-            item_id = f"row_ds{int(di)}_{int(i)}"
+            # If missing id, fall back to a stable synthetic id within the dataset.
+            item_id = f"row_{int(i)}"
         yield ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
 
 
 def load_items_by_ids(
     *,
-    dataset_names: Sequence[str],
+    dataset_name: str,
     split: str,
-    dataset_paths: Sequence[str],
+    dataset_path: str,
     item_ids: Sequence[str],
 ) -> Tuple[List[ItemRecord], List[str]]:
     """
@@ -622,19 +605,25 @@ def load_items_by_ids(
     if not want:
         return [], []
 
-    dss: List[Tuple[str, object, str]] = []
-    for ds_path in [str(x).strip() for x in list(dataset_paths or []) if str(x).strip()]:
-        dss.append((f"json:{ds_path}", load_dataset("json", data_files=str(ds_path), split="train"), "train"))
-    names = [str(x).strip() for x in list(dataset_names or []) if str(x).strip()]
-    for name in names:
-        dss.append((str(name), load_dataset(str(name), split=str(split)), str(split)))
-    if not dss:
-        raise ValueError("No datasets provided (set --dataset_name and/or --dataset_path).")
+    dataset_name = str(dataset_name or "").strip()
+    dataset_path = str(dataset_path or "").strip()
+    if bool(dataset_name) and bool(dataset_path):
+        raise ValueError("Provide only one of dataset_name or dataset_path (single-benchmark mode).")
+    if not dataset_name and not dataset_path:
+        raise ValueError("No dataset provided (set dataset_name or dataset_path).")
 
-    for name, ds, ds_split in dss:
-        n_total = len(ds)
-        if n_total == 0:
-            raise RuntimeError(f"Loaded empty dataset: {name} split={ds_split}")
+    if dataset_path:
+        name = f"json:{dataset_path}"
+        ds = load_dataset("json", data_files=str(dataset_path), split="train")
+        ds_split = "train"
+    else:
+        name = str(dataset_name)
+        ds = load_dataset(str(dataset_name), split=str(split))
+        ds_split = str(split)
+
+    n_total = int(len(ds))
+    if n_total == 0:
+        raise RuntimeError(f"Loaded empty dataset: {name} split={ds_split}")
 
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
     id_keys = ["instance_id", "task_id", "id"]
@@ -642,44 +631,40 @@ def load_items_by_ids(
 
     found: Dict[str, ItemRecord] = {}
     # Scan dataset once; stop early when all requested ids have been found.
-    for name, ds, _ in dss:
-        n_total = int(len(ds))
-        for i in range(n_total):
-            row = ds[int(i)]
-            item_id = ""
-            for k in id_keys:
-                v = row.get(k, None)
-                if v is None:
-                    continue
-                s = str(v).strip()
-                if s:
-                    item_id = normalize_swebench_item_id(s)
-                    break
-            if not item_id or item_id not in want_set or item_id in found:
+    for i in range(n_total):
+        row = ds[int(i)]
+        item_id = ""
+        for k in id_keys:
+            v = row.get(k, None)
+            if v is None:
                 continue
-
-            qs = ""
-            for k in qs_keys:
-                v = row.get(k, None)
-                if v is None:
-                    continue
-                s = str(v)
-                if str(s).strip():
-                    qs = s
-                    break
-            sol = ""
-            for k in solution_keys:
-                v = row.get(k, None)
-                if v is None:
-                    continue
-                s = str(v)
-                if s.strip():
-                    sol = s
-                    break
-
-            found[item_id] = ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
-            if len(found) >= len(want_set):
+            s = str(v).strip()
+            if s:
+                item_id = normalize_swebench_item_id(s)
                 break
+        if not item_id or item_id not in want_set or item_id in found:
+            continue
+
+        qs = ""
+        for k in qs_keys:
+            v = row.get(k, None)
+            if v is None:
+                continue
+            s = str(v)
+            if str(s).strip():
+                qs = s
+                break
+        sol = ""
+        for k in solution_keys:
+            v = row.get(k, None)
+            if v is None:
+                continue
+            s = str(v)
+            if s.strip():
+                sol = s
+                break
+
+        found[item_id] = ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
         if len(found) >= len(want_set):
             break
 
@@ -1106,26 +1091,12 @@ def save_regression_weights(
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument(
-        "--difficulties",
-        type=str,
-        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/question_difficulties.csv",
-        help=(
-            "Path to ground-truth labels CSV. Supports either (a) columns item_id,diff (older) "
-            "or (b) IRT items.csv with columns '<blank>,b,b_std' (newer; uses b as label)."
-        ),
-    )
 
     p.add_argument(
         "--dataset_name",
         type=str,
-        nargs="+",
-        default=["princeton-nlp/SWE-bench_Verified"],
-        help=(
-            "One or more HF dataset repos to load (space-separated). "
-            "Also supports comma-separated values within a token, e.g. "
-            "'princeton-nlp/SWE-bench_Verified,scaleAI/SWE-bench_Pro'."
-        ),
+        default="princeton-nlp/SWE-bench_Verified",
+        help="HF dataset repo to load (single source). Ignored if --dataset_path is set.",
     )
     p.add_argument("--split", type=str, default="test")
     p.add_argument(
@@ -1133,21 +1104,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=str,
         default="",
         help=(
-            "Optional local JSON/JSONL path(s). If set, loads via datasets('json', data_files=...). "
-            "You may provide multiple paths as a comma-separated string. If both --dataset_name and "
-            "--dataset_path are provided, all sources are pooled together."
+            "Optional local JSON/JSONL dataset path (single source). If set, loads via "
+            "datasets('json', data_files=..., split='train'). Overrides --dataset_name."
         ),
     )
-    p.add_argument("--n_inputs", type=int, default=500, help="Number of dataset items to embed (0 means all).")
-    p.add_argument("--shuffle", action="store_true", help="Shuffle dataset rows before taking the first --n_inputs.")
     p.add_argument("--seed", type=int, default=0)
+    # Fixed policy: we always seed non-IRT steps deterministically.
 
-    p.add_argument("--backbone", type=str, default="Qwen/Qwen2.5-Coder-14B")
+    p.add_argument("--backbone", type=str, default="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B")
     p.add_argument("--trust_remote_code", action="store_true")
-    p.add_argument("--max_length", type=int, default=1024)
+    p.add_argument("--max_length", type=int, default=8192)
     p.add_argument("--batch_size", type=int, default=1)
     p.add_argument("--device_map", type=str, default="auto", help="HF device_map (e.g. auto). Use 'none' to force single-device .to(device).")
-    p.add_argument("--torch_dtype", type=str, default="auto", choices=["auto", "float16", "bfloat16", "float32"])
+    p.add_argument("--torch_dtype", type=str, default="bfloat16", choices=["auto", "float16", "bfloat16", "float32"])
     p.add_argument("--attn_implementation", type=str, default="auto", help="e.g. auto, flash_attention_2")
     p.add_argument(
         "--embedding_layer",
@@ -1158,33 +1127,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     p.add_argument("--instruction", type=str, default=DIFFICULTY_INSTRUCTION, help="Instruction text appended last in the embedding input.")
 
-    p.add_argument("--out_dir", type=str, default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/qwen25coder14b_qs_sol_instr_lr")
+    p.add_argument("--out_dir", type=str, default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/swebench_verified")
     p.add_argument("--embeddings_cache", type=str, default="", help="Optional path to existing embeddings cache (.npz).")
     p.add_argument("--overwrite", action="store_true")
 
     p.add_argument(
         "--agent_results",
         type=str,
-        nargs="*",
-        default=[],
+        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/swebench_verified_20251115_full.jsonl",
         help=(
-            "Optional path(s) to JSONL file(s) with per-subject responses of the form "
-            "{'subject_id': ..., 'responses': {'task_id': 0/1, ...}}. Any task_id with "
-            "zero successes across all subjects will be excluded from both train and test; "
-            "after training/evaluating on the remaining items, predictions for these zero-success "
-            "items will be printed (sorted) to stdout."
+            "Path to a JSONL file with per-subject responses of the form "
+            "{'subject_id': ..., 'responses': {'task_id': 0/1, ...}}."
         ),
     )
     p.add_argument(
-        "--auroc_thetas",
-        type=str,
-        default="",
-        help=(
-            "Optional path to an IRT abilities CSV (expects columns: <index>,theta,theta_std). "
-            "If provided (and --agent_results is provided), we compute held-out ROC-AUC per CV fold "
-            "using probs = sigmoid(theta - diff_pred), mirroring `auroc.py`."
-        ),
+        "--include_zero_success",
+        action="store_true",
+        help="Include items with 0 successes in CV/IRT (not recommended; can destabilize IRT).",
     )
+    p.add_argument("--irt_epochs", type=int, default=5000)
+    p.add_argument("--irt_device", type=str, default="cuda", help="Device for IRT training (cuda or cpu).")
+    # Fixed IRT policy: we seed IRT, but keep torch determinism disabled during IRT for stability.
     p.add_argument(
         "--regressor",
         type=str,
@@ -1195,15 +1158,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--ridge_alpha", type=float, default=10000.0)
     p.add_argument("--ridge_alphas", type=str, default="1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1,10,100,1000,10000")
     p.add_argument("--cv_folds", type=int, default=5)
+    p.add_argument(
+        "--inner_splits",
+        type=int,
+        default=5,
+        help="Inner CV splits for RidgeCV (used when --regressor=ridge_cv). Will be capped by train size; must be >=2.",
+    )
 
     args = p.parse_args(argv)
     ensure_dir(args.out_dir)
+    deterministic = True
+    seed_everything(int(args.seed), deterministic=True)
 
-    dataset_names = _split_multi_arg(args.dataset_name)
-    dataset_paths = _split_multi_arg(args.dataset_path)
-    dataset_sources_str = _dataset_sources_signature(dataset_names=dataset_names, dataset_paths=dataset_paths) or (
-        "princeton-nlp/SWE-bench_Verified"
-    )
+    dataset_name = str(args.dataset_name).strip()
+    dataset_path = str(args.dataset_path).strip()
+    if dataset_path:
+        dataset_sources_str = f"json:{os.path.basename(dataset_path) or 'dataset.jsonl'}"
+    else:
+        dataset_sources_str = dataset_name or "princeton-nlp/SWE-bench_Verified"
 
     # Cache path derived from key settings.
     safe_backbone = str(args.backbone).replace("/", "__")
@@ -1216,7 +1188,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not emb_cache:
         emb_cache = os.path.join(
             args.out_dir,
-            f"embeddings__{safe_backbone}__pool-lasttoken{layer_flag}__qs-sol-instr__{instr_sig}{idnorm_flag}__{ds_flag}__{split_flag}__n{int(args.n_inputs)}__maxlen{int(args.max_length)}__seed{int(args.seed)}.npz",
+            f"embeddings__{safe_backbone}__pool-lasttoken{layer_flag}__qs-sol-instr__{instr_sig}{idnorm_flag}__{ds_flag}__{split_flag}__maxlen{int(args.max_length)}.npz",
         )
 
     # Load or compute embeddings.
@@ -1252,12 +1224,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Collect items to embed.
         items = list(
             iter_swebench_items(
-                dataset_names=list(dataset_names),
+                dataset_name=str(dataset_name),
                 split=str(args.split),
-                dataset_paths=list(dataset_paths),
-                n_inputs=int(args.n_inputs),
-                seed=int(args.seed),
-                shuffle=bool(args.shuffle),
+                dataset_path=str(dataset_path),
             )
         )
         src = dataset_sources_str
@@ -1289,8 +1258,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             counts=counts_arr,
             dataset_name=np.array([str(dataset_sources_str)], dtype=object),
             split=np.array([str(args.split)], dtype=object),
-            dataset_path=np.array([";".join([str(x) for x in dataset_paths])], dtype=object),
-            n_inputs=np.array([int(len(ids_sorted))], dtype=np.int64),
+            dataset_path=np.array([str(dataset_path)], dtype=object),
+            n_items=np.array([int(len(ids_sorted))], dtype=np.int64),
             instruction=np.array([str(args.instruction)], dtype=object),
             instruction_signature=np.array([str(instr_sig)], dtype=object),
             backbone=np.array([str(args.backbone)], dtype=object),
@@ -1301,42 +1270,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Wrote embeddings cache: {emb_cache} (n={len(ids_sorted)}, dim={X.shape[1]}, embedding_layer={int(args.embedding_layer)})")
         task_ids = ids_sorted
 
-    diffs = load_ground_truth_csv(str(args.difficulties))
-
-    # Align X with y by item_id / instance_id.
-    # NOTE: we will optionally exclude "zero-success" items from BOTH train and test.
+    # Align embeddings with response JSONL items.
     id_to_row = {tid: i for i, tid in enumerate(task_ids)}
-    labeled_ids = [tid for tid in task_ids if tid in diffs]
-    missing_diff = [tid for tid in task_ids if tid not in diffs]
-    if missing_diff:
-        print(f"WARNING: {len(missing_diff)} item_ids missing difficulty; ignoring (e.g. {missing_diff[:3]})")
-    if not labeled_ids:
-        raise RuntimeError("No overlap between embedded ids and difficulty CSV item_id values.")
 
-    agent_results_paths = _split_multi_arg(args.agent_results)
-    zero_success_source = ",".join(agent_results_paths)
-    zero_success_ids: List[str] = []
-    if agent_results_paths:
-        zero_success_ids = load_zero_success_task_ids_from_subject_responses_jsonls(agent_results_paths)
+    all_responses = load_all_responses(str(args.agent_results))
+    if not all_responses:
+        raise RuntimeError(f"Loaded 0 subject responses from --agent_results={args.agent_results!r}")
+
+    response_items: Set[str] = set()
+    for _, resp in all_responses:
+        response_items.update(resp.keys())
+
+    overlap_ids = [tid for tid in task_ids if tid in response_items]
+    if not overlap_ids:
+        raise RuntimeError("No overlap between embedded task_ids and item_ids found in --agent_results responses.")
+
+    zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
-
-    # Items used for train/test evaluation: labeled AND not zero-success.
-    eligible = [tid for tid in labeled_ids if tid not in zero_success_set]
-    if agent_results_paths:
+    exclude_zero_success = not bool(args.include_zero_success)
+    if exclude_zero_success:
+        eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
-            f"Excluding zero-success items from train/test: {len(labeled_ids) - len(eligible)}/{len(labeled_ids)} labeled items "
-            f"(source={zero_success_source})"
+            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
+            f"(agent_results={args.agent_results})"
         )
+    else:
+        eligible = list(overlap_ids)
+
     if not eligible:
-        raise RuntimeError("After excluding zero-success items, no labeled items remain for train/test.")
+        raise RuntimeError("After filtering, no items remain for CV/IRT.")
 
     Xy = np.stack([X[id_to_row[tid]] for tid in eligible], axis=0).astype(np.float32)
-    y = np.array([diffs[tid] for tid in eligible], dtype=np.float32)
 
     regressor_name = str(args.regressor)
     alphas: np.ndarray = np.array([], dtype=np.float64)
 
-    def _make_model():
+    def _make_model(*, n_train: int, fold_seed: int):
         nonlocal alphas
         if regressor_name == "linear":
             return LinearRegression()
@@ -1357,7 +1326,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise ValueError(f"Failed to parse --ridge_alphas={args.ridge_alphas!r}: {e}") from e
             if alphas.size == 0:
                 raise ValueError("Expected at least one alpha in --ridge_alphas")
-            inner_cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+            req_inner = int(args.inner_splits)
+            if req_inner < 2:
+                raise ValueError("--inner_splits must be >= 2")
+            inner_splits = int(min(req_inner, max(2, int(n_train))))
+            inner_cv = KFold(n_splits=int(inner_splits), shuffle=True, random_state=int(fold_seed))
             return Pipeline(
                 steps=[
                     ("scaler", StandardScaler(with_mean=True, with_std=True)),
@@ -1366,82 +1339,98 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         raise AssertionError(f"Unhandled regressor: {regressor_name}")
 
-    # 5-fold CV evaluation on eligible items only.
-    outer_cv = KFold(n_splits=5, shuffle=True, random_state=int(args.seed))
-    cv_r2_folds: List[float] = []
-    cv_rmse_folds: List[float] = []
-    cv_pearson_folds: List[float] = []
+    # K-fold CV over items. Each fold trains IRT on the K-1 training folds only.
+    outer_cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
     cv_test_auc_folds: List[float] = []
+    cv_test_n_obs_folds: List[int] = []
     yhat_oof = np.full((int(len(eligible)),), np.nan, dtype=np.float64)
     fold_of_item = np.full((int(len(eligible)),), -1, dtype=np.int32)
 
-    # Optional AUROC inputs (abilities + response JSONLs).
-    thetas: Dict[str, float] = {}
-    compute_auroc = False
-    auroc_thetas_path = str(args.auroc_thetas or "").strip()
-    if auroc_thetas_path and agent_results_paths:
-        thetas = load_thetas_csv(auroc_thetas_path)
-        compute_auroc = bool(thetas)
-        if not compute_auroc:
-            print(f"WARNING: Loaded 0 thetas from {auroc_thetas_path}; skipping AUROC.")
-    elif auroc_thetas_path and not agent_results_paths:
-        print("WARNING: --auroc_thetas was set but --agent_results was not provided; skipping AUROC.")
-
-    # Preload responses once if we will compute AUROC.
-    responses_by_subject: List[Tuple[str, Dict[str, int]]] = []
-    if compute_auroc:
-        eligible_set = set(eligible)
-        for sid, resp in iter_subject_responses_jsonls(agent_results_paths):
-            if sid not in thetas:
-                continue
-            # Keep only items we might evaluate (eligible only; excludes zero-success + unlabeled).
-            filt = {k: int(v) for k, v in resp.items() if k in eligible_set}
-            if not filt:
-                continue
-            responses_by_subject.append((sid, filt))
-        if not responses_by_subject:
-            print("WARNING: No usable (theta, responses) pairs found after filtering; skipping AUROC.")
-            compute_auroc = False
-
-    if not compute_auroc:
-        raise ValueError(
-            "Selecting the best saved model by ROC-AUC requires both --auroc_thetas and --agent_results "
-            "with usable overlapping subjects/items."
-        )
-
     best_fold_auc = -float("inf")
-    best_fold_auc_r2 = float("nan")
     best_fold = -1
     best_model = None
 
     for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
-        m = _make_model()
-        m.fit(Xy[tr], y[tr])
-        pred = m.predict(Xy[te]).astype(np.float64)
+        train_items = [eligible[int(i)] for i in tr.tolist()]
+        test_items = [eligible[int(i)] for i in te.tolist()]
+
+        fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
+        ensure_dir(fold_root)
+
+        train_jsonl = os.path.join(fold_root, "train_responses.jsonl")
+        n_subj_written, n_items_written = write_filtered_responses_jsonl(
+            all_responses=all_responses, item_ids=train_items, out_path=train_jsonl
+        )
+        if n_subj_written == 0 or n_items_written == 0:
+            raise RuntimeError(f"Fold {fold}: wrote 0 subjects/items to {train_jsonl} (check filtering).")
+
+        irt_device = str(args.irt_device or "cpu").strip() or "cpu"
+        if irt_device.startswith("cuda") and not torch.cuda.is_available():
+            print("WARNING: --irt_device=cuda requested but CUDA is unavailable; falling back to cpu for IRT.")
+            irt_device = "cpu"
+
+        # Fixed IRT policy: seeded RNG, but torch determinism OFF for IRT only.
+        set_torch_determinism(False)
+        seed_everything(int(args.seed), deterministic=False)
+
+        theta_by_subject, diff_by_item = train_irt_1pl(
+            responses_jsonl=train_jsonl,
+            epochs=int(args.irt_epochs),
+            device=str(irt_device),
+            seed=int(args.seed),
+            out_dir=os.path.join(fold_root, "irt_1pl"),
+        )
+        # Restore global determinism setting after IRT.
+        set_torch_determinism(True)
+        if not theta_by_subject:
+            raise RuntimeError(f"Fold {fold}: IRT produced 0 subject thetas (unexpected).")
+        if not diff_by_item:
+            raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
+
+        train_labeled = [tid for tid in train_items if tid in diff_by_item]
+        if len(train_labeled) < 2:
+            raise RuntimeError(
+                f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties; cannot fit regressor."
+            )
+
+        # Seed post-IRT for any downstream randomness (sklearn CV shuffles, etc).
+        seed_everything(int(args.seed) + int(fold), deterministic=True)
+
+        X_train = np.stack([X[id_to_row[tid]] for tid in train_labeled], axis=0).astype(np.float32)
+        y_train = np.array([float(diff_by_item[tid]) for tid in train_labeled], dtype=np.float32)
+
+        m = _make_model(n_train=int(len(train_labeled)), fold_seed=int(args.seed) + int(fold))
+        m.fit(X_train, y_train)
+
+        X_test = np.stack([X[id_to_row[tid]] for tid in test_items], axis=0).astype(np.float32)
+        pred = m.predict(X_test).astype(np.float64)
         yhat_oof[te] = pred
         fold_of_item[te] = int(fold)
-        fold_r2 = float(r2_score(y[te], pred))
-        cv_r2_folds.append(fold_r2)
-        cv_rmse_folds.append(float(_rmse(y[te], pred)))
-        cv_pearson_folds.append(float(_pearsonr(y[te], pred)))
-        te_items = [eligible[int(i)] for i in te.tolist()]
-        z_by_item = {tid: float(z) for tid, z in zip(te_items, pred.tolist())}
+
+        # Held-out AUROC using held-out items only, with theta from fold's IRT.
+        z_by_item = {tid: float(z) for tid, z in zip(test_items, pred.tolist())}
         scores: List[float] = []
         labels: List[int] = []
-        for sid, resp in responses_by_subject:
-            theta = float(thetas[sid])
+        test_set = set(test_items)
+        for sid, resp in all_responses:
+            theta = theta_by_subject.get(sid, None)
+            if theta is None:
+                continue
+            th = float(theta)
             for item_id, y_obs in resp.items():
+                if item_id not in test_set:
+                    continue
                 z = z_by_item.get(item_id, None)
                 if z is None:
                     continue
-                # Match `auroc.py` probability definition: sigmoid(theta - z)
-                scores.append(1.0 / (1.0 + math.exp(-(theta - float(z)))))
+                scores.append(1.0 / (1.0 + math.exp(-(th - float(z)))))
                 labels.append(int(y_obs))
+
         fold_auc = float(_compute_binary_auroc(scores, labels))
         cv_test_auc_folds.append(float(fold_auc))
+        cv_test_n_obs_folds.append(int(len(labels)))
         if fold_auc == fold_auc and fold_auc > best_fold_auc:
             best_fold_auc = float(fold_auc)
-            best_fold_auc_r2 = float(fold_r2)
             best_fold = int(fold)
             best_model = m
 
@@ -1450,15 +1439,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if best_model is None or best_fold < 1:
         raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
 
-    cv_r2_mean = float(np.mean(cv_r2_folds)) if cv_r2_folds else float("nan")
-    print(f"5-fold CV R^2 (mean over folds): {cv_r2_mean:.6f}")
-    print("5-fold CV R^2 per fold: " + ", ".join([f"{x:.6f}" for x in cv_r2_folds]))
-    auc_mean = float(np.mean(cv_test_auc_folds)) if cv_test_auc_folds else float("nan")
-    print(f"5-fold CV test ROC-AUC (mean over folds): {auc_mean}")
-    print("5-fold CV test ROC-AUC per fold: " + ", ".join([str(x) for x in cv_test_auc_folds]))
-    print(f"Best CV fold by held-out ROC-AUC: fold={best_fold} auc={best_fold_auc} (r2={best_fold_auc_r2:.6f})")
+    auc_arr = np.asarray(cv_test_auc_folds, dtype=np.float64)
+    auc_mean = float(np.nanmean(auc_arr)) if auc_arr.size else float("nan")
+    auc_std = float(np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
+    print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
+    print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
 
-    # Use the best-fold model (highest held-out R^2) for saving weights + predicting zero-success items.
+    # Use the best-fold model for saving weights + predicting excluded items.
     model = best_model
 
     ridge_alpha = None
@@ -1470,39 +1457,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     metrics = {
         "n_items_total": int(len(task_ids)),
-        "n_items_with_difficulty": int(len(labeled_ids)),
-        "n_items_eligible_train_test": int(len(eligible)),
-        "n_items_zero_success_labeled_excluded": int(len(labeled_ids) - len(eligible)),
-        "zero_success_source": (zero_success_source or None),
+        "n_items_with_responses": int(len(overlap_ids)),
+        "n_items_eligible_cv_irt": int(len(eligible)),
+        "exclude_zero_success": bool(exclude_zero_success),
+        "n_items_zero_success_in_responses": int(len(zero_success_ids)),
         "embedding_dim": int(Xy.shape[1]),
         "seed": int(args.seed),
-        "cv_n_splits": 5,
-        "cv_r2_folds": [float(x) for x in cv_r2_folds],
-        "cv_r2_mean": float(cv_r2_mean),
+        "deterministic": True,
+        "irt_seeded": True,
+        "irt_deterministic": False,
+        "cv_n_splits": int(args.cv_folds),
         "cv_best_auc_fold": int(best_fold),
         "cv_best_auc": float(best_fold_auc),
-        "cv_best_auc_fold_r2": float(best_fold_auc_r2),
-        "cv_rmse_folds": [float(x) for x in cv_rmse_folds],
-        "cv_rmse_mean": float(np.mean(cv_rmse_folds)) if cv_rmse_folds else float("nan"),
-        "cv_pearson_folds": [float(x) for x in cv_pearson_folds],
-        "cv_pearson_mean": float(np.mean(cv_pearson_folds)) if cv_pearson_folds else float("nan"),
         "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
-        "cv_test_auc_mean": float(np.mean(cv_test_auc_folds)) if cv_test_auc_folds else float("nan"),
-        "auroc_thetas_csv": (auroc_thetas_path or None),
+        "cv_test_auc_mean": float(auc_mean),
+        "cv_test_auc_std": float(auc_std),
+        "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
+        "irt_epochs": int(args.irt_epochs),
+        "irt_device": str(args.irt_device),
         "regressor": regressor_name,
         "ridge_alpha": ridge_alpha,
         "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
-        "cv_folds": int(args.cv_folds) if regressor_name == "ridge_cv" else None,
+        "inner_splits": int(args.inner_splits),
         "backbone": str(args.backbone),
         "pooling": "last_token_of_hidden_state",
         "embedding_layer": int(args.embedding_layer),
         "max_length": int(args.max_length),
         "dataset_sources": str(dataset_sources_str),
-        "dataset_names": list(dataset_names),
-        "dataset_paths": list(dataset_paths),
+        "dataset_name": (dataset_name or None),
+        "dataset_path": (dataset_path or None),
         "split": str(args.split),
-        "n_inputs_requested": int(args.n_inputs),
-        "shuffle": bool(args.shuffle),
+        "agent_results": str(args.agent_results),
         "instruction": str(args.instruction),
         "instruction_signature": instr_sig,
         "batch_size": int(args.batch_size),
@@ -1510,7 +1495,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "torch_dtype": str(args.torch_dtype),
         "attn_implementation": str(args.attn_implementation),
         "embeddings_cache": emb_cache,
-        "ground_truth_csv": str(args.difficulties),
     }
 
     # Save regression weights (coef/intercept + optional StandardScaler stats) for reuse.
@@ -1528,19 +1512,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "torch_dtype": str(args.torch_dtype),
         "attn_implementation": str(args.attn_implementation),
         "dataset_sources": str(dataset_sources_str),
-        "dataset_names": list(dataset_names),
-        "dataset_paths": list(dataset_paths),
+        "dataset_name": (dataset_name or None),
+        "dataset_path": (dataset_path or None),
         "split": str(args.split),
-        "dataset_path": str(args.dataset_path),
         "id_normalization": "strip instance_ prefix; strip -v.* suffix",
         "seed": int(args.seed),
-        "cv_n_splits": 5,
+        "deterministic": True,
+        "irt_seeded": True,
+        "irt_deterministic": False,
+        "cv_n_splits": int(args.cv_folds),
         "cv_best_auc_fold": int(best_fold),
         "cv_best_auc": float(best_fold_auc),
-        "cv_best_auc_fold_r2": float(best_fold_auc_r2),
         "ridge_alpha": ridge_alpha,
-        "cv_folds": (int(args.cv_folds) if regressor_name == "ridge_cv" else None),
         "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
+        "inner_splits": int(args.inner_splits),
     }
     weights_json, weights_npz = save_regression_weights(
         out_dir=str(args.out_dir),
@@ -1550,10 +1535,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         metadata=weights_meta,
     )
     metrics.update({"regression_weights_json": weights_json, "regression_weights_npz": weights_npz})
-    # Predict on zero-success items (excluded from train/test).
+
+    # Predict on zero-success items (excluded from CV/IRT, if requested).
     zero_embedded: List[str] = []
     yhat_zero: Optional[np.ndarray] = None
-    if zero_success_set:
+    if bool(exclude_zero_success) and zero_success_set:
         zero_embedded = [tid for tid in task_ids if tid in zero_success_set]
         if zero_embedded:
             X_zero = np.stack([X[id_to_row[tid]] for tid in zero_embedded], axis=0).astype(np.float32)
@@ -1572,7 +1558,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Write per-item predictions (OOF CV + optional zero_success rows).
     pred_path = os.path.join(args.out_dir, "predictions.csv")
     with open(pred_path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["item_id", "diff_true", "diff_pred", "split", "fold"])
+        w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
         w.writeheader()
 
         # Eligible rows: one per item with out-of-fold prediction.
@@ -1580,7 +1566,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             w.writerow(
                 {
                     "item_id": tid,
-                    "diff_true": float(y[i]),
                     "diff_pred": float(yhat_oof[i]),
                     "split": "cv_val",
                     "fold": int(fold_of_item[i]),
@@ -1590,12 +1575,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Zero-success rows (separate split label).
         if yhat_zero is not None and zero_embedded:
             for tid, score in zip(zero_embedded, yhat_zero.tolist()):
-                # diff_true is available if present in the ground-truth CSV; keep it for analysis.
-                diff_true = diffs.get(tid, None)
                 w.writerow(
                     {
                         "item_id": tid,
-                        "diff_true": "" if diff_true is None else float(diff_true),
                         "diff_pred": float(score),
                         "split": "zero_success",
                         "fold": "",
@@ -1608,7 +1590,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pairs.sort(key=lambda kv: float(kv[1]), reverse=True)
         print(
             f"\n=== ZERO_SUCCESS_PREDICTIONS_SORTED (task_id, diff_pred) "
-            f"[model=best_cv_fold_by_auc fold={best_fold} auc={best_fold_auc} r2={best_fold_auc_r2:.6f}] ==="
+            f"[model=best_by_auc fold={best_fold} auc={best_fold_auc}] ==="
         )
         for tid, score in pairs:
             print(f"{tid}\t{float(score):.6f}")
