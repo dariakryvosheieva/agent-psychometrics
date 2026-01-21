@@ -11,24 +11,40 @@ TerminalBench experiments use. The experiments differ only in:
 
 import argparse
 import json
-import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type
 
-import numpy as np
 import pandas as pd
 
-from experiment_ab_shared.predictor_base import (
-    ConstantPredictor,
-    GroundTruthPredictor,
-)
 from experiment_ab_shared.feature_source import (
     EmbeddingFeatureSource,
     CSVFeatureSource,
 )
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
+)
+from experiment_ab_shared import (
+    load_dataset,
+    load_dataset_for_fold,
+    convert_numpy,
+    filter_unsolved_tasks,
+)
+from experiment_ab_shared.dataset import (
+    _load_binary_responses,
+    _load_binomial_responses,
+)
+
+from experiment_a.shared.cross_validation import (
+    k_fold_split_tasks,
+    run_cv,
+    CrossValidationResult,
+)
+from experiment_a.shared.baselines import (
+    AgentOnlyPredictor,
+    ConstantPredictor,
+    OraclePredictor,
+    DifficultyPredictorAdapter,
 )
 
 # Default SWE-bench LLM Judge features (all 9 semantic features)
@@ -43,26 +59,6 @@ SWEBENCH_LLM_JUDGE_FEATURES = [
     "logical_reasoning_required",
     "atypicality",
 ]
-from experiment_ab_shared import (
-    load_dataset,
-    load_dataset_for_fold,
-    compute_auc,
-    run_evaluation_pipeline,
-    PredictorConfig,
-    agent_only_baseline,
-    convert_numpy,
-    filter_unsolved_tasks,
-)
-from experiment_ab_shared.dataset import (
-    _load_binary_responses,
-    _load_binomial_responses,
-)
-from experiment_ab_shared.cross_validation import (
-    k_fold_split_tasks,
-    run_cv_for_predictor,
-    run_cv_for_baseline,
-    CrossValidationResult,
-)
 
 
 @dataclass
@@ -83,234 +79,107 @@ class ExperimentSpec:
     llm_judge_features: Optional[List[str]] = None
 
 
-def build_predictor_configs(
+# Import CVPredictor protocol for type hints
+from experiment_a.shared.cross_validation import CVPredictor
+
+
+@dataclass
+class CVPredictorConfig:
+    """Configuration for a predictor in cross-validation.
+
+    Attributes:
+        predictor: Any predictor implementing the CVPredictor protocol
+        name: Key for storing results
+        display_name: Human-readable name for display
+    """
+
+    predictor: CVPredictor
+    name: str
+    display_name: str
+
+
+def build_cv_predictors(
     config: Any,
     root: Path,
     llm_judge_features: Optional[List[str]] = None,
-) -> List[PredictorConfig]:
-    """Build list of predictor configurations from experiment config.
+) -> List[CVPredictorConfig]:
+    """Build list of CVPredictor configurations for cross-validation.
+
+    All predictors implement the CVPredictor protocol (fit/predict_probability).
 
     Args:
         config: Experiment configuration (ExperimentAConfig or TerminalBenchConfig)
         root: Root directory for resolving relative paths
         llm_judge_features: Optional list of feature columns for LLM Judge.
-            If provided, uses these instead of the default SWE-bench features.
 
     Returns:
-        List of PredictorConfig objects with pre-instantiated predictors.
+        List of CVPredictorConfig objects with pre-instantiated predictors.
     """
-    configs = []
+    configs: List[CVPredictorConfig] = []
+
+    # Oracle (upper bound) - uses full IRT model
+    configs.append(
+        CVPredictorConfig(
+            predictor=OraclePredictor(),
+            name="oracle",
+            display_name="Oracle (true b)",
+        )
+    )
+
+    # Embedding predictor (wrapped with adapter)
+    if config.embeddings_path is not None:
+        embeddings_path = root / config.embeddings_path
+        if embeddings_path.exists():
+            source = EmbeddingFeatureSource(embeddings_path)
+            difficulty_predictor = FeatureBasedPredictor(
+                source,
+                ridge_alphas=list(config.ridge_alphas),
+            )
+            configs.append(
+                CVPredictorConfig(
+                    predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                    name="embedding_predictor",
+                    display_name="Embedding",
+                )
+            )
+
+    # LLM Judge predictor (wrapped with adapter)
+    if config.llm_judge_features_path is not None:
+        llm_judge_path = root / config.llm_judge_features_path
+        if llm_judge_path.exists():
+            feature_cols = llm_judge_features or SWEBENCH_LLM_JUDGE_FEATURES
+            source = CSVFeatureSource(llm_judge_path, feature_cols, name="LLM Judge")
+            difficulty_predictor = FeatureBasedPredictor(
+                source,
+                ridge_alphas=list(config.ridge_alphas),
+            )
+            configs.append(
+                CVPredictorConfig(
+                    predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                    name="llm_judge_predictor",
+                    display_name="LLM Judge",
+                )
+            )
 
     # Constant baseline (mean difficulty)
     configs.append(
-        PredictorConfig(
+        CVPredictorConfig(
             predictor=ConstantPredictor(),
             name="constant_baseline",
             display_name="Constant (mean b)",
         )
     )
 
-    # Embedding predictor
-    if config.embeddings_path is not None:
-        embeddings_path = root / config.embeddings_path
-        if embeddings_path.exists():
-            source = EmbeddingFeatureSource(embeddings_path)
-            predictor = FeatureBasedPredictor(
-                source,
-                ridge_alphas=list(config.ridge_alphas),
-            )
-            configs.append(
-                PredictorConfig(
-                    predictor=predictor,
-                    name="embedding_predictor",
-                    display_name="Embedding",
-                )
-            )
-
-    # LLM Judge predictor
-    if config.llm_judge_features_path is not None:
-        llm_judge_path = root / config.llm_judge_features_path
-        if llm_judge_path.exists():
-            # Use provided features or defaults
-            feature_cols = llm_judge_features or SWEBENCH_LLM_JUDGE_FEATURES
-            source = CSVFeatureSource(llm_judge_path, feature_cols, name="LLM Judge")
-            predictor = FeatureBasedPredictor(
-                source,
-                ridge_alphas=list(config.llm_judge_ridge_alphas),
-            )
-            configs.append(
-                PredictorConfig(
-                    predictor=predictor,
-                    name="llm_judge_predictor",
-                    display_name="LLM Judge",
-                )
-            )
+    # Agent-only baseline
+    configs.append(
+        CVPredictorConfig(
+            predictor=AgentOnlyPredictor(),
+            name="agent_only_baseline",
+            display_name="Agent-only",
+        )
+    )
 
     return configs
-
-
-def run_single_holdout(
-    config: Any,
-    spec: ExperimentSpec,
-    root: Path,
-    metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
-) -> Dict[str, Any]:
-    """Run the evaluation pipeline with a single holdout split.
-
-    Args:
-        config: Experiment configuration
-        spec: Experiment specification
-        root: Root directory for resolving relative paths
-        metadata_loader: Optional callable to load task metadata
-
-    Returns:
-        Dict with all results
-    """
-    print("=" * 60)
-    print(f"EXPERIMENT A: PRIOR VALIDATION (IRT AUC) - {spec.name}")
-    print("=" * 60)
-
-    # Resolve paths relative to root
-    abilities_path = root / config.abilities_path
-    items_path = root / config.items_path
-    responses_path = root / config.responses_path
-    output_dir = root / config.output_dir
-
-    # 1. Load data using common loader
-    print("\n1. Loading data...")
-    data = load_dataset(
-        abilities_path=abilities_path,
-        items_path=items_path,
-        responses_path=responses_path,
-        test_fraction=config.test_fraction,
-        split_seed=config.split_seed,
-        is_binomial=spec.is_binomial,
-        irt_cache_dir=spec.irt_cache_dir,
-        metadata_loader=metadata_loader,
-        exclude_unsolved=config.exclude_unsolved,
-    )
-    print(f"   Agents: {data.n_agents}")
-    print(f"   Tasks: {data.n_tasks}")
-    print(f"   Train tasks: {data.n_train_tasks}")
-    print(f"   Test tasks: {data.n_test_tasks}")
-    if metadata_loader and data.metadata:
-        task_data = data.metadata.get("task_data", {})
-        if task_data:
-            print(f"   Tasks with metadata: {len(task_data)}")
-
-    # 2. Initialize results dict
-    results: Dict[str, Any] = {
-        "config": config.to_dict(),
-        "data_summary": {
-            "n_agents": data.n_agents,
-            "n_tasks_total": data.n_tasks,
-            "n_train_tasks": data.n_train_tasks,
-            "n_test_tasks": data.n_test_tasks,
-        },
-    }
-
-    # Determine if we should compute binomial metrics
-    compute_binomial = spec.is_binomial
-
-    # 3. Oracle baseline (handled specially - needs full_items)
-    print("\n2. Computing oracle baseline (ground truth b from full IRT)...")
-    oracle_predictor = GroundTruthPredictor(data.full_items)
-    oracle_preds = oracle_predictor.predict(data.test_tasks)
-    oracle_result = compute_auc(data, oracle_preds, use_full_abilities=True)
-    print(f"   Oracle AUC: {oracle_result.get('auc', 'N/A'):.4f}")
-
-    # Add binomial metrics to oracle if applicable
-    if compute_binomial:
-        from experiment_ab_shared.binomial_metrics import compute_binomial_metrics
-        from experiment_ab_shared.dataset import BinomialExperimentData
-        if isinstance(data, BinomialExperimentData):
-            binom_result = compute_binomial_metrics(data, oracle_preds, use_full_abilities=True)
-            oracle_result["binomial_metrics"] = binom_result.to_dict()
-            print(f"   Oracle Pass Rate MSE: {binom_result.pass5_mse:.4f}")
-
-    results["oracle"] = oracle_result
-
-    # 4. Build predictor configs and run evaluation pipeline
-    predictor_configs = build_predictor_configs(
-        config, root, llm_judge_features=spec.llm_judge_features
-    )
-    pipeline_results = run_evaluation_pipeline(
-        data, predictor_configs, verbose=True, compute_binomial=compute_binomial
-    )
-    results.update(pipeline_results)
-
-    # 5. Agent-only baseline (uses common implementation)
-    print("\nComputing agent-only baseline...")
-    agent_result = agent_only_baseline(data, compute_binomial=compute_binomial)
-    print(f"   Agent-only AUC: {agent_result.get('auc', 'N/A'):.4f}")
-    if compute_binomial and "binomial_metrics" in agent_result:
-        bm = agent_result["binomial_metrics"]
-        print(f"   Agent-only Pass Rate MSE: {bm['pass5_mse']:.4f}")
-    results["agent_only_baseline"] = agent_result
-
-    # 6. Print summary
-    print("\n" + "=" * 60)
-    print("SUMMARY")
-    print("=" * 60)
-    print(f"\nTest set: {data.n_test_tasks} tasks")
-
-    # Define display order
-    display_order = [
-        ("Oracle (true b)", "oracle"),
-        ("Embedding", "embedding_predictor"),
-        ("LLM Judge", "llm_judge_predictor"),
-        ("Constant (mean b)", "constant_baseline"),
-        ("Agent-only", "agent_only_baseline"),
-    ]
-
-    if compute_binomial:
-        print(f"\n{'Method':<25} {'AUC':>10} {'Pass Rate MSE':>14}")
-        print("-" * 52)
-
-        for name, key in display_order:
-            result = results.get(key, {})
-            if "auc_result" in result:
-                auc = result["auc_result"].get("auc")
-            else:
-                auc = result.get("auc")
-
-            bm = result.get("binomial_metrics", {})
-            mse = bm.get("pass5_mse")
-
-            if auc is not None:
-                mse_str = f"{mse:.4f}" if mse is not None else "N/A"
-                print(f"{name:<25} {auc:>10.4f} {mse_str:>14}")
-            elif "error" in result:
-                print(f"{name:<25} {'ERROR':>10} {'N/A':>14}")
-            elif "skipped" in result:
-                continue
-            elif key not in results:
-                continue
-            else:
-                print(f"{name:<25} {'N/A':>10} {'N/A':>14}")
-    else:
-        print(f"\n{'Method':<30} {'AUC':>10}")
-        print("-" * 42)
-
-        for name, key in display_order:
-            result = results.get(key, {})
-            if "auc_result" in result:
-                auc = result["auc_result"].get("auc")
-            else:
-                auc = result.get("auc")
-
-            if auc is not None:
-                print(f"{name:<30} {auc:>10.4f}")
-            elif "error" in result:
-                print(f"{name:<30} {'ERROR':>10}")
-            elif "skipped" in result:
-                continue
-            elif key not in results:
-                continue
-            else:
-                print(f"{name:<30} {'N/A':>10}")
-
-    return results
 
 
 def run_cross_validation(
@@ -321,6 +190,8 @@ def run_cross_validation(
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Run the evaluation pipeline with k-fold cross-validation.
+
+    Uses the unified run_cv function for ALL predictors including baselines.
 
     Args:
         config: Experiment configuration
@@ -346,7 +217,6 @@ def run_cross_validation(
     all_task_ids = list(full_items.index)
 
     # Optionally filter unsolved tasks before generating folds
-    n_excluded = 0
     if config.exclude_unsolved:
         if spec.is_binomial:
             responses = _load_binomial_responses(responses_path)
@@ -380,39 +250,26 @@ def run_cross_validation(
             exclude_unsolved=config.exclude_unsolved,
         )
 
-    # Build predictor configs
-    predictor_configs = build_predictor_configs(
+    # Build ALL predictor configs (oracle, feature-based, baselines)
+    predictor_configs = build_cv_predictors(
         config, root, llm_judge_features=spec.llm_judge_features
     )
+
+    # Determine if we should compute binomial metrics
+    compute_pass_rate_mse = spec.is_binomial
 
     # Results dict
     cv_results: Dict[str, CrossValidationResult] = {}
 
-    # Add oracle as a predictor config
-    oracle_config = PredictorConfig(
-        predictor=GroundTruthPredictor(full_items),
-        name="oracle",
-        display_name="Oracle (true b)",
-        use_full_abilities=True,
-    )
-
-    # Determine if we should compute binomial metrics
-    compute_binomial = spec.is_binomial
-
-    # Run CV for oracle
-    print("\n1. Oracle (ground truth b from full IRT):")
-    cv_results["oracle"] = run_cv_for_predictor(
-        oracle_config, folds, load_fold_data, verbose=True, compute_binomial=compute_binomial
-    )
-    print(
-        f"   Mean AUC: {cv_results['oracle'].mean_auc:.4f} ± {cv_results['oracle'].std_auc:.4f}"
-    )
-
-    # Run CV for each predictor
-    for i, pc in enumerate(predictor_configs, 2):
+    # Run CV for each predictor using the unified framework
+    for i, pc in enumerate(predictor_configs, 1):
         print(f"\n{i}. {pc.display_name}:")
-        cv_results[pc.name] = run_cv_for_predictor(
-            pc, folds, load_fold_data, verbose=True, compute_binomial=compute_binomial
+        cv_results[pc.name] = run_cv(
+            pc.predictor,
+            folds,
+            load_fold_data,
+            verbose=True,
+            compute_pass_rate_mse=compute_pass_rate_mse,
         )
         result = cv_results[pc.name]
         if result.mean_auc is not None:
@@ -420,36 +277,15 @@ def run_cross_validation(
         else:
             print("   Mean AUC: N/A")
 
-    # Run CV for agent-only baseline with binomial support
-    print(f"\n{len(predictor_configs) + 2}. Agent-only baseline:")
-
-    def agent_only_with_binomial(data):
-        return agent_only_baseline(data, compute_binomial=compute_binomial)
-
-    cv_results["agent_only_baseline"] = run_cv_for_baseline(
-        agent_only_with_binomial, folds, load_fold_data, verbose=True, compute_binomial=compute_binomial
-    )
-    agent_result = cv_results["agent_only_baseline"]
-    if agent_result.mean_auc is not None:
-        print(f"   Mean AUC: {agent_result.mean_auc:.4f} ± {agent_result.std_auc:.4f}")
-    else:
-        print("   Mean AUC: N/A")
-
     # Print summary
     print("\n" + "=" * 60)
     print(f"SUMMARY ({k}-FOLD CROSS-VALIDATION)")
     print("=" * 60)
 
-    # Define display order
-    display_order = [
-        ("Oracle (true b)", "oracle"),
-        ("Embedding", "embedding_predictor"),
-        ("LLM Judge", "llm_judge_predictor"),
-        ("Constant (mean b)", "constant_baseline"),
-        ("Agent-only", "agent_only_baseline"),
-    ]
+    # Get display order from predictor configs
+    display_order = [(pc.display_name, pc.name) for pc in predictor_configs]
 
-    if compute_binomial:
+    if compute_pass_rate_mse:
         print(f"\n{'Method':<25} {'Mean AUC':>10} {'Std':>8} {'Pass Rate MSE':>14}")
         print("-" * 62)
 
@@ -457,7 +293,7 @@ def run_cross_validation(
             if key in cv_results:
                 result = cv_results[key]
                 if result.mean_auc is not None:
-                    mse_str = f"{result.mean_pass5_mse:.4f}" if result.mean_pass5_mse is not None else "N/A"
+                    mse_str = f"{result.mean_pass_rate_mse:.4f}" if result.mean_pass_rate_mse is not None else "N/A"
                     print(f"{name:<25} {result.mean_auc:>10.4f} {result.std_auc:>8.4f} {mse_str:>14}")
                 else:
                     print(f"{name:<25} {'N/A':>10} {'N/A':>8} {'N/A':>14}")
@@ -499,17 +335,6 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         type=int,
         default=5,
         help="Number of folds for cross-validation (default: 5)",
-    )
-    parser.add_argument(
-        "--single_holdout",
-        action="store_true",
-        help="Use single 20%% holdout instead of cross-validation (legacy behavior)",
-    )
-    parser.add_argument(
-        "--test_fraction",
-        type=float,
-        default=0.2,
-        help="Fraction of tasks to hold out for testing (default: 0.2)",
     )
     parser.add_argument(
         "--split_seed",
@@ -586,7 +411,6 @@ def run_experiment_main(
 
     # Build config kwargs from args - only override if CLI arg is provided
     config_kwargs: Dict[str, Any] = {
-        "test_fraction": args.test_fraction,
         "split_seed": args.split_seed,
         "output_dir": Path(args.output_dir),
         "exclude_unsolved": args.exclude_unsolved,
@@ -615,13 +439,9 @@ def run_experiment_main(
     if metadata_loader_factory is not None:
         metadata_loader = metadata_loader_factory(config)
 
-    # Run experiment - CV is the default, single holdout is legacy
-    if args.single_holdout:
-        results = run_single_holdout(config, spec, root, metadata_loader)
-        output_filename = "experiment_a_results.json"
-    else:
-        results = run_cross_validation(config, spec, root, args.k_folds, metadata_loader)
-        output_filename = f"experiment_a_cv{args.k_folds}_results.json"
+    # Run cross-validation
+    results = run_cross_validation(config, spec, root, args.k_folds, metadata_loader)
+    output_filename = f"experiment_a_cv{args.k_folds}_results.json"
 
     # Save results
     output_dir = root / config.output_dir

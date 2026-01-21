@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 import yaml
 
-# Reuse stable_split_tasks from experiment_a
-from experiment_a.data_loader import stable_split_tasks
+# Reuse stable_split_tasks from experiment_ab_shared
+from experiment_ab_shared import stable_split_tasks
 
 
 def load_abilities(abilities_path: Path) -> pd.DataFrame:

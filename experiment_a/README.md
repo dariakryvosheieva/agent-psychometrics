@@ -19,20 +19,14 @@ Then measure AUC by comparing these predicted probabilities to actual binary out
 ```bash
 source .venv/bin/activate
 
-# Run all 4 experiments with default embeddings
-python run_all_experiments.py
+# Run SWE-bench experiment
+python -m experiment_a.swebench.train_evaluate
 
-# Run all 4 experiments with custom embeddings per dataset
-python run_all_experiments.py \
-    --swebench_embeddings path/to/swebench_embeddings.npz \
-    --terminalbench_embeddings path/to/terminalbench_embeddings.npz
-
-# Run individual experiments
-python -m experiment_a.train_evaluate                    # SWE-bench
-python -m experiment_a_terminalbench.train_evaluate      # TerminalBench
+# Run TerminalBench experiment
+python -m experiment_a.terminalbench.train_evaluate
 
 # Dry run to check config
-python -m experiment_a.train_evaluate --dry_run
+python -m experiment_a.swebench.train_evaluate --dry_run
 ```
 
 ## Results (2026-01-20)
@@ -79,36 +73,56 @@ The IRT model provides ground truth difficulties (β) used as training targets. 
 
 ## Architecture
 
-The experiment uses a unified framework in `experiment_a_common/` that supports both SWE-bench (binary) and TerminalBench (binomial) datasets.
+The experiment uses a unified CVPredictor protocol that all methods implement, enabling consistent k-fold cross-validation across both SWE-bench (binary) and TerminalBench (binomial) datasets.
 
-### Shared Infrastructure (`experiment_a_common/`)
+### CVPredictor Protocol
+
+All methods implement the same interface:
+
+```python
+class CVPredictor(Protocol):
+    def fit(self, data: ExperimentData, train_task_ids: List[str]) -> None: ...
+    def predict_probability(self, data: ExperimentData, agent_id: str, task_id: str) -> float: ...
+```
+
+### Shared Infrastructure
+
+**`experiment_ab_shared/`** - Core abstractions shared with Experiment B:
 
 | File | Purpose |
 |------|---------|
+| `dataset.py` | `ExperimentData` ABC with `BinaryExperimentData`, `BinomialExperimentData` |
 | `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource` |
 | `feature_predictor.py` | `FeatureBasedPredictor` (StandardScaler → RidgeCV) |
-| `predictor_base.py` | `DifficultyPredictorBase` ABC, `ConstantPredictor`, `GroundTruthPredictor` |
-| `dataset.py` | `ExperimentData` ABC with `BinaryExperimentData`, `BinomialExperimentData` |
-| `evaluator.py` | `compute_auc()`, `PredictorConfig`, evaluation pipeline |
-| `cross_validation.py` | k-fold CV utilities |
-| `pipeline.py` | `ExperimentSpec`, `run_experiment_main()` orchestration |
+| `predictor_base.py` | `DifficultyPredictorBase` ABC |
+| `evaluator.py` | `compute_auc()`, `compute_irt_probability()` |
 
-### SWE-bench Specific (`experiment_a/`)
+**`experiment_a/shared/`** - Experiment A orchestration:
 
 | File | Purpose |
 |------|---------|
-| `train_evaluate.py` | Main entry point (thin wrapper, ~40 LOC) |
+| `pipeline.py` | `ExperimentSpec`, `CVPredictorConfig`, `run_experiment_main()` |
+| `cross_validation.py` | `CVPredictor` protocol, `run_cv()`, `k_fold_split_tasks()` |
+| `baselines.py` | `OraclePredictor`, `ConstantPredictor`, `AgentOnlyPredictor`, `DifficultyPredictorAdapter` |
+
+### SWE-bench Specific (`experiment_a/swebench/`)
+
+| File | Purpose |
+|------|---------|
+| `train_evaluate.py` | Main entry point |
 | `config.py` | `ExperimentAConfig` with default paths |
 | `generate_embeddings.py` | Generate task embeddings |
 | `compute_llm_judge_features.py` | Extract LLM semantic features |
 
-### TerminalBench Specific (`experiment_a_terminalbench/`)
+### TerminalBench Specific (`experiment_a/terminalbench/`)
 
 | File | Purpose |
 |------|---------|
 | `train_evaluate.py` | Main entry with `is_binomial=True` |
 | `config.py` | `TerminalBenchConfig` with TerminalBench paths |
 | `data_loader.py` | Load task data from terminal-bench repo |
+| `binomial_metrics.py` | Pass rate MSE for binomial responses |
+| `sampling.py` | Stratified train/test splitting |
 
 ## Feature Sources
 
@@ -164,8 +178,6 @@ python -m experiment_a.compute_llm_judge_features
 
 ```
 --k_folds             Number of folds for cross-validation (default: 5)
---single_holdout      Use single 20% holdout instead of CV
---test_fraction       Fraction of tasks for test set (default: 0.2)
 --split_seed          Random seed for train/test split (default: 0)
 --embeddings_path     Override default embeddings path
 --llm_judge_features_path  Override default LLM features path

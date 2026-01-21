@@ -11,26 +11,41 @@ Entry points:
 # Re-export core classes from shared modules for convenience
 from experiment_ab_shared import (
     DifficultyPredictorBase,
-    ConstantPredictor,
     GroundTruthPredictor,
     FeatureBasedPredictor,
     EmbeddingFeatureSource,
     CSVFeatureSource,
     compute_auc,
-    agent_only_baseline,
-    random_baseline,
     stable_split_tasks,
 )
 
+from experiment_a.shared import (
+    CVPredictor,
+    CrossValidationResult,
+    AgentOnlyPredictor,
+    ConstantPredictor,
+    OraclePredictor,
+    DifficultyPredictorAdapter,
+    run_cv,
+    k_fold_split_tasks,
+)
+
 __all__ = [
+    # From experiment_ab_shared
     "DifficultyPredictorBase",
-    "ConstantPredictor",
     "GroundTruthPredictor",
     "FeatureBasedPredictor",
     "EmbeddingFeatureSource",
     "CSVFeatureSource",
     "compute_auc",
-    "agent_only_baseline",
-    "random_baseline",
     "stable_split_tasks",
+    # From experiment_a.shared
+    "CVPredictor",
+    "CrossValidationResult",
+    "AgentOnlyPredictor",
+    "ConstantPredictor",
+    "OraclePredictor",
+    "DifficultyPredictorAdapter",
+    "run_cv",
+    "k_fold_split_tasks",
 ]
