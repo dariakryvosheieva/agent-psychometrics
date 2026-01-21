@@ -46,7 +46,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import pandas as pd
 import torch
 
-from experiment_sad_irt.data_splits import get_pre_frontier_agents
+# Import directly to avoid loading peft/transformers from __init__.py
+import importlib.util
+spec = importlib.util.spec_from_file_location(
+    "data_splits", PROJECT_ROOT / "experiment_sad_irt" / "data_splits.py"
+)
+data_splits_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(data_splits_module)
+get_pre_frontier_agents = data_splits_module.get_pre_frontier_agents
 
 logging.basicConfig(
     level=logging.INFO,
