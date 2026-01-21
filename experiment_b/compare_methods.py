@@ -299,10 +299,11 @@ def print_comparison_table(
     alignment_method: str = "affine",
     cutoff_date: str = "20250401",
     frontier_definition: str = "passrate",
-    irt_solve_prob: float = 0.3,
+    irt_solve_prob: float = 0.5,
     date_results: Optional[Dict[str, Dict]] = None,
     last_agent_date: Optional[str] = None,
     verbose: bool = False,
+    dataset_name: str = "",
 ) -> None:
     """Print formatted comparison table."""
     print("=" * 90)
@@ -356,8 +357,18 @@ def print_comparison_table(
 
         print()
 
+    # Build table header with dataset and frontier definition
+    frontier_label = "IRT" if frontier_definition == "irt" else "Pass-rate"
+    header_parts = []
+    if dataset_name:
+        header_parts.append(dataset_name)
+    header_parts.append(f"{frontier_label} definition")
+    header_parts.append(f"{frontier_task_count} frontier tasks")
+    header_parts.append(f"{post_frontier_count} eval agents")
+    header_line = " | ".join(header_parts)
+
     print("=" * 90)
-    print(f"COMPARISON TABLE (Frontier Tasks: {frontier_task_count}, Eval Agents: {post_frontier_count})")
+    print(header_line)
     print("=" * 90)
     print()
 
@@ -1137,6 +1148,7 @@ def main():
             date_results=date_results_for_def,
             last_agent_date=last_agent_date,
             verbose=args.verbose,
+            dataset_name=dataset_config.name,
         )
 
     # Save to CSV if requested (use first frontier definition for backwards compatibility)
