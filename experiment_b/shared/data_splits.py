@@ -202,6 +202,42 @@ def identify_frontier_tasks_irt(
     return post_cutoff_tasks
 
 
+def identify_frontier_tasks_zero_pre(
+    responses_path: Path,
+    pre_frontier_agents: List[str],
+    post_frontier_agents: List[str],
+) -> List[str]:
+    """Identify frontier tasks: zero pre-frontier solves, nonzero post-frontier solves.
+
+    Frontier tasks are those where:
+    - Pass rate among pre-frontier agents == 0 (no pre-frontier agent solves it)
+    - Pass rate among post-frontier agents > 0 (at least one post-frontier agent solves it)
+
+    This is a stricter criterion than identify_frontier_tasks() which allows up to
+    10% pre-frontier pass rate.
+
+    Args:
+        responses_path: Path to JSONL response matrix
+        pre_frontier_agents: List of pre-frontier agent names
+        post_frontier_agents: List of post-frontier agent names
+
+    Returns:
+        List of task_ids that are frontier tasks
+    """
+    pre_pass_rates = compute_pass_rates(responses_path, pre_frontier_agents)
+    post_pass_rates = compute_pass_rates(responses_path, post_frontier_agents)
+
+    frontier_tasks = []
+    for task_id in pre_pass_rates:
+        pre_rate = pre_pass_rates[task_id]
+        post_rate = post_pass_rates[task_id]
+
+        if pre_rate == 0.0 and post_rate > 0.0:
+            frontier_tasks.append(task_id)
+
+    return frontier_tasks
+
+
 def identify_nontrivial_tasks(
     responses_path: Path,
     pre_frontier_agents: List[str],

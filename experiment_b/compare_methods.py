@@ -40,6 +40,7 @@ from experiment_b.shared.data_splits import (
     get_all_agents_from_responses,
     identify_frontier_tasks,
     identify_frontier_tasks_irt,
+    identify_frontier_tasks_zero_pre,
     identify_nontrivial_tasks,
     split_agents_by_dates,
 )
@@ -313,7 +314,11 @@ def print_comparison_table(
     if frontier_definition == "irt":
         print("Frontier Task Definition (IRT-based):")
         print(f"  - No pre-frontier agent has >={irt_solve_prob:.0%} solve probability")
-    else:
+    elif frontier_definition == "zero_pre":
+        print("Frontier Task Definition (zero pre-frontier):")
+        print("  - Pre-frontier pass rate == 0% (no pre-frontier agent solves)")
+        print("  - Post-frontier pass rate > 0% (at least one post-frontier agent solves)")
+    else:  # passrate
         print("Frontier Task Definition (pass-rate based):")
         print("  - Pre-frontier pass rate <= 10%")
         print("  - Post-frontier pass rate > 10%")
@@ -358,7 +363,12 @@ def print_comparison_table(
         print()
 
     # Build table header with dataset and frontier definition
-    frontier_label = "IRT" if frontier_definition == "irt" else "Pass-rate"
+    if frontier_definition == "irt":
+        frontier_label = "IRT"
+    elif frontier_definition == "zero_pre":
+        frontier_label = "Zero-pre"
+    else:
+        frontier_label = "Pass-rate"
     header_parts = []
     if dataset_name:
         header_parts.append(dataset_name)
@@ -593,10 +603,11 @@ def main():
         "--frontier_definitions",
         type=str,
         nargs="+",
-        default=["passrate", "irt"],
-        choices=["irt", "passrate"],
-        help="Frontier definitions to evaluate (default: both). "
-             "'passrate' = pass rate thresholds, 'irt' = IRT probability threshold",
+        default=["passrate", "irt", "zero_pre"],
+        choices=["irt", "passrate", "zero_pre"],
+        help="Frontier definitions to evaluate (default: all three). "
+             "'passrate' = pass rate thresholds, 'irt' = IRT probability threshold, "
+             "'zero_pre' = 0%% pre-frontier, >0%% post-frontier",
     )
     args = parser.parse_args()
 
@@ -705,7 +716,14 @@ def main():
                 solve_probability=irt_solve_prob,
             )
             print(f"  Frontier tasks ({frontier_def}: no pre-frontier agent with >={irt_solve_prob:.0%} solve prob): {len(frontier_task_ids)}")
-        else:
+        elif frontier_def == "zero_pre":
+            frontier_task_ids = identify_frontier_tasks_zero_pre(
+                responses_path,
+                pre_frontier,
+                post_frontier,
+            )
+            print(f"  Frontier tasks ({frontier_def}: 0% pre, >0% post): {len(frontier_task_ids)}")
+        else:  # passrate
             frontier_task_ids = identify_frontier_tasks(
                 responses_path,
                 pre_frontier,
