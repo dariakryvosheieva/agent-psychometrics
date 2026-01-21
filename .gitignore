@@ -174,3 +174,14 @@ chris_output/scale_alignment_analysis/
 
 # Experiment B TerminalBench outputs (regenerable)
 chris_output/experiment_b/terminalbench/
+
+# Experiment B SWE-bench outputs (regenerable)
+chris_output/experiment_b/swebench/
+
+# Feature-IRT grid search outputs (regenerable)
+chris_output/feature_irt_grid_search.csv
+chris_output/feature_irt_grid_search.png
+
+# Generated figures (regenerable, but keep .py scripts)
+chris_output/figures/*.png
+chris_output/figures/*.pdf
