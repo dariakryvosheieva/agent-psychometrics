@@ -680,7 +680,8 @@ def main():
         print(f"  Baseline IRT: {len(baseline_items)} tasks, {len(baseline_abilities)} agents")
 
     # Default solve probability threshold for IRT-based frontier definition
-    irt_solve_prob = 0.3
+    # Using 50% means tasks where no pre-frontier agent can solve with majority probability
+    irt_solve_prob = 0.5
 
     # Identify frontier tasks for each definition
     frontier_tasks_by_def = {}
