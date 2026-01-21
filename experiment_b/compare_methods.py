@@ -1090,19 +1090,22 @@ def main():
     primary_frontier_tasks = frontier_tasks_by_def[primary_frontier_def]
 
     # Configure hyperparameter grid
+    # Default: no residuals (residuals tend to overfit; main benefit is from joint ability learning)
     if args.diagnostic_mode:
-        # Extended grid for diagnostics - wider range to explore
+        # Extended grid for diagnostics - wider range to explore WITH residuals
         l2_weight_grid = [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0]
         l2_residual_grid = [0.1, 1.0, 10.0, 100.0, 1000.0]
         use_residuals_grid = [True]  # Only test with residuals for contribution analysis
     elif args.grid_search:
+        # Grid search over l2_weight only (no residuals by default)
         l2_weight_grid = [0.001, 0.01, 0.1]
-        l2_residual_grid = [1.0, 10.0, 100.0]
-        use_residuals_grid = [True, False]
+        l2_residual_grid = [10.0]  # Not used when use_residuals=False
+        use_residuals_grid = [False]
     else:
+        # Default: no residuals, single l2_weight value
         l2_weight_grid = [0.01]
-        l2_residual_grid = [10.0]
-        use_residuals_grid = [True]
+        l2_residual_grid = [10.0]  # Not used when use_residuals=False
+        use_residuals_grid = [False]
 
     # Store Feature-IRT learned abilities for date forecasting
     feature_irt_abilities = {}
