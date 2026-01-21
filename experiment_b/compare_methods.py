@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 from experiment_b.shared.data_splits import (
     get_all_agents_from_responses,
     identify_frontier_tasks,
+    identify_frontier_tasks_irt,
     identify_nontrivial_tasks,
     split_agents_by_dates,
 )
@@ -296,7 +297,9 @@ def print_comparison_table(
     post_frontier_count: int,
     anchor_task_count: int = 0,
     alignment_method: str = "affine",
-    cutoff_date: str = "20250807",
+    cutoff_date: str = "20250401",
+    frontier_definition: str = "passrate",
+    date_results: Optional[Dict[str, Dict]] = None,
     verbose: bool = False,
 ) -> None:
     """Print formatted comparison table."""
@@ -304,9 +307,13 @@ def print_comparison_table(
     print("EXPERIMENT B: FRONTIER TASK DIFFICULTY PREDICTION")
     print("=" * 90)
     print()
-    print("Frontier Task Definition:")
-    print("  - Pre-frontier pass rate <= 10%")
-    print("  - Post-frontier pass rate > 10%")
+    if frontier_definition == "irt":
+        print("Frontier Task Definition (IRT-based):")
+        print("  - No pre-frontier agent has theta >= beta (50% solve probability)")
+    else:
+        print("Frontier Task Definition (pass-rate based):")
+        print("  - Pre-frontier pass rate <= 10%")
+        print("  - Post-frontier pass rate > 10%")
     print(f"  - Cutoff date: {cutoff_date}")
     print()
     print("Data Summary:")
@@ -346,27 +353,25 @@ def print_comparison_table(
     print(f"COMPARISON TABLE (Frontier Tasks: {frontier_task_count}, Eval Agents: {post_frontier_count})")
     print("=" * 90)
     print()
-    print(f"{'Method':<45} {'ROC-AUC':>10} {'Spearman ρ':>12} {'p-value':>10}")
-    print("-" * 90)
 
-    # Sort by AUC (descending), with Spearman as tiebreaker
+    # Determine columns based on whether date_results is available
+    if date_results:
+        print(f"{'Method':<45} {'ROC-AUC':>10} {'MAE (days)':>12}")
+    else:
+        print(f"{'Method':<45} {'ROC-AUC':>10} {'Spearman ρ':>12} {'p-value':>10}")
+    print("-" * 78)
+
+    # Sort by AUC (descending)
     def sort_key(item):
         auc = item[1].get("auc")
-        rho = item[1].get("frontier_spearman_rho", float("-inf"))
         if auc is None or (isinstance(auc, float) and np.isnan(auc)):
-            auc_val = float("-inf")
-        else:
-            auc_val = auc
-        if isinstance(rho, float) and np.isnan(rho):
-            rho = float("-inf")
-        return (auc_val, rho)
+            return float("-inf")
+        return auc
 
     sorted_methods = sorted(results.items(), key=sort_key, reverse=True)
 
     for method, metrics in sorted_methods:
         auc = metrics.get("auc")
-        rho = metrics.get("frontier_spearman_rho", float("nan"))
-        p = metrics.get("frontier_spearman_p", float("nan"))
 
         # Format AUC
         if auc is None or (isinstance(auc, float) and np.isnan(auc)):
@@ -374,15 +379,28 @@ def print_comparison_table(
         else:
             auc_str = f"{auc:.4f}"
 
-        # Format Spearman
-        if isinstance(rho, float) and np.isnan(rho):
-            rho_str = "N/A"
-            p_str = "N/A"
+        if date_results:
+            # Get MAE from date_results
+            date_metrics = date_results.get(method, {})
+            mae = date_metrics.get("mae_days", float("nan"))
+            if isinstance(mae, float) and np.isnan(mae):
+                mae_str = "N/A"
+            else:
+                mae_str = f"{mae:.1f}"
+            print(f"{method:<45} {auc_str:>10} {mae_str:>12}")
         else:
-            rho_str = f"{rho:.4f}"
-            p_str = f"{p:.4f}" if p >= 0.0001 else "<0.0001"
+            rho = metrics.get("frontier_spearman_rho", float("nan"))
+            p = metrics.get("frontier_spearman_p", float("nan"))
 
-        print(f"{method:<45} {auc_str:>10} {rho_str:>12} {p_str:>10}")
+            # Format Spearman
+            if isinstance(rho, float) and np.isnan(rho):
+                rho_str = "N/A"
+                p_str = "N/A"
+            else:
+                rho_str = f"{rho:.4f}"
+                p_str = f"{p:.4f}" if p >= 0.0001 else "<0.0001"
+
+            print(f"{method:<45} {auc_str:>10} {rho_str:>12} {p_str:>10}")
 
     print()
 
@@ -565,9 +583,17 @@ def main():
         help="Run grid search over Feature-IRT hyperparameters",
     )
     parser.add_argument(
-        "--forecast_dates",
+        "--no_forecast_dates",
         action="store_true",
-        help="Also run date forecasting evaluation (predict when tasks become solvable)",
+        help="Disable date forecasting evaluation (enabled by default)",
+    )
+    parser.add_argument(
+        "--frontier_definition",
+        type=str,
+        default="passrate",
+        choices=["irt", "passrate"],
+        help="Method for defining frontier tasks: 'passrate' (pass rate thresholds, default) "
+             "or 'irt' (no pre-frontier agent with theta>=beta, i.e., 50%% solve probability)",
     )
     args = parser.parse_args()
 
@@ -641,14 +667,24 @@ def main():
         )
         print(f"  Baseline IRT: {len(baseline_items)} tasks")
 
-    frontier_task_ids = identify_frontier_tasks(
-        responses_path,
-        pre_frontier,
-        post_frontier,
-        pre_threshold,
-        post_threshold,
-    )
-    print(f"  Frontier tasks: {len(frontier_task_ids)}")
+    # Identify frontier tasks using selected definition
+    if args.frontier_definition == "irt":
+        frontier_task_ids = identify_frontier_tasks_irt(
+            oracle_items=oracle_items,
+            oracle_abilities=oracle_abilities,
+            agent_dates=agent_dates,
+            cutoff_date=cutoff_date,
+        )
+        print(f"  Frontier tasks (IRT: no pre-frontier agent with theta>=beta): {len(frontier_task_ids)}")
+    else:
+        frontier_task_ids = identify_frontier_tasks(
+            responses_path,
+            pre_frontier,
+            post_frontier,
+            pre_threshold,
+            post_threshold,
+        )
+        print(f"  Frontier tasks (pass-rate: <={pre_threshold*100:.0f}% pre, >{post_threshold*100:.0f}% post): {len(frontier_task_ids)}")
 
     # Identify nontrivial anchor tasks for scale alignment
     print("\nIdentifying nontrivial anchor tasks...")
@@ -815,10 +851,10 @@ def main():
                     anchor_task_ids=anchor_task_ids,
                     eval_agents=post_frontier,
                     alignment_method=args.alignment_method,
-                    return_predictions=args.forecast_dates,
+                    return_predictions=not args.no_forecast_dates,
                 )
                 results[method_name] = metrics
-                if args.forecast_dates and "raw_predictions" in metrics:
+                if not args.no_forecast_dates and "raw_predictions" in metrics:
                     raw_predictions[method_name] = metrics.pop("raw_predictions")
                 auc = metrics.get('auc')
                 rho = metrics.get('frontier_spearman_rho')
@@ -885,7 +921,7 @@ def main():
                             train_agents=pre_frontier,
                             alignment_method=args.alignment_method,
                             sanity_check=not args.grid_search,
-                            return_predictions=args.forecast_dates,
+                            return_predictions=not args.no_forecast_dates,
                         )
                         auc = metrics.get('auc', 0) or 0
                         if args.grid_search:
@@ -911,7 +947,7 @@ def main():
             if not args.grid_search:
                 print(f"\nEvaluating {method_name}...")
                 print(f"  Training on {len(all_task_ids_baseline)} tasks")
-            if args.forecast_dates and "raw_predictions" in best_metrics:
+            if not args.no_forecast_dates and "raw_predictions" in best_metrics:
                 raw_predictions[method_name] = best_metrics.pop("raw_predictions")
             results[method_name] = best_metrics
             auc = best_metrics.get('auc')
@@ -926,21 +962,9 @@ def main():
                 "num_frontier_tasks": 0,
             }
 
-    # Print comparison table
-    print()
-    print_comparison_table(
-        results,
-        len(frontier_task_ids),
-        len(pre_frontier),
-        len(post_frontier),
-        anchor_task_count=len(anchor_task_ids),
-        alignment_method=args.alignment_method,
-        cutoff_date=cutoff_date,
-        verbose=args.verbose,
-    )
-
-    # Date forecasting evaluation (if enabled)
-    if args.forecast_dates:
+    # Date forecasting evaluation (enabled by default)
+    date_results = None
+    if not args.no_forecast_dates:
         print("\nRunning date forecasting evaluation...")
 
         # Get agent dates for ground truth computation
@@ -1014,22 +1038,25 @@ def main():
                         "r_squared_fit": float("nan"),
                         "n_tasks": 0,
                     }
-
-            # Print date forecasting table
-            print_date_forecast_table(
-                date_results,
-                n_frontier_total=len(post_cutoff_tasks),
-                n_frontier_with_gt=len(post_cutoff_tasks),
-                n_excluded=len(tasks_without_capable),
-                earliest_agent_date=earliest_agent_date.strftime("%Y-%m-%d"),
-                latest_agent_date=latest_agent_date.strftime("%Y-%m-%d"),
-                cutoff_date=cutoff_date,
-                gt_date_min=gt_date_min,
-                gt_date_max=gt_date_max,
-            )
         else:
-            print("  Error: Too few tasks for date forecasting")
+            print("  Warning: Too few tasks for date forecasting")
             print(f"    Need >=3 pre-cutoff tasks ({len(pre_cutoff_tasks)}) and >=3 post-cutoff tasks ({len(post_cutoff_tasks)})")
+
+    # Print comparison table (with date results if available)
+    print()
+    print_comparison_table(
+        results,
+        len(frontier_task_ids),
+        len(pre_frontier),
+        len(post_frontier),
+        anchor_task_count=len(anchor_task_ids),
+        alignment_method=args.alignment_method,
+        cutoff_date=cutoff_date,
+        frontier_definition=args.frontier_definition,
+        date_results=date_results,
+        verbose=args.verbose,
+    )
+
 
     # Save to CSV if requested
     if args.output_csv:
