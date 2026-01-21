@@ -298,7 +298,7 @@ def run_cross_validation(
 
     # Print summary
     print("\n" + "=" * 60)
-    print(f"SUMMARY ({k}-FOLD CROSS-VALIDATION)")
+    print(f"SUMMARY: {spec.name} ({k}-FOLD CROSS-VALIDATION)")
     print("=" * 60)
 
     # Get display order from predictor configs
