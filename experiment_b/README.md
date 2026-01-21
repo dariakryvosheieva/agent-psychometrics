@@ -52,27 +52,27 @@ python -m experiment_b.compare_methods --output_csv results.csv
 
 #### Pass-rate Definition (47 frontier tasks)
 
-| Method | ROC-AUC | MAE (days) |
-|--------|---------|------------|
-| Oracle (upper bound) | 0.8439 | 20.9 |
-| SAD-IRT (best) | 0.8034 | 119.4 |
-| Feature-IRT (Embedding) | 0.7744 | 72.2 |
-| Embedding + Ridge | 0.7485 | N/A |
-| Feature-IRT (LLM Judge) | 0.7480 | 171.5 |
-| LLM Judge + Ridge | 0.7478 | N/A |
-| Baseline IRT (pre-frontier only) | 0.7472 | 115.9 |
+| Method | ROC-AUC |
+|--------|---------|
+| Oracle (upper bound) | 0.8439 |
+| SAD-IRT (best) | 0.8036 |
+| Feature-IRT (Embedding) | 0.7744 |
+| Baseline IRT (pre-frontier only) | 0.7600 ± 0.011 |
+| LLM Judge + Ridge | 0.7481 |
+| Feature-IRT (LLM Judge) | 0.7480 |
+| Embedding + Ridge | 0.7475 |
 
 #### IRT Definition (30 frontier tasks)
 
-| Method | ROC-AUC | MAE (days) |
-|--------|---------|------------|
-| Oracle (upper bound) | 0.7412 | 20.9 |
-| SAD-IRT (best) | 0.6993 | 119.4 |
-| Feature-IRT (Embedding) | 0.6974 | 72.2 |
-| Feature-IRT (LLM Judge) | 0.6757 | 171.5 |
-| LLM Judge + Ridge | 0.6744 | N/A |
-| Embedding + Ridge | 0.6740 | N/A |
-| Baseline IRT (pre-frontier only) | 0.6640 | 115.9 |
+| Method | ROC-AUC |
+|--------|---------|
+| Oracle (upper bound) | 0.7412 |
+| SAD-IRT (best) | 0.6998 |
+| Feature-IRT (Embedding) | 0.6974 |
+| Baseline IRT (pre-frontier only) | 0.6829 ± 0.014 |
+| Feature-IRT (LLM Judge) | 0.6757 |
+| LLM Judge + Ridge | 0.6746 |
+| Embedding + Ridge | 0.6741 |
 
 ### TerminalBench
 
@@ -80,31 +80,31 @@ python -m experiment_b.compare_methods --output_csv results.csv
 
 #### Pass-rate Definition (18 frontier tasks)
 
-| Method | ROC-AUC | MAE (days) |
-|--------|---------|------------|
-| Oracle (upper bound) | 0.8224 | 6.1 |
-| LLM Judge + Ridge | 0.7483 | N/A |
-| Feature-IRT (Embedding) | 0.7427 | 22.9 |
-| Feature-IRT (LLM Judge) | 0.7414 | 33.7 |
-| Embedding + Ridge | 0.7307 | N/A |
-| Baseline IRT (pre-frontier only) | 0.7029 | 22.6 |
+| Method | ROC-AUC |
+|--------|---------|
+| Oracle (upper bound) | 0.8224 |
+| LLM Judge + Ridge | 0.7457 |
+| Feature-IRT (Embedding) | 0.7427 |
+| Feature-IRT (LLM Judge) | 0.7414 |
+| Baseline IRT (pre-frontier only) | 0.7289 ± 0.012 |
+| Embedding + Ridge | 0.7237 |
 
 #### IRT Definition (18 frontier tasks)
 
-| Method | ROC-AUC | MAE (days) |
-|--------|---------|------------|
-| Oracle (upper bound) | 0.7863 | 6.1 |
-| LLM Judge + Ridge | 0.7455 | N/A |
-| Feature-IRT (LLM Judge) | 0.7427 | 33.7 |
-| Feature-IRT (Embedding) | 0.7368 | 22.9 |
-| Embedding + Ridge | 0.7363 | N/A |
-| Baseline IRT (pre-frontier only) | 0.6967 | 22.6 |
+| Method | ROC-AUC |
+|--------|---------|
+| Oracle (upper bound) | 0.7863 |
+| LLM Judge + Ridge | 0.7448 |
+| Feature-IRT (LLM Judge) | 0.7427 |
+| Feature-IRT (Embedding) | 0.7368 |
+| Embedding + Ridge | 0.7348 |
+| Baseline IRT (pre-frontier only) | 0.7211 ± 0.011 |
 
 **Key observations**:
 - **Feature-IRT (Embedding) consistently outperforms Baseline IRT** in ROC-AUC
 - **SAD-IRT** (using trajectory information) achieves strong results on SWE-bench
-- **Methods without their own IRT** (Embedding + Ridge, LLM Judge + Ridge) show N/A for MAE because they cannot produce date forecasts (see Date Forecasting section below)
-- Feature-IRT achieves better MAE than Baseline IRT on SWE-bench (72.2 vs 115.9 days)
+- **Baseline IRT error bars** (± 1 std) from 30 random seed runs show typical variance from IRT training randomness; results use seed=42 for reproducibility
+- **Methods without their own IRT** (Embedding + Ridge, LLM Judge + Ridge) cannot produce date forecasts (see Date Forecasting section below)
 
 ## Methods Compared
 

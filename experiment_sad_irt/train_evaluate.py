@@ -155,12 +155,19 @@ def train_baseline_irt_on_prefrontier(
     dataset = Dataset.from_pandas(df, subject_column="subject_id", item_columns=item_columns)
 
     # Train 1PL IRT (same as SAD-IRT uses)
+    # Use fixed seed for reproducibility
+    seed = 42
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    pyro.set_rng_seed(seed)
+
     config = IrtConfig(
         model_type=OneParamLog,
         priors="hierarchical",
         initializers=[
             {"name": "difficulty_from_accuracy", "eps": 1e-3},
         ],
+        seed=seed,
     )
 
     # Clear pyro param store to avoid conflicts
