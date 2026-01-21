@@ -7,7 +7,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import pandas as pd
 
@@ -52,7 +52,7 @@ def get_or_train_baseline_irt(
     cutoff_date: str,
     output_dir: Path,
     force_retrain: bool = False,
-) -> pd.DataFrame:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Get cached baseline IRT or train a new one.
 
     Baseline IRT is trained on pre-frontier agents only to provide
@@ -71,7 +71,9 @@ def get_or_train_baseline_irt(
         force_retrain: If True, retrain even if cache exists
 
     Returns:
-        DataFrame with 'b' column containing task difficulties
+        Tuple of (items_df, abilities_df):
+            - items_df: DataFrame with 'b' column containing task difficulties
+            - abilities_df: DataFrame with 'theta' column containing agent abilities
     """
     # Compute cache key and paths
     cache_key = compute_baseline_irt_cache_key(
@@ -79,21 +81,28 @@ def get_or_train_baseline_irt(
     )
     cache_dir = output_dir / "baseline_irt" / f"cache_{cache_key}"
     items_path = cache_dir / "items.csv"
+    abilities_path = cache_dir / "abilities.csv"
     cache_info_path = cache_dir / "cache_info.json"
 
-    # Check for valid cache
-    if not force_retrain and items_path.exists() and cache_info_path.exists():
+    # Check for valid cache (both items and abilities must exist)
+    if (
+        not force_retrain
+        and items_path.exists()
+        and abilities_path.exists()
+        and cache_info_path.exists()
+    ):
         # Verify cache info matches
         with open(cache_info_path) as f:
             cached_info = json.load(f)
 
         if cached_info.get("cache_key") == cache_key:
             baseline_items = pd.read_csv(items_path, index_col=0)
+            baseline_abilities = pd.read_csv(abilities_path, index_col=0)
             logger.info(f"Loaded cached baseline IRT from {cache_dir}")
             logger.info(f"  Cache key: {cache_key}")
             logger.info(f"  Pre-frontier agents: {cached_info.get('n_pre_frontier_agents')}")
             logger.info(f"  Cutoff date: {cached_info.get('cutoff_date')}")
-            return baseline_items
+            return baseline_items, baseline_abilities
 
     # Train new baseline IRT
     logger.info(f"Training baseline IRT on pre-frontier agents...")
@@ -123,5 +132,6 @@ def get_or_train_baseline_irt(
         json.dump(cache_info, f, indent=2)
 
     baseline_items = pd.read_csv(items_path, index_col=0)
+    baseline_abilities = pd.read_csv(abilities_path, index_col=0)
     logger.info(f"Saved baseline IRT cache to {cache_dir}")
-    return baseline_items
+    return baseline_items, baseline_abilities

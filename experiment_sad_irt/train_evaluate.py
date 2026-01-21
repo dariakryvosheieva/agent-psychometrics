@@ -169,10 +169,13 @@ def train_baseline_irt_on_prefrontier(
     trainer = IrtModelTrainer(config=config, data_path=None, dataset=dataset)
     trainer.train(epochs=epochs)
 
-    # Extract difficulty parameters
+    # Extract difficulty and ability parameters
     difficulties = list(trainer.best_params["diff"])
+    abilities = list(trainer.best_params["ability"])
     item_id_map = trainer.best_params["item_ids"]
+    subject_id_map = trainer.best_params["subject_ids"]
     item_ids = [item_id_map[i] for i in range(len(difficulties))]
+    subject_ids = [subject_id_map[i] for i in range(len(abilities))]
 
     # Save outputs
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -181,8 +184,14 @@ def train_baseline_irt_on_prefrontier(
     }, index=item_ids)
     items_df.to_csv(output_dir / "items.csv")
 
+    abilities_df = pd.DataFrame({
+        "theta": abilities,
+    }, index=subject_ids)
+    abilities_df.to_csv(output_dir / "abilities.csv")
+
     logger.info(f"Baseline IRT saved to {output_dir}")
     logger.info(f"β stats: mean={np.mean(difficulties):.4f}, std={np.std(difficulties):.4f}")
+    logger.info(f"θ stats: mean={np.mean(abilities):.4f}, std={np.std(abilities):.4f}")
 
     # Return as dict
     return {task_id: diff for task_id, diff in zip(item_ids, difficulties)}

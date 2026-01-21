@@ -647,18 +647,24 @@ def main():
     if baseline_irt_path and baseline_irt_path.exists():
         # Use explicitly provided baseline IRT path (e.g., SWE-bench pre-computed)
         baseline_items = pd.read_csv(baseline_irt_path, index_col=0)
+        # Try to load abilities from the same directory
+        baseline_abilities_path = baseline_irt_path.parent / "abilities.csv"
+        if baseline_abilities_path.exists():
+            baseline_abilities = pd.read_csv(baseline_abilities_path, index_col=0)
+        else:
+            baseline_abilities = None
         print(f"  Baseline IRT: {len(baseline_items)} tasks (loaded from {baseline_irt_path})")
     else:
         # Use cached baseline IRT or train new one
         # Cache is invalidated if training data changes (responses, agents, or cutoff)
         print("\nLoading/training baseline IRT...")
-        baseline_items = get_or_train_baseline_irt(
+        baseline_items, baseline_abilities = get_or_train_baseline_irt(
             responses_path=responses_path,
             pre_frontier_agents=pre_frontier,
             cutoff_date=cutoff_date,
             output_dir=output_dir,
         )
-        print(f"  Baseline IRT: {len(baseline_items)} tasks")
+        print(f"  Baseline IRT: {len(baseline_items)} tasks, {len(baseline_abilities)} agents")
 
     # Default solve probability threshold for IRT-based frontier definition
     irt_solve_prob = 0.3
@@ -801,10 +807,14 @@ def main():
         l2_residual_grid = [10.0]
         use_residuals_grid = [True]
 
+    # Store Feature-IRT learned abilities for date forecasting
+    feature_irt_abilities = {}
+
     for source_name, source in feature_sources:
         method_name = f"Feature-IRT ({source_name})"
         best_auc = -1
         best_predictions = None
+        best_abilities = None
 
         if args.grid_search:
             print(f"\nRunning {method_name} grid search (using '{primary_frontier_def}' frontier for selection)...")
@@ -876,6 +886,7 @@ def main():
                         if auc > best_auc:
                             best_auc = auc
                             best_predictions = predictions
+                            best_abilities = predictor.learned_abilities
 
                     except Exception as e:
                         if args.grid_search:
@@ -889,8 +900,13 @@ def main():
             if args.grid_search:
                 print(f"  Best AUC: {best_auc:.4f}")
             raw_predictions[method_name] = best_predictions
+            if best_abilities is not None:
+                feature_irt_abilities[method_name] = best_abilities
 
     # Date forecasting evaluation (enabled by default)
+    # NOTE: Date forecasting requires abilities from IRT methods to fit
+    # the ability-over-time regression. Methods without their own IRT
+    # (Embedding + Ridge, LLM Judge + Ridge) are skipped.
     date_results = None
     if not args.no_forecast_dates:
         print("\nRunning date forecasting evaluation...")
@@ -899,30 +915,27 @@ def main():
         agent_dates = dataset_config.get_agent_dates(all_agents)
 
         # Compute ground truth solvability dates (when first agent with θ >= β appeared)
+        # NOTE: This uses oracle IRT and is ONLY for evaluation, not training
         gt_result = compute_first_capable_dates(oracle_items, oracle_abilities, agent_dates)
         first_capable_dates = gt_result.first_capable_dates
         tasks_without_capable = gt_result.tasks_without_capable_agent
         earliest_agent_date = gt_result.earliest_agent_date
         latest_agent_date = gt_result.latest_agent_date
-        reference_date = earliest_agent_date
 
         # Split tasks by whether first capable agent is pre/post cutoff
-        # - pre_cutoff_tasks: became solvable BEFORE cutoff -> use for training
-        # - post_cutoff_tasks: became solvable AFTER cutoff -> use for evaluation
         cutoff_datetime = parse_date(cutoff_date)
         pre_cutoff_tasks, post_cutoff_tasks = split_tasks_by_first_capable_date(
             first_capable_dates, cutoff_datetime
         )
 
         print(f"  Tasks with ground truth (first capable agent exists): {len(first_capable_dates)}")
-        print(f"  Pre-cutoff tasks (for training): {len(pre_cutoff_tasks)}")
         print(f"  Post-cutoff tasks (for evaluation): {len(post_cutoff_tasks)}")
         print(f"  Tasks without any capable agent: {len(tasks_without_capable)}")
 
-        if len(post_cutoff_tasks) >= 3 and len(pre_cutoff_tasks) >= 3:
+        if len(post_cutoff_tasks) >= 3:
             # Compute ground truth days for all tasks
             ground_truth_days = compute_ground_truth_days(
-                all_task_ids, first_capable_dates, reference_date
+                all_task_ids, first_capable_dates, earliest_agent_date
             )
 
             # Get ground truth date range for post-cutoff tasks (eval set)
@@ -930,25 +943,45 @@ def main():
             gt_date_min = min(post_cutoff_gt_dates).strftime("%Y-%m-%d")
             gt_date_max = max(post_cutoff_gt_dates).strftime("%Y-%m-%d")
 
-            # Evaluate date forecasting for each method
+            # Build abilities dict for each method that has IRT abilities
+            # Methods without their own IRT are skipped for date forecasting
+            method_abilities = {}
+
+            # Oracle uses oracle abilities (upper bound)
+            method_abilities["Oracle (upper bound)"] = oracle_abilities["theta"].to_dict()
+
+            # Baseline IRT uses baseline abilities
+            if baseline_abilities is not None:
+                method_abilities["Baseline IRT (pre-frontier only)"] = baseline_abilities["theta"].to_dict()
+            else:
+                print("  Warning: Baseline IRT abilities not available for date forecasting")
+
+            # Feature-IRT learned abilities
+            for method_name, abilities in feature_irt_abilities.items():
+                method_abilities[method_name] = abilities
+
+            # SAD-IRT theta from extracted CSV files
+            sad_irt_theta_dir = Path("chris_output/sad_irt_theta_values")
+            if sad_irt_theta_dir.exists():
+                for theta_file in sad_irt_theta_dir.glob("*.csv"):
+                    theta_df = pd.read_csv(theta_file, index_col=0)
+                    if "theta" in theta_df.columns:
+                        sad_method_name = f"SAD-IRT ({theta_file.stem})"
+                        method_abilities[sad_method_name] = theta_df["theta"].to_dict()
+
+            # Evaluate date forecasting for each method with abilities
             date_results = {}
 
-            # All tasks with ground truth (for Oracle fitting)
-            all_task_ids_with_gt = list(first_capable_dates.keys())
-
             for method_name, pred_beta in raw_predictions.items():
-                try:
-                    # Oracle gets to fit on ALL tasks (including post-cutoff) - it's an upper bound
-                    # Other methods only fit on pre-cutoff tasks (no data leakage)
-                    if method_name == "Oracle (upper bound)":
-                        fit_task_ids = all_task_ids_with_gt
-                    else:
-                        fit_task_ids = pre_cutoff_tasks
+                # Skip methods without their own IRT abilities
+                if method_name not in method_abilities:
+                    continue
 
+                abilities = method_abilities[method_name]
+
+                try:
                     date_model = DateForecastModel()
-                    fit_stats = date_model.fit(
-                        pred_beta, ground_truth_days, fit_task_ids, reference_date
-                    )
+                    fit_stats = date_model.fit(abilities, agent_dates)
                     predictions = date_model.predict(pred_beta, post_cutoff_tasks)
                     metrics = compute_date_forecast_metrics(
                         predictions, ground_truth_days, post_cutoff_tasks
@@ -957,6 +990,7 @@ def main():
                         **metrics,
                         "r_squared_fit": fit_stats["r_squared"],
                     }
+                    print(f"  {method_name}: MAE={metrics['mae_days']:.1f} days, r={metrics['pearson_r']:.3f}")
                 except Exception as e:
                     print(f"  Error forecasting dates for {method_name}: {e}")
                     date_results[method_name] = {
@@ -967,8 +1001,8 @@ def main():
                         "n_tasks": 0,
                     }
         else:
-            print("  Warning: Too few tasks for date forecasting")
-            print(f"    Need >=3 pre-cutoff tasks ({len(pre_cutoff_tasks)}) and >=3 post-cutoff tasks ({len(post_cutoff_tasks)})")
+            print("  Warning: Too few post-cutoff tasks for date forecasting")
+            print(f"    Need >=3 post-cutoff tasks ({len(post_cutoff_tasks)})")
 
     # =========================================================================
     # PHASE 2: Compute metrics and print tables for each frontier definition

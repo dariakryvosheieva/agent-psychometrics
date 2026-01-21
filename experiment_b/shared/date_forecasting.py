@@ -1,22 +1,25 @@
 """Date forecasting utilities for experiment B.
 
 Predicts when tasks will become solvable (50% probability) based on
-the linear relationship between difficulty and time.
+the linear relationship between frontier ability and time.
 
 Key insight: From IRT, P(success) = sigmoid(theta - beta) = 0.5 when theta = beta.
 So a task is solvable with 50% probability when an agent's ability >= task difficulty.
 Combined with Experiment D's finding that frontier ability is linear over time,
 we can predict when a task will become solvable.
+
+Approach:
+1. Fit frontier ability over time: theta = slope * days + intercept
+2. Invert to predict solvability: days = (beta - intercept) / slope
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 from scipy import stats
-from sklearn.linear_model import LinearRegression
 
 
 def parse_date(date_str: str) -> datetime:
@@ -53,6 +56,9 @@ def compute_first_capable_dates(
 
     A task is solvable with probability p when theta_agent >= beta_task + logit(p),
     where logit(p) = log(p / (1-p)). For p=0.5, this simplifies to theta >= beta.
+
+    NOTE: This uses oracle IRT values and is only used for computing GROUND TRUTH
+    for evaluation. It should NOT be used for training predictors.
 
     Args:
         oracle_items: DataFrame with 'b' column (oracle task difficulties)
@@ -176,17 +182,105 @@ def compute_ground_truth_days(
     return result
 
 
+@dataclass
+class AbilityOverTimeResult:
+    """Result from fit_ability_over_time().
+
+    Attributes:
+        slope: Theta units per day (frontier ability growth rate)
+        intercept: Initial frontier ability at reference date
+        r_squared: R² of the linear fit
+        reference_date: The earliest agent date (day 0)
+        n_agents: Number of agents used in fitting
+        n_frontier_points: Number of frontier points (days where frontier improved)
+    """
+
+    slope: float
+    intercept: float
+    r_squared: float
+    reference_date: datetime
+    n_agents: int
+    n_frontier_points: int
+
+
+def fit_ability_over_time(
+    abilities: Dict[str, float],
+    agent_dates: Dict[str, str],
+) -> AbilityOverTimeResult:
+    """Fit a linear model of frontier ability over time.
+
+    Follows the approach from Experiment D:
+    1. Group agents by date
+    2. Compute max ability per date
+    3. Compute cumulative max (frontier trajectory)
+    4. Fit linear regression on frontier points where ability increased
+
+    Args:
+        abilities: Dict mapping agent_id -> theta (ability)
+        agent_dates: Dict mapping agent_id -> date string (YYYYMMDD)
+
+    Returns:
+        AbilityOverTimeResult with slope, intercept, r_squared, etc.
+
+    Raises:
+        ValueError: If insufficient data for fitting
+    """
+    # Build dataframe of agents with dates
+    agent_data = []
+    for agent_id, theta in abilities.items():
+        if agent_id not in agent_dates:
+            continue
+        date = parse_date(agent_dates[agent_id])
+        agent_data.append({"agent_id": agent_id, "theta": theta, "date": date})
+
+    if len(agent_data) < 3:
+        raise ValueError(f"Insufficient agents with dates: {len(agent_data)}")
+
+    df = pd.DataFrame(agent_data)
+    df = df.sort_values("date")
+
+    reference_date = df["date"].min()
+
+    # Group by date, take max ability per date
+    df_grouped = df.groupby("date").agg({"theta": "max"}).reset_index()
+    df_grouped = df_grouped.sort_values("date")
+
+    # Compute cumulative max (frontier trajectory)
+    df_grouped["frontier_theta"] = df_grouped["theta"].cummax()
+
+    # Find points where frontier improved
+    frontier_changes = df_grouped[df_grouped["frontier_theta"].diff().fillna(1) > 0].copy()
+
+    if len(frontier_changes) < 2:
+        raise ValueError(f"Insufficient frontier points: {len(frontier_changes)}")
+
+    # Convert dates to days since reference
+    frontier_x = np.array([(d - reference_date).days for d in frontier_changes["date"]])
+    frontier_y = frontier_changes["frontier_theta"].values
+
+    # Fit linear regression
+    slope, intercept, r_value, p_value, std_err = stats.linregress(frontier_x, frontier_y)
+
+    return AbilityOverTimeResult(
+        slope=float(slope),
+        intercept=float(intercept),
+        r_squared=float(r_value**2),
+        reference_date=reference_date,
+        n_agents=len(df),
+        n_frontier_points=len(frontier_changes),
+    )
+
+
 class DateForecastModel:
-    """Linear model for predicting solvability dates from difficulties."""
+    """Model for predicting solvability dates from difficulties using ability regression.
+
+    Fits: frontier_theta = slope * days + intercept
+    Predicts: days = (beta - intercept) / slope
+    """
 
     def __init__(self):
-        self._model: Optional[LinearRegression] = None
+        self._ability_fit: Optional[AbilityOverTimeResult] = None
         self._is_fitted: bool = False
-        self._reference_date: Optional[datetime] = None
-        self._slope: Optional[float] = None
-        self._intercept: Optional[float] = None
-        self._r_squared: Optional[float] = None
-        self._n_train: int = 0
 
     @property
     def is_fitted(self) -> bool:
@@ -194,70 +288,43 @@ class DateForecastModel:
 
     @property
     def slope(self) -> Optional[float]:
-        return self._slope
+        return self._ability_fit.slope if self._ability_fit else None
 
     @property
     def intercept(self) -> Optional[float]:
-        return self._intercept
+        return self._ability_fit.intercept if self._ability_fit else None
 
     @property
     def r_squared(self) -> Optional[float]:
-        return self._r_squared
+        return self._ability_fit.r_squared if self._ability_fit else None
+
+    @property
+    def reference_date(self) -> Optional[datetime]:
+        return self._ability_fit.reference_date if self._ability_fit else None
 
     def fit(
         self,
-        predicted_beta: Dict[str, float],
-        ground_truth_days: Dict[str, float],
-        task_ids: List[str],
-        reference_date: datetime,
+        abilities: Dict[str, float],
+        agent_dates: Dict[str, str],
     ) -> Dict[str, float]:
-        """Fit linear model: days = slope * predicted_beta + intercept.
+        """Fit the ability-over-time model.
 
         Args:
-            predicted_beta: Raw predicted difficulties (NOT oracle-aligned)
-            ground_truth_days: Days since reference for each task
-            task_ids: Training task IDs
-            reference_date: Reference date for converting days back to dates
+            abilities: Dict mapping agent_id -> theta (ability)
+            agent_dates: Dict mapping agent_id -> date string (YYYYMMDD)
 
         Returns:
-            Dict with fit statistics (slope, intercept, r_squared, n_train)
+            Dict with fit statistics (slope, intercept, r_squared, n_agents, n_frontier_points)
         """
-        self._reference_date = reference_date
-
-        # Collect training data
-        X = []
-        y = []
-        for task_id in task_ids:
-            if task_id in predicted_beta and task_id in ground_truth_days:
-                X.append(predicted_beta[task_id])
-                y.append(ground_truth_days[task_id])
-
-        if len(X) < 3:
-            raise ValueError(f"Insufficient training data: only {len(X)} tasks")
-
-        X_arr = np.array(X).reshape(-1, 1)
-        y_arr = np.array(y)
-
-        # Fit linear regression
-        self._model = LinearRegression()
-        self._model.fit(X_arr, y_arr)
-
-        self._slope = float(self._model.coef_[0])
-        self._intercept = float(self._model.intercept_)
-        self._n_train = len(X)
+        self._ability_fit = fit_ability_over_time(abilities, agent_dates)
         self._is_fitted = True
 
-        # Compute R²
-        y_pred = self._model.predict(X_arr)
-        ss_res = np.sum((y_arr - y_pred) ** 2)
-        ss_tot = np.sum((y_arr - np.mean(y_arr)) ** 2)
-        self._r_squared = float(1 - ss_res / ss_tot) if ss_tot > 0 else 0.0
-
         return {
-            "slope": self._slope,
-            "intercept": self._intercept,
-            "r_squared": self._r_squared,
-            "n_train": self._n_train,
+            "slope": self._ability_fit.slope,
+            "intercept": self._ability_fit.intercept,
+            "r_squared": self._ability_fit.r_squared,
+            "n_agents": self._ability_fit.n_agents,
+            "n_frontier_points": self._ability_fit.n_frontier_points,
         }
 
     def predict(
@@ -267,8 +334,10 @@ class DateForecastModel:
     ) -> Dict[str, Tuple[float, datetime]]:
         """Predict solvability dates for tasks.
 
+        Inverts the ability regression: days = (beta - intercept) / slope
+
         Args:
-            predicted_beta: Raw predicted difficulties
+            predicted_beta: Predicted difficulties
             task_ids: Task IDs to predict for
 
         Returns:
@@ -283,8 +352,10 @@ class DateForecastModel:
                 continue
 
             beta = predicted_beta[task_id]
-            days = self._slope * beta + self._intercept
-            date = self._reference_date + pd.Timedelta(days=int(round(days)))
+            # Invert: theta = slope * days + intercept  =>  days = (theta - intercept) / slope
+            # At solvability, theta = beta
+            days = (beta - self._ability_fit.intercept) / self._ability_fit.slope
+            date = self._ability_fit.reference_date + timedelta(days=int(round(days)))
             result[task_id] = (float(days), date)
 
         return result
