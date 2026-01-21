@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-Extract Terminal-Bench 2.0 task statements ("Instruction") from the public registry
-and write a SWE-bench-like JSONL for embedding scripts.
+Extract Terminal-Bench 2.0 task statements ("instruction") from the local
+`terminal-bench/tasks/` registry and write a SWE-bench-like JSONL.
 
 Output JSONL schema per line:
-  {"task_id": "...", "problem_statement": "...", "patch": ""}
+  {"task_id": "...", "problem_statement": "...", "patch": "..."}
 
-Source pages:
-  - https://www.tbench.ai/registry/terminal-bench/2.0
-  - https://www.tbench.ai/registry/terminal-bench/2.0/<task_id>
+Gold patches:
+  - We store the *entire* contents of `solution.sh` (when present) in the `patch`
+    field. Many tasks don't use a `diff --git` patch; they instead generate files,
+    run commands, etc. Keeping the whole `solution.sh` captures the intended
+    reference solution behavior.
+  - If `solution.sh` does not exist, `patch` is left as an empty string.
 """
 
 from __future__ import annotations
@@ -16,158 +19,186 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import time
-from typing import List, Optional, Tuple
-from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup  # type: ignore[import-not-found]
-import requests  # type: ignore[import-not-found]
+from pathlib import Path
+from typing import Dict, Iterable, List, Optional
 
 
-BASE = "https://www.tbench.ai"
-INDEX_PATH = "/registry/terminal-bench/2.0"
-# Task ids are mostly kebab-case, but a few include dots (e.g. "install-windows-3.11").
-TASK_URL_RE = re.compile(r"^/registry/terminal-bench/2\.0/([a-z0-9][a-z0-9\-.]*)/?$", re.I)
-
-
-def fetch(url: str, *, timeout: int = 30) -> str:
-    r = requests.get(url, timeout=timeout, headers={"User-Agent": "tb2-statement-extractor/1.0"})
-    r.raise_for_status()
-    return r.text
-
-
-def discover_task_ids(index_html: str) -> List[str]:
-    # The index contains many links; task links look like:
-    #   /registry/terminal-bench/2.0/<task-id>
-    # We extract all hrefs and filter by pattern.
-    hrefs = re.findall(r'href="([^"]+)"', index_html)
-    out = []
-    seen = set()
-    for h in hrefs:
-        m = TASK_URL_RE.match(h.strip())
-        if not m:
-            continue
-        tid = m.group(1)
-        if tid not in seen:
-            seen.add(tid)
-            out.append(tid)
-    return out
-
-
-def strip_tags(s: str) -> str:
-    # very small HTML-to-text helper (good enough for these pages)
-    s = re.sub(r"<br\s*/?>", "\n", s, flags=re.I)
-    s = re.sub(r"</p\s*>", "\n\n", s, flags=re.I)
-    s = re.sub(r"<[^>]+>", "", s)
-    # unescape common entities
-    s = (
-        s.replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", '"')
-        .replace("&#39;", "'")
-        .replace("&nbsp;", " ")
-    )
-    return s
+_TOP_LEVEL_KEY_RE = re.compile(r"^[A-Za-z0-9_]+:\s*")
 
 
 def normalize_text(s: str) -> str:
     s = s.replace("\r\n", "\n").replace("\r", "\n")
-    # Trim trailing whitespace per-line and collapse excessive blank lines.
     s = "\n".join(line.rstrip() for line in s.split("\n"))
     s = re.sub(r"\n{3,}", "\n\n", s).strip()
     return s
 
 
-def extract_instruction(task_html: str) -> Optional[str]:
+def normalize_newlines_preserve_whitespace(s: str) -> str:
+    # Keep content as close as possible to the source file, while normalizing
+    # line endings to Unix newlines for JSONL portability.
+    return s.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def extract_instruction_from_task_yaml(task_yaml_text: str) -> Optional[str]:
     """
-    Extract text after "### Instruction" up to the next "### " section.
-    The registry pages render headings like "### Instruction" and "### Tags".
+    Extract the `instruction` block scalar from a Terminal-Bench `task.yaml`.
+
+    We intentionally avoid a full YAML dependency (PyYAML) and parse just the
+    `instruction: |-` style block used in the benchmark tasks.
     """
-    # Newer registry pages render something like:
-    #   <h3 ...>Instruction</h3>
-    #   <p ...>...</p>
-    # rather than literal "### Instruction" markdown in the HTML source.
-    # Prefer a structured parse first.
-    soup = BeautifulSoup(task_html, "html.parser")
-    heading = soup.find(
-        lambda t: getattr(t, "name", None) in {"h1", "h2", "h3", "h4"}
-        and t.get_text(strip=True).lower() == "instruction"
-    )
-    if heading:
-        chunks: List[str] = []
-        # Usually the instruction body is in the heading's sibling <p>/<div> nodes.
-        for sib in heading.find_next_siblings():
-            if getattr(sib, "name", None) in {"h1", "h2", "h3", "h4"}:
+    lines = task_yaml_text.splitlines()
+    start_idx = None
+    for i, line in enumerate(lines):
+        if line.startswith("instruction:"):
+            start_idx = i
+            break
+    if start_idx is None:
+        return None
+
+    # Some tasks use an inline scalar: `instruction: ...`
+    inline = lines[start_idx][len("instruction:") :].strip()
+    if inline and not inline.startswith("|") and not inline.startswith(">"):
+        return normalize_text(inline)
+
+    # Most tasks use `instruction: |-` followed by 2-space indented content.
+    instr_lines: List[str] = []
+    for j in range(start_idx + 1, len(lines)):
+        line = lines[j]
+        # Stop at the next top-level YAML key.
+        if _TOP_LEVEL_KEY_RE.match(line) and not line.startswith(" "):
+            break
+        if line.startswith("  "):
+            instr_lines.append(line[2:])
+        elif line.strip() == "":
+            instr_lines.append("")
+        else:
+            # Unexpected indentation style; best-effort include.
+            if line.startswith(" "):
+                instr_lines.append(line.lstrip(" "))
+            else:
                 break
-            text = sib.get_text("\n", strip=False)
-            text = normalize_text(text)
-            if text:
-                chunks.append(text)
-        if chunks:
-            return normalize_text("\n\n".join(chunks))
 
-    # Try a few patterns because the page is simple but could vary slightly.
-    patterns: List[re.Pattern] = [
-        re.compile(r"###\s*Instruction\s*(.*?)\s*###\s*Tags", re.S | re.I),
-        re.compile(r"###\s*Instruction\s*(.*?)\s*Created by", re.S | re.I),
-    ]
-    for pat in patterns:
-        m = pat.search(task_html)
-        if m:
-            chunk = m.group(1)
-            text = strip_tags(chunk).strip()
-            return normalize_text(text) if text else None
+    instr = "\n".join(instr_lines)
+    instr = normalize_text(instr)
+    return instr if instr else None
 
-    # Fallback: sometimes the content is already mostly text in the HTML;
-    # try searching in the tag-stripped full page.
-    full = strip_tags(task_html)
-    m2 = re.search(r"###\s*Instruction\s*(.*?)\s*###\s*Tags", full, flags=re.S | re.I)
-    if m2:
-        t = m2.group(1).strip()
-        return normalize_text(t) if t else None
 
-    return None
+_HEREDOC_START_RE = re.compile(r"<<\s*(['\"]?)([A-Za-z0-9_]+)\1")
+
+
+def _iter_heredoc_blocks(sh_text: str) -> Iterable[str]:
+    """
+    Yield heredoc bodies from a shell script, for patterns like:
+      cat > file << 'EOF'
+      ... body ...
+      EOF
+    """
+    lines = sh_text.splitlines()
+    i = 0
+    while i < len(lines):
+        m = _HEREDOC_START_RE.search(lines[i])
+        if not m:
+            i += 1
+            continue
+        tag = m.group(2)
+        body: List[str] = []
+        j = i + 1
+        while j < len(lines):
+            if lines[j].strip() == tag:
+                break
+            body.append(lines[j])
+            j += 1
+        if body:
+            yield "\n".join(body).strip("\n")
+        i = j + 1
+
+
+def extract_patch_from_solution_sh(solution_sh_text: str) -> str:
+    """
+    Return the entire `solution.sh` contents.
+
+    This intentionally does NOT try to infer a unified diff; many Terminal-Bench
+    tasks have reference solutions that are not expressed as diffs.
+    """
+    s = normalize_newlines_preserve_whitespace(solution_sh_text)
+    if not s.endswith("\n"):
+        s += "\n"
+    return s
+
+
+def load_task_list(meta_json_path: Path) -> List[str]:
+    meta = json.loads(meta_json_path.read_text(encoding="utf-8"))
+    task_list = meta.get("task_list")
+    if not isinstance(task_list, list) or not all(isinstance(t, str) for t in task_list):
+        raise ValueError(f"Invalid task_list in meta json: {meta_json_path}")
+    return list(task_list)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", required=True, help="Path to write JSONL, e.g. terminal_bench_2_statements.jsonl")
-    ap.add_argument("--sleep", type=float, default=0.10, help="Sleep between task page fetches (seconds)")
-    ap.add_argument("--limit", type=int, default=0, help="If >0, only extract this many tasks (debugging)")
+    ap.add_argument("--out", required=True, help="Path to write JSONL, e.g. terminal_bench_tasks.jsonl")
+    ap.add_argument(
+        "--tasks-dir",
+        default=str(Path(__file__).resolve().parent / "terminal-bench" / "tasks"),
+        help="Path to the Terminal-Bench tasks directory",
+    )
+    ap.add_argument(
+        "--meta",
+        default=str(Path(__file__).resolve().parent / "data" / "terminal_bench" / "terminal_bench_2.0.meta.json"),
+        help="Path to a meta JSON containing a `task_list` to filter tasks (recommended)",
+    )
+    ap.add_argument("--limit", type=int, default=0, help="If >0, only process this many tasks (debugging)")
     args = ap.parse_args()
 
-    index_url = urljoin(BASE, INDEX_PATH)
-    index_html = fetch(index_url)
-    task_ids = discover_task_ids(index_html)
+    tasks_dir = Path(args.tasks_dir)
+    if not tasks_dir.exists():
+        raise FileNotFoundError(f"tasks dir not found: {tasks_dir}")
 
-    if not task_ids:
-        raise RuntimeError(f"Found 0 task ids on {index_url}. The page structure may have changed.")
-
+    meta_path = Path(args.meta)
+    task_ids = load_task_list(meta_path) if meta_path.exists() else sorted(p.name for p in tasks_dir.iterdir() if p.is_dir())
     if args.limit and args.limit > 0:
         task_ids = task_ids[: int(args.limit)]
 
     records = []
-    missing: List[str] = []
+    missing_instruction: List[str] = []
+    missing_task_dir: List[str] = []
+    patches_found = 0
 
-    for i, tid in enumerate(task_ids, start=1):
-        task_url = urljoin(BASE, f"{INDEX_PATH}/{tid}")
-        html = fetch(task_url)
-        instr = extract_instruction(html)
-        if not instr:
-            missing.append(tid)
+    for tid in task_ids:
+        task_path = tasks_dir / tid
+        if not task_path.exists():
+            missing_task_dir.append(tid)
             continue
-        records.append({"task_id": tid, "problem_statement": instr, "patch": ""})
-        if args.sleep > 0:
-            time.sleep(float(args.sleep))
+
+        task_yaml = task_path / "task.yaml"
+        if not task_yaml.exists():
+            missing_task_dir.append(tid)
+            continue
+
+        instr = extract_instruction_from_task_yaml(task_yaml.read_text(encoding="utf-8"))
+        if not instr:
+            missing_instruction.append(tid)
+            continue
+
+        patch = ""
+        solution_sh = task_path / "solution.sh"
+        if solution_sh.exists():
+            patch = extract_patch_from_solution_sh(solution_sh.read_text(encoding="utf-8"))
+            if patch:
+                patches_found += 1
+
+        records.append({"task_id": tid, "problem_statement": instr, "patch": patch})
 
     with open(args.out, "w", encoding="utf-8") as f:
         for r in records:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
     print(f"Wrote {len(records)} tasks to {args.out}")
-    if missing:
-        print(f"WARNING: failed to extract instruction for {len(missing)} tasks, e.g. {missing[:10]}")
+    print(f"Found {patches_found} tasks with non-empty patches")
+    if missing_task_dir:
+        print(f"WARNING: missing task.yaml for {len(missing_task_dir)} tasks, e.g. {missing_task_dir[:10]}")
+    if missing_instruction:
+        print(f"WARNING: failed to extract instruction for {len(missing_instruction)} tasks, e.g. {missing_instruction[:10]}")
     return 0
 
 
