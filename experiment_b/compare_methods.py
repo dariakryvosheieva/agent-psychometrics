@@ -6,16 +6,27 @@ This script compares:
 2. Baseline IRT: Train IRT on pre-frontier agents only
 3. Embedding + Ridge: Task embeddings with Ridge regression
 4. LLM Judge + Ridge: LLM-extracted semantic features with Ridge
-5. SAD-IRT (optional): From experiment_sad_irt extracted beta values
+5. Feature-IRT: Joint learning of feature weights and agent abilities
+6. SAD-IRT (optional): From experiment_sad_irt extracted beta values
 
 Methods are evaluated by:
-- Spearman correlation with oracle IRT difficulties on frontier tasks
 - ROC-AUC on frontier tasks using oracle abilities and aligned difficulties
 - (Optional) Date forecasting: predicting when tasks become solvable
+- (Optional) Spearman correlation (noisy, use --verbose to see)
 
 The AUC metric requires aligning predicted difficulties to the oracle scale using
 an affine transformation fitted on "nontrivial" anchor tasks (10-90% pass rate in
 both agent groups). This alignment uses oracle information and is ONLY for evaluation.
+
+NOTE on Spearman correlation: This metric is noisy and can be misleading. For example,
+when Feature-IRT uses residuals with low regularization, Spearman improves but AUC
+degrades due to overfitting. AUC is the more reliable metric for comparing methods.
+
+NOTE on Feature-IRT: The primary benefit of Feature-IRT over Ridge regression comes
+from jointly learning agent abilities (θ), not from the per-task residuals. With high
+residual regularization (which forces residuals to ~0), Feature-IRT still outperforms
+Ridge because the IRT optimization finds better feature weights that work with the
+learned abilities. The residuals tend to overfit when not regularized.
 
 Usage:
     python -m experiment_b.compare_methods
@@ -1172,7 +1183,11 @@ def main():
                             )
                             auc = metrics.get('auc', 0) or 0
                             rho = metrics.get('frontier_spearman_rho', 0) or 0
-                            print(f"      AUC: {auc:.4f}, Spearman: {rho:.4f}")
+                            # Spearman is noisy and can be misleading; only show with --verbose
+                            if args.verbose:
+                                print(f"      AUC: {auc:.4f}, Spearman: {rho:.4f}")
+                            else:
+                                print(f"      AUC: {auc:.4f}")
 
                             # Capture diagnostics for this configuration
                             if args.diagnostic_mode and use_res:  # Only for configs with residuals
