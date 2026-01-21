@@ -960,14 +960,34 @@ def main():
             for method_name, abilities in feature_irt_abilities.items():
                 method_abilities[method_name] = abilities
 
-            # SAD-IRT theta from extracted CSV files
+            # SAD-IRT: match beta and theta files by stem name
+            # Load theta files and match with corresponding beta files
             sad_irt_theta_dir = Path("chris_output/sad_irt_theta_values")
-            if sad_irt_theta_dir.exists():
+            sad_irt_matched = {}  # stem -> (beta_dict, theta_dict)
+            if sad_irt_theta_dir.exists() and sad_irt_betas:
                 for theta_file in sad_irt_theta_dir.glob("*.csv"):
-                    theta_df = pd.read_csv(theta_file, index_col=0)
-                    if "theta" in theta_df.columns:
-                        sad_method_name = f"SAD-IRT ({theta_file.stem})"
-                        method_abilities[sad_method_name] = theta_df["theta"].to_dict()
+                    stem = theta_file.stem
+                    if stem in sad_irt_betas:
+                        theta_df = pd.read_csv(theta_file, index_col=0)
+                        if "theta" in theta_df.columns:
+                            sad_irt_matched[stem] = (sad_irt_betas[stem], theta_df["theta"].to_dict())
+
+                # Select best SAD-IRT based on task coverage (use first frontier def)
+                if sad_irt_matched:
+                    primary_frontier = frontier_tasks_by_def[args.frontier_definitions[0]]
+                    best_coverage = 0
+                    best_stem = None
+                    for stem, (beta_dict, theta_dict) in sad_irt_matched.items():
+                        coverage = len([t for t in primary_frontier if t in beta_dict])
+                        if coverage > best_coverage:
+                            best_coverage = coverage
+                            best_stem = stem
+
+                    if best_stem:
+                        beta_dict, theta_dict = sad_irt_matched[best_stem]
+                        raw_predictions["SAD-IRT (best)"] = beta_dict
+                        method_abilities["SAD-IRT (best)"] = theta_dict
+                        print(f"  Using SAD-IRT run: {best_stem}")
 
             # Evaluate date forecasting for each method with abilities
             date_results = {}
@@ -1041,7 +1061,8 @@ def main():
                 }
 
         # Add SAD-IRT (select best for this frontier definition)
-        if sad_irt_betas:
+        # Skip if already in raw_predictions (already selected in date forecasting phase)
+        if sad_irt_betas and "SAD-IRT (best)" not in raw_predictions:
             best_sad_irt_auc = -1
             best_sad_irt_metrics = None
             best_sad_irt_name = None

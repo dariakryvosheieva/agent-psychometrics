@@ -54,47 +54,57 @@ python -m experiment_b.compare_methods --output_csv results.csv
 
 | Method | ROC-AUC | MAE (days) |
 |--------|---------|------------|
-| Oracle (upper bound) | 0.8439 | 39.3 |
-| SAD-IRT (best) | 0.8036 | 111.8 |
-| Feature-IRT (Embedding) | 0.7744 | 107.8 |
-| Baseline IRT (pre-frontier only) | 0.7654 | 95.8 |
-| LLM Judge + Ridge | 0.7482 | 248.4 |
-| Embedding + Ridge | 0.7476 | 229.9 |
+| Oracle (upper bound) | 0.8439 | 20.9 |
+| SAD-IRT (best) | 0.8034 | 119.4 |
+| Feature-IRT (Embedding) | 0.7744 | 72.2 |
+| Embedding + Ridge | 0.7485 | N/A |
+| Feature-IRT (LLM Judge) | 0.7480 | 171.5 |
+| LLM Judge + Ridge | 0.7478 | N/A |
+| Baseline IRT (pre-frontier only) | 0.7472 | 115.9 |
 
 #### IRT Definition (30 frontier tasks)
 
 | Method | ROC-AUC | MAE (days) |
 |--------|---------|------------|
-| Oracle (upper bound) | 0.7412 | N/A |
-| SAD-IRT (best) | 0.6998 | N/A |
-| Feature-IRT (Embedding) | 0.6974 | N/A |
-| Baseline IRT (pre-frontier only) | 0.6868 | N/A |
+| Oracle (upper bound) | 0.7412 | 20.9 |
+| SAD-IRT (best) | 0.6993 | 119.4 |
+| Feature-IRT (Embedding) | 0.6974 | 72.2 |
+| Feature-IRT (LLM Judge) | 0.6757 | 171.5 |
+| LLM Judge + Ridge | 0.6744 | N/A |
+| Embedding + Ridge | 0.6740 | N/A |
+| Baseline IRT (pre-frontier only) | 0.6640 | 115.9 |
 
 ### TerminalBench
 
-**Cutoff**: 2025-11-17 | **Pre-frontier agents**: 52 | **Post-frontier agents**: 31
+**Cutoff**: 2025-11-05 | **Pre-frontier agents**: 48 | **Post-frontier agents**: 35
 
 #### Pass-rate Definition (18 frontier tasks)
 
 | Method | ROC-AUC | MAE (days) |
 |--------|---------|------------|
-| Oracle (upper bound) | 0.8130 | 20.3 |
-| Feature-IRT (Embedding) | 0.7378 | 39.4 |
-| LLM Judge + Ridge | 0.7366 | 43.9 |
-| Baseline IRT (pre-frontier only) | 0.6988 | 39.0 |
+| Oracle (upper bound) | 0.8224 | 6.1 |
+| LLM Judge + Ridge | 0.7483 | N/A |
+| Feature-IRT (Embedding) | 0.7427 | 22.9 |
+| Feature-IRT (LLM Judge) | 0.7414 | 33.7 |
+| Embedding + Ridge | 0.7307 | N/A |
+| Baseline IRT (pre-frontier only) | 0.7029 | 22.6 |
 
-#### IRT Definition (4 frontier tasks)
+#### IRT Definition (18 frontier tasks)
 
 | Method | ROC-AUC | MAE (days) |
 |--------|---------|------------|
-| Oracle (upper bound) | 0.7725 | N/A |
-| Feature-IRT (Embedding) | 0.7542 | N/A |
-| Baseline IRT (pre-frontier only) | 0.6740 | N/A |
+| Oracle (upper bound) | 0.7863 | 6.1 |
+| LLM Judge + Ridge | 0.7455 | N/A |
+| Feature-IRT (LLM Judge) | 0.7427 | 33.7 |
+| Feature-IRT (Embedding) | 0.7368 | 22.9 |
+| Embedding + Ridge | 0.7363 | N/A |
+| Baseline IRT (pre-frontier only) | 0.6967 | 22.6 |
 
 **Key observations**:
-- **Feature-IRT (Embedding) consistently outperforms Baseline IRT**
+- **Feature-IRT (Embedding) consistently outperforms Baseline IRT** in ROC-AUC
 - **SAD-IRT** (using trajectory information) achieves strong results on SWE-bench
-- Ridge-based predictors have high MAE, suggesting they don't generalize well to frontier tasks
+- **Methods without their own IRT** (Embedding + Ridge, LLM Judge + Ridge) show N/A for MAE because they cannot produce date forecasts (see Date Forecasting section below)
+- Feature-IRT achieves better MAE than Baseline IRT on SWE-bench (72.2 vs 115.9 days)
 
 ## Methods Compared
 
@@ -139,37 +149,46 @@ P(success) = sigmoid(θ_j - b_i)
 3. **Compute probabilities**: For each (post-frontier agent, frontier task): `P(success) = sigmoid(θ_oracle - β_shifted)`
 4. **Calculate ROC-AUC**: Compare predicted probabilities to actual responses
 
-### 3. Date Forecasting (Optional)
+### 3. Date Forecasting
 
-Predict **when** tasks will become solvable with 50% probability, based on the linear relationship between difficulty and time discovered in Experiment D.
+Predict **when** tasks will become solvable with 50% probability. Enabled by default (disable with `--no_forecast_dates`).
 
-**Key insight**: From IRT, `P(success) = sigmoid(θ - β) = 0.5` when `θ = β`. Combined with Experiment D's finding that frontier ability grows linearly over time, we can predict when a task with difficulty β will become solvable.
+**Key insight**: From IRT, `P(success) = sigmoid(θ - β) = 0.5` when `θ = β`. Combined with Experiment D's finding that frontier ability grows linearly over time, we can invert the ability-over-time relationship to predict when a task with difficulty β will become solvable.
 
-**Methodology**:
-1. **Compute ground truth**: For each task, find the earliest agent where `θ_agent >= β_oracle` (using Oracle IRT)
-2. **Split tasks**: Pre-cutoff tasks (first capable agent before cutoff) for training; post-cutoff tasks for evaluation
-3. **Fit linear model**: `days = slope × predicted_β + intercept` on pre-cutoff tasks
-4. **Evaluate**: MAE, Pearson correlation on post-cutoff task predictions
+**Methodology** (per-method, avoids data leakage):
+
+1. **Fit ability-over-time regression** using each method's own IRT abilities:
+   - Group pre-frontier agents by date, compute cumulative max ability (frontier trajectory)
+   - Fit linear model: `frontier_θ = slope × days + intercept`
+   - This uses ONLY pre-frontier information from that method's own IRT model
+
+2. **Predict solvability date** by inverting the regression:
+   - For a task with predicted difficulty β: `days = (β - intercept) / slope`
+   - Convert days to calendar date
+
+3. **Evaluate against ground truth**:
+   - Ground truth: Oracle IRT's first-capable-date (earliest agent with θ >= β_oracle)
+   - Metrics: MAE (days), Pearson r
+
+**Which methods support date forecasting?**
+
+Only methods that learn their own IRT model with abilities can produce date forecasts:
+
+| Method | Has Own IRT? | Date Forecast |
+|--------|--------------|---------------|
+| Oracle | ✓ (oracle abilities) | ✓ |
+| Baseline IRT | ✓ (pre-frontier abilities) | ✓ |
+| Feature-IRT | ✓ (learned abilities) | ✓ |
+| SAD-IRT | ✓ (learned abilities) | ✓ |
+| Embedding + Ridge | ✗ (no IRT) | N/A |
+| LLM Judge + Ridge | ✗ (no IRT) | N/A |
 
 ```bash
-# Run with date forecasting
-python -m experiment_b.compare_methods --forecast_dates
-```
+# Run with date forecasting (default)
+python -m experiment_b.compare_methods
 
-**Example output** (TerminalBench):
-```
-DATE FORECASTING: PREDICT WHEN TASKS BECOME SOLVABLE
-==========================================================================================
-
-Data Summary:
-  Post-cutoff tasks (eval set): 10
-  Tasks without any capable agent: 12
-
-Method                                          MAE (days)    Pearson r    R²(fit)      n
---------------------------------------------------------------------------------------
-Oracle (upper bound)                                  20.3       0.7047     0.5106     10
-Baseline IRT (pre-frontier only)                      39.0       0.1718     0.2845     10
-Feature-IRT (Embedding)                               39.4       0.2748     0.2912     10
+# Disable date forecasting (faster)
+python -m experiment_b.compare_methods --no_forecast_dates
 ```
 
 ## Data Leakage Constraints
