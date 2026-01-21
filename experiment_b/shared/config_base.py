@@ -131,7 +131,7 @@ class DatasetConfig(ABC):
         """
         if self._responses is None:
             # Import here to avoid circular imports
-            from experiment_b.shared.evaluate import load_responses_dict
+            from experiment_b.shared.evaluation import load_responses_dict
             self._responses = load_responses_dict(self.responses_path)
         return self._responses
 

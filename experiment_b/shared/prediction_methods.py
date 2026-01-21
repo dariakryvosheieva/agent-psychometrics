@@ -1,36 +1,50 @@
-"""Feature-based IRT predictor with joint ability learning.
+"""Prediction methods for frontier task difficulty prediction.
 
-Unlike FeatureBasedPredictor which uses Ridge regression on ground-truth
-difficulties, this predictor learns feature weights jointly with agent
-abilities by optimizing the IRT log-likelihood directly.
+This module contains:
+- FeatureIRTPredictor: Joint IRT + feature learning predictor
+- Helper functions for collecting predictions from various methods
+- Feature source builders
 
-This predictor is designed for Experiment B where:
-- Training uses responses from pre-frontier agents only
-- ALL tasks are seen during training (no held-out tasks)
-- Evaluation uses post-frontier agents on frontier tasks
-
-Example usage:
-    from experiment_ab_shared.feature_source import EmbeddingFeatureSource, CSVFeatureSource
-    from experiment_b.shared.feature_irt_predictor import FeatureIRTPredictor
-
-    # With embeddings (default: no residuals)
-    source = EmbeddingFeatureSource(Path("embeddings.npz"))
-    predictor = FeatureIRTPredictor(source)
-
-    # Fit on pre-frontier agent responses (all tasks)
-    predictor.fit(task_ids, ground_truth_b, pre_frontier_responses)
-
-    # Predict difficulties for tasks
-    predictions = predictor.predict(task_ids)
+All prediction method code should live here. Adding a new method should only
+require changes to this file.
 """
 
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
-from experiment_ab_shared.feature_source import TaskFeatureSource
+from experiment_ab_shared.feature_source import (
+    TaskFeatureSource,
+    EmbeddingFeatureSource,
+    CSVFeatureSource,
+)
+from experiment_ab_shared.feature_predictor import FeatureBasedPredictor
+from experiment_b.shared.config_base import DatasetConfig
+
+
+# =============================================================================
+# Dataclasses
+# =============================================================================
+
+
+@dataclass
+class FeatureIRTResults:
+    """Results from running Feature-IRT methods."""
+
+    predictions: Dict[str, Dict[str, float]]  # method_name -> beta predictions
+    abilities: Dict[str, Dict[str, float]]  # method_name -> theta abilities
+    diagnostics: Optional[List[Dict[str, Any]]] = None  # Grid search diagnostics
+    best_predictors: Dict[str, Any] = field(default_factory=dict)  # source_name -> predictor
+
+
+# =============================================================================
+# Feature-IRT Predictor
+# =============================================================================
 
 
 class FeatureIRTPredictor:
@@ -323,13 +337,8 @@ class FeatureIRTPredictor:
     def predict(self, task_ids: List[str]) -> Dict[str, float]:
         """Predict difficulty for tasks.
 
-        All tasks must have been seen during training. This predictor does
-        not support prediction on unseen tasks (use FeatureBasedPredictor
-        for that use case).
-
         Args:
-            task_ids: List of task identifiers to predict for. All must have
-                     been included in the training task_ids.
+            task_ids: List of task identifiers to predict for.
 
         Returns:
             Dictionary mapping task_id -> predicted difficulty.
@@ -370,12 +379,7 @@ class FeatureIRTPredictor:
 
     @property
     def feature_weights(self) -> Optional[Dict[str, float]]:
-        """Return feature weights if feature names are available.
-
-        Returns:
-            Dictionary mapping feature_name -> weight, or None if
-            the feature source doesn't provide feature names.
-        """
+        """Return feature weights if feature names are available."""
         if not self._is_fitted:
             return None
 
@@ -387,11 +391,7 @@ class FeatureIRTPredictor:
 
     @property
     def learned_abilities(self) -> Optional[Dict[str, float]]:
-        """Return learned agent abilities.
-
-        Returns:
-            Dictionary mapping agent_id -> ability, or None if not fitted.
-        """
+        """Return learned agent abilities."""
         if not self._is_fitted or self._agent_ids is None:
             return None
 
@@ -401,11 +401,7 @@ class FeatureIRTPredictor:
         }
 
     def get_model_info(self) -> Dict[str, Any]:
-        """Get information about the fitted model.
-
-        Returns:
-            Dictionary with model information.
-        """
+        """Get information about the fitted model."""
         if not self._is_fitted:
             return {"is_fitted": False}
 
@@ -460,15 +456,7 @@ class FeatureIRTPredictor:
                 print(f"    {name}: {weight:+.4f}")
 
     def get_training_diagnostics(self) -> Dict[str, Any]:
-        """Get training diagnostics including loss history and components.
-
-        Returns:
-            Dictionary with:
-            - loss_history: List of total loss values per iteration
-            - loss_components: List of dicts with per-iteration breakdown
-            - n_iterations: Number of training iterations
-            - final_loss: Final loss value
-        """
+        """Get training diagnostics including loss history and components."""
         if not self._is_fitted:
             raise RuntimeError("Predictor must be fit before getting diagnostics")
 
@@ -486,13 +474,7 @@ class FeatureIRTPredictor:
         the feature-based component vs the residual component.
 
         Returns:
-            Dictionary with:
-            - var_feature: Variance of feature component (X @ w)
-            - var_residual: Variance of residual component
-            - var_total: Variance of total difficulty
-            - feature_ratio: Var(features) / Var(total)
-            - residual_ratio: Var(residuals) / Var(total)
-            - covariance: Covariance between feature and residual components
+            Dictionary with variance ratios and covariance.
 
         Raises:
             RuntimeError: If predictor is not fitted or residuals are not enabled.
@@ -540,3 +522,302 @@ class FeatureIRTPredictor:
             "residual_ratio": var_residual / var_total if var_total > 0 else 0.0,
             "covariance": covariance,
         }
+
+
+# =============================================================================
+# Feature Source Builders
+# =============================================================================
+
+
+def build_feature_sources(
+    config: DatasetConfig,
+    embeddings_path_override: Optional[Path] = None,
+    llm_judge_path_override: Optional[Path] = None,
+) -> List[Tuple[str, TaskFeatureSource]]:
+    """Build list of available feature sources.
+
+    Args:
+        config: Dataset configuration
+        embeddings_path_override: Optional path to override config embeddings
+        llm_judge_path_override: Optional path to override config LLM judge features
+
+    Returns:
+        List of (source_name, feature_source) tuples
+    """
+    embeddings_path = embeddings_path_override or config.embeddings_path
+    llm_judge_path = llm_judge_path_override or config.llm_judge_path
+
+    feature_sources: List[Tuple[str, TaskFeatureSource]] = []
+
+    if embeddings_path and embeddings_path.exists():
+        feature_sources.append(("Embedding", EmbeddingFeatureSource(embeddings_path)))
+    else:
+        print(f"\nEmbeddings not found: {embeddings_path}")
+
+    if llm_judge_path and llm_judge_path.exists():
+        feature_sources.append((
+            "LLM Judge",
+            CSVFeatureSource(
+                llm_judge_path,
+                feature_cols=config.llm_judge_feature_cols,
+                name="LLM Judge",
+            ),
+        ))
+    else:
+        print(f"\nLLM Judge features not found: {llm_judge_path}")
+
+    return feature_sources
+
+
+# =============================================================================
+# Prediction Collection Functions
+# =============================================================================
+
+
+def collect_ridge_predictions(
+    feature_sources: List[Tuple[str, TaskFeatureSource]],
+    train_task_ids: List[str],
+    ground_truth_b: np.ndarray,
+    all_task_ids: List[str],
+) -> Dict[str, Dict[str, float]]:
+    """Train Ridge regressors on available feature sources.
+
+    Args:
+        feature_sources: List of (source_name, feature_source) tuples
+        train_task_ids: Task IDs for training
+        ground_truth_b: Ground truth difficulties from baseline IRT
+        all_task_ids: All task IDs to predict for
+
+    Returns:
+        Dict mapping method_name -> predictions dict
+    """
+    predictions: Dict[str, Dict[str, float]] = {}
+
+    for source_name, source in feature_sources:
+        method_name = f"{source_name} + Ridge"
+        print(f"\nTraining {method_name}...")
+        print(f"  Training on {len(train_task_ids)} tasks")
+        try:
+            predictor = FeatureBasedPredictor(source)
+            predictor.fit(train_task_ids, ground_truth_b)
+            predictions[method_name] = predictor.predict(all_task_ids)
+        except Exception as e:
+            print(f"  Error: {e}")
+            import traceback
+            traceback.print_exc()
+
+    return predictions
+
+
+def collect_feature_irt_predictions(
+    feature_sources: List[Tuple[str, TaskFeatureSource]],
+    train_task_ids: List[str],
+    ground_truth_b: np.ndarray,
+    train_responses: Dict[str, Dict[str, int]],
+    oracle_items: pd.DataFrame,
+    oracle_abilities: pd.DataFrame,
+    responses: Dict[str, Dict[str, int]],
+    frontier_task_ids: List[str],
+    anchor_task_ids: List[str],
+    post_frontier_agents: List[str],
+    alignment_method: str = "affine",
+    grid_search: bool = False,
+    diagnostic_mode: bool = False,
+    verbose: bool = False,
+) -> FeatureIRTResults:
+    """Run Feature-IRT with optional grid search.
+
+    Args:
+        feature_sources: List of (source_name, feature_source) tuples
+        train_task_ids: Task IDs for training (all tasks)
+        ground_truth_b: Ground truth difficulties from baseline IRT
+        train_responses: Pre-filtered responses (pre-frontier agents only)
+        oracle_items: Oracle IRT items for evaluation
+        oracle_abilities: Oracle abilities for evaluation
+        responses: Full responses for evaluation
+        frontier_task_ids: Frontier tasks for metric computation
+        anchor_task_ids: Anchor tasks for scale alignment
+        post_frontier_agents: Post-frontier agents for evaluation
+        alignment_method: Scale alignment method
+        grid_search: Whether to run grid search
+        diagnostic_mode: Whether to run extended diagnostics
+        verbose: Print verbose output
+
+    Returns:
+        FeatureIRTResults with predictions, abilities, and optional diagnostics
+    """
+    # Import here to avoid circular dependency
+    from experiment_b.shared.evaluation import compute_method_metrics
+
+    if diagnostic_mode:
+        l2_weight_grid = [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0]
+        l2_residual_grid = [0.1, 1.0, 10.0, 100.0, 1000.0]
+        use_residuals_grid = [True]
+    elif grid_search:
+        l2_weight_grid = [0.001, 0.01, 0.1]
+        l2_residual_grid = [10.0]
+        use_residuals_grid = [False]
+    else:
+        l2_weight_grid = [0.01]
+        l2_residual_grid = [10.0]
+        use_residuals_grid = [False]
+
+    predictions: Dict[str, Dict[str, float]] = {}
+    abilities: Dict[str, Dict[str, float]] = {}
+    diagnostics: Optional[List[Dict[str, Any]]] = [] if diagnostic_mode else None
+    best_predictors: Dict[str, Any] = {}
+
+    for source_name, source in feature_sources:
+        method_name = f"Feature-IRT ({source_name})"
+        best_auc = -1.0
+        best_predictions: Optional[Dict[str, float]] = None
+        best_abilities: Optional[Dict[str, float]] = None
+        best_predictor: Optional[Any] = None
+
+        if grid_search or diagnostic_mode:
+            print(f"\nRunning {method_name} grid search...")
+            print(f"  Training on {len(train_task_ids)} tasks")
+            if diagnostic_mode:
+                print(f"  Extended diagnostic grid: {len(l2_weight_grid)}x{len(l2_residual_grid)}x{len(use_residuals_grid)} configs")
+
+        for l2_w in l2_weight_grid:
+            for l2_r in l2_residual_grid:
+                for use_res in use_residuals_grid:
+                    if grid_search or diagnostic_mode:
+                        print(f"    Testing: l2_w={l2_w}, l2_r={l2_r}, res={use_res}")
+
+                    try:
+                        predictor = FeatureIRTPredictor(
+                            source,
+                            use_residuals=use_res,
+                            l2_weight=l2_w,
+                            l2_residual=l2_r,
+                            verbose=verbose and not (grid_search or diagnostic_mode),
+                        )
+
+                        if not (grid_search or diagnostic_mode):
+                            print(f"\nTraining {method_name}...")
+                            print(f"  Training on {len(train_task_ids)} tasks with {len(train_responses)} pre-frontier agents")
+
+                        predictor.fit(
+                            task_ids=train_task_ids,
+                            ground_truth_b=ground_truth_b,
+                            responses=train_responses,
+                        )
+
+                        preds = predictor.predict(train_task_ids)
+
+                        if grid_search or diagnostic_mode:
+                            metrics = compute_method_metrics(
+                                predicted_beta=preds,
+                                oracle_items=oracle_items,
+                                oracle_abilities=oracle_abilities,
+                                responses=responses,
+                                frontier_task_ids=frontier_task_ids,
+                                anchor_task_ids=anchor_task_ids,
+                                eval_agents=post_frontier_agents,
+                                alignment_method=alignment_method,
+                            )
+                            auc = metrics.get('auc', 0) or 0
+                            print(f"      AUC: {auc:.4f}")
+
+                            if diagnostic_mode and use_res:
+                                contributions = predictor.analyze_contributions()
+                                diag = predictor.get_training_diagnostics()
+                                diagnostics.append({
+                                    'source': source_name,
+                                    'l2_weight': l2_w,
+                                    'l2_residual': l2_r,
+                                    'use_residuals': use_res,
+                                    'auc': auc,
+                                    'final_loss': diag['final_loss'],
+                                    'n_iterations': diag['n_iterations'],
+                                    'loss_history': diag['loss_history'],
+                                    'loss_components': diag['loss_components'],
+                                    'contributions': contributions,
+                                })
+                        else:
+                            auc = 1.0  # Not in grid search mode, just use this config
+
+                        if auc > best_auc:
+                            best_auc = auc
+                            best_predictions = preds
+                            best_abilities = predictor.learned_abilities
+                            best_predictor = predictor
+
+                    except Exception as e:
+                        if grid_search or diagnostic_mode:
+                            print(f"      Error: {e}")
+                        else:
+                            print(f"  Error: {e}")
+                            import traceback
+                            traceback.print_exc()
+
+        if best_predictions is not None:
+            if grid_search or diagnostic_mode:
+                print(f"  Best AUC: {best_auc:.4f}")
+            predictions[method_name] = best_predictions
+            if best_abilities is not None:
+                abilities[method_name] = best_abilities
+            if best_predictor is not None:
+                best_predictors[source_name] = best_predictor
+
+    return FeatureIRTResults(
+        predictions=predictions,
+        abilities=abilities,
+        diagnostics=diagnostics,
+        best_predictors=best_predictors,
+    )
+
+
+def collect_sad_irt_predictions(
+    sad_irt_beta_dir: Path,
+) -> Tuple[Dict[str, Dict[str, float]], Dict[str, Dict[str, float]]]:
+    """Load SAD-IRT beta and theta values from CSV files.
+
+    Each SAD-IRT run is loaded as a separate method. The best run can be
+    selected by AUC during evaluation.
+
+    Args:
+        sad_irt_beta_dir: Directory containing extracted SAD-IRT beta CSV files
+
+    Returns:
+        Tuple of (predictions_dict, abilities_dict) where each maps
+        method_name -> task/agent -> value
+    """
+    predictions: Dict[str, Dict[str, float]] = {}
+    abilities: Dict[str, Dict[str, float]] = {}
+
+    if not sad_irt_beta_dir.exists():
+        print(f"\nSAD-IRT beta directory not found: {sad_irt_beta_dir}")
+        print("  To include SAD-IRT results, run experiment_sad_irt and extract beta values")
+        return predictions, abilities
+
+    beta_files = list(sad_irt_beta_dir.glob("*.csv"))
+    print(f"\nLoading SAD-IRT beta values from {sad_irt_beta_dir}...")
+    print(f"  Found {len(beta_files)} beta CSV files")
+
+    sad_irt_theta_dir = Path("chris_output/sad_irt_theta_values")
+    loaded_count = 0
+
+    for beta_file in beta_files:
+        beta_df = pd.read_csv(beta_file, index_col=0)
+        if "beta" not in beta_df.columns:
+            print(f"  Skipping {beta_file.name}: no 'beta' column")
+            continue
+
+        stem = beta_file.stem
+        method_name = f"SAD-IRT ({stem})"
+        predictions[method_name] = beta_df["beta"].to_dict()
+        loaded_count += 1
+
+        # Load matching theta file if available
+        theta_file = sad_irt_theta_dir / f"{stem}.csv"
+        if theta_file.exists():
+            theta_df = pd.read_csv(theta_file, index_col=0)
+            if "theta" in theta_df.columns:
+                abilities[method_name] = theta_df["theta"].to_dict()
+
+    print(f"  Loaded {loaded_count} valid SAD-IRT beta files")
+
+    return predictions, abilities

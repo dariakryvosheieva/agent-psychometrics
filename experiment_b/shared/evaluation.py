@@ -1,9 +1,9 @@
 """Evaluation metrics for frontier task difficulty prediction.
 
 This module provides functions for:
-- Computing Spearman correlation on frontier tasks
 - Scale alignment between predicted and oracle difficulties
 - ROC-AUC computation using IRT probability model
+- Full evaluation pipelines for predictors
 """
 
 import json
@@ -20,53 +20,27 @@ from sklearn.metrics import roc_auc_score
 logger = logging.getLogger(__name__)
 
 
-def compute_frontier_difficulty_metrics(
-    predicted_beta: Dict[str, float],
-    oracle_beta: Dict[str, float],
-    frontier_task_ids: List[str],
-) -> Dict[str, float]:
-    """Compute Spearman correlation for frontier task difficulties.
+# =============================================================================
+# Response Loading
+# =============================================================================
+
+
+def load_responses_dict(responses_path: Path) -> Dict[str, Dict[str, int]]:
+    """Load response matrix as nested dict: agent_id -> task_id -> 0|1.
 
     Args:
-        predicted_beta: Dict mapping task_id -> predicted difficulty
-        oracle_beta: Dict mapping task_id -> oracle difficulty (from full IRT)
-        frontier_task_ids: List of task IDs that are frontier tasks
+        responses_path: Path to JSONL response matrix
 
     Returns:
-        Dictionary with Spearman rho and p-value for frontier tasks
+        Nested dict of responses
     """
-    # Get matched pairs
-    predicted_values = []
-    oracle_values = []
-
-    for task_id in frontier_task_ids:
-        if task_id in predicted_beta and task_id in oracle_beta:
-            predicted_values.append(predicted_beta[task_id])
-            oracle_values.append(oracle_beta[task_id])
-
-    if len(predicted_values) < 3:
-        logger.warning(f"Only {len(predicted_values)} frontier tasks with both predictions, skipping correlation")
-        return {
-            "frontier_spearman_rho": float("nan"),
-            "frontier_spearman_p": float("nan"),
-            "num_frontier_tasks": len(predicted_values),
-        }
-
-    predicted_arr = np.array(predicted_values)
-    oracle_arr = np.array(oracle_values)
-
-    spearman_rho, spearman_p = stats.spearmanr(predicted_arr, oracle_arr)
-    pearson_r, pearson_p = stats.pearsonr(predicted_arr, oracle_arr)
-
-    logger.info(f"Frontier tasks ({len(predicted_values)}): Spearman ρ = {spearman_rho:.4f} (p={spearman_p:.4f})")
-
-    return {
-        "frontier_spearman_rho": float(spearman_rho),
-        "frontier_spearman_p": float(spearman_p),
-        "frontier_pearson_r": float(pearson_r),
-        "frontier_pearson_p": float(pearson_p),
-        "num_frontier_tasks": len(predicted_values),
-    }
+    responses = {}
+    with open(responses_path) as f:
+        for line in f:
+            data = json.loads(line)
+            agent_id = data["subject_id"]
+            responses[agent_id] = data["responses"]
+    return responses
 
 
 # =============================================================================
@@ -151,12 +125,9 @@ def analyze_scale_alignment(
     }
 
     # 3. Correlation metrics
-    spearman_r, spearman_p = scipy_stats.spearmanr(predicted_arr, oracle_arr)
     pearson_r, pearson_p = scipy_stats.pearsonr(predicted_arr, oracle_arr)
 
     results["correlation"] = {
-        "spearman_r": float(spearman_r),
-        "spearman_p": float(spearman_p),
         "pearson_r": float(pearson_r),
         "pearson_p": float(pearson_p),
     }
@@ -346,24 +317,6 @@ def shift_to_oracle_scale(
 # =============================================================================
 
 
-def load_responses_dict(responses_path: Path) -> Dict[str, Dict[str, int]]:
-    """Load response matrix as nested dict: agent_id -> task_id -> 0|1.
-
-    Args:
-        responses_path: Path to JSONL response matrix
-
-    Returns:
-        Nested dict of responses
-    """
-    responses = {}
-    with open(responses_path) as f:
-        for line in f:
-            data = json.loads(line)
-            agent_id = data["subject_id"]
-            responses[agent_id] = data["responses"]
-    return responses
-
-
 def compute_frontier_auc(
     oracle_abilities: pd.DataFrame,
     shifted_beta: Dict[str, float],
@@ -482,3 +435,147 @@ def compute_frontier_auc(
         "n_positive": n_positive,
         "n_negative": n_negative,
     }
+
+
+# =============================================================================
+# Full Evaluation Pipeline
+# =============================================================================
+
+
+def compute_method_metrics(
+    predicted_beta: Dict[str, float],
+    oracle_items: pd.DataFrame,
+    oracle_abilities: pd.DataFrame,
+    responses: Dict[str, Dict[str, int]],
+    frontier_task_ids: List[str],
+    anchor_task_ids: List[str],
+    eval_agents: List[str],
+    alignment_method: str = "affine",
+) -> Dict[str, Any]:
+    """Compute all metrics for a difficulty prediction method.
+
+    Args:
+        predicted_beta: Dict mapping task_id -> predicted difficulty
+        oracle_items: DataFrame with 'b' column (oracle difficulties)
+        oracle_abilities: DataFrame with 'theta' column (oracle abilities)
+        responses: Response matrix as nested dict
+        frontier_task_ids: Tasks to evaluate AUC on
+        anchor_task_ids: Tasks for fitting the alignment transformation
+        eval_agents: Agents to use for AUC computation (post-frontier)
+        alignment_method: "constant" or "affine"
+
+    Returns:
+        Dict with auc and alignment info
+    """
+    oracle_beta = oracle_items["b"].to_dict()
+
+    # 1. Compute alignment parameters using anchor tasks
+    alignment_params = compute_scale_offset(
+        predicted_beta, oracle_beta, anchor_task_ids, method=alignment_method
+    )
+
+    # 2. Shift predictions to oracle scale
+    shifted_beta = shift_to_oracle_scale(predicted_beta, alignment_params)
+
+    # 3. Compute AUC on frontier tasks using post-frontier agents
+    auc_metrics = compute_frontier_auc(
+        oracle_abilities, shifted_beta, responses, frontier_task_ids, eval_agents
+    )
+
+    return {
+        "auc": auc_metrics.get("auc"),
+        "auc_n_pairs": auc_metrics.get("n_pairs"),
+        "auc_n_positive": auc_metrics.get("n_positive"),
+        "auc_n_negative": auc_metrics.get("n_negative"),
+        "num_frontier_tasks": len(frontier_task_ids),
+        "alignment_method": alignment_method,
+        "alignment_params": alignment_params,
+    }
+
+
+def evaluate_predictor(
+    predictor,
+    baseline_items: pd.DataFrame,
+    oracle_items: pd.DataFrame,
+    oracle_abilities: pd.DataFrame,
+    responses: Dict[str, Dict[str, int]],
+    frontier_task_ids: List[str],
+    train_task_ids: List[str],
+    anchor_task_ids: List[str],
+    eval_agents: List[str],
+    train_responses: Optional[Dict[str, Dict[str, int]]] = None,
+    alignment_method: str = "affine",
+    return_predictions: bool = False,
+) -> Dict[str, Any]:
+    """Train a difficulty predictor and evaluate with full metrics.
+
+    This function handles both simple predictors (fit with task_ids and ground_truth)
+    and response-based predictors like FeatureIRTPredictor (fit with additional
+    responses parameter).
+
+    In Experiment B, all predictors train on ALL tasks. The held-out set is
+    post-frontier agents, not tasks. Ground truth difficulties come from baseline
+    IRT (trained only on pre-frontier agents), ensuring no data leakage.
+
+    Args:
+        predictor: Predictor instance (DifficultyPredictorBase or FeatureIRTPredictor)
+        baseline_items: DataFrame with 'b' column (training targets from baseline IRT)
+        oracle_items: DataFrame with 'b' column (oracle difficulties for evaluation)
+        oracle_abilities: DataFrame with 'theta' column (oracle abilities for AUC)
+        responses: Full response matrix as nested dict (used for AUC evaluation)
+        frontier_task_ids: List of frontier task IDs (evaluation)
+        train_task_ids: List of training task IDs (all tasks in Experiment B)
+        anchor_task_ids: List of anchor task IDs (for scale alignment)
+        eval_agents: Agents to use for AUC (post-frontier)
+        train_responses: Pre-filtered responses for training (pre-frontier agents only).
+            Required for predictors that use response data (e.g., FeatureIRTPredictor).
+            Must be filtered to only include pre-frontier agents to prevent data leakage.
+        alignment_method: "constant" or "affine"
+        return_predictions: If True, also return raw predictions dict
+
+    Returns:
+        Dict with auc metrics (and optionally 'raw_predictions')
+    """
+    # Get training data - all tasks that exist in baseline IRT
+    train_tasks_available = [t for t in train_task_ids if t in baseline_items.index]
+    ground_truth_b = baseline_items.loc[train_tasks_available, "b"].values
+
+    # Check if predictor needs response data (has a fit method that accepts responses)
+    fit_params = predictor.fit.__code__.co_varnames
+    needs_responses = 'responses' in fit_params
+
+    if needs_responses:
+        if train_responses is None:
+            raise ValueError(
+                "train_responses must be provided for predictors that use response data. "
+                "Pass pre-filtered responses containing only pre-frontier agents."
+            )
+        print(f"    Training with {len(train_responses)} pre-frontier agents")
+        predictor.fit(
+            task_ids=train_tasks_available,
+            ground_truth_b=ground_truth_b,
+            responses=train_responses,
+        )
+    else:
+        predictor.fit(train_tasks_available, ground_truth_b)
+
+    # Predict for all tasks (all predictors train on all tasks in Experiment B)
+    all_tasks = list(set(frontier_task_ids + anchor_task_ids + train_task_ids))
+    predictions = predictor.predict(all_tasks)
+
+    # Compute full metrics
+    metrics = compute_method_metrics(
+        predicted_beta=predictions,
+        oracle_items=oracle_items,
+        oracle_abilities=oracle_abilities,
+        responses=responses,
+        frontier_task_ids=frontier_task_ids,
+        anchor_task_ids=anchor_task_ids,
+        eval_agents=eval_agents,
+        alignment_method=alignment_method,
+    )
+
+    if return_predictions:
+        metrics["raw_predictions"] = predictions
+
+    return metrics

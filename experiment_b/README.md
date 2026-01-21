@@ -139,11 +139,7 @@ P(success) = sigmoid(θ_j - b_i)
 
 ## Evaluation Methodology
 
-### 1. Spearman Correlation
-- Compare predicted vs oracle difficulty ranking on frontier tasks
-- No scale alignment needed (rank-based metric)
-
-### 2. ROC-AUC with Scale Alignment
+### ROC-AUC with Scale Alignment
 1. **Identify anchor tasks**: Tasks with 10-90% pass rate in BOTH pre- and post-frontier groups
 2. **Fit affine transformation**: `oracle_β = slope × predicted_β + intercept` on anchors
 3. **Compute probabilities**: For each (post-frontier agent, frontier task): `P(success) = sigmoid(θ_oracle - β_shifted)`
@@ -208,7 +204,7 @@ Uses the shared `experiment_ab_shared/` infrastructure for predictors:
 ```python
 from experiment_ab_shared.feature_source import EmbeddingFeatureSource, CSVFeatureSource
 from experiment_ab_shared.feature_predictor import FeatureBasedPredictor
-from experiment_b.shared.feature_irt_predictor import FeatureIRTPredictor
+from experiment_b.shared.prediction_methods import FeatureIRTPredictor
 
 # Ridge-based predictor
 source = EmbeddingFeatureSource(embeddings_path)
@@ -223,55 +219,52 @@ predictor.fit(task_ids, ground_truth_b, responses)  # responses = pre-frontier o
 
 ```
 experiment_b/
-├── compare_methods.py        # Main entry point (refactored with helper functions)
+├── compare_methods.py        # Thin orchestration (~275 lines)
 ├── shared/
 │   ├── config_base.py        # DatasetConfig base class with lazy-loaded properties
-│   ├── data_splits.py        # Agent/task splitting utilities
-│   ├── evaluate.py           # Evaluation metrics (Spearman, AUC, alignment)
-│   ├── baseline_irt.py       # Baseline IRT training with caching
-│   ├── feature_irt_predictor.py  # Feature-IRT predictor
-│   └── date_forecasting.py   # Date forecasting utilities
+│   ├── data_preparation.py   # Data loading, frontier ID, baseline IRT
+│   ├── evaluation.py         # ROC-AUC, scale alignment metrics
+│   ├── prediction_methods.py # FeatureIRTPredictor + method collection
+│   ├── frontier_evaluation.py# Date forecasting setup, evaluation loop
+│   ├── output_formatting.py  # Print tables, save CSV
+│   ├── diagnostics.py        # Feature-IRT diagnostic plots
+│   └── date_forecasting.py   # Date prediction utilities
 ├── swebench/
 │   └── config.py             # SWE-bench dataset configuration
 └── terminalbench/
     └── config.py             # TerminalBench dataset configuration
 ```
 
-### Code Organization (`compare_methods.py`)
+### Code Organization
 
-The main script is organized into:
+**Design Principle**: Adding a new prediction method should only require changes in `prediction_methods.py`. The method is then automatically evaluated through the whole pipeline.
 
-**Dataclasses** for grouping related data:
+**Module Responsibilities**:
+
+| Module | Purpose |
+|--------|---------|
+| `data_preparation.py` | Load IRT models, split agents, identify frontier tasks |
+| `evaluation.py` | Compute ROC-AUC, scale alignment |
+| `prediction_methods.py` | All predictor classes and collection functions |
+| `frontier_evaluation.py` | Date forecasting setup, multi-definition evaluation |
+| `output_formatting.py` | Print comparison tables, save CSV |
+| `diagnostics.py` | Grid search heatmaps, loss curves |
+| `date_forecasting.py` | Date prediction utilities |
+| `config_base.py` | Dataset config with lazy-loaded properties |
+
+**Key Dataclasses**:
 - `ExperimentData`: Runtime-computed values (IRT models, agent splits, frontier tasks)
 - `FeatureIRTResults`: Predictions, abilities, and diagnostics from Feature-IRT
 - `DateForecastingData`: Date models, ground truth, and evaluation metadata
 
-**Helper Functions** for modularity:
+**Key Functions**:
 - `load_and_prepare_data()`: Load IRT models and compute experiment-specific splits
-- `load_sad_irt_predictions()`: Load all SAD-IRT runs as separate methods
 - `build_feature_sources()`: Create feature source objects for embeddings/LLM judge
-- `collect_feature_ridge_predictions()`: Train Ridge regressors on feature sources
-- `run_feature_irt_methods()`: Run Feature-IRT with optional grid search
+- `collect_ridge_predictions()`: Train Ridge regressors on feature sources
+- `collect_feature_irt_predictions()`: Run Feature-IRT with optional grid search
+- `collect_sad_irt_predictions()`: Load all SAD-IRT runs as separate methods
 - `setup_date_forecasting()`: Prepare date models and ground truth
-- `evaluate_all_frontier_definitions()`: Evaluate all methods, consolidate SAD-IRT at reporting
-
-**DatasetConfig** (`shared/config_base.py`) provides lazy-loaded cached properties:
-- `responses`: Load response matrix on first access
-- `all_agents`, `all_task_ids`: Derived from responses
-- `agent_dates`, `last_agent_date`: Agent date mappings
-
-### Key Functions
-
-**Data Splitting** (`shared/data_splits.py`):
-- `split_agents_by_dates()`: Split by date cutoff
-- `identify_frontier_tasks_irt()`: IRT-based frontier definition (no pre-frontier agent with theta >= beta)
-- `identify_frontier_tasks()`: Pass-rate based definition (use `--frontier_definition passrate`)
-- `identify_nontrivial_tasks()`: Anchor tasks (10-90% pass rate)
-
-**Evaluation** (`shared/evaluate.py`):
-- `compute_frontier_difficulty_metrics()`: Spearman correlation
-- `compute_scale_offset()`: Fit alignment transformation
-- `compute_frontier_auc()`: ROC-AUC on frontier tasks
+- `evaluate_all_frontier_definitions()`: Evaluate all methods across frontier definitions
 
 ## Data Paths
 
