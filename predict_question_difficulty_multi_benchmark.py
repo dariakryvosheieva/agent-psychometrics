@@ -1586,6 +1586,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         z_pred = model.predict(X_ood).astype(base.np.float64)
         z_by_item = {iid: float(z) for iid, z in zip(ood_ids_sorted, z_pred.tolist())}
 
+        # Write per-item OOD predictions for the 4th benchmark.
+        pred_path = os.path.join(str(args.out_dir), "predictions.csv")
+        with open(pred_path, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+            w.writeheader()
+            for iid, z in zip(ood_ids_sorted, z_pred.tolist()):
+                w.writerow({"item_id": str(iid), "diff_pred": float(z), "split": "ood", "fold": ""})
+        print(f"Wrote predictions: {pred_path}")
+
         ood_auc, ood_meta = evaluate_ood_auroc(
             ood_agent_results_jsonl=ood_agent_results,
             ood_normalize_item_ids=bool(args.ood_normalize_item_ids),

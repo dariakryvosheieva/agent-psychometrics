@@ -5,7 +5,7 @@
   "deterministic": true,
   "device_map": "auto",
   "embedding_layer": -1,
-  "embeddings_cache": "out/multi_benchmark_ood/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_multibench__verified_princeton-nlp_SWE-bench_Verified_test_pro_ScaleAI_SWE-bench_Pro_test_terminal_jsonl_ter__maxlen8192.npz",
+  "embeddings_cache": "/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/multi_benchmark_ood/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__qs-sol-instr__qs_sol_instr_b7008f2d__idnorm_multibench__verified_princeton-nlp_SWE-bench_Verified_test_pro_ScaleAI_SWE-bench_Pro_test_terminal_jsonl_ter__maxlen8192.npz",
   "eval_mode": "ood",
   "feature_dim": 5120,
   "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
