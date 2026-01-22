@@ -268,7 +268,8 @@ def load_tasks_for_dataset(
     """Load tasks for a built-in dataset."""
     if dataset == "swebench":
         return load_swebench_tasks()
-    elif dataset == "swebench_pro":
+    elif dataset in ("swebench_pro", "swebench_pro_v2", "swebench_pro_v3", "swebench_pro_v4", "swebench_pro_v5"):
+        # V2/V3/V4/V5 use same data as swebench_pro, just different prompts
         return load_swebench_pro_tasks()
     elif dataset == "terminalbench":
         return load_terminalbench_tasks(items_path, repo_path)
@@ -329,6 +330,14 @@ def cmd_extract(args: argparse.Namespace) -> None:
             limit=args.limit,
             task_ids=task_ids,
             skip_existing=not args.no_skip_existing,
+        )
+    elif args.parallel:
+        extractor.run_parallel(
+            tasks=tasks,
+            skip_existing=not args.no_skip_existing,
+            limit=args.limit,
+            task_ids=task_ids,
+            concurrency=args.concurrency,
         )
     else:
         extractor.run(
@@ -472,6 +481,17 @@ def main():
         action="store_true",
         dest="dry_run",
         help="Show execution plan and cost estimate without running",
+    )
+    extract_parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Run extraction in parallel (faster, uses async API calls)",
+    )
+    extract_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=10,
+        help="Max concurrent API calls when --parallel is used (default: 10)",
     )
 
     # Aggregate subcommand

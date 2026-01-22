@@ -2,8 +2,10 @@
 
 Supports both Anthropic and OpenAI providers with unified interface.
 Uses the new OpenAI Responses API per project guidelines.
+Supports both sync and async calls for parallelization.
 """
 
+import asyncio
 from typing import Optional
 
 # Try to import API clients
@@ -125,6 +127,37 @@ class LLMApiClient:
         )
 
         return response.output_text.strip()
+
+    async def call_async(self, prompt: str, max_tokens: int = 1024) -> str:
+        """Async version of call() for parallel processing.
+
+        Args:
+            prompt: The prompt to send to the LLM
+            max_tokens: Maximum tokens in response
+
+        Returns:
+            Response text from the LLM
+        """
+        if self.provider == "anthropic":
+            return await self._call_anthropic_async(prompt, max_tokens)
+        elif self.provider == "openai":
+            # OpenAI async not implemented yet, fallback to sync in executor
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(None, self._call_openai, prompt, max_tokens)
+        else:
+            raise ValueError(f"Unknown provider: {self.provider}")
+
+    async def _call_anthropic_async(self, prompt: str, max_tokens: int) -> str:
+        """Async call to Anthropic API."""
+        client = anthropic.AsyncAnthropic()
+
+        response = await client.messages.create(
+            model=self.model,
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        return response.content[0].text.strip()
 
     def estimate_cost(
         self,

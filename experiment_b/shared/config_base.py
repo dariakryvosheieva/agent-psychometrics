@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from experiment_b.shared.model_release_dates import get_model_release_date
+
 
 def _parse_date(date_str: str) -> datetime:
     """Parse YYYYMMDD date string to datetime."""
@@ -53,6 +55,11 @@ class DatasetConfig(ABC):
     # IRT-based frontier definition threshold
     # Tasks where no pre-frontier agent has >= this probability are "frontier"
     irt_solve_probability: float = 0.5
+
+    # Date mode: use model release dates instead of submission dates
+    # When True, get_agent_dates() will return model release dates where known,
+    # falling back to submission dates for unknown models
+    use_release_dates: bool = False
 
     # Output
     output_dir: Path = field(default_factory=Path)
@@ -159,11 +166,22 @@ class DatasetConfig(ABC):
     def agent_dates(self) -> Dict[str, str]:
         """Get dates for all agents (cached).
 
+        If use_release_dates is True, returns model release dates where known,
+        falling back to submission dates for unknown models.
+
         Returns:
             Dict mapping agent_id -> date string (YYYYMMDD)
         """
         if self._agent_dates is None:
-            self._agent_dates = self.get_agent_dates(self.all_agents)
+            if self.use_release_dates:
+                # Use model release dates with submission date fallback
+                self._agent_dates = {
+                    agent: get_model_release_date(agent)
+                    for agent in self.all_agents
+                }
+            else:
+                # Use submission dates (dataset-specific implementation)
+                self._agent_dates = self.get_agent_dates(self.all_agents)
         return self._agent_dates
 
     @property

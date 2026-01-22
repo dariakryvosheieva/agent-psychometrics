@@ -5,8 +5,10 @@ This module provides the main extraction class that handles:
 - Resume capability (skip existing JSONs)
 - Aggregation to CSV
 - Dry-run cost estimation
+- Parallel extraction with configurable concurrency
 """
 
+import asyncio
 import json
 import logging
 import time
@@ -203,6 +205,138 @@ class LLMFeatureExtractor:
             # Rate limiting
             if delay and i < len(tasks) - 1:
                 time.sleep(delay)
+
+        # Summary
+        print("\n" + "=" * 60)
+        print("EXTRACTION SUMMARY")
+        print("=" * 60)
+        print(f"Total processed: {stats['total']}")
+        print(f"Success: {stats['success']}")
+        print(f"Failed: {stats['failed']}")
+
+        # Save stats
+        self._save_stats(stats)
+
+        # Aggregate to CSV
+        return self.aggregate_to_csv()
+
+    async def _extract_single_async(
+        self,
+        task: Dict[str, Any],
+        semaphore: asyncio.Semaphore,
+    ) -> Optional[Dict[str, Any]]:
+        """Extract features for a single task asynchronously."""
+        async with semaphore:
+            task_id = self._get_task_id(task)
+            prompt = self.config.format_prompt(task)
+
+            try:
+                response_text = await self.client.call_async(prompt)
+
+                feature_names = self.config.get_feature_names()
+                features = parse_llm_response(response_text, expected_features=feature_names)
+
+                if features is None:
+                    logger.warning(f"Failed to parse response for task {task_id}")
+                    return None
+
+                if not validate_features(features, feature_names, require_all=False):
+                    logger.warning(f"Response missing expected features for task {task_id}")
+                    return None
+
+                features["_task_id"] = task_id
+                features["_model"] = self.client.model
+                features["_provider"] = self.client.provider
+                features["_extracted_at"] = datetime.now().isoformat()
+
+                return features
+
+            except Exception as e:
+                logger.error(f"Error extracting features for task {task_id}: {e}")
+                return None
+
+    async def _run_parallel_async(
+        self,
+        tasks: List[Dict[str, Any]],
+        concurrency: int = 10,
+    ) -> Dict[str, int]:
+        """Run extraction on tasks in parallel with limited concurrency."""
+        semaphore = asyncio.Semaphore(concurrency)
+        stats = {"total": len(tasks), "success": 0, "failed": 0}
+
+        async def process_task(i: int, task: Dict[str, Any]):
+            task_id = self._get_task_id(task)
+            output_path = self._get_output_path(task_id)
+
+            features = await self._extract_single_async(task, semaphore)
+
+            if features:
+                with open(output_path, "w") as f:
+                    json.dump(features, f, indent=2)
+                stats["success"] += 1
+                print(f"[{i+1}/{len(tasks)}] {task_id}... ✓")
+            else:
+                stats["failed"] += 1
+                print(f"[{i+1}/{len(tasks)}] {task_id}... ✗")
+
+        # Create all tasks
+        coroutines = [process_task(i, task) for i, task in enumerate(tasks)]
+
+        # Run with progress
+        await asyncio.gather(*coroutines)
+
+        return stats
+
+    def run_parallel(
+        self,
+        tasks: List[Dict[str, Any]],
+        skip_existing: bool = True,
+        limit: Optional[int] = None,
+        task_ids: Optional[List[str]] = None,
+        concurrency: int = 10,
+    ) -> Optional[Path]:
+        """Run extraction on all tasks in parallel.
+
+        Args:
+            tasks: List of task dictionaries
+            skip_existing: Skip tasks with existing JSON files
+            limit: Maximum number of tasks to process
+            task_ids: If provided, only process these specific task IDs
+            concurrency: Maximum number of concurrent API calls (default: 10)
+
+        Returns:
+            Path to aggregated CSV file, or None if no tasks processed
+        """
+        # Filter to specific task IDs if requested
+        if task_ids:
+            task_ids_set = set(task_ids)
+            tasks = [t for t in tasks if self._get_task_id(t) in task_ids_set]
+            logger.info(f"Filtered to {len(tasks)} specified tasks")
+
+        # Apply limit
+        if limit and len(tasks) > limit:
+            tasks = tasks[:limit]
+            logger.info(f"Limited to {limit} tasks")
+
+        # Filter out existing
+        if skip_existing:
+            original_count = len(tasks)
+            tasks = [
+                t for t in tasks
+                if not self._get_output_path(self._get_task_id(t)).exists()
+            ]
+            skipped = original_count - len(tasks)
+            if skipped > 0:
+                logger.info(f"Skipping {skipped} existing, {len(tasks)} remaining")
+
+        if not tasks:
+            logger.info("No tasks to process")
+            return self.aggregate_to_csv()
+
+        print(f"\nProcessing {len(tasks)} tasks with concurrency={concurrency}...\n")
+
+        # Run async extraction
+        stats = asyncio.run(self._run_parallel_async(tasks, concurrency))
 
         # Summary
         print("\n" + "=" * 60)
