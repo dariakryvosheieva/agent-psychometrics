@@ -206,8 +206,21 @@ Semantic features extracted via LLM structured output:
 
 To extract features:
 ```bash
-python -m experiment_a.compute_llm_judge_features --dry_run
-python -m experiment_a.compute_llm_judge_features
+# SWE-bench features
+python -m experiment_ab_shared.llm_judge extract --dataset swebench --dry-run
+python -m experiment_ab_shared.llm_judge extract --dataset swebench
+
+# TerminalBench features
+python -m experiment_ab_shared.llm_judge extract --dataset terminalbench --dry-run
+python -m experiment_ab_shared.llm_judge extract --dataset terminalbench
+
+# Options
+python -m experiment_ab_shared.llm_judge extract --dataset swebench --limit 50  # Process first 50 tasks
+python -m experiment_ab_shared.llm_judge extract --dataset swebench --provider openai  # Use OpenAI
+python -m experiment_ab_shared.llm_judge extract --dataset swebench --model claude-sonnet-4-20250514  # Use specific model
+
+# Aggregate existing JSON files to CSV
+python -m experiment_ab_shared.llm_judge aggregate --dataset swebench
 ```
 
 ## Data Paths

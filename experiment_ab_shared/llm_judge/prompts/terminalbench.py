@@ -1,35 +1,67 @@
-"""LLM judge prompt for semantic feature extraction (Experiment A - TerminalBench).
+"""TerminalBench prompt configuration for LLM judge feature extraction.
 
-This prompt extracts semantic features from static task information
-(instruction, solution.sh) to predict task difficulty for terminal/shell tasks.
-
-The features are adapted from the SWE-bench LLM judge to fit terminal tasks:
-- fix_in_description (0-3) -> solution_in_instruction
-- problem_clarity (1-5) -> task_clarity
-- error_message_provided (0/1) -> dropped (not applicable)
-- reproduction_steps (0/1) -> dropped (not applicable)
-- fix_locality (1-3) -> solution_size
-- domain_knowledge_required (1-5) -> domain_knowledge_required
-- fix_complexity (1-5) -> task_complexity
-- logical_reasoning_required (1-5) -> logical_reasoning_required
-- atypicality (1-5) -> atypicality
-- NEW: tooling_complexity (1-5)
+This module defines the prompt template and feature definitions for extracting
+semantic features from TerminalBench terminal/shell tasks.
 """
 
-# Feature names for TerminalBench semantic extraction
-LLM_JUDGE_SEMANTIC_FEATURES = [
-    "solution_in_instruction",
-    "task_clarity",
-    "solution_size",
-    "domain_knowledge_required",
-    "task_complexity",
-    "logical_reasoning_required",
-    "atypicality",
-    "tooling_complexity",
+from typing import Any, Dict, List
+
+from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition, PromptConfig
+
+# Feature definitions for TerminalBench
+TERMINALBENCH_FEATURES = [
+    FeatureDefinition(
+        name="solution_in_instruction",
+        min_value=0,
+        max_value=3,
+        description="Does the instruction contain or hint at the solution? (0=none, 3=exact commands)",
+    ),
+    FeatureDefinition(
+        name="task_clarity",
+        min_value=1,
+        max_value=5,
+        description="How clear and well-specified is the task? (1=vague, 5=crystal clear)",
+    ),
+    FeatureDefinition(
+        name="solution_size",
+        min_value=1,
+        max_value=3,
+        description="How large is the reference solution? (1=few commands, 3=complex script)",
+    ),
+    FeatureDefinition(
+        name="domain_knowledge_required",
+        min_value=1,
+        max_value=5,
+        description="How much specialized knowledge is needed? (1=basic shell, 5=obscure tools)",
+    ),
+    FeatureDefinition(
+        name="task_complexity",
+        min_value=1,
+        max_value=5,
+        description="How complex is the task? (1=trivial, 5=very complex)",
+    ),
+    FeatureDefinition(
+        name="logical_reasoning_required",
+        min_value=1,
+        max_value=5,
+        description="How much logical reasoning is needed? (1=mechanical, 5=deep reasoning)",
+    ),
+    FeatureDefinition(
+        name="atypicality",
+        min_value=1,
+        max_value=5,
+        description="How unusual is this task type? (1=very common, 5=rare/novel)",
+    ),
+    FeatureDefinition(
+        name="tooling_complexity",
+        min_value=1,
+        max_value=5,
+        description="How complex is the tooling/environment? (1=basic shell, 5=exotic toolchain)",
+    ),
 ]
 
-# The semantic-only grading prompt for TerminalBench tasks
-LLM_JUDGE_PROMPT = """You are analyzing a TerminalBench terminal/shell task to predict its difficulty.
+# The prompt template for TerminalBench tasks
+TERMINALBENCH_PROMPT_TEMPLATE = """You are analyzing a TerminalBench terminal/shell task to predict its difficulty.
 You will analyze the task instruction and reference solution to evaluate semantic features.
 
 ## TASK INFORMATION
@@ -131,39 +163,51 @@ Respond with ONLY a JSON object containing all features. No markdown, no extra t
 """
 
 
-def format_llm_judge_prompt(
-    task_id: str,
-    instruction: str,
-    solution: str,
-    category: str = "",
-    tags: list = None,
-    claimed_difficulty: str = "",
-) -> str:
-    """Format the LLM judge prompt with task-specific information.
+def format_terminalbench_prompt(task: Dict[str, Any]) -> str:
+    """Format the TerminalBench prompt with task-specific information.
 
     Args:
-        task_id: TerminalBench task ID (e.g., "3d-model-format-legacy")
-        instruction: The task instruction from task.yaml
-        solution: The reference solution from solution.sh
-        category: Task category (e.g., "software-engineering")
-        tags: List of tags (e.g., ["coding", "file-operations"])
-        claimed_difficulty: Self-reported difficulty (e.g., "hard")
+        task: TerminalBench task dict with keys:
+            - task_id: TerminalBench task ID (e.g., "3d-model-format-legacy")
+            - instruction: The task instruction from task.yaml
+            - solution: The reference solution from solution.sh
+            - category: Task category (e.g., "software-engineering")
+            - tags: List of tags (e.g., ["coding", "file-operations"])
+            - claimed_difficulty: Self-reported difficulty (e.g., "hard")
 
     Returns:
         Formatted prompt string
     """
-    if tags is None:
-        tags = []
+    tags: List[str] = task.get("tags") or []
 
     # Truncate very long fields to avoid context overflow
-    instruction = instruction[:12000] if len(instruction) > 12000 else instruction
-    solution = solution[:12000] if len(solution) > 12000 else solution
+    instruction = task.get("instruction", "")
+    if len(instruction) > 12000:
+        instruction = instruction[:12000]
 
-    return LLM_JUDGE_PROMPT.format(
-        task_id=task_id,
-        category=category or "N/A",
+    solution = task.get("solution", "")
+    if len(solution) > 12000:
+        solution = solution[:12000]
+
+    return TERMINALBENCH_PROMPT_TEMPLATE.format(
+        task_id=task.get("task_id", ""),
+        category=task.get("category") or "N/A",
         tags=", ".join(tags) if tags else "N/A",
-        claimed_difficulty=claimed_difficulty or "N/A",
+        claimed_difficulty=task.get("claimed_difficulty") or "N/A",
         instruction=instruction,
         solution=solution,
     )
+
+
+# The main configuration object
+TERMINALBENCH_CONFIG = PromptConfig(
+    name="terminalbench",
+    features=TERMINALBENCH_FEATURES,
+    prompt_template=TERMINALBENCH_PROMPT_TEMPLATE,
+    task_id_field="task_id",
+    truncation_limits={
+        "instruction": 12000,
+        "solution": 12000,
+    },
+    format_prompt_fn=format_terminalbench_prompt,
+)

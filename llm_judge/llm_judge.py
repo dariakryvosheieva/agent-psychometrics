@@ -2,7 +2,8 @@
 LLM-as-judge for extracting discrete features from SWE-bench tasks.
 
 This script uses an LLM to analyze task descriptions and patches to extract
-features that may predict IRT difficulty.
+features that may predict IRT difficulty. It includes correlation analysis
+with ground-truth IRT difficulty.
 
 Usage:
     python llm_judge/llm_judge.py --num_tasks 10 --output_path chris_output/llm_judge/features.csv
@@ -10,27 +11,21 @@ Usage:
 """
 
 import argparse
-import json
-import os
 import time
 from pathlib import Path
 from typing import Optional
 
 import pandas as pd
 
-# Try to import API clients
-try:
-    import anthropic
-    HAS_ANTHROPIC = True
-except ImportError:
-    HAS_ANTHROPIC = False
+from experiment_ab_shared.llm_judge import LLMApiClient, parse_llm_response
 
-try:
-    import openai
-    HAS_OPENAI = True
-except ImportError:
-    HAS_OPENAI = False
 
+# Feature names for this prompt (used for correlation analysis)
+FEATURE_COLS = [
+    'fix_in_description', 'patch_matches_suggestion', 'problem_clarity',
+    'error_message_provided', 'reproduction_steps', 'fix_locality',
+    'domain_knowledge_required', 'fix_complexity'
+]
 
 JUDGE_PROMPT = """You are an expert software engineer analyzing a GitHub issue and its solution patch.
 
@@ -113,49 +108,12 @@ Respond with ONLY a JSON object in this exact format:
 """
 
 
-def call_anthropic(prompt: str, model: str = "claude-sonnet-4-20250514") -> dict:
-    """Call Anthropic API and parse JSON response."""
-    client = anthropic.Anthropic()
-
-    response = client.messages.create(
-        model=model,
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    text = response.content[0].text.strip()
-
-    # Extract JSON from response
-    if "```json" in text:
-        text = text.split("```json")[1].split("```")[0].strip()
-    elif "```" in text:
-        text = text.split("```")[1].split("```")[0].strip()
-
-    return json.loads(text)
-
-
-def call_openai(prompt: str, model: str = "gpt-4o") -> dict:
-    """Call OpenAI API and parse JSON response."""
-    client = openai.OpenAI()
-
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        response_format={"type": "json_object"},
-        max_tokens=1024,
-    )
-
-    text = response.choices[0].message.content.strip()
-    return json.loads(text)
-
-
 def judge_task(
     task_id: str,
     repo: str,
     problem_statement: str,
     patch: str,
-    provider: str = "anthropic",
-    model: Optional[str] = None,
+    client: LLMApiClient,
 ) -> dict:
     """Judge a single task and return features."""
 
@@ -166,21 +124,14 @@ def judge_task(
         patch=patch[:4000],
     )
 
-    if provider == "anthropic":
-        if not HAS_ANTHROPIC:
-            raise ImportError("anthropic package not installed")
-        model = model or "claude-sonnet-4-20250514"
-        result = call_anthropic(prompt, model)
-    elif provider == "openai":
-        if not HAS_OPENAI:
-            raise ImportError("openai package not installed")
-        model = model or "gpt-4o"
-        result = call_openai(prompt, model)
-    else:
-        raise ValueError(f"Unknown provider: {provider}")
+    response_text = client.call(prompt)
+    result = parse_llm_response(response_text, expected_features=FEATURE_COLS)
+
+    if result is None:
+        raise ValueError(f"Failed to parse response for task {task_id}")
 
     result["task_id"] = task_id
-    result["model"] = model
+    result["model"] = client.model
     return result
 
 
@@ -226,6 +177,10 @@ def main():
     output_path = Path(args.output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # Create API client
+    client = LLMApiClient(provider=args.provider, model=args.model)
+    print(f"Using {client.get_info()}")
+
     # Load tasks
     print("Loading tasks...")
     tasks = load_tasks()
@@ -267,8 +222,7 @@ def main():
                 repo=row['repo'],
                 problem_statement=row['problem_statement'],
                 patch=row['patch'],
-                provider=args.provider,
-                model=args.model,
+                client=client,
             )
             result['irt_difficulty'] = row['b']
             results.append(result)
@@ -294,13 +248,7 @@ def main():
         print("CORRELATION WITH IRT DIFFICULTY")
         print("=" * 60)
 
-        feature_cols = [
-            'fix_in_description', 'patch_matches_suggestion', 'problem_clarity',
-            'error_message_provided', 'reproduction_steps', 'fix_locality',
-            'domain_knowledge_required', 'fix_complexity'
-        ]
-
-        for col in feature_cols:
+        for col in FEATURE_COLS:
             if col in results_df.columns:
                 corr = results_df['irt_difficulty'].corr(results_df[col])
                 print(f"  {col:30s}: r = {corr:+.3f}")

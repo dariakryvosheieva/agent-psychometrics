@@ -34,7 +34,6 @@ gcode-to-text,2.0198047161102295,cv_val,4
 git-leak-recovery,-0.7231000065803528,cv_val,4
 git-multibranch,-2.5451502799987793,cv_val,1
 gpt2-codegolf,1.0538595914840698,cv_val,3
-headless-terminal,-0.23996974527835846,cv_val,3
 hf-model-inference,0.205077663064003,cv_val,5
 install-windows-3.11,-1.03215754032135,cv_val,5
 kv-store-grpc,-0.5434857606887817,cv_val,3
