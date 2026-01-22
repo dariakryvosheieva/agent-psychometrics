@@ -55,7 +55,7 @@ pytest tests/test_irt_pipeline.py -v
 
 ## Current Dataset
 
-- **130 agents** (cutoff: 2025-11-15)
+- **131 agents** (cutoff: 2025-11-20)
 - **500 tasks** (SWE-bench Verified)
 - **76 agents** with unified trajectories
 
