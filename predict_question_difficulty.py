@@ -1167,7 +1167,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     args = p.parse_args(argv)
     ensure_dir(args.out_dir)
-    deterministic = True
     seed_everything(int(args.seed), deterministic=True)
 
     dataset_name = str(args.dataset_name).strip()
