@@ -5,8 +5,8 @@ Input:
   gso-experiments/results/reports/<model_name>.json
 
 We treat:
-  - instance_sets.passed_ids   => success (1)
-  - other task ids (typically instance_sets.completed_ids) => failure (0)
+  - instance_sets.opt_commit_ids => success (1)
+  - remaining task ids (typically instance_sets.completed_ids) => failure (0)
 
 Output JSONL matches the format used by:
   - fulcrum/fellowship/out/chris_irt/swebench_verified_20251115_full.jsonl
@@ -78,11 +78,11 @@ def _collect_task_ids(instance_sets: object) -> set[str]:
     return items
 
 
-def load_report(report_path: Path) -> Tuple[set[str], set[str]]:
+def load_report(report_path: Path, *, success_ids_key: str) -> Tuple[set[str], set[str]]:
     """
     Returns:
       - all_task_ids observed in this report
-      - passed_ids set
+      - success ids set (as configured by `success_ids_key`)
     """
     with report_path.open() as f:
         obj = json.load(f)
@@ -91,10 +91,59 @@ def load_report(report_path: Path) -> Tuple[set[str], set[str]]:
 
     instance_sets = obj.get("instance_sets")
     items = _collect_task_ids(instance_sets)
-    passed = set()
+    successes = set()
     if isinstance(instance_sets, dict):
-        passed = set(_list_str(instance_sets.get("passed_ids")))
-    return items, passed
+        successes = set(_list_str(instance_sets.get(success_ids_key)))
+    return items, successes
+
+
+def write_jsonl(
+    *,
+    per_subject: Dict[str, Tuple[set[str], set[str]]],
+    all_items: set[str],
+    selected_subjects: list[str],
+    output_path: Path,
+    no_complete_matrix: bool,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    items_list = sorted(all_items)
+
+    records: list[dict] = []
+    summary = []
+    for subject_id in selected_subjects:
+        items, successes = per_subject[subject_id]
+        if no_complete_matrix:
+            # Sparse: only include tasks this subject attempted.
+            subject_items = sorted(items)
+            responses = {iid: (1 if iid in successes else 0) for iid in subject_items}
+        else:
+            # Dense: include all tasks observed across selected subjects.
+            responses = {iid: (1 if iid in successes else 0) for iid in items_list}
+
+        resolved_ct = sum(responses.values())
+        summary.append((subject_id, len(responses), resolved_ct, len(successes), len(items)))
+        records.append({"subject_id": subject_id, "responses": responses})
+
+    with output_path.open("w") as f:
+        for record in records:
+            f.write(json.dumps(record))
+            f.write("\n")
+
+    print(f"Wrote {len(records)} subjects to {output_path}")
+    print(f"Unique tasks observed: {len(all_items)}")
+    obs_total = sum(len(r["responses"]) for r in records)
+    if records:
+        counts = [len(r["responses"]) for r in records]
+        print(f"Total observations: {obs_total}")
+        print(f"Tasks per subject: min={min(counts)} max={max(counts)} mean={obs_total / len(counts):.2f}")
+        print(f"Complete matrix: {'no (sparse)' if no_complete_matrix else 'yes'}")
+    if summary:
+        # (subject, tasks_in_output, successes_in_output, success_ids, attempted_ids)
+        best = max(summary, key=lambda t: t[2])
+        worst = min(summary, key=lambda t: t[2])
+        print(f"Most successes: {best[0]} ({best[2]}/{best[1]})")
+        print(f"Fewest successes: {worst[0]} ({worst[2]}/{worst[1]})")
 
 
 def main() -> None:
@@ -123,16 +172,21 @@ def main() -> None:
         help="Don't fill missing tasks (sparse matrix). Default is to fill with 0.",
     )
     p.add_argument(
+        "--success_ids_key",
+        type=str,
+        default="opt_commit_ids",
+        help='Which `instance_sets` key to treat as "success". Default: opt_commit_ids',
+    )
+    p.add_argument(
         "--output_path",
         type=str,
-        default="clean_data/gso/gso_agents.jsonl",
+        default="out/chris_irt/gso.jsonl",
         help="Output JSONL path",
     )
     args = p.parse_args()
 
     reports_dir = resolve_path(args.reports_dir)
     output_path = resolve_path(args.output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if not reports_dir.exists():
         raise FileNotFoundError(f"reports_dir not found: {reports_dir}")
@@ -152,12 +206,12 @@ def main() -> None:
         if rx is not None and not rx.search(subject_id):
             continue
 
-        items, passed = load_report(report_path)
+        items, successes = load_report(report_path, success_ids_key=args.success_ids_key)
         if not items:
             logger.warning(f"Skipping {report_path} (no task ids found)")
             continue
 
-        per_subject[subject_id] = (items, passed)
+        per_subject[subject_id] = (items, successes)
         all_items.update(items)
 
     if not per_subject:
@@ -167,43 +221,14 @@ def main() -> None:
     if args.max_subjects is not None:
         selected_subjects = selected_subjects[: args.max_subjects]
 
-    items_list = sorted(all_items)
-
-    records: list[dict] = []
-    summary = []
-    for subject_id in selected_subjects:
-        items, passed = per_subject[subject_id]
-        if args.no_complete_matrix:
-            # Sparse: only include tasks this subject attempted.
-            subject_items = sorted(items)
-            responses = {iid: (1 if iid in passed else 0) for iid in subject_items}
-        else:
-            # Dense: include all tasks observed across selected subjects.
-            responses = {iid: (1 if iid in passed else 0) for iid in items_list}
-
-        resolved_ct = sum(responses.values())
-        summary.append((subject_id, len(responses), resolved_ct, len(passed), len(items)))
-        records.append({"subject_id": subject_id, "responses": responses})
-
-    with output_path.open("w") as f:
-        for record in records:
-            f.write(json.dumps(record))
-            f.write("\n")
-
-    print(f"Wrote {len(records)} subjects to {output_path}")
-    print(f"Unique tasks observed: {len(all_items)}")
-    obs_total = sum(len(r["responses"]) for r in records)
-    if records:
-        counts = [len(r["responses"]) for r in records]
-        print(f"Total observations: {obs_total}")
-        print(f"Tasks per subject: min={min(counts)} max={max(counts)} mean={obs_total / len(counts):.2f}")
-        print(f"Complete matrix: {'no (sparse)' if args.no_complete_matrix else 'yes'}")
-    if summary:
-        # (subject, tasks_in_output, successes_in_output, passed_ids, attempted_ids)
-        best = max(summary, key=lambda t: t[2])
-        worst = min(summary, key=lambda t: t[2])
-        print(f"Most successes: {best[0]} ({best[2]}/{best[1]})")
-        print(f"Fewest successes: {worst[0]} ({worst[2]}/{worst[1]})")
+    # Output (configurable success key; default is opt_commit_ids).
+    write_jsonl(
+        per_subject=per_subject,
+        all_items=all_items,
+        selected_subjects=selected_subjects,
+        output_path=output_path,
+        no_complete_matrix=args.no_complete_matrix,
+    )
 
 
 if __name__ == "__main__":
