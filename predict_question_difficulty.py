@@ -475,6 +475,45 @@ def format_qs_solution_instruction(*, question_statement: str, solution: str, in
     return f"Task statement:\n{qs}\n\nSolution:\n{sol}\n\n{instr}".strip()
 
 
+# GSO (and other OOD-style) benchmarks can store the task statement as a *test script*
+# (`prob_script`) which is meant to be wrapped into a fixed "spec test" prompt template
+# before embedding. This mirrors the multi-benchmark script's behavior so embeddings are
+# identical by construction.
+_GSO_PROMPT_TEMPLATE = """I’ve uploaded a python code repository in the directory workspace_dir_name. Consider the
+following test script showing an example usage of the repository:
+<test_script>
+{SPEC_TEST}
+</test_script>
+Can you help me implement the necessary changes to the repository so that the runtime of
+the <test_script> is optimized? Basic guidelines:
+1. Your task is to make changes to non-test files in the /workspace directory to improve the
+performance of the <test_script>.
+2. Make changes while ensuring the repository is functionally equivalent to the original.
+3. Do not overoptimize for just the specific inputs in <test_script>. Make general perfor-
+mance improvements for the usage scenario shown.
+4. You may need to rebuild the repo for your changes to take effect before testing. Some
+rebuilds may take time to run, so be patient with running them.
+Follow these steps to improve performance:
+1. As a first step, explore the repository structure.
+2. Create a script in the /workspace directory (e.g., /workspace/test_opt.py) to reproduce and
+time the example, then execute it with python /workspace/<filename.py>.
+3. Edit the source code of the repository to improve performance.
+4. Rebuild and rerun your script to confirm that performance has improved.
+"""
+
+
+def _wrap_gso_problem_statement(prob_script: str) -> str:
+    return _GSO_PROMPT_TEMPLATE.format(SPEC_TEST=str(prob_script or "").strip())
+
+
+def _is_gso_dataset(*, dataset_name: str, dataset_path: str) -> bool:
+    """
+    Heuristic: detect GSO-style datasets (e.g. HF `gso-bench/gso` or local `...gso...jsonl`).
+    """
+    s = " ".join([str(dataset_name or ""), str(dataset_path or "")]).lower()
+    return ("gso-bench" in s) or bool(re.search(r"(^|[^a-z0-9])gso([^a-z0-9]|$)", s))
+
+
 @dataclass(frozen=True)
 class ItemRecord:
     item_id: str
@@ -525,7 +564,9 @@ def iter_swebench_items(
     Field extraction is best-effort:
     - item_id: instance_id | task_id | id
     - question_statement: problem_statement | statement | description
+        - GSO-style tasks: `prob_script` (wrapped into a fixed prompt template)
     - solution/patch: patch | gold_patch | resolved_patch | solution | diff | fix_patch
+        - GSO-style tasks: `gt_diff`
     """
     dataset_name = str(dataset_name or "").strip()
     dataset_path = str(dataset_path or "").strip()
@@ -534,6 +575,7 @@ def iter_swebench_items(
     if not dataset_name and not dataset_path:
         raise ValueError("No dataset provided (set --dataset_name or --dataset_path).")
 
+    is_gso = _is_gso_dataset(dataset_name=dataset_name, dataset_path=dataset_path)
     if dataset_path:
         src_name = f"json:{dataset_path}"
         d = load_dataset("json", data_files=str(dataset_path), split="train")
@@ -548,8 +590,12 @@ def iter_swebench_items(
         raise RuntimeError(f"Loaded empty dataset: {src_name} split={src_split}")
 
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
+    if is_gso:
+        solution_keys = ["gt_diff"] + solution_keys
     id_keys = ["instance_id", "task_id", "id"]
     qs_keys = ["problem_statement", "statement", "description"]
+    if is_gso:
+        qs_keys = ["prob_script"] + qs_keys
 
     for i in range(n_total):
         row = d[int(i)]
@@ -563,6 +609,7 @@ def iter_swebench_items(
                 item_id = normalize_swebench_item_id(s)
                 break
         qs = ""
+        qs_key_used = ""
         for k in qs_keys:
             v = row.get(k, None)
             if v is None:
@@ -570,7 +617,10 @@ def iter_swebench_items(
             s = str(v)
             if str(s).strip():
                 qs = s
+                qs_key_used = str(k)
                 break
+        if is_gso and qs_key_used == "prob_script":
+            qs = _wrap_gso_problem_statement(qs)
         sol = ""
         for k in solution_keys:
             v = row.get(k, None)
@@ -625,9 +675,14 @@ def load_items_by_ids(
     if n_total == 0:
         raise RuntimeError(f"Loaded empty dataset: {name} split={ds_split}")
 
+    is_gso = _is_gso_dataset(dataset_name=dataset_name, dataset_path=dataset_path)
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
+    if is_gso:
+        solution_keys = ["gt_diff"] + solution_keys
     id_keys = ["instance_id", "task_id", "id"]
     qs_keys = ["problem_statement", "statement", "description"]
+    if is_gso:
+        qs_keys = ["prob_script"] + qs_keys
 
     found: Dict[str, ItemRecord] = {}
     # Scan dataset once; stop early when all requested ids have been found.
@@ -646,6 +701,7 @@ def load_items_by_ids(
             continue
 
         qs = ""
+        qs_key_used = ""
         for k in qs_keys:
             v = row.get(k, None)
             if v is None:
@@ -653,7 +709,10 @@ def load_items_by_ids(
             s = str(v)
             if str(s).strip():
                 qs = s
+                qs_key_used = str(k)
                 break
+        if is_gso and qs_key_used == "prob_script":
+            qs = _wrap_gso_problem_statement(qs)
         sol = ""
         for k in solution_keys:
             v = row.get(k, None)
