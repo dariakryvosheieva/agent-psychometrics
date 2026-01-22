@@ -38,10 +38,10 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Method | Mean AUC | Std |
 |--------|----------|-----|
 | Oracle (true b) | 0.9441 | 0.0045 |
+| Feature-IRT (Embedding) | 0.8272 | 0.0091 |
 | Embedding | 0.8269 | 0.0070 |
 | LLM Judge | 0.8227 | 0.0118 |
 | Feature-IRT (LLM Judge) | 0.8224 | 0.0124 |
-| Feature-IRT (Embedding) | 0.8079 | 0.0145 |
 | Constant (mean b) | 0.7149 | 0.0108 |
 | Agent-only | 0.7150 | 0.0109 |
 
@@ -52,10 +52,10 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Method | Mean AUC | Std | Pass Rate MSE |
 |--------|----------|-----|---------------|
 | Oracle (true b) | 0.9037 | 0.0109 | 0.0540 |
-| Feature-IRT (LLM Judge) | 0.7896 | 0.0254 | 0.1139 |
+| Feature-IRT (Embedding) | 0.7899 | 0.0423 | 0.1139 |
+| Feature-IRT (LLM Judge) | 0.7892 | 0.0243 | 0.1134 |
 | LLM Judge | 0.7841 | 0.0278 | 0.1212 |
 | Embedding | 0.7829 | 0.0402 | 0.1240 |
-| Feature-IRT (Embedding) | 0.7714 | 0.0397 | 0.1316 |
 | Constant (mean b) | 0.7036 | 0.0123 | 0.1490 |
 | Agent-only | 0.7039 | 0.0125 | 0.1404 |
 
@@ -155,6 +155,7 @@ Key differences from Ridge:
 - Learns from response patterns (IRT likelihood), not frozen IRT difficulties
 - Agent abilities are jointly optimized with feature weights
 - Supports both Bernoulli (binary) and Binomial (multi-trial) likelihoods
+- Uses internal 3-fold CV to select `l2_weight` from `[0.01, 0.1, 1.0, 10.0]` (similar to RidgeCV)
 
 **Note**: In Experiment A (task holdout), Feature-IRT performs similarly to Ridge because it must generalize to unseen test tasks using only feature weights. This is unlike Experiment B (agent holdout) where Feature-IRT can leverage jointly-learned abilities across all tasks.
 

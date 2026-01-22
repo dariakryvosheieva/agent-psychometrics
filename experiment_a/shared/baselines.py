@@ -180,13 +180,21 @@ class FeatureIRTCVPredictor:
     Supports both:
     - Binary data (Bernoulli likelihood): y_ij ~ Bernoulli(sigmoid(theta_j - b_i))
     - Binomial data (Binomial likelihood): k_ij ~ Binomial(n_ij, sigmoid(theta_j - b_i))
+
+    Hyperparameter selection:
+    - Uses internal k-fold CV (default k=3) to select best l2_weight from a grid
+    - Similar to how RidgeCV works for the Ridge baseline
     """
+
+    # Default L2 weight grid (similar range to RidgeCV alphas)
+    DEFAULT_L2_WEIGHTS = [0.01, 0.1, 1.0, 10.0]
 
     def __init__(
         self,
         source: TaskFeatureSource,
-        l2_weight: float = 0.01,
+        l2_weights: Optional[List[float]] = None,
         l2_ability: float = 0.01,
+        inner_cv_folds: int = 3,
         lr: float = 0.1,
         max_iter: int = 500,
         tol: float = 1e-5,
@@ -196,16 +204,19 @@ class FeatureIRTCVPredictor:
 
         Args:
             source: TaskFeatureSource providing features for tasks.
-            l2_weight: L2 regularization on feature weights.
+            l2_weights: List of L2 regularization values to try for feature weights.
+                Uses internal CV to select the best one. Defaults to [0.01, 0.1, 1.0, 10.0].
             l2_ability: L2 regularization on mean(abilities)^2 for identifiability.
+            inner_cv_folds: Number of folds for internal CV to select l2_weight.
             lr: Learning rate for L-BFGS optimizer.
             max_iter: Maximum optimization iterations.
             tol: Convergence tolerance.
             verbose: Print training progress.
         """
         self.source = source
-        self.l2_weight = l2_weight
+        self.l2_weights = l2_weights or self.DEFAULT_L2_WEIGHTS
         self.l2_ability = l2_ability
+        self.inner_cv_folds = inner_cv_folds
         self.lr = lr
         self.max_iter = max_iter
         self.tol = tol
@@ -218,86 +229,86 @@ class FeatureIRTCVPredictor:
         self._learned_abilities: Optional[Dict[str, float]] = None
         self._is_fitted: bool = False
         self._predicted_difficulties: Dict[str, float] = {}
+        self._best_l2_weight: Optional[float] = None
 
-    def fit(self, data: ExperimentData, train_task_ids: List[str]) -> None:
-        """Fit by maximizing IRT log-likelihood jointly with abilities.
+    def _prepare_data(
+        self,
+        data: ExperimentData,
+        task_ids: List[str],
+        agent_ids: List[str],
+    ) -> dict:
+        """Prepare response data for training.
 
-        Automatically detects binary vs binomial data and uses appropriate likelihood.
-
-        Args:
-            data: ExperimentData containing responses and agent information
-            train_task_ids: Task IDs to train on
+        Returns dict with keys depending on data type:
+        - Binary: 'responses_binary', 'agent_ids_with_responses'
+        - Binomial: 'responses_counts', 'agent_ids_with_responses'
         """
-        try:
-            import torch
-            from torch.optim import LBFGS
-            from torch.distributions import Bernoulli, Binomial
-        except ImportError:
-            raise ImportError("PyTorch is required for FeatureIRTCVPredictor")
-
-        # Clear cached predictions for new fold
-        self._predicted_difficulties = {}
-
-        # Detect if data is binomial
         from experiment_ab_shared.dataset import BinomialExperimentData
         is_binomial = isinstance(data, BinomialExperimentData)
 
-        # Extract responses from data.responses for train tasks
-        agent_ids = list(data.train_abilities.index)
-
         if is_binomial:
-            # Binomial: store (successes, trials) per agent-task
             responses_counts: Dict[str, Dict[str, tuple]] = {}
             for agent_id in agent_ids:
                 if agent_id not in data.responses:
                     continue
                 agent_responses = {}
-                for task_id in train_task_ids:
+                for task_id in task_ids:
                     if task_id in data.responses[agent_id]:
                         resp = data.responses[agent_id][task_id]
                         agent_responses[task_id] = (resp["successes"], resp["trials"])
                 if agent_responses:
                     responses_counts[agent_id] = agent_responses
-            agent_ids_with_responses = list(responses_counts.keys())
+            return {
+                'is_binomial': True,
+                'responses_counts': responses_counts,
+                'agent_ids_with_responses': list(responses_counts.keys()),
+            }
         else:
-            # Binary: store 0/1 per agent-task
             responses_binary: Dict[str, Dict[str, int]] = {}
             for agent_id in agent_ids:
                 if agent_id not in data.responses:
                     continue
                 agent_responses = {}
-                for task_id in train_task_ids:
+                for task_id in task_ids:
                     if task_id in data.responses[agent_id]:
                         agent_responses[task_id] = data.responses[agent_id][task_id]
                 if agent_responses:
                     responses_binary[agent_id] = agent_responses
-            agent_ids_with_responses = list(responses_binary.keys())
+            return {
+                'is_binomial': False,
+                'responses_binary': responses_binary,
+                'agent_ids_with_responses': list(responses_binary.keys()),
+            }
 
+    def _fit_single(
+        self,
+        features_scaled: np.ndarray,
+        task_ids: List[str],
+        prepared_data: dict,
+        l2_weight: float,
+    ) -> dict:
+        """Fit model with a single l2_weight value.
+
+        Returns dict with 'weights', 'bias', 'abilities', 'final_nll'.
+        """
+        import torch
+        from torch.optim import LBFGS
+        from torch.distributions import Bernoulli, Binomial
+
+        is_binomial = prepared_data['is_binomial']
+        agent_ids_with_responses = prepared_data['agent_ids_with_responses']
         n_agents = len(agent_ids_with_responses)
-        n_tasks = len(train_task_ids)
-
-        if n_agents == 0:
-            raise ValueError("No agents with responses on training tasks")
-        if n_tasks == 0:
-            raise ValueError("No training tasks")
-
-        # Get features from source
-        features = self.source.get_features(train_task_ids)
-        feature_dim = features.shape[1]
-
-        # Standardize features
-        self._scaler = StandardScaler()
-        features_scaled = self._scaler.fit_transform(features)
-
-        # Build response tensors
+        n_tasks = len(task_ids)
         device = "cpu"
 
         if is_binomial:
+            responses_counts = prepared_data['responses_counts']
+
             # Build counts and trials matrices
             counts_matrix = np.full((n_agents, n_tasks), np.nan)
             trials_matrix = np.full((n_agents, n_tasks), np.nan)
             for i, agent_id in enumerate(agent_ids_with_responses):
-                for j, task_id in enumerate(train_task_ids):
+                for j, task_id in enumerate(task_ids):
                     if task_id in responses_counts.get(agent_id, {}):
                         k, n = responses_counts[agent_id][task_id]
                         counts_matrix[i, j] = k
@@ -310,7 +321,7 @@ class FeatureIRTCVPredictor:
             # Compute empirical task pass rate for initialization
             eps = 1e-3
             task_difficulty_init = np.zeros(n_tasks)
-            for j, task_id in enumerate(train_task_ids):
+            for j, task_id in enumerate(task_ids):
                 total_successes = 0
                 total_trials = 0
                 for agent_id in agent_ids_with_responses:
@@ -332,10 +343,12 @@ class FeatureIRTCVPredictor:
                     acc = max(eps, min(1 - eps, total_successes / total_trials))
                     theta_init[i] = np.log(acc / (1 - acc))
         else:
+            responses_binary = prepared_data['responses_binary']
+
             # Binary data
             response_matrix = np.full((n_agents, n_tasks), np.nan)
             for i, agent_id in enumerate(agent_ids_with_responses):
-                for j, task_id in enumerate(train_task_ids):
+                for j, task_id in enumerate(task_ids):
                     if task_id in responses_binary.get(agent_id, {}):
                         response_matrix[i, j] = responses_binary[agent_id][task_id]
 
@@ -345,7 +358,7 @@ class FeatureIRTCVPredictor:
             # Compute empirical task pass rate for initialization
             eps = 1e-3
             task_difficulty_init = np.zeros(n_tasks)
-            for j, task_id in enumerate(train_task_ids):
+            for j, task_id in enumerate(task_ids):
                 successes = sum(
                     1 for r in responses_binary.values() if r.get(task_id, None) == 1
                 )
@@ -389,63 +402,40 @@ class FeatureIRTCVPredictor:
             line_search_fn="strong_wolfe",
         )
 
-        l2_w = self.l2_weight
+        l2_w = l2_weight
         l2_a = self.l2_ability
+        final_nll = None
 
         if is_binomial:
             def closure():
+                nonlocal final_nll
                 optim.zero_grad()
-
-                # Compute difficulties: b_i = features @ w + bias
                 diff = torch.matmul(features_tensor, w) + b
-
-                # P(success) = sigmoid(theta - diff)
-                # logits = theta - diff
                 logits = theta[:, None] - diff[None, :]
-
-                # Binomial negative log-likelihood
-                # k ~ Binomial(n, sigmoid(logits))
                 nll = -Binomial(total_count=trials_tensor[mask], logits=logits[mask]).log_prob(
                     counts_tensor[mask]
                 ).mean()
-
-                # Regularization
                 weight_reg = l2_w * torch.sum(w**2)
                 ability_reg = l2_a * (theta.mean() ** 2)
-
                 loss = nll + weight_reg + ability_reg
                 loss.backward()
-
+                final_nll = nll.item()
                 return loss
         else:
             def closure():
+                nonlocal final_nll
                 optim.zero_grad()
-
-                # Compute difficulties: b_i = features @ w + bias
                 diff = torch.matmul(features_tensor, w) + b
-
-                # P(success) = sigmoid(theta - diff)
                 probs = torch.sigmoid(theta[:, None] - diff[None, :])
-
-                # Bernoulli negative log-likelihood
                 nll = -Bernoulli(probs=probs[mask]).log_prob(response_tensor[mask]).mean()
-
-                # Regularization
                 weight_reg = l2_w * torch.sum(w**2)
                 ability_reg = l2_a * (theta.mean() ** 2)
-
                 loss = nll + weight_reg + ability_reg
                 loss.backward()
-
+                final_nll = nll.item()
                 return loss
 
         # Training loop
-        if self.verbose:
-            data_type = "binomial" if is_binomial else "binary"
-            print(f"   Feature-IRT Training ({data_type}): {n_tasks} tasks, {n_agents} agents")
-            print(f"   Feature dim: {feature_dim}")
-            print(f"   Valid response pairs: {mask.sum().item()}")
-
         for iteration in range(self.max_iter):
             if iteration > 0:
                 previous_loss = loss.clone().detach()
@@ -454,33 +444,218 @@ class FeatureIRTCVPredictor:
 
             if iteration > 0:
                 d_loss = abs((previous_loss - loss).item())
-
-                if self.verbose and (iteration % 50 == 0 or iteration < 5):
-                    print(
-                        f"     Iter {iteration}: loss={loss.item():.6f}, d_loss={d_loss:.2e}"
-                    )
-
-                # Check convergence
                 if d_loss < self.tol:
-                    if self.verbose:
-                        print(f"   Converged at iteration {iteration}")
                     break
 
-        # Store learned parameters
-        self._weights = w.detach().cpu().numpy()
-        self._bias = b.detach().cpu().item()
-
-        # Store learned abilities as dict
-        abilities_np = theta.detach().cpu().numpy()
-        self._learned_abilities = {
-            agent_id: float(abilities_np[i])
+        abilities_dict = {
+            agent_id: float(theta[i].detach().cpu().item())
             for i, agent_id in enumerate(agent_ids_with_responses)
         }
 
+        return {
+            'weights': w.detach().cpu().numpy(),
+            'bias': b.detach().cpu().item(),
+            'abilities': abilities_dict,
+            'final_nll': final_nll,
+        }
+
+    def _compute_held_out_nll(
+        self,
+        weights: np.ndarray,
+        bias: float,
+        abilities: Dict[str, float],
+        features_scaled: np.ndarray,
+        task_ids: List[str],
+        prepared_data: dict,
+    ) -> float:
+        """Compute negative log-likelihood on held-out data."""
+        import torch
+        from torch.distributions import Bernoulli, Binomial
+
+        is_binomial = prepared_data['is_binomial']
+        agent_ids_with_responses = prepared_data['agent_ids_with_responses']
+
+        # Filter to agents we have abilities for
+        agent_ids_with_responses = [a for a in agent_ids_with_responses if a in abilities]
+        if not agent_ids_with_responses:
+            return float('inf')
+
+        n_agents = len(agent_ids_with_responses)
+        n_tasks = len(task_ids)
+        device = "cpu"
+
+        # Compute difficulties
+        diff = features_scaled @ weights + bias
+
+        if is_binomial:
+            responses_counts = prepared_data['responses_counts']
+            counts_matrix = np.full((n_agents, n_tasks), np.nan)
+            trials_matrix = np.full((n_agents, n_tasks), np.nan)
+            for i, agent_id in enumerate(agent_ids_with_responses):
+                for j, task_id in enumerate(task_ids):
+                    if task_id in responses_counts.get(agent_id, {}):
+                        k, n = responses_counts[agent_id][task_id]
+                        counts_matrix[i, j] = k
+                        trials_matrix[i, j] = n
+
+            counts_tensor = torch.tensor(counts_matrix, dtype=torch.float32, device=device)
+            trials_tensor = torch.tensor(trials_matrix, dtype=torch.float32, device=device)
+            mask = ~torch.isnan(counts_tensor)
+
+            if mask.sum() == 0:
+                return float('inf')
+
+            theta_arr = np.array([abilities[a] for a in agent_ids_with_responses])
+            theta_tensor = torch.tensor(theta_arr, dtype=torch.float32, device=device)
+            diff_tensor = torch.tensor(diff, dtype=torch.float32, device=device)
+
+            logits = theta_tensor[:, None] - diff_tensor[None, :]
+            nll = -Binomial(total_count=trials_tensor[mask], logits=logits[mask]).log_prob(
+                counts_tensor[mask]
+            ).mean()
+            return nll.item()
+        else:
+            responses_binary = prepared_data['responses_binary']
+            response_matrix = np.full((n_agents, n_tasks), np.nan)
+            for i, agent_id in enumerate(agent_ids_with_responses):
+                for j, task_id in enumerate(task_ids):
+                    if task_id in responses_binary.get(agent_id, {}):
+                        response_matrix[i, j] = responses_binary[agent_id][task_id]
+
+            response_tensor = torch.tensor(response_matrix, dtype=torch.float32, device=device)
+            mask = ~torch.isnan(response_tensor)
+
+            if mask.sum() == 0:
+                return float('inf')
+
+            theta_arr = np.array([abilities[a] for a in agent_ids_with_responses])
+            theta_tensor = torch.tensor(theta_arr, dtype=torch.float32, device=device)
+            diff_tensor = torch.tensor(diff, dtype=torch.float32, device=device)
+
+            probs = torch.sigmoid(theta_tensor[:, None] - diff_tensor[None, :])
+            nll = -Bernoulli(probs=probs[mask]).log_prob(response_tensor[mask]).mean()
+            return nll.item()
+
+    def fit(self, data: ExperimentData, train_task_ids: List[str]) -> None:
+        """Fit by maximizing IRT log-likelihood jointly with abilities.
+
+        Uses internal k-fold CV to select the best l2_weight from the grid.
+
+        Args:
+            data: ExperimentData containing responses and agent information
+            train_task_ids: Task IDs to train on
+        """
+        try:
+            import torch
+        except ImportError:
+            raise ImportError("PyTorch is required for FeatureIRTCVPredictor")
+
+        # Clear cached predictions for new fold
+        self._predicted_difficulties = {}
+
+        agent_ids = list(data.train_abilities.index)
+
+        # Get features and fit scaler on all train data
+        features = self.source.get_features(train_task_ids)
+        self._scaler = StandardScaler()
+        features_scaled = self._scaler.fit_transform(features)
+
+        # Create task index mapping
+        task_to_idx = {t: i for i, t in enumerate(train_task_ids)}
+
+        # Prepare full data
+        full_prepared = self._prepare_data(data, train_task_ids, agent_ids)
+
+        if len(full_prepared['agent_ids_with_responses']) == 0:
+            raise ValueError("No agents with responses on training tasks")
+
+        # If only one l2_weight, skip CV
+        if len(self.l2_weights) == 1:
+            best_l2 = self.l2_weights[0]
+            if self.verbose:
+                print(f"   Using single l2_weight={best_l2}")
+        else:
+            # Internal CV to select best l2_weight
+            # Split tasks into k folds
+            n_tasks = len(train_task_ids)
+            k = min(self.inner_cv_folds, n_tasks)
+
+            # Use deterministic fold assignment
+            np.random.seed(42)
+            fold_indices = np.random.permutation(n_tasks) % k
+
+            cv_scores = {l2: [] for l2 in self.l2_weights}
+
+            for fold_idx in range(k):
+                # Split into inner train/val
+                inner_train_mask = fold_indices != fold_idx
+                inner_val_mask = fold_indices == fold_idx
+
+                inner_train_tasks = [train_task_ids[i] for i in range(n_tasks) if inner_train_mask[i]]
+                inner_val_tasks = [train_task_ids[i] for i in range(n_tasks) if inner_val_mask[i]]
+
+                if len(inner_train_tasks) == 0 or len(inner_val_tasks) == 0:
+                    continue
+
+                inner_train_features = features_scaled[inner_train_mask]
+                inner_val_features = features_scaled[inner_val_mask]
+
+                # Prepare data for inner train/val
+                inner_train_prepared = self._prepare_data(data, inner_train_tasks, agent_ids)
+                inner_val_prepared = self._prepare_data(data, inner_val_tasks, agent_ids)
+
+                if len(inner_train_prepared['agent_ids_with_responses']) == 0:
+                    continue
+
+                for l2 in self.l2_weights:
+                    # Train on inner train
+                    result = self._fit_single(
+                        inner_train_features,
+                        inner_train_tasks,
+                        inner_train_prepared,
+                        l2,
+                    )
+
+                    # Evaluate on inner val
+                    val_nll = self._compute_held_out_nll(
+                        result['weights'],
+                        result['bias'],
+                        result['abilities'],
+                        inner_val_features,
+                        inner_val_tasks,
+                        inner_val_prepared,
+                    )
+                    cv_scores[l2].append(val_nll)
+
+            # Select best l2_weight (lowest mean validation NLL)
+            mean_scores = {l2: np.mean(scores) if scores else float('inf')
+                          for l2, scores in cv_scores.items()}
+            best_l2 = min(mean_scores, key=mean_scores.get)
+
+            if self.verbose:
+                print(f"   L2 weight CV scores: {mean_scores}")
+                print(f"   Selected l2_weight={best_l2}")
+
+        self._best_l2_weight = best_l2
+
+        # Final fit on all train data with best l2_weight
+        if self.verbose:
+            print(f"   Final training with l2_weight={best_l2}")
+
+        result = self._fit_single(
+            features_scaled,
+            train_task_ids,
+            full_prepared,
+            best_l2,
+        )
+
+        self._weights = result['weights']
+        self._bias = result['bias']
+        self._learned_abilities = result['abilities']
         self._is_fitted = True
 
         if self.verbose:
-            print(f"   Final loss: {loss.item():.6f}")
+            print(f"   Final NLL: {result['final_nll']:.6f}")
 
     def predict_probability(
         self, data: ExperimentData, agent_id: str, task_id: str
