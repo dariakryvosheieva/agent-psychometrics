@@ -62,8 +62,16 @@ class TwoParamLog(abstract_model.IrtModel):
             raise ValueError("Options for priors are vague and hierarchical")
         self.priors = priors
 
-    def model_vague(self, subjects, items, obs):
-        """Initialize a 2PL model with vague priors"""
+    def model_vague(self, subjects, items, obs, trials=None):
+        """Initialize a 2PL model with vague priors
+
+        Args:
+            subjects: Subject indices for each observation
+            items: Item indices for each observation
+            obs: Observations (0/1 for binary, or success counts for binomial)
+            trials: Number of trials for each observation (for binomial likelihood).
+                   If None, uses Bernoulli (binary) likelihood.
+        """
         with pyro.plate("thetas", self.num_subjects, device=self.device):
             ability = pyro.sample(
                 "theta",
@@ -87,13 +95,14 @@ class TwoParamLog(abstract_model.IrtModel):
             )
 
         with pyro.plate("observe_data", obs.size(0), device=self.device):
-            pyro.sample(
-                "obs",
-                dist.Bernoulli(logits=(slope[items] * (ability[subjects] - diff[items]))),
-                obs=obs,
-            )
+            logits = slope[items] * (ability[subjects] - diff[items])
+            if trials is not None:
+                probs = torch.sigmoid(logits)
+                pyro.sample("obs", dist.Binomial(total_count=trials, probs=probs), obs=obs)
+            else:
+                pyro.sample("obs", dist.Bernoulli(logits=logits), obs=obs)
 
-    def guide_vague(self, subjects, items, obs):
+    def guide_vague(self, subjects, items, obs, trials=None):
         """Initialize a 2PL guide with vague priors"""
         # register learnable params in the param store
         m_theta_param = pyro.param(
@@ -132,8 +141,16 @@ class TwoParamLog(abstract_model.IrtModel):
             dist_a = dist.Normal(m_a_param, s_a_param)
             pyro.sample("a", dist_a)
 
-    def model_hierarchical(self, subjects, items, obs):
-        """Initialize a 2PL model with hierarchical priors"""
+    def model_hierarchical(self, subjects, items, obs, trials=None):
+        """Initialize a 2PL model with hierarchical priors
+
+        Args:
+            subjects: Subject indices for each observation
+            items: Item indices for each observation
+            obs: Observations (0/1 for binary, or success counts for binomial)
+            trials: Number of trials for each observation (for binomial likelihood).
+                   If None, uses Bernoulli (binary) likelihood.
+        """
         mu_b = pyro.sample(
             "mu_b",
             dist.Normal(
@@ -176,13 +193,14 @@ class TwoParamLog(abstract_model.IrtModel):
             diff = pyro.sample("b", dist.Normal(mu_b, 1.0 / u_b))
             slope = pyro.sample("a", dist.Normal(mu_a, 1.0 / u_a))
         with pyro.plate("observe_data", obs.size(0)):
-            pyro.sample(
-                "obs",
-                dist.Bernoulli(logits=slope[items] * (ability[subjects] - diff[items])),
-                obs=obs,
-            )
+            logits = slope[items] * (ability[subjects] - diff[items])
+            if trials is not None:
+                probs = torch.sigmoid(logits)
+                pyro.sample("obs", dist.Binomial(total_count=trials, probs=probs), obs=obs)
+            else:
+                pyro.sample("obs", dist.Bernoulli(logits=logits), obs=obs)
 
-    def guide_hierarchical(self, subjects, items, obs):
+    def guide_hierarchical(self, subjects, items, obs, trials=None):
         """Initialize a 2PL guide with hierarchical priors"""
         loc_mu_b_param = pyro.param("loc_mu_b", torch.tensor(0.0, device=self.device))
         scale_mu_b_param = pyro.param(

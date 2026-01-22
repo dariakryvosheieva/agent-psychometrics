@@ -199,6 +199,28 @@ class BinomialExperimentData(ExperimentData[Dict[str, int]]):
         return y_true, y_scores
 
 
+def expand_response_for_auc(response: Any) -> List[int]:
+    """Expand a response to binary observations for AUC computation.
+
+    For binary data: returns [0] or [1]
+    For binomial data: returns [1]*k + [0]*(n-k) where k=successes, n=trials
+
+    This treats each trial as an independent observation, giving more weight
+    to binomial responses. Used for computing AUC in both experiments A and B.
+
+    Args:
+        response: Either int (0/1) or dict {"successes": k, "trials": n}
+
+    Returns:
+        List of binary outcomes (0 or 1)
+    """
+    if isinstance(response, dict) and "successes" in response:
+        k = response["successes"]
+        n = response["trials"]
+        return [1] * k + [0] * (n - k)
+    return [int(response)]
+
+
 def _load_abilities(abilities_path: Path) -> pd.DataFrame:
     """Load agent abilities from IRT model."""
     df = pd.read_csv(abilities_path, index_col=0)

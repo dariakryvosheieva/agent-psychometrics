@@ -105,6 +105,11 @@ class IrtModelTrainer:
         self._dataset.training_example = [
             self._dataset.training_example[i] for i in training_idx
         ]
+        # Filter observation_trials if present (for binomial likelihood)
+        if self._dataset.observation_trials is not None:
+            self._dataset.observation_trials = [
+                self._dataset.observation_trials[i] for i in training_idx
+            ]
 
         if config.initializers is None:
             initializers = []
@@ -182,10 +187,19 @@ class IrtModelTrainer:
         responses = torch.tensor(
             self._dataset.observations, dtype=torch.float, device=device
         )
+        # Build trials tensor for binomial likelihood (if present)
+        trials = None
+        if self._dataset.observation_trials is not None:
+            # Check if any trials > 1 (i.e., we have count data)
+            if any(t > 1 for t in self._dataset.observation_trials):
+                trials = torch.tensor(
+                    self._dataset.observation_trials, dtype=torch.float, device=device
+                )
+                console.log(f"Using binomial likelihood with trials (max={int(trials.max().item())})")
         # Don't take a step here, just make sure params are initialized
         # so that initializers can modify the params
-        _ = self._pyro_model(subjects, items, responses)
-        _ = self._pyro_guide(subjects, items, responses)
+        _ = self._pyro_model(subjects, items, responses, trials)
+        _ = self._pyro_guide(subjects, items, responses, trials)
         for init in self._initializers:
             init.initialize()
 
@@ -206,7 +220,7 @@ class IrtModelTrainer:
 
         with live:
             for epoch in range(epochs):
-                loss = svi.step(subjects, items, responses)
+                loss = svi.step(subjects, items, responses, trials)
                 if loss < best_loss:
                     best_loss = loss
                     self.best_params = self.export(items)

@@ -112,18 +112,37 @@ def set_seed(seed: int) -> None:
         pass
 
 def load_irt_data(filepath):
-    """Load and reshape JSONL data for IRT analysis."""
-    data_list = []
+    """Load and reshape JSONL data for IRT analysis.
+
+    Supports both binary (0/1) and binomial ({"successes": k, "trials": n}) responses.
+    Binomial responses are detected automatically and loaded via Dataset.from_jsonlines.
+    """
+    # Check if the data contains binomial responses (dict format)
+    is_binomial = False
     with open(filepath, 'r') as f:
-        for line in f:
-            record = json.loads(line)
-            row = {'subject_id': record['subject_id']}
-            row.update(record['responses'])
-            data_list.append(row)
-    
-    df = pd.DataFrame(data_list)
-    item_columns = [col for col in df.columns if col != 'subject_id']
-    return Dataset.from_pandas(df, subject_column="subject_id", item_columns=item_columns), item_columns
+        first_line = json.loads(f.readline())
+        first_response = next(iter(first_line["responses"].values()))
+        if isinstance(first_response, dict) and "successes" in first_response:
+            is_binomial = True
+
+    if is_binomial:
+        # Use Dataset.from_jsonlines which handles binomial data
+        dataset = Dataset.from_jsonlines(filepath)
+        item_columns = list(dataset.item_ids)
+        return dataset, item_columns
+    else:
+        # Use pandas for binary data (original approach)
+        data_list = []
+        with open(filepath, 'r') as f:
+            for line in f:
+                record = json.loads(line)
+                row = {'subject_id': record['subject_id']}
+                row.update(record['responses'])
+                data_list.append(row)
+
+        df = pd.DataFrame(data_list)
+        item_columns = [col for col in df.columns if col != 'subject_id']
+        return Dataset.from_pandas(df, subject_column="subject_id", item_columns=item_columns), item_columns
 
 def fit_1d_irt(data: Dataset, epochs: int, output_dir: Path) -> IrtModelTrainer:
     config = IrtConfig(

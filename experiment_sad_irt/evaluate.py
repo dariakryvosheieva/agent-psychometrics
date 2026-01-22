@@ -1,10 +1,9 @@
 """Evaluation metrics for SAD-IRT.
 
 This module contains SAD-IRT specific evaluation functions (torch-based).
-For general frontier evaluation utilities, see experiment_b.evaluate.
+For general frontier evaluation utilities, see experiment_b.shared.evaluation.
 
-Re-exports from experiment_b.evaluate for backwards compatibility:
-- compute_frontier_difficulty_metrics
+Re-exports from experiment_b.shared.evaluation for backwards compatibility:
 - analyze_scale_alignment
 - compute_scale_offset
 - shift_to_oracle_scale
@@ -25,8 +24,7 @@ from scipy.special import expit as sigmoid
 from sklearn.metrics import roc_auc_score, brier_score_loss
 
 # Re-export general utilities from experiment_b for backwards compatibility
-from experiment_b.evaluate import (
-    compute_frontier_difficulty_metrics,
+from experiment_b.shared.evaluation import (
     analyze_scale_alignment,
     compute_scale_offset,
     shift_to_oracle_scale,

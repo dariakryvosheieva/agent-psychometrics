@@ -52,10 +52,14 @@ class Dataset(BaseModel):
     observation_subjects: List[int] # subjects encoded as integers
     observation_items: List # items encoded as integers
 
-    # Actual response value, usually an integer
+    # Actual response value, usually an integer (or count of successes for binomial)
     observations: List[float]
 
-    # should this example be included in training? 
+    # Number of trials for each observation (for binomial likelihood)
+    # If None or all 1s, use Bernoulli likelihood; otherwise use Binomial
+    observation_trials: Optional[List[int]] = None
+
+    # should this example be included in training?
     training_example: List[bool]
 
     class Config:
@@ -112,12 +116,23 @@ class Dataset(BaseModel):
         observation_subjects = []
         observation_items = []
         observations = []
+        observation_trials = []
         training_example = []
+        has_trials = False
         console.log(f'amortized: {amortized}')
         for idx, line in enumerate(input_data):
             subject_id = line["subject_id"]
             for item_id, response in line["responses"].items():
-                observations.append(response)
+                # Handle both binary responses and count data
+                # Count data format: {"successes": 3, "trials": 5}
+                # Binary format: 0 or 1
+                if isinstance(response, dict) and "successes" in response:
+                    observations.append(response["successes"])
+                    observation_trials.append(response["trials"])
+                    has_trials = True
+                else:
+                    observations.append(response)
+                    observation_trials.append(1)
                 observation_subjects.append(subject_id_to_ix[subject_id])
                 if not amortized:
                     observation_items.append(item_id_to_ix[item_id])
@@ -138,6 +153,7 @@ class Dataset(BaseModel):
             observation_subjects=observation_subjects,
             observation_items=observation_items,
             observations=observations,
+            observation_trials=observation_trials if has_trials else None,
             training_example=training_example,
         )
 

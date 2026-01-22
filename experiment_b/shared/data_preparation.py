@@ -129,12 +129,16 @@ def compute_pass_rates(
 ) -> Dict[str, float]:
     """Compute empirical pass rate for each task among specified agents.
 
+    Pass rate = fraction of agents that solved the task (at least once).
+    Supports both binary (0/1) and binomial ({successes, trials}) data.
+
     Args:
         responses_path: Path to JSONL response matrix
         agents: List of agent names to include
 
     Returns:
-        Dict mapping task_id -> pass_rate (0-1)
+        Dict mapping task_id -> pass_rate (0-1), where pass_rate is the
+        fraction of agents that achieved at least one success on the task
     """
     agent_set = set(agents)
     task_successes: Dict[str, List[int]] = defaultdict(list)
@@ -145,7 +149,14 @@ def compute_pass_rates(
             if data["subject_id"] not in agent_set:
                 continue
             for task_id, response in data["responses"].items():
-                task_successes[task_id].append(response)
+                # Handle both binary and binomial responses
+                # For pass rate, we care about whether agent solved at least once
+                if isinstance(response, dict) and "successes" in response:
+                    # Binomial: 1 if any success, 0 otherwise
+                    task_successes[task_id].append(1 if response["successes"] > 0 else 0)
+                else:
+                    # Binary: 0 or 1
+                    task_successes[task_id].append(int(response))
 
     return {
         task_id: sum(successes) / len(successes) if successes else 0.0
@@ -484,6 +495,125 @@ def compute_baseline_irt_cache_key(
     return cache_hash
 
 
+def _train_baseline_irt_on_agents(
+    responses_path: Path,
+    agent_subset: List[str],
+    output_dir: Path,
+    epochs: int = 2000,
+) -> Dict[str, float]:
+    """Train standard IRT on a subset of agents using py_irt.
+
+    Supports both binary (SWE-bench) and binomial (TerminalBench) data formats.
+
+    Args:
+        responses_path: Path to response matrix JSONL
+        agent_subset: List of agent IDs to include in training
+        output_dir: Directory to save IRT outputs
+        epochs: Number of training epochs for py_irt
+
+    Returns:
+        Dict mapping task_id -> difficulty (β)
+    """
+    import pyro
+    import torch
+    import tempfile
+
+    from py_irt.dataset import Dataset
+    from py_irt.models import OneParamLog
+    from py_irt.config import IrtConfig
+    from py_irt.training import IrtModelTrainer
+
+    # Load response matrix and filter to subset of agents
+    agent_set = set(agent_subset)
+    filtered_records = []
+    is_binomial = False
+
+    with open(responses_path, 'r') as f:
+        for line in f:
+            record = json.loads(line)
+            if record['subject_id'] in agent_set:
+                filtered_records.append(record)
+                # Check if first response is dict (binomial data)
+                if not is_binomial and record['responses']:
+                    first_response = next(iter(record['responses'].values()))
+                    if isinstance(first_response, dict) and "successes" in first_response:
+                        is_binomial = True
+
+    logger.info(f"Loaded {len(filtered_records)} agent responses for baseline IRT")
+    logger.info(f"Data format: {'binomial' if is_binomial else 'binary'}")
+
+    if is_binomial:
+        # Write filtered records to temp file and use from_jsonlines
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.jsonl', delete=False) as tmp:
+            for record in filtered_records:
+                tmp.write(json.dumps(record) + '\n')
+            tmp_path = tmp.name
+
+        try:
+            dataset = Dataset.from_jsonlines(tmp_path)
+        finally:
+            import os
+            os.unlink(tmp_path)
+    else:
+        # Binary data - use pandas approach
+        data_list = []
+        for record in filtered_records:
+            row = {'subject_id': record['subject_id']}
+            row.update(record['responses'])
+            data_list.append(row)
+
+        df = pd.DataFrame(data_list)
+        item_columns = [col for col in df.columns if col != 'subject_id']
+        dataset = Dataset.from_pandas(df, subject_column="subject_id", item_columns=item_columns)
+
+    # Train 1PL IRT with fixed seed for reproducibility
+    seed = 42
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    pyro.set_rng_seed(seed)
+
+    config = IrtConfig(
+        model_type=OneParamLog,
+        priors="hierarchical",
+        initializers=[
+            {"name": "difficulty_from_accuracy", "eps": 1e-3},
+        ],
+        seed=seed,
+    )
+
+    # Clear pyro param store to avoid conflicts
+    pyro.clear_param_store()
+
+    trainer = IrtModelTrainer(config=config, data_path=None, dataset=dataset)
+    trainer.train(epochs=epochs)
+
+    # Extract difficulty and ability parameters
+    difficulties = list(trainer.best_params["diff"])
+    abilities = list(trainer.best_params["ability"])
+    item_id_map = trainer.best_params["item_ids"]
+    subject_id_map = trainer.best_params["subject_ids"]
+    item_ids = [item_id_map[i] for i in range(len(difficulties))]
+    subject_ids = [subject_id_map[i] for i in range(len(abilities))]
+
+    # Save outputs
+    output_dir.mkdir(parents=True, exist_ok=True)
+    items_df = pd.DataFrame({
+        "b": difficulties,
+    }, index=item_ids)
+    items_df.to_csv(output_dir / "items.csv")
+
+    abilities_df = pd.DataFrame({
+        "theta": abilities,
+    }, index=subject_ids)
+    abilities_df.to_csv(output_dir / "abilities.csv")
+
+    logger.info(f"Baseline IRT saved to {output_dir}")
+    logger.info(f"β stats: mean={np.mean(difficulties):.4f}, std={np.std(difficulties):.4f}")
+    logger.info(f"θ stats: mean={np.mean(abilities):.4f}, std={np.std(abilities):.4f}")
+
+    return {task_id: diff for task_id, diff in zip(item_ids, difficulties)}
+
+
 def get_or_train_baseline_irt(
     responses_path: Path,
     pre_frontier_agents: List[str],
@@ -548,12 +678,10 @@ def get_or_train_baseline_irt(
     logger.info(f"  Pre-frontier agents: {len(pre_frontier_agents)}")
     logger.info(f"  Cutoff date: {cutoff_date}")
 
-    from experiment_sad_irt.train_evaluate import train_baseline_irt_on_prefrontier
-
     cache_dir.mkdir(parents=True, exist_ok=True)
-    train_baseline_irt_on_prefrontier(
+    _train_baseline_irt_on_agents(
         responses_path=responses_path,
-        pre_frontier_agents=pre_frontier_agents,
+        agent_subset=pre_frontier_agents,
         output_dir=cache_dir,
     )
 

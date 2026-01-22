@@ -188,12 +188,27 @@ class TerminalBenchConfig(DatasetConfig):
 
     TerminalBench agents have submission dates in the metadata file
     (not in the agent name). Dates are extracted from agent_org field.
+
+    Data format options:
+    - Binary (default): Uses binarized pass@5 data (any success → 1)
+    - Binomial (opt-in): Uses raw data with full trial counts (k successes out of n trials)
+
+    Binary is the default because empirical testing showed slightly better ROC-AUC
+    on the same frontier task set (18 tasks, pass-rate definition):
+      - Oracle: 0.8224 (binary) vs 0.7832 (binomial)
+      - Feature-IRT: 0.7417 (binary) vs 0.7191 (binomial)
+
+    To use binomial likelihood, override paths to point to raw data:
+        responses_path = Path("data/terminal_bench/terminal_bench_2.0_raw.jsonl")
+        oracle_irt_path = Path("chris_output/terminal_bench_2.0_binomial/1d_1pl/items.csv")
+        oracle_abilities_path = Path("chris_output/terminal_bench_2.0_binomial/1d_1pl/abilities.csv")
     """
 
-    # Data paths
+    # Data paths - default to binarized data (binary likelihood)
     responses_path: Path = field(
         default_factory=lambda: Path("data/terminal_bench/terminal_bench_2.0.jsonl")
     )
+    # IRT trained with binary likelihood on binarized data
     oracle_irt_path: Path = field(
         default_factory=lambda: Path("chris_output/terminal_bench_2.0/1d/items.csv")
     )

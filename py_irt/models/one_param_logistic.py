@@ -67,8 +67,16 @@ class OneParamLog(abstract_model.IrtModel):
             raise ValueError("Options for priors are vague and hierarchical")
         self.priors = priors
 
-    def model_vague(self, models, items, obs):
-        """Initialize a 1PL model with vague priors"""
+    def model_vague(self, models, items, obs, trials=None):
+        """Initialize a 1PL model with vague priors
+
+        Args:
+            models: Subject indices for each observation
+            items: Item indices for each observation
+            obs: Observations (0/1 for binary, or success counts for binomial)
+            trials: Number of trials for each observation (for binomial likelihood).
+                   If None, uses Bernoulli (binary) likelihood.
+        """
         with pyro.plate("thetas", self.num_subjects, device=self.device):
             ability = pyro.sample(
                 "theta",
@@ -86,9 +94,16 @@ class OneParamLog(abstract_model.IrtModel):
             )
 
         with pyro.plate("observe_data", obs.size(0), device=self.device):
-            pyro.sample("obs", dist.Bernoulli(logits=ability[models] - diff[items]), obs=obs)
+            logits = ability[models] - diff[items]
+            if trials is not None:
+                # Binomial likelihood: obs = successes, trials = total attempts
+                probs = torch.sigmoid(logits)
+                pyro.sample("obs", dist.Binomial(total_count=trials, probs=probs), obs=obs)
+            else:
+                # Binary likelihood
+                pyro.sample("obs", dist.Bernoulli(logits=logits), obs=obs)
 
-    def guide_vague(self, models, items, obs):
+    def guide_vague(self, models, items, obs, trials=None):
         """Initialize a 1PL guide with vague priors"""
         # register learnable params in the param store
         m_theta_param = pyro.param(
@@ -114,8 +129,16 @@ class OneParamLog(abstract_model.IrtModel):
             dist_b = dist.Normal(m_b_param, s_b_param)
             pyro.sample("b", dist_b)
 
-    def model_hierarchical(self, models, items, obs):
-        """Initialize a 1PL model with hierarchical priors"""
+    def model_hierarchical(self, models, items, obs, trials=None):
+        """Initialize a 1PL model with hierarchical priors
+
+        Args:
+            models: Subject indices for each observation
+            items: Item indices for each observation
+            obs: Observations (0/1 for binary, or success counts for binomial)
+            trials: Number of trials for each observation (for binomial likelihood).
+                   If None, uses Bernoulli (binary) likelihood.
+        """
         mu_b = pyro.sample(
             "mu_b",
             dist.Normal(
@@ -145,9 +168,14 @@ class OneParamLog(abstract_model.IrtModel):
         with pyro.plate("bs", self.num_items, device=self.device):
             diff = pyro.sample("b", dist.Normal(mu_b, 1.0 / u_b))
         with pyro.plate("observe_data", obs.size(0)):
-            pyro.sample("obs", dist.Bernoulli(logits=ability[models] - diff[items]), obs=obs)
+            logits = ability[models] - diff[items]
+            if trials is not None:
+                probs = torch.sigmoid(logits)
+                pyro.sample("obs", dist.Binomial(total_count=trials, probs=probs), obs=obs)
+            else:
+                pyro.sample("obs", dist.Bernoulli(logits=logits), obs=obs)
 
-    def guide_hierarchical(self, models, items, obs):
+    def guide_hierarchical(self, models, items, obs, trials=None):
         """Initialize a 1PL guide with hierarchical priors"""
         loc_mu_b_param = pyro.param("loc_mu_b", torch.tensor(0.0, device=self.device))
         scale_mu_b_param = pyro.param(
@@ -209,8 +237,17 @@ class OneParamLog(abstract_model.IrtModel):
         else:
             return self.guide_hierarchical
 
-    def fit(self, models, items, responses, num_epochs):
-        """Fit the IRT model with variational inference"""
+    def fit(self, models, items, responses, num_epochs, trials=None):
+        """Fit the IRT model with variational inference
+
+        Args:
+            models: Subject indices for each observation
+            items: Item indices for each observation
+            responses: Observations (0/1 for binary, or success counts for binomial)
+            num_epochs: Number of training epochs
+            trials: Number of trials for each observation (for binomial likelihood).
+                   If None, uses Bernoulli (binary) likelihood.
+        """
         optim = Adam({"lr": 0.1})
         if self.priors == "vague":
             svi = SVI(self.model_vague, self.guide_vague, optim, loss=Trace_ELBO())
@@ -219,7 +256,7 @@ class OneParamLog(abstract_model.IrtModel):
 
         pyro.clear_param_store()
         for j in range(num_epochs):
-            loss = svi.step(models, items, responses)
+            loss = svi.step(models, items, responses, trials)
             if j % 100 == 0 and self.verbose:
                 print("[epoch %04d] loss: %.4f" % (j + 1, loss))
 
