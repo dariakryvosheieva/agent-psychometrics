@@ -219,6 +219,7 @@ python -m experiment_a.compute_llm_judge_features
 --output_dir          Output directory
 --dry_run             Show configuration without running
 --exclude_unsolved    Exclude tasks no agent solved
+--include_feature_irt Include Feature-IRT joint learning methods (off by default)
 ```
 
 ## Output

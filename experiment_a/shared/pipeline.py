@@ -103,6 +103,7 @@ def build_cv_predictors(
     config: Any,
     root: Path,
     llm_judge_features: Optional[List[str]] = None,
+    include_feature_irt: bool = False,
 ) -> List[CVPredictorConfig]:
     """Build list of CVPredictor configurations for cross-validation.
 
@@ -112,6 +113,8 @@ def build_cv_predictors(
         config: Experiment configuration (ExperimentAConfig or TerminalBenchConfig)
         root: Root directory for resolving relative paths
         llm_judge_features: Optional list of feature columns for LLM Judge.
+        include_feature_irt: Whether to include Feature-IRT joint learning methods.
+            Defaults to False since they provide minimal improvement over Ridge.
 
     Returns:
         List of CVPredictorConfig objects with pre-instantiated predictors.
@@ -145,13 +148,14 @@ def build_cv_predictors(
             )
 
             # Feature-IRT with embeddings (joint learning)
-            configs.append(
-                CVPredictorConfig(
-                    predictor=FeatureIRTCVPredictor(source, verbose=False),
-                    name="feature_irt_embedding",
-                    display_name="Feature-IRT (Embedding)",
+            if include_feature_irt:
+                configs.append(
+                    CVPredictorConfig(
+                        predictor=FeatureIRTCVPredictor(source, verbose=False),
+                        name="feature_irt_embedding",
+                        display_name="Feature-IRT (Embedding)",
+                    )
                 )
-            )
 
     # LLM Judge predictor (Ridge regression)
     if config.llm_judge_features_path is not None:
@@ -172,13 +176,14 @@ def build_cv_predictors(
             )
 
             # Feature-IRT with LLM Judge features (joint learning)
-            configs.append(
-                CVPredictorConfig(
-                    predictor=FeatureIRTCVPredictor(source, verbose=False),
-                    name="feature_irt_llm_judge",
-                    display_name="Feature-IRT (LLM Judge)",
+            if include_feature_irt:
+                configs.append(
+                    CVPredictorConfig(
+                        predictor=FeatureIRTCVPredictor(source, verbose=False),
+                        name="feature_irt_llm_judge",
+                        display_name="Feature-IRT (LLM Judge)",
+                    )
                 )
-            )
 
     # Constant baseline (mean difficulty)
     configs.append(
@@ -207,6 +212,7 @@ def run_cross_validation(
     root: Path,
     k: int = 5,
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
+    include_feature_irt: bool = False,
 ) -> Dict[str, Any]:
     """Run the evaluation pipeline with k-fold cross-validation.
 
@@ -218,6 +224,8 @@ def run_cross_validation(
         root: Root directory for resolving relative paths
         k: Number of folds
         metadata_loader: Optional callable to load task metadata
+        include_feature_irt: Whether to include Feature-IRT joint learning methods.
+            Defaults to False since they provide minimal improvement over Ridge.
 
     Returns:
         Dict with CV results for each method
@@ -271,7 +279,8 @@ def run_cross_validation(
 
     # Build ALL predictor configs (oracle, feature-based, baselines)
     predictor_configs = build_cv_predictors(
-        config, root, llm_judge_features=spec.llm_judge_features
+        config, root, llm_judge_features=spec.llm_judge_features,
+        include_feature_irt=include_feature_irt,
     )
 
     # Determine if we should compute binomial metrics
@@ -410,6 +419,11 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         action="store_true",
         help="Exclude tasks that no agent has solved from both train and test sets",
     )
+    parser.add_argument(
+        "--include_feature_irt",
+        action="store_true",
+        help="Include Feature-IRT joint learning methods (slower, minimal improvement over Ridge)",
+    )
     return parser
 
 
@@ -462,7 +476,10 @@ def run_experiment_main(
         metadata_loader = metadata_loader_factory(config)
 
     # Run cross-validation
-    results = run_cross_validation(config, spec, root, args.k_folds, metadata_loader)
+    results = run_cross_validation(
+        config, spec, root, args.k_folds, metadata_loader,
+        include_feature_irt=args.include_feature_irt,
+    )
     output_filename = f"experiment_a_cv{args.k_folds}_results.json"
 
     # Save results
