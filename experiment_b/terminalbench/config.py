@@ -210,10 +210,10 @@ class TerminalBenchConfig(DatasetConfig):
     )
     # IRT trained with binary likelihood on binarized data
     oracle_irt_path: Path = field(
-        default_factory=lambda: Path("chris_output/terminal_bench_2.0/1d/items.csv")
+        default_factory=lambda: Path("chris_output/terminal_bench_2.0/1d_1pl/items.csv")
     )
     oracle_abilities_path: Path = field(
-        default_factory=lambda: Path("chris_output/terminal_bench_2.0/1d/abilities.csv")
+        default_factory=lambda: Path("chris_output/terminal_bench_2.0/1d_1pl/abilities.csv")
     )
     metadata_path: Path = field(
         default_factory=lambda: Path("data/terminal_bench/terminal_bench_2.0.meta.json")

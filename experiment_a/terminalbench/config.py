@@ -6,8 +6,8 @@ from typing import Any, Dict, Optional
 
 
 # Binary mode paths (collapsed: any success out of 5 = 1)
-_BINARY_ABILITIES_PATH = Path("chris_output/terminal_bench_2.0/1d/abilities.csv")
-_BINARY_ITEMS_PATH = Path("chris_output/terminal_bench_2.0/1d/items.csv")
+_BINARY_ABILITIES_PATH = Path("chris_output/terminal_bench_2.0/1d_1pl/abilities.csv")
+_BINARY_ITEMS_PATH = Path("chris_output/terminal_bench_2.0/1d_1pl/items.csv")
 _BINARY_RESPONSES_PATH = Path("data/terminal_bench/terminal_bench_2.0.jsonl")
 
 # Binomial mode paths (default: k successes out of n trials)

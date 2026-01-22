@@ -1,36 +1,73 @@
-"""LLM judge prompt for semantic feature extraction (Experiment A).
+"""SWE-bench prompt configuration for LLM judge feature extraction.
 
-This prompt extracts only the 9 semantic features from static task information
-(problem statement, gold patch, tests, hints) WITHOUT sandbox/environment access.
-This is the "ablation" version of Lunette grading that doesn't use shell commands.
-
-The 9 semantic features match those in lunette_grading_prompt.py:
-- fix_in_description (0-3)
-- problem_clarity (1-5)
-- error_message_provided (0/1)
-- reproduction_steps (0/1)
-- fix_locality (1-3)
-- domain_knowledge_required (1-5)
-- fix_complexity (1-5)
-- logical_reasoning_required (1-5)
-- atypicality (1-5)
+This module defines the prompt template and feature definitions for extracting
+semantic features from SWE-bench Verified tasks.
 """
 
-# Feature names for semantic-only extraction
-LLM_JUDGE_SEMANTIC_FEATURES = [
-    "fix_in_description",
-    "problem_clarity",
-    "error_message_provided",
-    "reproduction_steps",
-    "fix_locality",
-    "domain_knowledge_required",
-    "fix_complexity",
-    "logical_reasoning_required",
-    "atypicality",
+from typing import Any, Dict
+
+from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition, PromptConfig
+
+# Feature definitions for SWE-bench
+SWEBENCH_FEATURES = [
+    FeatureDefinition(
+        name="fix_in_description",
+        min_value=0,
+        max_value=3,
+        description="Does the problem statement contain or hint at the solution? (0=none, 3=exact fix)",
+    ),
+    FeatureDefinition(
+        name="problem_clarity",
+        min_value=1,
+        max_value=5,
+        description="How clear and well-specified is the problem? (1=vague, 5=crystal clear)",
+    ),
+    FeatureDefinition(
+        name="error_message_provided",
+        min_value=0,
+        max_value=1,
+        description="Does the problem include an error message or traceback? (0=no, 1=yes)",
+    ),
+    FeatureDefinition(
+        name="reproduction_steps",
+        min_value=0,
+        max_value=1,
+        description="Are concrete reproduction steps provided? (0=no, 1=yes)",
+    ),
+    FeatureDefinition(
+        name="fix_locality",
+        min_value=1,
+        max_value=3,
+        description="How localized is the fix? (1=single location, 3=multiple files)",
+    ),
+    FeatureDefinition(
+        name="domain_knowledge_required",
+        min_value=1,
+        max_value=5,
+        description="How much specialized knowledge is needed? (1=basic Python, 5=obscure APIs)",
+    ),
+    FeatureDefinition(
+        name="fix_complexity",
+        min_value=1,
+        max_value=5,
+        description="How complex is the actual fix? (1=trivial, 5=very complex)",
+    ),
+    FeatureDefinition(
+        name="logical_reasoning_required",
+        min_value=1,
+        max_value=5,
+        description="How much logical reasoning is needed? (1=mechanical, 5=deep reasoning)",
+    ),
+    FeatureDefinition(
+        name="atypicality",
+        min_value=1,
+        max_value=5,
+        description="How unusual is this bug pattern? (1=very common, 5=rare/novel)",
+    ),
 ]
 
-# The semantic-only grading prompt (no shell commands)
-LLM_JUDGE_PROMPT = """You are analyzing a SWE-bench coding task to predict its difficulty.
+# The prompt template for SWE-bench tasks
+SWEBENCH_PROMPT_TEMPLATE = """You are analyzing a SWE-bench coding task to predict its difficulty.
 You will analyze ONLY the static task information (no code execution or environment access).
 
 ## TASK INFORMATION
@@ -142,48 +179,58 @@ Respond with ONLY a JSON object containing all features. No markdown, no extra t
 """
 
 
-def format_llm_judge_prompt(
-    instance_id: str,
-    repo: str,
-    version: str,
-    problem_statement: str,
-    patch: str,
-    fail_to_pass: str,
-    pass_to_pass: str,
-    hints_text: str = "",
-) -> str:
-    """Format the LLM judge prompt with task-specific information.
+def format_swebench_prompt(task: Dict[str, Any]) -> str:
+    """Format the SWE-bench prompt with task-specific information.
 
     Args:
-        instance_id: SWE-bench instance ID
-        repo: Repository name (e.g., "django/django")
-        version: Version string
-        problem_statement: The issue description
-        patch: The gold solution patch
-        fail_to_pass: Tests that should pass after fix
-        pass_to_pass: Regression tests
-        hints_text: Optional hints
+        task: SWE-bench task dict with keys:
+            - instance_id: SWE-bench instance ID
+            - repo: Repository name (e.g., "django/django")
+            - version: Version string
+            - problem_statement: The issue description
+            - patch: The gold solution patch
+            - FAIL_TO_PASS: Tests that should pass after fix
+            - PASS_TO_PASS: Regression tests
+            - hints_text: Optional hints (may be empty)
 
     Returns:
         Formatted prompt string
     """
+    hints_text = task.get("hints_text", "")
     hints_section = ""
     if hints_text and hints_text.strip():
         hints_section = f"**Hints:**\n{hints_text}"
 
     # Truncate very long fields to avoid context overflow
-    problem_statement = (
-        problem_statement[:12000] if len(problem_statement) > 12000 else problem_statement
-    )
-    patch = patch[:8000] if len(patch) > 8000 else patch
+    problem_statement = task.get("problem_statement", "")
+    if len(problem_statement) > 12000:
+        problem_statement = problem_statement[:12000]
 
-    return LLM_JUDGE_PROMPT.format(
-        instance_id=instance_id,
-        repo=repo,
-        version=version,
+    patch = task.get("patch", "")
+    if len(patch) > 8000:
+        patch = patch[:8000]
+
+    return SWEBENCH_PROMPT_TEMPLATE.format(
+        instance_id=task.get("instance_id", ""),
+        repo=task.get("repo", ""),
+        version=task.get("version", "unknown"),
         problem_statement=problem_statement,
         patch=patch,
-        fail_to_pass=fail_to_pass,
-        pass_to_pass=pass_to_pass,
+        fail_to_pass=task.get("FAIL_TO_PASS", "[]"),
+        pass_to_pass=task.get("PASS_TO_PASS", "[]"),
         hints_section=hints_section,
     )
+
+
+# The main configuration object
+SWEBENCH_CONFIG = PromptConfig(
+    name="swebench",
+    features=SWEBENCH_FEATURES,
+    prompt_template=SWEBENCH_PROMPT_TEMPLATE,
+    task_id_field="instance_id",
+    truncation_limits={
+        "problem_statement": 12000,
+        "patch": 8000,
+    },
+    format_prompt_fn=format_swebench_prompt,
+)
