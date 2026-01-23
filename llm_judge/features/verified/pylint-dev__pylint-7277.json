@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The problem statement explicitly describes the exact fix needed: check if the first item is '', '.', or os.getcwd() before removing it from sys.path. The reproduction steps and context are clear. The fix is localized to a few lines and involves adding a conditional check, making it straightforward once the solution is known. Some understanding of Python's sys.path behavior and runpy module is helpful but not deeply specialized.",
+  "_instance_id": "pylint-dev__pylint-7277",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:16:02.508060"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with screenshots showing incorrect rendering and expected behavior. The fix is a single character change (split -> rsplit), but finding this requires understanding Sphinx's docfield parsing internals. The key insight is recognizing that types like dict(str, str) contain spaces, so splitting from the left incorrectly parses the type, while splitting from the right correctly separates type from parameter name.",
+  "_instance_id": "sphinx-doc__sphinx-9230",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:23:45.110289"
+}

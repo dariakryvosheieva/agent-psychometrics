@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The problem statement explicitly provides the exact fix needed: adding `using=db` to the `save()` call. The issue is crystal clear with context about their multi-database setup and the error they receive. However, understanding why the fix works requires knowledge of Django's multi-database routing system and how `save(using=...)` bypasses query routing. The fix itself is trivial - just adding one parameter.",
+  "_instance_id": "django__django-11066",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:47:35.432633"
+}

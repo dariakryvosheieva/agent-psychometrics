@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction code and visual examples, but the fix requires understanding matplotlib's internal axis limit handling across multiple files (axes/_base.py, ticker.py, mplot3d/axes3d.py). The solution involves tracking whether limits were swapped before calling nonsingular() and restoring the order afterward, which requires understanding the interaction between axis limits, scales, and the locator's nonsingular method. The hint mentions the root cause PR but doesn't specify the exact fix needed.",
+  "_instance_id": "matplotlib__matplotlib-14623",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:09:00.036867"
+}

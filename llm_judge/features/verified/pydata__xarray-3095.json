@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps showing the dtype regression. However, the fix requires deep understanding of xarray's internal indexing architecture, specifically the PandasIndexAdapter class and how it preserves dtypes. The solution involves adding a copy method to PandasIndexAdapter that properly preserves dtype information, which requires understanding the interaction between pandas Index objects and numpy dtype handling.",
+  "_instance_id": "pydata__xarray-3095",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:13:10.372521"
+}

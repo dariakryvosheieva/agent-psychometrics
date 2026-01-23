@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is very clearly described with screenshots and exact LaTeX output showing the whitespace issue. The solution hint is provided in the problem statement showing the expected markup with '%' characters to suppress whitespace. However, fixing it requires understanding LaTeX's whitespace handling and the Sphinx LaTeX writer internals, making it a specialized domain fix despite being a small code change.",
+  "_instance_id": "sphinx-doc__sphinx-10435",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:54.973277"
+}

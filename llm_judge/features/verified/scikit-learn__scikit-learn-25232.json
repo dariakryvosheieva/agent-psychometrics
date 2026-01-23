@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "reasoning": "The problem clearly describes that IterativeImputer is missing a fill_value parameter that SimpleImputer has, and the solution direction is explicitly stated. The fix requires adding a new parameter in multiple places (docstring, parameter constraints, __init__, and passing to SimpleImputer), which is a standard pattern for adding parameters in scikit-learn. This is a straightforward feature addition requiring framework-specific knowledge of scikit-learn's parameter validation patterns.",
+  "_instance_id": "scikit-learn__scikit-learn-25232",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:11.272800"
+}

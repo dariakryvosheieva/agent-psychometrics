@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps, but the fix requires deep understanding of Sphinx's RST parsing internals. The bug involves incorrect regex pattern matching for field markers vs docinfo, and the fix requires understanding how rst_prolog insertion interacts with section headings containing domain directives. The hint mentions adding empty lines but the actual fix involves changing the regex pattern used to detect field markers, requiring knowledge of docutils parsing patterns.",
+  "_instance_id": "sphinx-doc__sphinx-11445",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:23.699001"
+}

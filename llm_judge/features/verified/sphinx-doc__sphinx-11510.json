@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem statement includes a complete working extension solution that monkey-patches StateMachine.insert_input, which is essentially the fix. However, implementing this properly in Sphinx requires deep understanding of docutils internals, the StateMachine class, and how the Include directive processes files. The fix involves patching an instance method to intercept include processing, handling docutils marker lines, and properly emitting the source-read event - a non-trivial integration requiring specialized knowledge of both Sphinx and docutils architecture.",
+  "_instance_id": "sphinx-doc__sphinx-11510",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:29.752865"
+}

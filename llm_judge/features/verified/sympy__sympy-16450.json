@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with full reproduction steps showing exactly how the finite assumption is lost. The fix is a simple one-liner that passes existing assumptions via `**s.assumptions0` when creating the Dummy symbol. The solution direction is clearly hinted in the description ('posify should preserve the finiteness assumption'), requiring only SymPy-specific knowledge about how assumptions work.",
+  "_instance_id": "sympy__sympy-16450",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:27:34.774087"
+}

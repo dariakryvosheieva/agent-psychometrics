@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 2,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement explicitly provides the exact fix needed: changing `return variable_attrs[0]` to `return dict(variable_attrs[0])`. The issue is a common Python mutable object reference bug where a dictionary reference is returned instead of a copy. The fix is a single character-level change on one line, and the user even pointed to the exact line number in the codebase.",
+  "_instance_id": "pydata__xarray-4629",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:14:02.347080"
+}

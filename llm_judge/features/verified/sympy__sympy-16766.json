@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "reasoning": "The problem statement provides the exact code fix needed, making this nearly a copy-paste solution. The issue is crystal clear with reproduction steps showing the warning message. The fix is a simple method addition to handle a missing print case, which is a common pattern in sympy's printer framework.",
+  "_instance_id": "sympy__sympy-16766",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:27:46.421693"
+}

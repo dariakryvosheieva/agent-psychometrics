@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps showing that setting a session header to None sends 'None' as the value instead of removing it. The fix requires understanding how the requests library merges session and request headers, specifically in the merge_setting function. The fix itself is a simple one-liner that filters out None values from the merged dictionary, but requires understanding the merging logic to know where to place it.",
+  "_instance_id": "psf__requests-1921",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:12:37.892128"
+}

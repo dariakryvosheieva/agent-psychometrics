@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement explicitly identifies the exact line to change (line 316 in basic.py) and the exact fix (replace 'return False' with 'return NotImplemented'). However, the gold patch shows this pattern needs to be applied across multiple files (basic.py, numbers.py, exprtools.py, geometry/entity.py, etc.) with additional fixes for __ne__ methods and comparison operator delegation bugs. The fix requires understanding Python's rich comparison protocol and how NotImplemented affects method resolution.",
+  "_instance_id": "sympy__sympy-13091",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:25:19.751078"
+}

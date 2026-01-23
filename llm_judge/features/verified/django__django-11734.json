@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "This bug requires deep understanding of Django's ORM internals, specifically how OuterRef expressions are resolved in subqueries and how exclude/~Q operations handle them differently from filter. The fix spans three files with subtle changes to expression handling and query splitting. The hint provides crucial insight about the alias resolution issue (V0 vs queries_number), but arriving at the correct fix requires understanding complex query compilation logic.",
+  "_instance_id": "django__django-11734",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:50:35.155008"
+}

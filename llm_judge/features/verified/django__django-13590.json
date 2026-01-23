@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement clearly identifies the root cause (namedtuples don't accept iterators in constructors) and suggests the fix (expand iterator contents). However, it requires understanding Django's query resolution internals and Python's namedtuple behavior. The fix is localized but requires knowledge of the `_make` method as a namedtuple detection mechanism.",
+  "_instance_id": "django__django-13590",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:56:37.527364"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with complete reproduction steps, error traceback, and the suggested fix ('explicitly check whether None is returned') points directly to the solution. The fix is a trivial one-liner adding None to the condition check. Requires some understanding of astropy's quantity_input decorator but the fix itself is straightforward.",
+  "_instance_id": "astropy__astropy-7336",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:44:46.310315"
+}

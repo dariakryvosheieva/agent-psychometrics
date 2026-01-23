@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is well-described with clear reproduction steps showing how empty strings in TEMPLATES DIRS break autoreload. The fix is a simple filter to exclude empty strings/falsy values in two places within the same function. While Django-specific knowledge is needed to understand the autoreload mechanism, the actual fix is straightforward - just adding 'if dir' and 'if directory' conditions to filter out empty paths.",
+  "_instance_id": "django__django-15572",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:03:43.173129"
+}

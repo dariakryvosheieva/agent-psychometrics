@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 2,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement provides an exact code fix with a diff showing the proposed solution. The issue is clearly explained - fcntl.flock returns None on success and raises OSError on failure, but the code incorrectly checks for return value 0. The fix requires standard library knowledge about fcntl behavior. The gold patch differs slightly from the proposed fix (uses BlockingIOError instead of OSError, and unlock doesn't need try/except), but the core fix is straightforward.",
+  "_instance_id": "django__django-13410",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:55:41.868739"
+}

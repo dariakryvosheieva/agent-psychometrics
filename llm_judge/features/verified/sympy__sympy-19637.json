@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 2,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "The error message clearly identifies the problem ('kern' referenced before assignment), and reproduction steps are provided. The fix requires understanding the control flow - the variable 'kern' is only assigned inside an 'if' block, but 'hit = kern in s' was outside that block, causing the error when the condition isn't met. The solution is to move the assignment inside the if block and add an else clause.",
+  "_instance_id": "sympy__sympy-19637",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:29:08.027855"
+}

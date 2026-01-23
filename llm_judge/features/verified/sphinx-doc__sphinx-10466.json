@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "reasoning": "The problem statement provides a detailed solution including code snippets showing how to deduplicate locations using set(). The fix is a simple 2-line change in a single location to deduplicate and sort positions. This is a common duplicate elimination pattern, but requires understanding of Sphinx's gettext builder internals.",
+  "_instance_id": "sphinx-doc__sphinx-10466",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:05.465744"
+}

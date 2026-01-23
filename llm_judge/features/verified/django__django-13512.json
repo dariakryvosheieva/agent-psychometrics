@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem clearly describes that JSON fields display unicode as ASCII escape sequences in Django admin, and hints at the solution (using ensure_ascii=False in json.dumps). The fix requires Django framework knowledge about form fields and admin utilities, but the actual change is straightforward - adding ensure_ascii=False parameter in two locations across two files. The fix pattern is relatively common (wrong default parameter for internationalization).",
+  "_instance_id": "django__django-13512",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:55:58.441847"
+}

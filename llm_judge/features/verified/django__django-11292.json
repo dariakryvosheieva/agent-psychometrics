@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "The problem clearly states the goal (expose skip_checks as a command line option), and mentions the existing stealth option. However, implementing this requires deep knowledge of Django's management command infrastructure, including understanding the parser creation, stealth options, and how system checks are executed. The fix involves multiple coordinated changes in one file: removing from stealth options, adding to help formatter, conditionally adding the argument, and modifying the check logic.",
+  "_instance_id": "django__django-11292",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:48:58.952258"
+}

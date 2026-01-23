@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement includes the exact fix in the hints section with a diff showing the solution (adding `sq.is_positive` check). The traceback is clear and reproduction steps are provided. However, understanding why this fix works requires knowledge of SymPy's symbolic math internals - specifically understanding that `split_surds` expects positive rational squares and complex numbers violate this assumption. The fix itself is simple but requires multi-step reasoning to understand the relationship between complex numbers, the `is_Rational` check, and the empty surds list that causes the IndexError.",
+  "_instance_id": "sympy__sympy-17318",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:28:08.712951"
+}

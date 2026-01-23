@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with reproduction code, expected vs actual LaTeX output, and even rendered images. The solution is explicitly shown in the problem statement (the desired LaTeX output with parentheses). The fix is trivial - adding \\left( and \\right) around %s in a single format string, requiring only basic knowledge of LaTeX printing in SymPy.",
+  "_instance_id": "sympy__sympy-18763",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:28:46.463408"
+}

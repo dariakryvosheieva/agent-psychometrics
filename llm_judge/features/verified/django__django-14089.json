@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 2,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "reasoning": "The problem statement explicitly states the exact solution: add a __reversed__() method to OrderedSet. The fix is trivial - just 2 lines adding a method that delegates to reversed(self.dict). Only basic Python knowledge of the __reversed__ protocol is needed.",
+  "_instance_id": "django__django-14089",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:58:22.624513"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction code and visual comparison, and the hints explain the root cause (tick rcParams being reset incorrectly). However, the fix requires deep understanding of matplotlib's axis/tick system - specifically knowing that `_reset_major_tick_kw()` and `_reset_minor_tick_kw()` should not be called because they clear visibility settings needed for shared axes, and instead only the gridOn property should be reset. The fix is localized but requires understanding the subtle interaction between tick keywords and shared axis behavior.",
+  "_instance_id": "matplotlib__matplotlib-20826",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:09:18.215160"
+}

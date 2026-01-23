@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear: 1-element tuples lose their trailing comma. The fix requires understanding Python AST visitor patterns and tuple syntax rules, but the actual change is straightforward - adding a special case for single-element tuples. The problem statement even provides the exact test case to add, making the expected behavior unambiguous.",
+  "_instance_id": "sphinx-doc__sphinx-9367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:24:04.900625"
+}

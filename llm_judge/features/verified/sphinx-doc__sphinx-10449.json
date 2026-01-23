@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with detailed reproduction steps showing that autodoc_typehints='description' incorrectly adds a return type to classes. The fix requires understanding Sphinx's autodoc internals, specifically how type hints are merged into field lists. The solution involves modifying the merge_typehints function to suppress return types for classes, requiring knowledge of how Sphinx distinguishes between classes and other object types.",
+  "_instance_id": "sphinx-doc__sphinx-10449",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:59.752617"
+}

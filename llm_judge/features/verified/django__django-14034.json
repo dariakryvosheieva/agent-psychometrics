@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem is clearly explained with reproduction code, and the hints in the discussion point toward the solution location (boundfield.py's build_widget_attrs). However, fixing it requires deep understanding of Django's form system including MultiValueField, MultiWidget, BoundField interactions, and the require_all_fields attribute. The fix involves conditional logic to handle subfield required attributes individually rather than applying the parent field's required status uniformly.",
+  "_instance_id": "django__django-14034",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:58:12.680009"
+}

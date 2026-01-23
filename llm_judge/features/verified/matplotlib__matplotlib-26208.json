@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The fix involves adding unit sharing between twin axes, which requires deep understanding of matplotlib's unit handling machinery and how twinx/twiny interact with data limits. The hint mentions it's 'an edge case in the unit handling code' pointing to the general direction, but understanding why copying xaxis.units or yaxis.units solves the dataLims inf issue requires knowledge of how categorical/unit data triggers autoscaling behavior. The fix itself is simple (2 lines), but identifying it requires specialized internal knowledge.",
+  "_instance_id": "matplotlib__matplotlib-26208",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:11:45.163618"
+}

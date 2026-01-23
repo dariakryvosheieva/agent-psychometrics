@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 2,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement is very brief, only hinting that AddIndex/RemoveIndex operations should be reduced during optimization. The fix requires deep understanding of Django's migration optimizer system, specifically how the `reduce` method works to combine/eliminate migration operations. The actual fix is small (5 lines) and follows an established pattern, but identifying where and how to implement it requires knowledge of Django's migration internals.",
+  "_instance_id": "django__django-16819",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:07:45.029553"
+}

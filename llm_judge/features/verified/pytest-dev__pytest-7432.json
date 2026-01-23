@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps, expected vs actual behavior, and even a hint about the bug location (skipping.py, pytest_runtest_makereport hook). However, the fix requires understanding pytest's internal hook system and the flow of skip/xfail handling. The actual fix is trivial (changing 'elif' to 'if'), but recognizing why this control flow change is needed requires understanding how --runxfail affects the branching logic.",
+  "_instance_id": "pytest-dev__pytest-7432",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:17:26.329198"
+}

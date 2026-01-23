@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "reasoning": "The problem is crystal clear - index entries for properties should not have parentheses, but the :property: option on py:method directive incorrectly adds them. The fix is trivial: removing '()' from one format string. The main requirement is understanding Sphinx's Python domain internals to locate the right code, but the actual change is mechanical.",
+  "_instance_id": "sphinx-doc__sphinx-9698",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:24:37.670396"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "reasoning": "The problem clearly states making element_id optional in json_script, and even mentions it doesn't break tests. The fix requires changes in two files (defaultfilters.py and html.py) to add a default value and conditional logic for the id attribute. This is a straightforward feature request with a common pattern of making a parameter optional.",
+  "_instance_id": "django__django-15103",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:01:39.375321"
+}

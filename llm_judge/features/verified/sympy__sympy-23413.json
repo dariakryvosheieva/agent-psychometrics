@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The bug involves understanding the Hermite Normal Form algorithm and recognizing that the row iteration limit was incorrectly set to min(m,n) instead of iterating through all rows with proper pivot counting. The fix requires understanding matrix rank, pivots, and the HNF algorithm internals. While the code change is localized, it requires deep reasoning about why the original bound was wrong when n < m.",
+  "_instance_id": "sympy__sympy-23413",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:30:53.381737"
+}

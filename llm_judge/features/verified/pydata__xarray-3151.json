@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with complete MCVE and expected behavior. The fix is localized (changing loop iteration from all dims to concat_dims only), but requires understanding xarray's combine_by_coords internals to know that monotonicity checks should only apply to dimensions being concatenated, not 'bystander' dimensions. The hint in the description about non-varying coordinate dimensions being ignored helps point in the right direction.",
+  "_instance_id": "pydata__xarray-3151",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:13:22.465972"
+}

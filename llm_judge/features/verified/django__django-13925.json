@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is clearly described with error messages and reproduction context, but the fix requires deep understanding of Django's model inheritance and primary key handling internals. The fix itself is localized (adding a condition to check for inherited parent_link PKs), but requires understanding the OneToOneField parent_link mechanism in model inheritance. The solution involves recognizing that inherited PKs via parent links should be excluded from the auto-created PK warning check.",
+  "_instance_id": "django__django-13925",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:57:41.734595"
+}

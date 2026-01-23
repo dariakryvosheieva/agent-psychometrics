@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem clearly states that a 'nonform' CSS class should be added to FormSets similar to how 'nonfield' class exists for Forms. The fix is straightforward - just adding error_class='nonform' parameter in two places in formsets.py. Requires Django forms framework knowledge but the change itself is trivial.",
+  "_instance_id": "django__django-14608",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:00:21.255370"
+}

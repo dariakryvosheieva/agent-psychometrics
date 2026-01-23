@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement clearly describes extending the GET fallback logic to handle TooManyRedirects exceptions, providing a clear direction for the fix. The fix is trivial - just adding TooManyRedirects to an existing except clause that already handles HTTPError. Understanding requires knowledge of Sphinx's linkcheck builder and requests library exception hierarchy, but the actual change is minimal (2 lines modified in one location).",
+  "_instance_id": "sphinx-doc__sphinx-8475",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:22:53.855740"
+}

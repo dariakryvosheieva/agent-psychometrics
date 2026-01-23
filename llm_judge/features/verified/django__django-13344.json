@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with reproduction steps, and the hints explicitly identify the root cause (SecurityMiddleware's __init__ not calling super().__init__()). However, the fix requires deep understanding of Django's middleware async handling internals and the MiddlewareMixin class. The fix spans multiple files (sessions, cache, security middleware) and requires understanding how the _async_check() method and _is_coroutine attribute work together.",
+  "_instance_id": "django__django-13344",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:55:16.299636"
+}

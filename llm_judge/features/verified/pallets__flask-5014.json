@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "reasoning": "The problem statement clearly describes that a ValueError should be raised when an empty name is given to a Blueprint, and even references a related issue. The fix is trivial - just adding a simple validation check (2 lines) similar to the existing check for dots in names. This is a very common input validation pattern requiring minimal reasoning.",
+  "_instance_id": "pallets__flask-5014",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:12:17.025971"
+}

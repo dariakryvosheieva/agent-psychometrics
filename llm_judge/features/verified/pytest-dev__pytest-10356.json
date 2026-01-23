@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem clearly describes that markers from multiple base classes aren't being merged due to MRO behavior, and even provides a metaclass workaround showing the expected solution direction. The fix requires deep understanding of pytest's marker internals and Python's MRO system. The solution involves modifying how marks are collected by explicitly walking the MRO instead of relying on attribute inheritance, which is a moderately complex change requiring careful handling of both class and non-class objects.",
+  "_instance_id": "pytest-dev__pytest-10356",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:16:24.889899"
+}

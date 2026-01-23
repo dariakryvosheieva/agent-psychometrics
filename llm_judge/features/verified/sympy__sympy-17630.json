@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is clearly described with full reproduction steps and traceback, identifying that Zero objects lack 'cols' attribute. However, the fix is in a different file (matexpr.py) than where the error occurs (blockmatrix.py), requiring deep understanding of SymPy's matrix expression postprocessing system. The fix adds special handling for MatAdd to call doit(), which is non-obvious from the problem description.",
+  "_instance_id": "sympy__sympy-17630",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:28:15.019535"
+}

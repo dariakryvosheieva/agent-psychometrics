@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with a specific test case showing the issue - thresholds exceeding 1 when probability estimates are provided. The fix involves changing `thresholds[0] + 1` to `np.inf` to avoid the arbitrary threshold exceeding valid probability bounds. The solution hint is provided (clipping or checking max), though the actual fix uses infinity instead. Requires understanding of ROC curves and scikit-learn's metric internals.",
+  "_instance_id": "scikit-learn__scikit-learn-26194",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:33.260249"
+}

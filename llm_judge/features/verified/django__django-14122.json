@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 3,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem describes that Meta.ordering fields are incorrectly included in GROUP BY clause, referencing a previous incomplete fix. Understanding the fix requires deep knowledge of Django's ORM internals, specifically how SQL compilation works with ordering and grouping. The fix itself is relatively simple - wrapping the order_by GROUP BY logic with a condition checking for _meta_ordering - but requires understanding the relationship between Meta.ordering, ORDER BY, and GROUP BY clauses.",
+  "_instance_id": "django__django-14122",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:58:27.683853"
+}

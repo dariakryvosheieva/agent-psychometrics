@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with excellent reproduction code and visual examples. The hints in the discussion explicitly point to the exact line of code (patches.py line 588-590) where the offset is being ignored (hardcoded to 0). The fix is trivial - just stop overriding the dash offset to 0 and use the actual value. The main challenge is understanding matplotlib's internal dash pattern handling, but the hints make this straightforward.",
+  "_instance_id": "matplotlib__matplotlib-23412",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:10:00.158058"
+}

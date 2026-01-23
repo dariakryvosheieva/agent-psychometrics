@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 2,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement clearly identifies the issue (Table instance passed instead of string to Columns), but lacks concrete reproduction steps or error messages. The fix requires understanding Django's schema internals, specifically how Table, Columns, IndexName, and Expressions classes interact. The fix involves multiple related changes in the same method to ensure the table parameter is passed as a string where needed and wrapped in Table() only at the final Statement construction.",
+  "_instance_id": "django__django-14434",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:59:43.375771"
+}

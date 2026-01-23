@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps showing is_zero returning False when it should return None or True. The fix is a single line adding a condition `len(nz) == 0`, but understanding why this is needed requires deep knowledge of SymPy's assumption system and how the Add._eval_is_zero method processes arguments. The logical reasoning involves understanding when the function should return None vs a definitive answer about zero status.",
+  "_instance_id": "sympy__sympy-15875",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:27:23.414372"
+}

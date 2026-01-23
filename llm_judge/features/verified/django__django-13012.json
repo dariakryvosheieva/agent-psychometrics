@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The hints section provides the exact patch and detailed explanation of the underlying issue (ExpressionWrapper inheriting BaseExpression.get_group_by_cols instead of delegating to the wrapped expression). The fix is a simple 3-line method addition, but understanding why it's needed requires deep knowledge of Django's ORM expression system and how GROUP BY clauses are constructed. The problem is clearly described with reproduction steps and error messages.",
+  "_instance_id": "django__django-13012",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:53:48.270450"
+}

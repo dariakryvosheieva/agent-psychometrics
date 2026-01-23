@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is clearly described with a reproduction repository and identifies that the issue is with OrderBy objects in Meta.ordering during multi-table inheritance. The fix is localized (3 lines) and straightforward once you understand Django's ORM internals - it adds a type check for OrderBy objects. However, finding the exact location requires deep knowledge of Django's SQL compiler and query ordering mechanisms.",
+  "_instance_id": "django__django-11555",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:49:56.660166"
+}

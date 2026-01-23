@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "This bug requires deep understanding of Python's module import system, specifically how __spec__ works with -m flag and the difference between packages with __main__.py and regular modules. The fix involves distinguishing between when spec.name ends with '__main__' (package case) vs when it's a direct module reference. The hints provide direction on the solution approach, but understanding why the original fix was incomplete requires reasoning about Python's module naming conventions.",
+  "_instance_id": "django__django-14311",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:59:06.543623"
+}

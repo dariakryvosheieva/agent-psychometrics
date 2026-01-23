@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement includes the exact fix in the hints section with a complete diff, making this straightforward to solve. The issue is clear: wrap `solve_univariate_inequality` in a try-except to catch `NotImplementedError` and return a `ConditionSet` instead. This requires some SymPy knowledge but the solution is provided directly.",
+  "_instance_id": "sympy__sympy-18211",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:28:35.978227"
+}

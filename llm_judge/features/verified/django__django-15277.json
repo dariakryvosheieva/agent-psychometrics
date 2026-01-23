@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement provides the exact fix needed (adding a null check for max_length before appending the validator), along with clear reproduction steps, timing benchmarks, and even mentions that BinaryField already follows this pattern. The fix is a simple 2-line change adding a conditional check. The main complexity is understanding Django's field/validator system, but the solution is explicitly provided.",
+  "_instance_id": "django__django-15277",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:02:16.543469"
+}

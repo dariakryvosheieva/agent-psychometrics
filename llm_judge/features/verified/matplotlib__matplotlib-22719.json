@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The hints section contains the exact patch needed to fix the issue, making this straightforward once identified. The problem is crystal clear with reproduction steps, full traceback, and expected behavior. The fix requires understanding matplotlib's unit conversion internals but is simple - just adding empty array checks before triggering deprecation warnings.",
+  "_instance_id": "matplotlib__matplotlib-22719",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:09:34.046535"
+}

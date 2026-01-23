@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem has excellent reproduction steps and a clear error message, but provides no hint at the solution. The fix requires understanding scikit-learn's LogisticRegressionCV internals, specifically the difference between self.multi_class and the resolved multi_class variable, and handling the l1_ratio_ attribute correctly when penalty is not 'elasticnet'. The fix involves multiple changes in the same location that require understanding the interplay between penalty types, multi_class settings, and array dimensions.",
+  "_instance_id": "scikit-learn__scikit-learn-14087",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:19:23.492215"
+}

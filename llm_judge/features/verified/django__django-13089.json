@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "reasoning": "The problem statement clearly explains that cursor.fetchone() returns None when the cache is empty, and suggests adding a check for this. The fix is a classic null check pattern - very common. The traceback and code reference make it clear where the issue is, though no concrete reproduction steps are provided. Only Django cache backend knowledge is needed to understand the context.",
+  "_instance_id": "django__django-13089",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:54:10.353765"
+}

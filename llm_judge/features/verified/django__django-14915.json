@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The fix is explicitly provided in the hints section with the exact code (`def __hash__(self): return hash(self.value)`). The problem is clear with a code example showing the breaking behavior and error message. The fix is trivial - adding a 3-line `__hash__` method to make the class hashable, which is a standard Python pattern when a class defines `__eq__`.",
+  "_instance_id": "django__django-14915",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:01:13.703974"
+}

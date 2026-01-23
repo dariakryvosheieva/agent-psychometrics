@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The problem clearly identifies the issue with builtin_str converting b'GET' to the literal string \"b'GET'\", and hints that requests should handle binary strings properly. The fix is simple - replacing builtin_str with to_native_string, but requires knowledge of the requests library's internal string handling utilities. The hint explicitly names to_native_str as the solution.",
+  "_instance_id": "psf__requests-2317",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:12:43.106674"
+}

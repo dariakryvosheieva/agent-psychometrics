@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with complete reproduction steps, expected behavior, and actual behavior. However, the fix requires deep understanding of Django's prefetch_related internals and how deferred fields interact with object caching. The hint points to the general area but the actual fix requires understanding that the already-prefetched relationship should not be overwritten with the parent's cached instance (which has different deferred fields). The fix itself is small (3 lines) but requires significant domain expertise to identify.",
+  "_instance_id": "django__django-15280",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:02:27.701606"
+}

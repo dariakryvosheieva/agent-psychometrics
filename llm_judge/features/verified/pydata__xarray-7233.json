@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with a complete MVCE showing that non-dimensional coordinates are demoted to variables after coarsen.construct. The fix is localized to a single line but requires understanding xarray's coordinate system and the construct method's internal logic. The solution involves modifying the set union to include all original coordinates, not just those in window_dim.",
+  "_instance_id": "pydata__xarray-7233",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:15:09.808080"
+}

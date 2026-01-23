@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement hints that case sensitivity matters ('MySQL != mysql') but doesn't specify the exact fix. The fix requires understanding Sphinx's domain internals - specifically how glossary terms are registered and cross-referenced. The patch removes lowercase normalization in two places (note_object and XRefRole), requiring knowledge of how these components interact for glossary term handling.",
+  "_instance_id": "sphinx-doc__sphinx-7440",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:35.105507"
+}

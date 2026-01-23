@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with full traceback and reproduction steps showing that complex exponents cause invalid comparisons. The fix is a simple 2-line guard clause checking if the exponent is real before doing comparisons, but requires understanding SymPy's type system and why complex numbers can't be compared with inequality operators. The traceback points directly to the problematic line in fu.py.",
+  "_instance_id": "sympy__sympy-17139",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:28:02.064385"
+}

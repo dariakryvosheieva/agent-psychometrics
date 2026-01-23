@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "reasoning": "The problem is crystal clear with reproduction steps and error message showing that `store_cv_values` parameter is missing from `RidgeClassifierCV` but documented as if it exists. The fix requires adding the parameter to `__init__` and passing it to the parent class, plus updating documentation. This is a common pattern of missing parameter propagation in class hierarchies, requiring basic sklearn knowledge but straightforward implementation.",
+  "_instance_id": "scikit-learn__scikit-learn-10297",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:17:57.444125"
+}

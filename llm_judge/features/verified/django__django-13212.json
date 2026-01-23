@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 3,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem clearly states that validators should include the provided value in ValidationError params so users can use %(value)s placeholder. The fix requires adding params={'value': value} to many ValidationError calls across multiple validators in django/core/validators.py. While the changes are repetitive and straightforward, they span multiple locations and require understanding Django's validation system.",
+  "_instance_id": "django__django-13212",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:54:49.312938"
+}

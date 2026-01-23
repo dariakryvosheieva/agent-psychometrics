@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The hints section contains the exact fix needed, making this straightforward to implement. However, understanding why the fix works requires knowledge of Django's migration system and how app labels vs model names are handled differently (app labels are case-sensitive, model names should be lowercased). The fix itself is localized and simple - just split the string and only lowercase the model name part, not the app label.",
+  "_instance_id": "django__django-13112",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:54:20.633231"
+}

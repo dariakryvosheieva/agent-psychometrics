@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement explicitly provides the exact code fix needed (replacing `mask.shape[axis]` with `np.take(a.shape, axis).prod()`), making this straightforward to implement. The issue is clear with reproduction steps, and the fix is localized to a single line change. Understanding requires numpy knowledge about array operations and how reduction over multiple axes should work.",
+  "_instance_id": "pydata__xarray-4356",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:13:57.177909"
+}

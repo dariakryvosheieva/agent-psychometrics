@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement is crystal clear with exact reproduction steps and expected outputs. The hints section provides the exact code fix needed, including the `__repr__` method addition and explanation about `cvargs`. The fix requires understanding sklearn's cross-validation class hierarchy and `_build_repr` function, making it moderately framework-specific. The fix involves two locations in the same file - adding `__repr__` and modifying `_build_repr` to handle `cvargs`.",
+  "_instance_id": "scikit-learn__scikit-learn-14983",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:19:54.796965"
+}

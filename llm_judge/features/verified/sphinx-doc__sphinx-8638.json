@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is clearly described with reproduction steps, but the fix requires deep understanding of Sphinx's domain system and how PyTypedField's rolename parameter causes automatic cross-referencing. The actual fix is trivial (removing 'rolename='obj''), but identifying that this parameter causes the unwanted auto-linking behavior requires understanding Sphinx's internal reference resolution. This is an unusual bug pattern involving unintended cross-reference behavior.",
+  "_instance_id": "sphinx-doc__sphinx-8638",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:23:28.928777"
+}

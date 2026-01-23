@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps and error messages showing \\r being converted to \\n. However, the fix requires understanding Python's io.TextIOWrapper newline handling - specifically that newline='' preserves line endings without translation. The fix itself is trivial (adding one parameter), but knowing which parameter to add requires deep knowledge of Python's text I/O system.",
+  "_instance_id": "pytest-dev__pytest-7521",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:17:37.743807"
+}

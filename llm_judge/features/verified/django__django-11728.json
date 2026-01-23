@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "The problem is very clearly described with reproduction steps and expected vs actual output. The hints section provides a nearly complete diff of the solution. The fix involves understanding regex parsing logic with bracket matching, requiring moderate reasoning about when to check for balanced brackets (before vs after decrementing the counter) and adjusting indices accordingly. Changes span two similar functions in the same file.",
+  "_instance_id": "django__django-11728",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:50:07.333995"
+}

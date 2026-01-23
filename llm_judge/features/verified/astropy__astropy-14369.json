@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The bug is in a YACC grammar parser for CDS unit format, requiring deep understanding of parsing grammars and operator associativity. The fix involves swapping the order of grammar rule elements in division_of_units from 'unit_expression DIVISION combined_units' to 'combined_units DIVISION unit_expression', which affects how division is parsed (left vs right associativity). This requires understanding both the CDS standard and parser implementation details, plus the pre-generated parse table also needs updating.",
+  "_instance_id": "astropy__astropy-14369",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:43:50.891166"
+}

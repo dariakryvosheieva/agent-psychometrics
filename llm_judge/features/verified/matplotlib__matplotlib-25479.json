@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with full reproduction steps and error traceback showing the mismatch between registered colormap names and internal colormap names. The fix requires understanding matplotlib's colormap registry internals and involves changes in two files (cm.py and colors.py) to update the registered cmap's name and modify equality comparison. The hints mention the issue is in set_cmap/rcParams but don't provide the exact solution.",
+  "_instance_id": "matplotlib__matplotlib-25479",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:11:21.253096"
+}

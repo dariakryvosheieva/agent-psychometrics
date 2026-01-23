@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem clearly describes that precomputed CDF methods need to be added to multiple distributions, with specific test cases and references to Wikipedia formulas. The fix requires understanding SymPy's statistical distribution internals and implementing mathematical CDF formulas. While the solution approach is clear (add _cdf methods), implementing it requires domain knowledge of both the library structure and statistical mathematics.",
+  "_instance_id": "sympy__sympy-13878",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:26:23.713554"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement clearly explains that the __file__ check is no longer needed since migration discovery was changed to use pkgutil.iter_modules(). However, implementing the fix requires understanding Django's migration loader internals and Python's namespace package behavior. The fix involves removing the outdated __file__ check and modifying the logic for determining migrated vs unmigrated apps based on whether migration_names exist rather than file existence.",
+  "_instance_id": "django__django-11141",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:48:11.287056"
+}

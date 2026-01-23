@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps and the root cause is identified in the hints (calling score_samples with array instead of DataFrame during fit). The fix requires understanding sklearn's validation patterns and creating a private method to bypass validation. The solution involves moderate refactoring to add a _score_samples method and update the fit method to use it, requiring knowledge of sklearn's internal validation mechanisms.",
+  "_instance_id": "scikit-learn__scikit-learn-25931",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:20:21.639544"
+}

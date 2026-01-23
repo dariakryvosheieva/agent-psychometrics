@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with reproduction steps and expected vs actual behavior. The hints suggest special-casing Enum types in autodoc and even provide a workaround showing the desired format. The fix is localized to a single function (object_description) adding a few lines to handle enum.Enum instances specially, requiring Sphinx-specific knowledge of where object descriptions are generated but the logic itself is straightforward.",
+  "_instance_id": "sphinx-doc__sphinx-9281",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:23:55.065880"
+}

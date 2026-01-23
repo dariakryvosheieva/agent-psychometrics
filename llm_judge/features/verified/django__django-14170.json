@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is very clearly specified with reproduction examples showing the incorrect BETWEEN optimization being applied to iso_year lookups. However, the fix requires deep understanding of Django's ORM internals (lookups, extract functions, database operations) and ISO-8601 week-numbering year calculations. The solution involves modifying multiple methods across two files to compute correct ISO year boundaries using fromisocalendar(), which is a non-obvious approach requiring understanding of both the optimization mechanism and ISO calendar semantics.",
+  "_instance_id": "django__django-14170",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:58:55.135939"
+}

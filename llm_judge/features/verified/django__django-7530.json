@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 3,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem describes that makemigrations calls allow_migrate() with incorrect (app_label, model) pairs - passing all models in the project for each app instead of just that app's models. The fix is a single line change from `apps.get_models(app_label)` to `apps.get_app_config(app_label).get_models()`, which is trivial once understood. However, understanding the issue requires deep knowledge of Django's migration system, app configs, and model registry internals.",
+  "_instance_id": "django__django-7530",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:08:42.080810"
+}

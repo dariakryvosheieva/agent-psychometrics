@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The hints section explicitly provides the exact fix (changing __name__ to __qualname__), making this trivial to implement. The problem is crystal clear with reproduction code and expected vs actual behavior. The fix is a single character change in one location, requiring Django migrations knowledge but straightforward once the issue is understood.",
+  "_instance_id": "django__django-17087",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:08:36.795341"
+}

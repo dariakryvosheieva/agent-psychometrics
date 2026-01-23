@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with full reproduction steps and error message. The fix requires understanding SymPy's unit system internals, specifically how dimensions are collected and when they should be treated as dimensionless. The solution involves adding a check to convert dimensionless dimensions to Dimension(1) when processing function arguments, which requires understanding the dimension system's behavior.",
+  "_instance_id": "sympy__sympy-24066",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:31:15.401566"
+}

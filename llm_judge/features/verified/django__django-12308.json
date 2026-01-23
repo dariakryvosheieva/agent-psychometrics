@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem clearly describes that JSONField values display as Python dict format instead of valid JSON in readonly admin views. The fix location is explicitly mentioned (display_for_field in django.contrib.admin.utils), and the general approach is suggested. However, implementing requires understanding Django admin internals, JSONField's prepare_value/get_prep_value methods, and how field display works. The actual fix is relatively simple - adding a type check and calling the appropriate method - but requires framework-specific knowledge.",
+  "_instance_id": "django__django-12308",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:52:45.095176"
+}

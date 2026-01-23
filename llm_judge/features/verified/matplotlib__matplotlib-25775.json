@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "reasoning": "This is an enhancement request with a clear description of what needs to be added (get/set_antialiased methods for Text objects). The fix requires understanding matplotlib's backend architecture and how GraphicsContext works across different backends (agg, cairo). The changes span multiple files (text.py, backend_agg.py, backend_cairo.py) with moderate complexity in wiring up the antialiased property through the drawing pipeline.",
+  "_instance_id": "matplotlib__matplotlib-25775",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:11:26.825963"
+}

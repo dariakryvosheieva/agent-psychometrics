@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 4,
+  "reasoning": "The problem clearly describes the missing edge case (x=0 when a%p==0), but the gold patch goes far beyond this simple fix - it implements a complete solution for composite moduli using Chinese Remainder Theorem and Hensel lifting. This requires deep number theory knowledge and complex algorithmic implementation spanning 50+ lines of new code across multiple mathematical concepts.",
+  "_instance_id": "sympy__sympy-18199",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:28:30.579304"
+}

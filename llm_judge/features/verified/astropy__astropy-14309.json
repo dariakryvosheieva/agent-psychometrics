@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with full traceback, reproduction steps, and even a hint about the cause (a recent commit changed behavior). The fix is trivial - just returning the result of the filepath extension check instead of conditionally returning True, which prevents falling through to access args[0] when it doesn't exist. The bug is a common pattern of missing early return.",
+  "_instance_id": "astropy__astropy-14309",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:43:39.459493"
+}

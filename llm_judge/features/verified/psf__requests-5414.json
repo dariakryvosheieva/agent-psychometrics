@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with reproduction steps, expected/actual results, and error messages. The fix is trivial - just adding '.' to an existing tuple check for '*' (changing `u'*'` to `(u'*', u'.')`). However, finding the exact location requires understanding the requests library's URL validation logic and the existing pattern for handling invalid URL labels.",
+  "_instance_id": "psf__requests-5414",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:12:53.940125"
+}

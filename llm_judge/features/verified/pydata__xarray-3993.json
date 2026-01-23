@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is clearly stated - DataArray.integrate uses 'dim' while Dataset.integrate uses 'coord', creating API inconsistency. The fix requires adding a deprecation warning and supporting both parameters temporarily. The solution requires understanding xarray's API patterns and implementing a proper deprecation cycle across multiple methods.",
+  "_instance_id": "pydata__xarray-3993",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:13:39.534992"
+}

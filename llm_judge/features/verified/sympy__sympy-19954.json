@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The bug involves modifying a list while iterating over it using indices, causing an IndexError when multiple items are deleted. The fix requires understanding the algorithm's logic for finding minimal block systems and recognizing that deleting elements during iteration corrupts the indices. While the error location is clear, understanding why the fix uses a mask approach to batch removals requires deeper reasoning about list mutation during iteration.",
+  "_instance_id": "sympy__sympy-19954",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:29:18.629120"
+}

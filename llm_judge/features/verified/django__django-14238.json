@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement clearly describes the issue with a full traceback and reproduction steps, and even hints at the fix location (AutoFieldMeta.__subclasscheck__ and _subclasses property). The fix itself is a one-line change from `in` to `issubclass()`, but understanding why this matters requires knowledge of Python metaclasses and Django's field inheritance system. The bug involves understanding how subclass checks work with metaclasses.",
+  "_instance_id": "django__django-14238",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:59:01.064959"
+}

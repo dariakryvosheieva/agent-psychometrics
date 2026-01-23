@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with reproduction steps and expected vs actual behavior. The fix is a simple one-liner that passes the `cls` parameter through a recursive call - a common bug pattern where a parameter is forgotten during delegation. Understanding requires some knowledge of SymPy's symbol creation mechanism but the fix itself is trivial once the bug location is identified.",
+  "_instance_id": "sympy__sympy-23534",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:30:59.151477"
+}

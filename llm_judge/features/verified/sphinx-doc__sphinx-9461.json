@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "This bug involves the complex interaction between Python's @classmethod and @property decorators and how Sphinx's autodoc extension handles them. The fix requires modifications across three files (sphinx/domains/python.py, sphinx/ext/autodoc/__init__.py, sphinx/util/inspect.py) with deep understanding of Sphinx's internal documenter classes and Python's descriptor protocol. The problem statement hints at the root cause but doesn't provide the solution, and the fix requires careful handling of special cases when classmethod wraps property.",
+  "_instance_id": "sphinx-doc__sphinx-9461",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:24:10.665429"
+}

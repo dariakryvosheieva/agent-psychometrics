@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps and expected behavior, but the fix requires understanding pylint's internal AST handling for type comments. The fix itself is relatively simple - adding handling for Attribute nodes in type annotations - but finding the right location requires knowledge of pylint's variable checker internals and how it processes type annotations. The patch also includes an unrelated constant addition.",
+  "_instance_id": "pylint-dev__pylint-4604",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:15:25.157333"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 2,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "reasoning": "The problem clearly states that Y() should return a four-digit year padded with zeros but doesn't for years < 1000. The fix is trivial - changing from returning the raw year to using '%04d' format string. This is a very common bug pattern (missing zero-padding) requiring minimal reasoning and only basic Python string formatting knowledge.",
+  "_instance_id": "django__django-14373",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:59:27.756438"
+}

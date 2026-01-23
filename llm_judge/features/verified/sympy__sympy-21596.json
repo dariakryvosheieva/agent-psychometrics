@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with exact reproduction steps showing incorrect vs correct behavior. However, the fix requires deep understanding of SymPy's set theory internals, particularly how ImageSet intersections with Reals work. The fix involves changing the logic from subtracting solutions (base_set -=) to intersecting with solutions (base_set &=), plus refactoring the solution handling into a helper function. This requires understanding the mathematical semantics of finding real elements in an imageset.",
+  "_instance_id": "sympy__sympy-21596",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:30:04.989370"
+}

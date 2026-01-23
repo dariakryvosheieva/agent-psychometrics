@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with a complete MWE showing the precision loss issue. The fix is trivial (changing repr() to str()), but understanding why requires knowledge of how Python's repr() for Decimal objects works versus str(), and how this affects precision when converting to the Decimal type. The hint about 'incorrect conversion to Decimal' points in the right direction but doesn't specify the exact fix.",
+  "_instance_id": "django__django-15863",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:04:35.198866"
+}

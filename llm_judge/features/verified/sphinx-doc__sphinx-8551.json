@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps and expected behavior. However, fixing it requires deep understanding of Sphinx's cross-reference resolution system, specifically how ref_context (py:module, py:class) needs to be passed through the make_xref method to enable proper module-scoped lookup. The fix spans two files and requires understanding the interaction between docfields and the Python domain's xref handling.",
+  "_instance_id": "sphinx-doc__sphinx-8551",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:23:07.544657"
+}

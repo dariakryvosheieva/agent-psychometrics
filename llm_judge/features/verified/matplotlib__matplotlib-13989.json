@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with reproduction steps and expected behavior. The fix is trivial (changing `hist_kwargs = dict(density=density)` to `hist_kwargs['density'] = density`), but finding it requires understanding that the bug overwrites previously set hist_kwargs (including 'range') instead of adding to it. The bisect reference provides a hint about where the issue was introduced, but understanding why requires knowledge of matplotlib internals.",
+  "_instance_id": "matplotlib__matplotlib-13989",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:08:53.858734"
+}

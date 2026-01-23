@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with full traceback and reproduction steps. However, the fix requires deep understanding of the Bareiss algorithm, pivot finding strategies, and why using `expand_mul` for zero detection prevents the NaN comparison issue. The hints mention pivot-related issues but the actual solution requires creating a new zero-detection function and modifying the pivot-finding approach, which requires significant domain knowledge about symbolic computation and matrix algorithms.",
+  "_instance_id": "sympy__sympy-13877",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:26:18.118971"
+}

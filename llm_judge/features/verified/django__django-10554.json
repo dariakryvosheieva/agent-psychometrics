@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "This bug involves deep Django ORM internals around SQL compilation, specifically how ORDER BY clauses interact with UNION queries and derived querysets. The fix requires understanding the query compilation pipeline, how columns are selected and aliased, and the specific edge case where ORDER BY columns without aliases need to be added to the select list. The hint about query attribute mutation without copying points in a general direction but doesn't specify the actual solution involving adding select columns.",
+  "_instance_id": "django__django-10554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:47:01.203629"
+}

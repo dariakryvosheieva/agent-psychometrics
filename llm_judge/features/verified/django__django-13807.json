@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement explicitly identifies the root cause (missing quotes around table names in PRAGMA statements) and the hints provide the exact solution (use self.ops.quote_name). The fix requires Django-specific knowledge about the quote_name method but is straightforward once identified. Multiple locations in the same file need changes, but the pattern is consistent and simple.",
+  "_instance_id": "django__django-13807",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:57:09.323822"
+}

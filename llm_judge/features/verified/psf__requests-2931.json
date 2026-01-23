@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem provides clear reproduction steps and identifies the regression source (issue #2844), but doesn't specify the error or solution. The fix requires understanding how `to_native_string` handles binary data differently for URL params vs body data, and involves modifying the logic in two places to handle the encoding properly. This requires deep knowledge of the requests library's internals and how it processes different types of data payloads.",
+  "_instance_id": "psf__requests-2931",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:12:48.504609"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem clearly describes a regression when passing lazy strings to date template filter, with a specific error message. The fix is trivial - converting format_type to str to handle lazy strings. Understanding Django's lazy string evaluation and i18n system is needed, but the fix itself is a simple one-liner once the cause is identified.",
+  "_instance_id": "django__django-15741",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:04:09.612313"
+}

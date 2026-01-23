@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "reasoning": "The problem is crystal clear with a minimal reproduction case and exact error message. The fix is small (replacing a custom AttributeError raise with calling __getattribute__), but requires understanding Python's attribute access protocol and how __getattr__ interacts with properties that raise AttributeError. The hints discuss the underlying Python behavior but don't give the exact solution of using __getattribute__.",
+  "_instance_id": "astropy__astropy-14096",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:43:28.777044"
+}

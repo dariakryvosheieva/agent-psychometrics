@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 3,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The fix requires deep Django ORM knowledge to understand how to avoid duplicates when filtering with Q objects involving joins. The solution uses a sophisticated pattern with Exists() and OuterRef() to prevent duplicates instead of the previously reverted .distinct() approach which caused issues with custom fields. The hints reveal extensive prior attempts and reversions, indicating this is a non-trivial problem requiring understanding of database query generation and Django's internal query building.",
+  "_instance_id": "django__django-13315",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:55:06.028881"
+}

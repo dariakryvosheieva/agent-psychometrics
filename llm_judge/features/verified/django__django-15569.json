@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement explicitly identifies the exact fix needed - calling _clear_cached_lookups() in _unregister_lookup() just like it's done in register_lookup(). The fix is a single line addition. However, understanding why this matters requires knowledge of Django's lookup system and caching mechanism. The bug follows a common pattern of forgetting to clear cache when undoing an operation.",
+  "_instance_id": "django__django-15569",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:03:38.032900"
+}

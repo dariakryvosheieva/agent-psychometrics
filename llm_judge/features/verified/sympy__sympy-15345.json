@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and expected output. However, the fix requires understanding SymPy's printer internals - specifically how the known_functions table works and that MinMaxBase needs special handling. The fix itself is simple (adding entries to a dict and aliasing a method), but knowing where and how to make these changes requires familiarity with the codebase.",
+  "_instance_id": "sympy__sympy-15345",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:27:01.608164"
+}

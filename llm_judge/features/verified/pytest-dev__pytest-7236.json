@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with exact reproduction steps, error messages, and version pinpointing. However, the fix requires deep knowledge of pytest's unittest integration internals - understanding how skip decorators interact with tearDown when --pdb is enabled. The fix involves creating a helper function and using it consistently across multiple locations to check skip status, requiring understanding of the test lifecycle flow.",
+  "_instance_id": "pytest-dev__pytest-7236",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:17:15.501678"
+}

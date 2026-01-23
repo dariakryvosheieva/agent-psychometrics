@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem statement clearly identifies that handler variable is being overwritten even when MiddlewareNotUsed is raised, pointing directly to the issue location. However, understanding why this causes async/sync middleware chain poisoning requires deep knowledge of Django's ASGI middleware handling. The fix is simple (use a temporary variable and only assign on success) but arriving at it requires understanding the middleware loading flow and async adaptation.",
+  "_instance_id": "django__django-13810",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:57:20.127575"
+}

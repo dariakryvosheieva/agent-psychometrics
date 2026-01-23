@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement provides the exact code fix needed ('if username is None or password is None: return'). The issue is crystal clear with SQL query output demonstrating the problem. The fix is trivial - adding a 2-line early return check. Some Django authentication backend knowledge is needed to understand the context, but the solution is straightforward.",
+  "_instance_id": "django__django-11451",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:49:26.341282"
+}

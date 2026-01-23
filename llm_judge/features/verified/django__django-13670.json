@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 2,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem is crystal clear with reproduction steps showing Django, Python, and PHP behaviors. The fix is a simple one-liner changing string slicing to modulo arithmetic with zero-padding. While the problem statement mentions a PR is ready, it doesn't describe the actual fix approach, just hints that a solution exists.",
+  "_instance_id": "django__django-13670",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:56:47.726165"
+}

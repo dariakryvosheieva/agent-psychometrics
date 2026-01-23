@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement clearly identifies the issue (TypeError with timezone-aware datetimes), provides reproduction steps, and even suggests the fix (adding tzinfo to the datetime call). The fix is a single line addition of `tzinfo=d.tzinfo` parameter, making it trivial in complexity. The main requirement is understanding Django's timezone handling, but the solution is essentially spelled out in the description.",
+  "_instance_id": "django__django-16429",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:06:20.452444"
+}

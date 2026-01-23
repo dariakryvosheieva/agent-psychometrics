@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps showing that shuffling doesn't work as expected. The fix is simple (2 lines changed: one doc string update and wrapping random_state with check_random_state), but finding it requires understanding sklearn's random state handling internals and why the same random state was being reused across stratifications. The hint clarifies the root cause as a regression where each stratification is shuffled the same way.",
+  "_instance_id": "scikit-learn__scikit-learn-13124",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:18:41.013587"
+}

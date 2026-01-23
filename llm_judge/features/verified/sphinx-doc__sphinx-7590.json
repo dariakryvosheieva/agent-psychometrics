@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 4,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 5,
+  "fix_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "This bug requires deep understanding of C++ language features (User Defined Literals), Sphinx's C++ domain parser internals, and how to properly mangle UDL identifiers for symbol lookup. The fix spans multiple files (c.py and cpp.py), introduces new AST classes, and requires careful handling of literal suffix parsing with proper identifier mangling. The problem statement only hints that UDLs are unsupported without specifying how to implement them.",
+  "_instance_id": "sphinx-doc__sphinx-7590",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:21:51.766202"
+}

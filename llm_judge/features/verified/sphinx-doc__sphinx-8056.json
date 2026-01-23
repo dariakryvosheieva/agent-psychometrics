@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 1,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is clearly specified with reproduction steps and expected behavior, but no error message since it's a rendering issue. The fix requires understanding Sphinx Napoleon extension internals, specifically how docstring fields are consumed and formatted. The solution involves adding a 'multiple' parameter to split comma-separated parameter names, requiring knowledge of the docstring parsing architecture.",
+  "_instance_id": "sphinx-doc__sphinx-8056",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:22:27.500313"
+}

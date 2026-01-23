@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 2,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is clearly described with reproduction steps and the hint identifies the exact issue (extra `<mi>` tags wrapping `<msub>`). The fix requires understanding MathML structure and SymPy's printing internals - specifically how the DOM elements are constructed. The fix involves restructuring how the Symbol is printed by removing the outer `<mi>` wrapper and directly returning the appropriate element (mname, msub, msup, or msubsup) instead of nesting them.",
+  "_instance_id": "sympy__sympy-15976",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:27:29.290192"
+}

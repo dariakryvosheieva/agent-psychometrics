@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "reasoning": "The problem statement provides an extremely detailed analysis including the exact code fix needed (shown in hints as adding close_request method with connections.close_all()). However, the fix is moderately complex as it involves understanding ThreadingMixIn internals, database connection handling, and SQLite thread-sharing logic. The fix spans multiple files and requires deep knowledge of Django's test infrastructure and Python's socketserver module.",
+  "_instance_id": "django__django-14011",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:58:01.010230"
+}

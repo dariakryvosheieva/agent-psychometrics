@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 1,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "reasoning": "The problem statement provides the exact fix (replace `s.replace(\".[\",'[')` with `return s`), complete with source code tracing to the problematic line. The fix is trivial (removing one method call), but understanding why this code existed required deep knowledge of pytest's historical features (yield tests). The reporter even traced the git history to understand the original purpose of the code.",
+  "_instance_id": "pytest-dev__pytest-6202",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:17:04.318587"
+}

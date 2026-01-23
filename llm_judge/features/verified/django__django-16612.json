@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 3,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 3,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "reasoning": "The problem statement clearly identifies the issue (query string being dropped in redirects) and the hints section provides the exact code fix using `request.get_full_path(force_append_slash=True)`. The fix is a single line change in one location. Basic Django framework knowledge about request methods is needed, but the solution is straightforward once the issue is identified.",
+  "_instance_id": "django__django-16612",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:07:10.105462"
+}

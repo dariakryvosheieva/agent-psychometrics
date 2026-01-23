@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 0,
+  "problem_clarity": 5,
+  "error_message_provided": 0,
+  "reproduction_steps": 1,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 1,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem is very clearly described with complete reproduction steps, expected vs actual behavior, and environment info. However, the fix requires deep knowledge of Sphinx's autodoc internals to understand that `type_aliases` parameter needs to be passed to `inspect.signature()`. The actual fix is trivial (adding one parameter), but finding where this change needs to be made requires understanding Sphinx's typehints processing flow.",
+  "_instance_id": "sphinx-doc__sphinx-8459",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T11:22:48.667795"
+}

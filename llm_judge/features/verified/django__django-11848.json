@@ -1,0 +1,16 @@
+{
+  "fix_in_description": 2,
+  "problem_clarity": 4,
+  "error_message_provided": 0,
+  "reproduction_steps": 0,
+  "fix_locality": 1,
+  "domain_knowledge_required": 4,
+  "fix_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "reasoning": "The problem statement clearly describes the RFC requirement for handling two-digit years relative to the current year rather than using hardcoded ranges. The fix requires understanding HTTP date parsing standards (RFC 7231) and implementing the 50-year window logic correctly. While the change is localized to a single location (~10 lines), it requires understanding both the RFC specification and careful date arithmetic to calculate the correct century.",
+  "_instance_id": "django__django-11848",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-13T10:51:06.385114"
+}
