@@ -119,11 +119,11 @@ def print_comparison_table(
     # Oracle MAE uses Oracle abilities for date lookup (isolates difficulty prediction error)
     has_oracle_mae = oracle_date_results is not None and len(oracle_date_results) > 0
     if has_oracle_mae:
-        print(f"{'Method':<40} {'ROC-AUC':>10} {'MAE (days)':>12} {'Oracle MAE†':>12}")
-        print("-" * 76)
+        print(f"{'Method':<50} {'ROC-AUC':>10} {'MAE (days)':>12} {'Oracle MAE†':>12}")
+        print("-" * 86)
     else:
-        print(f"{'Method':<45} {'ROC-AUC':>10} {'MAE (days)':>12}")
-        print("-" * 68)
+        print(f"{'Method':<50} {'ROC-AUC':>10} {'MAE (days)':>12}")
+        print("-" * 73)
 
     # Sort by AUC (descending)
     def sort_key(item):
@@ -162,9 +162,9 @@ def print_comparison_table(
                 oracle_mae_str = "N/A"
             else:
                 oracle_mae_str = f"{oracle_mae:.1f}"
-            print(f"{method:<40} {auc_str:>10} {mae_str:>12} {oracle_mae_str:>12}")
+            print(f"{method:<50} {auc_str:>10} {mae_str:>12} {oracle_mae_str:>12}")
         else:
-            print(f"{method:<45} {auc_str:>10} {mae_str:>12}")
+            print(f"{method:<50} {auc_str:>10} {mae_str:>12}")
 
     # Print footnote for Oracle MAE if present
     if has_oracle_mae:
