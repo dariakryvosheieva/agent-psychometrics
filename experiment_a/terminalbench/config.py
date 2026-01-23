@@ -75,6 +75,9 @@ class TerminalBenchConfig:
     # Task filtering
     exclude_unsolved: bool = False  # Exclude tasks no agent solved
 
+    # Alpha selection method for grouped ridge
+    expand_grouped_ridge: bool = False  # If True, use AUC-based alpha selection
+
     def __post_init__(self):
         """Switch data paths based on use_binary mode.
 

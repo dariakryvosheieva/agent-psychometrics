@@ -253,6 +253,7 @@ class GroupedRidgePredictor:
         source: GroupedFeatureSource,
         alpha_grids: Optional[Dict[str, List[float]]] = None,
         default_alpha_grid: Optional[List[float]] = None,
+        fixed_alphas: Optional[Dict[str, float]] = None,
     ):
         """Initialize the grouped ridge predictor.
 
@@ -263,9 +264,13 @@ class GroupedRidgePredictor:
                 If a source is not in this dict, uses default_alpha_grid.
             default_alpha_grid: Default alpha grid for sources not in alpha_grids.
                 Defaults to [0.1, 1.0, 10.0, 100.0, 1000.0].
+            fixed_alphas: If provided, use these exact alphas per source (no grid search).
+                Keys are source names, values are alpha values.
+                Mutually exclusive with alpha_grids.
 
         Raises:
             TypeError: If source is not a GroupedFeatureSource.
+            ValueError: If fixed_alphas is provided but missing entries for some sources.
         """
         if not isinstance(source, GroupedFeatureSource):
             raise TypeError(
@@ -273,9 +278,19 @@ class GroupedRidgePredictor:
                 "Use FeatureBasedPredictor for single sources."
             )
 
+        # Validate fixed_alphas if provided
+        if fixed_alphas is not None:
+            source_names = {s.name for s in source.sources}
+            missing = source_names - set(fixed_alphas.keys())
+            if missing:
+                raise ValueError(
+                    f"fixed_alphas missing entries for sources: {missing}"
+                )
+
         self.source = source
         self._alpha_grids = alpha_grids or {}
         self._default_alpha_grid = default_alpha_grid or self.DEFAULT_ALPHA_GRID
+        self._fixed_alphas = fixed_alphas
 
         # Model state (set after fit())
         self._scaler: Optional[StandardScaler] = None
@@ -286,6 +301,9 @@ class GroupedRidgePredictor:
     @property
     def name(self) -> str:
         """Human-readable predictor name."""
+        if self._fixed_alphas is not None:
+            alpha_str = ", ".join(f"{k}={v}" for k, v in self._fixed_alphas.items())
+            return f"Grouped Ridge ({alpha_str})"
         return f"Grouped Ridge ({self.source.name})"
 
     def _get_alpha_grid_for_source(self, source_name: str) -> List[float]:
@@ -306,7 +324,10 @@ class GroupedRidgePredictor:
         return X_out
 
     def fit(self, task_ids: List[str], ground_truth_b: Union[np.ndarray, List[float]]) -> None:
-        """Fit the predictor on training data with grid search over per-source alphas.
+        """Fit the predictor on training data.
+
+        If fixed_alphas was provided at construction, uses those alphas directly.
+        Otherwise, performs grid search over per-source alphas using MSE.
 
         Args:
             task_ids: List of training task identifiers.
@@ -326,44 +347,48 @@ class GroupedRidgePredictor:
         # Get concatenated features
         X = self.source.get_features(task_ids)
 
-        # Build alpha grid for each source
-        source_grids = []
-        for s in self.source.sources:
-            grid = self._get_alpha_grid_for_source(s.name)
-            source_grids.append(grid)
+        # IMPORTANT: StandardScaler must be applied BEFORE group scaling.
+        # If applied after, it normalizes each feature to unit variance,
+        # completely negating the differential regularization from group scaling.
+        # Correct order: StandardScaler -> Group Scaling -> Ridge(alpha=1)
+        self._scaler = StandardScaler()
+        X_std = self._scaler.fit_transform(X)
 
-        # Grid search over all combinations of per-source alphas
-        best_score = float("inf")
-        best_alphas: Optional[Tuple[float, ...]] = None
+        if self._fixed_alphas is not None:
+            # Use fixed alphas directly (no grid search)
+            best_alphas = tuple(self._fixed_alphas[s.name] for s in self.source.sources)
+        else:
+            # Grid search over all combinations of per-source alphas
+            source_grids = []
+            for s in self.source.sources:
+                grid = self._get_alpha_grid_for_source(s.name)
+                source_grids.append(grid)
 
-        for alpha_combo in itertools.product(*source_grids):
-            # Apply per-group scaling
-            X_scaled = self._apply_group_scaling(X, alpha_combo)
+            best_score = float("inf")
+            best_alphas = None
 
-            # Standardize (important: fit scaler on scaled data)
-            scaler = StandardScaler()
-            X_std = scaler.fit_transform(X_scaled)
+            for alpha_combo in itertools.product(*source_grids):
+                # Apply per-group scaling AFTER standardization
+                X_scaled = self._apply_group_scaling(X_std, alpha_combo)
 
-            # Cross-validate with standard ridge (alpha=1 after scaling)
-            scores = cross_val_score(
-                Ridge(alpha=1.0), X_std, y, cv=5, scoring="neg_mean_squared_error"
-            )
-            mean_score = -scores.mean()  # Convert to positive MSE
+                # Cross-validate with standard ridge (alpha=1 after scaling)
+                scores = cross_val_score(
+                    Ridge(alpha=1.0), X_scaled, y, cv=5, scoring="neg_mean_squared_error"
+                )
+                mean_score = -scores.mean()  # Convert to positive MSE
 
-            if mean_score < best_score:
-                best_score = mean_score
-                best_alphas = alpha_combo
+                if mean_score < best_score:
+                    best_score = mean_score
+                    best_alphas = alpha_combo
 
-        # Refit with best alphas
+        # Fit with selected alphas
         self._best_alphas = {
             s.name: alpha for s, alpha in zip(self.source.sources, best_alphas)
         }
 
-        X_scaled = self._apply_group_scaling(X, best_alphas)
-        self._scaler = StandardScaler()
-        X_std = self._scaler.fit_transform(X_scaled)
+        X_scaled = self._apply_group_scaling(X_std, best_alphas)
         self._model = Ridge(alpha=1.0)
-        self._model.fit(X_std, y)
+        self._model.fit(X_scaled, y)
 
         self._is_fitted = True
 
@@ -385,12 +410,12 @@ class GroupedRidgePredictor:
 
         X = self.source.get_features(task_ids)
 
-        # Apply same scaling used during training
+        # Apply same transformations as training: StandardScaler -> Group Scaling
+        X_std = self._scaler.transform(X)
         alphas = tuple(self._best_alphas[s.name] for s in self.source.sources)
-        X_scaled = self._apply_group_scaling(X, alphas)
-        X_std = self._scaler.transform(X_scaled)
+        X_scaled = self._apply_group_scaling(X_std, alphas)
 
-        predictions = self._model.predict(X_std)
+        predictions = self._model.predict(X_scaled)
         return {task_id: float(pred) for task_id, pred in zip(task_ids, predictions)}
 
     def get_model_info(self) -> Dict[str, Any]:

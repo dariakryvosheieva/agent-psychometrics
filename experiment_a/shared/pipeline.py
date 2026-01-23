@@ -10,6 +10,7 @@ TerminalBench experiments use. The experiments differ only in:
 """
 
 import argparse
+import itertools
 import json
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -209,18 +210,25 @@ def build_cv_predictors(
     if len(feature_source_list) >= 2:
         # Extract just the sources (without names) for GroupedFeatureSource
         feature_sources = [source for _, source in feature_source_list]
-        # Create grouped source with default alphas (will grid search)
         grouped_source = GroupedFeatureSource([
             RegularizedFeatureSource(src) for src in feature_sources
         ])
-        grouped_predictor = GroupedRidgePredictor(grouped_source)
-        configs.append(
-            CVPredictorConfig(
-                predictor=DifficultyPredictorAdapter(grouped_predictor),
-                name="grouped_ridge",
-                display_name=f"Grouped Ridge ({grouped_source.name})",
+
+        # Check if we should expand to multiple configs for AUC-based alpha selection
+        expand_grouped_ridge = getattr(config, "expand_grouped_ridge", False)
+        if expand_grouped_ridge:
+            # Expand to multiple fixed-alpha configs (evaluated by AUC in outer CV loop)
+            configs.extend(expand_grouped_ridge_configs(grouped_source))
+        else:
+            # Original behavior: single GroupedRidgePredictor with MSE-based grid search
+            grouped_predictor = GroupedRidgePredictor(grouped_source)
+            configs.append(
+                CVPredictorConfig(
+                    predictor=DifficultyPredictorAdapter(grouped_predictor),
+                    name="grouped_ridge",
+                    display_name=f"Grouped Ridge ({grouped_source.name})",
+                )
             )
-        )
 
     # Constant baseline (mean difficulty)
     configs.append(
@@ -239,6 +247,47 @@ def build_cv_predictors(
             display_name="Agent-only",
         )
     )
+
+    return configs
+
+
+def expand_grouped_ridge_configs(
+    grouped_source: GroupedFeatureSource,
+    alpha_grid: Optional[List[float]] = None,
+) -> List[CVPredictorConfig]:
+    """Expand grouped ridge into multiple fixed-alpha configs for AUC-based selection.
+
+    Instead of using internal grid search (which optimizes MSE), this creates
+    one predictor config per alpha combination. The outer CV loop evaluates
+    each by AUC, allowing AUC-based alpha selection.
+
+    Args:
+        grouped_source: GroupedFeatureSource with 2+ underlying sources.
+        alpha_grid: Alpha values to try per source.
+            Defaults to [0.1, 1.0, 10.0, 100.0, 1000.0].
+
+    Returns:
+        List of CVPredictorConfig, one per alpha combination.
+    """
+    alpha_grid = alpha_grid or [0.1, 1.0, 10.0, 100.0, 1000.0]
+    source_names = [s.name for s in grouped_source.sources]
+
+    configs = []
+    for alpha_combo in itertools.product(alpha_grid, repeat=len(source_names)):
+        fixed_alphas = dict(zip(source_names, alpha_combo))
+
+        # Create predictor with fixed alphas (no internal grid search)
+        predictor = GroupedRidgePredictor(grouped_source, fixed_alphas=fixed_alphas)
+
+        # Create unique name for this combination
+        alpha_str = "_".join(f"{v}" for v in alpha_combo)
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(predictor),
+                name=f"grouped_ridge_alpha_{alpha_str}",
+                display_name=predictor.name,
+            )
+        )
 
     return configs
 
@@ -349,6 +398,54 @@ def run_cross_validation(
             print(f"   Mean AUC: {result.mean_auc:.4f} ± {result.std_auc:.4f}")
         else:
             print("   Mean AUC: N/A")
+
+    # Post-process grouped ridge results if expanded
+    expand_grouped_ridge = getattr(config, "expand_grouped_ridge", False)
+    if expand_grouped_ridge:
+        # Find all grouped ridge alpha variants
+        grouped_results = {
+            k: v for k, v in cv_results.items()
+            if k.startswith("grouped_ridge_alpha_")
+        }
+        if grouped_results:
+            # Select best by mean AUC
+            best_name = max(
+                grouped_results,
+                key=lambda n: grouped_results[n].mean_auc or 0.0
+            )
+            best_result = grouped_results[best_name]
+
+            # Remove all alpha variants from results
+            for name in list(cv_results.keys()):
+                if name.startswith("grouped_ridge_alpha_"):
+                    del cv_results[name]
+
+            # Add the best one back with a clear name
+            cv_results["grouped_ridge_best_auc"] = best_result
+
+            # Also update predictor_configs for summary display
+            # Find the matching config for display name
+            best_display_name = None
+            for pc in predictor_configs:
+                if pc.name == best_name:
+                    best_display_name = pc.display_name
+                    break
+
+            print(f"\n=> Best Grouped Ridge by AUC: {best_display_name}")
+            print(f"   Mean AUC: {best_result.mean_auc:.4f} ± {best_result.std_auc:.4f}")
+
+            # Update predictor_configs to only include the best grouped ridge for summary
+            predictor_configs = [
+                pc for pc in predictor_configs
+                if not pc.name.startswith("grouped_ridge_alpha_")
+            ]
+            predictor_configs.append(
+                CVPredictorConfig(
+                    predictor=None,  # Not needed for summary
+                    name="grouped_ridge_best_auc",
+                    display_name=f"Grouped Ridge (best by AUC: {best_display_name})",
+                )
+            )
 
     # Print summary
     print("\n" + "=" * 60)
@@ -470,6 +567,11 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         help="Include Feature-IRT joint learning methods (slower, minimal improvement over Ridge)",
     )
     parser.add_argument(
+        "--expand_grouped_ridge",
+        action="store_true",
+        help="Use AUC-based alpha selection for grouped ridge (instead of MSE-based grid search)",
+    )
+    parser.add_argument(
         "--binary",
         action="store_true",
         help="Use collapsed binary data (any success = 1) instead of binomial (k/n successes). "
@@ -505,6 +607,7 @@ def run_experiment_main(
         "split_seed": args.split_seed,
         "output_dir": Path(args.output_dir),
         "exclude_unsolved": args.exclude_unsolved,
+        "expand_grouped_ridge": args.expand_grouped_ridge,
     }
 
     # Handle --binary flag for TerminalBench (default is binomial)

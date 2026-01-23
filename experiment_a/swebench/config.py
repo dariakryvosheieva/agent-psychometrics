@@ -53,6 +53,9 @@ class ExperimentAConfig:
     # Task filtering
     exclude_unsolved: bool = False  # Exclude tasks no agent solved
 
+    # Alpha selection method for grouped ridge
+    expand_grouped_ridge: bool = False  # If True, use AUC-based alpha selection
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serializable dict."""
         d = asdict(self)
