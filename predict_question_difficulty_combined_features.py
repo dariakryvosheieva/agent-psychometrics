@@ -486,6 +486,175 @@ def _predict_block_ridge(state, *, X_emb, X_judge):
     return np.asarray(pred, dtype=np.float64).reshape(-1)
 
 
+def _decompose_block_ridge_single(state, *, x_emb_raw, x_judge_raw):
+    """
+    Decompose prediction into embedding vs judge contributions.
+
+    Returns a dict with two views:
+      - **raw_dot**: dot products against raw feature vectors (what you asked for)
+      - **std_contrib**: contributions in standardized space (exactly what the model computes pre-intercept)
+
+    In raw space we can write:
+      yhat = intercept_raw + dot(w_emb_raw, x_emb_raw) + dot(w_judge_raw, x_judge_raw)
+    """
+    import numpy as np
+
+    ridge = state["ridge"]
+    coef = np.asarray(getattr(ridge, "coef_", []), dtype=np.float64).reshape(-1)
+    if coef.size == 0:
+        raise RuntimeError("Model has no coef_; cannot decompose.")
+
+    n_emb = int(state["n_emb"])
+    w_emb_t = coef[:n_emb].reshape(-1)
+    w_judge_t = coef[n_emb:].reshape(-1)
+
+    alpha_emb = float(state["alpha_emb"])
+    alpha_judge = float(state["alpha_judge"])
+    emb_scaler = state["emb_scaler"]
+    judge_scaler = state["judge_scaler"]
+
+    x_emb_raw = np.asarray(x_emb_raw, dtype=np.float64).reshape(1, -1)
+    x_judge_raw = np.asarray(x_judge_raw, dtype=np.float64).reshape(1, -1)
+
+    # Standardized-space contributions (exactly matches feature construction used for training).
+    x_emb_s = emb_scaler.transform(x_emb_raw)[0]
+    x_judge_s = judge_scaler.transform(x_judge_raw)[0]
+    w_emb_std = w_emb_t / math.sqrt(alpha_emb)
+    w_judge_std = w_judge_t / math.sqrt(alpha_judge)
+    emb_contrib_std = float(np.dot(x_emb_s, w_emb_std))
+    judge_contrib_std = float(np.dot(x_judge_s, w_judge_std))
+    intercept_model = float(getattr(ridge, "intercept_", 0.0))
+
+    # Raw-space effective weights (so you can compute dot products with raw feature components).
+    emb_scale = np.asarray(getattr(emb_scaler, "scale_", None), dtype=np.float64).reshape(-1)
+    judge_scale = np.asarray(getattr(judge_scaler, "scale_", None), dtype=np.float64).reshape(-1)
+    emb_mean = np.asarray(getattr(emb_scaler, "mean_", None), dtype=np.float64).reshape(-1)
+    judge_mean = np.asarray(getattr(judge_scaler, "mean_", None), dtype=np.float64).reshape(-1)
+
+    # guard: StandardScaler can produce zeros if a feature is constant; avoid infs.
+    emb_scale = np.where(emb_scale == 0.0, 1.0, emb_scale)
+    judge_scale = np.where(judge_scale == 0.0, 1.0, judge_scale)
+
+    w_emb_raw = w_emb_std / emb_scale
+    w_judge_raw = w_judge_std / judge_scale
+    emb_dot_raw = float(np.dot(x_emb_raw.reshape(-1), w_emb_raw))
+    judge_dot_raw = float(np.dot(x_judge_raw.reshape(-1), w_judge_raw))
+    intercept_raw = intercept_model - float(np.dot(emb_mean, w_emb_raw)) - float(np.dot(judge_mean, w_judge_raw))
+
+    pred_check = intercept_model + emb_contrib_std + judge_contrib_std
+    pred_raw = intercept_raw + emb_dot_raw + judge_dot_raw
+
+    return {
+        "pred": float(pred_check),
+        "pred_raw": float(pred_raw),
+        "intercept_model": float(intercept_model),
+        "intercept_raw": float(intercept_raw),
+        "emb_contrib_std": float(emb_contrib_std),
+        "judge_contrib_std": float(judge_contrib_std),
+        "emb_dot_raw": float(emb_dot_raw),
+        "judge_dot_raw": float(judge_dot_raw),
+    }
+
+
+def _extract_block_ridge_raw_weights(state):
+    """
+    Return (w_emb_raw, w_judge_raw, intercept_raw) so that:
+      yhat = intercept_raw + dot(w_emb_raw, x_emb_raw) + dot(w_judge_raw, x_judge_raw)
+    """
+    import numpy as np
+
+    ridge = state["ridge"]
+    coef = np.asarray(getattr(ridge, "coef_", []), dtype=np.float64).reshape(-1)
+    if coef.size == 0:
+        raise RuntimeError("Model has no coef_.")
+
+    n_emb = int(state["n_emb"])
+    w_emb_t = coef[:n_emb].reshape(-1)
+    w_judge_t = coef[n_emb:].reshape(-1)
+
+    alpha_emb = float(state["alpha_emb"])
+    alpha_judge = float(state["alpha_judge"])
+    emb_scaler = state["emb_scaler"]
+    judge_scaler = state["judge_scaler"]
+
+    emb_scale = np.asarray(getattr(emb_scaler, "scale_", None), dtype=np.float64).reshape(-1)
+    judge_scale = np.asarray(getattr(judge_scaler, "scale_", None), dtype=np.float64).reshape(-1)
+    emb_mean = np.asarray(getattr(emb_scaler, "mean_", None), dtype=np.float64).reshape(-1)
+    judge_mean = np.asarray(getattr(judge_scaler, "mean_", None), dtype=np.float64).reshape(-1)
+    emb_scale = np.where(emb_scale == 0.0, 1.0, emb_scale)
+    judge_scale = np.where(judge_scale == 0.0, 1.0, judge_scale)
+
+    w_emb_std = w_emb_t / math.sqrt(alpha_emb)
+    w_judge_std = w_judge_t / math.sqrt(alpha_judge)
+    w_emb_raw = w_emb_std / emb_scale
+    w_judge_raw = w_judge_std / judge_scale
+
+    intercept_model = float(getattr(ridge, "intercept_", 0.0))
+    intercept_raw = intercept_model - float(np.dot(emb_mean, w_emb_raw)) - float(np.dot(judge_mean, w_judge_raw))
+    return w_emb_raw.astype(np.float32, copy=False), w_judge_raw.astype(np.float32, copy=False), float(intercept_raw)
+
+
+def save_regression_weights_block_ridge(
+    *,
+    out_dir: str,
+    state,
+    judge_feature_names: Sequence[str],
+    metadata: dict,
+) -> Tuple[str, str]:
+    """
+    Save a minimal representation of the *joint* block-ridge.
+
+    Writes:
+      - regression_weights.json (metadata)
+      - regression_weights.npz  (arrays: coef_emb_raw, coef_judge_raw, intercept_raw, judge_feature_names, plus scaler stats)
+    """
+    import numpy as np
+
+    os.makedirs(str(out_dir), exist_ok=True)
+    w_emb_raw, w_judge_raw, intercept_raw = _extract_block_ridge_raw_weights(state)
+
+    emb_scaler = state["emb_scaler"]
+    judge_scaler = state["judge_scaler"]
+    emb_mean = np.asarray(getattr(emb_scaler, "mean_", []), dtype=np.float32).reshape(-1)
+    emb_scale = np.asarray(getattr(emb_scaler, "scale_", []), dtype=np.float32).reshape(-1)
+    judge_mean = np.asarray(getattr(judge_scaler, "mean_", []), dtype=np.float32).reshape(-1)
+    judge_scale = np.asarray(getattr(judge_scaler, "scale_", []), dtype=np.float32).reshape(-1)
+
+    weights_npz = os.path.join(str(out_dir), "regression_weights.npz")
+    np.savez_compressed(
+        weights_npz,
+        coef_emb_raw=np.asarray(w_emb_raw, dtype=np.float32).reshape(-1),
+        coef_judge_raw=np.asarray(w_judge_raw, dtype=np.float32).reshape(-1),
+        intercept_raw=np.asarray([float(intercept_raw)], dtype=np.float32),
+        alpha_emb=np.asarray([float(state["alpha_emb"])], dtype=np.float32),
+        alpha_judge=np.asarray([float(state["alpha_judge"])], dtype=np.float32),
+        emb_scaler_mean=emb_mean,
+        emb_scaler_scale=emb_scale,
+        judge_scaler_mean=judge_mean,
+        judge_scaler_scale=judge_scale,
+        judge_feature_names=np.asarray(list(judge_feature_names), dtype=object),
+        n_emb=np.asarray([int(state["n_emb"])], dtype=np.int64),
+        n_judge=np.asarray([int(state["n_judge"])], dtype=np.int64),
+    )
+
+    weights_json = os.path.join(str(out_dir), "regression_weights.json")
+    meta = dict(metadata or {})
+    meta.update(
+        {
+            "regressor": "block_ridge",
+            "n_emb": int(state["n_emb"]),
+            "n_judge": int(state["n_judge"]),
+            "alpha_emb": float(state["alpha_emb"]),
+            "alpha_judge": float(state["alpha_judge"]),
+            "judge_feature_names": list(judge_feature_names),
+            "weights_npz": str(weights_npz),
+        }
+    )
+    with open(weights_json, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2, sort_keys=True)
+    return weights_json, weights_npz
+
+
 def _select_block_alphas_inner_cv(
     *,
     X_emb,
@@ -788,7 +957,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument(
         "--debug",
         action="store_true",
-        help="Print extra per-fold diagnostics (embedding-only vs final AUC, coefficient norms, etc).",
+        help="Print per-fold debug diagnostics (emb_auc/final_auc + selected block alphas + contribution summary).",
     )
 
     args = p.parse_args(argv)
@@ -947,6 +1116,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     fold_alpha_emb: List[float] = []
     fold_alpha_judge: List[float] = []
 
+    # Out-of-fold per-item predictions for predictions.csv (may be NaN if judge features missing).
+    eligible_index = {tid: i for i, tid in enumerate(eligible)}
+    yhat_oof = np.full((int(len(eligible)),), np.nan, dtype=np.float64)
+    fold_of_item = np.full((int(len(eligible)),), -1, dtype=np.int32)
+
+    best_fold_auc = -float("inf")
+    best_fold = -1
+    best_joint_state = None
+    best_fold_root = ""
+
     for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
         train_items = [eligible[int(i)] for i in tr.tolist()]
         test_items = [eligible[int(i)] for i in te.tolist()]
@@ -1055,6 +1234,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # (4) Evaluate on held-out fold
         # -------------------------
         final_pred_by_item: Dict[str, float] = {}
+        contrib_by_item: Dict[str, Dict[str, float]] = {}
         n_missing_judge = 0
         for tid in test_items:
             j = _load_judge_vector(tid, features_dir=feat_dir, feature_names=judge_feature_names, index=idx)
@@ -1065,6 +1245,40 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             x_j = j.reshape(1, -1).astype(np.float32)
             z_final = float(_predict_block_ridge(joint_state, X_emb=x_emb, X_judge=x_j)[0])
             final_pred_by_item[tid] = z_final
+            try:
+                contrib = _decompose_block_ridge_single(joint_state, x_emb_raw=x_emb, x_judge_raw=x_j)
+                contrib_by_item[tid] = {
+                    "pred": float(contrib["pred"]),
+                    "pred_raw": float(contrib["pred_raw"]),
+                    "intercept_model": float(contrib["intercept_model"]),
+                    "intercept_raw": float(contrib["intercept_raw"]),
+                    # What you asked for:
+                    "emb_dot_raw": float(contrib["emb_dot_raw"]),
+                    "judge_dot_raw": float(contrib["judge_dot_raw"]),
+                    # Useful sanity view:
+                    "emb_contrib_std": float(contrib["emb_contrib_std"]),
+                    "judge_contrib_std": float(contrib["judge_contrib_std"]),
+                }
+            except Exception:
+                # Decomposition is for analysis only; prediction should still work.
+                pass
+
+        # Fill OOF predictions for this fold's test items (NaN if missing judge).
+        for tid in test_items:
+            i = eligible_index.get(tid, None)
+            if i is None:
+                continue
+            fold_of_item[int(i)] = int(fold)
+            if tid in final_pred_by_item:
+                yhat_oof[int(i)] = float(final_pred_by_item[tid])
+
+        # Save per-item decomposition for this fold (test items only).
+        try:
+            os.makedirs(fold_root, exist_ok=True)
+            with open(os.path.join(str(fold_root), "block_contributions_test_items.json"), "w", encoding="utf-8") as f:
+                json.dump(contrib_by_item, f, indent=2, sort_keys=True)
+        except Exception:
+            pass
 
         # Score only items with final predictions (judge features present), so we can
         # compare embedding-only vs final AUC on the exact same observation set.
@@ -1104,47 +1318,119 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         fold_n_obs.append(int(len(labels)))
         fold_n_items_scored.append(int(len(final_pred_by_item)))
 
+        if fold_auc == fold_auc and float(fold_auc) > float(best_fold_auc):
+            best_fold_auc = float(fold_auc)
+            best_fold = int(fold)
+            best_joint_state = joint_state
+            best_fold_root = str(fold_root)
+
         if bool(args.debug):
             try:
-                ridge = joint_state["ridge"]
-                coef = np.asarray(getattr(ridge, "coef_", []), dtype=np.float64).reshape(-1)
-                n_emb = int(joint_state["n_emb"])
-                w_emb_t = coef[:n_emb]
-                w_judge_t = coef[n_emb:]
-                if coef.size:
-                    # Convert coefficients back to "standardized-feature" space for a clearer block norm:
-                    # since we fit on (X_std / sqrt(alpha)), w_std = coef / sqrt(alpha).
-                    w_emb_std = w_emb_t / math.sqrt(float(joint_state["alpha_emb"]))
-                    w_judge_std = w_judge_t / math.sqrt(float(joint_state["alpha_judge"]))
-                    print(
-                        f"Fold {fold:02d} debug: emb_auc={fold_auc_emb:.4f} final_auc={fold_auc:.4f} "
-                        f"joint_train_n={len(joint_train_items_used)} "
-                        f"alpha_emb={float(joint_state['alpha_emb']):.3g} alpha_judge={float(joint_state['alpha_judge']):.3g} "
-                        f"coef_norm_total={float(np.linalg.norm(coef)):.3e} "
-                        f"coef_norm_emb_std={float(np.linalg.norm(w_emb_std)):.3e} "
-                        f"coef_norm_judge_std={float(np.linalg.norm(w_judge_std)):.3e} "
-                        f"inner_best_mse={float(inner_best_mse):.4g}"
-                    )
+                print(
+                    f"Fold {fold:02d} debug: emb_auc={fold_auc_emb:.4f} final_auc={fold_auc:.4f} "
+                    f"alpha_emb={float(joint_state['alpha_emb']):.3g} alpha_judge={float(joint_state['alpha_judge']):.3g}"
+                )
+
+                # Relative contribution summary on scored test items (raw dot-products).
+                if contrib_by_item:
+                    emb_abs = []
+                    judge_abs = []
+                    frac_emb = []
+                    for tid in scored_items:
+                        c = contrib_by_item.get(tid, None)
+                        if not c:
+                            continue
+                        e = abs(float(c.get("emb_dot_raw", 0.0)))
+                        jv = abs(float(c.get("judge_dot_raw", 0.0)))
+                        if not (math.isfinite(e) and math.isfinite(jv)):
+                            continue
+                        emb_abs.append(e)
+                        judge_abs.append(jv)
+                        denom = e + jv
+                        frac_emb.append(float(e / denom) if denom > 0 else float("nan"))
+                    if emb_abs and judge_abs:
+                        print(
+                            f"Fold {fold:02d} contrib (test items): "
+                            f"mean|emb_dot|={float(np.mean(emb_abs)):.3g} "
+                            f"mean|judge_dot|={float(np.mean(judge_abs)):.3g} "
+                            f"mean frac_emb={float(np.nanmean(np.asarray(frac_emb))):.3g}"
+                        )
             except Exception as e:
                 print(f"Fold {fold:02d} debug: failed to inspect judge weights ({e})")
 
         print(
-            f"Fold {fold:02d}: auc={fold_auc} obs={len(labels)} "
-            f"test_items={len(test_items)} scored_items={len(final_pred_by_item)} missing_judge={n_missing_judge}"
+            f"Fold {fold:02d}: auc={fold_auc} missing_judge={n_missing_judge}"
         )
 
     auc_arr = np.asarray(fold_aucs, dtype=np.float64)
     auc_mean = float(np.nanmean(auc_arr)) if auc_arr.size else float("nan")
     auc_std = float(np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
-    print(f"{int(args.cv_folds)}-fold CV test ROC-AUC (combined features): mean={auc_mean} std={auc_std}")
+    print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
     print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in fold_aucs]))
-    if bool(args.debug):
-        emb_auc_arr = np.asarray(fold_aucs_embedding_only, dtype=np.float64)
-        emb_auc_mean = float(np.nanmean(emb_auc_arr)) if emb_auc_arr.size else float("nan")
-        print(f"{int(args.cv_folds)}-fold CV test ROC-AUC (embedding-only on same scored items): mean={emb_auc_mean}")
+
+    if best_joint_state is None or best_fold < 1:
+        raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
+
+    # Save regression weights from the best fold (by AUC), mirroring predict_question_difficulty.py.
+    weights_meta = {
+        "script": os.path.abspath(__file__),
+        "id_normalization": "strip instance_ prefix; strip -v.* suffix",
+        "seed": int(args.seed),
+        "deterministic": True,
+        "cv_n_splits": int(args.cv_folds),
+        "cv_best_auc_fold": int(best_fold),
+        "cv_best_auc": float(best_fold_auc),
+        "best_fold_root": str(best_fold_root),
+        "embeddings_cache": str(emb_cache),
+        "agent_results": str(args.agent_results),
+        "judge_features_dir": str(args.judge_features_dir),
+        "judge_feature_schema": str(schema),
+        "regressor": str(args.regressor),
+        "ridge_alpha": float(args.ridge_alpha),
+        "ridge_alphas": str(args.ridge_alphas),
+        "ridge_alphas_emb": str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas),
+        "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
+        "inner_splits": int(args.inner_splits),
+    }
+    weights_json, weights_npz = save_regression_weights_block_ridge(
+        out_dir=str(args.out_dir),
+        state=best_joint_state,
+        judge_feature_names=judge_feature_names,
+        metadata=weights_meta,
+    )
+
+    # Predict on zero-success items (excluded from CV/IRT, if requested).
+    zero_success_ids = compute_zero_success_items(all_responses)
+    zero_success_set = set(zero_success_ids)
+    zero_embedded = [tid for tid in task_ids if tid in zero_success_set] if exclude_zero_success else []
+    yhat_zero: Dict[str, float] = {}
+    if zero_embedded:
+        for tid in zero_embedded:
+            j = _load_judge_vector(tid, features_dir=feat_dir, feature_names=judge_feature_names, index=idx)
+            if j is None:
+                continue
+            x_emb = X[id_to_row[tid]].reshape(1, -1).astype(np.float32)
+            x_j = j.reshape(1, -1).astype(np.float32)
+            yhat_zero[tid] = float(_predict_block_ridge(best_joint_state, X_emb=x_emb, X_judge=x_j)[0])
+
+    # Write per-item predictions CSV (OOF CV + optional zero_success rows), mirroring predict_question_difficulty.py.
+    pred_path = os.path.join(str(args.out_dir), "predictions.csv")
+    with open(pred_path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+        w.writeheader()
+
+        for i, tid in enumerate(eligible):
+            v = float(yhat_oof[int(i)])
+            fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
+            split = "cv_val" if (v == v) else "missing_judge"
+            w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split, "fold": fold_id})
+
+        if yhat_zero:
+            for tid, v in sorted(yhat_zero.items()):
+                w.writerow({"item_id": tid, "diff_pred": float(v), "split": "zero_success", "fold": ""})
 
     # Persist a small metrics file for convenience.
-    metrics_out = os.path.join(str(args.out_dir), "metrics_combined_features.json")
+    metrics_out = os.path.join(str(args.out_dir), "metrics.json")
     try:
         with open(metrics_out, "w", encoding="utf-8") as f:
             json.dump(
@@ -1180,6 +1466,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
                     "cv_selected_alpha_emb_folds": [float(x) for x in fold_alpha_emb],
                     "cv_selected_alpha_judge_folds": [float(x) for x in fold_alpha_judge],
+                    "cv_best_auc_fold": int(best_fold),
+                    "cv_best_auc": float(best_fold_auc),
+                    "regression_weights_json": str(weights_json),
+                    "regression_weights_npz": str(weights_npz),
+                    "predictions_csv": str(pred_path),
+                    "n_items_zero_success_predicted": int(len(yhat_zero)),
                     "cv_test_auc_folds": [float(x) for x in fold_aucs],
                     "cv_test_auc_mean": float(auc_mean),
                     "cv_test_auc_std": float(auc_std),
@@ -1194,6 +1486,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Wrote metrics: {metrics_out}")
     except Exception as e:
         print(f"WARNING: failed to write metrics file: {metrics_out} ({e})")
+
+    print(f"Wrote predictions: {pred_path}")
+    print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
 
     return 0
 
