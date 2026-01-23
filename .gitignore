@@ -23,6 +23,7 @@ trajectory_data/swebench_pro/
 IssueSolvingEmpirical/
 reeval/
 terminal_bench/
+gso-experiments/
 
 # Embeddings from cluster (large files, don't sync back)
 out/

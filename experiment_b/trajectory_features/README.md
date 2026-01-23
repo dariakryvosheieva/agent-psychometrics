@@ -18,8 +18,17 @@ Extracts behavioral features from agent trajectories to predict task difficulty.
 
 ## Output Files
 
-- `chris_output/trajectory_features/raw_features_500tasks_6agents.csv` - 500 tasks × 6 agents per task
-- `chris_output/trajectory_features/raw_features_all.csv` - All extracted trajectories (may have >6 per task)
+- `chris_output/trajectory_features/raw_features_500tasks_6agents.csv` - Raw per-trajectory features (499 tasks × ~9 agents per task)
+- `chris_output/trajectory_features/aggregated_features.csv` - Task-level aggregated features (499 tasks × 33 columns)
+
+### Aggregated Feature Columns
+
+For each raw feature, the aggregation produces:
+- `{feat}_mean` - Mean across all agents
+- `{feat}_std` - Standard deviation across agents
+- `{feat}_ability_weighted` - Mean weighted by agent IRT ability
+
+Plus metadata: `n_agents`, `n_pass`, `n_fail`, `pass_rate`, `trajectory_length_mean`, `trajectory_length_std`
 
 ## Usage
 
@@ -53,9 +62,17 @@ Using Claude Sonnet 4.5 ($3/M input, $15/M output):
 - ~$0.044 per trajectory
 - 500 tasks × 6 agents = ~$130 total
 
+### Aggregate features
+```bash
+python -m experiment_b.trajectory_features.aggregate_features \
+    --input_path chris_output/trajectory_features/raw_features_500tasks_6agents.csv \
+    --output_path chris_output/trajectory_features/aggregated_features.csv
+```
+
 ## Files
 
 - `config.py` - Agent selection and feature definitions
 - `prompts.py` - LLM prompt for feature extraction
 - `extract_features.py` - Core extraction logic
 - `extract_missing.py` - Script to fill in missing trajectories
+- `aggregate_features.py` - Aggregate raw features to task-level

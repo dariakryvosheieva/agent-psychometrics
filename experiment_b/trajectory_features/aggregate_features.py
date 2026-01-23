@@ -29,8 +29,6 @@ def aggregate_features(
     Produces multiple aggregation statistics for each feature:
     - {feat}_mean: Mean across all agents
     - {feat}_std: Standard deviation across agents
-    - {feat}_pass_mean: Mean for agents that solved the task
-    - {feat}_fail_mean: Mean for agents that failed the task
     - {feat}_ability_weighted: Mean weighted by agent ability
 
     Args:
@@ -43,6 +41,19 @@ def aggregate_features(
     """
     if feature_cols is None:
         feature_cols = [c for c in FEATURE_NAMES if c in raw_df.columns]
+
+    # Fail loudly if there are any NaN values in feature columns
+    for col in feature_cols:
+        if col in raw_df.columns:
+            nan_count = raw_df[col].isna().sum()
+            if nan_count > 0:
+                nan_rows = raw_df[raw_df[col].isna()][['task_id', 'agent']].head(5)
+                examples = [f"{r['task_id']}/{r['agent']}" for _, r in nan_rows.iterrows()]
+                raise ValueError(
+                    f"Found {nan_count} NaN values in feature column '{col}'. "
+                    f"First examples: {examples}. "
+                    f"Fix the raw features before aggregating."
+                )
 
     aggregated_rows = []
 
@@ -73,25 +84,16 @@ def aggregate_features(
             row[f"{feat}_mean"] = values.mean()
             row[f"{feat}_std"] = values.std() if len(values) > 1 else 0
 
-            # Split by pass/fail
-            pass_mask = task_df["resolved"] == True
-            fail_mask = task_df["resolved"] == False
-
-            pass_values = task_df.loc[pass_mask, feat].dropna()
-            fail_values = task_df.loc[fail_mask, feat].dropna()
-
-            row[f"{feat}_pass_mean"] = pass_values.mean() if len(pass_values) > 0 else np.nan
-            row[f"{feat}_fail_mean"] = fail_values.mean() if len(fail_values) > 0 else np.nan
-
             # Ability-weighted mean (if abilities provided)
             if agent_abilities is not None:
                 weights = task_df["agent"].map(agent_abilities).fillna(0)
                 # Shift weights to be positive (add offset)
                 weights = weights - weights.min() + 1
-                weighted_values = values * weights[task_df[feat].notna()]
-                if weighted_values.sum() > 0:
+                valid_weights = weights[task_df[feat].notna()]
+                # Compute weighted mean if we have values and non-zero weights
+                if len(values) > 0 and valid_weights.sum() > 0:
                     row[f"{feat}_ability_weighted"] = (
-                        weighted_values.sum() / weights[task_df[feat].notna()].sum()
+                        (values * valid_weights.values).sum() / valid_weights.sum()
                     )
 
         aggregated_rows.append(row)

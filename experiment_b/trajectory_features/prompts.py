@@ -82,6 +82,8 @@ Analyze the trajectory and rate each feature. Be precise and consistent.
 
 ## Response Format
 
+IMPORTANT: You MUST include ALL 9 numeric features. Do NOT omit any field.
+
 Respond with ONLY a JSON object in this exact format:
 {{
     "loop_detection": <0-5>,
@@ -95,6 +97,8 @@ Respond with ONLY a JSON object in this exact format:
     "test_verification": <0-5>,
     "reasoning": "<brief 2-3 sentence explanation of your ratings>"
 }}
+
+Every field above is REQUIRED. If a feature is not applicable (e.g., no focus drift observed), use 0.
 '''
 
 

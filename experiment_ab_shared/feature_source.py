@@ -288,8 +288,21 @@ class CSVFeatureSource(TaskFeatureSource):
         # Extract features
         X = self._df.loc[task_ids, self._feature_cols].values.astype(np.float32)
 
-        # Handle NaN values (replace with 0)
-        X = np.nan_to_num(X, nan=0.0)
+        # Check for NaN values and fail loudly
+        if np.any(np.isnan(X)):
+            nan_mask = np.isnan(X)
+            nan_rows, nan_cols = np.where(nan_mask)
+            # Get the first few examples
+            examples = []
+            for i in range(min(5, len(nan_rows))):
+                task_id = task_ids[nan_rows[i]]
+                col_name = self._feature_cols[nan_cols[i]]
+                examples.append(f"{task_id}:{col_name}")
+            raise ValueError(
+                f"Found {nan_mask.sum()} NaN values in features. "
+                f"First examples: {examples}. "
+                f"Either exclude these columns or ensure all tasks have values."
+            )
 
         return X
 
