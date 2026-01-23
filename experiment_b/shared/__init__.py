@@ -36,6 +36,7 @@ from experiment_b.shared.prediction_methods import (
     FeatureIRTResults,
     build_feature_sources,
     collect_ridge_predictions,
+    collect_grouped_ridge_predictions,
     collect_feature_irt_predictions,
     collect_sad_irt_predictions,
 )
@@ -105,6 +106,7 @@ __all__ = [
     "FeatureIRTResults",
     "build_feature_sources",
     "collect_ridge_predictions",
+    "collect_grouped_ridge_predictions",
     "collect_feature_irt_predictions",
     "collect_sad_irt_predictions",
     # frontier_evaluation

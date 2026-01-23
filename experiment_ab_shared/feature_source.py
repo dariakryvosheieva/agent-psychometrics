@@ -13,14 +13,18 @@ Example usage:
     source = CSVFeatureSource(Path("features.csv"), ["col1", "col2"])
     X = source.get_features(["task1", "task2"])  # (2, 2)
 
-    # Combine sources
-    source = ConcatenatedFeatureSource([emb_source, csv_source])
-    X = source.get_features(["task1", "task2"])  # (2, 770)
+    # Combine sources with per-source regularization
+    grouped = GroupedFeatureSource([
+        RegularizedFeatureSource(emb_source, alpha=1000.0),  # High reg for high-dim
+        RegularizedFeatureSource(csv_source, alpha=1.0),     # Low reg for low-dim
+    ])
+    X = grouped.get_features(["task1", "task2"])  # (2, 770)
 """
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -290,29 +294,69 @@ class CSVFeatureSource(TaskFeatureSource):
         return X
 
 
-class ConcatenatedFeatureSource(TaskFeatureSource):
-    """Combine multiple feature sources by concatenating their features.
+@dataclass
+class RegularizedFeatureSource:
+    """Associates any feature source with its regularization strength.
 
-    All sources must have features for the same tasks. The resulting feature
-    vector is the concatenation of all individual feature vectors.
+    This wrapper allows specifying different regularization parameters for
+    different feature sources when combining them in a GroupedFeatureSource.
 
     Example:
-        combined = ConcatenatedFeatureSource([
-            EmbeddingFeatureSource(Path("embeddings.npz")),
-            CSVFeatureSource(Path("features.csv"), ["col1", "col2"]),
-        ])
-        X = combined.get_features(["task1"])  # (1, embedding_dim + 2)
+        # High regularization for high-dimensional embeddings
+        emb = RegularizedFeatureSource(EmbeddingFeatureSource(path), alpha=1000.0)
+        # Lower regularization for low-dimensional LLM judge features
+        llm = RegularizedFeatureSource(CSVFeatureSource(path), alpha=1.0)
+    """
+
+    source: TaskFeatureSource
+    alpha: float = 1.0  # Regularization strength (higher = more regularization)
+
+    @property
+    def name(self) -> str:
+        """Delegate to wrapped source."""
+        return self.source.name
+
+    @property
+    def task_ids(self) -> List[str]:
+        """Delegate to wrapped source."""
+        return self.source.task_ids
+
+    @property
+    def feature_dim(self) -> int:
+        """Delegate to wrapped source."""
+        return self.source.feature_dim
+
+    @property
+    def feature_names(self) -> Optional[List[str]]:
+        """Delegate to wrapped source."""
+        return self.source.feature_names
+
+
+class GroupedFeatureSource(TaskFeatureSource):
+    """Combines multiple sources with per-source regularization preferences.
+
+    This class preserves source boundaries and regularization preferences for
+    use with GroupedRidgePredictor.
+
+    Example:
+        sources = [
+            RegularizedFeatureSource(EmbeddingFeatureSource(path), alpha=1000.0),
+            RegularizedFeatureSource(CSVFeatureSource(path), alpha=1.0),
+        ]
+        grouped = GroupedFeatureSource(sources)
+        # Use with GroupedRidgePredictor for per-source regularization
     """
 
     def __init__(
         self,
-        sources: List[TaskFeatureSource],
+        sources: List[Union[TaskFeatureSource, RegularizedFeatureSource]],
         name: Optional[str] = None,
     ):
-        """Initialize concatenated feature source.
+        """Initialize grouped feature source.
 
         Args:
-            sources: List of feature sources to concatenate.
+            sources: List of feature sources to combine. Can be TaskFeatureSource
+                (wrapped with alpha=1.0) or RegularizedFeatureSource.
             name: Optional custom name (defaults to "source1 + source2 + ...").
 
         Raises:
@@ -321,15 +365,30 @@ class ConcatenatedFeatureSource(TaskFeatureSource):
         if not sources:
             raise ValueError("At least one source is required")
 
-        self._sources = sources
-        self._name = name or " + ".join(s.name for s in sources)
+        # Convert plain sources to RegularizedFeatureSource with alpha=1.0
+        self._sources = [
+            s if isinstance(s, RegularizedFeatureSource) else RegularizedFeatureSource(s)
+            for s in sources
+        ]
+        self._name = name or " + ".join(s.name for s in self._sources)
 
-        # Compute combined feature dimension
-        self._feature_dim = sum(s.feature_dim for s in sources)
+        # Compute group boundaries (slices for extracting each source's features)
+        self._group_slices: List[slice] = []
+        offset = 0
+        for s in self._sources:
+            dim = s.feature_dim
+            self._group_slices.append(slice(offset, offset + dim))
+            offset += dim
+        self._feature_dim = offset
 
-        # Compute intersection of task IDs (tasks that have features in all sources)
-        task_id_sets = [set(s.task_ids) for s in sources]
-        self._task_ids = list(task_id_sets[0].intersection(*task_id_sets[1:]))
+        # Compute intersection of task IDs across all sources
+        self._task_ids = self._compute_common_tasks()
+
+    def _compute_common_tasks(self) -> List[str]:
+        """Compute intersection of task IDs across all sources."""
+        task_sets = [set(s.source.task_ids) for s in self._sources]
+        common = task_sets[0].intersection(*task_sets[1:])
+        return list(common)
 
     @property
     def name(self) -> str:
@@ -342,6 +401,21 @@ class ConcatenatedFeatureSource(TaskFeatureSource):
     @property
     def feature_dim(self) -> int:
         return self._feature_dim
+
+    @property
+    def sources(self) -> List[RegularizedFeatureSource]:
+        """Access to underlying regularized sources."""
+        return self._sources
+
+    @property
+    def group_slices(self) -> List[slice]:
+        """Slices for extracting each source's features from concatenated matrix."""
+        return self._group_slices
+
+    @property
+    def group_alphas(self) -> List[float]:
+        """Regularization alphas for each source."""
+        return [s.alpha for s in self._sources]
 
     @property
     def feature_names(self) -> Optional[List[str]]:
@@ -368,7 +442,7 @@ class ConcatenatedFeatureSource(TaskFeatureSource):
             ValueError: If any task_id is missing from any source.
         """
         # Get features from each source
-        feature_matrices = [source.get_features(task_ids) for source in self._sources]
+        feature_matrices = [s.source.get_features(task_ids) for s in self._sources]
 
         # Concatenate along feature dimension
         return np.concatenate(feature_matrices, axis=1)

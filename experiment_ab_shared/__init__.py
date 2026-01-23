@@ -29,10 +29,12 @@ from experiment_ab_shared.feature_source import (
     TaskFeatureSource,
     EmbeddingFeatureSource,
     CSVFeatureSource,
-    ConcatenatedFeatureSource,
+    RegularizedFeatureSource,
+    GroupedFeatureSource,
 )
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
+    GroupedRidgePredictor,
 )
 from experiment_ab_shared.predictor_base import (
     DifficultyPredictorBase,
@@ -67,9 +69,11 @@ __all__ = [
     "TaskFeatureSource",
     "EmbeddingFeatureSource",
     "CSVFeatureSource",
-    "ConcatenatedFeatureSource",
-    # Feature-based predictor
+    "RegularizedFeatureSource",
+    "GroupedFeatureSource",
+    # Feature-based predictors
     "FeatureBasedPredictor",
+    "GroupedRidgePredictor",
     # Predictor base classes
     "DifficultyPredictorBase",
     "ConstantPredictor",

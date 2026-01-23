@@ -39,6 +39,7 @@ from experiment_b.shared import (
     # Prediction methods
     build_feature_sources,
     collect_ridge_predictions,
+    collect_grouped_ridge_predictions,
     collect_feature_irt_predictions,
     collect_sad_irt_predictions,
     # Frontier evaluation
@@ -229,6 +230,16 @@ def main():
     )
     raw_predictions.update(
         collect_ridge_predictions(
+            feature_sources,
+            data.train_task_ids,
+            data.baseline_ground_truth_b,
+            data.config.all_task_ids,
+        )
+    )
+
+    # Collect grouped ridge predictions (combines all sources with per-source regularization)
+    raw_predictions.update(
+        collect_grouped_ridge_predictions(
             feature_sources,
             data.train_task_ids,
             data.baseline_ground_truth_b,

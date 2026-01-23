@@ -98,8 +98,11 @@ Predicts difficulty of frontier tasks (tasks only solvable by newer models) usin
 |--------|---------|
 | Oracle | Upper bound |
 | Baseline IRT | Pre-frontier only |
+| Grouped Ridge | Combined features with per-source regularization |
 | Embedding + Ridge | Task embeddings |
 | LLM Judge + Ridge | Semantic features |
+
+**Grouped Ridge** combines multiple feature sources (e.g., embeddings + LLM judge) with different regularization per source, allowing high-dim embeddings and low-dim semantic features to be properly regularized.
 
 ### Experiment D: Time Horizon
 
@@ -114,6 +117,8 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 | `swebench_irt/train.py` | Train IRT models |
 | `swebench_irt/prep_swebench.py` | Build response matrix |
 | `llm_judge/llm_judge.py` | LLM feature extraction |
+| `experiment_ab_shared/feature_source.py` | Feature source abstractions (`GroupedFeatureSource`, `RegularizedFeatureSource`) |
+| `experiment_ab_shared/feature_predictor.py` | Predictors (`FeatureBasedPredictor`, `GroupedRidgePredictor`) |
 
 ## Development Guidelines
 

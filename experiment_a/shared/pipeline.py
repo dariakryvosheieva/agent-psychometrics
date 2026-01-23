@@ -20,9 +20,12 @@ import pandas as pd
 from experiment_ab_shared.feature_source import (
     EmbeddingFeatureSource,
     CSVFeatureSource,
+    RegularizedFeatureSource,
+    GroupedFeatureSource,
 )
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
+    GroupedRidgePredictor,
 )
 from experiment_ab_shared import (
     load_dataset,
@@ -184,6 +187,32 @@ def build_cv_predictors(
                         display_name="Feature-IRT (LLM Judge)",
                     )
                 )
+
+    # Grouped Ridge predictor (combines all available sources with per-source regularization)
+    # Collect all feature sources that were loaded
+    feature_sources = []
+    if config.embeddings_path is not None:
+        embeddings_path = root / config.embeddings_path
+        if embeddings_path.exists():
+            feature_sources.append(EmbeddingFeatureSource(embeddings_path))
+    if config.llm_judge_features_path is not None:
+        llm_judge_path = root / config.llm_judge_features_path
+        if llm_judge_path.exists():
+            feature_sources.append(CSVFeatureSource(llm_judge_path, llm_judge_features, name="LLM Judge"))
+
+    if len(feature_sources) >= 2:
+        # Create grouped source with default alphas (will grid search)
+        grouped_source = GroupedFeatureSource([
+            RegularizedFeatureSource(src) for src in feature_sources
+        ])
+        grouped_predictor = GroupedRidgePredictor(grouped_source)
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(grouped_predictor),
+                name="grouped_ridge",
+                display_name=f"Grouped Ridge ({grouped_source.name})",
+            )
+        )
 
     # Constant baseline (mean difficulty)
     configs.append(
