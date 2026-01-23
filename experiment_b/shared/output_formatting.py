@@ -7,10 +7,13 @@ This module handles:
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
+
+if TYPE_CHECKING:
+    from experiment_b.shared.data_preparation import AgentFilteringStats
 
 
 def print_comparison_table(
@@ -28,6 +31,7 @@ def print_comparison_table(
     last_agent_date: Optional[str] = None,
     verbose: bool = False,
     dataset_name: str = "",
+    filtering_stats: Optional["AgentFilteringStats"] = None,
 ) -> None:
     """Print formatted comparison table."""
     print("=" * 90)
@@ -54,7 +58,13 @@ def print_comparison_table(
     print()
     print("Data Summary:")
     print(f"  - Pre-frontier agents: {pre_frontier_count}")
-    print(f"  - Post-frontier agents: {post_frontier_count}")
+    if filtering_stats is not None and filtering_stats.removed_count > 0:
+        print(f"  - Post-frontier agents: {filtering_stats.total_post_frontier} "
+              f"(filtered to {post_frontier_count})")
+        print(f"    └─ Removed bottom {filtering_stats.filter_bottom_percentile * 100:.0f}% "
+              f"(success rate < {filtering_stats.success_rate_threshold:.3f})")
+    else:
+        print(f"  - Post-frontier agents: {post_frontier_count}")
     print(f"  - Frontier tasks: {frontier_task_count}")
     print(f"  - Anchor tasks (for AUC alignment): {anchor_task_count}")
     print(f"  - Alignment method: {alignment_method}")

@@ -66,6 +66,11 @@ class ExperimentData:
     # Ground truth difficulties from baseline IRT for training predictors
     baseline_ground_truth_b: Optional[np.ndarray] = field(default=None, repr=False)
 
+    # Filtered evaluation agents (may differ per frontier definition)
+    # Maps frontier_def -> filtered agent list (None if no filtering applied)
+    eval_agents_by_def: Dict[str, List[str]] = field(default_factory=dict)
+    filtering_stats_by_def: Dict[str, "AgentFilteringStats"] = field(default_factory=dict)
+
 
 # =============================================================================
 # Agent splitting functions
@@ -367,6 +372,166 @@ def identify_nontrivial_tasks(
             nontrivial_tasks.append(task_id)
 
     return nontrivial_tasks, pre_pass_rates, post_pass_rates
+
+
+# =============================================================================
+# Evaluation agent filtering
+# =============================================================================
+
+
+@dataclass
+class AgentFilteringStats:
+    """Statistics about agent filtering for evaluation."""
+
+    total_post_frontier: int  # Total post-frontier agents before filtering
+    filtered_count: int  # Number of agents that passed filters
+    removed_count: int  # Number of agents removed
+    filter_bottom_percentile: float  # Percentile threshold used
+    success_rate_threshold: float  # Computed success rate cutoff from percentile
+    agent_success_rates: Dict[str, float]  # agent_id -> success rate on frontier tasks
+
+
+def filter_eval_agents(
+    post_frontier_agents: List[str],
+    responses: Dict[str, Dict[str, int]],
+    frontier_task_ids: List[str],
+    filter_bottom_percentile: float,
+    oracle_abilities: Optional[pd.DataFrame] = None,
+    min_oracle_ability: Optional[float] = None,
+) -> Tuple[List[str], AgentFilteringStats]:
+    """Filter out bottom X% of agents by frontier task success rate.
+
+    Computes success rate on frontier tasks for each post-frontier agent,
+    then removes agents below the specified percentile threshold.
+
+    This function should only be called when filtering is needed. If no filtering
+    is desired, don't call this function.
+
+    Args:
+        post_frontier_agents: List of post-frontier agent IDs
+        responses: Response matrix {agent_id -> {task_id -> response}}
+        frontier_task_ids: List of frontier task IDs
+        filter_bottom_percentile: Remove agents below this percentile (0.0-1.0).
+            Must be > 0 (use 0.2 to remove bottom 20%)
+        oracle_abilities: Optional DataFrame with 'theta' column (for secondary filter)
+        min_oracle_ability: Optional minimum oracle theta (secondary filter, may bias results)
+
+    Returns:
+        Tuple of (filtered_agents, filtering_stats)
+
+    Raises:
+        ValueError: If called with no filtering, filtering removes all agents,
+            or agent missing from responses
+    """
+    # Validate that filtering is actually requested
+    if filter_bottom_percentile <= 0.0 and min_oracle_ability is None:
+        raise ValueError(
+            "filter_eval_agents should only be called when filtering is needed. "
+            "filter_bottom_percentile must be > 0 or min_oracle_ability must be set."
+        )
+
+    if not post_frontier_agents:
+        raise ValueError("No post-frontier agents provided")
+
+    if not frontier_task_ids:
+        raise ValueError("No frontier task IDs provided")
+
+    n_frontier_tasks = len(frontier_task_ids)
+
+    # Compute success rate on frontier tasks for each agent
+    agent_success_rates: Dict[str, float] = {}
+    for agent_id in post_frontier_agents:
+        if agent_id not in responses:
+            raise ValueError(f"Agent {agent_id} missing from responses")
+
+        agent_responses = responses[agent_id]
+        successes = 0
+
+        for task_id in frontier_task_ids:
+            if task_id in agent_responses:
+                response = agent_responses[task_id]
+                # Handle binomial responses
+                if isinstance(response, dict) and "successes" in response:
+                    if response["successes"] > 0:
+                        successes += 1
+                elif response == 1:
+                    successes += 1
+
+        # Success rate = successes / total frontier tasks
+        agent_success_rates[agent_id] = successes / n_frontier_tasks
+
+    # Compute percentile threshold for success rate
+    success_rates = list(agent_success_rates.values())
+    if filter_bottom_percentile > 0.0:
+        success_rate_threshold = float(np.percentile(success_rates, filter_bottom_percentile * 100))
+    else:
+        success_rate_threshold = 0.0
+
+    # Apply filters
+    filtered_agents = []
+    for agent_id in post_frontier_agents:
+        # Check success rate filter (use strict < so agents at threshold are kept)
+        if filter_bottom_percentile > 0.0 and agent_success_rates[agent_id] < success_rate_threshold:
+            continue
+
+        # Check oracle ability filter (if enabled)
+        if min_oracle_ability is not None:
+            if oracle_abilities is None:
+                raise ValueError("oracle_abilities required when min_oracle_ability is set")
+            if agent_id not in oracle_abilities.index:
+                raise ValueError(f"Agent {agent_id} missing from oracle abilities")
+            theta = oracle_abilities.loc[agent_id, "theta"]
+            if theta < min_oracle_ability:
+                continue
+
+        filtered_agents.append(agent_id)
+
+    # Validate we have agents remaining
+    if not filtered_agents:
+        raise ValueError(
+            f"All {len(post_frontier_agents)} post-frontier agents were filtered out. "
+            f"filter_bottom_percentile={filter_bottom_percentile}, "
+            f"success_rate_threshold={success_rate_threshold:.3f}, "
+            f"min_oracle_ability={min_oracle_ability}"
+        )
+
+    stats = AgentFilteringStats(
+        total_post_frontier=len(post_frontier_agents),
+        filtered_count=len(filtered_agents),
+        removed_count=len(post_frontier_agents) - len(filtered_agents),
+        filter_bottom_percentile=filter_bottom_percentile,
+        success_rate_threshold=success_rate_threshold,
+        agent_success_rates=agent_success_rates,
+    )
+
+    return filtered_agents, stats
+
+
+def log_filtering_stats(stats: AgentFilteringStats, frontier_def: str = "") -> None:
+    """Log agent filtering statistics."""
+    prefix = f"[{frontier_def}] " if frontier_def else ""
+    print(f"\n{prefix}Agent Filtering Statistics:")
+    print(f"  Total post-frontier agents: {stats.total_post_frontier}")
+    print(f"  Agents after filtering: {stats.filtered_count} "
+          f"({stats.filtered_count / stats.total_post_frontier * 100:.1f}%)")
+
+    if stats.filter_bottom_percentile > 0:
+        print(f"  Removed bottom {stats.filter_bottom_percentile * 100:.0f}% "
+              f"(success rate < {stats.success_rate_threshold:.3f}): {stats.removed_count} agents")
+
+    # Show agents at the boundary
+    if stats.removed_count > 0:
+        removed_agents = [
+            (agent_id, rate)
+            for agent_id, rate in stats.agent_success_rates.items()
+            if rate < stats.success_rate_threshold
+        ]
+        removed_agents.sort(key=lambda x: x[1])
+        print(f"  Removed agents (lowest first):")
+        for agent_id, rate in removed_agents[:5]:
+            print(f"    - {agent_id}: {rate:.3f} success rate")
+        if len(removed_agents) > 5:
+            print(f"    ... and {len(removed_agents) - 5} more")
 
 
 # =============================================================================
@@ -830,6 +995,38 @@ def load_and_prepare_data(args: argparse.Namespace, config: DatasetConfig) -> Ex
     train_task_ids = list(baseline_items.index)
     print(f"  Training tasks: {len(train_task_ids)}")
 
+    # Filter evaluation agents if requested
+    filter_bottom_percentile = getattr(args, "filter_bottom_percentile", 0.0)
+    min_oracle_ability = getattr(args, "min_oracle_ability", None)
+
+    eval_agents_by_def: Dict[str, List[str]] = {}
+    filtering_stats_by_def: Dict[str, AgentFilteringStats] = {}
+
+    filtering_enabled = filter_bottom_percentile > 0.0 or min_oracle_ability is not None
+    if filtering_enabled:
+        print(f"\nFiltering evaluation agents...")
+        if filter_bottom_percentile > 0:
+            print(f"  Removing bottom {filter_bottom_percentile * 100:.0f}% by frontier success rate")
+        if min_oracle_ability is not None:
+            print(f"  [Research] Requiring oracle ability >= {min_oracle_ability}")
+
+    for frontier_def, frontier_task_ids in frontier_tasks_by_def.items():
+        if filtering_enabled:
+            filtered_agents, stats = filter_eval_agents(
+                post_frontier_agents=post_frontier,
+                responses=config.responses,
+                frontier_task_ids=frontier_task_ids,
+                filter_bottom_percentile=filter_bottom_percentile,
+                oracle_abilities=oracle_abilities if min_oracle_ability is not None else None,
+                min_oracle_ability=min_oracle_ability,
+            )
+            eval_agents_by_def[frontier_def] = filtered_agents
+            filtering_stats_by_def[frontier_def] = stats
+            log_filtering_stats(stats, frontier_def)
+        else:
+            # No filtering - use all post-frontier agents
+            eval_agents_by_def[frontier_def] = post_frontier
+
     # Pre-filter responses for training (no post-frontier agents)
     train_responses = {
         agent_id: agent_responses
@@ -853,4 +1050,6 @@ def load_and_prepare_data(args: argparse.Namespace, config: DatasetConfig) -> Ex
         cutoff_date=cutoff_date,
         train_responses=train_responses,
         baseline_ground_truth_b=baseline_ground_truth_b,
+        eval_agents_by_def=eval_agents_by_def,
+        filtering_stats_by_def=filtering_stats_by_def,
     )

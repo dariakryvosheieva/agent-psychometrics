@@ -176,6 +176,9 @@ def evaluate_all_frontier_definitions(
 
         results: Dict[str, Dict[str, Any]] = {}
 
+        # Get filtered eval agents for this frontier definition (if filtering applied)
+        eval_agents = data.eval_agents_by_def.get(frontier_def, data.post_frontier_agents)
+
         # Compute metrics for each method uniformly
         for method_name, pred_beta in raw_predictions.items():
             try:
@@ -186,7 +189,7 @@ def evaluate_all_frontier_definitions(
                     responses=data.config.responses,
                     frontier_task_ids=frontier_task_ids,
                     anchor_task_ids=data.anchor_task_ids,
-                    eval_agents=data.post_frontier_agents,
+                    eval_agents=eval_agents,
                     alignment_method=alignment_method,
                 )
                 results[method_name] = metrics
@@ -304,11 +307,13 @@ def evaluate_all_frontier_definitions(
                     consolidated_oracle_date_results[method_name] = date_metrics
 
         print()
+        # Get filtering stats for this frontier definition (if any)
+        filtering_stats = data.filtering_stats_by_def.get(frontier_def)
         print_comparison_table(
             consolidated_results,
             len(frontier_task_ids),
             len(data.pre_frontier_agents),
-            len(data.post_frontier_agents),
+            len(eval_agents),  # Use filtered agent count
             anchor_task_count=len(data.anchor_task_ids),
             alignment_method=alignment_method,
             cutoff_date=data.cutoff_date,
@@ -319,6 +324,7 @@ def evaluate_all_frontier_definitions(
             last_agent_date=data.config.last_agent_date,
             verbose=verbose,
             dataset_name=data.config.name,
+            filtering_stats=filtering_stats,
         )
 
     return all_results

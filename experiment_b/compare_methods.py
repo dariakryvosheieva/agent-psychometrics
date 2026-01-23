@@ -30,6 +30,9 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from experiment_b import get_dataset_config, list_datasets
+
+# Easy-to-change default: set to 0.2 to remove bottom 20% of agents after validation
+DEFAULT_FILTER_BOTTOM_PERCENTILE = 0.0
 from experiment_b.shared import (
     # Data preparation
     load_and_prepare_data,
@@ -118,6 +121,20 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=None,
         help="Min post-frontier pass rate for frontier tasks (overrides dataset default)",
+    )
+    parser.add_argument(
+        "--filter_bottom_percentile",
+        type=float,
+        default=DEFAULT_FILTER_BOTTOM_PERCENTILE,
+        help="Remove bottom X%% of post-frontier agents by frontier success rate (0.0-1.0). "
+             "E.g., 0.2 removes bottom 20%%. Default: 0.0 (no filtering).",
+    )
+    parser.add_argument(
+        "--min_oracle_ability",
+        type=float,
+        default=None,
+        help="[Research] Minimum oracle theta for evaluation agents. "
+             "Warning: may bias AUC results since oracle theta is used in evaluation.",
     )
     parser.add_argument(
         "--alignment_method",

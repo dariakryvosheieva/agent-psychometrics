@@ -404,7 +404,34 @@ class DatasetConfig(ABC):
 --grid_search          Run grid search over Feature-IRT hyperparameters
 --verbose              Show alignment parameters and training progress
 --cutoff_date          Override default cutoff date (YYYYMMDD format)
+--filter_bottom_percentile  Remove bottom X% of eval agents by frontier success rate (0.0-1.0)
+--min_oracle_ability   [Research] Minimum oracle theta for eval agents (may bias results)
 ```
+
+## Evaluation Agent Filtering
+
+Post-frontier agents are defined by date (release date >= cutoff), but not all are capable frontier solvers. Low-performing agents add noise to ROC-AUC evaluation. Use `--filter_bottom_percentile` to remove the bottom X% of agents by their success rate on frontier tasks.
+
+```bash
+# Remove bottom 20% of agents by frontier success rate
+python -m experiment_b.compare_methods --filter_bottom_percentile 0.2
+```
+
+**How it works:**
+1. Compute success rate on frontier tasks for each post-frontier agent
+2. Find the Xth percentile threshold (e.g., 20th percentile)
+3. Remove agents below this threshold
+
+**Example output with filtering:**
+```
+Data Summary:
+  - Pre-frontier agents: 76
+  - Post-frontier agents: 55 (filtered to 44)
+    └─ Removed bottom 20% (success rate < 0.060)
+  - Frontier tasks: 47
+```
+
+**Default behavior:** No filtering (`--filter_bottom_percentile 0.0`). To change the default, edit `DEFAULT_FILTER_BOTTOM_PERCENTILE` in `compare_methods.py`.
 
 ## Caches
 
