@@ -24,6 +24,7 @@ from experiment_ab_shared.feature_source import (
     CSVFeatureSource,
     RegularizedFeatureSource,
     GroupedFeatureSource,
+    build_feature_sources as _build_feature_sources,
 )
 from experiment_ab_shared.feature_predictor import FeatureBasedPredictor, GroupedRidgePredictor
 from experiment_b.shared.config_base import DatasetConfig
@@ -595,26 +596,12 @@ def build_feature_sources(
     embeddings_path = embeddings_path_override or config.embeddings_path
     llm_judge_path = llm_judge_path_override or config.llm_judge_path
 
-    feature_sources: List[Tuple[str, TaskFeatureSource]] = []
-
-    if embeddings_path and embeddings_path.exists():
-        feature_sources.append(("Embedding", EmbeddingFeatureSource(embeddings_path)))
-    else:
-        print(f"\nEmbeddings not found: {embeddings_path}")
-
-    if llm_judge_path and llm_judge_path.exists():
-        feature_sources.append((
-            "LLM Judge",
-            CSVFeatureSource(
-                llm_judge_path,
-                feature_cols=config.llm_judge_feature_cols,
-                name="LLM Judge",
-            ),
-        ))
-    else:
-        print(f"\nLLM Judge features not found: {llm_judge_path}")
-
-    return feature_sources
+    return _build_feature_sources(
+        embeddings_path=embeddings_path,
+        llm_judge_path=llm_judge_path,
+        llm_judge_feature_cols=config.llm_judge_feature_cols,
+        verbose=True,
+    )
 
 
 # =============================================================================

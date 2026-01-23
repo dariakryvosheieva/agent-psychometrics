@@ -22,6 +22,7 @@ from experiment_ab_shared.feature_source import (
     CSVFeatureSource,
     RegularizedFeatureSource,
     GroupedFeatureSource,
+    build_feature_sources,
 )
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
@@ -133,74 +134,81 @@ def build_cv_predictors(
         )
     )
 
+    # Resolve paths relative to root
+    embeddings_path = (
+        root / config.embeddings_path if config.embeddings_path is not None else None
+    )
+    llm_judge_path = (
+        root / config.llm_judge_features_path
+        if config.llm_judge_features_path is not None
+        else None
+    )
+
+    # Build feature sources once using shared utility (verbose=False to avoid extra output)
+    feature_source_list = build_feature_sources(
+        embeddings_path=embeddings_path,
+        llm_judge_path=llm_judge_path,
+        llm_judge_feature_cols=llm_judge_features,
+        verbose=False,
+    )
+
+    # Build a dict for easy lookup by source name
+    source_by_name = {name: source for name, source in feature_source_list}
+
     # Embedding predictor (Ridge regression)
-    if config.embeddings_path is not None:
-        embeddings_path = root / config.embeddings_path
-        if embeddings_path.exists():
-            source = EmbeddingFeatureSource(embeddings_path)
-            difficulty_predictor = FeatureBasedPredictor(
-                source,
-                ridge_alphas=list(config.ridge_alphas),
+    if "Embedding" in source_by_name:
+        source = source_by_name["Embedding"]
+        difficulty_predictor = FeatureBasedPredictor(
+            source,
+            ridge_alphas=list(config.ridge_alphas),
+        )
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                name="embedding_predictor",
+                display_name="Embedding",
             )
+        )
+
+        # Feature-IRT with embeddings (joint learning)
+        if include_feature_irt:
             configs.append(
                 CVPredictorConfig(
-                    predictor=DifficultyPredictorAdapter(difficulty_predictor),
-                    name="embedding_predictor",
-                    display_name="Embedding",
+                    predictor=FeatureIRTCVPredictor(source, verbose=False),
+                    name="feature_irt_embedding",
+                    display_name="Feature-IRT (Embedding)",
                 )
             )
-
-            # Feature-IRT with embeddings (joint learning)
-            if include_feature_irt:
-                configs.append(
-                    CVPredictorConfig(
-                        predictor=FeatureIRTCVPredictor(source, verbose=False),
-                        name="feature_irt_embedding",
-                        display_name="Feature-IRT (Embedding)",
-                    )
-                )
 
     # LLM Judge predictor (Ridge regression)
-    if config.llm_judge_features_path is not None:
-        llm_judge_path = root / config.llm_judge_features_path
-        if llm_judge_path.exists():
-            # Pass feature_cols if specified, otherwise auto-detect from CSV
-            source = CSVFeatureSource(llm_judge_path, llm_judge_features, name="LLM Judge")
-            difficulty_predictor = FeatureBasedPredictor(
-                source,
-                ridge_alphas=list(config.ridge_alphas),
+    if "LLM Judge" in source_by_name:
+        source = source_by_name["LLM Judge"]
+        difficulty_predictor = FeatureBasedPredictor(
+            source,
+            ridge_alphas=list(config.ridge_alphas),
+        )
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                name="llm_judge_predictor",
+                display_name="LLM Judge",
             )
+        )
+
+        # Feature-IRT with LLM Judge features (joint learning)
+        if include_feature_irt:
             configs.append(
                 CVPredictorConfig(
-                    predictor=DifficultyPredictorAdapter(difficulty_predictor),
-                    name="llm_judge_predictor",
-                    display_name="LLM Judge",
+                    predictor=FeatureIRTCVPredictor(source, verbose=False),
+                    name="feature_irt_llm_judge",
+                    display_name="Feature-IRT (LLM Judge)",
                 )
             )
 
-            # Feature-IRT with LLM Judge features (joint learning)
-            if include_feature_irt:
-                configs.append(
-                    CVPredictorConfig(
-                        predictor=FeatureIRTCVPredictor(source, verbose=False),
-                        name="feature_irt_llm_judge",
-                        display_name="Feature-IRT (LLM Judge)",
-                    )
-                )
-
     # Grouped Ridge predictor (combines all available sources with per-source regularization)
-    # Collect all feature sources that were loaded
-    feature_sources = []
-    if config.embeddings_path is not None:
-        embeddings_path = root / config.embeddings_path
-        if embeddings_path.exists():
-            feature_sources.append(EmbeddingFeatureSource(embeddings_path))
-    if config.llm_judge_features_path is not None:
-        llm_judge_path = root / config.llm_judge_features_path
-        if llm_judge_path.exists():
-            feature_sources.append(CSVFeatureSource(llm_judge_path, llm_judge_features, name="LLM Judge"))
-
-    if len(feature_sources) >= 2:
+    if len(feature_source_list) >= 2:
+        # Extract just the sources (without names) for GroupedFeatureSource
+        feature_sources = [source for _, source in feature_source_list]
         # Create grouped source with default alphas (will grid search)
         grouped_source = GroupedFeatureSource([
             RegularizedFeatureSource(src) for src in feature_sources

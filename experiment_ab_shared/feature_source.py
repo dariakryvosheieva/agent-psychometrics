@@ -446,3 +446,41 @@ class GroupedFeatureSource(TaskFeatureSource):
 
         # Concatenate along feature dimension
         return np.concatenate(feature_matrices, axis=1)
+
+
+def build_feature_sources(
+    embeddings_path: Optional[Path] = None,
+    llm_judge_path: Optional[Path] = None,
+    llm_judge_feature_cols: Optional[List[str]] = None,
+    verbose: bool = True,
+) -> List[Tuple[str, TaskFeatureSource]]:
+    """Build list of available feature sources from paths.
+
+    This is the shared utility for both Experiment A and Experiment B.
+
+    Args:
+        embeddings_path: Path to embeddings .npz file (None to skip)
+        llm_judge_path: Path to LLM judge features CSV (None to skip)
+        llm_judge_feature_cols: Optional list of feature columns for LLM Judge.
+            If None, auto-detects numeric columns from CSV.
+        verbose: Print messages about missing paths (default True)
+
+    Returns:
+        List of (source_name, feature_source) tuples for each valid source.
+    """
+    sources: List[Tuple[str, TaskFeatureSource]] = []
+
+    if embeddings_path and embeddings_path.exists():
+        sources.append(("Embedding", EmbeddingFeatureSource(embeddings_path)))
+    elif verbose and embeddings_path:
+        print(f"\nEmbeddings not found: {embeddings_path}")
+
+    if llm_judge_path and llm_judge_path.exists():
+        sources.append((
+            "LLM Judge",
+            CSVFeatureSource(llm_judge_path, llm_judge_feature_cols, name="LLM Judge"),
+        ))
+    elif verbose and llm_judge_path:
+        print(f"\nLLM Judge features not found: {llm_judge_path}")
+
+    return sources
