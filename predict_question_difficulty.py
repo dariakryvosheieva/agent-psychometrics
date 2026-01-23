@@ -1200,9 +1200,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
     p.add_argument(
-        "--include_zero_success",
-        action="store_true",
-        help="Include items with 0 successes in CV/IRT (not recommended; can destabilize IRT).",
+        "--zero_success_tasks",
+        type=str,
+        default="exclude",
+        choices=["exclude", "include", "mean"],
+        help=(
+            "How to handle items with 0 successes across all subjects in --agent_results. "
+            "'exclude' (default): exclude from CV/IRT pool and predict separately at end. "
+            "'include': include in CV/IRT pool (can destabilize IRT). "
+            "'mean': include in CV pool, but for any zero-success items that appear in a fold's IRT training set, "
+            "replace their IRT difficulty with the mean over zero-success difficulties in that fold before fitting the regressor."
+        ),
     )
     p.add_argument("--irt_epochs", type=int, default=5000)
     p.add_argument("--irt_device", type=str, default="cuda", help="Device for IRT training (cuda or cpu).")
@@ -1345,15 +1353,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
-    exclude_zero_success = not bool(args.include_zero_success)
-    if exclude_zero_success:
+
+    zero_success_mode = str(args.zero_success_tasks)
+
+    if zero_success_mode == "exclude":
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
             f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
             f"(agent_results={args.agent_results})"
         )
-    else:
+    elif zero_success_mode in ("include", "mean"):
         eligible = list(overlap_ids)
+        if zero_success_set and zero_success_mode == "include":
+            print(
+                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
+                f"(agent_results={args.agent_results})"
+            )
+        if zero_success_set and zero_success_mode == "mean":
+            print(
+                f"Including zero-success items in CV; will mean-impute their fold-train IRT difficulties: "
+                f"{len(zero_success_set)}/{len(overlap_ids)} overlapped items (agent_results={args.agent_results})"
+            )
+    else:
+        raise AssertionError(f"Unhandled zero_success_mode: {zero_success_mode}")
 
     if not eligible:
         raise RuntimeError("After filtering, no items remain for CV/IRT.")
@@ -1445,6 +1467,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if not diff_by_item:
             raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
 
+        # Optional post-processing for zero-success items:
+        # Replace each zero-success item's IRT difficulty with the mean over
+        # zero-success difficulties in this fold's IRT training set.
+        if zero_success_mode == "mean" and zero_success_set:
+            zs_in_fold = [tid for tid in train_items if tid in zero_success_set and tid in diff_by_item]
+            if zs_in_fold:
+                zs_vals = np.asarray([float(diff_by_item[tid]) for tid in zs_in_fold], dtype=np.float64)
+                zs_mean = float(np.mean(zs_vals))
+                for tid in zs_in_fold:
+                    diff_by_item[tid] = float(zs_mean)
+
         train_labeled = [tid for tid in train_items if tid in diff_by_item]
         if len(train_labeled) < 2:
             raise RuntimeError(
@@ -1517,7 +1550,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "n_items_total": int(len(task_ids)),
         "n_items_with_responses": int(len(overlap_ids)),
         "n_items_eligible_cv_irt": int(len(eligible)),
-        "exclude_zero_success": bool(exclude_zero_success),
+        "zero_success_tasks": str(zero_success_mode),
+        # Backwards-compatible key (older analysis scripts may expect it).
+        "exclude_zero_success": bool(str(zero_success_mode) == "exclude"),
         "n_items_zero_success_in_responses": int(len(zero_success_ids)),
         "embedding_dim": int(Xy.shape[1]),
         "seed": int(args.seed),
@@ -1574,6 +1609,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "dataset_path": (dataset_path or None),
         "split": str(args.split),
         "id_normalization": "strip instance_ prefix; strip -v.* suffix",
+        "zero_success_tasks": str(zero_success_mode),
         "seed": int(args.seed),
         "deterministic": True,
         "irt_seeded": True,
@@ -1597,7 +1633,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Predict on zero-success items (excluded from CV/IRT, if requested).
     zero_embedded: List[str] = []
     yhat_zero: Optional[np.ndarray] = None
-    if bool(exclude_zero_success) and zero_success_set:
+    if str(zero_success_mode) == "exclude" and zero_success_set:
         zero_embedded = [tid for tid in task_ids if tid in zero_success_set]
         if zero_embedded:
             X_zero = np.stack([X[id_to_row[tid]] for tid in zero_embedded], axis=0).astype(np.float32)

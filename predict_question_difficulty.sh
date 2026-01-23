@@ -4,6 +4,7 @@
 #SBATCH --mem=100G
 #SBATCH --partition=mit_normal_gpu
 #SBATCH --gres=gpu:h200:1
+#SBATCH --exclude=node4100
 
 set -euo pipefail
 cd /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship
@@ -18,4 +19,5 @@ python predict_question_difficulty.py \
   --dataset_name "" \
   --dataset_path "out/chris_irt/terminal_bench_tasks.jsonl" \
   --agent_results "out/chris_irt/terminal_bench_2.0.jsonl" \
-  --out_dir "out/terminal_bench"
+  --out_dir "out/terminal_bench" \
+  --zero_success_tasks "mean"
