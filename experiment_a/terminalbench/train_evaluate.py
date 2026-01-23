@@ -3,8 +3,8 @@
 This is a thin wrapper around the shared pipeline in experiment_a.shared.pipeline.
 
 Supports two modes:
-- Binary (default): Uses collapsed binary (any success = 1)
-- Binomial (--binomial flag): Uses k/n successes per agent-task pair
+- Binomial (default): Uses k/n successes per agent-task pair
+- Binary (--binary flag): Uses collapsed binary (any success = 1)
 """
 
 from pathlib import Path
@@ -57,8 +57,8 @@ def get_spec(use_binary: bool) -> ExperimentSpec:
         )
 
 
-# Default spec (binary mode)
-SPEC = get_spec(use_binary=True)
+# Default spec (binomial mode)
+SPEC = get_spec(use_binary=False)
 
 
 def create_metadata_loader(config: TerminalBenchConfig):
@@ -81,12 +81,12 @@ def create_metadata_loader(config: TerminalBenchConfig):
 def main():
     """Run Experiment A on TerminalBench.
 
-    Default is binary mode (collapsed any success = 1).
-    Use --binomial flag to use full k/n successes per agent-task pair.
+    Default is binomial mode (k/n successes per agent-task pair).
+    Use --binary flag to use collapsed binary mode (any success = 1).
     """
     run_experiment_main(
         TerminalBenchConfig,
-        SPEC,  # Default spec (binary) - will be overridden if spec_factory is used
+        SPEC,  # Default spec (binomial) - will be overridden if spec_factory is used
         ROOT,
         metadata_loader_factory=create_metadata_loader,
         spec_factory=get_spec,  # Pass the factory for dynamic spec selection

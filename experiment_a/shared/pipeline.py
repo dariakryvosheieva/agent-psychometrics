@@ -433,9 +433,9 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         help="Include Feature-IRT joint learning methods (slower, minimal improvement over Ridge)",
     )
     parser.add_argument(
-        "--binomial",
+        "--binary",
         action="store_true",
-        help="Use binomial data (k/n successes) instead of collapsed binary (any success = 1). "
+        help="Use collapsed binary data (any success = 1) instead of binomial (k/n successes). "
              "Only applies to TerminalBench experiments.",
     )
     return parser
@@ -470,9 +470,9 @@ def run_experiment_main(
         "exclude_unsolved": args.exclude_unsolved,
     }
 
-    # Handle --binomial flag for TerminalBench (default is binary)
-    if hasattr(args, "binomial") and args.binomial:
-        config_kwargs["use_binary"] = False
+    # Handle --binary flag for TerminalBench (default is binomial)
+    if hasattr(args, "binary") and args.binary:
+        config_kwargs["use_binary"] = True
 
     # Only override paths if explicitly provided via CLI
     if args.embeddings_path is not None:
@@ -489,9 +489,9 @@ def run_experiment_main(
     config = config_class(**config_kwargs)
 
     # Get the appropriate spec (dynamic if factory provided, static otherwise)
-    # Default is binary (use_binary=True), --binomial flag switches to binomial mode
-    if spec_factory is not None and hasattr(args, "binomial"):
-        use_binary = not args.binomial
+    # Default is binomial (use_binary=False), --binary flag switches to binary mode
+    if spec_factory is not None and hasattr(args, "binary"):
+        use_binary = args.binary
         spec = spec_factory(use_binary)
 
     if args.dry_run:

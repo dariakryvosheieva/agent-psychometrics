@@ -25,11 +25,11 @@ python -m experiment_a.swebench.train_evaluate
 # Run SWE-bench Pro experiment
 python -m experiment_a.swebench_pro.train_evaluate
 
-# Run TerminalBench experiment (binary mode - default)
+# Run TerminalBench experiment (binomial mode - default, k/n successes)
 python -m experiment_a.terminalbench.train_evaluate
 
-# Run TerminalBench experiment (binomial mode - k/n successes)
-python -m experiment_a.terminalbench.train_evaluate --binomial
+# Run TerminalBench experiment (binary mode - any success = 1)
+python -m experiment_a.terminalbench.train_evaluate --binary
 
 # Dry run to check config
 python -m experiment_a.swebench.train_evaluate --dry_run
@@ -66,10 +66,22 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 ### TerminalBench (5-Fold Cross-Validation)
 
 TerminalBench supports two data modes:
-- **Binary** (default): Collapses to any success = 1 (single observation per pair)
-- **Binomial** (`--binomial`): Models k successes out of 5 trials per agent-task pair
+- **Binomial** (default): Models k successes out of 5 trials per agent-task pair
+- **Binary** (`--binary`): Collapses to any success = 1 (single observation per pair)
 
-#### Binary Mode (Default)
+#### Binomial Mode (Default)
+
+**Data**: 89 tasks, 83 agents, 5 trials each
+
+| Method | Mean AUC | Std | Pass Rate MSE |
+|--------|----------|-----|---------------|
+| Oracle (true b) | 0.9040 | 0.0109 | 0.0540 |
+| Embedding | 0.7817 | 0.0429 | - |
+| LLM Judge | 0.7738 | 0.0256 | - |
+| Constant (mean b) | 0.7036 | 0.0123 | 0.1490 |
+| Agent-only | 0.7039 | 0.0125 | 0.1404 |
+
+#### Binary Mode (`--binary`)
 
 **Data**: 88 tasks, 83 agents (any success = 1)
 
@@ -81,19 +93,7 @@ TerminalBench supports two data modes:
 | Constant (mean b) | 0.6904 | 0.0163 |
 | Agent-only | 0.6904 | 0.0167 |
 
-#### Binomial Mode (`--binomial`)
-
-**Data**: 89 tasks, 83 agents, 5 trials each
-
-| Method | Mean AUC | Std | Pass Rate MSE |
-|--------|----------|-----|---------------|
-| Oracle (true b) | 0.9037 | 0.0109 | 0.0540 |
-| LLM Judge | 0.7841 | 0.0278 | 0.1212 |
-| Embedding | 0.7829 | 0.0402 | 0.1240 |
-| Constant (mean b) | 0.7036 | 0.0123 | 0.1490 |
-| Agent-only | 0.7039 | 0.0125 | 0.1404 |
-
-**Summary**: Binary mode (default) shows higher oracle AUC and is consistent with SWE-bench's single-trial format. Binomial mode preserves more information about task difficulty gradations but gives similar predictor AUCs.
+**Summary**: Binomial mode (default) preserves more information about task difficulty gradations and shows slightly better predictor AUCs when evaluated fairly. See "Fair Comparison" below for details.
 
 #### Fair Comparison: Training vs Evaluation Methods (5-Fold CV)
 
