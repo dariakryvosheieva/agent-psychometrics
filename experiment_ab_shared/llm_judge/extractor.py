@@ -172,7 +172,7 @@ class LLMFeatureExtractor:
             return self.aggregate_to_csv()
 
         # Process tasks
-        stats = {"total": len(tasks), "success": 0, "failed": 0}
+        stats = {"total": len(tasks), "success": 0, "failed": 0, "failed_task_ids": []}
 
         for i, task in enumerate(tasks):
             task_id = self._get_task_id(task)
@@ -200,6 +200,7 @@ class LLMFeatureExtractor:
                 logger.debug(f"    -> {feature_preview}")
             else:
                 stats["failed"] += 1
+                stats["failed_task_ids"].append(task_id)
                 logger.warning(f"    Failed to extract features")
 
             # Rate limiting
@@ -213,6 +214,8 @@ class LLMFeatureExtractor:
         print(f"Total processed: {stats['total']}")
         print(f"Success: {stats['success']}")
         print(f"Failed: {stats['failed']}")
+        if stats["failed_task_ids"]:
+            print(f"Failed task IDs: {stats['failed_task_ids']}")
 
         # Save stats
         self._save_stats(stats)
@@ -259,10 +262,10 @@ class LLMFeatureExtractor:
         self,
         tasks: List[Dict[str, Any]],
         concurrency: int = 10,
-    ) -> Dict[str, int]:
+    ) -> Dict[str, Any]:
         """Run extraction on tasks in parallel with limited concurrency."""
         semaphore = asyncio.Semaphore(concurrency)
-        stats = {"total": len(tasks), "success": 0, "failed": 0}
+        stats = {"total": len(tasks), "success": 0, "failed": 0, "failed_task_ids": []}
 
         async def process_task(i: int, task: Dict[str, Any]):
             task_id = self._get_task_id(task)
@@ -277,6 +280,7 @@ class LLMFeatureExtractor:
                 print(f"[{i+1}/{len(tasks)}] {task_id}... ✓")
             else:
                 stats["failed"] += 1
+                stats["failed_task_ids"].append(task_id)
                 print(f"[{i+1}/{len(tasks)}] {task_id}... ✗")
 
         # Create all tasks
@@ -345,6 +349,8 @@ class LLMFeatureExtractor:
         print(f"Total processed: {stats['total']}")
         print(f"Success: {stats['success']}")
         print(f"Failed: {stats['failed']}")
+        if stats.get("failed_task_ids"):
+            print(f"Failed task IDs: {stats['failed_task_ids']}")
 
         # Save stats
         self._save_stats(stats)

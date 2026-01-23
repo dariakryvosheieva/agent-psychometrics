@@ -194,3 +194,6 @@ chris_output/swebench_pro_irt/
 
 # SWE-bench Pro Experiment B outputs (regenerable)
 chris_output/experiment_b/swebench_pro/
+chris_output/experiment_a/llm_judge_features_v2/
+chris_output/experiment_a/llm_judge_features_v2_pilot/
+chris_output/experiment_a_terminalbench/llm_judge_features_v2/

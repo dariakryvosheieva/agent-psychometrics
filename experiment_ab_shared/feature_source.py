@@ -169,22 +169,24 @@ class CSVFeatureSource(TaskFeatureSource):
     def __init__(
         self,
         features_path: Path,
-        feature_cols: List[str],
+        feature_cols: Optional[List[str]] = None,
         name: Optional[str] = None,
     ):
         """Initialize CSV feature source.
 
         Args:
             features_path: Path to CSV file with features.
-            feature_cols: List of column names to use as features.
+            feature_cols: List of column names to use as features. If None,
+                auto-detects all numeric columns (excluding metadata columns
+                starting with '_' and 'reasoning').
             name: Optional custom name (defaults to "CSV Features").
 
         Raises:
             FileNotFoundError: If features_path doesn't exist.
-            ValueError: If any feature_cols are missing from the CSV.
+            ValueError: If any feature_cols are missing from the CSV, or if
+                no numeric columns found when auto-detecting.
         """
         self._features_path = Path(features_path)
-        self._feature_cols = list(feature_cols)
         self._name = name or "CSV Features"
 
         # Load CSV
@@ -198,6 +200,8 @@ class CSVFeatureSource(TaskFeatureSource):
             df = df.set_index("_instance_id")
         elif "instance_id" in df.columns:
             df = df.set_index("instance_id")
+        elif "_task_id" in df.columns:
+            df = df.set_index("_task_id")
         elif "task_id" in df.columns:
             df = df.set_index("task_id")
         else:
@@ -206,6 +210,27 @@ class CSVFeatureSource(TaskFeatureSource):
 
         # Convert index to strings for consistent lookup
         df.index = df.index.astype(str)
+
+        # Strip 'instance_' prefix from task IDs if present
+        df.index = df.index.str.replace(r"^instance_", "", regex=True)
+
+        # Auto-detect feature columns if not specified
+        if feature_cols is None:
+            # Find all numeric columns, excluding metadata
+            feature_cols = [
+                c for c in df.columns
+                if pd.api.types.is_numeric_dtype(df[c])
+                and not c.startswith("_")
+                and c != "reasoning"
+            ]
+            if not feature_cols:
+                raise ValueError(
+                    f"No numeric feature columns found in CSV. "
+                    f"Available columns: {list(df.columns)}"
+                )
+            print(f"Auto-detected {len(feature_cols)} feature columns: {feature_cols}")
+
+        self._feature_cols = list(feature_cols)
 
         # Validate feature columns
         available_cols = [c for c in self._feature_cols if c in df.columns]

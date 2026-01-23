@@ -26,6 +26,26 @@ SWEBENCH_LLM_JUDGE_FEATURES = [
     "atypicality",
 ]
 
+# SWE-bench V2 LLM judge features (9 LLM + 4 deterministic = 13 features)
+# Based on pilot analysis - only includes significant features (p<0.05)
+SWEBENCH_LLM_JUDGE_V2_FEATURES = [
+    # LLM features (9)
+    "fix_in_description",
+    "fix_locality",
+    "domain_knowledge_required",
+    "fix_complexity",
+    "logical_reasoning_required",
+    "atypicality",
+    "verification_difficulty",
+    "standard_pattern_available",
+    "integration_complexity",
+    # Deterministic features (4)
+    "num_files_modified",
+    "num_hunks",
+    "num_lines_changed",
+    "log_lines_changed",
+]
+
 # Experiment specification for SWE-bench
 SPEC = ExperimentSpec(
     name="SWE-bench",

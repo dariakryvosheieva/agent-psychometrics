@@ -110,16 +110,17 @@ class SWEBenchProConfig(DatasetConfig):
     def llm_judge_feature_cols(self) -> List[str]:
         """SWE-bench Pro LLM judge feature columns.
 
-        Same as SWE-bench Verified since both are code/patch datasets.
+        Uses v5 prompt features + deterministic patch features.
         """
         return [
-            "fix_in_description",
-            "problem_clarity",
-            "error_message_provided",
-            "reproduction_steps",
-            "fix_locality",
-            "domain_knowledge_required",
+            # v5 LLM-extracted features
             "fix_complexity",
-            "logical_reasoning_required",
-            "atypicality",
+            "verification_difficulty",
+            "standard_pattern_available",
+            "integration_complexity",
+            # Deterministic patch features
+            "num_files_modified",
+            "num_hunks",
+            "num_lines_changed",
+            "log_lines_changed",
         ]

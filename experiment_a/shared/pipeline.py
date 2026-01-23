@@ -161,8 +161,8 @@ def build_cv_predictors(
     if config.llm_judge_features_path is not None:
         llm_judge_path = root / config.llm_judge_features_path
         if llm_judge_path.exists():
-            feature_cols = llm_judge_features or SWEBENCH_LLM_JUDGE_FEATURES
-            source = CSVFeatureSource(llm_judge_path, feature_cols, name="LLM Judge")
+            # Pass feature_cols if specified, otherwise auto-detect from CSV
+            source = CSVFeatureSource(llm_judge_path, llm_judge_features, name="LLM Judge")
             difficulty_predictor = FeatureBasedPredictor(
                 source,
                 ridge_alphas=list(config.ridge_alphas),
@@ -278,8 +278,9 @@ def run_cross_validation(
         )
 
     # Build ALL predictor configs (oracle, feature-based, baselines)
+    # LLM judge features are auto-detected from the CSV
     predictor_configs = build_cv_predictors(
-        config, root, llm_judge_features=spec.llm_judge_features,
+        config, root, llm_judge_features=None,  # Auto-detect from CSV
         include_feature_irt=include_feature_irt,
     )
 
