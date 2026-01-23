@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 3,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The task is fairly well specified (constraints, interfaces, and in-place reconstruction) but still leaves ambiguity about exact sharding strategy and how to guarantee exact byte-for-byte reconstruction while meeting size/directory limits. Implementing a robust reversible resharding scheme requires multi-step reasoning (metadata mapping, ordering, compression, cleanup) and moderate Python/data-processing knowledge, plus some environment/tooling constraints around using uv/pyproject.",
+  "_task_id": "reshard-c4-data",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:58.435847"
+}

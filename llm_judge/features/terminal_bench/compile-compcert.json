@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction is clear about the end state (CompCert built under /tmp/CompCert and invokable as /tmp/CompCert/ccomp) but leaves key implementation details (Coq/OCaml versions, opam setup, target selection) to the solver. Building CompCert requires nontrivial domain knowledge of the OCaml/Coq ecosystem and coordinating multiple dependencies and configuration choices (including architecture-specific configure target), making the tooling and task moderately complex.",
+  "_task_id": "compile-compcert",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:31:40.310284"
+}

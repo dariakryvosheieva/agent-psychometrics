@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 2,
+  "reasoning": "Implementing GPT-2 inference in dependency-free C while parsing a TensorFlow .ckpt and BPE vocab, then producing correct next-20-token argmax outputs under a strict <5000-byte constraint, requires deep ML/model-architecture and binary-format knowledge plus heavy optimization/code-golfing. The environment/tooling is simple (gcc, libc, libm), but the task is rare and demands intricate multi-step reasoning about tensor shapes, attention, and tokenization.",
+  "_task_id": "gpt2-codegolf",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:15.876255"
+}

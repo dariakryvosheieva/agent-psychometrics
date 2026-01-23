@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 3,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "tooling_complexity": 3,
+  "reasoning": "The instruction clearly specifies inputs, schema mapping, priority-based merging, and conflict-report structure, effectively outlining the needed approach without providing exact implementation steps. Difficulty comes from correctly normalizing heterogeneous schemas/formats (JSON/CSV/Parquet), enforcing priority conflict resolution while also enumerating field-level conflicts, and ensuring correct typing/date formatting in the final Parquet output.",
+  "_task_id": "multi-source-data-merger",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:34:24.745330"
+}

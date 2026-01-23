@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction specifies AFAB scheduling, tensor shapes, where loss is computed, and suggests using P2POp, which strongly guides the approach but does not give an exact implementation. Successfully implementing correct pipeline partitioning, distributed point-to-point communication, and matching forward/backward activations across ranks (including edge cases for world_size 1 vs 2 and layer balancing) requires deep PyTorch distributed and autograd knowledge and careful reasoning about tensor lifetimes and gradients.",
+  "_task_id": "torch-pipeline-parallelism",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:37.018265"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 2,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 2,
+  "reasoning": "The task is fairly well-specified (output shape, EU-country definition by date, file locations) but still leaves ontology/property details to be discovered from the TTL, requiring solid SPARQL and RDF modeling knowledge. Complexity comes from combining role filtering, EU membership via a fixed VALUES list, temporal enrollment logic, and an aggregate HAVING constraint (>10 distinct current students) while also producing grouped country results. Tooling is simple (just writing a .sparql file), but the query reasoning and graph navigation are non-trivial and somewhat atypical for terminal tasks.",
+  "_task_id": "sparql-university",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:18.297622"
+}

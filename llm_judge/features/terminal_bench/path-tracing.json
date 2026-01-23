@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 0,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "tooling_complexity": 2,
+  "reasoning": "The task is well-specified in terms of I/O, build command, and similarity threshold, but gives no hints about the scene/rendering method, requiring the solver to infer or recreate the rendering algorithm. Achieving 0.99 normalized L2 similarity without reading the target image is highly challenging and demands substantial graphics/math knowledge plus careful implementation under a strict code-size constraint, though the build tooling itself is straightforward (gcc and libm).",
+  "_task_id": "path-tracing",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:34:46.686144"
+}

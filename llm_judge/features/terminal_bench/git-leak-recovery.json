@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 2,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 2,
+  "reasoning": "The task is clearly framed (recover a removed secret, write it to a file, then ensure it is unrecoverable) but leaves implementation details to the solver beyond a vague hint about location and pattern. Successfully completing it requires fairly deep git internals knowledge (dangling objects, fsck, reflog expiration, aggressive GC) and careful reasoning to both recover from rewritten history and then fully purge without altering unrelated files or commit messages.",
+  "_task_id": "git-leak-recovery",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:08.633171"
+}

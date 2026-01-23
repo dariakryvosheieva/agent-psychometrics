@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 0,
+  "task_clarity": 3,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 3,
+  "reasoning": "The instruction gives a goal (run a provided MIPS ELF in Node and save rendered frames) but provides no implementation hints and leaves many architectural details implicit (ELF loading, memory map, syscalls, framebuffer extraction). Implementing a functional MIPS interpreter with enough ISA coverage and syscall/file I/O behavior to boot Doom requires highly specialized low-level systems/ISA knowledge and substantial debugging and edge-case reasoning.",
+  "_task_id": "make-mips-interpreter",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:56.076059"
+}

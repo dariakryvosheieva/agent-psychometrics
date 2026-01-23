@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "tooling_complexity": 4,
+  "reasoning": "The task requires recovering a Bayesian network DAG from data, enforcing extra orientation constraints (U parentless, edge-count, and alphabetical tie-breaks), fitting a BN, then performing a do-intervention and resampling\u2014steps that demand strong domain knowledge. It also involves nontrivial tooling (installing/using bnlearn in R) and multi-step reasoning about structure learning, Markov equivalence, and how to implement interventions by modifying both arcs and parameters.",
+  "_task_id": "bn-fit-modify",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:30:48.647859"
+}

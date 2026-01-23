@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 1,
+  "domain_knowledge_required": 2,
+  "task_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "tooling_complexity": 1,
+  "reasoning": "The instruction clearly indicates the goal (remove API keys) and provides concrete placeholder examples, implying a search-and-replace approach, but it doesn\u2019t specify exact patterns or files to check. Successfully completing it requires using standard Unix text-search tools with appropriate regexes and careful scoping to avoid modifying clean files, plus some reasoning about token formats and consistent replacement.",
+  "_task_id": "sanitize-git-repo",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:09.907369"
+}

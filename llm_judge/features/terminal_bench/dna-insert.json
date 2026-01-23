@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 2,
+  "domain_knowledge_required": 5,
+  "task_complexity": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The task is well-specified in terms of primer constraints and exact Tm computation parameters, but it does not hint at how to detect the edit or where primers should bind. Solving requires specialized molecular biology knowledge (Q5 SDM primer structure, handling circular plasmids) plus multi-step reasoning to align sequences, identify the insert, design primer overhangs vs annealing regions, and validate Tm with primer3/oligotm using specific flags.",
+  "_task_id": "dna-insert",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:32:23.371432"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 5,
+  "tooling_complexity": 5,
+  "reasoning": "The instruction specifies key configuration requirements (VNC :1/5901, snapshot mode, nginx on 80, and programmatic keyboard input), giving a clear approach but not concrete commands. The reference solution is large and involves compiling a specific QEMU version, configuring VNC + noVNC/websockify + nginx-like web access, and exposing a QEMU monitor socket for automated keystrokes, making the task unusually specialized and tooling-heavy.",
+  "_task_id": "install-windows-3.11",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:23.974383"
+}

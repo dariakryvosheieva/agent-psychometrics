@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 3,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The task is clearly specified (find the top Mean(Task) model on the Scandinavian MTEB leaderboard as of a particular time and write org/model_name), but it requires knowing how to obtain historical leaderboard results and compute the aggregate across tasks. The reference uses a nontrivial pipeline (git clone + pinned commit + Python + MTEB result loading and dataframe aggregation), making it moderately complex and atypical compared to standard shell tasks.",
+  "_task_id": "mteb-leaderboard",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:34:14.469331"
+}

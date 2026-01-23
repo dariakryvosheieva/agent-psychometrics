@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 3,
+  "task_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The instruction specifies the architecture (gRPC service, method names, message fields, codegen outputs, port, background execution) but leaves implementation and exact commands to the solver. Completing it requires familiarity with protobuf/grpc tooling (grpc_tools.protoc invocation, generated module names/imports) and writing a minimal concurrent gRPC Python server that stays running, making it moderately complex and somewhat unusual compared to typical shell/file tasks.",
+  "_task_id": "kv-store-grpc",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:27.463542"
+}

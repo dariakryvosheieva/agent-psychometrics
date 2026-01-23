@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction clearly specifies the target binary path and provides a concrete sanity-check command, but does not describe the legacy source layout or required compatibility patches. Successfully building POV-Ray 2.2 requires nontrivial domain knowledge about old tar.Z archives and Makefile-based builds, plus multiple source edits (headers, config fixes, deterministic RNG) to compile on a modern system, making it an unusual and moderately complex task.",
+  "_task_id": "build-pov-ray",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:31:03.436243"
+}

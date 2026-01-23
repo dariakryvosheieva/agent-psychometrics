@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 2,
+  "domain_knowledge_required": 4,
+  "task_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction specifies the goal state (telnet to 127.0.0.1:6665 and see a login prompt) but not the exact QEMU flags, so the solver must know how to expose a VM console over telnet and daemonize QEMU. It also requires coordinating boot readiness by polling/expecting a prompt, combining QEMU configuration with process management and a readiness check.",
+  "_task_id": "qemu-startup",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:34.727734"
+}

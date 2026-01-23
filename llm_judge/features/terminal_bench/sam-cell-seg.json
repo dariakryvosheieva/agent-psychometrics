@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction clearly mandates using MobileSAM on CPU to convert heterogeneous mask encodings into non-overlapping, single-component polylines saved back to a CSV, but leaves key algorithmic choices (prompting strategy, overlap resolution, contour extraction) to the implementer. Successfully doing this requires specialized knowledge of SAM/MobileSAM predictor APIs, image-coordinate transforms, and post-processing (NMS/max-suppression, contour selection) to enforce contiguity and non-overlap, plus nontrivial environment/tooling setup for a specific SAM variant.",
+  "_task_id": "sam-cell-seg",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:06.789975"
+}

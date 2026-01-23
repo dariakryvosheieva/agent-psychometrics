@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction clearly specifies the package name/version, required API surface, and the exact pip install command to validate success, but leaves the concrete server/tool choices (pypiserver vs devpi, auth/no-auth, upload method) to the solver. Completing it requires packaging knowledge (building wheels/sdists, correct package layout) plus running and configuring a local PyPI-compatible index and uploading artifacts so pip can install via --index-url, making it moderately complex and somewhat unusual.",
+  "_task_id": "pypi-server",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:16.128712"
+}

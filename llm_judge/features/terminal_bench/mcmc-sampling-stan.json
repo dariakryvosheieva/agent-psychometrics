@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 5,
+  "reasoning": "The instruction clearly specifies the modeling structure, required outputs, and MCMC settings, but leaves key implementation details (Stan parameterization to realize the unusual prior and handling Stan/RStan installation pitfalls) to the solver. Completing it requires substantial Bayesian/Stan knowledge plus nontrivial toolchain setup and compilation of pinned R packages, and involves multiple interdependent steps across system deps, Stan model correctness, and long MCMC execution.",
+  "_task_id": "mcmc-sampling-stan",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:34:00.532238"
+}

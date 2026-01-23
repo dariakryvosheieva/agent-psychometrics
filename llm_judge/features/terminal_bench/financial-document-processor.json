@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 4,
+  "reasoning": "The task is mostly well-specified (move files, generate a CSV with a final totals row), but classification and amount/VAT extraction depend on interpreting document content and handling edge cases like conflicting \"Total\" vs \"Amount Due\". The reference solution requires OCR/PDF text extraction plus regex-based parsing and directory/file operations, involving nontrivial tooling setup (tesseract, PyMuPDF, pytesseract) and multi-step logic.",
+  "_task_id": "financial-document-processor",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:32:48.125711"
+}

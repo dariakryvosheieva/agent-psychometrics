@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction clearly defines the gate language and I/O behavior, but gives only a very high-level target function, leaving the implementation approach (e.g., building a sequential circuit/CPU in gates) implicit. The reference solution is a large custom hardware-description framework that effectively constructs a clocked processor/ROM/register file in logic gates, indicating very high logical and domain complexity. This is a rare, highly specialized task requiring deep reasoning about bit-level arithmetic, state over 32,000 ticks, and circuit synthesis under line-count constraints.",
+  "_task_id": "circuit-fibsqrt",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:31:27.260987"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The task is clearly specified with strong success criteria, but reconstructing the exact PyTorch architecture from a state_dict requires nontrivial PyTorch/Transformer knowledge and careful reasoning about parameter names/shapes. Additional complexity comes from freezing all but the output layer, ensuring only that layer changes, and producing a TorchScript artifact compatible with the original weights.",
+  "_task_id": "pytorch-model-recovery",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:22.772287"
+}

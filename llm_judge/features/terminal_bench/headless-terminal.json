@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 1,
+  "domain_knowledge_required": 3,
+  "task_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The task requires implementing a headless terminal, which involves understanding interactive shell behavior and modifier keys. The instructions are clear, but specialized knowledge of terminal interfaces and environment configuration is needed. Logical reasoning is required to mimic terminal-like interactions and integrate with shell startup scripts.",
+  "_task_id": "headless-terminal",
+  "_model": "gpt-4o",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-19T22:47:39.930630"
+}

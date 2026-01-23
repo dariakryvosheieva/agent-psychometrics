@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 3,
+  "reasoning": "The task is well-specified in terms of opponents, simulator parameters, and win-rate thresholds, but it provides only general context (opponent descriptions) rather than actionable design guidance. Producing a warrior that consistently meets multiple matchup-specific win-rate targets requires highly specialized CoreWars/pMARS and Redcode knowledge plus substantial iterative reasoning about opponent behaviors and counter-strategies. While tooling is straightforward (single simulator command), the solution itself is large and multi-component, indicating significant complexity and tuning.",
+  "_task_id": "winning-avg-corewars",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:37:00.909595"
+}

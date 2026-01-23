@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction clearly specifies the model, cache path, Flask endpoint schema, and runtime requirements, which strongly suggests using Hugging Face Transformers plus a lightweight web server. Difficulty comes from integrating multiple components (model download/caching, correct inference/probabilities, JSON validation/errors, and background service management) and ensuring the service binds to 0.0.0.0:5000 with the expected response format.",
+  "_task_id": "hf-model-inference",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:20.654297"
+}

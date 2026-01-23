@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 2,
+  "reasoning": "The instruction explicitly points to a known-plaintext linear attack and mentions reduced 20-bit round-key seeds, giving clear direction but not the actual method or masks needed. Completing the task requires specialized cryptanalysis knowledge (linear approximations over a FEAL-like round function) plus implementing a nontrivial key-recovery program and validating by decrypting an external ciphertext set; tooling is straightforward (compile/run C).",
+  "_task_id": "feal-linear-cryptanalysis",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:32:39.486687"
+}

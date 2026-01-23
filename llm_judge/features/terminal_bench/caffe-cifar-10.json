@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 2,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 4,
+  "reasoning": "The instruction clearly implies cloning/building Caffe CPU-only and running the CIFAR-10 example with specific iteration/accuracy constraints, but leaves key build/debug details (dependency quirks, OpenCV/HDF5 compatibility, required patches) to the solver. Successfully completing it typically requires nontrivial systems/ML framework knowledge and multi-step reasoning to fix legacy build issues and ensure the correct solver settings and output artifacts.",
+  "_task_id": "caffe-cifar-10",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:31:07.738239"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 1,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 2,
+  "reasoning": "The task is clearly specified (regex-rewrite pipeline over FEN, with explicit required chess rules and an example I/O), but implementing a fully correct legal-move generator via ordered regex substitutions is exceptionally nonstandard. It requires deep chess domain knowledge (castling rights, check legality, en passant, promotions) and substantial logical reasoning to encode state transitions and edge cases within regex/replace constraints, even though the shell/tooling setup itself is simple.",
+  "_task_id": "regex-chess",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:49.466182"
+}

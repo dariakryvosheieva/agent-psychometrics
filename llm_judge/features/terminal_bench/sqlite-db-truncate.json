@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 0,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 2,
+  "reasoning": "The task is clearly specified (recover rows from a truncated SQLite DB and output a JSON array), but gives no hint on recovery method. The reference solution performs low-level binary scanning and interpretation of SQLite payload patterns/encodings, requiring specialized knowledge and multi-step reasoning to avoid garbage/duplicates, though the environment/tooling itself is simple (just Python).",
+  "_task_id": "sqlite-db-truncate",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:27.367077"
+}

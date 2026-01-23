@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 3,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "tooling_complexity": 5,
+  "reasoning": "The instruction explains the goal (build a MIPS ELF named doomgeneric_mips that works under vm.js and writes frames) but provides little about the required cross-compilation and libc/stdio constraints, leaving substantial ambiguity. The reference solution involves extensive Makefile/toolchain changes and widespread source/header patching to remove system includes and use a custom stdlib, requiring deep cross-compilation and low-level build/linking knowledge with an unusual MIPS/LLVM+binutils pipeline.",
+  "_task_id": "make-doom-for-mips",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:50.782047"
+}

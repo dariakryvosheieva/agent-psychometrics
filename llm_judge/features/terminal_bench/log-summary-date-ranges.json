@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 5,
+  "solution_size": 3,
+  "domain_knowledge_required": 2,
+  "task_complexity": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "tooling_complexity": 2,
+  "reasoning": "The task is very well-specified (fixed reference date, exact filename pattern, explicit CSV schema), but requires correctly computing multiple inclusive date ranges and aggregating counts by parsing filenames. Implementation needs standard Unix tooling (find/grep/date) and some careful logic to avoid off-by-one errors across ranges, making it moderately complex though not requiring specialized domain knowledge.",
+  "_task_id": "log-summary-date-ranges",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:33:42.712104"
+}

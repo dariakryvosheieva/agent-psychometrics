@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "tooling_complexity": 2,
+  "reasoning": "The instruction specifies a metacircular evaluator compatible with an existing Scheme-like interpreter and requires correct stdin redirection semantics plus self-hosting (interpreting itself), which strongly constrains behavior but leaves many implementation details implicit. Building an evaluator with environments, special forms, primitives, and file I/O to match interp.py (including EOF/empty-read edge cases) is large and requires deep reasoning about interpreter semantics and representation.",
+  "_task_id": "schemelike-metacircular-eval",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:13.788264"
+}

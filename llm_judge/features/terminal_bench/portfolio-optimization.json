@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The instruction clearly specifies the mathematical operations, performance target, and build/test commands, but implementing a correct and fast NumPy C extension requires familiarity with the Python C API, NumPy array handling, and memory/contiguity concerns. The task involves coordinating C code, a Python wrapper, and the extension build process, with correctness tolerances and speed constraints adding moderate complexity.",
+  "_task_id": "portfolio-optimization",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:03.056437"
+}

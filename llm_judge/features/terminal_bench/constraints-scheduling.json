@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 3,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 2,
+  "reasoning": "The task is well-specified about constraints, file paths, UTC formatting, and output ICS requirements, but has some ambiguity in preference tie-breaking vs \u201cearliest valid slot.\u201d Solving it requires parsing ICS events, doing interval overlap checks, and reasoning over multiple personal constraints and edge cases (lunch break, weekday-specific cutoff, buffer rule) across a multi-day search window. Tooling is straightforward (a scripting language), but the scheduling/constraint-satisfaction pattern is relatively unusual for terminal tasks.",
+  "_task_id": "constraints-scheduling",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:31:48.140950"
+}

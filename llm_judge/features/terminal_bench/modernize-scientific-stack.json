@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 2,
+  "task_clarity": 4,
+  "solution_size": 2,
+  "domain_knowledge_required": 2,
+  "task_complexity": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "tooling_complexity": 2,
+  "reasoning": "The instruction clearly specifies using pandas, pathlib, and an exact output format, strongly guiding the implementation approach without giving exact commands. The work is mostly straightforward file creation plus a small Python data-processing script with basic dependencies, requiring only light reasoning about reading CSVs and computing grouped means.",
+  "_task_id": "modernize-scientific-stack",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:34:10.326267"
+}

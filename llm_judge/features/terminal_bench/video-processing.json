@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 0,
+  "task_clarity": 3,
+  "solution_size": 3,
+  "domain_knowledge_required": 4,
+  "task_complexity": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "tooling_complexity": 3,
+  "reasoning": "The task specifies inputs/outputs clearly but leaves the key problem\u2014detecting takeoff/landing frames\u2014underspecified and requires designing a vision heuristic that generalizes across videos. The reference uses background subtraction, morphological filtering, and a custom foot-region movement heuristic to pick the largest motion event as the jump, which demands nontrivial CV knowledge and iterative reasoning about noise, motion segmentation, and frame indexing.",
+  "_task_id": "video-processing",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:36:54.029457"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_instruction": 1,
+  "task_clarity": 4,
+  "solution_size": 3,
+  "domain_knowledge_required": 5,
+  "task_complexity": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "tooling_complexity": 4,
+  "reasoning": "The task is well-specified in output format and biological/sequence constraints, but requires significant domain knowledge to identify the antibody target (FLAG), interpret the SMILES as benzylguanine (SNAP-tag), and select donor/acceptor fluorophores matching exact excitation/emission via fpbase. The solution involves multiple APIs, parsing GenBank/FASTA, selecting sequences from a PDB allowlist, and performing constrained codon optimization with sliding-window GC constraints, making it a large and highly atypical multi-step workflow.",
+  "_task_id": "protein-assembly",
+  "_model": "gpt-5.2",
+  "_provider": "openai",
+  "_extracted_at": "2026-01-17T14:35:08.277540"
+}
