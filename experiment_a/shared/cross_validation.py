@@ -12,12 +12,12 @@ Each predictor implements a protocol that provides predicted probabilities
 for (agent, task) pairs, allowing flexibility in how predictions are made.
 """
 
-import hashlib
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple
 
 import numpy as np
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import KFold
 
 from experiment_ab_shared.dataset import ExperimentData
 
@@ -147,16 +147,15 @@ def k_fold_split_tasks(
     k: int,
     seed: int,
 ) -> List[Tuple[List[str], List[str]]]:
-    """Deterministic k-fold split using hash-based assignment.
+    """K-fold split using sklearn KFold.
 
-    Each task is assigned to exactly one fold based on its hash.
-    Returns k (train_tasks, test_tasks) tuples where each test set
-    is one fold and train set is the remaining k-1 folds.
+    Uses sklearn's standard KFold implementation for splitting tasks.
+    This is more standard and well-tested than custom hash-based splitting.
 
     Args:
         task_ids: List of task identifiers
         k: Number of folds (e.g., 5)
-        seed: Random seed for reproducibility
+        seed: Random seed for reproducibility (used with shuffle=True)
 
     Returns:
         List of k tuples: [(train_tasks_0, test_tasks_0), ...]
@@ -164,30 +163,13 @@ def k_fold_split_tasks(
     if k < 2:
         raise ValueError(f"k must be >= 2, got {k}")
 
-    # Score each task using MD5 hash
-    scored: List[Tuple[float, str]] = []
-    for task_id in task_ids:
-        h = hashlib.md5((str(task_id) + f"::{seed}").encode("utf-8")).hexdigest()
-        score = int(h[:8], 16) / float(16**8)
-        scored.append((score, task_id))
-    scored.sort()
+    task_ids = list(task_ids)
+    kfold = KFold(n_splits=k, shuffle=True, random_state=seed)
 
-    # Extract sorted task IDs
-    all_tasks_sorted = [task_id for _, task_id in scored]
-
-    # Divide into k folds (last fold may be slightly larger)
-    fold_size = len(all_tasks_sorted) // k
-    folds: List[List[str]] = []
-    for i in range(k):
-        start = i * fold_size
-        end = start + fold_size if i < k - 1 else len(all_tasks_sorted)
-        folds.append(all_tasks_sorted[start:end])
-
-    # Generate (train, test) tuples for each fold
     result: List[Tuple[List[str], List[str]]] = []
-    for i in range(k):
-        test_tasks = folds[i]
-        train_tasks = [t for j, fold in enumerate(folds) if j != i for t in fold]
+    for train_idx, test_idx in kfold.split(task_ids):
+        train_tasks = [task_ids[i] for i in train_idx]
+        test_tasks = [task_ids[i] for i in test_idx]
         result.append((train_tasks, test_tasks))
 
     return result
