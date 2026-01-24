@@ -168,6 +168,35 @@ def load_agent_abilities(
     return df["theta"].to_dict()
 
 
+def get_behavioral_columns(result_df: pd.DataFrame) -> List[str]:
+    """Get only behavioral feature columns (no outcome leakage).
+
+    Returns columns that don't leak pass/fail information:
+    - trajectory_length_mean, trajectory_length_std
+    - {feat}_mean, {feat}_std for each behavioral feature
+
+    Excludes:
+    - n_agents, n_pass, n_fail, pass_rate (outcome info)
+    - {feat}_ability_weighted (not needed for simpler model)
+    """
+    behavioral_cols = []
+
+    # Trajectory length stats
+    if "trajectory_length_mean" in result_df.columns:
+        behavioral_cols.append("trajectory_length_mean")
+    if "trajectory_length_std" in result_df.columns:
+        behavioral_cols.append("trajectory_length_std")
+
+    # Feature mean and std only (no ability_weighted)
+    for col in result_df.columns:
+        if col.endswith("_mean") and not col.startswith("trajectory"):
+            behavioral_cols.append(col)
+        elif col.endswith("_std") and not col.startswith("trajectory"):
+            behavioral_cols.append(col)
+
+    return behavioral_cols
+
+
 def main():
     parser = argparse.ArgumentParser(description="Aggregate trajectory features")
     parser.add_argument(
@@ -186,6 +215,11 @@ def main():
         "--high_dim",
         action="store_true",
         help="Create high-dimensional features instead of aggregated",
+    )
+    parser.add_argument(
+        "--behavioral_only",
+        action="store_true",
+        help="Only output behavioral features (no pass/fail info leakage)",
     )
     parser.add_argument(
         "--abilities_path",
@@ -216,14 +250,22 @@ def main():
 
     print(f"  Created {len(result_df)} task rows with {len(result_df.columns)} columns")
 
-    result_df.to_csv(output_path)
+    # Filter to behavioral-only columns if requested
+    if args.behavioral_only and not args.high_dim:
+        behavioral_cols = get_behavioral_columns(result_df)
+        print(f"\n  Filtering to {len(behavioral_cols)} behavioral-only columns (no outcome leakage)")
+        output_df = result_df[behavioral_cols]
+    else:
+        output_df = result_df
+
+    output_df.to_csv(output_path)
     print(f"Saved to {output_path}")
 
     # Print summary statistics
     print("\n=== Aggregated Feature Summary ===")
-    feature_cols = [c for c in result_df.columns if "_mean" in c and not c.startswith("trajectory")]
+    feature_cols = [c for c in output_df.columns if "_mean" in c and not c.startswith("trajectory")]
     for col in feature_cols[:10]:
-        print(f"  {col}: mean={result_df[col].mean():.2f}, std={result_df[col].std():.2f}")
+        print(f"  {col}: mean={output_df[col].mean():.2f}, std={output_df[col].std():.2f}")
 
 
 if __name__ == "__main__":

@@ -16,29 +16,19 @@ class AgentInfo:
     max_tokens: int  # Maximum trajectory tokens
 
 
-# Selected 20 agents spanning the ability spectrum
-# All have trajectories that fit in 200K context window
+# Selected 6 pre-frontier agents (date < 20250501) for Experiment B
+# Selection criteria:
+# 1. Date before cutoff (20250501) to avoid contamination
+# 2. 100% task coverage (500/500 tasks in unified_trajs)
+# 3. Optimal ability spread from theta=-1.60 to theta=+1.65
+# 4. Even gaps (0.53-0.72 points) across ability spectrum
 SELECTED_AGENTS: List[AgentInfo] = [
-    AgentInfo("20250928_trae_doubao_seed_code", 2.24, 41000, 79000),
-    AgentInfo("20250804_epam-ai-run-claude-4-sonnet", 2.19, 28000, 55000),
-    AgentInfo("20251103_sonar-foundation-agent_claude-sonnet-4-5", 2.07, 33000, 54000),
-    AgentInfo("20250915_JoyCode", 2.04, 20000, 52000),
-    AgentInfo("20251103_SalesforceAIResearch_SAGE_OpenHands", 1.88, 23000, 53000),
-    AgentInfo("20250807_openhands_gpt5", 1.71, 32000, 72000),
-    AgentInfo("20250522_sweagent_claude-4-sonnet-20250514", 1.19, 47000, 87000),
-    AgentInfo("20250415_openhands", 1.11, 35000, 55000),
-    AgentInfo("20250117_wandb_programmer_o1_crosscheck5", 0.98, 10000, 53000),
-    AgentInfo("20250228_epam-ai-run-claude-3-5-sonnet", 0.79, 17000, 55000),
-    AgentInfo("20250901_entroPO_R2E_QwenCoder30BA3B_tts", 0.68, 54000, 72000),
-    AgentInfo("20251110_frogboss-32b", 0.40, 54000, 91000),
-    AgentInfo("20241029_OpenHands-CodeAct-2.1-sonnet-20241022", 0.26, 13000, 55000),
-    AgentInfo("20241125_enginelabs", 0.16, 10000, 54000),
-    AgentInfo("20250520_openhands_devstral_small", -0.04, 32000, 55000),
-    AgentInfo("20241108_autocoderover-v2.0-claude-3-5-sonnet-20241022", -0.12, 6000, 10000),
-    AgentInfo("20250527_amazon.nova-premier-v1.0", -0.47, 10000, 54000),
-    AgentInfo("20240620_sweagent_claude3.5sonnet", -0.81, 33000, 71000),
-    AgentInfo("20241016_epam-ai-run-gpt-4o", -1.21, 22000, 55000),
-    AgentInfo("20240918_lingma-agent_lingma-swe-gpt-72b", -1.26, 8000, 29000),
+    AgentInfo("20250415_openhands", 1.65, 27419, 77677),
+    AgentInfo("20250410_cortexa", 1.03, 3171, 3763),
+    AgentInfo("20241029_OpenHands-CodeAct-2.1-sonnet-20241022", 0.50, 26151, 63186),
+    AgentInfo("20241108_autocoderover-v2.0-claude-3-5-sonnet-20241022", -0.22, 17947, 81182),
+    AgentInfo("20240721_amazon-q-developer-agent-20240719-dev", -0.91, 1946, 5757),
+    AgentInfo("20241002_lingma-agent_lingma-swe-gpt-72b", -1.60, 10813, 25451),
 ]
 
 AGENT_NAMES = [a.name for a in SELECTED_AGENTS]
