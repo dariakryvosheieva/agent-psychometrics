@@ -149,6 +149,328 @@ def _sigmoid(x: float) -> float:
     return 1.0 / (1.0 + math.exp(-float(x)))
 
 
+# -----------------------------
+# Judge feature schema (per benchmark)
+# -----------------------------
+VERIFIED_JUDGE_FEATURE_NAMES: List[str] = [
+    "fix_in_description",
+    "problem_clarity",
+    "error_message_provided",
+    "reproduction_steps",
+    "fix_locality",
+    "domain_knowledge_required",
+    "fix_complexity",
+    "logical_reasoning_required",
+    "atypicality",
+]
+
+# SWE-bench Pro judge features (different schema).
+PRO_JUDGE_FEATURE_NAMES: List[str] = [
+    "fix_complexity",
+    "verification_difficulty",
+    "standard_pattern_available",
+    "integration_complexity",
+]
+
+# Terminal-Bench judge features (different schema again).
+TERMINAL_BENCH_JUDGE_FEATURE_NAMES: List[str] = [
+    "solution_in_instruction",
+    "task_clarity",
+    "solution_size",
+    "domain_knowledge_required",
+    "task_complexity",
+    "logical_reasoning_required",
+    "atypicality",
+    "tooling_complexity",
+]
+
+
+_JUDGE_INDEX_CACHE: Dict[Tuple[str, bool], Dict[str, str]] = {}
+
+
+def _build_judge_index(features_dir: str, *, normalize_item_ids: bool) -> Dict[str, str]:
+    """
+    Build a mapping from (maybe-normalized) task id -> JSON file path.
+
+    Why: Pro judge JSONs are often stored with filenames like:
+      instance_<id>-v<hash>.json
+    while this pipeline may normalize ids (drops `instance_` and `-v...`).
+    """
+    root = os.path.abspath(str(features_dir))
+    key = (root, bool(normalize_item_ids))
+    if key in _JUDGE_INDEX_CACHE:
+        return _JUDGE_INDEX_CACHE[key]
+
+    idx: Dict[str, str] = {}
+    try:
+        names = [x for x in os.listdir(root) if x.endswith(".json")]
+    except Exception:
+        names = []
+    for fn in names:
+        stem = fn[:-5]
+        norm = base.normalize_swebench_item_id(stem) if bool(normalize_item_ids) else str(stem).strip()
+        if not norm:
+            continue
+        idx.setdefault(norm, os.path.join(root, fn))
+
+    _JUDGE_INDEX_CACHE[key] = idx
+    return idx
+
+
+def _load_judge_vector(
+    item_id: str,
+    *,
+    features_dir: str,
+    feature_names: Sequence[str],
+    index: Dict[str, str],
+    normalize_item_ids: bool,
+):
+    """
+    Load judge feature vector for `item_id` from `<features_dir>/<item_id>.json`,
+    with an index fallback (important for Pro `instance_...-v...` filenames).
+    """
+    tid = str(item_id or "").strip()
+    if not tid:
+        return None
+
+    # 1) exact match
+    p = os.path.join(str(features_dir), f"{tid}.json")
+    if not os.path.exists(p):
+        # 2) normalized / indexed lookup
+        key = base.normalize_swebench_item_id(tid) if bool(normalize_item_ids) else tid
+        p = index.get(key, "")
+        if not p or not os.path.exists(p):
+            return None
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            obj = json.load(f)
+    except Exception:
+        return None
+    xs: List[float] = []
+    for k in feature_names:
+        v = obj.get(k, None)
+        if v is None:
+            return None
+        try:
+            xs.append(float(v))
+        except Exception:
+            return None
+    return base.np.asarray(xs, dtype=base.np.float32)
+
+
+def _parse_alpha_list(s: str):
+    try:
+        xs = [float(x.strip()) for x in str(s or "").split(",") if x.strip()]
+    except Exception as e:
+        raise ValueError(f"Failed to parse alpha list {s!r}: {e}") from e
+    if not xs:
+        raise ValueError("Expected at least one alpha.")
+    arr = base.np.asarray(xs, dtype=base.np.float64)
+    if not base.np.all(arr > 0):
+        raise ValueError(f"All alphas must be > 0; got {arr.tolist()}")
+    return arr
+
+
+def _fit_block_ridge(
+    *,
+    X_emb,
+    X_judge,
+    y,
+    alpha_emb: float,
+    alpha_judge: float,
+):
+    """
+    Fit ridge with different penalties per feature block:
+      min ||y - X_emb w_emb - X_judge w_judge||^2 + alpha_emb||w_emb||^2 + alpha_judge||w_judge||^2
+
+    Mirrors `predict_question_difficulty_combined_features.py`.
+    """
+    ae = float(alpha_emb)
+    aj = float(alpha_judge)
+    if not (ae > 0 and aj > 0):
+        raise ValueError(f"alpha_emb and alpha_judge must be > 0; got {ae}, {aj}")
+
+    X_emb = base.np.asarray(X_emb, dtype=base.np.float64)
+    X_judge = base.np.asarray(X_judge, dtype=base.np.float64)
+    y = base.np.asarray(y, dtype=base.np.float64).reshape(-1)
+    if X_emb.shape[0] != X_judge.shape[0] or X_emb.shape[0] != y.shape[0]:
+        raise ValueError(f"Row mismatch: X_emb={X_emb.shape} X_judge={X_judge.shape} y={y.shape}")
+
+    emb_scaler = base.StandardScaler(with_mean=True, with_std=True)
+    judge_scaler = base.StandardScaler(with_mean=True, with_std=True)
+    X_emb_s = emb_scaler.fit_transform(X_emb)
+    X_judge_s = judge_scaler.fit_transform(X_judge)
+
+    X_t = base.np.concatenate([X_emb_s / math.sqrt(ae), X_judge_s / math.sqrt(aj)], axis=1)
+    model = base.Ridge(alpha=1.0, fit_intercept=True, random_state=None)
+    model.fit(X_t, y)
+    return {
+        "ridge": model,
+        "emb_scaler": emb_scaler,
+        "judge_scaler": judge_scaler,
+        "alpha_emb": ae,
+        "alpha_judge": aj,
+        "n_emb": int(X_emb.shape[1]),
+        "n_judge": int(X_judge.shape[1]),
+    }
+
+
+def _predict_block_ridge(state, *, X_emb, X_judge):
+    X_emb = base.np.asarray(X_emb, dtype=base.np.float64)
+    X_judge = base.np.asarray(X_judge, dtype=base.np.float64)
+    X_emb_s = state["emb_scaler"].transform(X_emb)
+    X_judge_s = state["judge_scaler"].transform(X_judge)
+    X_t = base.np.concatenate(
+        [
+            X_emb_s / math.sqrt(float(state["alpha_emb"])),
+            X_judge_s / math.sqrt(float(state["alpha_judge"])),
+        ],
+        axis=1,
+    )
+    pred = state["ridge"].predict(X_t)
+    return base.np.asarray(pred, dtype=base.np.float64).reshape(-1)
+
+
+def _select_block_alphas_inner_cv(
+    *,
+    X_emb,
+    X_judge,
+    y,
+    alphas_emb,
+    alphas_judge,
+    inner_splits: int,
+    seed: int,
+):
+    """
+    Select (alpha_emb, alpha_judge) via inner KFold minimizing MSE.
+    """
+    X_emb = base.np.asarray(X_emb, dtype=base.np.float64)
+    X_judge = base.np.asarray(X_judge, dtype=base.np.float64)
+    y = base.np.asarray(y, dtype=base.np.float64).reshape(-1)
+    n = int(y.shape[0])
+    k = int(min(int(inner_splits), max(2, n)))
+    cv = base.KFold(n_splits=k, shuffle=True, random_state=int(seed))
+
+    best = (None, None, float("inf"))
+    for ae in alphas_emb:
+        for aj in alphas_judge:
+            mse_sum = 0.0
+            n_folds = 0
+            for tr, va in cv.split(y):
+                st = _fit_block_ridge(
+                    X_emb=X_emb[tr],
+                    X_judge=X_judge[tr],
+                    y=y[tr],
+                    alpha_emb=float(ae),
+                    alpha_judge=float(aj),
+                )
+                p = _predict_block_ridge(st, X_emb=X_emb[va], X_judge=X_judge[va])
+                err = y[va] - p
+                mse_sum += float(base.np.mean(err * err))
+                n_folds += 1
+            mse = mse_sum / max(1, n_folds)
+            if mse < best[2]:
+                best = (float(ae), float(aj), float(mse))
+    if best[0] is None or best[1] is None:
+        raise RuntimeError("Inner CV failed to select block alphas.")
+    return float(best[0]), float(best[1]), float(best[2])
+
+
+def _extract_block_ridge_raw_weights(state):
+    """
+    Return (w_emb_raw, w_judge_raw, intercept_raw) so that:
+      yhat = intercept_raw + dot(w_emb_raw, x_emb_raw) + dot(w_judge_raw, x_judge_raw)
+    """
+    ridge = state["ridge"]
+    coef = base.np.asarray(getattr(ridge, "coef_", []), dtype=base.np.float64).reshape(-1)
+    if coef.size == 0:
+        raise RuntimeError("Model has no coef_.")
+
+    n_emb = int(state["n_emb"])
+    w_emb_t = coef[:n_emb].reshape(-1)
+    w_judge_t = coef[n_emb:].reshape(-1)
+
+    alpha_emb = float(state["alpha_emb"])
+    alpha_judge = float(state["alpha_judge"])
+    emb_scaler = state["emb_scaler"]
+    judge_scaler = state["judge_scaler"]
+
+    emb_scale = base.np.asarray(getattr(emb_scaler, "scale_", None), dtype=base.np.float64).reshape(-1)
+    judge_scale = base.np.asarray(getattr(judge_scaler, "scale_", None), dtype=base.np.float64).reshape(-1)
+    emb_mean = base.np.asarray(getattr(emb_scaler, "mean_", None), dtype=base.np.float64).reshape(-1)
+    judge_mean = base.np.asarray(getattr(judge_scaler, "mean_", None), dtype=base.np.float64).reshape(-1)
+    emb_scale = base.np.where(emb_scale == 0.0, 1.0, emb_scale)
+    judge_scale = base.np.where(judge_scale == 0.0, 1.0, judge_scale)
+
+    w_emb_std = w_emb_t / math.sqrt(alpha_emb)
+    w_judge_std = w_judge_t / math.sqrt(alpha_judge)
+    w_emb_raw = w_emb_std / emb_scale
+    w_judge_raw = w_judge_std / judge_scale
+
+    intercept_model = float(getattr(ridge, "intercept_", 0.0))
+    intercept_raw = intercept_model - float(base.np.dot(emb_mean, w_emb_raw)) - float(base.np.dot(judge_mean, w_judge_raw))
+    return w_emb_raw.astype(base.np.float32, copy=False), w_judge_raw.astype(base.np.float32, copy=False), float(intercept_raw)
+
+
+def save_regression_weights_block_ridge(
+    *,
+    out_dir: str,
+    state,
+    judge_feature_names: Sequence[str],
+    metadata: dict,
+) -> Tuple[str, str]:
+    """
+    Save a minimal representation of the joint block-ridge.
+
+    Writes:
+      - regression_weights.json (metadata)
+      - regression_weights.npz  (arrays: coef_emb_raw, coef_judge_raw, intercept_raw, judge_feature_names, plus scaler stats)
+    """
+    base.ensure_dir(str(out_dir))
+    w_emb_raw, w_judge_raw, intercept_raw = _extract_block_ridge_raw_weights(state)
+
+    emb_scaler = state["emb_scaler"]
+    judge_scaler = state["judge_scaler"]
+    emb_mean = base.np.asarray(getattr(emb_scaler, "mean_", []), dtype=base.np.float32).reshape(-1)
+    emb_scale = base.np.asarray(getattr(emb_scaler, "scale_", []), dtype=base.np.float32).reshape(-1)
+    judge_mean = base.np.asarray(getattr(judge_scaler, "mean_", []), dtype=base.np.float32).reshape(-1)
+    judge_scale = base.np.asarray(getattr(judge_scaler, "scale_", []), dtype=base.np.float32).reshape(-1)
+
+    weights_npz = os.path.join(str(out_dir), "regression_weights.npz")
+    base.np.savez_compressed(
+        weights_npz,
+        coef_emb_raw=base.np.asarray(w_emb_raw, dtype=base.np.float32).reshape(-1),
+        coef_judge_raw=base.np.asarray(w_judge_raw, dtype=base.np.float32).reshape(-1),
+        intercept_raw=base.np.asarray([float(intercept_raw)], dtype=base.np.float32),
+        alpha_emb=base.np.asarray([float(state["alpha_emb"])], dtype=base.np.float32),
+        alpha_judge=base.np.asarray([float(state["alpha_judge"])], dtype=base.np.float32),
+        emb_scaler_mean=emb_mean,
+        emb_scaler_scale=emb_scale,
+        judge_scaler_mean=judge_mean,
+        judge_scaler_scale=judge_scale,
+        judge_feature_names=base.np.asarray(list(judge_feature_names), dtype=object),
+        n_emb=base.np.asarray([int(state["n_emb"])], dtype=base.np.int64),
+        n_judge=base.np.asarray([int(state["n_judge"])], dtype=base.np.int64),
+    )
+
+    weights_json = os.path.join(str(out_dir), "regression_weights.json")
+    meta = dict(metadata or {})
+    meta.update(
+        {
+            "regressor": "block_ridge",
+            "n_emb": int(state["n_emb"]),
+            "n_judge": int(state["n_judge"]),
+            "alpha_emb": float(state["alpha_emb"]),
+            "alpha_judge": float(state["alpha_judge"]),
+            "judge_feature_names": list(judge_feature_names),
+            "weights_npz": str(weights_npz),
+        }
+    )
+    with open(weights_json, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2, sort_keys=True)
+    return weights_json, weights_npz
+
+
 def _is_swebench_pro_benchmark(*, dataset_name: str, dataset_path: str) -> bool:
     """
     Only SWE-bench Pro should be "treated as Pro" for subject_id parsing.
@@ -856,6 +1178,72 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Inner CV splits for RidgeCV (used when --regressor=ridge_cv). Will be capped by train size; must be >=2.",
     )
 
+    # -----------------------------
+    # Optional joint ridge training (embeddings + judge features)
+    # -----------------------------
+    p.add_argument(
+        "--include_judge",
+        action="store_true",
+        help=(
+            "Train a joint (block) ridge model over [embeddings, LLM-judge features] with separate ridge penalties "
+            "for the embedding vs judge blocks. If unset, preserves historical embeddings-only behavior."
+        ),
+    )
+    p.add_argument(
+        "--verified_judge_features_dir",
+        type=str,
+        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/llm_judge/features/verified",
+        help="Directory with per-item Verified judge feature JSONs (<item_id>.json).",
+    )
+    p.add_argument(
+        "--pro_judge_features_dir",
+        type=str,
+        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/llm_judge/features/pro",
+        help="Directory with per-item Pro judge feature JSONs (often instance_<id>-v... .json).",
+    )
+    p.add_argument(
+        "--terminal_bench_judge_features_dir",
+        type=str,
+        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/llm_judge/features/terminal_bench",
+        help="Directory with per-item Terminal-Bench judge feature JSONs (<task_id>.json).",
+    )
+    p.add_argument(
+        "--ridge_alpha_emb",
+        type=float,
+        default=float("nan"),
+        help=(
+            "Embedding block ridge alpha (only used when --include_judge and --regressor=ridge). "
+            "Defaults to --ridge_alpha when unset."
+        ),
+    )
+    p.add_argument(
+        "--ridge_alpha_judge",
+        type=float,
+        default=float("nan"),
+        help=(
+            "Judge block ridge alpha (only used when --include_judge and --regressor=ridge). "
+            "Defaults to --ridge_alpha when unset."
+        ),
+    )
+    p.add_argument(
+        "--ridge_alphas_emb",
+        type=str,
+        default="",
+        help=(
+            "Embedding alpha grid for inner CV (only used when --include_judge and --regressor=ridge_cv). "
+            "Defaults to --ridge_alphas when unset."
+        ),
+    )
+    p.add_argument(
+        "--ridge_alphas_judge",
+        type=str,
+        default="",
+        help=(
+            "Judge alpha grid for inner CV (only used when --include_judge and --regressor=ridge_cv). "
+            "Defaults to --ridge_alphas when unset."
+        ),
+    )
+
     p.add_argument(
         "--eval_mode",
         type=str,
@@ -918,6 +1306,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=str,
         default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/gso.jsonl",
         help="OOD response-matrix JSONL: {'subject_id': ..., 'responses': {'item_id': 0/1, ...}} (OOD mode only).",
+    )
+    p.add_argument(
+        "--ood_judge_features_dir",
+        type=str,
+        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/llm_judge/features/gso",
+        help=(
+            "Optional directory with per-item OOD judge feature JSONs (<item_id>.json). "
+            "Assumed to use one of the existing judge schemas (Verified/Pro/Terminal-Bench). "
+            "Used only when --eval_mode=ood and --include_judge."
+        ),
     )
     p.add_argument(
         "--ood_no_normalize_item_ids",
@@ -1223,10 +1621,385 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         raise AssertionError(f"Unhandled regressor: {regressor_name}")
 
+    use_joint = bool(getattr(args, "include_judge", False))
+    if use_joint and str(regressor_name) not in {"ridge", "ridge_cv"}:
+        raise ValueError("--include_judge requires --regressor to be ridge or ridge_cv (linear is not supported).")
+
     # Normalize early; argparse choices are lowercase.
     eval_mode = str(args.eval_mode or "ood").strip().lower()
     if eval_mode not in {"id", "ood"}:
         raise ValueError(f"Unknown --eval_mode: {args.eval_mode!r}")
+
+    if eval_mode == "id" and use_joint:
+        # -----------------------------
+        # K-fold CV over items (joint block-ridge: embeddings + judge features)
+        # -----------------------------
+        outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        cv_test_auc_folds: List[float] = []
+        cv_test_auc_folds_embedding_only: List[float] = []
+        cv_test_n_obs_folds: List[int] = []
+        cv_test_n_items_scored_folds: List[int] = []
+        yhat_oof = base.np.full((int(len(eligible)),), base.np.nan, dtype=base.np.float64)
+        fold_of_item = base.np.full((int(len(eligible)),), -1, dtype=base.np.int32)
+
+        eligible_index = {tid: i for i, tid in enumerate(eligible)}
+
+        verified_item_set = set(obs_full.verified_item_ids)
+        pro_item_set = set(obs_full.pro_item_ids)
+        terminal_item_set = set(obs_full.terminal_bench_item_ids)
+
+        # Judge feature vector is a fixed concat of per-benchmark schemas.
+        verified_off = 0
+        pro_off = verified_off + int(len(VERIFIED_JUDGE_FEATURE_NAMES))
+        terminal_off = pro_off + int(len(PRO_JUDGE_FEATURE_NAMES))
+        judge_dim = terminal_off + int(len(TERMINAL_BENCH_JUDGE_FEATURE_NAMES))
+        judge_feature_names_full: List[str] = (
+            [f"verified::{k}" for k in VERIFIED_JUDGE_FEATURE_NAMES]
+            + [f"pro::{k}" for k in PRO_JUDGE_FEATURE_NAMES]
+            + [f"terminal_bench::{k}" for k in TERMINAL_BENCH_JUDGE_FEATURE_NAMES]
+        )
+
+        verified_feat_dir = str(args.verified_judge_features_dir)
+        pro_feat_dir = str(args.pro_judge_features_dir)
+        terminal_feat_dir = str(args.terminal_bench_judge_features_dir)
+        verified_idx = _build_judge_index(verified_feat_dir, normalize_item_ids=True)
+        pro_idx = _build_judge_index(pro_feat_dir, normalize_item_ids=True)
+        terminal_idx = _build_judge_index(terminal_feat_dir, normalize_item_ids=False)
+
+        def _judge_full_vec_for_item(item_id: str):
+            tid = str(item_id)
+            x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
+            if tid in verified_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=verified_feat_dir,
+                    feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                    index=verified_idx,
+                    normalize_item_ids=True,
+                )
+                if v is None:
+                    return None
+                x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                return x
+            if tid in pro_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=pro_feat_dir,
+                    feature_names=PRO_JUDGE_FEATURE_NAMES,
+                    index=pro_idx,
+                    normalize_item_ids=True,
+                )
+                if v is None:
+                    return None
+                x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                return x
+            if tid in terminal_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=terminal_feat_dir,
+                    feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
+                    index=terminal_idx,
+                    normalize_item_ids=False,
+                )
+                if v is None:
+                    return None
+                x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                return x
+            return None
+
+        best_fold_auc = -float("inf")
+        best_fold = -1
+        best_joint_state = None
+        fold_alpha_emb: List[float] = []
+        fold_alpha_judge: List[float] = []
+
+        for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
+            train_items = [eligible[int(i)] for i in tr.tolist()]
+            test_items = [eligible[int(i)] for i in te.tolist()]
+
+            fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
+            base.ensure_dir(fold_root)
+
+            # Save train/test item lists (debugging / provenance).
+            base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
+            base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+
+            # IRT on train items only (no leakage).
+            base.set_torch_determinism(False)
+            base.seed_everything(int(args.seed), deterministic=False)
+
+            obs_train = build_multibench_obs_for_items(obs_full=obs_full, keep_item_ids=train_items)
+            theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
+                obs_train=obs_train,
+                irt_model=str(irt_model),
+                epochs=int(args.irt_epochs),
+                device=str(args.irt_device),
+                seed=int(args.seed),
+                lr=float(args.irt_lr),
+                out_dir=os.path.join(fold_root, _irt_out_dir_name(irt_model)),
+            )
+
+            # Restore determinism for downstream sklearn/regression steps.
+            base.set_torch_determinism(True)
+
+            if not theta_by_model or not theta_by_scaffold:
+                raise RuntimeError(f"Fold {fold}: IRT produced 0 model/scaffold thetas (unexpected).")
+            if not diff_by_item:
+                raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
+
+            train_labeled = [tid for tid in train_items if tid in diff_by_item]
+            if len(train_labeled) < 2:
+                raise RuntimeError(
+                    f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties; cannot fit regressor."
+                )
+
+            # Embeddings-only baseline (for comparability on the scored subset).
+            base.seed_everything(int(args.seed) + int(fold), deterministic=True)
+            X_train = base.np.stack([X[id_to_row[tid]] for tid in train_labeled], axis=0).astype(base.np.float32)
+            y_train = base.np.array([float(diff_by_item[tid]) for tid in train_labeled], dtype=base.np.float32)
+            emb_model = _make_model(n_train=int(len(train_labeled)), fold_seed=int(args.seed) + int(fold))
+            emb_model.fit(X_train, y_train)
+
+            X_test = base.np.stack([X[id_to_row[tid]] for tid in test_items], axis=0).astype(base.np.float32)
+            emb_pred_test = emb_model.predict(X_test).astype(base.np.float64)
+            emb_pred_by_item_test = {tid: float(z) for tid, z in zip(test_items, emb_pred_test.tolist())}
+
+            # Joint block-ridge training uses only train items with judge features available.
+            joint_emb_train_rows = []
+            joint_judge_train_rows = []
+            joint_y_train_rows = []
+            joint_train_items_used: List[str] = []
+            for tid in train_labeled:
+                jv = _judge_full_vec_for_item(tid)
+                if jv is None:
+                    continue
+                joint_emb_train_rows.append(X[id_to_row[tid]].astype(base.np.float32))
+                joint_judge_train_rows.append(base.np.asarray(jv, dtype=base.np.float32))
+                joint_y_train_rows.append(float(diff_by_item[tid]))
+                joint_train_items_used.append(tid)
+            if len(joint_train_items_used) < 2:
+                raise RuntimeError(
+                    f"Fold {fold}: only {len(joint_train_items_used)} train items had judge features; cannot fit joint ridge."
+                )
+
+            X_emb_joint_train = base.np.stack(joint_emb_train_rows, axis=0).astype(base.np.float32)
+            X_judge_joint_train = base.np.stack(joint_judge_train_rows, axis=0).astype(base.np.float32)
+            y_joint_train = base.np.asarray(joint_y_train_rows, dtype=base.np.float32)
+
+            reg = str(regressor_name or "ridge_cv").strip()
+            if reg == "ridge":
+                alpha_emb = (
+                    float(args.ridge_alpha_emb) if math.isfinite(float(args.ridge_alpha_emb)) else float(args.ridge_alpha)
+                )
+                alpha_judge = (
+                    float(args.ridge_alpha_judge)
+                    if math.isfinite(float(args.ridge_alpha_judge))
+                    else float(args.ridge_alpha)
+                )
+                joint_state = _fit_block_ridge(
+                    X_emb=X_emb_joint_train,
+                    X_judge=X_judge_joint_train,
+                    y=y_joint_train,
+                    alpha_emb=float(alpha_emb),
+                    alpha_judge=float(alpha_judge),
+                )
+            else:
+                ae_grid_s = str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas)
+                aj_grid_s = str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas)
+                ae_grid = _parse_alpha_list(ae_grid_s)
+                aj_grid = _parse_alpha_list(aj_grid_s)
+                alpha_emb, alpha_judge, _ = _select_block_alphas_inner_cv(
+                    X_emb=X_emb_joint_train,
+                    X_judge=X_judge_joint_train,
+                    y=y_joint_train,
+                    alphas_emb=ae_grid,
+                    alphas_judge=aj_grid,
+                    inner_splits=int(args.inner_splits),
+                    seed=int(args.seed) + 2000 + int(fold),
+                )
+                joint_state = _fit_block_ridge(
+                    X_emb=X_emb_joint_train,
+                    X_judge=X_judge_joint_train,
+                    y=y_joint_train,
+                    alpha_emb=float(alpha_emb),
+                    alpha_judge=float(alpha_judge),
+                )
+
+            fold_alpha_emb.append(float(joint_state["alpha_emb"]))
+            fold_alpha_judge.append(float(joint_state["alpha_judge"]))
+
+            # Predict held-out items where judge features exist.
+            final_pred_by_item: Dict[str, float] = {}
+            n_missing_judge = 0
+            for tid in test_items:
+                jv = _judge_full_vec_for_item(tid)
+                if jv is None:
+                    n_missing_judge += 1
+                    continue
+                x_emb = X[id_to_row[tid]].reshape(1, -1).astype(base.np.float32)
+                x_j = base.np.asarray(jv, dtype=base.np.float32).reshape(1, -1)
+                final_pred_by_item[tid] = float(_predict_block_ridge(joint_state, X_emb=x_emb, X_judge=x_j)[0])
+
+            # Fill OOF predictions (NaN if missing judge).
+            for tid in test_items:
+                i = eligible_index.get(tid, None)
+                if i is None:
+                    continue
+                fold_of_item[int(i)] = int(fold)
+                if tid in final_pred_by_item:
+                    yhat_oof[int(i)] = float(final_pred_by_item[tid])
+
+            # Held-out AUROC: score only items with final predictions (judge present),
+            # and compare embedding-only vs final on the exact same obs set.
+            scored_items = set(final_pred_by_item.keys())
+            scores_final: List[float] = []
+            scores_emb: List[float] = []
+            labels: List[int] = []
+            test_set = set(test_items)
+
+            for bench, sid, resp in all_responses_tagged:
+                key = f"{bench}::{sid}"
+                pair = agent_to_ms_pair.get(key, None)
+                if pair is None:
+                    continue
+                model_name, scaffold = pair
+                tm = theta_by_model.get(model_name, None)
+                ts = theta_by_scaffold.get(scaffold, None)
+                if tm is None or ts is None:
+                    continue
+                th = float(tm) + float(ts)
+                for item_id, y_obs in resp.items():
+                    if item_id not in test_set:
+                        continue
+                    if item_id not in scored_items:
+                        continue
+                    z = final_pred_by_item.get(item_id, None)
+                    z_emb = emb_pred_by_item_test.get(item_id, None)
+                    if z is None or z_emb is None:
+                        continue
+                    scores_final.append(_sigmoid(th - float(z)))
+                    scores_emb.append(_sigmoid(th - float(z_emb)))
+                    labels.append(int(y_obs))
+
+            fold_auc = float(base._compute_binary_auroc(scores_final, labels))
+            fold_auc_emb = float(base._compute_binary_auroc(scores_emb, labels))
+            cv_test_auc_folds.append(float(fold_auc))
+            cv_test_auc_folds_embedding_only.append(float(fold_auc_emb))
+            cv_test_n_obs_folds.append(int(len(labels)))
+            cv_test_n_items_scored_folds.append(int(len(scored_items)))
+
+            print(f"Fold {fold:02d}: auc={fold_auc} missing_judge={n_missing_judge}")
+            if fold_auc == fold_auc and fold_auc > best_fold_auc:
+                best_fold_auc = float(fold_auc)
+                best_fold = int(fold)
+                best_joint_state = joint_state
+
+        if best_joint_state is None or best_fold < 1:
+            raise RuntimeError("Failed to select a best CV fold joint model by ROC-AUC (all folds NaN?).")
+
+        auc_arr = base.np.asarray(cv_test_auc_folds, dtype=base.np.float64)
+        auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
+        auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
+        print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
+        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
+
+        # Save regression weights from the best fold.
+        weights_meta = {
+            "eval_mode": "id",
+            "script": os.path.abspath(__file__),
+            "include_judge": True,
+            "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
+            "min_models_per_scaffold": int(args.min_models_per_scaffold),
+            "seed": int(args.seed),
+            "deterministic": True,
+            "irt_seeded": True,
+            "irt_deterministic": False,
+            "cv_n_splits": int(args.cv_folds),
+            "cv_best_auc_fold": int(best_fold),
+            "cv_best_auc": float(best_fold_auc),
+            "irt_model": str(irt_model_label),
+            "regressor": str(regressor_name),
+            "ridge_alpha": float(args.ridge_alpha),
+            "ridge_alphas": str(args.ridge_alphas),
+            "ridge_alphas_emb": str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas),
+            "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
+            "inner_splits": int(args.inner_splits),
+            "verified_judge_features_dir": str(args.verified_judge_features_dir),
+            "pro_judge_features_dir": str(args.pro_judge_features_dir),
+            "terminal_bench_judge_features_dir": str(args.terminal_bench_judge_features_dir),
+            "judge_feature_names": list(judge_feature_names_full),
+        }
+        weights_json, weights_npz = save_regression_weights_block_ridge(
+            out_dir=str(args.out_dir),
+            state=best_joint_state,
+            judge_feature_names=judge_feature_names_full,
+            metadata=weights_meta,
+        )
+
+        metrics = {
+            "eval_mode": "id",
+            "include_judge": True,
+            "n_items_total": int(len(task_ids)),
+            "n_items_with_responses": int(len(overlap_ids)),
+            "n_items_eligible_cv_irt": int(len(eligible)),
+            "exclude_zero_success": bool(exclude_zero_success),
+            "n_items_zero_success_in_responses": int(len(zero_success_ids)),
+            "embedding_dim": int(Xy.shape[1]),
+            "judge_feature_dim": int(judge_dim),
+            "seed": int(args.seed),
+            "deterministic": True,
+            "irt_seeded": True,
+            "irt_deterministic": False,
+            "cv_n_splits": int(args.cv_folds),
+            "cv_best_auc_fold": int(best_fold),
+            "cv_best_auc": float(best_fold_auc),
+            "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
+            "cv_test_auc_mean": float(auc_mean),
+            "cv_test_auc_std": float(auc_std),
+            "cv_test_auc_folds_embedding_only": [float(x) for x in cv_test_auc_folds_embedding_only],
+            "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
+            "cv_test_n_items_scored_folds": [int(x) for x in cv_test_n_items_scored_folds],
+            "cv_selected_alpha_emb_folds": [float(x) for x in fold_alpha_emb],
+            "cv_selected_alpha_judge_folds": [float(x) for x in fold_alpha_judge],
+            "irt_epochs": int(args.irt_epochs),
+            "irt_device": str(args.irt_device),
+            "irt_lr": float(args.irt_lr),
+            "irt_model": str(irt_model_label),
+            "regressor": str(regressor_name),
+            "ridge_alpha": float(args.ridge_alpha),
+            "ridge_alphas": str(args.ridge_alphas),
+            "inner_splits": int(args.inner_splits),
+            "dataset_sources": str(dataset_sources_str),
+            "verified_agent_results_raw": str(verified_agent_results_raw),
+            "pro_agent_results_raw": str(pro_agent_results_raw),
+            "terminal_bench_agent_results_raw": str(terminal_agent_results_raw),
+            "instruction": str(args.instruction),
+            "instruction_signature": instr_sig,
+            "batch_size": int(args.batch_size),
+            "device_map": str(args.device_map),
+            "torch_dtype": str(args.torch_dtype),
+            "attn_implementation": str(args.attn_implementation),
+            "embeddings_cache": emb_cache,
+            "regression_weights_json": str(weights_json),
+            "regression_weights_npz": str(weights_npz),
+        }
+        base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
+
+        # Write per-item predictions (OOF CV; NaNs are written as missing_judge).
+        pred_path = os.path.join(args.out_dir, "predictions.csv")
+        with open(pred_path, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+            w.writeheader()
+            for i, tid in enumerate(eligible):
+                v = float(yhat_oof[int(i)])
+                fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
+                split = "cv_val" if (v == v) else "missing_judge"
+                w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split, "fold": fold_id})
+
+        print(f"Wrote predictions: {pred_path}")
+        print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
+        print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
+        return 0
 
     if eval_mode == "id":
         # -----------------------------
@@ -1527,15 +2300,140 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     X_train = base.np.stack([X[id_to_row[tid]] for tid in train_labeled], axis=0).astype(base.np.float32)
     y_train = base.np.array([float(diff_by_item[tid]) for tid in train_labeled], dtype=base.np.float32)
 
-    model = _make_model(n_train=int(len(train_labeled)), fold_seed=int(args.seed))
-    model.fit(X_train, y_train)
+    model = None
+    joint_state = None
+    judge_feature_names_full: List[str] = []
+    judge_dim = 0
+
+    if not use_joint:
+        model = _make_model(n_train=int(len(train_labeled)), fold_seed=int(args.seed))
+        model.fit(X_train, y_train)
+    else:
+        verified_item_set = set(obs_full.verified_item_ids)
+        pro_item_set = set(obs_full.pro_item_ids)
+        terminal_item_set = set(obs_full.terminal_bench_item_ids)
+
+        verified_off = 0
+        pro_off = verified_off + int(len(VERIFIED_JUDGE_FEATURE_NAMES))
+        terminal_off = pro_off + int(len(PRO_JUDGE_FEATURE_NAMES))
+        judge_dim = terminal_off + int(len(TERMINAL_BENCH_JUDGE_FEATURE_NAMES))
+        judge_feature_names_full = (
+            [f"verified::{k}" for k in VERIFIED_JUDGE_FEATURE_NAMES]
+            + [f"pro::{k}" for k in PRO_JUDGE_FEATURE_NAMES]
+            + [f"terminal_bench::{k}" for k in TERMINAL_BENCH_JUDGE_FEATURE_NAMES]
+        )
+
+        verified_feat_dir = str(args.verified_judge_features_dir)
+        pro_feat_dir = str(args.pro_judge_features_dir)
+        terminal_feat_dir = str(args.terminal_bench_judge_features_dir)
+        verified_idx = _build_judge_index(verified_feat_dir, normalize_item_ids=True)
+        pro_idx = _build_judge_index(pro_feat_dir, normalize_item_ids=True)
+        terminal_idx = _build_judge_index(terminal_feat_dir, normalize_item_ids=False)
+
+        def _judge_full_vec_for_item(item_id: str):
+            tid = str(item_id)
+            x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
+            if tid in verified_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=verified_feat_dir,
+                    feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                    index=verified_idx,
+                    normalize_item_ids=True,
+                )
+                if v is None:
+                    return None
+                x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                return x
+            if tid in pro_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=pro_feat_dir,
+                    feature_names=PRO_JUDGE_FEATURE_NAMES,
+                    index=pro_idx,
+                    normalize_item_ids=True,
+                )
+                if v is None:
+                    return None
+                x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                return x
+            if tid in terminal_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=terminal_feat_dir,
+                    feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
+                    index=terminal_idx,
+                    normalize_item_ids=False,
+                )
+                if v is None:
+                    return None
+                x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                return x
+            return None
+
+        joint_emb_train_rows = []
+        joint_judge_train_rows = []
+        joint_y_train_rows = []
+        joint_train_items_used: List[str] = []
+        for tid in train_labeled:
+            jv = _judge_full_vec_for_item(tid)
+            if jv is None:
+                continue
+            joint_emb_train_rows.append(X[id_to_row[tid]].astype(base.np.float32))
+            joint_judge_train_rows.append(base.np.asarray(jv, dtype=base.np.float32))
+            joint_y_train_rows.append(float(diff_by_item[tid]))
+            joint_train_items_used.append(tid)
+        if len(joint_train_items_used) < 2:
+            raise RuntimeError(
+                f"Training-only mode: only {len(joint_train_items_used)} train items had judge features; cannot fit joint ridge."
+            )
+
+        X_emb_joint_train = base.np.stack(joint_emb_train_rows, axis=0).astype(base.np.float32)
+        X_judge_joint_train = base.np.stack(joint_judge_train_rows, axis=0).astype(base.np.float32)
+        y_joint_train = base.np.asarray(joint_y_train_rows, dtype=base.np.float32)
+
+        reg = str(regressor_name or "ridge_cv").strip()
+        if reg == "ridge":
+            alpha_emb = float(args.ridge_alpha_emb) if math.isfinite(float(args.ridge_alpha_emb)) else float(args.ridge_alpha)
+            alpha_judge = (
+                float(args.ridge_alpha_judge) if math.isfinite(float(args.ridge_alpha_judge)) else float(args.ridge_alpha)
+            )
+            joint_state = _fit_block_ridge(
+                X_emb=X_emb_joint_train,
+                X_judge=X_judge_joint_train,
+                y=y_joint_train,
+                alpha_emb=float(alpha_emb),
+                alpha_judge=float(alpha_judge),
+            )
+        else:
+            ae_grid_s = str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas)
+            aj_grid_s = str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas)
+            ae_grid = _parse_alpha_list(ae_grid_s)
+            aj_grid = _parse_alpha_list(aj_grid_s)
+            alpha_emb, alpha_judge, _ = _select_block_alphas_inner_cv(
+                X_emb=X_emb_joint_train,
+                X_judge=X_judge_joint_train,
+                y=y_joint_train,
+                alphas_emb=ae_grid,
+                alphas_judge=aj_grid,
+                inner_splits=int(args.inner_splits),
+                seed=int(args.seed) + 2000,
+            )
+            joint_state = _fit_block_ridge(
+                X_emb=X_emb_joint_train,
+                X_judge=X_judge_joint_train,
+                y=y_joint_train,
+                alpha_emb=float(alpha_emb),
+                alpha_judge=float(alpha_judge),
+            )
 
     ridge_alpha = None
     if regressor_name in ("ridge", "ridge_cv"):
-        try:
-            ridge_alpha = float(model.named_steps["ridge"].alpha_)
-        except Exception:
-            ridge_alpha = None
+        if not use_joint:
+            try:
+                ridge_alpha = float(model.named_steps["ridge"].alpha_)
+            except Exception:
+                ridge_alpha = None
 
     weights_meta = {
         "eval_mode": str(eval_mode),
@@ -1572,13 +2470,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "n_items_zero_success_in_responses": int(len(zero_success_ids)),
         "embeddings_cache": emb_cache,
     }
-    base.save_regression_weights(
-        out_dir=str(args.out_dir),
-        model=model,
-        regressor_name=str(regressor_name),
-        feature_dim=int(Xy.shape[1]),
-        metadata=weights_meta,
-    )
+    if not use_joint:
+        base.save_regression_weights(
+            out_dir=str(args.out_dir),
+            model=model,
+            regressor_name=str(regressor_name),
+            feature_dim=int(Xy.shape[1]),
+            metadata=weights_meta,
+        )
+    else:
+        if joint_state is None:
+            raise RuntimeError("Internal error: joint_state was None after joint training.")
+        weights_meta.update(
+            {
+                "include_judge": True,
+                "ridge_alpha": float(args.ridge_alpha),
+                "ridge_alphas": str(args.ridge_alphas),
+                "ridge_alphas_emb": str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas),
+                "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
+                "verified_judge_features_dir": str(args.verified_judge_features_dir),
+                "pro_judge_features_dir": str(args.pro_judge_features_dir),
+                "terminal_bench_judge_features_dir": str(args.terminal_bench_judge_features_dir),
+                "judge_feature_names": list(judge_feature_names_full),
+                "judge_feature_dim": int(judge_dim),
+            }
+        )
+        save_regression_weights_block_ridge(
+            out_dir=str(args.out_dir),
+            state=joint_state,
+            judge_feature_names=judge_feature_names_full,
+            metadata=weights_meta,
+        )
 
     # -----------------------------
     # OOD evaluation: 4th benchmark AUROC using learned thetas + regressor
@@ -1646,15 +2568,93 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             raise RuntimeError("OOD benchmark: embeddings produced 0 ids (unexpected).")
 
         X_ood = base.np.stack([ood_emb_by_id[iid] for iid in ood_ids_sorted], axis=0).astype(base.np.float32)
-        z_pred = model.predict(X_ood).astype(base.np.float64)
-        z_by_item = {iid: float(z) for iid, z in zip(ood_ids_sorted, z_pred.tolist())}
+        if not use_joint:
+            z_pred = model.predict(X_ood).astype(base.np.float64)
+        else:
+            if joint_state is None:
+                raise RuntimeError("Internal error: joint_state was None for OOD evaluation in joint mode.")
+            if int(judge_dim) != int(joint_state["n_judge"]):
+                raise RuntimeError("Joint ridge: internal judge_dim mismatch vs trained model (cannot predict).")
+
+            ood_feat_dir = str(getattr(args, "ood_judge_features_dir", "") or "").strip()
+            ood_idx: Dict[str, str] = _build_judge_index(
+                ood_feat_dir, normalize_item_ids=bool(args.ood_normalize_item_ids)
+            ) if ood_feat_dir else {}
+
+            def _ood_judge_full_vec_for_item(item_id: str):
+                """
+                Load OOD judge vector from a single directory, assuming it matches one of the known schemas.
+                Returns a full-length vector of size `judge_dim`, or None if not found/parsable.
+                """
+                tid = str(item_id)
+                x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
+
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=ood_feat_dir,
+                    feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                    index=ood_idx,
+                    normalize_item_ids=bool(args.ood_normalize_item_ids),
+                )
+                if v is not None:
+                    x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                    return x
+
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=ood_feat_dir,
+                    feature_names=PRO_JUDGE_FEATURE_NAMES,
+                    index=ood_idx,
+                    normalize_item_ids=bool(args.ood_normalize_item_ids),
+                )
+                if v is not None:
+                    x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                    return x
+
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=ood_feat_dir,
+                    feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
+                    index=ood_idx,
+                    normalize_item_ids=bool(args.ood_normalize_item_ids),
+                )
+                if v is not None:
+                    x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
+                    return x
+
+                return None
+
+            # Behave like in-distribution joint mode: only predict items with judge features.
+            ood_ids_used: List[str] = []
+            ood_emb_rows: List[base.np.ndarray] = []
+            ood_judge_rows: List[base.np.ndarray] = []
+            for iid in ood_ids_sorted:
+                jv = _ood_judge_full_vec_for_item(iid) if ood_feat_dir else None
+                if jv is None:
+                    continue
+                ood_ids_used.append(str(iid))
+                ood_emb_rows.append(base.np.asarray(ood_emb_by_id[iid], dtype=base.np.float32).reshape(-1))
+                ood_judge_rows.append(base.np.asarray(jv, dtype=base.np.float32).reshape(-1))
+
+            if not ood_ids_used:
+                raise RuntimeError(
+                    "OOD benchmark: 0 items had OOD judge features; cannot run joint (emb+judge) prediction. "
+                    "Provide --ood_judge_features_dir with per-item JSONs or run without --include_judge."
+                )
+
+            X_emb_ood_used = base.np.stack(ood_emb_rows, axis=0).astype(base.np.float32)
+            X_judge_ood_used = base.np.stack(ood_judge_rows, axis=0).astype(base.np.float32)
+            z_pred_used = _predict_block_ridge(joint_state, X_emb=X_emb_ood_used, X_judge=X_judge_ood_used).astype(base.np.float64)
+            z_by_item = {iid: float(z) for iid, z in zip(ood_ids_used, z_pred_used.tolist())}
+        if not use_joint:
+            z_by_item = {iid: float(z) for iid, z in zip(ood_ids_sorted, z_pred.tolist())}
 
         # Write per-item OOD predictions for the 4th benchmark.
         pred_path = os.path.join(str(args.out_dir), "predictions.csv")
         with open(pred_path, "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
             w.writeheader()
-            for iid, z in zip(ood_ids_sorted, z_pred.tolist()):
+            for iid, z in (z_by_item or {}).items():
                 w.writerow({"item_id": str(iid), "diff_pred": float(z), "split": "ood", "fold": ""})
         print(f"Wrote predictions: {pred_path}")
 
@@ -1694,11 +2694,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             {
                 "eval_mode": "ood",
                 "auc": float(ood_auc),
+                "include_judge": bool(use_joint),
                 "agent_results": str(ood_agent_results),
                 "dataset_name": (ood_dataset_name or None),
                 "dataset_path": (ood_dataset_path or None),
                 "split": str(args.ood_split),
                 "normalize_item_ids": bool(args.ood_normalize_item_ids),
+                "ood_judge_features_dir": str(getattr(args, "ood_judge_features_dir", "") or "").strip() or None,
                 **ood_meta,
             },
         )
