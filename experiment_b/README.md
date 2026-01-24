@@ -100,17 +100,18 @@ All results use the **zero_pre** frontier definition (0% pre-frontier, >0% post-
 
 ### TerminalBench
 
-**Cutoff**: 2025-11-05 | **Pre-frontier agents**: 48 | **Post-frontier agents**: 35 | **Frontier tasks**: 10 | **Eval agents with variance**: 21
+**Cutoff**: 2025-09-01 | **Pre-frontier agents**: 37 | **Post-frontier agents**: 46 | **Frontier tasks**: 11 | **Eval agents with variance**: 25
 
 | Method | Mean AUC ± SEM | ROC-AUC |
 |--------|----------------|---------|
-| Oracle (upper bound) | **0.7507 ± 0.179** | 0.7926 |
-| Baseline IRT (pre-frontier only) | 0.5382 ± 0.220 | 0.6982 |
-| LLM Judge + Ridge | 0.4505 ± 0.255 | 0.6897 |
-| Embedding + Ridge | 0.4201 ± 0.209 | 0.6268 |
-| Feature-IRT (LLM Judge) | 0.4172 ± 0.224 | 0.6781 |
+| Oracle (upper bound) | **0.7614 ± 0.041** | 0.8348 |
+| Baseline IRT (pre-frontier only) | 0.5910 ± 0.051 | 0.7681 |
+| LLM Judge + Ridge | 0.5318 ± 0.046 | 0.7539 |
+| Feature-IRT (LLM Judge) | 0.4716 ± 0.040 | 0.7502 |
+| Embedding + Ridge | 0.4253 ± 0.041 | 0.6676 |
+| Feature-IRT (Embedding) | 0.4189 ± 0.043 | 0.6937 |
 
-**Note**: SAD-IRT not available (trained on SWE-bench tasks only).
+**Note**: SAD-IRT not available (trained on SWE-bench tasks only). Earlier cutoff (moved from 2025-11-01 to 2025-09-01) provides more frontier tasks and much tighter confidence intervals.
 
 ### GSO (Software Optimization Benchmark)
 
