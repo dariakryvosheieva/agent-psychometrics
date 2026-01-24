@@ -45,19 +45,19 @@ Three definitions of "frontier task" are supported:
 ```bash
 source .venv/bin/activate
 
-# Run on SWE-bench with recommended settings (zero_pre frontier definition, no date forecasting)
-python -m experiment_b.compare_methods --dataset swebench --frontier_definitions zero_pre --no_forecast_dates
+# Run on SWE-bench with default settings (zero_pre frontier definition, no date forecasting)
+python -m experiment_b.compare_methods
 
 # Run on all datasets
-python -m experiment_b.compare_methods --dataset swebench_pro --frontier_definitions zero_pre --no_forecast_dates
-python -m experiment_b.compare_methods --dataset terminalbench --frontier_definitions zero_pre --no_forecast_dates
-python -m experiment_b.compare_methods --dataset gso --frontier_definitions zero_pre --no_forecast_dates
+python -m experiment_b.compare_methods --dataset swebench_pro
+python -m experiment_b.compare_methods --dataset terminalbench
+python -m experiment_b.compare_methods --dataset gso
 
-# Run with multiple frontier definitions (original behavior)
+# Run with multiple frontier definitions
 python -m experiment_b.compare_methods --frontier_definitions passrate irt
 
 # Enable date forecasting (slower)
-python -m experiment_b.compare_methods --frontier_definitions zero_pre
+python -m experiment_b.compare_methods --forecast_dates
 
 # Save results to CSV
 python -m experiment_b.compare_methods --output_csv results.csv
@@ -422,9 +422,8 @@ class DatasetConfig(ABC):
 
 ```
 --dataset              Dataset to use: swebench (default), swebench_pro, terminalbench, or gso
---frontier_definitions Space-separated list: 'zero_pre' 'passrate' 'irt' (default: passrate irt)
-                       Recommended: 'zero_pre' for cleanest metric
---no_forecast_dates    Disable date forecasting evaluation (faster, recommended)
+--frontier_definitions Space-separated list: 'zero_pre' 'passrate' 'irt' (default: zero_pre)
+--forecast_dates       Enable date forecasting evaluation (disabled by default)
 --output_csv           Save results to CSV file
 --grid_search          Run grid search over Feature-IRT hyperparameters
 --verbose              Show alignment parameters and training progress

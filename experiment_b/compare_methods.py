@@ -21,8 +21,8 @@ Usage:
     python -m experiment_b.compare_methods
     python -m experiment_b.compare_methods --dataset terminalbench
     python -m experiment_b.compare_methods --output_csv chris_output/experiment_b_results.csv
-    python -m experiment_b.compare_methods --no_forecast_dates
-    python -m experiment_b.compare_methods --frontier_definitions passrate
+    python -m experiment_b.compare_methods --forecast_dates
+    python -m experiment_b.compare_methods --frontier_definitions passrate irt
 """
 
 import argparse
@@ -173,17 +173,17 @@ def parse_args() -> argparse.Namespace:
              "training loss curves, and feature/residual contribution analysis",
     )
     parser.add_argument(
-        "--no_forecast_dates",
+        "--forecast_dates",
         action="store_true",
-        help="Disable date forecasting evaluation (enabled by default)",
+        help="Enable date forecasting evaluation (disabled by default)",
     )
     parser.add_argument(
         "--frontier_definitions",
         type=str,
         nargs="+",
-        default=["passrate", "irt"],
+        default=["zero_pre"],
         choices=["irt", "passrate", "zero_pre"],
-        help="Frontier definitions to evaluate (default: passrate, irt). "
+        help="Frontier definitions to evaluate (default: zero_pre). "
              "'passrate' = pass rate thresholds, 'irt' = IRT probability threshold, "
              "'zero_pre' = 0%% pre-frontier, >0%% post-frontier",
     )
@@ -248,6 +248,8 @@ def main():
     }
 
     # === DIAGNOSTIC: Add random baseline to verify evaluation ===
+    # Note: With <20 frontier tasks, random baseline can deviate from 0.5 due to variance.
+    # Test with multiple seeds if results seem suspicious.
     import random
     random.seed(42)
     all_task_ids = list(data.oracle_items.index)
@@ -317,7 +319,7 @@ def main():
     # 3. Setup date forecasting (optional)
     # =========================================================================
     date_info = None
-    if not args.no_forecast_dates:
+    if args.forecast_dates:
         date_info = setup_date_forecasting(data, raw_predictions, method_abilities)
 
     # =========================================================================
