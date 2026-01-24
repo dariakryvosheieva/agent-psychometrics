@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of pandas internals - specifically how dict_to_mgr works and why using a Series constructor for column lookup is inefficient. The fix involves replacing Series-based indexing with direct dictionary lookups and manual array construction, which is not a standard pattern but requires understanding pandas' internal data management. The verification is moderately difficult due to edge cases like NA scalars and dtype handling.",
+  "_task_id": "pandas-dev__pandas-9a6c8f0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:55.339495"
+}

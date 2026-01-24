@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 4,
+  "atypicality": 4,
+  "reasoning": "The optimization requires deep understanding of numpy internals and algorithmic trade-offs. The solution involves creating a boolean lookup table for integer arrays within a certain range, with a mathematically-derived heuristic (log10-based formula) to decide when this approach is beneficial. This is not a standard pattern and requires domain expertise to determine the optimal parameters threshold. The integration is relatively clean as it adds a fast path to existing code, but the algorithmic insight needed is substantial.",
+  "_task_id": "numpy__numpy-cedba62",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:55.965931"
+}

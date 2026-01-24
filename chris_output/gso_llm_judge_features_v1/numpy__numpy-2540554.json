@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep understanding of NumPy's memory layout, strides, and structured array internals. The solution involves computing common strides across fields with varying offsets and counts, then manipulating array views through stride tricks to avoid copies. The complexity lies in handling edge cases like reversed fields, subarrays, and negative strides while maintaining correctness across different array subtypes (ndarray, recarray, memmap).",
+  "_task_id": "numpy__numpy-2540554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:49.216830"
+}

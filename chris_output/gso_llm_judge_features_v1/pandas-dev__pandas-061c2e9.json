@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of pandas merge internals to detect and exploit monotonic sorted keys. The patch modifies multiple files across the codebase (merge.py, base.py, generic.py) and introduces a new function get_join_indexers_non_unique with complex logic handling None indexers throughout the merge operation. The test setup hints at sorted data but doesn't explicitly suggest the optimization strategy of detecting monotonicity to avoid unnecessary indexer computation.",
+  "_task_id": "pandas-dev__pandas-061c2e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:36.155616"
+}

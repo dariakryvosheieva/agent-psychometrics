@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 3,
+  "problem_clarity": 4,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The hint explicitly states 'Do not update images during n_frames or is_animated seeking', which directly points to the optimization strategy. The fix requires understanding GIF frame seeking internals and adding an update_image parameter to skip expensive image processing operations. While the pattern of lazy/deferred computation is standard, implementing it requires deep knowledge of the GifImagePlugin's frame navigation and image update mechanics.",
+  "_task_id": "python-pillow__Pillow-f854676",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:25:40.050941"
+}

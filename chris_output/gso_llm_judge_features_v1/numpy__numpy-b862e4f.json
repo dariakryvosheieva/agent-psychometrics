@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing specialized indexed loops for complex number arithmetic in NumPy's ufunc system. The developer must understand NumPy's code generation infrastructure (generate_umath.py), the ufunc dispatch mechanism, and how to write low-level C loops for complex arithmetic operations. The solution involves modifying multiple source files including code generators and template files, requiring deep knowledge of NumPy's internal architecture.",
+  "_task_id": "numpy__numpy-b862e4f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:15.851811"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires replacing a numpy-based approach (np.divmod) with a Cython-optimized function for checking if a sequence forms an arithmetic progression. This requires understanding pandas internals, Cython compilation, and the type system (.pyi files). The hint mentions avoiding np.divmod but doesn't explain the full solution involving creating a new Cython function. The pattern of replacing numpy operations with Cython is standard in pandas, but the specific implementation requires deep knowledge of the codebase.",
+  "_task_id": "pandas-dev__pandas-bfaf917",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:09.656987"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing SIMD (SSE4 & AVX2) vectorization for image resampling operations in C code, including coefficient normalization changes, loop unrolling, and creating separate SIMD convolution files. The test script only identifies Image.resize as the target without hinting at the low-level SIMD approach needed. This requires expert-level knowledge of CPU SIMD instructions, memory alignment, and image processing algorithms, making it extremely complex despite SIMD being a documented pattern.",
+  "_task_id": "uploadcare__pillow-simd-b4045cf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:26:19.374912"
+}

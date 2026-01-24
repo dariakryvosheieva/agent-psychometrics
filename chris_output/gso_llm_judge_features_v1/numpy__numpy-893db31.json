@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 2,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new ufuncs in NumPy's C-level code generator system, which involves deep understanding of NumPy's internal architecture including the umath module, string buffer handling, and ufunc registration. The patch touches multiple files across code generators, C source files, and Python wrappers, requiring expert knowledge of NumPy internals. The test script gives no hint about needing to convert from _vec_string to native ufuncs, making the optimization approach entirely non-obvious.",
+  "_task_id": "numpy__numpy-893db31",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:00.056808"
+}

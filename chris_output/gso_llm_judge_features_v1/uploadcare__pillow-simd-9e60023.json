@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 3,
+  "problem_clarity": 4,
+  "fix_complexity": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "The hints explicitly mention 'SIMD BoxBlur' and 'sse4 ImagingBoxBlur implementation', directly revealing the optimization strategy. However, the actual implementation requires expert-level knowledge of SSE4 intrinsics, SIMD programming patterns, memory alignment, and low-level C optimization. The patch involves rewriting core C functions with complex __m128i vector operations, shuffle masks, and adding specialized zero-radius blur functions - this is highly complex low-level optimization work that touches multiple functions in the image processing pipeline.",
+  "_task_id": "uploadcare__pillow-simd-9e60023",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:26:01.768963"
+}

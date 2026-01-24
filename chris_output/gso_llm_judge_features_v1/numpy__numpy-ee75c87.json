@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new ufuncs (startswith/endswith) in NumPy's C++ string processing layer, replacing the slower Python-based _vec_string approach. It involves deep knowledge of NumPy's ufunc generation system, C++ template metaprogramming for string buffers, and understanding of memory-efficient string comparison algorithms (tailmatch). The changes span code generators, C++ implementations, and Python wrappers across multiple files, making integration complex.",
+  "_task_id": "numpy__numpy-ee75c87",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:22.012668"
+}

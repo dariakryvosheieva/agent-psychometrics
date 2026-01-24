@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep understanding of NumPy's ufunc implementation, including indexed loops, striding mechanics, and the internal dispatching system. The patch modifies low-level C code across multiple source files to add a fast path for 1D arrays using indexed loops, and fixes stride calculation bugs (dividing by sizeof(npy_intp)). The test script gives no hints about the optimization approach, and this requires expert knowledge of NumPy internals and memory layout.",
+  "_task_id": "numpy__numpy-eb21b25",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:22.652795"
+}

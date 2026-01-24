@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 2,
+  "reasoning": "The test script shows merging with empty DataFrames but doesn't hint at the fast-path solution. The optimization adds early-exit conditions when left/right are empty, avoiding expensive join operations. This requires deep understanding of pandas merge internals and join indexer logic, but the pattern of early-exit for empty inputs is standard. The integration touches the core merge operation and requires careful handling of different join types (left, right, inner, outer, cross).",
+  "_task_id": "pandas-dev__pandas-c51c2a7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:19.367172"
+}

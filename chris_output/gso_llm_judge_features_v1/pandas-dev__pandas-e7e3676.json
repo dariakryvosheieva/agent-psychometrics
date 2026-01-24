@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep understanding of pandas internals, specifically the BlockManager and Block architecture. The solution involves splitting blocks during deletion to avoid copying underlying data, which is a non-obvious optimization pattern requiring expert knowledge of pandas memory management. The change touches multiple files across the internals subsystem and requires careful handling of block numbering and memory references.",
+  "_task_id": "pandas-dev__pandas-e7e3676",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:23:00.209118"
+}

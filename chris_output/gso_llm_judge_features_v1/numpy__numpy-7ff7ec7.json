@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of NumPy dtype behavior (knowing which types cannot hold NaN), identity checks for self-comparison shortcuts, and removing unnecessary asarray() calls. The test script exercises various array equality scenarios but doesn't hint at the optimization approach. The fix involves multiple micro-optimizations that require understanding NumPy internals, particularly around NaN handling and type systems, making it moderately complex despite each individual change being small.",
+  "_task_id": "numpy__numpy-7ff7ec7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:10.847873"
+}

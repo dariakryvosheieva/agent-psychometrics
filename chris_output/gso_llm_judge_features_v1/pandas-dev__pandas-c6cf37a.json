@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 2,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization involves understanding pandas MultiIndex internals and the safe_sort algorithm. The patch modifies how MultiIndex objects are handled during sorting operations, avoiding unnecessary conversions and simplifying the tuple sorting logic. This requires deep knowledge of pandas' internal data structures and the interaction between MultiIndex, ExtensionArray, and numpy arrays, making it non-trivial despite being a relatively contained change.",
+  "_task_id": "pandas-dev__pandas-c6cf37a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:25:02.308126"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 4,
+  "atypicality": 4,
+  "reasoning": "The optimization involves replacing Tornado's custom Future implementation with asyncio.Future when available, which is a significant architectural change touching many subsystems (auth, gen, ioloop, httpclient, websocket, etc.). This requires deep understanding of both Tornado's and asyncio's Future semantics, including callback scheduling behavior changes. The test script only hints at Future.set_exception being slow without suggesting the asyncio integration solution.",
+  "_task_id": "tornadoweb__tornado-4d4c1e0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:27:35.522565"
+}

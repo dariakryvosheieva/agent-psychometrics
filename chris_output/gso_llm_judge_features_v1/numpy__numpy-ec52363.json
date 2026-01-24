@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep knowledge of NumPy's C internals, specifically the iterator implementation and boolean counting functions. The fix replaces a naive loop-based boolean counting with an optimized `count_boolean_trues` function and adds early-exit for empty results, requiring understanding of NumPy's low-level array iteration patterns. The test script only shows usage patterns without hinting at the specific C-level optimization needed.",
+  "_task_id": "numpy__numpy-ec52363",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:54.324333"
+}

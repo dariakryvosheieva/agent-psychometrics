@@ -1,0 +1,161 @@
+{
+  "dataset": "gso",
+  "n_tasks": 102,
+  "n_features": 12,
+  "correlations": [
+    {
+      "feature": "fix_complexity",
+      "n": 102,
+      "pearson_r": 0.3669993033477487,
+      "pearson_p": 0.00014817234631334217,
+      "pearson_sig": "***",
+      "spearman_r": 0.4294714623623266,
+      "spearman_p": 6.6590090293178e-06,
+      "spearman_sig": "***"
+    },
+    {
+      "feature": "verification_difficulty",
+      "n": 102,
+      "pearson_r": 0.35984551413988203,
+      "pearson_p": 0.00020343337527186454,
+      "pearson_sig": "***",
+      "spearman_r": 0.3774814820813785,
+      "spearman_p": 9.187087637146316e-05,
+      "spearman_sig": "***"
+    },
+    {
+      "feature": "log_lines_changed",
+      "n": 102,
+      "pearson_r": 0.29697293291019045,
+      "pearson_p": 0.0024374103619080106,
+      "pearson_sig": "**",
+      "spearman_r": 0.3221304594628624,
+      "spearman_p": 0.0009608847430968251,
+      "spearman_sig": "***"
+    },
+    {
+      "feature": "integration_complexity",
+      "n": 102,
+      "pearson_r": 0.2877735260502938,
+      "pearson_p": 0.003358579412859702,
+      "pearson_sig": "**",
+      "spearman_r": 0.3279385255059153,
+      "spearman_p": 0.0007661216919041866,
+      "spearman_sig": "***"
+    },
+    {
+      "feature": "domain_knowledge_required",
+      "n": 102,
+      "pearson_r": 0.27762697208768183,
+      "pearson_p": 0.004726605283659823,
+      "pearson_sig": "**",
+      "spearman_r": 0.29328485608749266,
+      "spearman_p": 0.00277515012402643,
+      "spearman_sig": "**"
+    },
+    {
+      "feature": "num_lines_changed",
+      "n": 102,
+      "pearson_r": 0.20985287439487924,
+      "pearson_p": 0.03426648496122231,
+      "pearson_sig": "*",
+      "spearman_r": 0.3221304594628624,
+      "spearman_p": 0.0009608847430968251,
+      "spearman_sig": "***"
+    },
+    {
+      "feature": "num_hunks",
+      "n": 102,
+      "pearson_r": 0.19550018332610122,
+      "pearson_p": 0.04893401820357645,
+      "pearson_sig": "*",
+      "spearman_r": 0.31491880078486034,
+      "spearman_p": 0.0012651699258802976,
+      "spearman_sig": "**"
+    },
+    {
+      "feature": "num_files_modified",
+      "n": 102,
+      "pearson_r": 0.1847343370781228,
+      "pearson_p": 0.06306067465251675,
+      "pearson_sig": "",
+      "spearman_r": 0.2973816650124667,
+      "spearman_p": 0.0024023588551853104,
+      "spearman_sig": "**"
+    },
+    {
+      "feature": "atypicality",
+      "n": 101,
+      "pearson_r": 0.1483165959096776,
+      "pearson_p": 0.1388172689527173,
+      "pearson_sig": "",
+      "spearman_r": 0.19983880270078364,
+      "spearman_p": 0.04511128056465282,
+      "spearman_sig": "*"
+    },
+    {
+      "feature": "problem_clarity",
+      "n": 102,
+      "pearson_r": -0.08934777850467039,
+      "pearson_p": 0.3718385042833895,
+      "pearson_sig": "",
+      "spearman_r": -0.11788286911196791,
+      "spearman_p": 0.23799823370932802,
+      "spearman_sig": ""
+    },
+    {
+      "feature": "solution_in_problem",
+      "n": 102,
+      "pearson_r": 0.08634294174707895,
+      "pearson_p": 0.38819978396531585,
+      "pearson_sig": "",
+      "spearman_r": 0.08491353293357949,
+      "spearman_p": 0.396132147980663,
+      "spearman_sig": ""
+    },
+    {
+      "feature": "standard_pattern_available",
+      "n": 102,
+      "pearson_r": 0.06738821227723604,
+      "pearson_p": 0.5009694197417373,
+      "pearson_sig": "",
+      "spearman_r": 0.07032559095828236,
+      "spearman_p": 0.4824481964556062,
+      "spearman_sig": ""
+    }
+  ],
+  "lasso_coefs": {
+    "solution_in_problem": 0.5985247019398536,
+    "problem_clarity": -0.3223622770317317,
+    "fix_complexity": 0.9269175378707643,
+    "verification_difficulty": 0.7111319594757458,
+    "standard_pattern_available": 0.007085220711679152,
+    "integration_complexity": 0.25787329335646114,
+    "domain_knowledge_required": 0.4298435871644908,
+    "atypicality": -0.769999381551425,
+    "num_files_modified": 0.23647755124478867,
+    "num_hunks": 0.0,
+    "num_lines_changed": 0.0,
+    "log_lines_changed": 0.0
+  },
+  "significant_features": [
+    "fix_complexity",
+    "verification_difficulty",
+    "log_lines_changed",
+    "integration_complexity",
+    "domain_knowledge_required",
+    "num_lines_changed",
+    "num_hunks"
+  ],
+  "lasso_selected_features": [
+    "solution_in_problem",
+    "problem_clarity",
+    "fix_complexity",
+    "verification_difficulty",
+    "standard_pattern_available",
+    "integration_complexity",
+    "domain_knowledge_required",
+    "atypicality",
+    "num_files_modified"
+  ]
+}

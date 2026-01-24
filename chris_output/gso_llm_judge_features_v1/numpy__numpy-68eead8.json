@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep understanding of NumPy's C internals, specifically the cast_info transfer function mechanism and memory management. The fix involves hoisting loop-invariant code (GetDTypeTransferFunction call) out of the inner loop and properly managing resources with NPY_cast_info_xfree - a classic loop hoisting pattern but applied in complex C code with subtle memory/refcount implications. The verification is tricky due to refcount behavior differences across Python versions (PEP 683).",
+  "_task_id": "numpy__numpy-68eead8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:32.888325"
+}

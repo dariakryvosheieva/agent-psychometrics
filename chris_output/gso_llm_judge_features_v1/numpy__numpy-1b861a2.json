@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing a new UFunc in C++ for string replacement operations in NumPy's core. It involves deep knowledge of NumPy's internal UFunc system, code generation infrastructure, string buffer handling, and low-level string manipulation algorithms. The changes span multiple files including code generators, C++ implementation, and Python wrappers, requiring understanding of NumPy's architecture at multiple levels.",
+  "_task_id": "numpy__numpy-1b861a2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:10.840710"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of Cython and pandas internals. The patch adds type-specific fast paths for float arrays and converts to object array upfront to avoid repeated type coercion in the loop. This is not a standard pattern but rather a domain-specific optimization requiring knowledge of how numpy dtype conversions work and Cython's typed memoryviews for performance.",
+  "_task_id": "pandas-dev__pandas-2a08b05",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:23:48.809125"
+}

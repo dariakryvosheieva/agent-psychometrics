@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of pandas MultiIndex internals and the lexsort_indexer function. The core change involves streamlining the code path by directly using codes from _get_codes_for_sorting() and simplifying the lexsort_indexer function to avoid redundant categorical conversions. While the test clearly targets MultiIndex.argsort, the optimization strategy is non-obvious and requires knowledge of pandas sorting internals.",
+  "_task_id": "pandas-dev__pandas-609c3b7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:42.061432"
+}

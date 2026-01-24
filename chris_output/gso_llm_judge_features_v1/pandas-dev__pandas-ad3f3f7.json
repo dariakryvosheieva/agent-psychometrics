@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 4,
+  "reasoning": "The optimization requires deep knowledge of pandas internals, specifically the merge_asof implementation and group indexing mechanisms. The solution replaces a custom 'flip' function that creates structured numpy arrays with a more efficient approach using factorize_keys and get_group_index - this is not a standard pattern and requires understanding pandas' internal sorting and grouping utilities. The integration touches multiple internal functions and requires careful handling of categorical dtypes and extension arrays.",
+  "_task_id": "pandas-dev__pandas-ad3f3f7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:30.317653"
+}

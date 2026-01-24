@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep understanding of NumPy's ufunc internals and C-level implementation. The patch adds a fast iteration path in low-level C code that bypasses the slower generic iterator when conditions allow. The optimization involves understanding array memory layout, alignment requirements, threading models, and NumPy's strided loop mechanism - expert-level knowledge of NumPy's core implementation.",
+  "_task_id": "numpy__numpy-7853cbc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:21.282816"
+}

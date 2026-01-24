@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new ufuncs in NumPy's C code generator infrastructure, touching code generators, docstrings, and the defchararray module. It requires deep knowledge of NumPy's ufunc system, code generation pipeline, and low-level string processing. The patch involves creating 6 new ufuncs with proper integration into NumPy's build system, which is a complex architectural change rather than a simple optimization pattern.",
+  "_task_id": "numpy__numpy-cb461ba",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:27.256262"
+}

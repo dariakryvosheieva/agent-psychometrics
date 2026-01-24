@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of pandas groupby internals, replacing a lexsort-based algorithm with a more efficient approach using group index computation and hashtable-based duplicate detection. The test script only specifies what to optimize (nunique) without hinting at the strategy. The solution involves non-trivial algorithmic changes using pandas internal functions like get_group_index and hashtable.duplicated, requiring intimate knowledge of pandas' groupby machinery.",
+  "_task_id": "pandas-dev__pandas-d377cc9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:23:32.920565"
+}

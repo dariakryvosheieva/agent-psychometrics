@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 4,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "The optimization requires deep understanding of CPU branch prediction and low-level C optimization techniques. The solution implements a branchless loop with manual unrolling to avoid branch misprediction stalls - this is expert-level knowledge about CPU architecture. While branchless programming is a known pattern, applying it correctly in NumPy's C internals with proper loop unrolling requires significant expertise. The test script only hints that np.where performance matters on random data without suggesting the branchless approach.",
+  "_task_id": "numpy__numpy-780799b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:33.126510"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The test script only benchmarks Image.split() without hinting at how to optimize it. The gold patch shows significant changes to PIL's core image handling including new getchannel method, fast split/merge operations, and storage cleanup - requiring deep understanding of Pillow's internal image representation and C extension interface. The optimization involves low-level changes to how image channels are extracted and memory is allocated, touching multiple components across the codebase.",
+  "_task_id": "python-pillow__Pillow-d8af3fc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:25:45.288185"
+}

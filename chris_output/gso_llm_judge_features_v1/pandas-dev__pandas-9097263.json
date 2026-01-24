@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires expert-level knowledge of NumPy's C API iterator pattern (flatiter, PyArray_GETITEM, PyArray_ITER_NEXT) to replace dual 1D/2D implementations with a unified approach. The patch involves low-level Cython optimizations using NumPy's C iterator API for efficient array traversal regardless of memory layout (C vs Fortran order). While the test script clearly targets pandas.isna performance, it provides no hints about the specific Cython-level iterator optimization needed.",
+  "_task_id": "pandas-dev__pandas-9097263",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:25:07.957874"
+}

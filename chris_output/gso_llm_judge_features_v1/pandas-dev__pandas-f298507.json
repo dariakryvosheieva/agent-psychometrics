@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep knowledge of pandas internals (Block/Manager architecture) to implement rounding at the block level instead of iterating through Series. The fix touches multiple files across the internals layer (blocks.py, managers.py, array_manager.py) and requires understanding Copy-on-Write semantics. While the test script shows what needs to be faster (DataFrame.round), it provides no hints about the block-level dispatch approach needed.",
+  "_task_id": "pandas-dev__pandas-f298507",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:23:16.430723"
+}

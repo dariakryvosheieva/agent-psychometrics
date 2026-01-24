@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 2,
+  "problem_clarity": 4,
+  "fix_complexity": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 3,
+  "atypicality": 2,
+  "reasoning": "The test script clearly tests both `is_animated` and `n_frames` in different orders, hinting that the optimization involves reusing computed values between these properties. The fix is simple - check if `_n_frames` is already computed before doing expensive seek operations. This is a standard caching/memoization pattern, but requires understanding Pillow's image file plugin architecture and how frame seeking works.",
+  "_task_id": "python-pillow__Pillow-fd8ee84",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:26:36.364751"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new C++ ufuncs for string operations (str_len, count) in NumPy's core, involving low-level buffer manipulation, encoding-aware string handling (ASCII/UTF-32), and integration with NumPy's ufunc machinery. The patch touches code generators, docstrings, Python wrappers, and C++ implementations across multiple files, requiring deep knowledge of NumPy internals, string encoding, and the fastsearch algorithm. While the test clearly exercises np.char.count, there's no hint that the solution involves rewriting it as a native ufunc.",
+  "_task_id": "numpy__numpy-e801e7a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:20:37.252236"
+}

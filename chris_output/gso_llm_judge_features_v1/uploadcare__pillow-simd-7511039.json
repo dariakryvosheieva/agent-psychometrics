@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 5,
+  "atypicality": 3,
+  "reasoning": "The optimization requires replacing scalar C code with SSE4 SIMD intrinsics for image reduction operations. While SIMD is a known pattern, implementing it correctly requires expert knowledge of x86 intrinsics, memory alignment, pixel packing/unpacking, and careful handling of edge cases for different band counts. The test script only hints that Image.reduce is slow without suggesting SIMD optimization, and verification requires ensuring numerical equivalence across all reduction factors while measuring performance gains.",
+  "_task_id": "uploadcare__pillow-simd-7511039",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:26:07.617009"
+}

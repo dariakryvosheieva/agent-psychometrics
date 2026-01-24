@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 2,
+  "fix_complexity": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 5,
+  "reasoning": "This is an extremely unusual 'optimization' task - the gold patch updates CI/CD configurations, GitHub Actions workflows, and bumps the llama.cpp submodule rather than optimizing actual Python code. The test script measures LLM inference throughput, but the optimization comes from updating external dependencies and build configurations. This requires deep knowledge of the llama.cpp ecosystem, CUDA compilation, and CI/CD infrastructure rather than traditional code optimization patterns.",
+  "_task_id": "abetlen__llama-cpp-python-218d361",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:18:58.846986"
+}

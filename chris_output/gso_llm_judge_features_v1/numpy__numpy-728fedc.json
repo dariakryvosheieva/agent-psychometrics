@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new ufuncs (strip/lstrip/rstrip) at the C level in NumPy's umath module, replacing Python-level _vec_string calls. It involves modifying code generators, adding C implementations with proper type resolvers, handling both ASCII and UTF32 encodings, and integrating across multiple NumPy subsystems (umath, defchararray, string_buffer). This requires expert-level knowledge of NumPy's internal ufunc machinery and string handling.",
+  "_task_id": "numpy__numpy-728fedc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:21:16.252166"
+}

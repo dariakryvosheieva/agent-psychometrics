@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 2,
+  "fix_complexity": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep knowledge of Linux memory management (hugepages, madvise syscall) and NumPy's memory allocation internals. The test script gives no hint about the hugepage optimization needed - it simply calls np.zeros. The fix involves low-level C code modifications to ensure calloc allocations also get hugepage hints, which requires understanding both the OS memory subsystem and NumPy's allocation paths. Verification is difficult due to platform-specific behavior (Linux-only) and the subtle performance characteristics of hugepages.",
+  "_task_id": "numpy__numpy-382b3ff",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:20:18.611549"
+}

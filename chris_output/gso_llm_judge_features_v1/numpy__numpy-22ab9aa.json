@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new UFuncs (find/rfind) at the C level with custom string buffer handling, supporting both ASCII and UTF32 encodings. The patch involves creating new C++ template code for string operations, modifying NumPy's code generation infrastructure, updating multiple subsystems (umath dispatching, defchararray), and integrating with NumPy's internal type system. This requires deep expertise in NumPy internals, C/C++ extension development, and understanding of NumPy's UFunc machinery.",
+  "_task_id": "numpy__numpy-22ab9aa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:44.920801"
+}

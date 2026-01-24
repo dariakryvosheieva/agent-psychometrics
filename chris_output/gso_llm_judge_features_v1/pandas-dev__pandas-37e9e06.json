@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 3,
+  "atypicality": 2,
+  "reasoning": "The optimization involves changing dictionary lookups from string-based keys to numpy dtype objects directly, eliminating string conversion overhead. The test script hints at the target (dtype access) but not the solution. The fix is a standard pattern of avoiding unnecessary type conversions in hot paths, but requires understanding pandas' masked array internals and affects multiple files (integer.py, floating.py, numeric.py, cast.py, dtypes.py).",
+  "_task_id": "pandas-dev__pandas-37e9e06",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:38.990443"
+}

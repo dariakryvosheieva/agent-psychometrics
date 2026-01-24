@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep NumPy internals knowledge to replace a Python-based string method call with a custom C++ ufunc implementation. The patch involves creating new C++ template functions, modifying header files to expose internal functions, and integrating with NumPy's ufunc machinery. The optimization pattern of converting character operations to ufuncs is specific to NumPy's architecture and requires understanding of NumPy's type system, memory layout, and ufunc registration process.",
+  "_task_id": "numpy__numpy-ef5e545",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:38.715431"
+}

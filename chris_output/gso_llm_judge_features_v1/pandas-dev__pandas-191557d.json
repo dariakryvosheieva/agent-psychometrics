@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 2,
+  "reasoning": "The optimization involves adding a fastpath for integer dtype arrays to skip expensive NA checking when creating masked arrays, plus refactoring value_counts to avoid redundant computation. This requires understanding pandas' nullable dtype internals and masked array implementation. The test script only shows the performance scenario without hinting at the solution, and the fix touches multiple files in the pandas core arrays module.",
+  "_task_id": "pandas-dev__pandas-191557d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:25:24.597024"
+}

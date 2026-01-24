@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep expertise in NumPy's ufunc internals and C-level implementation. The patch involves a complete rewrite of the ufunc_at function, introducing fast-path iterators, modifying SIMD dispatch logic in C source files, and handling complex memory management with auxiliary data. The changes span multiple C files in the core umath module, requiring understanding of array iterators, strided loops, type casting, and error handling at the lowest level of NumPy's implementation.",
+  "_task_id": "numpy__numpy-ba89ef9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:20:24.436397"
+}

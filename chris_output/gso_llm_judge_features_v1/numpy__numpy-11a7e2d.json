@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing specialized indexed loops for ufuncs (maximum, minimum, fmax, fmin) in NumPy's low-level C code. The developer must understand NumPy's ufunc internals, code generation system (generate_umath.py), and the indexed loop mechanism. The patch touches multiple files including C source templates, header files, and code generators, requiring deep knowledge of NumPy's build system and internal type dispatch mechanisms.",
+  "_task_id": "numpy__numpy-11a7e2d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:20:01.227408"
+}

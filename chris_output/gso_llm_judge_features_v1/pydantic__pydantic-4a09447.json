@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 4,
+  "reasoning": "The optimization requires deep understanding of Python's frame introspection mechanisms and pydantic's generic model creation internals. The key insight is replacing expensive `inspect.stack()` calls with direct `sys._getframe()` access, and combining two separate frame inspection functions into one. This is not a standard optimization pattern and requires understanding both Python internals and the specific pydantic generics implementation.",
+  "_task_id": "pydantic__pydantic-4a09447",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:26:47.060199"
+}

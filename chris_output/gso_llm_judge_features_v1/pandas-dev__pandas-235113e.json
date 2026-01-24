@@ -1,0 +1,14 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "integration_complexity": 2,
+  "domain_knowledge_required": 3,
+  "reasoning": "The optimization is a special-case shortcut: when subset has only one column, delegate directly to Series.duplicated() instead of using the more complex get_group_index machinery. This is a standard pattern of optimizing common cases. The test script hints at single-column subset usage but doesn't explicitly suggest the optimization. Requires understanding pandas internals (how duplicated works via get_group_index) but the fix itself is straightforward conditional logic.",
+  "_task_id": "pandas-dev__pandas-235113e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:23:05.384038"
+}

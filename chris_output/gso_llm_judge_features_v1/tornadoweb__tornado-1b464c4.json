@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 4,
+  "reasoning": "The optimization requires implementing a specialized buffer class (_StreamBuffer) that avoids memory copies for large writes by using memoryviews and a deque of buffers. This is a non-trivial architectural change requiring deep understanding of Python's buffer protocol, memory management, and the IOStream internals. The hint only mentions 'avoid copies on non-small writes' without providing implementation details, and the solution involves careful amortized O(1) buffer management across multiple methods.",
+  "_task_id": "tornadoweb__tornado-1b464c4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:27:25.455103"
+}

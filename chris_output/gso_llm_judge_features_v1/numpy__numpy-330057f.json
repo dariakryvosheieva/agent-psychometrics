@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 5,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep knowledge of C-level NumPy internals, SIMD auto-vectorization patterns, and how compiler optimizations work with loop structures. The fix involves modifying low-level C macros in NumPy's umath module to help compilers auto-vectorize reduction operations by restructuring the loop to expose contiguity information. While auto-vectorization is a known pattern, applying it correctly within NumPy's complex macro system requires expert-level understanding of both the library internals and compiler behavior.",
+  "_task_id": "numpy__numpy-330057f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:17.098569"
+}

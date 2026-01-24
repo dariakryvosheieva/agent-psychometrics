@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 1,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep C programming knowledge and understanding of SIMD-like patterns - processing data in 64-bit and 32-bit chunks instead of byte-by-byte XOR operations. While the pattern of loop unrolling and wider data processing is well-documented, applying it correctly in C with proper pointer casting and handling remaining bytes requires expert-level systems programming knowledge. The test script gives no hint about the optimization approach, only benchmarking the websocket_mask function.",
+  "_task_id": "tornadoweb__tornado-9a18f6c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:27:41.421134"
+}

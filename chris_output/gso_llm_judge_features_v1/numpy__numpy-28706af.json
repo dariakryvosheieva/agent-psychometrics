@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 5,
+  "reasoning": "This optimization requires deep understanding of NumPy's ufunc internals, code generation system, and C-level implementations. The patch modifies multiple files including code generators, dispatching logic, and low-level loop implementations in templated C code. The optimization involves adding proper indexed operation support for divide operations, fixing function naming conventions, and reorganizing where certain functions are defined - this is highly specialized NumPy core development work requiring expert knowledge of the ufunc machinery.",
+  "_task_id": "numpy__numpy-28706af",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:19:50.489061"
+}

@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 1,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep knowledge of NumPy's internal ufunc implementation, specifically the code generation system and low-level loop implementations for indexed operations on complex numbers. The patch modifies multiple code generation files (generate_umath.py, loops.c.src, loops.h.src) to add specialized indexed loop implementations for complex types, which requires understanding NumPy's template-based C code generation and how ufunc.at dispatches to optimized loops. The test only hints that np.subtract.at with complex numbers is slow, but gives no indication of the C-level indexed loop implementation needed.",
+  "_task_id": "numpy__numpy-be52f19",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:11.917874"
+}

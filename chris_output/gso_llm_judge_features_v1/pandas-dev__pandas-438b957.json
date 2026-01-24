@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of pandas MultiIndex internals, including how intersection operations work with extension arrays and the interplay between Index and MultiIndex classes. The fix involves changes across multiple files (base.py, multi.py) with subtle algorithmic improvements like using drop_duplicates() instead of algos.unique1d() for non-numeric types, and modifying how results are wrapped. The lack of hints in the test script and the need to preserve EA dtypes while improving performance makes this moderately complex.",
+  "_task_id": "pandas-dev__pandas-438b957",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:57.536232"
+}

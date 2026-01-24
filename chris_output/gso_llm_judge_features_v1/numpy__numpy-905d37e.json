@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "The optimization requires expert-level C programming and compiler optimization knowledge - specifically using NPY_GCC_OPT_3 annotations and loop specialization for different chunk sizes to enable compiler optimizations like loop unrolling and SIMD. The test script only shows what function to optimize (np.repeat) without hinting at the low-level C implementation strategy. The pattern of specializing loops for constant values is documented but applying it in NumPy's C internals requires deep understanding of array memory layouts and compiler behavior.",
+  "_task_id": "numpy__numpy-905d37e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:22:00.339845"
+}

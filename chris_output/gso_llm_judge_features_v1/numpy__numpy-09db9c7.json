@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 5,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires implementing new ufuncs (startswith/endswith) at the C/C++ level in NumPy's core, involving code generators, docstrings, and low-level string buffer operations. The patch touches multiple subsystems including umath code generators, C++ string handling with different encodings (ASCII/UTF32), and Python-level API changes. This requires deep knowledge of NumPy's ufunc machinery and internal string handling, making it a complex architectural change rather than a simple algorithm improvement.",
+  "_task_id": "numpy__numpy-09db9c7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:20:48.074293"
+}

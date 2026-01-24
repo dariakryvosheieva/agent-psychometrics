@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 3,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization requires deep understanding of pandas Index internals, specifically how union operations with duplicates are handled. The fix replaces an inefficient loop-based approach with vectorized numpy operations (np.maximum, np.repeat, reindex), but requires careful handling of MultiIndex vs regular Index cases and extension array dtypes. The test script only reveals performance issues with duplicates but gives no hint about the algorithmic improvement needed.",
+  "_task_id": "pandas-dev__pandas-c34da50",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:23:59.620235"
+}

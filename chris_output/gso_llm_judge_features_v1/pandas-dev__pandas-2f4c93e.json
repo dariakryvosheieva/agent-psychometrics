@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 5,
+  "atypicality": 4,
+  "reasoning": "This optimization requires deep understanding of pandas internals and Cython code. The fix involves changing the type handling in merge_asof by factorizing 'by' columns to int64 and simplifying the fused type in Cython, eliminating unnecessary type variants. This requires expert knowledge of pandas' merge implementation, Cython typed memoryviews, and hash table internals - making it quite atypical and complex despite fixing a performance/correctness issue.",
+  "_task_id": "pandas-dev__pandas-2f4c93e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:25.054803"
+}

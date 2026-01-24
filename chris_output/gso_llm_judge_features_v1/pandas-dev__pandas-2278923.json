@@ -1,0 +1,15 @@
+{
+  "solution_in_problem": 0,
+  "problem_clarity": 3,
+  "fix_complexity": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "integration_complexity": 4,
+  "domain_knowledge_required": 4,
+  "atypicality": 3,
+  "reasoning": "The optimization involves changing the internal data structure from Int64Index to boolean arrays for tracking positions in MultiIndex.get_locs, requiring deep understanding of pandas MultiIndex internals. The patch modifies multiple internal methods (_get_level_indexer, _convert_to_indexer, _update_indexer) and changes the algorithmic approach from index intersections to boolean masking. This requires significant knowledge of pandas indexing mechanisms and careful handling of edge cases like slices, boolean indexers, and list-like keys.",
+  "_task_id": "pandas-dev__pandas-2278923",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-23T17:24:47.132821"
+}
