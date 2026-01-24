@@ -27,6 +27,8 @@ from experiment_b.shared.evaluation import (
     shift_to_oracle_scale,
     compute_frontier_auc,
     compute_method_metrics,
+    compute_mean_per_agent_auc,
+    filter_agents_with_frontier_variance,
     evaluate_predictor,
 )
 
@@ -100,6 +102,8 @@ __all__ = [
     "shift_to_oracle_scale",
     "compute_frontier_auc",
     "compute_method_metrics",
+    "compute_mean_per_agent_auc",
+    "filter_agents_with_frontier_variance",
     "evaluate_predictor",
     # prediction_methods
     "FeatureIRTPredictor",

@@ -12,163 +12,125 @@ Predict difficulty of **frontier tasks** (tasks only solvable by newer models) u
 
 ## Evaluation Metrics
 
-The two primary metrics reported are:
-1. **ROC-AUC**: Ability to rank (agent, task) pairs by solve probability on frontier tasks
-2. **MAE (days)**: Mean absolute error in predicting when tasks become solvable
+### Primary: Mean Per-Agent AUC (Scale-Free)
+
+The primary metric is **Mean Per-Agent AUC**, a scale-free metric that requires no oracle data or scale alignment:
+
+1. For each post-frontier agent, compute AUC on frontier tasks using predicted difficulty ranking
+2. Average across all agents with response variance (at least one success on frontier tasks)
+3. Report mean ± SEM (standard error of the mean)
+
+**Key insight**: For a fixed agent, `AUC(y_true, sigmoid(θ - β̂)) = AUC(y_true, -β̂)` because sigmoid is monotonic. We don't need to know agent abilities—just whether harder-predicted tasks have lower success rates.
+
+**Advantages over pooled ROC-AUC**:
+- No scale alignment needed (completely scale-free)
+- No oracle abilities needed
+- Each agent is an independent measurement
+- Directly grounded in response data
+
+### Secondary: Pooled ROC-AUC (Requires Scale Alignment)
+
+The pooled ROC-AUC pools all (agent, task) pairs and requires fitting an affine transformation to align predicted difficulties to the oracle scale. This metric is still reported for comparison but is less principled.
 
 ## Frontier Task Definitions
 
-Two definitions of "frontier task" are supported (both evaluated by default):
+Three definitions of "frontier task" are supported:
 
-1. **Pass-rate based** (`passrate`): Tasks with ≤10% pre-frontier pass rate AND >10% post-frontier pass rate
-2. **IRT-based** (`irt`): Tasks where NO pre-frontier agent has ≥50% solve probability under IRT
+1. **Zero pre-frontier** (`zero_pre`) **[Recommended]**: Tasks with 0% pre-frontier pass rate AND >0% post-frontier pass rate. Most principled—identifies tasks that became solvable with frontier agents.
+2. **Pass-rate based** (`passrate`): Tasks with ≤10% pre-frontier pass rate AND >10% post-frontier pass rate
+3. **IRT-based** (`irt`): Tasks where NO pre-frontier agent has ≥50% solve probability under IRT
 
 ## Quick Start
 
 ```bash
 source .venv/bin/activate
 
-# Run on SWE-bench (default) - evaluates both frontier definitions
-python -m experiment_b.compare_methods
+# Run on SWE-bench with recommended settings (zero_pre frontier definition, no date forecasting)
+python -m experiment_b.compare_methods --dataset swebench --frontier_definitions zero_pre --no_forecast_dates
 
-# Run on TerminalBench
-python -m experiment_b.compare_methods --dataset terminalbench
+# Run on all datasets
+python -m experiment_b.compare_methods --dataset swebench_pro --frontier_definitions zero_pre --no_forecast_dates
+python -m experiment_b.compare_methods --dataset terminalbench --frontier_definitions zero_pre --no_forecast_dates
+python -m experiment_b.compare_methods --dataset gso --frontier_definitions zero_pre --no_forecast_dates
 
-# Run on SWE-bench Pro
-python -m experiment_b.compare_methods --dataset swebench_pro
+# Run with multiple frontier definitions (original behavior)
+python -m experiment_b.compare_methods --frontier_definitions passrate irt
 
-# Run on GSO (optimization benchmark)
-python -m experiment_b.compare_methods --dataset gso
-
-# Run with only one frontier definition
-python -m experiment_b.compare_methods --frontier_definitions passrate
-
-# Disable date forecasting (faster)
-python -m experiment_b.compare_methods --no_forecast_dates
+# Enable date forecasting (slower)
+python -m experiment_b.compare_methods --frontier_definitions zero_pre
 
 # Save results to CSV
 python -m experiment_b.compare_methods --output_csv results.csv
 ```
 
-## Results (2026-01-20)
+## Results (2026-01-23)
+
+All results use the **zero_pre** frontier definition (0% pre-frontier, >0% post-frontier) and report **Mean Per-Agent AUC ± SEM**.
 
 ### SWE-bench Verified
 
-**Cutoff**: 2025-05-01 | **Pre-frontier agents**: 76 | **Post-frontier agents**: 55
+**Cutoff**: 2025-05-01 | **Pre-frontier agents**: 76 | **Post-frontier agents**: 55 | **Frontier tasks**: 34 | **Eval agents with variance**: 41
 
-#### Pass-rate Definition (47 frontier tasks)
-
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.8439 |
-| SAD-IRT (best) | 0.8036 |
-| Feature-IRT (Embedding) | 0.7744 |
-| Baseline IRT (pre-frontier only) | 0.7600 ± 0.011 |
-| LLM Judge + Ridge | 0.7481 |
-| Feature-IRT (LLM Judge) | 0.7480 |
-| Embedding + Ridge | 0.7475 |
-
-#### IRT Definition (36 frontier tasks)
-
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.7810 |
-| SAD-IRT (best) | 0.7315 |
-| Feature-IRT (LLM Judge) | 0.7302 |
-| LLM Judge + Ridge | 0.7294 |
-| Embedding + Ridge | 0.7291 |
-| Feature-IRT (Embedding) | 0.7284 |
-| Baseline IRT (pre-frontier only) | 0.6966 ± 0.014 |
+| Method | Mean AUC ± SEM | ROC-AUC |
+|--------|----------------|---------|
+| SAD-IRT (best) | **0.7592 ± 0.022** | 0.7794 |
+| Oracle (upper bound) | 0.7322 ± 0.039 | 0.8399 |
+| Trajectory + Ridge | 0.5442 ± 0.033 | 0.7157 |
+| Grouped Ridge (all features) | 0.5256 ± 0.032 | 0.7041 |
+| Feature-IRT (Trajectory) | 0.5250 ± 0.034 | 0.7017 |
+| Baseline IRT (pre-frontier only) | 0.4854 ± 0.031 | 0.7503 |
+| Embedding + Ridge | 0.4716 ± 0.039 | 0.6868 |
+| LLM Judge + Ridge | 0.4665 ± 0.034 | 0.6898 |
 
 ### SWE-bench Pro
 
-**Cutoff**: 2025-09-01 | **Pre-frontier agents**: 11 | **Post-frontier agents**: 3
+**Cutoff**: 2025-09-01 | **Pre-frontier agents**: 11 | **Post-frontier agents**: 3 | **Frontier tasks**: 24 | **Eval agents with variance**: 3
 
-#### Pass-rate Definition (60 frontier tasks)
+| Method | Mean AUC ± SEM | ROC-AUC |
+|--------|----------------|---------|
+| Oracle (upper bound) | **0.8000 ± 0.144** | 0.8600 |
+| LLM Judge + Ridge | 0.3524 ± 0.188 | 0.7537 |
+| Feature-IRT (LLM Judge) | 0.3305 ± 0.204 | 0.7514 |
+| Baseline IRT (pre-frontier only) | 0.3059 ± 0.189 | 0.7427 |
+| Embedding + Ridge | 0.3009 ± 0.209 | 0.7349 |
 
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.7975 |
-| Embedding + Ridge | 0.7412 |
-| LLM Judge + Ridge | 0.7376 |
-| Feature-IRT (LLM Judge) | 0.7339 |
-| Feature-IRT (Embedding) | 0.6869 |
-| Baseline IRT (pre-frontier only) | 0.6500 |
-
-#### IRT Definition (60 frontier tasks)
-
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.7196 |
-| Embedding + Ridge | 0.7040 |
-| Feature-IRT (LLM Judge) | 0.6876 |
-| LLM Judge + Ridge | 0.6835 |
-| Feature-IRT (Embedding) | 0.6018 |
-| Baseline IRT (pre-frontier only) | 0.5179 |
-
-**Note**: SWE-bench Pro uses public release dates for agents (stored in `data/swebench_pro_agent_dates.json`) since agent names don't follow the YYYYMMDD prefix convention. LLM judge features use v5 prompts with 4 LLM features + 3 deterministic patch features (num_files_modified, num_hunks, log_lines_changed).
-
-### GSO (Software Optimization Benchmark)
-
-**Cutoff**: 2025-08-15 | **Pre-frontier agents**: 8 | **Post-frontier agents**: 6
-
-#### Pass-rate Definition (33 frontier tasks)
-
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.8043 |
-| Grouped Ridge (Embedding + LLM Judge) | 0.7351 |
-| LLM Judge + Ridge | 0.7334 |
-| Feature-IRT (LLM Judge) | 0.7278 |
-| Baseline IRT (pre-frontier only) | 0.7155 |
-| Embedding + Ridge | 0.7023 |
-| Feature-IRT (Embedding) | 0.6890 |
-
-#### IRT Definition (19 frontier tasks)
-
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.6963 |
-| Embedding + Ridge | 0.6154 |
-| Feature-IRT (LLM Judge) | 0.6052 |
-| LLM Judge + Ridge | 0.6031 |
-| Grouped Ridge (Embedding + LLM Judge) | 0.5981 |
-| Feature-IRT (Embedding) | 0.4886 |
-| Baseline IRT (pre-frontier only) | 0.4617 |
-
-**Note**: GSO is a software optimization benchmark with 102 tasks across 10 Python repos (numpy, pandas, etc.). Tasks involve optimizing code performance, not fixing bugs. Agent release dates are stored in `data/gso_agent_dates.json`. LLM judge features (8 features + 4 deterministic) are adapted from SWE-bench features for the optimization context.
+**Note**: SWE-bench Pro has only 3 post-frontier agents, resulting in high uncertainty. SAD-IRT not available (trained on SWE-bench tasks only).
 
 ### TerminalBench
 
-**Cutoff**: 2025-11-05 | **Pre-frontier agents**: 48 | **Post-frontier agents**: 35
+**Cutoff**: 2025-11-05 | **Pre-frontier agents**: 48 | **Post-frontier agents**: 35 | **Frontier tasks**: 10 | **Eval agents with variance**: 21
 
-#### Pass-rate Definition (18 frontier tasks)
+| Method | Mean AUC ± SEM | ROC-AUC |
+|--------|----------------|---------|
+| Oracle (upper bound) | **0.7507 ± 0.179** | 0.7926 |
+| Baseline IRT (pre-frontier only) | 0.5382 ± 0.220 | 0.6982 |
+| LLM Judge + Ridge | 0.4505 ± 0.255 | 0.6897 |
+| Embedding + Ridge | 0.4201 ± 0.209 | 0.6268 |
+| Feature-IRT (LLM Judge) | 0.4172 ± 0.224 | 0.6781 |
 
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.8224 |
-| LLM Judge + Ridge | 0.7457 |
-| Feature-IRT (Embedding) | 0.7427 |
-| Feature-IRT (LLM Judge) | 0.7414 |
-| Baseline IRT (pre-frontier only) | 0.7289 ± 0.012 |
-| Embedding + Ridge | 0.7237 |
+**Note**: SAD-IRT not available (trained on SWE-bench tasks only).
 
-#### IRT Definition (16 frontier tasks)
+### GSO (Software Optimization Benchmark)
 
-| Method | ROC-AUC |
-|--------|---------|
-| Oracle (upper bound) | 0.8088 |
-| Feature-IRT (Embedding) | 0.7426 |
-| LLM Judge + Ridge | 0.7376 |
-| Feature-IRT (LLM Judge) | 0.7315 |
-| Baseline IRT (pre-frontier only) | 0.7287 ± 0.011 |
-| Embedding + Ridge | 0.7200 |
+**Cutoff**: 2025-08-15 | **Pre-frontier agents**: 8 | **Post-frontier agents**: 6 | **Frontier tasks**: 33 | **Eval agents with variance**: 6
 
-**Key observations**:
-- **Feature-IRT (Embedding) consistently outperforms Baseline IRT** in ROC-AUC
-- **SAD-IRT** (using trajectory information) achieves strong results on SWE-bench
-- **Baseline IRT error bars** (± 1 std) from 30 random seed runs show typical variance from IRT training randomness; results use seed=42 for reproducibility
-- **Methods without their own IRT** (Embedding + Ridge, LLM Judge + Ridge) cannot produce date forecasts (see Date Forecasting section below)
+| Method | Mean AUC ± SEM | ROC-AUC |
+|--------|----------------|---------|
+| Oracle (upper bound) | **0.7319 ± 0.043** | 0.8043 |
+| Feature-IRT (Embedding) | 0.6282 ± 0.171 | 0.6890 |
+| Grouped Ridge (Embedding + LLM Judge) | 0.5886 ± 0.128 | 0.7351 |
+| LLM Judge + Ridge | 0.5787 ± 0.114 | 0.7334 |
+| Embedding + Ridge | 0.5678 ± 0.150 | 0.7023 |
+| Baseline IRT (pre-frontier only) | 0.5206 ± 0.047 | 0.7155 |
+
+**Note**: SAD-IRT not available (trained on SWE-bench tasks only).
+
+### Key Observations
+
+- **SAD-IRT** (using trajectory information) achieves the best Mean AUC on SWE-bench (0.759), even outperforming Oracle (0.732)
+- **Mean AUC and ROC-AUC can give different rankings**: This is because Mean AUC is scale-free while ROC-AUC requires scale alignment
+- **Error bars are informative**: Oracle has low SEM on GSO (0.043) but high on SWE-bench Pro (0.144), reflecting different data sizes
+- **Agent filtering**: Only agents with at least one frontier task success are included in Mean AUC computation
 
 ## Methods Compared
 
@@ -203,11 +165,24 @@ P(success) = sigmoid(θ_j - b_i)
 
 ## Evaluation Methodology
 
-### ROC-AUC with Scale Alignment
+### Mean Per-Agent AUC (Primary, Scale-Free)
+
+1. **Filter eval agents**: Remove agents that fail ALL frontier tasks (they provide no ranking information)
+2. **For each remaining agent**:
+   - Rank frontier tasks by predicted difficulty (higher β = harder = lower expected success)
+   - Compute AUC: do harder-predicted tasks have lower success rates?
+   - Note: This is equivalent to `AUC(y_true, -predicted_β)` since AUC only depends on ranking
+3. **Average across agents**: Compute mean and standard error of the mean (SEM)
+
+**Why this works**: For any fixed agent ability θ, `sigmoid(θ - β)` is a monotonic function of `-β`. Therefore, ranking tasks by `sigmoid(θ - β)` is equivalent to ranking by `-β`. We never need to know θ!
+
+### ROC-AUC with Scale Alignment (Secondary)
 1. **Identify anchor tasks**: Tasks with 10-90% pass rate in BOTH pre- and post-frontier groups
 2. **Fit affine transformation**: `oracle_β = slope × predicted_β + intercept` on anchors
 3. **Compute probabilities**: For each (post-frontier agent, frontier task): `P(success) = sigmoid(θ_oracle - β_shifted)`
 4. **Calculate ROC-AUC**: Compare predicted probabilities to actual responses
+
+**Note**: This requires oracle abilities and scale alignment, making it less principled than Mean Per-Agent AUC.
 
 ### 3. Date Forecasting
 
@@ -443,9 +418,10 @@ class DatasetConfig(ABC):
 ## Command Line Options
 
 ```
---dataset              Dataset to use: swebench (default), swebench_pro, or terminalbench
---frontier_definitions Space-separated list: 'passrate' 'irt' (default: both)
---no_forecast_dates    Disable date forecasting evaluation (faster, but no MAE metric)
+--dataset              Dataset to use: swebench (default), swebench_pro, terminalbench, or gso
+--frontier_definitions Space-separated list: 'zero_pre' 'passrate' 'irt' (default: passrate irt)
+                       Recommended: 'zero_pre' for cleanest metric
+--no_forecast_dates    Disable date forecasting evaluation (faster, recommended)
 --output_csv           Save results to CSV file
 --grid_search          Run grid search over Feature-IRT hyperparameters
 --verbose              Show alignment parameters and training progress

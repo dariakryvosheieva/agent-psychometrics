@@ -28,6 +28,8 @@ from experiment_b.shared.evaluation import (
     compute_method_metrics,
     compute_scale_offset,
     shift_to_oracle_scale,
+    compute_mean_per_agent_auc,
+    filter_agents_with_frontier_variance,
 )
 
 
@@ -179,9 +181,18 @@ def evaluate_all_frontier_definitions(
         # Get filtered eval agents for this frontier definition (if filtering applied)
         eval_agents = data.eval_agents_by_def.get(frontier_def, data.post_frontier_agents)
 
+        # Filter to agents with frontier variance (at least one success on frontier tasks)
+        eval_agents_with_variance = filter_agents_with_frontier_variance(
+            responses=data.config.responses,
+            frontier_task_ids=frontier_task_ids,
+            candidate_agents=eval_agents,
+        )
+        print(f"  Eval agents: {len(eval_agents)} total, {len(eval_agents_with_variance)} with frontier variance")
+
         # Compute metrics for each method uniformly
         for method_name, pred_beta in raw_predictions.items():
             try:
+                # Old pooled AUC (requires scale alignment)
                 metrics = compute_method_metrics(
                     predicted_beta=pred_beta,
                     oracle_items=data.oracle_items,
@@ -192,11 +203,28 @@ def evaluate_all_frontier_definitions(
                     eval_agents=eval_agents,
                     alignment_method=alignment_method,
                 )
+
+                # New scale-free Mean Per-Agent AUC
+                per_agent_metrics = compute_mean_per_agent_auc(
+                    predicted_beta=pred_beta,
+                    responses=data.config.responses,
+                    frontier_task_ids=frontier_task_ids,
+                    eval_agents=eval_agents_with_variance,
+                )
+                metrics["mean_per_agent_auc"] = per_agent_metrics["mean_auc"]
+                metrics["mean_per_agent_auc_std"] = per_agent_metrics["std_auc"]
+                metrics["mean_per_agent_auc_sem"] = per_agent_metrics["sem_auc"]
+                metrics["mean_per_agent_auc_n_agents"] = per_agent_metrics["n_agents"]
+
                 results[method_name] = metrics
             except Exception as e:
                 print(f"  Error computing metrics for {method_name}: {e}")
                 results[method_name] = {
                     "auc": None,
+                    "mean_per_agent_auc": None,
+                    "mean_per_agent_auc_std": None,
+                    "mean_per_agent_auc_sem": None,
+                    "mean_per_agent_auc_n_agents": 0,
                     "num_frontier_tasks": 0,
                 }
 

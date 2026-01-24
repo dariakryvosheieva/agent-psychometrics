@@ -115,19 +115,14 @@ def print_comparison_table(
     print("=" * 90)
     print()
 
-    # Always show ROC-AUC and MAE metrics
-    # Oracle MAE uses Oracle abilities for date lookup (isolates difficulty prediction error)
-    has_oracle_mae = oracle_date_results is not None and len(oracle_date_results) > 0
-    if has_oracle_mae:
-        print(f"{'Method':<50} {'ROC-AUC':>10} {'MAE (days)':>12} {'Oracle MAE†':>12}")
-        print("-" * 86)
-    else:
-        print(f"{'Method':<50} {'ROC-AUC':>10} {'MAE (days)':>12}")
-        print("-" * 73)
+    # Show Mean Per-Agent AUC (scale-free) as primary metric, old ROC-AUC as secondary
+    has_date_results = date_results is not None and len(date_results) > 0
+    print(f"{'Method':<55} {'Mean AUC ± SEM':>16} {'ROC-AUC':>10}")
+    print("-" * 83)
 
-    # Sort by AUC (descending)
+    # Sort by Mean Per-Agent AUC (descending)
     def sort_key(item):
-        auc = item[1].get("auc")
+        auc = item[1].get("mean_per_agent_auc")
         if auc is None or (isinstance(auc, float) and np.isnan(auc)):
             return float("-inf")
         return auc
@@ -135,41 +130,26 @@ def print_comparison_table(
     sorted_methods = sorted(results.items(), key=sort_key, reverse=True)
 
     for method, metrics in sorted_methods:
-        auc = metrics.get("auc")
+        # Mean Per-Agent AUC (scale-free, primary)
+        mean_auc = metrics.get("mean_per_agent_auc")
+        sem_auc = metrics.get("mean_per_agent_auc_sem")
+        if mean_auc is None or (isinstance(mean_auc, float) and np.isnan(mean_auc)):
+            mean_auc_str = "N/A"
+        else:
+            sem_str = f"±{sem_auc:.3f}" if sem_auc is not None else ""
+            mean_auc_str = f"{mean_auc:.4f} {sem_str}"
 
-        # Format AUC
+        # Old pooled ROC-AUC (requires scale alignment)
+        auc = metrics.get("auc")
         if auc is None or (isinstance(auc, float) and np.isnan(auc)):
             auc_str = "N/A"
         else:
             auc_str = f"{auc:.4f}"
 
-        # Get MAE from date_results if available
-        if date_results:
-            date_metrics = date_results.get(method, {})
-            mae = date_metrics.get("mae_days", float("nan"))
-            if isinstance(mae, float) and np.isnan(mae):
-                mae_str = "N/A"
-            else:
-                mae_str = f"{mae:.1f}"
-        else:
-            mae_str = "N/A"
+        print(f"{method:<55} {mean_auc_str:>16} {auc_str:>10}")
 
-        # Get Oracle MAE if available
-        if has_oracle_mae:
-            oracle_metrics = oracle_date_results.get(method, {})
-            oracle_mae = oracle_metrics.get("mae_days", float("nan"))
-            if isinstance(oracle_mae, float) and np.isnan(oracle_mae):
-                oracle_mae_str = "N/A"
-            else:
-                oracle_mae_str = f"{oracle_mae:.1f}"
-            print(f"{method:<50} {auc_str:>10} {mae_str:>12} {oracle_mae_str:>12}")
-        else:
-            print(f"{method:<50} {auc_str:>10} {mae_str:>12}")
-
-    # Print footnote for Oracle MAE if present
-    if has_oracle_mae:
-        print()
-        print("† Oracle MAE: Earliest Oracle agent with θ ≥ predicted β (bypasses regression)")
+    print()
+    print("Note: Mean AUC ± SEM (standard error); ROC-AUC = pooled (requires scale alignment)")
 
     print()
 
@@ -180,6 +160,10 @@ def save_results_csv(results: Dict[str, Dict], output_path: Path) -> None:
     for method, metrics in results.items():
         rows.append({
             "method": method,
+            "mean_per_agent_auc": metrics.get("mean_per_agent_auc"),
+            "mean_per_agent_auc_sem": metrics.get("mean_per_agent_auc_sem"),
+            "mean_per_agent_auc_std": metrics.get("mean_per_agent_auc_std"),
+            "mean_per_agent_auc_n_agents": metrics.get("mean_per_agent_auc_n_agents"),
             "auc": metrics.get("auc"),
             "n_tasks": metrics.get("num_frontier_tasks"),
             "auc_n_pairs": metrics.get("auc_n_pairs"),
@@ -188,8 +172,8 @@ def save_results_csv(results: Dict[str, Dict], output_path: Path) -> None:
         })
 
     df = pd.DataFrame(rows)
-    # Sort by AUC descending (with NaN at bottom)
-    df = df.sort_values("auc", ascending=False, na_position="last")
+    # Sort by Mean Per-Agent AUC descending (with NaN at bottom)
+    df = df.sort_values("mean_per_agent_auc", ascending=False, na_position="last")
     df.to_csv(output_path, index=False)
     print(f"Results saved to: {output_path}")
 

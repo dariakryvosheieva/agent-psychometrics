@@ -450,6 +450,159 @@ def compute_frontier_auc(
     }
 
 
+def compute_mean_per_agent_auc(
+    predicted_beta: Dict[str, float],
+    responses: Dict[str, Dict[str, Any]],
+    frontier_task_ids: List[str],
+    eval_agents: List[str],
+) -> Dict[str, Any]:
+    """Compute scale-free AUC: per-agent AUC averaged across agents.
+
+    This metric is completely scale-free - no alignment or oracle abilities needed.
+    For each agent, we measure whether tasks with higher predicted difficulty have
+    lower success rates. This is equivalent to ranking tasks by -predicted_beta
+    since AUC only depends on ranking.
+
+    Key insight: AUC(y_true, sigmoid(theta - beta)) = AUC(y_true, -beta) for any
+    fixed theta, because sigmoid is monotonic.
+
+    IMPORTANT: eval_agents should be pre-filtered to exclude agents that fail ALL
+    frontier tasks. Use filter_agents_with_frontier_variance() before calling this.
+
+    Args:
+        predicted_beta: Dict mapping task_id -> predicted difficulty (any scale)
+        responses: Response matrix as nested dict (agent_id -> task_id -> response)
+        frontier_task_ids: Tasks to evaluate on
+        eval_agents: Agents to evaluate on (must have response variance on frontier tasks)
+
+    Returns:
+        Dict with 'mean_auc', 'std_auc', 'n_agents', 'per_agent_aucs'
+
+    Raises:
+        ValueError: If any required data is missing or if an agent has no response variance
+    """
+    from experiment_ab_shared.dataset import expand_response_for_auc
+
+    # Validate all required data is present
+    missing_agents = [a for a in eval_agents if a not in responses]
+    if missing_agents:
+        raise ValueError(
+            f"{len(missing_agents)} eval agents missing from responses. "
+            f"First 5: {missing_agents[:5]}"
+        )
+
+    missing_tasks = [t for t in frontier_task_ids if t not in predicted_beta]
+    if missing_tasks:
+        raise ValueError(
+            f"{len(missing_tasks)} frontier tasks missing from predicted_beta. "
+            f"First 5: {missing_tasks[:5]}"
+        )
+
+    agent_aucs = []
+
+    for agent_id in eval_agents:
+        agent_responses = responses[agent_id]
+        y_true = []
+        y_scores = []
+
+        for task_id in frontier_task_ids:
+            if task_id not in agent_responses:
+                raise ValueError(
+                    f"Agent {agent_id} missing response for frontier task {task_id}"
+                )
+
+            # Score = -predicted_beta (higher difficulty = lower success probability)
+            score = -predicted_beta[task_id]
+            response = agent_responses[task_id]
+
+            # Expand response for binomial data
+            expanded = expand_response_for_auc(response)
+            y_true.extend(expanded)
+            y_scores.extend([score] * len(expanded))
+
+        # All agents should have variance - if not, they should have been pre-filtered
+        if len(set(y_true)) < 2:
+            raise ValueError(
+                f"Agent {agent_id} has no response variance on frontier tasks "
+                f"(solved all or none). eval_agents should be pre-filtered using "
+                f"filter_agents_with_frontier_variance()."
+            )
+
+        auc = roc_auc_score(y_true, y_scores)
+        agent_aucs.append(auc)
+
+    mean_auc = float(np.mean(agent_aucs))
+    std_auc = float(np.std(agent_aucs))
+    n_agents = len(agent_aucs)
+    sem_auc = float(std_auc / np.sqrt(n_agents))  # Standard error of the mean
+
+    logger.info(
+        f"Mean Per-Agent AUC: {mean_auc:.4f} ± {sem_auc:.4f} (SEM, n_agents={n_agents})"
+    )
+
+    return {
+        "mean_auc": mean_auc,
+        "std_auc": std_auc,
+        "sem_auc": sem_auc,  # Standard error of the mean - use this for error bars
+        "n_agents": n_agents,
+        "per_agent_aucs": agent_aucs,
+    }
+
+
+def filter_agents_with_frontier_variance(
+    responses: Dict[str, Dict[str, Any]],
+    frontier_task_ids: List[str],
+    candidate_agents: List[str],
+) -> List[str]:
+    """Filter agents to those with response variance on frontier tasks.
+
+    Removes agents that fail ALL frontier tasks (they provide no information
+    for difficulty ranking since they have no successes to compare).
+
+    Args:
+        responses: Response matrix as nested dict
+        frontier_task_ids: Frontier tasks to check variance on
+        candidate_agents: Agents to filter
+
+    Returns:
+        List of agents that have at least one success on frontier tasks
+    """
+    from experiment_ab_shared.dataset import expand_response_for_auc
+
+    filtered_agents = []
+    removed_agents = []
+
+    for agent_id in candidate_agents:
+        if agent_id not in responses:
+            raise ValueError(f"Agent {agent_id} not found in responses")
+
+        agent_responses = responses[agent_id]
+        has_success = False
+
+        for task_id in frontier_task_ids:
+            if task_id not in agent_responses:
+                raise ValueError(
+                    f"Agent {agent_id} missing response for frontier task {task_id}"
+                )
+            expanded = expand_response_for_auc(agent_responses[task_id])
+            if any(r == 1 for r in expanded):
+                has_success = True
+                break
+
+        if has_success:
+            filtered_agents.append(agent_id)
+        else:
+            removed_agents.append(agent_id)
+
+    if removed_agents:
+        logger.info(
+            f"Filtered out {len(removed_agents)} agents with no frontier task successes. "
+            f"Remaining: {len(filtered_agents)} agents."
+        )
+
+    return filtered_agents
+
+
 # =============================================================================
 # Full Evaluation Pipeline
 # =============================================================================
