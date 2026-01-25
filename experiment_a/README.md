@@ -19,29 +19,42 @@ Then measure AUC by comparing these predicted probabilities to actual binary out
 ```bash
 source .venv/bin/activate
 
-# Run SWE-bench Verified experiment
+# Run ALL datasets and get a summary table
+python -m experiment_a.run_all_datasets --unified_judge
+
+# Run specific datasets only
+python -m experiment_a.run_all_datasets --unified_judge --datasets gso terminalbench
+
+# Export results to CSV
+python -m experiment_a.run_all_datasets --unified_judge --output results.csv
+
+# Run individual datasets
 python -m experiment_a.swebench.train_evaluate
-
-# Run SWE-bench Pro experiment
 python -m experiment_a.swebench_pro.train_evaluate
-
-# Run TerminalBench experiment (binomial mode - default, k/n successes)
+python -m experiment_a.gso.train_evaluate --exclude_unsolved
 python -m experiment_a.terminalbench.train_evaluate
-
-# Run TerminalBench experiment (binary mode - any success = 1)
-python -m experiment_a.terminalbench.train_evaluate --binary
-
-# Run GSO experiment (optimization benchmark)
-python -m experiment_a.gso.train_evaluate
-
-# Run with AUC-based alpha selection for grouped ridge (recommended for GSO)
-python -m experiment_a.gso.train_evaluate --expand_grouped_ridge
 
 # Dry run to check config
 python -m experiment_a.swebench.train_evaluate --dry_run
 ```
 
 ## Results (2026-01-24)
+
+### Summary Table (Unified Judge Features)
+
+Run with: `python -m experiment_a.run_all_datasets --unified_judge`
+
+| Dataset | Oracle | Grouped Ridge | Stacked (Emb→LLM) | Embedding | LLM Judge | Baseline |
+|---------|--------|---------------|-------------------|-----------|-----------|----------|
+| SWE-bench Verified | 0.9441 | 0.8280 | **0.8296** | 0.8230 | 0.8163 | 0.7146 |
+| GSO | 0.8516 | **0.7496** | 0.7367 | 0.7332 | 0.7333 | 0.7262 |
+| TerminalBench | 0.8995 | **0.8006** | 0.7994 | 0.7905 | 0.7700 | 0.7076 |
+| SWE-bench Pro | 0.9183 | 0.7443 | **0.7444** | 0.7366 | 0.7212 | 0.6567 |
+
+**Key findings**:
+- **Grouped Ridge vs Embedding**: Grouped Ridge consistently outperforms Embedding alone (+0.5% to +1.6%)
+- **Grouped Ridge vs Stacked**: Mixed results - Stacked wins on SWE-bench Verified/Pro by tiny margins (0.1-0.2%), Grouped Ridge wins on GSO/TerminalBench (+1.0-1.3%)
+- **Combining features helps**: All combination methods (Grouped Ridge, Stacked) outperform single sources
 
 ### SWE-bench Verified (5-Fold Cross-Validation)
 
@@ -50,15 +63,14 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Method | Mean AUC | Std |
 |--------|----------|-----|
 | Oracle (true b) | 0.9441 | 0.0085 |
-| Grouped Ridge (Emb + LLM) | 0.8309 | 0.0167 |
-| Stacked (Emb → LLM) | 0.8278 | 0.0172 |
-| Stacked (LLM → Emb) | 0.8276 | 0.0149 |
+| Stacked (Emb → LLM) | 0.8296 | 0.0175 |
+| Grouped Ridge (Emb + LLM) | 0.8280 | 0.0185 |
+| Stacked (LLM → Emb) | 0.8242 | 0.0155 |
 | Embedding | 0.8230 | 0.0193 |
-| LLM Judge | 0.8227 | 0.0093 |
+| LLM Judge | 0.8163 | 0.0093 |
 | Constant (mean b) | 0.7146 | 0.0083 |
-| Agent-only | 0.7147 | 0.0084 |
 
-**Note**: Grouped Ridge combines embeddings and LLM judge features with per-source regularization. It uses per-source StandardScalers (ensuring each feature block has independent mean=0, std=1) and wide alpha grids (1e-6 to 1e4) for grid search. On this larger dataset, Grouped Ridge outperforms both individual sources and Stacked methods.
+**Note**: On this large dataset, both combination methods work well. Stacked has a slight edge (+0.16%) over Grouped Ridge.
 
 ### SWE-bench Pro (5-Fold Cross-Validation)
 
@@ -67,30 +79,30 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Method | Mean AUC | Std |
 |--------|----------|-----|
 | Oracle (true b) | 0.9183 | 0.0074 |
-| Grouped Ridge (Embedding + LLM Judge) | 0.7505 | 0.0244 |
+| Stacked (Emb → LLM) | 0.7444 | 0.0295 |
+| Grouped Ridge (Emb + LLM) | 0.7443 | 0.0261 |
+| Stacked (LLM → Emb) | 0.7434 | 0.0235 |
 | Embedding | 0.7366 | 0.0281 |
-| LLM Judge | 0.7291 | 0.0231 |
-| Agent-only | 0.6568 | 0.0073 |
+| LLM Judge | 0.7212 | 0.0224 |
 | Constant (mean b) | 0.6567 | 0.0072 |
 
-**Note**: SWE-bench Pro shows lower predictor AUCs (~0.73-0.75) compared to SWE-bench Verified (~0.83-0.84). This may be due to having fewer agents (14 vs 131) for IRT training, or inherently harder-to-predict task difficulty in the Pro dataset.
+**Note**: SWE-bench Pro shows lower predictor AUCs (~0.73-0.75) compared to SWE-bench Verified (~0.82-0.83). This may be due to having fewer agents (14 vs 131) for IRT training.
 
 ### GSO (5-Fold Cross-Validation)
 
-**Data**: 102 tasks, 14 agents (performance optimization benchmark)
+**Data**: 57 tasks (excluding zero-solve), 14 agents (performance optimization benchmark)
 
 | Method | Mean AUC | Std |
 |--------|----------|-----|
-| Oracle (true b) | 0.9227 | 0.0156 |
-| Stacked (Emb → LLM) | 0.7416 | 0.0176 |
-| Stacked (LLM → Emb) | 0.7390 | 0.0092 |
-| Embedding | 0.7378 | 0.0396 |
-| LLM Judge | 0.7356 | 0.0109 |
-| Grouped Ridge (Emb + LLM) | 0.7319 | 0.0179 |
-| Constant (mean b) | 0.6934 | 0.0536 |
-| Agent-only | 0.6926 | 0.0561 |
+| Oracle (true b) | 0.8516 | 0.0453 |
+| Grouped Ridge (Emb + LLM) | 0.7496 | 0.0626 |
+| Stacked (Emb → LLM) | 0.7367 | 0.0659 |
+| Stacked (LLM → Emb) | 0.7351 | 0.0651 |
+| LLM Judge | 0.7333 | 0.0783 |
+| Embedding | 0.7332 | 0.0603 |
+| Constant (mean b) | 0.7262 | 0.0709 |
 
-**Note**: GSO is a software optimization benchmark (different from bug-fixing in SWE-bench). Stacked (Emb → LLM) performs best here. Grouped Ridge improved from 0.7282 to 0.7319 with per-source StandardScalers and wider alpha grids, but still doesn't outperform individual sources on this small dataset. The stacked approach works better on smaller datasets where the two-stage residual correction can capture complementary signal.
+**Note**: GSO uses `--exclude_unsolved` to match Daria's setup (excluding 45 zero-solve tasks). On this dataset, Grouped Ridge significantly outperforms Stacked (+1.3%).
 
 ### TerminalBench (5-Fold Cross-Validation)
 
