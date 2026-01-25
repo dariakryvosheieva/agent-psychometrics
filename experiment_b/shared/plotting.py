@@ -362,3 +362,102 @@ def plot_ability_vs_date(
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.close()
     print(f"Saved ability-vs-date plot to {output_path}")
+
+
+def plot_predicted_vs_oracle_scatter(
+    predicted_beta: Dict[str, float],
+    oracle_beta: Dict[str, float],
+    frontier_task_ids: List[str],
+    dataset_name: str,
+    method_name: str,
+    output_path: Path,
+) -> None:
+    """Generate scatter plot of predicted vs oracle IRT difficulties for frontier tasks.
+
+    Args:
+        predicted_beta: Dict mapping task_id -> predicted difficulty
+        oracle_beta: Dict mapping task_id -> oracle difficulty
+        frontier_task_ids: List of frontier task IDs to plot
+        dataset_name: Name of the dataset (for title)
+        method_name: Name of the prediction method (for subtitle)
+        output_path: Path to save the plot
+    """
+    from scipy.stats import pearsonr
+
+    # Collect matched pairs for frontier tasks
+    predicted_vals = []
+    oracle_vals = []
+
+    for task_id in frontier_task_ids:
+        if task_id in predicted_beta and task_id in oracle_beta:
+            predicted_vals.append(predicted_beta[task_id])
+            oracle_vals.append(oracle_beta[task_id])
+
+    if len(predicted_vals) < 2:
+        print(f"Warning: Only {len(predicted_vals)} frontier tasks with both predictions "
+              f"and oracle - skipping scatter plot for {dataset_name}")
+        return
+
+    predicted_arr = np.array(predicted_vals)
+    oracle_arr = np.array(oracle_vals)
+
+    # Compute statistics
+    pearson_r, pearson_p = pearsonr(predicted_arr, oracle_arr)
+    mae = np.mean(np.abs(predicted_arr - oracle_arr))
+
+    # Create plot
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    ax.scatter(
+        oracle_arr,
+        predicted_arr,
+        alpha=0.6,
+        s=50,
+        c="steelblue",
+        edgecolors="white",
+        linewidth=0.5,
+    )
+
+    # Add diagonal reference line (y = x)
+    min_val = min(oracle_arr.min(), predicted_arr.min())
+    max_val = max(oracle_arr.max(), predicted_arr.max())
+    margin = (max_val - min_val) * 0.1
+    ax.plot(
+        [min_val - margin, max_val + margin],
+        [min_val - margin, max_val + margin],
+        "k--",
+        alpha=0.5,
+        label="y = x (perfect)",
+    )
+
+    # Add linear regression fit line
+    slope, intercept = np.polyfit(oracle_arr, predicted_arr, 1)
+    x_line = np.array([min_val - margin, max_val + margin])
+    ax.plot(
+        x_line,
+        slope * x_line + intercept,
+        "r-",
+        alpha=0.7,
+        label=f"Fit: y = {slope:.2f}x + {intercept:.2f}",
+    )
+
+    ax.set_xlabel("Oracle IRT Difficulty (β)", fontsize=12)
+    ax.set_ylabel("Predicted Difficulty (β)", fontsize=12)
+    ax.set_title(
+        f"{dataset_name}: Predicted vs Oracle Difficulty\n"
+        f"{method_name}\n"
+        f"N={len(predicted_vals)} frontier tasks, Pearson r={pearson_r:.3f}, MAE={mae:.3f}",
+        fontsize=11,
+    )
+
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlim(min_val - margin, max_val + margin)
+    ax.set_ylim(min_val - margin, max_val + margin)
+    ax.legend(loc="upper left", fontsize=10)
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Saved scatter plot to {output_path}")

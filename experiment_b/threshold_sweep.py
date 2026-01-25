@@ -35,6 +35,7 @@ from experiment_b.shared import (
     plot_threshold_sweep_auc,
     plot_threshold_sweep_mae,
     plot_ability_vs_date,
+    plot_predicted_vs_oracle_scatter,
 )
 from experiment_b.shared.data_preparation import (
     _train_baseline_irt_on_agents,
@@ -314,6 +315,28 @@ def run_single_dataset(
         all_predictions["Baseline-Init Feature-IRT (Embedding)"] = feature_irt_preds
         if feature_irt_abilities is not None:
             all_abilities["Baseline-Init Feature-IRT (Embedding)"] = feature_irt_abilities
+
+    # Generate scatter plot of predicted vs oracle for zero_pre frontier tasks
+    if feature_irt_preds is not None:
+        zero_pre_frontier = identify_frontier_tasks_for_threshold(
+            responses=config.responses,
+            pre_frontier_agents=data.pre_frontier_agents,
+            post_frontier_agents=data.post_frontier_agents,
+            all_task_ids=config.all_task_ids,
+            pre_threshold=0.0,  # zero_pre definition
+        )
+        if zero_pre_frontier:
+            scatter_path = output_dir / f"predicted_vs_oracle_{dataset_name}.png"
+            plot_predicted_vs_oracle_scatter(
+                predicted_beta=feature_irt_preds,
+                oracle_beta=oracle_items["b"].to_dict(),
+                frontier_task_ids=zero_pre_frontier,
+                dataset_name=config.name,
+                method_name="Baseline-Init Feature-IRT (Embedding)",
+                output_path=scatter_path,
+            )
+        else:
+            print(f"  No zero_pre frontier tasks for {dataset_name} - skipping scatter plot")
 
     # Date forecasting (optional, only for datasets with sufficient agent diversity)
     date_models: Dict[str, DateForecastModel] = {}

@@ -519,6 +519,7 @@ Results are saved to `chris_output/threshold_sweep/`:
 |------|-------------|
 | `threshold_sweep_{dataset}.csv` | AUC and MAE metrics per threshold/method |
 | `threshold_sweep_{dataset}.png` | Mean Per-Agent AUC plot |
+| `predicted_vs_oracle_{dataset}.png` | Scatter plot of Baseline-Init Feature-IRT predicted vs Oracle difficulty for zero_pre frontier tasks |
 | `date_forecast_{dataset}.png` | Date forecast MAE plot (swebench only by default) |
 | `ability_vs_date_{dataset}.png` | Ability-over-time linear fit visualization (swebench only by default) |
 

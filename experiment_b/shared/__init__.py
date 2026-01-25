@@ -85,6 +85,7 @@ from experiment_b.shared.plotting import (
     plot_threshold_sweep_mae,
     plot_combined_threshold_sweep,
     plot_ability_vs_date,
+    plot_predicted_vs_oracle_scatter,
 )
 
 __all__ = [
@@ -150,4 +151,5 @@ __all__ = [
     "plot_threshold_sweep_mae",
     "plot_combined_threshold_sweep",
     "plot_ability_vs_date",
+    "plot_predicted_vs_oracle_scatter",
 ]
