@@ -41,7 +41,7 @@ python -m experiment_a.gso.train_evaluate --expand_grouped_ridge
 python -m experiment_a.swebench.train_evaluate --dry_run
 ```
 
-## Results (2026-01-23)
+## Results (2026-01-24)
 
 ### SWE-bench Verified (5-Fold Cross-Validation)
 
@@ -50,7 +50,7 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Method | Mean AUC | Std |
 |--------|----------|-----|
 | Oracle (true b) | 0.9441 | 0.0085 |
-| Grouped Ridge (Emb + LLM) | 0.8296 | 0.0152 |
+| Grouped Ridge (Emb + LLM) | 0.8309 | 0.0167 |
 | Stacked (Emb → LLM) | 0.8278 | 0.0172 |
 | Stacked (LLM → Emb) | 0.8276 | 0.0149 |
 | Embedding | 0.8230 | 0.0193 |
@@ -58,7 +58,7 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Constant (mean b) | 0.7146 | 0.0083 |
 | Agent-only | 0.7147 | 0.0084 |
 
-**Note**: Grouped Ridge combines embeddings and LLM judge features with per-source regularization. It uses higher alpha (10000-30000) for high-dim embeddings and lower alpha (100) for low-dim LLM features. On this larger dataset, Grouped Ridge slightly outperforms Stacked methods.
+**Note**: Grouped Ridge combines embeddings and LLM judge features with per-source regularization. It uses per-source StandardScalers (ensuring each feature block has independent mean=0, std=1) and wide alpha grids (1e-6 to 1e4) for grid search. On this larger dataset, Grouped Ridge outperforms both individual sources and Stacked methods.
 
 ### SWE-bench Pro (5-Fold Cross-Validation)
 
@@ -86,11 +86,11 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 | Stacked (LLM → Emb) | 0.7390 | 0.0092 |
 | Embedding | 0.7378 | 0.0396 |
 | LLM Judge | 0.7356 | 0.0109 |
-| Grouped Ridge (Emb + LLM) | 0.7282 | 0.0214 |
+| Grouped Ridge (Emb + LLM) | 0.7319 | 0.0179 |
 | Constant (mean b) | 0.6934 | 0.0536 |
 | Agent-only | 0.6926 | 0.0561 |
 
-**Note**: GSO is a software optimization benchmark (different from bug-fixing in SWE-bench). Stacked (Emb → LLM) performs best here, outperforming both individual sources and Grouped Ridge. The stacked approach works better on smaller datasets where the two-stage residual correction can capture complementary signal.
+**Note**: GSO is a software optimization benchmark (different from bug-fixing in SWE-bench). Stacked (Emb → LLM) performs best here. Grouped Ridge improved from 0.7282 to 0.7319 with per-source StandardScalers and wider alpha grids, but still doesn't outperform individual sources on this small dataset. The stacked approach works better on smaller datasets where the two-stage residual correction can capture complementary signal.
 
 ### TerminalBench (5-Fold Cross-Validation)
 

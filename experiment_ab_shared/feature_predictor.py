@@ -302,13 +302,13 @@ class GroupedRidgePredictor:
         predictions = predictor.predict(test_task_ids)
     """
 
-    # Per-source alpha grids optimized for common feature types.
-    # High-dim embeddings need strong regularization; low-dim semantic features need less.
+    # Per-source alpha grids for common feature types.
+    # Wide range spanning 1e-6 to 1e4, matching Daria's predict_question_difficulty.py defaults.
     # Sources not in this dict must have alpha_grids explicitly provided.
     SOURCE_ALPHA_GRIDS = {
-        "Embedding": [1000.0, 3000.0, 10000.0, 30000.0, 100000.0],  # High regularization
-        "LLM Judge": [1.0, 10.0, 30.0, 100.0, 300.0],  # Lower regularization
-        "Trajectory": [0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0],  # Wide range (~33 features)
+        "Embedding": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0, 10000.0],
+        "LLM Judge": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0, 10000.0],
+        "Trajectory": [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0, 1000.0, 10000.0],
     }
 
     def __init__(
@@ -353,7 +353,7 @@ class GroupedRidgePredictor:
         self._fixed_alphas = fixed_alphas
 
         # Model state (set after fit())
-        self._scaler: Optional[StandardScaler] = None
+        self._per_source_scalers: Optional[Dict[str, StandardScaler]] = None
         self._model: Optional[Ridge] = None
         self._best_alphas: Optional[Dict[str, float]] = None
         self._is_fitted: bool = False
@@ -423,8 +423,17 @@ class GroupedRidgePredictor:
         # If applied after, it normalizes each feature to unit variance,
         # completely negating the differential regularization from group scaling.
         # Correct order: StandardScaler -> Group Scaling -> Ridge(alpha=1)
-        self._scaler = StandardScaler()
-        X_std = self._scaler.fit_transform(X)
+        #
+        # We fit separate scalers per source, ensuring each block has mean=0, std=1
+        # independently. This is important when combining high-dim (embeddings) and
+        # low-dim (LLM) sources, as a single scaler would have statistics dominated
+        # by the high-dim source.
+        self._per_source_scalers = {}
+        X_std = np.empty_like(X)
+        for source, slice_obj in zip(self.source.sources, self.source.group_slices):
+            scaler = StandardScaler()
+            X_std[:, slice_obj] = scaler.fit_transform(X[:, slice_obj])
+            self._per_source_scalers[source.name] = scaler
 
         if self._fixed_alphas is not None:
             # Use fixed alphas directly (no grid search)
@@ -482,8 +491,11 @@ class GroupedRidgePredictor:
 
         X = self.source.get_features(task_ids)
 
-        # Apply same transformations as training: StandardScaler -> Group Scaling
-        X_std = self._scaler.transform(X)
+        # Apply same transformations as training: per-source StandardScaler -> Group Scaling
+        X_std = np.empty_like(X)
+        for source, slice_obj in zip(self.source.sources, self.source.group_slices):
+            scaler = self._per_source_scalers[source.name]
+            X_std[:, slice_obj] = scaler.transform(X[:, slice_obj])
         alphas = tuple(self._best_alphas[s.name] for s in self.source.sources)
         X_scaled = self._apply_group_scaling(X_std, alphas)
 
