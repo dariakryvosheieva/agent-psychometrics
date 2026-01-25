@@ -19,14 +19,17 @@ Then measure AUC by comparing these predicted probabilities to actual binary out
 ```bash
 source .venv/bin/activate
 
-# Run ALL datasets and get a summary table
-python -m experiment_a.run_all_datasets --unified_judge
+# Run ALL datasets and get a summary table (uses unified judge features by default)
+python -m experiment_a.run_all_datasets
 
 # Run specific datasets only
-python -m experiment_a.run_all_datasets --unified_judge --datasets gso terminalbench
+python -m experiment_a.run_all_datasets --datasets gso terminalbench
+
+# Use dataset-specific features instead of unified
+python -m experiment_a.run_all_datasets --no-unified_judge
 
 # Export results to CSV
-python -m experiment_a.run_all_datasets --unified_judge --output results.csv
+python -m experiment_a.run_all_datasets --output results.csv
 
 # Run individual datasets
 python -m experiment_a.swebench.train_evaluate
@@ -40,9 +43,9 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 
 ## Results (2026-01-24)
 
-### Summary Table (Unified Judge Features)
+### Summary Table (Unified Judge Features, Default)
 
-Run with: `python -m experiment_a.run_all_datasets --unified_judge`
+Run with: `python -m experiment_a.run_all_datasets`
 
 | Dataset | Oracle | Stacked (Emb→LLM) | Grouped Ridge | Embedding | LLM Judge | Baseline |
 |---------|--------|-------------------|---------------|-----------|-----------|----------|
@@ -334,12 +337,13 @@ A standardized 9-feature set is available for fair cross-dataset comparison. All
 - `chris_output/llm_judge_features/terminalbench_unified/llm_judge_features.csv`
 - `chris_output/llm_judge_features/gso_unified/llm_judge_features.csv`
 
-To use unified features:
+Usage:
 ```bash
-python -m experiment_a.swebench.train_evaluate --llm_judge_features_path chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv
+# run_all_datasets uses unified features by default
+python -m experiment_a.run_all_datasets
 
-# Or run all datasets with unified features
-python -m experiment_a.run_all_datasets --unified_judge
+# For individual dataset scripts, specify the path explicitly
+python -m experiment_a.swebench.train_evaluate --llm_judge_features_path chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv
 ```
 
 #### Unified vs Dataset-Specific Features Comparison
@@ -353,7 +357,7 @@ Both approaches yield comparable results (within ~0.005 AUC noise). Dataset-spec
 | TerminalBench | 0.8006 | **0.8062** | 0.8044 | 0.8034 |
 | SWE-bench Pro | 0.7443 | **0.7477** | 0.7444 | **0.7493** |
 
-**Recommendation**: Use dataset-specific features (default) for best performance. Use unified features (`--unified_judge`) when comparing across datasets to ensure consistent feature definitions.
+**Recommendation**: Unified features are now the default for consistency across datasets. Use `--no-unified_judge` if you need dataset-specific features for slightly better per-dataset performance.
 
 To extract features:
 ```bash

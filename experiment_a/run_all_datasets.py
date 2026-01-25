@@ -261,8 +261,9 @@ def main():
     )
     parser.add_argument(
         "--unified_judge",
-        action="store_true",
-        help="Use unified LLM judge features instead of dataset defaults",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use unified LLM judge features (default: True). Use --no-unified_judge for dataset-specific features.",
     )
     parser.add_argument(
         "--output",
