@@ -44,17 +44,17 @@ python -m experiment_a.swebench.train_evaluate --dry_run
 
 Run with: `python -m experiment_a.run_all_datasets --unified_judge`
 
-| Dataset | Oracle | Grouped Ridge | Stacked (Emb→LLM) | Embedding | LLM Judge | Baseline |
-|---------|--------|---------------|-------------------|-----------|-----------|----------|
-| SWE-bench Verified | 0.9441 | 0.8280 | **0.8296** | 0.8230 | 0.8163 | 0.7146 |
-| GSO | 0.8516 | **0.7496** | 0.7367 | 0.7332 | 0.7333 | 0.7262 |
-| TerminalBench | 0.8995 | **0.8006** | 0.7994 | 0.7905 | 0.7700 | 0.7076 |
-| SWE-bench Pro | 0.9183 | 0.7443 | **0.7444** | 0.7366 | 0.7212 | 0.6567 |
+| Dataset | Oracle | Stacked (Emb→LLM) | Grouped Ridge | Embedding | LLM Judge | Baseline |
+|---------|--------|-------------------|---------------|-----------|-----------|----------|
+| SWE-bench Verified | 0.9441 | **0.8296** | 0.8280 | 0.8230 | 0.8163 | 0.7146 |
+| GSO | 0.8516 | **0.7507** | 0.7496 | 0.7332 | 0.7333 | 0.7262 |
+| TerminalBench | 0.8995 | **0.8044** | 0.8006 | 0.7905 | 0.7700 | 0.7076 |
+| SWE-bench Pro | 0.9183 | **0.7444** | 0.7443 | 0.7366 | 0.7212 | 0.6567 |
 
 **Key findings**:
-- **Grouped Ridge vs Embedding**: Grouped Ridge consistently outperforms Embedding alone (+0.5% to +1.6%)
-- **Grouped Ridge vs Stacked**: Mixed results - Stacked wins on SWE-bench Verified/Pro by tiny margins (0.1-0.2%), Grouped Ridge wins on GSO/TerminalBench (+1.0-1.3%)
-- **Combining features helps**: All combination methods (Grouped Ridge, Stacked) outperform single sources
+- **Stacked (Emb→LLM) is best**: Outperforms Grouped Ridge on all datasets (+0.01% to +0.4%)
+- **Combining features helps**: Both combination methods outperform single sources (+0.5% to +1.8%)
+- **LLM Judge adds value**: Combining with embeddings consistently improves over embeddings alone
 
 ### SWE-bench Verified (5-Fold Cross-Validation)
 
@@ -95,14 +95,14 @@ Run with: `python -m experiment_a.run_all_datasets --unified_judge`
 | Method | Mean AUC | Std |
 |--------|----------|-----|
 | Oracle (true b) | 0.8516 | 0.0453 |
+| Stacked (Emb → LLM) | 0.7507 | 0.0677 |
 | Grouped Ridge (Emb + LLM) | 0.7496 | 0.0626 |
-| Stacked (Emb → LLM) | 0.7367 | 0.0659 |
-| Stacked (LLM → Emb) | 0.7351 | 0.0651 |
+| Stacked (LLM → Emb) | 0.7433 | 0.0706 |
 | LLM Judge | 0.7333 | 0.0783 |
 | Embedding | 0.7332 | 0.0603 |
 | Constant (mean b) | 0.7262 | 0.0709 |
 
-**Note**: GSO uses `--exclude_unsolved` to match Daria's setup (excluding 45 zero-solve tasks). On this dataset, Grouped Ridge significantly outperforms Stacked (+1.3%).
+**Note**: GSO uses `--exclude_unsolved` to match Daria's setup (excluding 45 zero-solve tasks). Stacked slightly outperforms Grouped Ridge (+0.1%).
 
 ### TerminalBench (5-Fold Cross-Validation)
 
@@ -117,11 +117,12 @@ TerminalBench supports two data modes:
 | Method | Mean AUC | Std | Pass Rate MSE |
 |--------|----------|-----|---------------|
 | Oracle (true b) | 0.8995 | 0.0224 | 0.0533 |
-| Grouped Ridge (Emb + LLM) | 0.8103 | 0.0302 | 0.1076 |
+| Stacked (Emb → LLM) | 0.8044 | 0.0285 | 0.1121 |
+| Stacked (LLM → Emb) | 0.8043 | 0.0239 | 0.1144 |
+| Grouped Ridge (Emb + LLM) | 0.8006 | 0.0210 | 0.1143 |
 | Embedding | 0.7905 | 0.0172 | 0.1188 |
-| LLM Judge | 0.7663 | 0.0165 | 0.1307 |
+| LLM Judge | 0.7700 | 0.0165 | 0.1307 |
 | Constant (mean b) | 0.7076 | 0.0172 | 0.1510 |
-| Agent-only | 0.7078 | 0.0174 | 0.1423 |
 
 #### Binary Mode (`--binary`)
 
