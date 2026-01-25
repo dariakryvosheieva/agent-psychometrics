@@ -2,7 +2,10 @@
 """Threshold sweep analysis for frontier task difficulty prediction.
 
 Runs experiment_b evaluation at multiple pre_threshold values (0% to 30%)
-and generates plots showing Oracle vs Baseline IRT performance across thresholds.
+and generates plots showing Oracle vs Baseline IRT vs Feature-IRT performance.
+
+This script trains models ONCE per dataset then evaluates across thresholds.
+Datasets are processed in parallel using multiprocessing.
 
 Usage:
     python -m experiment_b.threshold_sweep
@@ -11,11 +14,10 @@ Usage:
 """
 
 import argparse
+from multiprocessing import Process
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from joblib import Parallel, delayed
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -26,60 +28,30 @@ from experiment_b.shared import (
     filter_agents_with_frontier_variance,
     build_feature_sources,
     FeatureIRTPredictor,
+    compute_first_capable_dates,
+    compute_ground_truth_days,
+    DateForecastModel,
+    compute_date_forecast_metrics,
+    plot_threshold_sweep_auc,
+    plot_threshold_sweep_mae,
+    plot_ability_vs_date,
 )
-from experiment_b.shared.data_preparation import _train_baseline_irt_on_agents
+from experiment_b.shared.data_preparation import (
+    _train_baseline_irt_on_agents,
+)
 
 
 # Default thresholds to sweep
 DEFAULT_THRESHOLDS = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
 
+# Default hyperparameters for Feature-IRT (from grid search across thresholds)
+# These values optimize for good performance at both low and high thresholds
+DEFAULT_L2_WEIGHT = 0.0001
+DEFAULT_L2_RESIDUAL = 1.0
 
-def _fit_feature_irt_single(
-    l2_weight: float,
-    l2_residual: float,
-    embedding_source,
-    train_task_ids: List[str],
-    baseline_ground_truth_b: np.ndarray,
-    train_responses: Dict,
-    baseline_ability_values: np.ndarray,
-    baseline_agent_ids: List[str],
-    all_task_ids: List[str],
-) -> Tuple[float, float, Dict[str, float]]:
-    """Fit Feature-IRT with single hyperparameter combination.
-
-    This function is designed to be called in parallel via joblib.
-
-    Args:
-        l2_weight: L2 regularization weight for feature weights
-        l2_residual: L2 regularization weight for per-task residuals
-        embedding_source: Feature source for embeddings
-        train_task_ids: Task IDs for training
-        baseline_ground_truth_b: Ground truth difficulties from baseline IRT
-        train_responses: Response matrix for training (pre-frontier agents only)
-        baseline_ability_values: Agent abilities from baseline IRT
-        baseline_agent_ids: Agent IDs corresponding to abilities
-        all_task_ids: All task IDs for prediction
-
-    Returns:
-        Tuple of (l2_weight, l2_residual, predictions dict)
-    """
-    predictor = FeatureIRTPredictor(
-        source=embedding_source,
-        use_residuals=True,
-        init_from_baseline=True,
-        l2_weight=l2_weight,
-        l2_residual=l2_residual,
-        verbose=False,
-    )
-    predictor.fit(
-        task_ids=train_task_ids,
-        ground_truth_b=baseline_ground_truth_b,
-        responses=train_responses,
-        baseline_abilities=baseline_ability_values,
-        baseline_agent_ids=baseline_agent_ids,
-    )
-    preds = predictor.predict(all_task_ids)
-    return l2_weight, l2_residual, preds
+# Datasets with sufficient agent date diversity for meaningful date forecasting
+# Other datasets have too few frontier points for reliable ability-over-time regression
+DATE_FORECAST_DATASETS = ["swebench"]
 
 
 def parse_args() -> argparse.Namespace:
@@ -113,314 +85,405 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Train Oracle IRT on post-frontier agents only (instead of all agents)",
     )
+    parser.add_argument(
+        "--l2_weight",
+        type=float,
+        default=DEFAULT_L2_WEIGHT,
+        help=f"L2 regularization for Feature-IRT weights (default: {DEFAULT_L2_WEIGHT})",
+    )
+    parser.add_argument(
+        "--l2_residual",
+        type=float,
+        default=DEFAULT_L2_RESIDUAL,
+        help=f"L2 regularization for Feature-IRT residuals (default: {DEFAULT_L2_RESIDUAL})",
+    )
+    parser.add_argument(
+        "--date_forecast_all",
+        action="store_true",
+        help="Enable date forecasting for all datasets (default: only swebench)",
+    )
     return parser.parse_args()
 
 
-def run_threshold_sweep_for_dataset(
+def _compute_pass_rates_from_dict(
+    responses: Dict[str, Dict[str, Any]],
+    task_ids: List[str],
+    agents: List[str],
+) -> Dict[str, float]:
+    """Compute pass rates from in-memory responses dict.
+
+    Args:
+        responses: Response matrix {agent: {task: response}}
+        task_ids: List of task IDs to compute rates for
+        agents: List of agent IDs to consider
+
+    Returns:
+        Dict mapping task_id -> pass rate (0.0 to 1.0)
+    """
+    pass_rates = {}
+    for task_id in task_ids:
+        successes = 0
+        total = 0
+        for agent_id in agents:
+            resp = responses.get(agent_id, {}).get(task_id)
+            if resp is not None:
+                # Handle both binary and binomial data
+                if isinstance(resp, dict) and "successes" in resp:
+                    successes += 1 if resp["successes"] > 0 else 0
+                else:
+                    successes += 1 if resp > 0 else 0
+                total += 1
+        pass_rates[task_id] = successes / total if total > 0 else 0.0
+    return pass_rates
+
+
+def identify_frontier_tasks_for_threshold(
+    responses: Dict[str, Dict[str, Any]],
+    pre_frontier_agents: List[str],
+    post_frontier_agents: List[str],
+    all_task_ids: List[str],
+    pre_threshold: float,
+) -> List[str]:
+    """Identify frontier tasks based on pre-frontier pass rate threshold.
+
+    A task is a frontier task if:
+    - Pre-frontier pass rate <= pre_threshold
+    - Post-frontier pass rate > 0 (at least one success)
+
+    Args:
+        responses: Response matrix {agent: {task: response}}
+        pre_frontier_agents: List of pre-frontier agent IDs
+        post_frontier_agents: List of post-frontier agent IDs
+        all_task_ids: List of all task IDs
+        pre_threshold: Maximum pre-frontier pass rate for frontier tasks
+
+    Returns:
+        List of frontier task IDs
+    """
+    pre_pass_rates = _compute_pass_rates_from_dict(responses, all_task_ids, pre_frontier_agents)
+    post_pass_rates = _compute_pass_rates_from_dict(responses, all_task_ids, post_frontier_agents)
+
+    frontier_tasks = []
+    for task_id in all_task_ids:
+        pre_rate = pre_pass_rates.get(task_id, 0.0)
+        post_rate = post_pass_rates.get(task_id, 0.0)
+
+        if pre_rate <= pre_threshold and post_rate > 0:
+            frontier_tasks.append(task_id)
+
+    return frontier_tasks
+
+
+def run_single_dataset(
     dataset_name: str,
     thresholds: List[float],
-    post_frontier_oracle: bool = False,
-) -> pd.DataFrame:
-    """Run threshold sweep for a single dataset.
+    output_dir: Path,
+    post_frontier_oracle: bool,
+    l2_weight: float,
+    l2_residual: float,
+    enable_date_forecast: bool,
+) -> None:
+    """Run full threshold sweep for one dataset.
+
+    This function is designed to run in a separate process.
+    It trains models ONCE then evaluates across all thresholds.
 
     Args:
         dataset_name: Name of the dataset to evaluate
         thresholds: List of pre_threshold values to sweep
+        output_dir: Directory to save results
         post_frontier_oracle: If True, train Oracle IRT on post-frontier agents only
-
-    Returns:
-        DataFrame with columns: threshold, method, mean_auc, sem, n_agents, n_frontier_tasks
+        l2_weight: L2 regularization for Feature-IRT weights
+        l2_residual: L2 regularization for Feature-IRT residuals
+        enable_date_forecast: If True, compute date forecasting metrics and plots
     """
     print(f"\n{'='*60}")
     print(f"Dataset: {dataset_name}")
-    if post_frontier_oracle:
-        print("Using POST-FRONTIER Oracle (trained on post-frontier agents only)")
     print(f"{'='*60}")
 
     config = get_dataset_config(dataset_name)
-    results = []
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Sort thresholds ascending to ensure lowest threshold is processed first
-    # This establishes the fixed agent set for consistent comparison
-    thresholds = sorted(thresholds)
-    fixed_eval_agents: Optional[List[str]] = None
+    # === TRAIN ONCE (threshold-independent) ===
+    print("\n--- Training Phase (once per dataset) ---")
+
+    # Create a minimal args object for load_and_prepare_data
+    # Use threshold=0 just to get the data structures
+    class Args:
+        responses_path = None
+        baseline_irt_path = None
+        oracle_irt_path = None
+        oracle_abilities_path = None
+        embeddings_path = None
+        llm_judge_path = None
+        trajectory_features_path = None
+        cutoff_date = None
+        pre_threshold = 0.0  # Start with 0 to get all data structures
+        post_threshold = None
+        filter_bottom_percentile = 0.0
+        min_oracle_ability = None
+        frontier_definitions = ["pre_only"]
+
+    args = Args()
+
+    # Load data with threshold=0 to get all structures
+    data = load_and_prepare_data(args, config)
+
+    # Load Oracle IRT
+    oracle_items = data.oracle_items
+    oracle_abilities = data.oracle_abilities
+    print(f"  Oracle IRT: {len(oracle_items)} tasks, {len(oracle_abilities)} agents")
 
     # Train post-frontier Oracle if requested
     post_frontier_oracle_beta: Optional[Dict[str, float]] = None
     if post_frontier_oracle:
-        # Get post-frontier agents
-        post_frontier_agents = [
-            a for a in config.all_agents
-            if config.agent_dates.get(a, "99999999") >= config.cutoff_date
-        ]
-        print(f"\nTraining Oracle IRT on {len(post_frontier_agents)} post-frontier agents...")
-
-        # Train IRT on post-frontier agents only
-        cache_dir = Path("chris_output/threshold_sweep") / f"post_frontier_oracle_{dataset_name}"
+        print(f"\nTraining Oracle IRT on {len(data.post_frontier_agents)} post-frontier agents...")
+        cache_dir = output_dir / f"post_frontier_oracle_{dataset_name}"
         post_frontier_oracle_beta = _train_baseline_irt_on_agents(
             responses_path=config.responses_path,
-            agent_subset=post_frontier_agents,
+            agent_subset=data.post_frontier_agents,
             output_dir=cache_dir,
             epochs=2000,
         )
         print(f"  Post-frontier Oracle trained: {len(post_frontier_oracle_beta)} tasks")
 
+    # Baseline IRT (trained on pre-frontier agents - cached)
+    baseline_items = data.baseline_items
+    baseline_abilities = data.baseline_abilities
+    print(f"  Baseline IRT: {len(baseline_items)} tasks, {len(baseline_abilities)} agents")
+
+    # Train Feature-IRT with FIXED hyperparameters
+    print(f"\nTraining Feature-IRT (l2_weight={l2_weight}, l2_residual={l2_residual})...")
+    feature_sources = build_feature_sources(config)
+
+    # Find embedding source
+    embedding_source = None
+    for name, source in feature_sources:
+        if name == "Embedding":
+            embedding_source = source
+            break
+
+    feature_irt_preds: Optional[Dict[str, float]] = None
+    feature_irt_abilities: Optional[Dict[str, float]] = None
+
+    if embedding_source is not None and baseline_abilities is not None:
+        try:
+            feature_irt_predictor = FeatureIRTPredictor(
+                source=embedding_source,
+                use_residuals=True,
+                init_from_baseline=True,
+                l2_weight=l2_weight,
+                l2_residual=l2_residual,
+                verbose=True,
+            )
+            feature_irt_predictor.fit(
+                task_ids=data.train_task_ids,
+                ground_truth_b=data.baseline_ground_truth_b,
+                responses=data.train_responses,
+                baseline_abilities=baseline_abilities["theta"].values,
+                baseline_agent_ids=list(baseline_abilities.index),
+            )
+            feature_irt_preds = feature_irt_predictor.predict(config.all_task_ids)
+            feature_irt_abilities = feature_irt_predictor.learned_abilities
+            print(f"  Feature-IRT: {len(feature_irt_preds)} task predictions")
+        except Exception as e:
+            print(f"  Feature-IRT training failed: {e}")
+    else:
+        print("  Skipping Feature-IRT (no embeddings or baseline abilities)")
+
+    # Collect all predictions and abilities
+    all_predictions: Dict[str, Dict[str, float]] = {}
+    all_abilities: Dict[str, Dict[str, float]] = {}
+
+    # Oracle
+    if post_frontier_oracle_beta is not None:
+        all_predictions["Oracle (post-frontier only)"] = post_frontier_oracle_beta
+        # For post-frontier oracle, we don't have abilities easily accessible
+        # Skip date forecasting for this variant
+    else:
+        all_predictions["Oracle (upper bound)"] = oracle_items["b"].to_dict()
+        all_abilities["Oracle (upper bound)"] = oracle_abilities["theta"].to_dict()
+
+    # Baseline IRT
+    all_predictions["Baseline IRT (pre-frontier only)"] = baseline_items["b"].to_dict()
+    if baseline_abilities is not None:
+        all_abilities["Baseline IRT (pre-frontier only)"] = baseline_abilities["theta"].to_dict()
+
+    # Feature-IRT
+    if feature_irt_preds is not None:
+        all_predictions["Baseline-Init Feature-IRT (Embedding)"] = feature_irt_preds
+        if feature_irt_abilities is not None:
+            all_abilities["Baseline-Init Feature-IRT (Embedding)"] = feature_irt_abilities
+
+    # Date forecasting (optional, only for datasets with sufficient agent diversity)
+    date_models: Dict[str, DateForecastModel] = {}
+    fit_results: Dict[str, Dict[str, Any]] = {}
+    ground_truth_days: Dict[str, float] = {}
+
+    if enable_date_forecast:
+        # Compute ground truth dates (using Oracle IRT)
+        print("\nComputing ground truth dates...")
+        try:
+            gt_result = compute_first_capable_dates(
+                oracle_items=oracle_items,
+                oracle_abilities=oracle_abilities,
+                agent_dates=config.agent_dates,
+            )
+            ground_truth_days = compute_ground_truth_days(
+                task_ids=config.all_task_ids,
+                first_capable_dates=gt_result.first_capable_dates,
+                reference_date=gt_result.earliest_agent_date,
+            )
+            print(f"  Ground truth: {len(ground_truth_days)} tasks with capable agents")
+            print(f"  Tasks without capable agent: {len(gt_result.tasks_without_capable_agent)}")
+        except Exception as e:
+            print(f"  Ground truth computation failed: {e}")
+            ground_truth_days = {}
+
+        # Fit date models (one per method with abilities)
+        print("\nFitting date forecast models...")
+        for method_name, abilities in all_abilities.items():
+            try:
+                model = DateForecastModel()
+                fit_stats = model.fit(abilities, config.agent_dates)
+                date_models[method_name] = model
+                fit_results[method_name] = fit_stats
+                print(f"  {method_name}: R²={fit_stats['r_squared']:.3f}, "
+                      f"slope={fit_stats['slope']:.4f} theta/day")
+            except Exception as e:
+                print(f"  {method_name}: Failed to fit ({e})")
+                fit_results[method_name] = {}  # Empty dict signals fit failure
+
+        # Generate ability-vs-date plot
+        ability_plot_path = output_dir / f"ability_vs_date_{dataset_name}.png"
+        try:
+            plot_ability_vs_date(
+                method_abilities=all_abilities,
+                agent_dates=config.agent_dates,
+                fit_results=fit_results,
+                dataset_name=config.name,
+                output_path=ability_plot_path,
+            )
+        except Exception as e:
+            print(f"  Failed to generate ability-vs-date plot: {e}")
+    else:
+        print("\nSkipping date forecasting (not enabled for this dataset)")
+
+    # === EVALUATE PER THRESHOLD ===
+    print("\n--- Evaluation Phase (per threshold) ---")
+    results: List[Dict[str, Any]] = []
+    thresholds = sorted(thresholds)
+    fixed_eval_agents: Optional[List[str]] = None
+
     for threshold in thresholds:
         print(f"\n--- Threshold: {threshold*100:.0f}% ---")
 
-        # Create args namespace to mimic CLI arguments
-        class Args:
-            responses_path = None
-            baseline_irt_path = None
-            oracle_irt_path = None
-            oracle_abilities_path = None
-            embeddings_path = None
-            llm_judge_path = None
-            trajectory_features_path = None
-            cutoff_date = None
-            pre_threshold = threshold
-            post_threshold = None
-            filter_bottom_percentile = 0.0
-            min_oracle_ability = None
-            frontier_definitions = ["pre_only"]
+        # Identify frontier tasks for this threshold
+        frontier_tasks = identify_frontier_tasks_for_threshold(
+            responses=config.responses,
+            pre_frontier_agents=data.pre_frontier_agents,
+            post_frontier_agents=data.post_frontier_agents,
+            all_task_ids=config.all_task_ids,
+            pre_threshold=threshold,
+        )
 
-        args = Args()
-
-        try:
-            # Load data for this threshold
-            data = load_and_prepare_data(args, config)
-
-            # Get frontier tasks for this threshold
-            frontier_def = "pre_only"
-            frontier_tasks = data.frontier_tasks_by_def.get(frontier_def, [])
-
-            if len(frontier_tasks) == 0:
-                print(f"  No frontier tasks at threshold {threshold*100:.0f}%, skipping")
-                continue
-
-            # Filter eval agents to those with variance on frontier tasks
-            # Use fixed agent set from lowest threshold for consistent comparison
-            if fixed_eval_agents is None:
-                # First threshold: establish the fixed agent set
-                fixed_eval_agents = filter_agents_with_frontier_variance(
-                    responses=data.config.responses,
-                    frontier_task_ids=frontier_tasks,
-                    candidate_agents=data.post_frontier_agents,
-                )
-                eval_agents = fixed_eval_agents
-                print(f"  Fixed eval agent set: {len(fixed_eval_agents)} agents (from {threshold*100:.0f}% threshold)")
-            else:
-                # Subsequent thresholds: use fixed set, filter out agents with no variance
-                eval_agents = filter_agents_with_frontier_variance(
-                    responses=data.config.responses,
-                    frontier_task_ids=frontier_tasks,
-                    candidate_agents=fixed_eval_agents,
-                )
-
-            if len(eval_agents) == 0:
-                print(f"  No eval agents with variance at threshold {threshold*100:.0f}%, skipping")
-                continue
-
-            print(f"  Frontier tasks: {len(frontier_tasks)}")
-            print(f"  Eval agents: {len(eval_agents)} (of {len(fixed_eval_agents)} fixed)")
-
-            # Compute metrics for Oracle
-            # Use post-frontier Oracle if trained, otherwise use standard Oracle
-            if post_frontier_oracle_beta is not None:
-                oracle_beta = post_frontier_oracle_beta
-                oracle_method_name = "Oracle (post-frontier only)"
-            else:
-                oracle_beta = data.oracle_items["b"].to_dict()
-                oracle_method_name = "Oracle (upper bound)"
-
-            oracle_metrics = compute_mean_per_agent_auc(
-                predicted_beta=oracle_beta,
-                responses=data.config.responses,
-                frontier_task_ids=frontier_tasks,
-                eval_agents=eval_agents,
-            )
-            results.append({
-                "threshold": threshold,
-                "method": oracle_method_name,
-                "mean_auc": oracle_metrics["mean_auc"],
-                "sem": oracle_metrics["sem_auc"],
-                "n_agents": oracle_metrics["n_agents"],
-                "n_frontier_tasks": len(frontier_tasks),
-            })
-
-            # Compute metrics for Baseline IRT
-            baseline_beta = data.baseline_items["b"].to_dict()
-            baseline_metrics = compute_mean_per_agent_auc(
-                predicted_beta=baseline_beta,
-                responses=data.config.responses,
-                frontier_task_ids=frontier_tasks,
-                eval_agents=eval_agents,
-            )
-            results.append({
-                "threshold": threshold,
-                "method": "Baseline IRT (pre-frontier only)",
-                "mean_auc": baseline_metrics["mean_auc"],
-                "sem": baseline_metrics["sem_auc"],
-                "n_agents": baseline_metrics["n_agents"],
-                "n_frontier_tasks": len(frontier_tasks),
-            })
-
-            print(f"  Oracle: {oracle_metrics['mean_auc']:.4f} +/- {oracle_metrics['sem_auc']:.4f}")
-            print(f"  Baseline: {baseline_metrics['mean_auc']:.4f} +/- {baseline_metrics['sem_auc']:.4f}")
-
-            # Compute metrics for Baseline-Init Feature-IRT (Embedding)
-            feature_sources = build_feature_sources(config)
-            embedding_source = None
-            for name, source in feature_sources:
-                if name == "Embedding":
-                    embedding_source = source
-                    break
-
-            if embedding_source is not None and data.baseline_abilities is not None:
-                # Run grid search for best hyperparameters (in parallel)
-                l2_grid = [0.001, 0.01, 0.1, 1.0, 10.0]
-
-                baseline_ability_values = data.baseline_abilities["theta"].values
-                baseline_agent_ids = data.baseline_abilities.index.tolist()
-
-                # Fit all hyperparameter combinations in parallel
-                grid_results = Parallel(n_jobs=-1, backend="loky")(
-                    delayed(_fit_feature_irt_single)(
-                        l2_w,
-                        l2_r,
-                        embedding_source,
-                        data.train_task_ids,
-                        data.baseline_ground_truth_b,
-                        data.train_responses,
-                        baseline_ability_values,
-                        baseline_agent_ids,
-                        data.config.all_task_ids,
-                    )
-                    for l2_w in l2_grid
-                    for l2_r in l2_grid
-                )
-
-                # Find best result and track best hyperparameters
-                best_auc = -1.0
-                best_preds: Optional[Dict[str, float]] = None
-                best_l2_weight: Optional[float] = None
-                best_l2_residual: Optional[float] = None
-
-                for l2_w, l2_r, preds in grid_results:
-                    # Compute AUC (scale-invariant, no alignment needed)
-                    metrics = compute_mean_per_agent_auc(
-                        predicted_beta=preds,
-                        responses=data.config.responses,
-                        frontier_task_ids=frontier_tasks,
-                        eval_agents=eval_agents,
-                    )
-
-                    if metrics["mean_auc"] > best_auc:
-                        best_auc = metrics["mean_auc"]
-                        best_preds = preds
-                        best_l2_weight = l2_w
-                        best_l2_residual = l2_r
-
-                # Compute final metrics with best predictions
-                feature_irt_metrics = compute_mean_per_agent_auc(
-                    predicted_beta=best_preds,
-                    responses=data.config.responses,
-                    frontier_task_ids=frontier_tasks,
-                    eval_agents=eval_agents,
-                )
-
-                results.append({
-                    "threshold": threshold,
-                    "method": "Baseline-Init Feature-IRT (Embedding)",
-                    "mean_auc": feature_irt_metrics["mean_auc"],
-                    "sem": feature_irt_metrics["sem_auc"],
-                    "n_agents": feature_irt_metrics["n_agents"],
-                    "n_frontier_tasks": len(frontier_tasks),
-                    "best_l2_weight": best_l2_weight,
-                    "best_l2_residual": best_l2_residual,
-                })
-                print(f"  Feature-IRT: {feature_irt_metrics['mean_auc']:.4f} ± {feature_irt_metrics['sem_auc']:.4f} "
-                      f"(l2_w={best_l2_weight}, l2_r={best_l2_residual})")
-
-        except Exception as e:
-            print(f"  Error at threshold {threshold*100:.0f}%: {e}")
+        if len(frontier_tasks) == 0:
+            print(f"  No frontier tasks at threshold {threshold*100:.0f}%, skipping")
             continue
 
-    return pd.DataFrame(results)
+        # Filter eval agents (fix at first threshold for consistent comparison)
+        if fixed_eval_agents is None:
+            fixed_eval_agents = filter_agents_with_frontier_variance(
+                responses=config.responses,
+                frontier_task_ids=frontier_tasks,
+                candidate_agents=data.post_frontier_agents,
+            )
+            print(f"  Fixed eval agent set: {len(fixed_eval_agents)} agents "
+                  f"(from {threshold*100:.0f}% threshold)")
+        else:
+            # Filter to agents with variance on current frontier tasks
+            eval_agents = filter_agents_with_frontier_variance(
+                responses=config.responses,
+                frontier_task_ids=frontier_tasks,
+                candidate_agents=fixed_eval_agents,
+            )
+            if len(eval_agents) == 0:
+                print(f"  No eval agents with variance at {threshold*100:.0f}%, skipping")
+                continue
+            eval_agents_for_threshold = eval_agents
 
+        # Use fixed_eval_agents for first threshold, otherwise use filtered
+        eval_agents_for_threshold = fixed_eval_agents if threshold == thresholds[0] else eval_agents
 
-def plot_threshold_sweep(
-    df: pd.DataFrame,
-    dataset_name: str,
-    output_path: Path,
-) -> None:
-    """Generate threshold sweep plot for a dataset.
+        print(f"  Frontier tasks: {len(frontier_tasks)}")
+        print(f"  Eval agents: {len(eval_agents_for_threshold)}")
 
-    Args:
-        df: DataFrame with sweep results
-        dataset_name: Name of the dataset (for title)
-        output_path: Path to save the plot
-    """
-    fig, ax = plt.subplots(figsize=(10, 6))
+        # Compute metrics for each method
+        for method_name, predictions in all_predictions.items():
+            # AUC metrics
+            auc_metrics = compute_mean_per_agent_auc(
+                predicted_beta=predictions,
+                responses=config.responses,
+                frontier_task_ids=frontier_tasks,
+                eval_agents=eval_agents_for_threshold,
+            )
 
-    # Plot Oracle (handle both standard and post-frontier oracle)
-    oracle_df = df[df["method"].str.startswith("Oracle")]
-    if not oracle_df.empty:
-        oracle_label = oracle_df["method"].iloc[0]
-        ax.errorbar(
-            oracle_df["threshold"] * 100,
-            oracle_df["mean_auc"],
-            yerr=oracle_df["sem"],
-            label=oracle_label,
-            color="blue",
-            marker="o",
-            capsize=3,
-            linewidth=2,
-            markersize=8,
-        )
+            # Date MAE metrics (if model available)
+            mae_days = float("nan")
+            r_squared_fit = float("nan")
+            n_date_tasks = 0
 
-    # Plot Baseline IRT
-    baseline_df = df[df["method"] == "Baseline IRT (pre-frontier only)"]
-    ax.errorbar(
-        baseline_df["threshold"] * 100,
-        baseline_df["mean_auc"],
-        yerr=baseline_df["sem"],
-        label="Baseline IRT (pre-frontier only)",
-        color="orange",
-        marker="s",
-        capsize=3,
-        linewidth=2,
-        markersize=8,
-    )
+            if method_name in date_models and ground_truth_days:
+                try:
+                    date_model = date_models[method_name]
+                    date_predictions = date_model.predict(predictions, frontier_tasks)
+                    date_metrics = compute_date_forecast_metrics(
+                        predicted=date_predictions,
+                        ground_truth_days=ground_truth_days,
+                        task_ids=frontier_tasks,
+                    )
+                    mae_days = date_metrics["mae_days"]
+                    r_squared_fit = date_model.r_squared
+                    n_date_tasks = date_metrics["n_tasks"]
+                except Exception as e:
+                    print(f"    Date forecast failed for {method_name}: {e}")
 
-    # Plot Baseline-Init Feature-IRT (Embedding)
-    feature_irt_df = df[df["method"] == "Baseline-Init Feature-IRT (Embedding)"]
-    if not feature_irt_df.empty:
-        ax.errorbar(
-            feature_irt_df["threshold"] * 100,
-            feature_irt_df["mean_auc"],
-            yerr=feature_irt_df["sem"],
-            label="Baseline-Init Feature-IRT (Embedding)",
-            color="green",
-            marker="^",
-            capsize=3,
-            linewidth=2,
-            markersize=8,
-        )
+            results.append({
+                "threshold": threshold,
+                "method": method_name,
+                "mean_auc": auc_metrics["mean_auc"],
+                "sem": auc_metrics["sem_auc"],
+                "n_agents": auc_metrics["n_agents"],
+                "n_frontier_tasks": len(frontier_tasks),
+                "mae_days": mae_days,
+                "r_squared_fit": r_squared_fit,
+                "n_date_tasks": n_date_tasks,
+            })
 
-    # Configure plot
-    ax.set_xlabel("Pre-frontier Threshold (%)", fontsize=12)
-    ax.set_ylabel("Mean Per-Agent AUC", fontsize=12)
-    ax.set_title(f"Threshold Sweep: {dataset_name}", fontsize=14)
-    ax.legend(loc="lower right", fontsize=10)
-    ax.grid(True, alpha=0.3)
-    ax.set_xlim(-2, 32)
-    ax.set_ylim(0.4, 1.0)  # Full range to show all data
+            print(f"  {method_name}: AUC={auc_metrics['mean_auc']:.4f} ± {auc_metrics['sem_auc']:.4f}"
+                  + (f", MAE={mae_days:.1f} days" if not np.isnan(mae_days) else ""))
 
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
-    plt.close()
-    print(f"Saved plot to {output_path}")
+    # Save results
+    if not results:
+        print(f"\nNo results for {dataset_name}")
+        return
+
+    df = pd.DataFrame(results)
+
+    # Save CSV
+    csv_path = output_dir / f"threshold_sweep_{dataset_name}.csv"
+    df.to_csv(csv_path, index=False)
+    print(f"\nSaved CSV to {csv_path}")
+
+    # Generate plots
+    auc_plot_path = output_dir / f"threshold_sweep_{dataset_name}.png"
+    plot_threshold_sweep_auc(df, dataset_name, auc_plot_path)
+
+    if enable_date_forecast:
+        mae_plot_path = output_dir / f"date_forecast_{dataset_name}.png"
+        plot_threshold_sweep_mae(df, dataset_name, mae_plot_path)
+
+    print(f"\nDone with {dataset_name}!")
 
 
 def main():
@@ -433,29 +496,43 @@ def main():
     print(f"Datasets: {', '.join(args.datasets)}")
     print(f"Thresholds: {[f'{t*100:.0f}%' for t in args.thresholds]}")
     print(f"Output directory: {args.output_dir}")
+    print(f"Feature-IRT hyperparameters: l2_weight={args.l2_weight}, l2_residual={args.l2_residual}")
     if args.post_frontier_oracle:
         print("Using POST-FRONTIER Oracle mode")
+    if args.date_forecast_all:
+        print("Date forecasting enabled for ALL datasets")
+    else:
+        print(f"Date forecasting enabled for: {DATE_FORECAST_DATASETS}")
 
+    # Launch one process per dataset
+    processes = []
     for dataset_name in args.datasets:
-        # Run sweep
-        df = run_threshold_sweep_for_dataset(
-            dataset_name, args.thresholds, post_frontier_oracle=args.post_frontier_oracle
+        # Determine if date forecasting is enabled for this dataset
+        enable_date_forecast = args.date_forecast_all or dataset_name in DATE_FORECAST_DATASETS
+
+        p = Process(
+            target=run_single_dataset,
+            args=(
+                dataset_name,
+                args.thresholds,
+                args.output_dir,
+                args.post_frontier_oracle,
+                args.l2_weight,
+                args.l2_residual,
+                enable_date_forecast,
+            ),
         )
+        processes.append(p)
+        p.start()
+        print(f"Started process for {dataset_name}")
 
-        if df.empty:
-            print(f"\nNo results for {dataset_name}, skipping")
-            continue
+    # Wait for all processes to complete
+    for p in processes:
+        p.join()
 
-        # Save CSV
-        csv_path = args.output_dir / f"threshold_sweep_{dataset_name}.csv"
-        df.to_csv(csv_path, index=False)
-        print(f"\nSaved CSV to {csv_path}")
-
-        # Generate plot
-        plot_path = args.output_dir / f"threshold_sweep_{dataset_name}.png"
-        plot_threshold_sweep(df, dataset_name, plot_path)
-
-    print("\nDone!")
+    print("\n" + "="*60)
+    print("All datasets complete!")
+    print("="*60)
 
 
 if __name__ == "__main__":

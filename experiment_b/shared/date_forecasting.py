@@ -538,7 +538,9 @@ def compute_date_forecast_metrics(
             pred_days.append(predicted[task_id][0])
             actual_days.append(ground_truth_days[task_id])
 
-    if len(pred_days) < 3:
+    n_tasks = len(pred_days)
+
+    if n_tasks == 0:
         return {
             "mae_days": float("nan"),
             "rmse_days": float("nan"),
@@ -546,7 +548,7 @@ def compute_date_forecast_metrics(
             "pearson_p": float("nan"),
             "spearman_rho": float("nan"),
             "spearman_p": float("nan"),
-            "n_tasks": len(pred_days),
+            "n_tasks": 0,
             "early_pct": float("nan"),
         }
 
@@ -554,24 +556,27 @@ def compute_date_forecast_metrics(
     actual_arr = np.array(actual_days)
     errors = pred_arr - actual_arr
 
-    # MAE and RMSE
+    # MAE and RMSE can be computed with any number of samples >= 1
     mae = float(np.mean(np.abs(errors)))
     rmse = float(np.sqrt(np.mean(errors**2)))
-
-    # Correlations
-    pearson_r, pearson_p = stats.pearsonr(pred_arr, actual_arr)
-    spearman_rho, spearman_p = stats.spearmanr(pred_arr, actual_arr)
 
     # Early prediction percentage (pred < actual)
     early_pct = float(np.mean(pred_arr < actual_arr) * 100)
 
+    # Correlations require at least 3 points to be meaningful
+    if n_tasks >= 3:
+        pearson_r, pearson_p = stats.pearsonr(pred_arr, actual_arr)
+        spearman_rho, spearman_p = stats.spearmanr(pred_arr, actual_arr)
+    else:
+        pearson_r = pearson_p = spearman_rho = spearman_p = float("nan")
+
     return {
         "mae_days": mae,
         "rmse_days": rmse,
-        "pearson_r": float(pearson_r),
-        "pearson_p": float(pearson_p),
-        "spearman_rho": float(spearman_rho),
-        "spearman_p": float(spearman_p),
-        "n_tasks": len(pred_days),
+        "pearson_r": float(pearson_r) if not np.isnan(pearson_r) else float("nan"),
+        "pearson_p": float(pearson_p) if not np.isnan(pearson_p) else float("nan"),
+        "spearman_rho": float(spearman_rho) if not np.isnan(spearman_rho) else float("nan"),
+        "spearman_p": float(spearman_p) if not np.isnan(spearman_p) else float("nan"),
+        "n_tasks": n_tasks,
         "early_pct": early_pct,
     }

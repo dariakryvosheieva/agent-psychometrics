@@ -506,27 +506,44 @@ python -m experiment_b.threshold_sweep --datasets swebench terminalbench
 
 # Custom thresholds
 python -m experiment_b.threshold_sweep --thresholds 0.0 0.1 0.2 0.3
+
+# Enable date forecasting for all datasets (by default, only swebench)
+python -m experiment_b.threshold_sweep --date_forecast_all
 ```
 
-**Output**: Plots and CSVs saved to `chris_output/threshold_sweep/`. The CSV includes `best_l2_weight` and `best_l2_residual` columns showing the optimal hyperparameters at each threshold.
+### Output Files
+
+Results are saved to `chris_output/threshold_sweep/`:
+
+| File | Description |
+|------|-------------|
+| `threshold_sweep_{dataset}.csv` | AUC and MAE metrics per threshold/method |
+| `threshold_sweep_{dataset}.png` | Mean Per-Agent AUC plot |
+| `date_forecast_{dataset}.png` | Date forecast MAE plot (swebench only by default) |
+| `ability_vs_date_{dataset}.png` | Ability-over-time linear fit visualization (swebench only by default) |
+
+### Date Forecasting
+
+Date forecasting predicts when tasks will become solvable based on the linear relationship between frontier ability and time. This is only enabled for SWE-bench by default because other datasets have insufficient agent date diversity for meaningful ability-over-time regression.
+
+The ability-vs-date plot shows:
+- Scatter plot of agent abilities vs release date
+- Red stars marking "frontier points" where cumulative max ability improved
+- Linear fit line with R² (requires ≥2 frontier points)
+
+Use `--date_forecast_all` to enable date forecasting for all datasets (may fail or produce poor fits for datasets with limited agent diversity).
+
+### Key Options
 
 **Fixed agent set**: The sweep uses a fixed set of evaluation agents (those with variance at threshold=0%) across all thresholds for consistent comparison. Without this, weaker agents joining at higher thresholds would cause misleading AUC drops.
 
-**Post-frontier Oracle**: By default, Oracle IRT is trained on all agents. Use `--post_frontier_oracle` to train Oracle on post-frontier agents only, which can reduce ranking inversions but doesn't eliminate them due to 1PL IRT's single-dimension limitation.
+**Post-frontier Oracle**: By default, Oracle IRT is trained on all agents. Use `--post_frontier_oracle` to train Oracle on post-frontier agents only:
 
 ```bash
-# Use post-frontier Oracle (experimental)
 python -m experiment_b.threshold_sweep --datasets gso --post_frontier_oracle
 ```
 
-**Parallel execution**: Datasets are independent and can be run in parallel:
-```bash
-python -m experiment_b.threshold_sweep --datasets swebench &
-python -m experiment_b.threshold_sweep --datasets swebench_pro &
-python -m experiment_b.threshold_sweep --datasets terminalbench &
-python -m experiment_b.threshold_sweep --datasets gso &
-wait
-```
+**Parallel execution**: Datasets are processed in parallel automatically (one process per dataset).
 
 **Key insight**: At low thresholds (0-5%), Baseline IRT has little signal on frontier tasks. As threshold increases, Baseline IRT catches up to Oracle. The Baseline-Init Feature-IRT can sometimes improve over Baseline IRT by leveraging task features.
 

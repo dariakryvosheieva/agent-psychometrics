@@ -79,6 +79,14 @@ from experiment_b.shared.date_forecasting import (
     compute_date_forecast_metrics,
 )
 
+# Plotting
+from experiment_b.shared.plotting import (
+    plot_threshold_sweep_auc,
+    plot_threshold_sweep_mae,
+    plot_combined_threshold_sweep,
+    plot_ability_vs_date,
+)
+
 __all__ = [
     # config_base
     "DatasetConfig",
@@ -137,4 +145,9 @@ __all__ = [
     "fit_ability_over_time",
     "DateForecastModel",
     "compute_date_forecast_metrics",
+    # plotting
+    "plot_threshold_sweep_auc",
+    "plot_threshold_sweep_mae",
+    "plot_combined_threshold_sweep",
+    "plot_ability_vs_date",
 ]
