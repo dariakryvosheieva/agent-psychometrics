@@ -148,11 +148,12 @@ def evaluate_all_frontier_definitions(
     date_info: Optional[DateForecastingData],
     alignment_method: str = "affine",
     verbose: bool = False,
+    show_all_sad_irt: bool = False,
 ) -> Dict[str, Dict[str, Dict[str, Any]]]:
     """Run evaluation for all frontier definitions and methods.
 
-    Evaluates ALL methods uniformly. For reporting, the caller can consolidate
-    SAD-IRT runs into a single "best" entry.
+    Evaluates ALL methods uniformly. For reporting, SAD-IRT runs are consolidated
+    to a single "best" entry unless show_all_sad_irt is True.
 
     Args:
         frontier_definitions: List of frontier definitions to evaluate
@@ -161,6 +162,7 @@ def evaluate_all_frontier_definitions(
         date_info: Date forecasting data (optional)
         alignment_method: Scale alignment method
         verbose: Print verbose output
+        show_all_sad_irt: If True, show all SAD-IRT runs instead of just the best
 
     Returns:
         Dict mapping frontier_def -> results dict (includes all SAD-IRT runs)
@@ -292,9 +294,8 @@ def evaluate_all_frontier_definitions(
                             "n_tasks": 0,
                         }
 
-        # Consolidate SAD-IRT runs and print comparison table
+        # Consolidate SAD-IRT runs (unless show_all_sad_irt is True)
         # Find best SAD-IRT run by AUC for this frontier definition
-        consolidated_results = {}
         best_sad_irt_auc = -1.0
         best_sad_irt_name: Optional[str] = None
 
@@ -304,35 +305,51 @@ def evaluate_all_frontier_definitions(
                 if auc > best_sad_irt_auc:
                     best_sad_irt_auc = auc
                     best_sad_irt_name = method_name
-            else:
-                consolidated_results[method_name] = metrics
 
-        # Add best SAD-IRT as "SAD-IRT (best)"
-        if best_sad_irt_name:
-            consolidated_results["SAD-IRT (best)"] = results[best_sad_irt_name]
-            print(f"  Best SAD-IRT: {best_sad_irt_name} (AUC: {best_sad_irt_auc:.4f})")
+        if show_all_sad_irt:
+            # Show all SAD-IRT runs without compression
+            consolidated_results = dict(results)
+            if best_sad_irt_name:
+                print(f"  Best SAD-IRT: {best_sad_irt_name} (AUC: {best_sad_irt_auc:.4f})")
+        else:
+            # Compress to single "SAD-IRT (best)" entry
+            consolidated_results = {}
+            for method_name, metrics in results.items():
+                if not method_name.startswith("SAD-IRT ("):
+                    consolidated_results[method_name] = metrics
+
+            # Add best SAD-IRT as "SAD-IRT (best)"
+            if best_sad_irt_name:
+                consolidated_results["SAD-IRT (best)"] = results[best_sad_irt_name]
+                print(f"  Best SAD-IRT: {best_sad_irt_name} (AUC: {best_sad_irt_auc:.4f})")
 
         # Consolidate date results similarly
         consolidated_date_results: Optional[Dict[str, Dict[str, Any]]] = None
         if date_results_for_def:
-            consolidated_date_results = {}
-            for method_name, date_metrics in date_results_for_def.items():
-                if method_name.startswith("SAD-IRT ("):
-                    if method_name == best_sad_irt_name:
-                        consolidated_date_results["SAD-IRT (best)"] = date_metrics
-                else:
-                    consolidated_date_results[method_name] = date_metrics
+            if show_all_sad_irt:
+                consolidated_date_results = dict(date_results_for_def)
+            else:
+                consolidated_date_results = {}
+                for method_name, date_metrics in date_results_for_def.items():
+                    if method_name.startswith("SAD-IRT ("):
+                        if method_name == best_sad_irt_name:
+                            consolidated_date_results["SAD-IRT (best)"] = date_metrics
+                    else:
+                        consolidated_date_results[method_name] = date_metrics
 
         # Consolidate Oracle date results similarly
         consolidated_oracle_date_results: Optional[Dict[str, Dict[str, Any]]] = None
         if oracle_date_results_for_def:
-            consolidated_oracle_date_results = {}
-            for method_name, date_metrics in oracle_date_results_for_def.items():
-                if method_name.startswith("SAD-IRT ("):
-                    if method_name == best_sad_irt_name:
-                        consolidated_oracle_date_results["SAD-IRT (best)"] = date_metrics
-                else:
-                    consolidated_oracle_date_results[method_name] = date_metrics
+            if show_all_sad_irt:
+                consolidated_oracle_date_results = dict(oracle_date_results_for_def)
+            else:
+                consolidated_oracle_date_results = {}
+                for method_name, date_metrics in oracle_date_results_for_def.items():
+                    if method_name.startswith("SAD-IRT ("):
+                        if method_name == best_sad_irt_name:
+                            consolidated_oracle_date_results["SAD-IRT (best)"] = date_metrics
+                    else:
+                        consolidated_oracle_date_results[method_name] = date_metrics
 
         print()
         # Get filtering stats for this frontier definition (if any)

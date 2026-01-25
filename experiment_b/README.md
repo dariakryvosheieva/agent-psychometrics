@@ -34,11 +34,12 @@ The pooled ROC-AUC pools all (agent, task) pairs and requires fitting an affine 
 
 ## Frontier Task Definitions
 
-Three definitions of "frontier task" are supported:
+Four definitions of "frontier task" are supported:
 
 1. **Zero pre-frontier** (`zero_pre`) **[Recommended]**: Tasks with 0% pre-frontier pass rate AND >0% post-frontier pass rate. Most principled—identifies tasks that became solvable with frontier agents.
 2. **Pass-rate based** (`passrate`): Tasks with ≤10% pre-frontier pass rate AND >10% post-frontier pass rate
-3. **IRT-based** (`irt`): Tasks where NO pre-frontier agent has ≥50% solve probability under IRT
+3. **Pre-only** (`pre_only`): Tasks with ≤X% pre-frontier pass rate (no post-frontier filter). Uses `--pre_threshold` argument. Useful for analyzing how prediction difficulty scales with available training signal.
+4. **IRT-based** (`irt`): Tasks where NO pre-frontier agent has ≥50% solve probability under IRT
 
 ## Quick Start
 

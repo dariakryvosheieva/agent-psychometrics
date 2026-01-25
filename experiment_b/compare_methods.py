@@ -182,10 +182,17 @@ def parse_args() -> argparse.Namespace:
         type=str,
         nargs="+",
         default=["zero_pre"],
-        choices=["irt", "passrate", "zero_pre"],
+        choices=["irt", "passrate", "zero_pre", "pre_only"],
         help="Frontier definitions to evaluate (default: zero_pre). "
-             "'passrate' = pass rate thresholds, 'irt' = IRT probability threshold, "
-             "'zero_pre' = 0%% pre-frontier, >0%% post-frontier",
+             "'zero_pre' = 0%% pre, >0%% post; "
+             "'passrate' = <=X%% pre AND >Y%% post; "
+             "'pre_only' = <=X%% pre (no post filter, uses --pre_threshold); "
+             "'irt' = IRT probability threshold",
+    )
+    parser.add_argument(
+        "--show_all_sad_irt",
+        action="store_true",
+        help="Show all individual SAD-IRT runs instead of compressing to 'SAD-IRT (best)'",
     )
     return parser.parse_args()
 
@@ -247,15 +254,6 @@ def main():
         "Baseline IRT (pre-frontier only)": data.baseline_items["b"].to_dict(),
     }
 
-    # === DIAGNOSTIC: Add random baseline to verify evaluation ===
-    # Note: With <20 frontier tasks, random baseline can deviate from 0.5 due to variance.
-    # Test with multiple seeds if results seem suspicious.
-    import random
-    random.seed(42)
-    all_task_ids = list(data.oracle_items.index)
-    random_beta = {t: random.random() for t in all_task_ids}
-    raw_predictions["Random Baseline"] = random_beta
-
     # Track abilities for methods that have their own IRT (for date forecasting)
     method_abilities: Dict[str, Dict[str, float]] = {
         "Oracle (upper bound)": data.oracle_abilities["theta"].to_dict(),
@@ -264,9 +262,10 @@ def main():
         method_abilities["Baseline IRT (pre-frontier only)"] = data.baseline_abilities["theta"].to_dict()
 
     # Load SAD-IRT predictions (each run added as separate method)
-    sad_preds, sad_abilities = collect_sad_irt_predictions(args.sad_irt_beta_dir)
-    raw_predictions.update(sad_preds)
-    method_abilities.update(sad_abilities)
+    # NOTE: Temporarily disabled - uncomment to re-enable
+    # sad_preds, sad_abilities = collect_sad_irt_predictions(args.sad_irt_beta_dir)
+    # raw_predictions.update(sad_preds)
+    # method_abilities.update(sad_abilities)
 
     # Build feature sources and collect Ridge predictions
     feature_sources = build_feature_sources(
@@ -332,6 +331,7 @@ def main():
         date_info=date_info,
         alignment_method=args.alignment_method,
         verbose=args.verbose,
+        show_all_sad_irt=args.show_all_sad_irt,
     )
 
     # =========================================================================

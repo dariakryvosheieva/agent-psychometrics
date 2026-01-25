@@ -318,6 +318,40 @@ def identify_frontier_tasks_zero_pre(
     return frontier_tasks
 
 
+def identify_frontier_tasks_pre_only(
+    responses_path: Path,
+    pre_frontier_agents: List[str],
+    max_pre_rate: float,
+) -> List[str]:
+    """Identify tasks by max pre-frontier pass rate only (no post-frontier filter).
+
+    This enables monotonically growing task sets as max_pre_rate increases:
+    - max_pre_rate=0.0: tasks with exactly 0% pre-frontier success
+    - max_pre_rate=0.1: tasks with ≤10% pre-frontier success (superset of 0%)
+    - max_pre_rate=0.2: tasks with ≤20% pre-frontier success (superset of 10%)
+
+    Does NOT filter by post-frontier performance at all. Tasks that are never
+    solved by any model will still be included, but they won't affect Mean
+    Per-Agent AUC since agents are filtered by variance.
+
+    Args:
+        responses_path: Path to JSONL response matrix
+        pre_frontier_agents: List of pre-frontier agent names
+        max_pre_rate: Maximum pre-frontier pass rate (0.0 to 1.0)
+
+    Returns:
+        List of task_ids where pre-frontier pass rate <= max_pre_rate
+    """
+    pre_pass_rates = compute_pass_rates(responses_path, pre_frontier_agents)
+
+    frontier_tasks = []
+    for task_id, pre_rate in pre_pass_rates.items():
+        if pre_rate <= max_pre_rate:
+            frontier_tasks.append(task_id)
+
+    return frontier_tasks
+
+
 def identify_nontrivial_tasks(
     responses_path: Path,
     pre_frontier_agents: List[str],
@@ -970,6 +1004,13 @@ def load_and_prepare_data(args: argparse.Namespace, config: DatasetConfig) -> Ex
                 post_frontier,
             )
             print(f"  Frontier tasks ({frontier_def}: 0% pre, >0% post): {len(frontier_task_ids)}")
+        elif frontier_def == "pre_only":
+            frontier_task_ids = identify_frontier_tasks_pre_only(
+                config.responses_path,
+                pre_frontier,
+                pre_threshold,
+            )
+            print(f"  Frontier tasks ({frontier_def}: <={pre_threshold*100:.0f}% pre, any post): {len(frontier_task_ids)}")
         else:  # passrate
             frontier_task_ids = identify_frontier_tasks_passrate(
                 config.responses_path,
