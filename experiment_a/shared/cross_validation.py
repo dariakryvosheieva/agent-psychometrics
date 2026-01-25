@@ -103,6 +103,9 @@ class CrossValidationResult:
     std_pass_rate_mse: Optional[float] = None
     fold_pass_rate_mses: Optional[List[Optional[float]]] = None
 
+    # Optional diagnostics collected via callback
+    fold_diagnostics: Optional[List[Any]] = None
+
 
 class CVPredictor(Protocol):
     """Protocol for predictors that can be used in cross-validation.
@@ -183,6 +186,7 @@ def run_cv(
     compute_pass_rate_mse: bool = False,
     expansion_mode: Optional[str] = None,
     binomial_responses: Optional[Dict[str, Dict[str, Dict[str, int]]]] = None,
+    diagnostics_extractor: Optional[Callable[[CVPredictor, int], Any]] = None,
 ) -> CrossValidationResult:
     """Run cross-validation for any predictor.
 
@@ -198,12 +202,16 @@ def run_cv(
         expansion_mode: Override AUC expansion method ("binary", "expand", or None for default)
         binomial_responses: Original binomial responses, required for expansion_mode="expand"
             when data is binary (trained on sampled data)
+        diagnostics_extractor: Optional callback to extract diagnostics from predictor after
+            each fold. Called as diagnostics_extractor(predictor, fold_idx) after fitting.
+            Results are collected in CrossValidationResult.fold_diagnostics.
 
     Returns:
         CrossValidationResult with mean/std AUC across folds
     """
     fold_aucs: List[Optional[float]] = []
     fold_mses: List[Optional[float]] = []
+    fold_diagnostics: List[Any] = []
 
     for fold_idx, (train_tasks, test_tasks) in enumerate(folds):
         # Load fold-specific data
@@ -211,6 +219,10 @@ def run_cv(
 
         # Train predictor
         predictor.fit(data, train_tasks)
+
+        # Extract diagnostics if callback provided
+        if diagnostics_extractor is not None:
+            fold_diagnostics.append(diagnostics_extractor(predictor, fold_idx))
 
         # Evaluate on test tasks
         y_true: List[int] = []
@@ -263,6 +275,7 @@ def run_cv(
         mean_pass_rate_mse=float(np.mean(valid_mses)) if valid_mses else None,
         std_pass_rate_mse=float(np.std(valid_mses)) if valid_mses else None,
         fold_pass_rate_mses=fold_mses if compute_pass_rate_mse else None,
+        fold_diagnostics=fold_diagnostics if diagnostics_extractor is not None else None,
     )
 
 

@@ -522,6 +522,57 @@ Higher in Standalone: log_lines_changed (-4.2), solution_complexity (-1.8)
 Higher in Residual:   problem_clarity (+2.8), num_hunks (+2.2)
 ```
 
+## Grouped Ridge Coefficient Analysis
+
+Analyze LLM judge feature coefficients from the **Grouped Ridge** predictor (joint embedding + LLM fitting):
+
+```bash
+# Run analysis across all 4 datasets
+python -m experiment_a.analyze_grouped_ridge_coefficients
+
+# Run for single dataset (faster for testing)
+python -m experiment_a.analyze_grouped_ridge_coefficients --dataset swebench
+```
+
+This script:
+1. Uses the existing CV infrastructure with a diagnostics callback
+2. Extracts coefficients from `GroupedRidgePredictor.get_detailed_diagnostics()`
+3. Reports contribution analysis (L2 norm squared) and selected alphas per source
+
+**Contribution is measured by L2 norm squared:**
+```
+Embedding % = ||w_emb||² / (||w_emb||² + ||w_llm||²)
+```
+
+Results saved to `chris_output/grouped_ridge_coefficient_analysis.json`.
+
+### Results (2026-01-25)
+
+**Feature Importance Ranking (by |coefficient|):**
+
+| Feature | SWE | Pro | GSO | Term | Avg Rank |
+|---------|-----|-----|-----|------|----------|
+| verification_difficulty | 5 | 4 | 1 | 1 | **2.8** |
+| solution_complexity | 3 | 1 | 4 | 8 | **4.0** |
+| logical_reasoning_required | 6 | 3 | 2 | 7 | **4.5** |
+| atypicality | 4 | 8 | 6 | 4 | 5.5 |
+| solution_hint | 12 | 5 | 3 | 6 | 6.5 |
+| standard_pattern_available | 8 | 9 | 7 | 2 | 6.5 |
+
+**Contribution Summary (L2 norm squared):**
+
+| Dataset | Embedding % | LLM Judge % | Emb α | LLM α |
+|---------|-------------|-------------|-------|-------|
+| SWE-bench | 86.8% | 13.2% | 10000 | 640 |
+| SWE-bench Pro | 84.4% | 15.6% | 10000 | 1000 |
+| GSO | 76.5% | 23.5% | 6400 | 2260 |
+| TerminalBench | 91.0% | 9.0% | 800 | 44 |
+
+**Key findings:**
+- **verification_difficulty** is the most consistently important LLM feature (avg rank 2.8)
+- LLM Judge contributes 9-24% of coefficient magnitude, with GSO showing highest contribution
+- Selected alphas vary significantly: higher embedding alpha for larger datasets
+
 ## Caches
 
 | Cache | Location | When to Clear |

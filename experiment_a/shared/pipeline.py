@@ -344,6 +344,7 @@ def run_cross_validation(
     include_feature_irt: bool = False,
     expansion_mode: Optional[str] = None,
     binomial_responses: Optional[Dict[str, Dict[str, Dict[str, int]]]] = None,
+    diagnostics_extractors: Optional[Dict[str, Callable]] = None,
 ) -> Dict[str, Any]:
     """Run the evaluation pipeline with k-fold cross-validation.
 
@@ -360,6 +361,9 @@ def run_cross_validation(
         expansion_mode: Override AUC expansion method ("binary", "expand", or None)
         binomial_responses: Original binomial responses, required for expansion_mode="expand"
             when data is binary (trained on sampled data)
+        diagnostics_extractors: Optional dict mapping predictor name -> extractor function.
+            Each extractor is called as extractor(predictor, fold_idx) after each fold.
+            Results are stored in CrossValidationResult.fold_diagnostics.
 
     Returns:
         Dict with CV results for each method
@@ -427,6 +431,12 @@ def run_cross_validation(
     # Run CV for each predictor using the unified framework
     for i, pc in enumerate(predictor_configs, 1):
         print(f"\n{i}. {pc.display_name}:")
+
+        # Get diagnostics extractor for this predictor if provided
+        extractor = None
+        if diagnostics_extractors and pc.name in diagnostics_extractors:
+            extractor = diagnostics_extractors[pc.name]
+
         cv_results[pc.name] = run_cv(
             pc.predictor,
             folds,
@@ -435,6 +445,7 @@ def run_cross_validation(
             compute_pass_rate_mse=compute_pass_rate_mse,
             expansion_mode=expansion_mode,
             binomial_responses=binomial_responses,
+            diagnostics_extractor=extractor,
         )
         result = cv_results[pc.name]
         if result.mean_auc is not None:
