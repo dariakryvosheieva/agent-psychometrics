@@ -337,7 +337,23 @@ A standardized 9-feature set is available for fair cross-dataset comparison. All
 To use unified features:
 ```bash
 python -m experiment_a.swebench.train_evaluate --llm_judge_features_path chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv
+
+# Or run all datasets with unified features
+python -m experiment_a.run_all_datasets --unified_judge
 ```
+
+#### Unified vs Dataset-Specific Features Comparison
+
+Both approaches yield comparable results (within ~0.005 AUC noise). Dataset-specific features have a slight edge on some benchmarks:
+
+| Dataset | Grouped Ridge (Unified) | Grouped Ridge (Default) | Stacked (Unified) | Stacked (Default) |
+|---------|------------------------|------------------------|-------------------|-------------------|
+| SWE-bench Verified | 0.8280 | **0.8309** | 0.8296 | 0.8278 |
+| GSO | 0.7496 | **0.7500** | 0.7507 | **0.7509** |
+| TerminalBench | 0.8006 | **0.8062** | 0.8044 | 0.8034 |
+| SWE-bench Pro | 0.7443 | **0.7477** | 0.7444 | **0.7493** |
+
+**Recommendation**: Use dataset-specific features (default) for best performance. Use unified features (`--unified_judge`) when comparing across datasets to ensure consistent feature definitions.
 
 To extract features:
 ```bash
