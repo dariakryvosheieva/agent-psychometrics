@@ -450,6 +450,45 @@ Embedding %       73.1%    69.2%    65.3%    58.8%
 LLM Judge %        4.9%    11.9%    16.4%    17.4%
 ```
 
+## Standalone LLM Judge Coefficient Analysis
+
+Compare LLM judge coefficients between **standalone** (direct prediction) and **residual** (error correction) forms:
+
+```bash
+# Run analysis across all 4 datasets
+python -m experiment_a.analyze_llm_standalone_coefficients
+
+# Run for single dataset (faster for testing)
+python -m experiment_a.analyze_llm_standalone_coefficients --dataset swebench
+```
+
+This script:
+1. Extracts coefficients from standalone LLM Judge Ridge predictor
+2. Compares rankings with residual form (from stacked predictor)
+3. Shows which features matter more for direct prediction vs. error correction
+
+**Key differences:**
+- **Standalone**: LLM Judge directly predicts task difficulty (β)
+- **Residual** (stacked): LLM Judge predicts errors from embedding predictions
+
+Results saved to `chris_output/llm_standalone_coefficient_analysis.json`.
+
+### Example Output
+
+```
+Feature Importance Ranking (by |coefficient|):
+                             ---- Standalone ----     ---- Residual ----
+Feature                    SWE  Pro  GSO Term  Avg    SWE  Pro  GSO Term  Avg
+-----------------------------------------------------------------------------
+verification_difficulty      7    3    1    1   3.0     5    7    1    1   3.5
+solution_complexity          3    2    3    7   3.8     8    1    4    9   5.5
+...
+
+Features with largest ranking changes:
+Higher in Standalone: log_lines_changed (-4.2), solution_complexity (-1.8)
+Higher in Residual:   problem_clarity (+2.8), num_hunks (+2.2)
+```
+
 ## Caches
 
 | Cache | Location | When to Clear |
