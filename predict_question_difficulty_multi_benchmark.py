@@ -185,6 +185,73 @@ TERMINAL_BENCH_JUDGE_FEATURE_NAMES: List[str] = [
 ]
 
 
+# GSO judge features (OOD default). The per-item JSONs in the default
+# `--ood_judge_features_dir` use their own key schema, so for OOD evaluation we
+# infer the set of feature keys directly from that directory.
+_GSO_JUDGE_FEATURE_NAMES_CACHE: Dict[str, List[str]] = {}
+
+
+def _infer_gso_judge_feature_names(features_dir: str) -> List[str]:
+    """
+    Infer canonical GSO judge feature keys from the OOD judge-features dir.
+
+    Notes:
+    - Filters out summary JSONs like `compute_stats_*.json`.
+    - Ignores metadata keys like `_task_id` and free-text `reasoning`.
+    """
+    root = os.path.abspath(str(features_dir or "").strip())
+    if not root:
+        return []
+    if root in _GSO_JUDGE_FEATURE_NAMES_CACHE:
+        return _GSO_JUDGE_FEATURE_NAMES_CACHE[root]
+
+    try:
+        names = [x for x in os.listdir(root) if x.endswith(".json")]
+    except Exception:
+        names = []
+
+    def _is_candidate(fn: str) -> bool:
+        s = str(fn or "")
+        if not s.endswith(".json"):
+            return False
+        if s.startswith("compute_stats_"):
+            return False
+        if s.startswith("correlation"):
+            return False
+        if s in {"correlation_analysis.json"}:
+            return False
+        return True
+
+    cands = [fn for fn in names if _is_candidate(fn)]
+    # Prefer typical GSO task-id filenames: "<org>__<repo>-<hash>.json"
+    cands.sort(key=lambda fn: (0 if ("__" in fn and "-" in fn) else 1, fn))
+
+    inferred: List[str] = []
+    for fn in cands:
+        p = os.path.join(root, fn)
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                obj = json.load(f)
+        except Exception:
+            continue
+        if not isinstance(obj, dict):
+            continue
+        keys: List[str] = []
+        for k in obj.keys():
+            if not isinstance(k, str):
+                continue
+            kk = k.strip()
+            if not kk or kk.startswith("_") or kk == "reasoning":
+                continue
+            keys.append(kk)
+        if keys:
+            inferred = sorted(set(keys))
+            break
+
+    _GSO_JUDGE_FEATURE_NAMES_CACHE[root] = inferred
+    return inferred
+
+
 _JUDGE_INDEX_CACHE: Dict[Tuple[str, bool], Dict[str, str]] = {}
 
 
@@ -2583,11 +2650,75 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             def _ood_judge_full_vec_for_item(item_id: str):
                 """
-                Load OOD judge vector from a single directory, assuming it matches one of the known schemas.
+                Load OOD judge vector from a single directory.
+
+                - For the default GSO OOD benchmark, the per-item JSON schema differs from
+                  Verified/Pro/Terminal-Bench. We infer the GSO feature keys from the dir
+                  and map overlapping keys into the trained joint judge vector.
+                - Otherwise, we fall back to trying the known schemas directly.
                 Returns a full-length vector of size `judge_dim`, or None if not found/parsable.
                 """
                 tid = str(item_id)
                 x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
+
+                # First try the GSO OOD schema (default `--ood_judge_features_dir`).
+                # We load the raw JSON dict because we need key-level mapping.
+                obj = None
+                try:
+                    p = os.path.join(str(ood_feat_dir), f"{tid}.json")
+                    if not os.path.exists(p):
+                        key = base.normalize_swebench_item_id(tid) if bool(args.ood_normalize_item_ids) else tid
+                        p = ood_idx.get(str(key), "")
+                    if p and os.path.exists(p):
+                        with open(p, "r", encoding="utf-8") as f:
+                            tmp = json.load(f)
+                        if isinstance(tmp, dict):
+                            obj = tmp
+                except Exception:
+                    obj = None
+
+                if isinstance(obj, dict):
+                    gso_keys = _infer_gso_judge_feature_names(str(ood_feat_dir))
+                    if gso_keys:
+                        # Map GSO keys into the trained "full" judge feature vector.
+                        # Note: some keys differ by name between schemas.
+                        gso_alias = {
+                            # GSO "solution included in prompt" ~= Terminal-Bench "solution_in_instruction"
+                            "solution_in_problem": "solution_in_instruction",
+                        }
+                        vpos = {k: i for i, k in enumerate(VERIFIED_JUDGE_FEATURE_NAMES)}
+                        ppos = {k: i for i, k in enumerate(PRO_JUDGE_FEATURE_NAMES)}
+                        tpos = {k: i for i, k in enumerate(TERMINAL_BENCH_JUDGE_FEATURE_NAMES)}
+
+                        n_set = 0
+                        for k in gso_keys:
+                            if k not in obj:
+                                # Treat missing as "not parsable" to match strict schema loading.
+                                n_set = 0
+                                break
+                            kk = gso_alias.get(str(k), str(k))
+                            try:
+                                fv = float(obj.get(k))
+                            except Exception:
+                                n_set = 0
+                                break
+
+                            # Deterministic precedence when a key exists in multiple schemas.
+                            if kk in ppos:
+                                x[pro_off + int(ppos[kk])] = float(fv)
+                                n_set += 1
+                            elif kk in vpos:
+                                x[verified_off + int(vpos[kk])] = float(fv)
+                                n_set += 1
+                            elif kk in tpos:
+                                x[terminal_off + int(tpos[kk])] = float(fv)
+                                n_set += 1
+                            else:
+                                # Feature not present in trained schemas; ignore.
+                                continue
+
+                        if n_set > 0:
+                            return x
 
                 v = _load_judge_vector(
                     tid,

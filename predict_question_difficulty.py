@@ -234,6 +234,72 @@ TERMINAL_BENCH_JUDGE_FEATURE_NAMES: List[str] = [
     "tooling_complexity",
 ]
 
+# GSO judge features (used when pointing --judge_features_dir at `.../features/gso`).
+# The per-item JSON schema differs from Verified/Pro/Terminal-Bench, so infer the
+# exact set of keys from the directory to avoid drifting schemas.
+_GSO_JUDGE_FEATURE_NAMES_CACHE: Dict[str, List[str]] = {}
+
+
+def _infer_gso_judge_feature_names(features_dir: str) -> List[str]:
+    """
+    Infer canonical GSO judge feature keys from a GSO judge-features directory.
+
+    Notes:
+    - Filters out summary JSONs like `compute_stats_*.json`.
+    - Ignores metadata keys like `_task_id` and free-text `reasoning`.
+    """
+    root = os.path.abspath(str(features_dir or "").strip())
+    if not root:
+        return []
+    if root in _GSO_JUDGE_FEATURE_NAMES_CACHE:
+        return _GSO_JUDGE_FEATURE_NAMES_CACHE[root]
+
+    try:
+        names = [x for x in os.listdir(root) if x.endswith(".json")]
+    except Exception:
+        names = []
+
+    def _is_candidate(fn: str) -> bool:
+        s = str(fn or "")
+        if not s.endswith(".json"):
+            return False
+        if s.startswith("compute_stats_"):
+            return False
+        if s.startswith("correlation"):
+            return False
+        if s in {"correlation_analysis.json"}:
+            return False
+        return True
+
+    cands = [fn for fn in names if _is_candidate(fn)]
+    # Prefer typical GSO task-id filenames: "<org>__<repo>-<hash>.json"
+    cands.sort(key=lambda fn: (0 if ("__" in fn and "-" in fn) else 1, fn))
+
+    inferred: List[str] = []
+    for fn in cands:
+        p = os.path.join(root, fn)
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                obj = json.load(f)
+        except Exception:
+            continue
+        if not isinstance(obj, dict):
+            continue
+        keys: List[str] = []
+        for k in obj.keys():
+            if not isinstance(k, str):
+                continue
+            kk = k.strip()
+            if not kk or kk.startswith("_") or kk == "reasoning":
+                continue
+            keys.append(kk)
+        if keys:
+            inferred = sorted(set(keys))
+            break
+
+    _GSO_JUDGE_FEATURE_NAMES_CACHE[root] = inferred
+    return inferred
+
 # Match ID normalization used when building the IRT dataset from agent runs:
 # - strip leading "instance_"
 # - strip trailing "-v..." (including "-vc<hash>" and "-vnan")
@@ -1231,10 +1297,13 @@ def _infer_judge_schema(features_dir: str) -> str:
     - Pro judge features live under `.../llm_judge/features/pro/...`
     - Verified judge features live under `.../llm_judge/features/verified/...`
     - Terminal-Bench judge features live under `.../llm_judge/features/terminal_bench/...`
+    - GSO judge features live under `.../llm_judge/features/gso/...`
     """
     p = os.path.abspath(str(features_dir)).replace("\\", "/").lower()
     if "/features/pro" in p or p.endswith("/pro"):
         return "pro"
+    if "/features/gso" in p or p.endswith("/gso"):
+        return "gso"
     if "/features/terminal_bench" in p or p.endswith("/terminal_bench") or p.endswith("/terminal-bench"):
         return "terminal_bench"
     return "verified"
@@ -1607,6 +1676,13 @@ def _run_with_judge_features(
     schema = _infer_judge_schema(feat_dir)
     if schema == "pro":
         judge_feature_names = PRO_JUDGE_FEATURE_NAMES
+    elif schema == "gso":
+        judge_feature_names = _infer_gso_judge_feature_names(feat_dir)
+        if not judge_feature_names:
+            raise RuntimeError(
+                f"Inferred 0 GSO judge feature names from judge_features_dir={feat_dir!r}. "
+                "Expected per-item JSONs with numeric feature keys (and optional metadata like `_task_id`)."
+            )
     elif schema == "terminal_bench":
         judge_feature_names = TERMINAL_BENCH_JUDGE_FEATURE_NAMES
     else:
