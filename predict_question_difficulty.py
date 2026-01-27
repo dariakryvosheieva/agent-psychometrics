@@ -1647,43 +1647,30 @@ def _run_with_judge_features(
     overlap_ids: List[str],
 ) -> int:
     """
-    Judge+embeddings path: mirror `predict_question_difficulty_combined_features.py`.
+    Combined (embeddings+judge) path: mirror `predict_question_difficulty_combined_features.py`.
     """
     _require("sklearn")
     from sklearn.metrics import roc_auc_score
 
     # IMPORTANT: match embedding-only behavior for zero-success items.
-    #
-    # Historically, judge mode used a separate boolean flag (--include_zero_success).
-    # That was easy to misuse because the rest of this script uses --zero_success_tasks
-    # with choices {exclude, include, mean}. We now treat --include_zero_success as a
-    # backwards-compatible alias for --zero_success_tasks=include.
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
-    zero_success_mode = str(getattr(args, "zero_success_tasks", "exclude")).strip() or "exclude"
-    if bool(getattr(args, "include_zero_success", False)) and zero_success_mode == "exclude":
-        zero_success_mode = "include"
+    include_zero_success = bool(getattr(args, "include_zero_success", False))
+    zero_success_mode = "include" if include_zero_success else "exclude"
 
-    if zero_success_mode == "exclude":
+    if not include_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
             f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
             f"(agent_results={args.agent_results})"
         )
-    elif zero_success_mode in ("include", "mean"):
+    else:
         eligible = list(overlap_ids)
-        if zero_success_set and zero_success_mode == "include":
+        if zero_success_set:
             print(
                 f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
                 f"(agent_results={args.agent_results})"
             )
-        if zero_success_set and zero_success_mode == "mean":
-            print(
-                f"Including zero-success items in CV; will mean-impute their fold-train IRT difficulties: "
-                f"{len(zero_success_set)}/{len(overlap_ids)} overlapped items (agent_results={args.agent_results})"
-            )
-    else:
-        raise AssertionError(f"Unhandled zero_success_mode: {zero_success_mode}")
     if not eligible:
         raise RuntimeError("After filtering, no items remain for CV.")
 
@@ -1691,7 +1678,7 @@ def _run_with_judge_features(
 
     feat_dir = str(getattr(args, "judge_features_dir", "")).strip()
     if not feat_dir:
-        raise ValueError("--judge_features_dir must be set when --include_judge is enabled.")
+        raise ValueError("--judge_features_dir must be set when --method=combined is used.")
     idx = _build_judge_index(feat_dir)
     schema = _infer_judge_schema(feat_dir)
     if schema == "pro":
@@ -1764,17 +1751,6 @@ def _run_with_judge_features(
         if not theta_by_subject or not diff_by_item:
             raise RuntimeError(f"Fold {fold}: IRT produced empty outputs under {irt_dir}")
 
-        # Optional post-processing for zero-success items (same policy as embedding-only mode):
-        # Replace each zero-success item's IRT difficulty with the mean over
-        # zero-success difficulties in this fold's IRT training set.
-        if zero_success_mode == "mean" and zero_success_set:
-            zs_in_fold = [tid for tid in train_items if tid in zero_success_set and tid in diff_by_item]
-            if zs_in_fold:
-                zs_vals = np.asarray([float(diff_by_item[tid]) for tid in zs_in_fold], dtype=np.float64)
-                zs_mean = float(np.mean(zs_vals))
-                for tid in zs_in_fold:
-                    diff_by_item[tid] = float(zs_mean)
-
         train_labeled = [tid for tid in train_items if tid in diff_by_item]
         if len(train_labeled) < 2:
             raise RuntimeError(f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties.")
@@ -1786,7 +1762,7 @@ def _run_with_judge_features(
 
         reg = str(args.regressor or "ridge_cv").strip()
         if reg == "linear":
-            raise ValueError("--regressor=linear is not supported when --include_judge is enabled.")
+            raise ValueError("--regressor=linear is not supported when --method=combined is used.")
         emb_model = None
         # Use the same ridge builder as the embedding-only path for baseline.
         emb_model = Pipeline(
@@ -1989,6 +1965,7 @@ def _run_with_judge_features(
         "script": os.path.abspath(__file__),
         "id_normalization": "strip instance_ prefix; strip -v.* suffix",
         "zero_success_tasks": str(zero_success_mode),
+        "include_zero_success": bool(include_zero_success),
         "seed": int(args.seed),
         "deterministic": True,
         "cv_n_splits": int(args.cv_folds),
@@ -2014,7 +1991,7 @@ def _run_with_judge_features(
     )
 
     # Predict on zero-success items (excluded from CV/IRT, if requested).
-    exclude_zero_success = bool(str(zero_success_mode) == "exclude")
+    exclude_zero_success = bool(not include_zero_success)
     zero_embedded = [tid for tid in task_ids if tid in zero_success_set] if exclude_zero_success else []
     yhat_zero: Dict[str, float] = {}
     if zero_embedded:
@@ -2054,6 +2031,7 @@ def _run_with_judge_features(
             "cv_folds": int(args.cv_folds),
             "seed": int(args.seed),
             "zero_success_tasks": str(zero_success_mode),
+            "include_zero_success": bool(include_zero_success),
             # Backwards-compatible key (older analysis scripts may expect it).
             "exclude_zero_success": bool(exclude_zero_success),
             "n_items_total": int(len(task_ids)),
@@ -2096,6 +2074,342 @@ def _run_with_judge_features(
     print(f"Wrote metrics: {metrics_out}")
     print(f"Wrote predictions: {pred_path}")
     print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
+    return 0
+
+
+def _run_judge_only(
+    *,
+    args: argparse.Namespace,
+    task_ids: List[str],
+    all_responses: List[Tuple[str, Dict[str, int]]],
+    overlap_ids: List[str],
+    dataset_sources_str: str,
+    dataset_name: Optional[str],
+    dataset_path: Optional[str],
+    split: str,
+    instruction_signature: str,
+) -> int:
+    """
+    Judge-only path: use LLM-judge feature vectors only (no embeddings).
+    Mirrors the embedding-only K-fold CV + IRT + AUROC pipeline, but with judge features as X.
+    """
+    _require("sklearn")
+
+    method = "judge"
+    regressor_name = str(args.regressor or "ridge_cv").strip()
+    if regressor_name == "linear":
+        raise ValueError("--regressor=linear is not supported when --method=judge is used.")
+
+    feat_dir = str(getattr(args, "judge_features_dir", "")).strip()
+    if not feat_dir:
+        raise ValueError("--judge_features_dir must be set when --method=judge is used.")
+
+    idx = _build_judge_index(feat_dir)
+    schema = _infer_judge_schema(feat_dir)
+    if schema == "pro":
+        judge_feature_names = PRO_JUDGE_FEATURE_NAMES
+    elif schema == "gso":
+        judge_feature_names = _infer_gso_judge_feature_names(feat_dir)
+        if not judge_feature_names:
+            raise RuntimeError(
+                f"Inferred 0 GSO judge feature names from judge_features_dir={feat_dir!r}. "
+                "Expected per-item JSONs with numeric feature keys (and optional metadata like `_task_id`)."
+            )
+    elif schema == "terminal_bench":
+        judge_feature_names = TERMINAL_BENCH_JUDGE_FEATURE_NAMES
+    else:
+        judge_feature_names = VERIFIED_JUDGE_FEATURE_NAMES
+
+    zero_success_ids = compute_zero_success_items(all_responses)
+    zero_success_set = set(zero_success_ids)
+    include_zero_success = bool(getattr(args, "include_zero_success", False))
+    zero_success_mode = "include" if include_zero_success else "exclude"
+    exclude_zero_success = bool(not include_zero_success)
+
+    if exclude_zero_success:
+        eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
+        print(
+            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
+            f"(agent_results={args.agent_results})"
+        )
+    else:
+        eligible = list(overlap_ids)
+        if zero_success_set:
+            print(
+                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
+                f"(agent_results={args.agent_results})"
+            )
+    if not eligible:
+        raise RuntimeError("After filtering, no items remain for CV/IRT.")
+
+    # Build judge feature matrix for eligible items (drop items missing judge features).
+    eligible_used: List[str] = []
+    judge_rows: List[np.ndarray] = []
+    for tid in eligible:
+        j = _load_judge_vector(tid, features_dir=feat_dir, feature_names=judge_feature_names, index=idx)
+        if j is None:
+            continue
+        eligible_used.append(tid)
+        judge_rows.append(j.astype(np.float32, copy=False))
+    n_dropped_missing = int(len(eligible) - len(eligible_used))
+    if n_dropped_missing:
+        print(
+            f"WARNING: --method=judge: dropped {n_dropped_missing}/{len(eligible)} eligible items with missing judge features "
+            f"(judge_features_dir={feat_dir})."
+        )
+    eligible = eligible_used
+    if not eligible:
+        raise RuntimeError("After filtering to items with judge features, no items remain for CV/IRT.")
+    Xy = np.stack(judge_rows, axis=0).astype(np.float32)
+
+    alphas: np.ndarray = np.array([], dtype=np.float64)
+
+    def _make_model(*, n_train: int, fold_seed: int):
+        nonlocal alphas
+        if regressor_name == "ridge":
+            alpha = float(args.ridge_alpha)
+            if not (alpha > 0):
+                raise ValueError("--ridge_alpha must be > 0")
+            return Pipeline(steps=[("scaler", StandardScaler(with_mean=True, with_std=True)), ("ridge", Ridge(alpha=alpha))])
+        if regressor_name == "ridge_cv":
+            try:
+                alphas = np.array([float(x.strip()) for x in str(args.ridge_alphas).split(",") if x.strip()], dtype=np.float64)
+            except Exception as e:
+                raise ValueError(f"Failed to parse --ridge_alphas={args.ridge_alphas!r}: {e}") from e
+            if alphas.size == 0:
+                raise ValueError("Expected at least one alpha in --ridge_alphas")
+            req_inner = int(args.inner_splits)
+            if req_inner < 2:
+                raise ValueError("--inner_splits must be >= 2")
+            inner_splits = int(min(req_inner, max(2, int(n_train))))
+            inner_cv = KFold(n_splits=int(inner_splits), shuffle=True, random_state=int(fold_seed))
+            return Pipeline(
+                steps=[
+                    ("scaler", StandardScaler(with_mean=True, with_std=True)),
+                    ("ridge", RidgeCV(alphas=alphas, cv=inner_cv)),
+                ]
+            )
+        raise AssertionError(f"Unhandled regressor: {regressor_name}")
+
+    outer_cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+    cv_test_auc_folds: List[float] = []
+    cv_test_n_obs_folds: List[int] = []
+    yhat_oof = np.full((int(len(eligible)),), np.nan, dtype=np.float64)
+    fold_of_item = np.full((int(len(eligible)),), -1, dtype=np.int32)
+
+    best_fold_auc = -float("inf")
+    best_fold = -1
+    best_model = None
+
+    eligible_index = {tid: i for i, tid in enumerate(eligible)}
+
+    for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
+        train_items = [eligible[int(i)] for i in tr.tolist()]
+        test_items = [eligible[int(i)] for i in te.tolist()]
+
+        fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
+        ensure_dir(fold_root)
+
+        train_jsonl = os.path.join(fold_root, "train_responses.jsonl")
+        n_subj_written, n_items_written = write_filtered_responses_jsonl(
+            all_responses=all_responses, item_ids=train_items, out_path=train_jsonl
+        )
+        if n_subj_written == 0 or n_items_written == 0:
+            raise RuntimeError(f"Fold {fold}: wrote 0 subjects/items to {train_jsonl} (check filtering).")
+
+        irt_device = str(args.irt_device or "cpu").strip() or "cpu"
+        if irt_device.startswith("cuda") and not torch.cuda.is_available():
+            print("WARNING: --irt_device=cuda requested but CUDA is unavailable; falling back to cpu for IRT.")
+            irt_device = "cpu"
+
+        set_torch_determinism(False)
+        seed_everything(int(args.seed), deterministic=False)
+        theta_by_subject, diff_by_item = train_irt_1pl(
+            responses_jsonl=train_jsonl,
+            epochs=int(args.irt_epochs),
+            device=str(irt_device),
+            seed=int(args.seed),
+            out_dir=os.path.join(fold_root, "irt_1pl"),
+        )
+        set_torch_determinism(True)
+        if not theta_by_subject:
+            raise RuntimeError(f"Fold {fold}: IRT produced 0 subject thetas (unexpected).")
+        if not diff_by_item:
+            raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
+
+        train_labeled = [tid for tid in train_items if tid in diff_by_item]
+        if len(train_labeled) < 2:
+            raise RuntimeError(
+                f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties; cannot fit regressor."
+            )
+
+        seed_everything(int(args.seed) + int(fold), deterministic=True)
+        train_idx = [int(eligible_index[tid]) for tid in train_labeled]
+        X_train = Xy[np.asarray(train_idx, dtype=np.int64)]
+        y_train = np.array([float(diff_by_item[tid]) for tid in train_labeled], dtype=np.float32)
+
+        m = _make_model(n_train=int(len(train_labeled)), fold_seed=int(args.seed) + int(fold))
+        m.fit(X_train, y_train)
+
+        X_test = Xy[np.asarray(te, dtype=np.int64)]
+        pred = m.predict(X_test).astype(np.float64)
+        yhat_oof[te] = pred
+        fold_of_item[te] = int(fold)
+
+        z_by_item = {tid: float(z) for tid, z in zip(test_items, pred.tolist())}
+        scores: List[float] = []
+        labels: List[int] = []
+        test_set = set(test_items)
+        for sid, resp in all_responses:
+            theta = theta_by_subject.get(sid, None)
+            if theta is None:
+                continue
+            th = float(theta)
+            for item_id, y_obs in resp.items():
+                if item_id not in test_set:
+                    continue
+                z = z_by_item.get(item_id, None)
+                if z is None:
+                    continue
+                scores.append(_sigmoid(th - float(z)))
+                labels.append(int(y_obs))
+
+        fold_auc = float(_compute_binary_auroc(scores, labels))
+        cv_test_auc_folds.append(float(fold_auc))
+        cv_test_n_obs_folds.append(int(len(labels)))
+        if fold_auc == fold_auc and fold_auc > best_fold_auc:
+            best_fold_auc = float(fold_auc)
+            best_fold = int(fold)
+            best_model = m
+
+    if np.isnan(yhat_oof).any() or (fold_of_item < 0).any():
+        raise RuntimeError("KFold CV produced incomplete out-of-fold predictions (unexpected).")
+    if best_model is None or best_fold < 1:
+        raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
+
+    auc_arr = np.asarray(cv_test_auc_folds, dtype=np.float64)
+    auc_mean = float(np.nanmean(auc_arr)) if auc_arr.size else float("nan")
+    auc_std = float(np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
+    print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
+    print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
+
+    model = best_model
+    ridge_alpha = None
+    if regressor_name in ("ridge", "ridge_cv"):
+        try:
+            ridge_alpha = float(model.named_steps["ridge"].alpha_)
+        except Exception:
+            ridge_alpha = None
+
+    weights_meta = {
+        "script": os.path.abspath(__file__),
+        "method": method,
+        "judge_features_dir": str(feat_dir),
+        "judge_feature_schema": str(schema),
+        "judge_feature_names": list(judge_feature_names),
+        "dataset_sources": str(dataset_sources_str),
+        "dataset_name": (dataset_name or None),
+        "dataset_path": (dataset_path or None),
+        "split": str(split),
+        "instruction_signature": str(instruction_signature),
+        "agent_results": str(args.agent_results),
+        "zero_success_tasks": str(zero_success_mode),
+        "include_zero_success": bool(include_zero_success),
+        "seed": int(args.seed),
+        "deterministic": True,
+        "irt_seeded": True,
+        "irt_deterministic": False,
+        "cv_n_splits": int(args.cv_folds),
+        "cv_best_auc_fold": int(best_fold),
+        "cv_best_auc": float(best_fold_auc),
+        "ridge_alpha": ridge_alpha,
+        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
+        "inner_splits": int(args.inner_splits),
+    }
+    weights_json, weights_npz = save_regression_weights(
+        out_dir=str(args.out_dir),
+        model=model,
+        regressor_name=str(regressor_name),
+        feature_dim=int(Xy.shape[1]),
+        metadata=weights_meta,
+    )
+
+    # Predict on zero-success items (excluded from CV/IRT), if requested.
+    zero_items: List[str] = []
+    yhat_zero: Optional[np.ndarray] = None
+    if exclude_zero_success and zero_success_set:
+        zero_items = [tid for tid in task_ids if tid in zero_success_set]
+        zero_rows: List[np.ndarray] = []
+        zero_used: List[str] = []
+        for tid in zero_items:
+            j = _load_judge_vector(tid, features_dir=feat_dir, feature_names=judge_feature_names, index=idx)
+            if j is None:
+                continue
+            zero_used.append(tid)
+            zero_rows.append(j.astype(np.float32, copy=False))
+        zero_items = zero_used
+        if zero_rows:
+            X_zero = np.stack(zero_rows, axis=0).astype(np.float32)
+            yhat_zero = model.predict(X_zero).astype(np.float64)
+        else:
+            print("NOTE: zero-success ids provided, but none had judge features; nothing to predict.")
+
+    metrics = {
+        "script": os.path.abspath(__file__),
+        "method": method,
+        "judge_features_dir": str(feat_dir),
+        "judge_feature_schema": str(schema),
+        "judge_feature_names": list(judge_feature_names),
+        "n_items_total": int(len(task_ids)),
+        "n_items_with_responses": int(len(overlap_ids)),
+        "n_items_eligible_cv_irt": int(len(eligible)),
+        "zero_success_tasks": str(zero_success_mode),
+        "include_zero_success": bool(include_zero_success),
+        # Backwards-compatible key (older analysis scripts may expect it).
+        "exclude_zero_success": bool(exclude_zero_success),
+        "n_items_zero_success_in_responses": int(len(zero_success_ids)),
+        "judge_dim": int(Xy.shape[1]),
+        "seed": int(args.seed),
+        "deterministic": True,
+        "irt_seeded": True,
+        "irt_deterministic": False,
+        "cv_n_splits": int(args.cv_folds),
+        "cv_best_auc_fold": int(best_fold),
+        "cv_best_auc": float(best_fold_auc),
+        "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
+        "cv_test_auc_mean": float(auc_mean),
+        "cv_test_auc_std": float(auc_std),
+        "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
+        "irt_epochs": int(args.irt_epochs),
+        "irt_device": str(args.irt_device),
+        "regressor": regressor_name,
+        "ridge_alpha": ridge_alpha,
+        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
+        "inner_splits": int(args.inner_splits),
+        "dataset_sources": str(dataset_sources_str),
+        "dataset_name": (dataset_name or None),
+        "dataset_path": (dataset_path or None),
+        "split": str(split),
+        "agent_results": str(args.agent_results),
+        "instruction_signature": str(instruction_signature),
+        "regression_weights_json": str(weights_json),
+        "regression_weights_npz": str(weights_npz),
+        "n_items_zero_success_predicted": int(0 if yhat_zero is None else int(np.asarray(yhat_zero).size)),
+    }
+    save_json(os.path.join(str(args.out_dir), "metrics.json"), metrics)
+
+    pred_path = os.path.join(str(args.out_dir), "predictions.csv")
+    with open(pred_path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+        w.writeheader()
+        for i, tid in enumerate(eligible):
+            w.writerow({"item_id": tid, "diff_pred": float(yhat_oof[i]), "split": "cv_val", "fold": int(fold_of_item[i])})
+        if yhat_zero is not None and zero_items:
+            for tid, score in zip(zero_items, yhat_zero.tolist()):
+                w.writerow({"item_id": tid, "diff_pred": float(score), "split": "zero_success", "fold": ""})
+
+    print(f"Wrote metrics: {os.path.join(str(args.out_dir), 'metrics.json')}")
+    print(f"Wrote predictions: {pred_path}")
     return 0
 
 
@@ -2142,15 +2456,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--overwrite", action="store_true")
 
     p.add_argument(
-        "--include_judge",
-        action="store_true",
-        help=(
-            "If set, include LLM-judge features and use the combined-features (block-ridge) pipeline "
-            "(mirrors predict_question_difficulty_combined_features.py)."
-        ),
-    )
-
-    p.add_argument(
         "--agent_results",
         type=str,
         default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/chris_irt/swebench_verified_20251115_full.jsonl",
@@ -2160,21 +2465,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
     p.add_argument(
-        "--zero_success_tasks",
-        type=str,
-        default="exclude",
-        choices=["exclude", "include", "mean"],
+        "--include_zero_success",
+        action="store_true",
         help=(
-            "How to handle items with 0 successes across all subjects in --agent_results. "
-            "'exclude' (default): exclude from CV/IRT pool and predict separately at end. "
-            "'include': include in CV/IRT pool (can destabilize IRT). "
-            "'mean': include in CV pool, but for any zero-success items that appear in a fold's IRT training set, "
-            "replace their IRT difficulty with the mean over zero-success difficulties in that fold before fitting the regressor."
+            "If set, include items with 0 successes across all subjects in --agent_results in the CV/IRT pool. "
+            "If unset (default), exclude them from CV/IRT and predict them separately at the end."
         ),
     )
     p.add_argument("--irt_epochs", type=int, default=5000)
     p.add_argument("--irt_device", type=str, default="cuda", help="Device for IRT training (cuda or cpu).")
     # Fixed IRT policy: we seed IRT, but keep torch determinism disabled during IRT for stability.
+    p.add_argument(
+        "--method",
+        type=str,
+        default="embedding",
+        choices=["embedding", "judge", "combined"],
+        help=(
+            "Which features to use for difficulty prediction. "
+            "'embedding' (default) trains ridge/linear on the embedding vector only (historical default). "
+            "'combined' uses embedding + LLM-judge features with a joint (block) ridge (separate penalties per block). "
+            "'judge' trains ridge on judge features only (no embeddings)."
+        ),
+    )
     p.add_argument(
         "--regressor",
         type=str,
@@ -2192,7 +2504,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Inner CV splits for RidgeCV (used when --regressor=ridge_cv). Will be capped by train size; must be >=2.",
     )
 
-    # Judge-mode options (used only when --include_judge is set; mirror combined_features script).
+    # Judge feature settings (used by --method=judge/combined)
     p.add_argument(
         "--judge_features_dir",
         type=str,
@@ -2200,43 +2512,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Directory with per-task LLM-judge feature JSONs (<task_id>.json).",
     )
     p.add_argument(
-        "--include_zero_success",
-        action="store_true",
-        help="(judge mode, deprecated) Alias for --zero_success_tasks=include. Prefer --zero_success_tasks include/mean/exclude.",
-    )
-    p.add_argument(
         "--ridge_alpha_emb",
         type=float,
         default=float("nan"),
-        help="(judge mode, --regressor=ridge) Embedding block alpha. Defaults to --ridge_alpha when unset.",
+        help="(combined mode, --regressor=ridge) Embedding block alpha. Defaults to --ridge_alpha when unset.",
     )
     p.add_argument(
         "--ridge_alpha_judge",
         type=float,
         default=float("nan"),
-        help="(judge mode, --regressor=ridge) Judge block alpha. Defaults to --ridge_alpha when unset.",
+        help="(combined mode, --regressor=ridge) Judge block alpha. Defaults to --ridge_alpha when unset.",
     )
     p.add_argument(
         "--ridge_alphas_emb",
         type=str,
         default="",
-        help="(judge mode, --regressor=ridge_cv) Embedding alpha grid. Defaults to --ridge_alphas when unset.",
+        help="(combined mode, --regressor=ridge_cv) Embedding alpha grid. Defaults to --ridge_alphas when unset.",
     )
     p.add_argument(
         "--ridge_alphas_judge",
         type=str,
         default="",
-        help="(judge mode, --regressor=ridge_cv) Judge alpha grid. Defaults to --ridge_alphas when unset.",
+        help="(combined mode, --regressor=ridge_cv) Judge alpha grid. Defaults to --ridge_alphas when unset.",
     )
     p.add_argument(
         "--debug",
         action="store_true",
-        help="(judge mode) Print per-fold debug diagnostics.",
+        help="(combined mode) Print per-fold debug diagnostics.",
     )
 
     args = p.parse_args(argv)
     ensure_dir(args.out_dir)
     seed_everything(int(args.seed), deterministic=True)
+
+    method = str(getattr(args, "method", "embedding") or "embedding").strip().lower()
+    if method not in {"embedding", "judge", "combined"}:
+        raise ValueError(f"Unknown --method: {getattr(args, 'method', None)!r}")
 
     dataset_name = str(args.dataset_name).strip()
     dataset_path = str(args.dataset_path).strip()
@@ -2245,51 +2556,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         dataset_sources_str = dataset_name or "princeton-nlp/SWE-bench_Verified"
 
-    # Cache path derived from key settings.
-    safe_backbone = str(args.backbone).replace("/", "__")
-    ds_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(dataset_sources_str))[:64]
-    split_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(args.split))[:32]
     instr_sig = prompt_signature(str(args.instruction))
-    layer_flag = "" if int(args.embedding_layer) == -1 else f"__layer{int(args.embedding_layer)}"
-    idnorm_flag = "__idnorm_instance-v1"
-    emb_cache = str(args.embeddings_cache or "").strip()
-    if not emb_cache:
-        emb_cache = os.path.join(
-            args.out_dir,
-            f"embeddings__{safe_backbone}__pool-lasttoken{layer_flag}__qs-sol-instr__{instr_sig}{idnorm_flag}__{ds_flag}__{split_flag}__maxlen{int(args.max_length)}.npz",
-        )
-
-    # Load or compute embeddings.
-    if os.path.exists(emb_cache) and not args.overwrite and not str(args.embeddings_cache or "").strip():
-        data = np.load(emb_cache, allow_pickle=True)
-        task_ids = [str(x) for x in list(data["task_ids"].tolist())]
-        X = data["X"].astype(np.float32)
-        counts_kind = str(_npz_scalar(data.get("counts_kind", None), "")) if "counts_kind" in data else ""
-        cached_layer = int(_npz_scalar(data.get("embedding_layer", None), -1)) if "embedding_layer" in data else -1
-        if int(args.embedding_layer) != int(cached_layer):
-            raise RuntimeError(
-                f"Embeddings cache was created with embedding_layer={cached_layer}, but you requested "
-                f"--embedding_layer={int(args.embedding_layer)}. Use --overwrite, or pick a different cache file."
-            )
-        print(
-            f"Loaded embeddings cache: {emb_cache} (n={len(task_ids)}, dim={X.shape[1]}, counts_kind={counts_kind or 'unknown'}, embedding_layer={cached_layer})"
-        )
-    elif os.path.exists(emb_cache) and not args.overwrite and str(args.embeddings_cache or "").strip():
-        data = np.load(emb_cache, allow_pickle=True)
-        task_ids = [str(x) for x in list(data["task_ids"].tolist())]
-        X = data["X"].astype(np.float32)
-        counts_kind = str(_npz_scalar(data.get("counts_kind", None), "")) if "counts_kind" in data else ""
-        cached_layer = int(_npz_scalar(data.get("embedding_layer", None), -1)) if "embedding_layer" in data else -1
-        if int(args.embedding_layer) != int(cached_layer):
-            raise RuntimeError(
-                f"Embeddings cache (explicit) was created with embedding_layer={cached_layer}, but you requested "
-                f"--embedding_layer={int(args.embedding_layer)}. Use --overwrite, or point --embeddings_cache to a matching file."
-            )
-        print(
-            f"Loaded embeddings cache (explicit): {emb_cache} (n={len(task_ids)}, dim={X.shape[1]}, counts_kind={counts_kind or 'unknown'}, embedding_layer={cached_layer})"
-        )
-    else:
-        # Collect items to embed.
+    emb_cache = ""
+    if method == "judge":
+        if str(args.embeddings_cache or "").strip():
+            print("NOTE: --method=judge ignores --embeddings_cache (no embedding is performed).")
+        # For judge-only mode, we still need the item id universe to align with agent_results.
         items = list(
             iter_swebench_items(
                 dataset_name=str(dataset_name),
@@ -2297,46 +2569,104 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 dataset_path=str(dataset_path),
             )
         )
-        src = dataset_sources_str
-        print(f"Loaded dataset items: {len(items)} (sources={src}, hf_split={args.split}, json_split=train)")
-
-        ids_sorted, emb_by_id, counts_by_id, emb_dim = embed_items(
-            items=items,
-            backbone=str(args.backbone),
-            trust_remote_code=bool(args.trust_remote_code),
-            max_length=int(args.max_length),
-            batch_size=int(args.batch_size),
-            device_map=str(args.device_map),
-            torch_dtype=str(args.torch_dtype),
-            attn_implementation=str(args.attn_implementation),
-            instruction=str(args.instruction),
-            embedding_layer=int(args.embedding_layer),
-        )
-        if not ids_sorted:
-            raise RuntimeError("No embeddings were produced (empty ids set).")
-
-        X = np.stack([emb_by_id[r] for r in ids_sorted], axis=0).astype(np.float32)
-        counts_arr = np.array([int(counts_by_id.get(r, 0)) for r in ids_sorted], dtype=np.int64)
-
-        np.savez_compressed(
-            emb_cache,
-            task_ids=np.array(ids_sorted, dtype=object),
-            X=X,
-            counts_kind=np.array(["text_len_chars"], dtype=object),
-            counts=counts_arr,
-            dataset_name=np.array([str(dataset_sources_str)], dtype=object),
-            split=np.array([str(args.split)], dtype=object),
-            dataset_path=np.array([str(dataset_path)], dtype=object),
-            n_items=np.array([int(len(ids_sorted))], dtype=np.int64),
-            instruction=np.array([str(args.instruction)], dtype=object),
-            instruction_signature=np.array([str(instr_sig)], dtype=object),
-            backbone=np.array([str(args.backbone)], dtype=object),
-            max_length=np.array([int(args.max_length)], dtype=np.int64),
-            embedding_dim=np.array([int(emb_dim)], dtype=np.int64),
-            embedding_layer=np.array([int(args.embedding_layer)], dtype=np.int64),
-        )
-        print(f"Wrote embeddings cache: {emb_cache} (n={len(ids_sorted)}, dim={X.shape[1]}, embedding_layer={int(args.embedding_layer)})")
+        ids_sorted = sorted([normalize_swebench_item_id(str(it.get("item_id", "")).strip()) for it in items if str(it.get("item_id", "")).strip()])
         task_ids = ids_sorted
+        X = None
+        id_to_row = {tid: i for i, tid in enumerate(task_ids)}
+    else:
+        # Cache path derived from key settings (embeddings / combined modes).
+        safe_backbone = str(args.backbone).replace("/", "__")
+        ds_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(dataset_sources_str))[:64]
+        split_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(args.split))[:32]
+        layer_flag = "" if int(args.embedding_layer) == -1 else f"__layer{int(args.embedding_layer)}"
+        idnorm_flag = "__idnorm_instance-v1"
+        emb_cache = str(args.embeddings_cache or "").strip()
+        if not emb_cache:
+            emb_cache = os.path.join(
+                args.out_dir,
+                f"embeddings__{safe_backbone}__pool-lasttoken{layer_flag}__qs-sol-instr__{instr_sig}{idnorm_flag}__{ds_flag}__{split_flag}__maxlen{int(args.max_length)}.npz",
+            )
+
+        # Load or compute embeddings.
+        if os.path.exists(emb_cache) and not args.overwrite and not str(args.embeddings_cache or "").strip():
+            data = np.load(emb_cache, allow_pickle=True)
+            task_ids = [str(x) for x in list(data["task_ids"].tolist())]
+            X = data["X"].astype(np.float32)
+            counts_kind = str(_npz_scalar(data.get("counts_kind", None), "")) if "counts_kind" in data else ""
+            cached_layer = int(_npz_scalar(data.get("embedding_layer", None), -1)) if "embedding_layer" in data else -1
+            if int(args.embedding_layer) != int(cached_layer):
+                raise RuntimeError(
+                    f"Embeddings cache was created with embedding_layer={cached_layer}, but you requested "
+                    f"--embedding_layer={int(args.embedding_layer)}. Use --overwrite, or pick a different cache file."
+                )
+            print(
+                f"Loaded embeddings cache: {emb_cache} (n={len(task_ids)}, dim={X.shape[1]}, counts_kind={counts_kind or 'unknown'}, embedding_layer={cached_layer})"
+            )
+        elif os.path.exists(emb_cache) and not args.overwrite and str(args.embeddings_cache or "").strip():
+            data = np.load(emb_cache, allow_pickle=True)
+            task_ids = [str(x) for x in list(data["task_ids"].tolist())]
+            X = data["X"].astype(np.float32)
+            counts_kind = str(_npz_scalar(data.get("counts_kind", None), "")) if "counts_kind" in data else ""
+            cached_layer = int(_npz_scalar(data.get("embedding_layer", None), -1)) if "embedding_layer" in data else -1
+            if int(args.embedding_layer) != int(cached_layer):
+                raise RuntimeError(
+                    f"Embeddings cache (explicit) was created with embedding_layer={cached_layer}, but you requested "
+                    f"--embedding_layer={int(args.embedding_layer)}. Use --overwrite, or point --embeddings_cache to a matching file."
+                )
+            print(
+                f"Loaded embeddings cache (explicit): {emb_cache} (n={len(task_ids)}, dim={X.shape[1]}, counts_kind={counts_kind or 'unknown'}, embedding_layer={cached_layer})"
+            )
+        else:
+            # Collect items to embed.
+            items = list(
+                iter_swebench_items(
+                    dataset_name=str(dataset_name),
+                    split=str(args.split),
+                    dataset_path=str(dataset_path),
+                )
+            )
+            src = dataset_sources_str
+            print(f"Loaded dataset items: {len(items)} (sources={src}, hf_split={args.split}, json_split=train)")
+
+            ids_sorted, emb_by_id, counts_by_id, emb_dim = embed_items(
+                items=items,
+                backbone=str(args.backbone),
+                trust_remote_code=bool(args.trust_remote_code),
+                max_length=int(args.max_length),
+                batch_size=int(args.batch_size),
+                device_map=str(args.device_map),
+                torch_dtype=str(args.torch_dtype),
+                attn_implementation=str(args.attn_implementation),
+                instruction=str(args.instruction),
+                embedding_layer=int(args.embedding_layer),
+            )
+            if not ids_sorted:
+                raise RuntimeError("No embeddings were produced (empty ids set).")
+
+            X = np.stack([emb_by_id[r] for r in ids_sorted], axis=0).astype(np.float32)
+            counts_arr = np.array([int(counts_by_id.get(r, 0)) for r in ids_sorted], dtype=np.int64)
+
+            np.savez_compressed(
+                emb_cache,
+                task_ids=np.array(ids_sorted, dtype=object),
+                X=X,
+                counts_kind=np.array(["text_len_chars"], dtype=object),
+                counts=counts_arr,
+                dataset_name=np.array([str(dataset_sources_str)], dtype=object),
+                split=np.array([str(args.split)], dtype=object),
+                dataset_path=np.array([str(dataset_path)], dtype=object),
+                n_items=np.array([int(len(ids_sorted))], dtype=np.int64),
+                instruction=np.array([str(args.instruction)], dtype=object),
+                instruction_signature=np.array([str(instr_sig)], dtype=object),
+                backbone=np.array([str(args.backbone)], dtype=object),
+                max_length=np.array([int(args.max_length)], dtype=np.int64),
+                embedding_dim=np.array([int(emb_dim)], dtype=np.int64),
+                embedding_layer=np.array([int(args.embedding_layer)], dtype=np.int64),
+            )
+            print(
+                f"Wrote embeddings cache: {emb_cache} (n={len(ids_sorted)}, dim={X.shape[1]}, embedding_layer={int(args.embedding_layer)})"
+            )
+            task_ids = ids_sorted
 
     # Align embeddings with response JSONL items.
     id_to_row = {tid: i for i, tid in enumerate(task_ids)}
@@ -2351,9 +2681,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     overlap_ids = [tid for tid in task_ids if tid in response_items]
     if not overlap_ids:
-        raise RuntimeError("No overlap between embedded task_ids and item_ids found in --agent_results responses.")
+        raise RuntimeError("No overlap between dataset task_ids and item_ids found in --agent_results responses.")
 
-    if bool(getattr(args, "include_judge", False)):
+    if method == "judge":
+        return _run_judge_only(
+            args=args,
+            task_ids=list(task_ids),
+            all_responses=all_responses,
+            overlap_ids=overlap_ids,
+            dataset_sources_str=str(dataset_sources_str),
+            dataset_name=(dataset_name or None),
+            dataset_path=(dataset_path or None),
+            split=str(args.split),
+            instruction_signature=str(instr_sig),
+        )
+    if method == "combined":
         return _run_with_judge_features(
             args=args,
             emb_cache=str(emb_cache),
@@ -2367,28 +2709,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
 
-    zero_success_mode = str(args.zero_success_tasks)
+    include_zero_success = bool(getattr(args, "include_zero_success", False))
+    zero_success_mode = "include" if include_zero_success else "exclude"
 
-    if zero_success_mode == "exclude":
+    if not include_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
             f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
             f"(agent_results={args.agent_results})"
         )
-    elif zero_success_mode in ("include", "mean"):
+    else:
         eligible = list(overlap_ids)
-        if zero_success_set and zero_success_mode == "include":
+        if zero_success_set:
             print(
                 f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
                 f"(agent_results={args.agent_results})"
             )
-        if zero_success_set and zero_success_mode == "mean":
-            print(
-                f"Including zero-success items in CV; will mean-impute their fold-train IRT difficulties: "
-                f"{len(zero_success_set)}/{len(overlap_ids)} overlapped items (agent_results={args.agent_results})"
-            )
-    else:
-        raise AssertionError(f"Unhandled zero_success_mode: {zero_success_mode}")
 
     if not eligible:
         raise RuntimeError("After filtering, no items remain for CV/IRT.")
@@ -2480,17 +2816,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if not diff_by_item:
             raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
 
-        # Optional post-processing for zero-success items:
-        # Replace each zero-success item's IRT difficulty with the mean over
-        # zero-success difficulties in this fold's IRT training set.
-        if zero_success_mode == "mean" and zero_success_set:
-            zs_in_fold = [tid for tid in train_items if tid in zero_success_set and tid in diff_by_item]
-            if zs_in_fold:
-                zs_vals = np.asarray([float(diff_by_item[tid]) for tid in zs_in_fold], dtype=np.float64)
-                zs_mean = float(np.mean(zs_vals))
-                for tid in zs_in_fold:
-                    diff_by_item[tid] = float(zs_mean)
-
         train_labeled = [tid for tid in train_items if tid in diff_by_item]
         if len(train_labeled) < 2:
             raise RuntimeError(
@@ -2564,6 +2889,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "n_items_with_responses": int(len(overlap_ids)),
         "n_items_eligible_cv_irt": int(len(eligible)),
         "zero_success_tasks": str(zero_success_mode),
+        "include_zero_success": bool(include_zero_success),
         # Backwards-compatible key (older analysis scripts may expect it).
         "exclude_zero_success": bool(str(zero_success_mode) == "exclude"),
         "n_items_zero_success_in_responses": int(len(zero_success_ids)),
@@ -2623,6 +2949,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "split": str(args.split),
         "id_normalization": "strip instance_ prefix; strip -v.* suffix",
         "zero_success_tasks": str(zero_success_mode),
+        "include_zero_success": bool(include_zero_success),
         "seed": int(args.seed),
         "deterministic": True,
         "irt_seeded": True,

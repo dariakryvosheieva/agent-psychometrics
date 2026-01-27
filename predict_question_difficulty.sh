@@ -15,10 +15,9 @@ export HF_HUB_ENABLE_HF_TRANSFER=1
 
 python predict_question_difficulty.py \
   --trust_remote_code \
-  --overwrite \
-  --dataset_name "" \
-  --dataset_path "out/chris_irt/terminal_bench_tasks.jsonl" \
-  --agent_results "out/chris_irt/terminal_bench_2.0.jsonl" \
-  --out_dir "out/terminal_bench" \
-  --include_judge \
-  --judge_features_dir llm_judge/features/terminal_bench
+  --dataset_name "princeton-nlp/SWE-bench_Verified" \
+  --dataset_path "" \
+  --agent_results "out/chris_irt/swebench_verified_20251115_full.jsonl" \
+  --out_dir "out/swebench_verified" \
+  --include_zero_success \
+  --overwrite

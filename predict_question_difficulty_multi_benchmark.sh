@@ -16,8 +16,8 @@ export PYTHONUNBUFFERED=1
 
 python -u predict_question_difficulty_multi_benchmark.py \
   --trust_remote_code \
-  --train_benchmarks verified,pro,terminal_bench \
-  --ood_benchmark gso \
+  --train_benchmarks verified,terminal_bench,gso \
+  --ood_benchmark pro \
+  --method embedding \
   --include_zero_success \
-  --method judge \
   --overwrite
