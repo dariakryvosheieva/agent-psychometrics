@@ -221,3 +221,10 @@ chris_output/grouped_ridge_coefficient_analysis.json
 # GSO LLM judge features (regenerable via LLM API)
 chris_output/gso_llm_judge_features_v1/
 threshold_sweep.log
+
+# LLM judge feature extraction outputs
+chris_output/llm_judge_features/swebench_v*_sample/
+chris_output/llm_judge_features/swebench_selected/
+chris_output/llm_judge_features/swebench_combined/
+chris_output/llm_judge_features/swebench_full_combined/
+

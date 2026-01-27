@@ -14,6 +14,10 @@ from experiment_ab_shared.llm_judge.prompts.swebench_pro_v4 import SWEBENCH_PRO_
 from experiment_ab_shared.llm_judge.prompts.swebench_pro_v5 import SWEBENCH_PRO_V5_CONFIG
 from experiment_ab_shared.llm_judge.prompts.swebench_v2 import SWEBENCH_V2_CONFIG
 from experiment_ab_shared.llm_judge.prompts.swebench_v3 import SWEBENCH_V3_CONFIG
+from experiment_ab_shared.llm_judge.prompts.swebench_v4 import SWEBENCH_V4_CONFIG
+from experiment_ab_shared.llm_judge.prompts.swebench_v5 import SWEBENCH_V5_CONFIG
+from experiment_ab_shared.llm_judge.prompts.swebench_v6 import SWEBENCH_V6_CONFIG
+from experiment_ab_shared.llm_judge.prompts.swebench_selected import SWEBENCH_SELECTED_CONFIG
 from experiment_ab_shared.llm_judge.prompts.terminalbench import TERMINALBENCH_CONFIG
 from experiment_ab_shared.llm_judge.prompts.terminalbench_v2 import TERMINALBENCH_V2_CONFIG
 from experiment_ab_shared.llm_judge.prompts.gso import GSO_CONFIG
@@ -34,6 +38,10 @@ _PROMPT_CONFIGS: Dict[str, PromptConfig] = {
     "swebench_pro_v5": SWEBENCH_PRO_V5_CONFIG,
     "swebench_v2": SWEBENCH_V2_CONFIG,
     "swebench_v3": SWEBENCH_V3_CONFIG,
+    "swebench_v4": SWEBENCH_V4_CONFIG,
+    "swebench_v5": SWEBENCH_V5_CONFIG,
+    "swebench_v6": SWEBENCH_V6_CONFIG,
+    "swebench_selected": SWEBENCH_SELECTED_CONFIG,
     "terminalbench": TERMINALBENCH_CONFIG,
     "terminalbench_v2": TERMINALBENCH_V2_CONFIG,
     "gso": GSO_CONFIG,
@@ -101,6 +109,10 @@ __all__ = [
     "SWEBENCH_PRO_V5_CONFIG",
     "SWEBENCH_V2_CONFIG",
     "SWEBENCH_V3_CONFIG",
+    "SWEBENCH_V4_CONFIG",
+    "SWEBENCH_V5_CONFIG",
+    "SWEBENCH_V6_CONFIG",
+    "SWEBENCH_SELECTED_CONFIG",
     "TERMINALBENCH_CONFIG",
     "TERMINALBENCH_V2_CONFIG",
     "GSO_CONFIG",

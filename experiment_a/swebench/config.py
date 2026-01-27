@@ -51,9 +51,8 @@ class ExperimentAConfig:
     llm_judge_max_features: Optional[int] = None  # None = use all features
 
     # Trajectory features config (from experiment B)
-    trajectory_features_path: Optional[Path] = Path(
-        "chris_output/trajectory_features/aggregated_features.csv"
-    )
+    # Default is None (excluded). Use --include_trajectory flag to enable.
+    trajectory_features_path: Optional[Path] = None
 
     # Task filtering
     exclude_unsolved: bool = False  # Exclude tasks no agent solved

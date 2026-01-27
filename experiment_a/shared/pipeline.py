@@ -681,6 +681,11 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         help="Use collapsed binary data (any success = 1) instead of binomial (k/n successes). "
              "Only applies to TerminalBench experiments.",
     )
+    parser.add_argument(
+        "--include_trajectory",
+        action="store_true",
+        help="Include trajectory features in evaluation (default: excluded)",
+    )
     return parser
 
 
@@ -729,6 +734,12 @@ def run_experiment_main(
         config_kwargs["items_path"] = Path(args.items_path)
     if args.abilities_path:
         config_kwargs["abilities_path"] = Path(args.abilities_path)
+
+    # Handle --include_trajectory flag (default is excluded)
+    if args.include_trajectory:
+        config_kwargs["trajectory_features_path"] = Path(
+            "chris_output/trajectory_features/aggregated_features.csv"
+        )
 
     config = config_class(**config_kwargs)
 
