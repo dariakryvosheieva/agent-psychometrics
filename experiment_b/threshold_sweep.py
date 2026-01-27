@@ -14,6 +14,7 @@ Usage:
 """
 
 import argparse
+import time
 from multiprocessing import Process
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -384,6 +385,7 @@ def run_single_dataset(
         for config_name, source in feature_configs:
             method_name = f"Baseline-Init Feature-IRT ({config_name})"
             print(f"\nTraining {method_name}...")
+            config_start_time = time.time()
 
             if use_cv_hyperparams:
                 # CV-based hyperparameter selection
@@ -419,9 +421,12 @@ def run_single_dataset(
                         verbose=True,
                     )
                     feature_irt_results[config_name] = (abilities, difficulties)
+                    config_elapsed = time.time() - config_start_time
                     print(f"  Best params: {best_params}")
+                    print(f"  Training completed in {config_elapsed:.1f}s")
                 except Exception as e:
-                    print(f"  CV hyperparameter selection failed: {e}")
+                    config_elapsed = time.time() - config_start_time
+                    print(f"  CV hyperparameter selection failed after {config_elapsed:.1f}s: {e}")
                     import traceback
                     traceback.print_exc()
             else:
@@ -455,9 +460,13 @@ def run_single_dataset(
                     preds = predictor.predict(config.all_task_ids)
                     abilities = predictor.learned_abilities
                     feature_irt_results[config_name] = (abilities, preds)
+                    config_elapsed = time.time() - config_start_time
                     print(f"  {method_name}: {len(preds)} task predictions")
+                    print(f"  Training completed in {config_elapsed:.1f}s")
                 except Exception as e:
                     print(f"  Feature-IRT training failed: {e}")
+                    config_elapsed = time.time() - config_start_time
+                    print(f"  Failed after {config_elapsed:.1f}s")
                     import traceback
                     traceback.print_exc()
 

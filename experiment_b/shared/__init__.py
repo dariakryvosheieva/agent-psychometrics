@@ -94,7 +94,9 @@ from experiment_b.shared.hyperparameter_selection import (
     stratified_pair_split,
     fit_with_cv_hyperparams,
     L2_GRID,
+    COARSE_L2_GRID,
     SINGLE_SOURCE_GRID,
+    SINGLE_SOURCE_GRID_FINE,
     make_grouped_source_grid,
 )
 
@@ -167,6 +169,8 @@ __all__ = [
     "stratified_pair_split",
     "fit_with_cv_hyperparams",
     "L2_GRID",
+    "COARSE_L2_GRID",
     "SINGLE_SOURCE_GRID",
+    "SINGLE_SOURCE_GRID_FINE",
     "make_grouped_source_grid",
 ]

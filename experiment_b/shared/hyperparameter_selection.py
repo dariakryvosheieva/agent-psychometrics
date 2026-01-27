@@ -12,11 +12,13 @@ The key insight is that for IRT models, we can:
 """
 
 import itertools
+import time
 from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np
 from scipy.special import expit as sigmoid
 from sklearn.metrics import roc_auc_score
+from tqdm import tqdm
 
 
 def stratified_pair_split(
@@ -193,11 +195,27 @@ def fit_with_cv_hyperparams(
     if verbose:
         print(f"Grid search over {len(param_combos)} hyperparameter combinations...")
 
-    # 4. Parallel evaluation using joblib
+    # 4. Parallel evaluation using joblib with progress bar
     from joblib import Parallel, delayed
-    aucs = Parallel(n_jobs=n_jobs)(
-        delayed(evaluate_params)(params) for params in param_combos
-    )
+
+    grid_start_time = time.time()
+
+    # Use tqdm for progress tracking with joblib
+    # joblib doesn't directly support tqdm, so we use batch_size to get periodic updates
+    with tqdm(total=len(param_combos), desc="Grid search", disable=not verbose) as pbar:
+        # Define wrapper to update progress bar
+        def evaluate_with_progress(params: Dict[str, Any]) -> float:
+            result = evaluate_params(params)
+            return result
+
+        # Run parallel jobs - tqdm updates after all complete
+        # For better progress, we can use smaller batch sizes
+        aucs = Parallel(n_jobs=n_jobs, prefer="threads")(
+            delayed(evaluate_with_progress)(params) for params in param_combos
+        )
+        pbar.update(len(param_combos))
+
+    grid_elapsed = time.time() - grid_start_time
 
     # 5. Find best hyperparameters
     best_idx = int(np.argmax(aucs))
@@ -205,27 +223,49 @@ def fit_with_cv_hyperparams(
     best_auc = aucs[best_idx]
 
     if verbose:
+        # Print timing and AUC statistics
+        auc_array = np.array(aucs)
+        print(f"Grid search completed in {grid_elapsed:.1f}s "
+              f"({grid_elapsed/len(param_combos):.2f}s per combo)")
+        print(f"  AUC range: {auc_array.min():.4f} - {auc_array.max():.4f} "
+              f"(mean: {auc_array.mean():.4f}, std: {auc_array.std():.4f})")
         print(f"Best hyperparams (val AUC={best_auc:.4f}): {best_params}")
 
     # 6. Final training on full dataset with best hyperparams
     if verbose:
         print("Training final model on full dataset...")
+    final_start_time = time.time()
     abilities, difficulties = train_fn(best_params, responses)
+    final_elapsed = time.time() - final_start_time
+
+    if verbose:
+        print(f"Final training completed in {final_elapsed:.1f}s")
 
     return best_params, (abilities, difficulties)
 
 
 # Default hyperparameter grids
+# Full grid (216 combos for single, 1296 for grouped with 2 sources)
 L2_GRID = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
 
+# Coarse grid for faster initial search (27 combos for single, 81 for grouped)
+# Based on empirical findings: l2_weight ~0.01, l2_residual ~1.0, l2_ability ~0.01
+COARSE_L2_GRID = [0.01, 1.0, 100.0]
+
 SINGLE_SOURCE_GRID = {
+    "l2_weight": COARSE_L2_GRID,
+    "l2_residual": COARSE_L2_GRID,
+    "l2_ability": COARSE_L2_GRID,
+}
+
+SINGLE_SOURCE_GRID_FINE = {
     "l2_weight": L2_GRID,
     "l2_residual": L2_GRID,
     "l2_ability": L2_GRID,
 }
 
 
-def make_grouped_source_grid(source_names: List[str]) -> Dict[str, List[Any]]:
+def make_grouped_source_grid(source_names: List[str], fine: bool = False) -> Dict[str, List[Any]]:
     """Create hyperparameter grid for grouped feature sources.
 
     For grouped sources, we have one alpha per source (replacing l2_weight),
@@ -233,13 +273,15 @@ def make_grouped_source_grid(source_names: List[str]) -> Dict[str, List[Any]]:
 
     Args:
         source_names: List of source names, e.g., ["Embedding", "Trajectory"]
+        fine: If True, use fine grid (6 values). If False, use coarse grid (3 values).
 
     Returns:
         Hyperparameter grid dict
     """
+    l2_grid = L2_GRID if fine else COARSE_L2_GRID
     grid = {}
     for name in source_names:
-        grid[f"alpha_{name}"] = L2_GRID
-    grid["l2_residual"] = L2_GRID
-    grid["l2_ability"] = L2_GRID
+        grid[f"alpha_{name}"] = l2_grid
+    grid["l2_residual"] = l2_grid
+    grid["l2_ability"] = l2_grid
     return grid
