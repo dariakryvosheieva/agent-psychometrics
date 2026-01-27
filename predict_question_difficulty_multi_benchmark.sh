@@ -18,6 +18,6 @@ python -u predict_question_difficulty_multi_benchmark.py \
   --trust_remote_code \
   --train_benchmarks verified,terminal_bench,gso \
   --ood_benchmark pro \
-  --method embedding \
+  --method judge \
   --include_zero_success \
   --overwrite

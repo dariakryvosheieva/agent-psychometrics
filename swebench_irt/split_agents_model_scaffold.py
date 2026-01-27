@@ -40,6 +40,31 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# -----------------------------
+# Assumed scaffolds (model-only subject_id exports)
+# -----------------------------
+#
+# Policy (analysis convention):
+# - GSO: subject_id is model-only; assume scaffold is OpenHands.
+# - SWE-bench Pro: subject_id is model-only; assume scaffold is SWE-agent 1.0.
+
+GSO_ASSUMED_SCAFFOLD: str = "OpenHands"
+SWEBENCH_PRO_ASSUMED_SCAFFOLD: str = "SWE-agent 1.0"
+
+
+def assumed_scaffold_for_benchmark(benchmark: str) -> Optional[str]:
+    """
+    Return the assumed scaffold for benchmarks whose subjects are model-only strings.
+
+    `benchmark` should be a canonical key such as: verified, pro, terminal_bench, gso.
+    """
+    b = str(benchmark or "").strip().lower().replace("-", "_")
+    if b == "gso":
+        return GSO_ASSUMED_SCAFFOLD
+    if b == "pro":
+        return SWEBENCH_PRO_ASSUMED_SCAFFOLD
+    return None
+
 _AT_SUFFIX_RE = re.compile(r"_at_.*$", flags=re.IGNORECASE)
 _TRAILING_DATE_RE = re.compile(r"[-_]\d{8}$")  # e.g. "-20251101" or "_20251101"
 
@@ -700,7 +725,8 @@ def main() -> None:
         default=None,
         help=(
             "Optional path to a Pro results-matrix JSONL. If provided, Pro subjects are mapped with "
-            "model=canonicalize_pro_model(subject_id) and scaffold='SWE-agent 1.0' (matching shared training)."
+            f"model=canonicalize_pro_model(subject_id) and scaffold='{SWEBENCH_PRO_ASSUMED_SCAFFOLD}' "
+            "(matching shared training)."
         ),
     )
     parser.add_argument("--agents_md", type=str, default=None, help="Optional path to agent list (one per line)")
@@ -760,7 +786,7 @@ def main() -> None:
         # - canonicalize the model label
         if "pro_results_jsonl" in sources:
             model = canonicalize_pro_model(agent)
-            scaffold = "SWE-agent 1.0"
+            scaffold = SWEBENCH_PRO_ASSUMED_SCAFFOLD
         else:
             split = split_agent_name(agent)
             if split is None:

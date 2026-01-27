@@ -577,11 +577,16 @@ def evaluate_ood_auroc(
         model_name: Optional[str] = None
         scaffold_name: Optional[str] = None
 
-        # If caller requests a fixed scaffold (e.g. GSO => OpenHands), treat the subject_id
-        # as a model string and canonicalize it using shared parsing rules.
+        # If caller requests a fixed scaffold (e.g. GSO => OpenHands, Pro => SWE-agent 1.0),
+        # treat the subject_id as a model string and canonicalize it using shared rules.
         if assume_scaffold:
+            used_model_only = True
             try:
-                model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
+                if bool(ood_treat_as_pro) and hasattr(split_mod, "canonicalize_pro_model"):
+                    # Pro convention: subject_id is a model string; canonicalize so paper/date variants collapse.
+                    model_name = str(split_mod.canonicalize_pro_model(str(sid)))  # type: ignore[attr-defined]
+                else:
+                    model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
             except Exception:
                 model_name = str(sid)
             try:
@@ -803,7 +808,10 @@ def evaluate_empirical_model_success_auroc(
         scaffold_name: Optional[str] = None
         if assume_scaffold:
             try:
-                model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
+                if bool(treat_as_pro) and hasattr(split_mod, "canonicalize_pro_model"):
+                    model_name = str(split_mod.canonicalize_pro_model(str(sid)))  # type: ignore[attr-defined]
+                else:
+                    model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
             except Exception:
                 model_name = str(sid)
             try:
@@ -1131,7 +1139,7 @@ def filter_subjects_gso_model_only(
     input_jsonl: str,
     output_jsonl: str,
     min_models_per_scaffold: int,
-    assumed_scaffold: str = "OpenHands",
+    assumed_scaffold: Optional[str] = None,
 ) -> None:
     """
     Filter GSO-style response matrices where subject_id is typically a *model name only*.
@@ -1155,6 +1163,8 @@ def filter_subjects_gso_model_only(
 
     # Canonicalize model labels using the shared splitter conventions when available.
     split_mod = _import_swebench_irt_module("split_agents_model_scaffold")
+    if not assumed_scaffold:
+        assumed_scaffold = str(getattr(split_mod, "GSO_ASSUMED_SCAFFOLD", "OpenHands"))
     models: Set[str] = set()
     rows: List[dict] = []
     for r in _iter_jsonl(in_path):
@@ -1816,7 +1826,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             input_jsonl=gso_agent_results_raw,
             output_jsonl=gso_agent_results,
             min_models_per_scaffold=int(args.min_models_per_scaffold),
-            assumed_scaffold="OpenHands",
+            assumed_scaffold=str(
+                getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "GSO_ASSUMED_SCAFFOLD", "OpenHands")
+            ),
         )
 
     # -----------------------------
@@ -3850,7 +3862,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ood_agent_results = str(args.pro_agent_results or "").strip()
             ood_normalize_item_ids = True
             ood_treat_as_pro = True
-            ood_default_scaffold = None
+            ood_default_scaffold = str(
+                getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "SWEBENCH_PRO_ASSUMED_SCAFFOLD", "SWE-agent 1.0")
+            )
             ood_feat_dir = str(getattr(args, "pro_judge_features_dir", "") or "").strip()
             ood_dataset_name = str(args.pro_dataset_name or "").strip()
             ood_split = str(args.pro_split)
@@ -3864,7 +3878,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ood_agent_results = str(args.gso_agent_results or "").strip()
             ood_normalize_item_ids = True
             ood_treat_as_pro = False
-            ood_default_scaffold = "OpenHands"
+            ood_default_scaffold = str(
+                getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "GSO_ASSUMED_SCAFFOLD", "OpenHands")
+            )
             ood_feat_dir = str(getattr(args, "gso_judge_features_dir", "") or "").strip()
             ood_dataset_name = str(args.gso_dataset_name or "").strip()
             ood_split = str(args.gso_split)
@@ -4191,7 +4207,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     input_jsonl=str(ood_agent_results),
                     output_jsonl=str(ood_oracle_filtered),
                     min_models_per_scaffold=int(args.min_models_per_scaffold),
-                    assumed_scaffold="OpenHands",
+                    assumed_scaffold=str(
+                        getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "GSO_ASSUMED_SCAFFOLD", "OpenHands")
+                    ),
                 )
             else:
                 filter_subjects_by_min_models_per_scaffold(

@@ -4,7 +4,7 @@
 #SBATCH --mem=100G
 #SBATCH --partition=mit_normal_gpu
 #SBATCH --gres=gpu:h200:1
-#SBATCH --exclude=node4100
+#SBATCH --exclude=node4100,node3401
 
 set -euo pipefail
 cd /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship
