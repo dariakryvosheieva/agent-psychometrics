@@ -28,7 +28,6 @@ from experiment_ab_shared.feature_source import (
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
     GroupedRidgePredictor,
-    StackedResidualPredictor,
 )
 from experiment_ab_shared import (
     load_dataset,
@@ -293,98 +292,6 @@ def build_cv_predictors(
                     ),
                     name="full_feature_irt_grouped",
                     display_name=f"Full Feature-IRT ({grouped_source.name})",
-                )
-            )
-
-    # Stacked Residual predictors (two-stage: base model + residual correction)
-    # Try both orderings to see which source is better as base vs residual
-    if "Embedding" in source_by_name and "LLM Judge" in source_by_name:
-        emb_source = source_by_name["Embedding"]
-        llm_source = source_by_name["LLM Judge"]
-
-        # Stacked: Embedding base → LLM residual
-        stacked_emb_llm = StackedResidualPredictor(
-            base_source=emb_source,
-            residual_source=llm_source,
-        )
-        configs.append(
-            CVPredictorConfig(
-                predictor=DifficultyPredictorAdapter(stacked_emb_llm),
-                name="stacked_emb_llm",
-                display_name="Stacked (Emb → LLM)",
-            )
-        )
-
-        # Stacked: LLM base → Embedding residual
-        stacked_llm_emb = StackedResidualPredictor(
-            base_source=llm_source,
-            residual_source=emb_source,
-        )
-        configs.append(
-            CVPredictorConfig(
-                predictor=DifficultyPredictorAdapter(stacked_llm_emb),
-                name="stacked_llm_emb",
-                display_name="Stacked (LLM → Emb)",
-            )
-        )
-
-    # Stacked variants with Trajectory
-    if "Trajectory" in source_by_name:
-        traj_source = source_by_name["Trajectory"]
-
-        # If Embedding exists, add Emb -> Traj and Traj -> Emb
-        if "Embedding" in source_by_name:
-            emb_source = source_by_name["Embedding"]
-
-            stacked_emb_traj = StackedResidualPredictor(
-                base_source=emb_source,
-                residual_source=traj_source,
-            )
-            configs.append(
-                CVPredictorConfig(
-                    predictor=DifficultyPredictorAdapter(stacked_emb_traj),
-                    name="stacked_emb_traj",
-                    display_name="Stacked (Emb → Traj)",
-                )
-            )
-
-            stacked_traj_emb = StackedResidualPredictor(
-                base_source=traj_source,
-                residual_source=emb_source,
-            )
-            configs.append(
-                CVPredictorConfig(
-                    predictor=DifficultyPredictorAdapter(stacked_traj_emb),
-                    name="stacked_traj_emb",
-                    display_name="Stacked (Traj → Emb)",
-                )
-            )
-
-        # If LLM Judge exists, add LLM -> Traj and Traj -> LLM
-        if "LLM Judge" in source_by_name:
-            llm_source = source_by_name["LLM Judge"]
-
-            stacked_llm_traj = StackedResidualPredictor(
-                base_source=llm_source,
-                residual_source=traj_source,
-            )
-            configs.append(
-                CVPredictorConfig(
-                    predictor=DifficultyPredictorAdapter(stacked_llm_traj),
-                    name="stacked_llm_traj",
-                    display_name="Stacked (LLM → Traj)",
-                )
-            )
-
-            stacked_traj_llm = StackedResidualPredictor(
-                base_source=traj_source,
-                residual_source=llm_source,
-            )
-            configs.append(
-                CVPredictorConfig(
-                    predictor=DifficultyPredictorAdapter(stacked_traj_llm),
-                    name="stacked_traj_llm",
-                    display_name="Stacked (Traj → LLM)",
                 )
             )
 
