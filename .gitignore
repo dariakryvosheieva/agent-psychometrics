@@ -210,6 +210,7 @@ chris_output/stacked_coefficient_analysis.json
 
 # Threshold sweep outputs (regenerable)
 chris_output/threshold_sweep/
+chris_output/threshold_sweep_*/
 
 # LLM standalone coefficient analysis (regenerable)
 chris_output/llm_standalone_coefficient_analysis.json
