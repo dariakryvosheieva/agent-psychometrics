@@ -539,6 +539,385 @@ def cmd_aggregate(args: argparse.Namespace) -> None:
         print("No JSON files found to aggregate")
 
 
+def cmd_quick_eval(args: argparse.Namespace) -> None:
+    """Handle the 'quick_eval' subcommand."""
+    import pandas as pd
+    from experiment_ab_shared.llm_judge.quick_eval import evaluate_features
+
+    # Load features CSV
+    features_df = pd.read_csv(args.features_csv)
+
+    # Find task ID column and set as index
+    task_id_col = None
+    for col in ["_instance_id", "instance_id", "_task_id", "task_id"]:
+        if col in features_df.columns:
+            task_id_col = col
+            break
+    if task_id_col is None:
+        task_id_col = features_df.columns[0]
+    features_df = features_df.set_index(task_id_col)
+
+    # Run evaluation
+    result = evaluate_features(
+        features_df,
+        Path(args.irt_items),
+        correlation_threshold=args.correlation_threshold,
+        redundancy_threshold=args.redundancy_threshold,
+    )
+
+    # Print report
+    result.print_report()
+
+    # Save if output path provided
+    if args.output:
+        result.to_json(Path(args.output))
+
+
+def cmd_compare(args: argparse.Namespace) -> None:
+    """Handle the 'compare' subcommand."""
+    from experiment_ab_shared.llm_judge.qualitative_compare import run_comparison
+
+    run_comparison(
+        dataset=args.dataset,
+        n_pairs=args.n_pairs,
+        feature_to_highlight=args.feature,
+        features_csv=Path(args.features_csv) if args.features_csv else None,
+        irt_items_path=Path(args.irt_items) if args.irt_items else None,
+        seed=args.seed,
+        interactive=args.interactive,
+    )
+
+
+def cmd_deterministic(args: argparse.Namespace) -> None:
+    """Handle the 'deterministic' subcommand."""
+    from experiment_ab_shared.llm_judge.extract_pipeline import (
+        extract_deterministic_features_only,
+    )
+
+    extract_deterministic_features_only(args.dataset, Path(args.output))
+
+
+def cmd_verify(args: argparse.Namespace) -> None:
+    """Handle the 'verify' subcommand."""
+    from experiment_ab_shared.llm_judge.extract_pipeline import (
+        _load_tasks_for_dataset,
+        _get_task_id,
+        verify_extraction_complete,
+    )
+
+    tasks = _load_tasks_for_dataset(args.dataset)
+    task_ids = [_get_task_id(t, args.dataset) for t in tasks]
+    status = verify_extraction_complete(Path(args.output_dir), task_ids)
+    status.print_report()
+
+
+def cmd_correlations(args: argparse.Namespace) -> None:
+    """Handle the 'correlations' subcommand."""
+    from experiment_ab_shared.llm_judge.analyze_feature_correlations import (
+        analyze_features,
+    )
+
+    analyze_features(
+        features_path=Path(args.features_csv),
+        irt_items_path=Path(args.irt_items),
+        dataset_name=args.dataset,
+        output_path=Path(args.output) if args.output else None,
+    )
+
+
+# ============================================================================
+# Argument Parser Setup Functions
+# ============================================================================
+
+
+def _setup_extract_parser(subparsers) -> None:
+    """Setup the 'extract' subcommand parser."""
+    parser = subparsers.add_parser(
+        "extract",
+        help="Extract LLM judge features from tasks",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=list_datasets(),
+        help="Built-in dataset to use",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        help="Path to custom PromptConfig Python file",
+    )
+    parser.add_argument(
+        "--tasks",
+        type=str,
+        help="Path to tasks JSONL file (for custom configs)",
+    )
+    parser.add_argument(
+        "--items-path",
+        type=str,
+        dest="items_path",
+        help="Path to items CSV (TerminalBench only)",
+    )
+    parser.add_argument(
+        "--repo-path",
+        type=str,
+        dest="repo_path",
+        help="Path to terminal-bench repo (TerminalBench only)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        dest="output_dir",
+        help="Output directory for JSON files and CSV",
+    )
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default="anthropic",
+        choices=["anthropic", "openai"],
+        help="LLM provider (default: anthropic)",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specific model to use (default: provider's default)",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Maximum number of tasks to process",
+    )
+    parser.add_argument(
+        "--task-ids",
+        type=str,
+        dest="task_ids",
+        help="Comma-separated list of specific task IDs to process",
+    )
+    parser.add_argument(
+        "--delay",
+        type=float,
+        default=0.5,
+        help="Delay between API calls in seconds (default: 0.5)",
+    )
+    parser.add_argument(
+        "--no-skip-existing",
+        action="store_true",
+        dest="no_skip_existing",
+        help="Re-process tasks with existing feature files",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        dest="dry_run",
+        help="Show execution plan and cost estimate without running",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Run extraction in parallel (faster, uses async API calls)",
+    )
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=10,
+        help="Max concurrent API calls when --parallel is used (default: 10)",
+    )
+    parser.add_argument(
+        "--add-deterministic",
+        action="store_true",
+        dest="add_deterministic",
+        help="Add deterministic features (from patch or solution) to the output CSV",
+    )
+
+
+def _setup_aggregate_parser(subparsers) -> None:
+    """Setup the 'aggregate' subcommand parser."""
+    parser = subparsers.add_parser(
+        "aggregate",
+        help="Aggregate existing JSON files into CSV",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=list_datasets(),
+        help="Dataset for column ordering",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        help="Path to custom PromptConfig Python file",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        dest="output_dir",
+        help="Directory containing JSON files",
+    )
+
+
+def _setup_quick_eval_parser(subparsers) -> None:
+    """Setup the 'quick_eval' subcommand parser."""
+    parser = subparsers.add_parser(
+        "quick_eval",
+        help="Quick evaluation of feature correlations with difficulty",
+    )
+    parser.add_argument(
+        "--features-csv",
+        type=str,
+        required=True,
+        dest="features_csv",
+        help="Path to features CSV file",
+    )
+    parser.add_argument(
+        "--irt-items",
+        type=str,
+        required=True,
+        dest="irt_items",
+        help="Path to IRT items.csv with difficulty column 'b'",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Path to save results JSON",
+    )
+    parser.add_argument(
+        "--correlation-threshold",
+        type=float,
+        default=0.05,
+        dest="correlation_threshold",
+        help="p-value threshold for significance (default: 0.05)",
+    )
+    parser.add_argument(
+        "--redundancy-threshold",
+        type=float,
+        default=0.9,
+        dest="redundancy_threshold",
+        help="Correlation threshold for redundant pairs (default: 0.9)",
+    )
+
+
+def _setup_compare_parser(subparsers) -> None:
+    """Setup the 'compare' subcommand parser."""
+    parser = subparsers.add_parser(
+        "compare",
+        help="Compare hard vs easy tasks for qualitative validation",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        required=True,
+        help="Dataset name",
+    )
+    parser.add_argument(
+        "--n-pairs",
+        type=int,
+        default=1,
+        dest="n_pairs",
+        help="Number of pairs to show (default: 1)",
+    )
+    parser.add_argument(
+        "--feature",
+        type=str,
+        help="Feature to highlight",
+    )
+    parser.add_argument(
+        "--features-csv",
+        type=str,
+        dest="features_csv",
+        help="Path to features CSV",
+    )
+    parser.add_argument(
+        "--irt-items",
+        type=str,
+        dest="irt_items",
+        help="Path to IRT items.csv",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="Random seed",
+    )
+    parser.add_argument(
+        "-i", "--interactive",
+        action="store_true",
+        help="Interactive mode (prompt for more pairs)",
+    )
+
+
+def _setup_deterministic_parser(subparsers) -> None:
+    """Setup the 'deterministic' subcommand parser."""
+    parser = subparsers.add_parser(
+        "deterministic",
+        help="Extract deterministic features only (no LLM calls)",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        required=True,
+        help="Dataset name",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        required=True,
+        help="Output CSV path",
+    )
+
+
+def _setup_verify_parser(subparsers) -> None:
+    """Setup the 'verify' subcommand parser."""
+    parser = subparsers.add_parser(
+        "verify",
+        help="Verify extraction completeness",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        required=True,
+        dest="output_dir",
+        help="Directory containing JSON files",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        required=True,
+        help="Dataset name",
+    )
+
+
+def _setup_correlations_parser(subparsers) -> None:
+    """Setup the 'correlations' subcommand parser."""
+    parser = subparsers.add_parser(
+        "correlations",
+        help="Analyze feature correlations with IRT difficulty",
+    )
+    parser.add_argument(
+        "--features-csv",
+        type=str,
+        required=True,
+        dest="features_csv",
+        help="Path to features CSV file",
+    )
+    parser.add_argument(
+        "--irt-items",
+        type=str,
+        required=True,
+        dest="irt_items",
+        help="Path to IRT items.csv",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="unknown",
+        help="Dataset name for display",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Path to save results JSON",
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="LLM Judge feature extraction for task difficulty prediction",
@@ -553,126 +932,14 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Extract subcommand
-    extract_parser = subparsers.add_parser(
-        "extract",
-        help="Extract LLM judge features from tasks",
-    )
-    extract_parser.add_argument(
-        "--dataset",
-        type=str,
-        choices=list_datasets(),
-        help="Built-in dataset to use",
-    )
-    extract_parser.add_argument(
-        "--config",
-        type=str,
-        help="Path to custom PromptConfig Python file",
-    )
-    extract_parser.add_argument(
-        "--tasks",
-        type=str,
-        help="Path to tasks JSONL file (for custom configs)",
-    )
-    extract_parser.add_argument(
-        "--items-path",
-        type=str,
-        dest="items_path",
-        help="Path to items CSV (TerminalBench only)",
-    )
-    extract_parser.add_argument(
-        "--repo-path",
-        type=str,
-        dest="repo_path",
-        help="Path to terminal-bench repo (TerminalBench only)",
-    )
-    extract_parser.add_argument(
-        "--output-dir",
-        type=str,
-        dest="output_dir",
-        help="Output directory for JSON files and CSV",
-    )
-    extract_parser.add_argument(
-        "--provider",
-        type=str,
-        default="anthropic",
-        choices=["anthropic", "openai"],
-        help="LLM provider (default: anthropic)",
-    )
-    extract_parser.add_argument(
-        "--model",
-        type=str,
-        help="Specific model to use (default: provider's default)",
-    )
-    extract_parser.add_argument(
-        "--limit",
-        type=int,
-        help="Maximum number of tasks to process",
-    )
-    extract_parser.add_argument(
-        "--task-ids",
-        type=str,
-        dest="task_ids",
-        help="Comma-separated list of specific task IDs to process",
-    )
-    extract_parser.add_argument(
-        "--delay",
-        type=float,
-        default=0.5,
-        help="Delay between API calls in seconds (default: 0.5)",
-    )
-    extract_parser.add_argument(
-        "--no-skip-existing",
-        action="store_true",
-        dest="no_skip_existing",
-        help="Re-process tasks with existing feature files",
-    )
-    extract_parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        dest="dry_run",
-        help="Show execution plan and cost estimate without running",
-    )
-    extract_parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="Run extraction in parallel (faster, uses async API calls)",
-    )
-    extract_parser.add_argument(
-        "--concurrency",
-        type=int,
-        default=10,
-        help="Max concurrent API calls when --parallel is used (default: 10)",
-    )
-    extract_parser.add_argument(
-        "--add-deterministic",
-        action="store_true",
-        dest="add_deterministic",
-        help="Add deterministic features (from patch or solution) to the output CSV",
-    )
-
-    # Aggregate subcommand
-    aggregate_parser = subparsers.add_parser(
-        "aggregate",
-        help="Aggregate existing JSON files into CSV",
-    )
-    aggregate_parser.add_argument(
-        "--dataset",
-        type=str,
-        choices=list_datasets(),
-        help="Dataset for column ordering",
-    )
-    aggregate_parser.add_argument(
-        "--config",
-        type=str,
-        help="Path to custom PromptConfig Python file",
-    )
-    aggregate_parser.add_argument(
-        "--output-dir",
-        type=str,
-        dest="output_dir",
-        help="Directory containing JSON files",
-    )
+    # Setup all subcommand parsers
+    _setup_extract_parser(subparsers)
+    _setup_aggregate_parser(subparsers)
+    _setup_quick_eval_parser(subparsers)
+    _setup_compare_parser(subparsers)
+    _setup_deterministic_parser(subparsers)
+    _setup_verify_parser(subparsers)
+    _setup_correlations_parser(subparsers)
 
     args = parser.parse_args()
 
@@ -684,10 +951,18 @@ def main():
     )
 
     # Dispatch to subcommand
-    if args.command == "extract":
-        cmd_extract(args)
-    elif args.command == "aggregate":
-        cmd_aggregate(args)
+    command_handlers = {
+        "extract": cmd_extract,
+        "aggregate": cmd_aggregate,
+        "quick_eval": cmd_quick_eval,
+        "compare": cmd_compare,
+        "deterministic": cmd_deterministic,
+        "verify": cmd_verify,
+        "correlations": cmd_correlations,
+    }
+
+    if args.command in command_handlers:
+        command_handlers[args.command](args)
     else:
         parser.print_help()
         sys.exit(1)
