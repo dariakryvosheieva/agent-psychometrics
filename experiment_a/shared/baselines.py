@@ -805,26 +805,23 @@ class FullFeatureIRTAdapter:
             print(f"  Training Full Feature-IRT ({self.source.name}) on {len(all_task_ids)} tasks, {len(responses)} agents")
 
         # Create and fit the predictor
+        # Use init_from_baseline=False for empirical initialization
+        # This initializes abilities from empirical agent performance and
+        # difficulties from empirical task difficulty, then learns corrections
         self._predictor = FeatureIRTPredictor(
             source=self.source,
             use_residuals=self.use_residuals,
-            init_from_baseline=True,
+            init_from_baseline=False,
             l2_weight=self.l2_weight,
             l2_residual=self.l2_residual,
             l2_ability=self.l2_ability,
             verbose=self.verbose,
         )
 
-        # Get baseline abilities from Oracle (full IRT model)
-        baseline_abilities = data.full_abilities["ability"].values
-        baseline_agent_ids = list(data.full_abilities.index)
-
         self._predictor.fit(
             task_ids=all_task_ids,
             ground_truth_b=ground_truth_b,
             responses=responses,
-            baseline_abilities=baseline_abilities,
-            baseline_agent_ids=baseline_agent_ids,
         )
 
         # Cache predictions for all tasks

@@ -448,10 +448,20 @@ class FeatureIRTPredictor:
         l2_r = self.l2_residual
         l2_a = self.l2_ability
 
+        # For init_from_baseline: regularize deviation from Oracle, not deviation from 0
+        # This keeps difficulty_latent close to Oracle while features learn a correction
+        baseline_b_tensor = None
+        if self.init_from_baseline and self._baseline_b is not None:
+            baseline_b_tensor = torch.tensor(
+                self._baseline_b.astype(np.float32), device=device
+            )
+
         def closure():
             optim.zero_grad()
 
-            # Compute difficulties: b_i = features @ w + bias + residual
+            # Compute difficulties: b_i = features @ w + bias + difficulty_latent
+            # Where difficulty_latent is initialized from Oracle and regularized to stay close
+            # The features (w @ f + bias) learn a correction term
             diff = torch.matmul(features_tensor, w) + b
             if residuals_tensor is not None:
                 diff = diff + residuals_tensor
@@ -471,7 +481,17 @@ class FeatureIRTPredictor:
 
             # Regularization components
             weight_reg = l2_w * torch.sum(w**2)
-            residual_reg = l2_r * torch.sum(residuals_tensor**2) if residuals_tensor is not None else torch.tensor(0.0)
+            # Difficulty latent regularization:
+            # - If init_from_baseline: penalize deviation from Oracle (||r - oracle||²)
+            # - Otherwise: penalize deviation from 0 (||r||²)
+            if residuals_tensor is not None:
+                if baseline_b_tensor is not None:
+                    # Keep difficulty_latent close to Oracle initialization
+                    residual_reg = l2_r * torch.sum((residuals_tensor - baseline_b_tensor)**2)
+                else:
+                    residual_reg = l2_r * torch.sum(residuals_tensor**2)
+            else:
+                residual_reg = torch.tensor(0.0)
             ability_reg = l2_a * (theta.mean() ** 2)
 
             loss = nll + weight_reg + residual_reg + ability_reg

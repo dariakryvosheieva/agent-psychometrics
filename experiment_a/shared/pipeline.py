@@ -110,8 +110,8 @@ def build_cv_predictors(
     root: Path,
     llm_judge_features: Optional[List[str]] = None,
     include_feature_irt: bool = False,
-    full_firt_l2_weight: float = 0.01,
-    full_firt_l2_residual: float = 10.0,
+    full_firt_l2_weight: float = 0.001,
+    full_firt_l2_residual: float = 0.0001,
 ) -> List[CVPredictorConfig]:
     """Build list of CVPredictor configurations for cross-validation.
 
@@ -374,8 +374,8 @@ def run_cross_validation(
     k: int = 5,
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
     include_feature_irt: bool = False,
-    full_firt_l2_weight: float = 0.01,
-    full_firt_l2_residual: float = 10.0,
+    full_firt_l2_weight: float = 0.001,
+    full_firt_l2_residual: float = 0.0001,
     expansion_mode: Optional[str] = None,
     binomial_responses: Optional[Dict[str, Dict[str, Dict[str, int]]]] = None,
     diagnostics_extractors: Optional[Dict[str, Callable]] = None,
@@ -661,14 +661,14 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
     parser.add_argument(
         "--full_firt_l2_weight",
         type=float,
-        default=0.01,
-        help="L2 regularization on feature weights for Full Feature-IRT (default: 0.01)",
+        default=0.001,
+        help="L2 regularization on feature weights for Full Feature-IRT (default: 0.001)",
     )
     parser.add_argument(
         "--full_firt_l2_residual",
         type=float,
-        default=10.0,
-        help="L2 regularization on residuals for Full Feature-IRT (default: 10.0)",
+        default=0.0001,
+        help="L2 regularization on residuals for Full Feature-IRT (default: 0.0001)",
     )
     parser.add_argument(
         "--expand_grouped_ridge",

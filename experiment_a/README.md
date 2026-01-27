@@ -573,6 +573,31 @@ Results saved to `chris_output/grouped_ridge_coefficient_analysis.json`.
 - LLM Judge contributes 9-24% of coefficient magnitude, with GSO showing highest contribution
 - Selected alphas vary significantly: higher embedding alpha for larger datasets
 
+## Full Feature-IRT (Experimental - Not for Comparison)
+
+The `--include_feature_irt` flag enables Full Feature-IRT predictors that train on ALL tasks (like Oracle). These were added to **sanity check trajectory features** and verify the Feature-IRT implementation, **not** as proper comparison methods.
+
+**Why these shouldn't be used for comparison:**
+
+1. **Trains on test data**: Unlike other predictors, Full Feature-IRT trains on ALL tasks including test tasks, making it an unfair comparison with methods that only see train tasks.
+
+2. **Matches Oracle by design**: With low residual regularization, the per-task difficulty latents can learn task-specific information, effectively recovering Oracle-level predictions (AUC ~0.944).
+
+3. **Different evaluation setup**: These predictors test whether features add value *given full response data*, which is a different question than Experiment A's goal of predicting difficulty *without* running agents.
+
+**When to use:**
+- Verifying feature source implementations work correctly
+- Sanity checking new feature sources (e.g., trajectory features)
+- Understanding variance decomposition between features and difficulty latents
+
+**Analysis script:**
+```bash
+# Analyze Feature-IRT decomposition (feature vs residual contributions)
+python -m experiment_a.analyze_feature_irt
+```
+
+**Do NOT include in results tables or comparison figures.**
+
 ## Caches
 
 | Cache | Location | When to Clear |
