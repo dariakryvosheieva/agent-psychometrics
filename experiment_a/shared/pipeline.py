@@ -28,6 +28,7 @@ from experiment_ab_shared.feature_source import (
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
     DecisionTreePredictor,
+    RandomForestPredictor,
     GroupedRidgePredictor,
     StackedResidualPredictor,
 )
@@ -113,6 +114,7 @@ def build_cv_predictors(
     root: Path,
     llm_judge_features: Optional[List[str]] = None,
     include_feature_irt: bool = False,
+    include_mlp: bool = True,
     full_firt_l2_weight: float = 0.001,
     full_firt_l2_residual: float = 0.0001,
 ) -> List[CVPredictorConfig]:
@@ -126,6 +128,8 @@ def build_cv_predictors(
         llm_judge_features: Optional list of feature columns for LLM Judge.
         include_feature_irt: Whether to include Feature-IRT joint learning methods.
             Defaults to False since they provide minimal improvement over Ridge.
+        include_mlp: Whether to include MLP predictors (default True).
+            Set to False for faster local execution (skips PyTorch training).
 
     Returns:
         List of CVPredictorConfig objects with pre-instantiated predictors.
@@ -239,6 +243,16 @@ def build_cv_predictors(
             )
         )
 
+        # LLM Judge with Random Forest (ensemble, more robust than single tree)
+        rf_predictor = RandomForestPredictor(source)
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(rf_predictor),
+                name="llm_judge_rf",
+                display_name="LLM Judge (RF)",
+            )
+        )
+
     # Trajectory features predictor (Ridge regression)
     if "Trajectory" in source_by_name:
         source = source_by_name["Trajectory"]
@@ -323,40 +337,42 @@ def build_cv_predictors(
         )
 
     # MLP predictors (IRT-style: learns P = sigmoid(θ_agent - β_task) end-to-end)
-    # MLP with Embedding features
-    if "Embedding" in source_by_name:
-        configs.append(
-            CVPredictorConfig(
-                predictor=MLPPredictor(source_by_name["Embedding"]),
-                name="mlp_embedding",
-                display_name="MLP (Embedding)",
+    # Skip if include_mlp=False (for faster local execution without PyTorch)
+    if include_mlp:
+        # MLP with Embedding features
+        if "Embedding" in source_by_name:
+            configs.append(
+                CVPredictorConfig(
+                    predictor=MLPPredictor(source_by_name["Embedding"]),
+                    name="mlp_embedding",
+                    display_name="MLP (Embedding)",
+                )
             )
-        )
 
-    # MLP with LLM Judge features
-    if "LLM Judge" in source_by_name:
-        configs.append(
-            CVPredictorConfig(
-                predictor=MLPPredictor(source_by_name["LLM Judge"]),
-                name="mlp_llm_judge",
-                display_name="MLP (LLM Judge)",
+        # MLP with LLM Judge features
+        if "LLM Judge" in source_by_name:
+            configs.append(
+                CVPredictorConfig(
+                    predictor=MLPPredictor(source_by_name["LLM Judge"]),
+                    name="mlp_llm_judge",
+                    display_name="MLP (LLM Judge)",
+                )
             )
-        )
 
-    # MLP with combined features
-    if len(feature_source_list) >= 2:
-        # Reuse the grouped source if available, otherwise create one
-        feature_sources = [source for _, source in feature_source_list]
-        mlp_grouped_source = GroupedFeatureSource([
-            RegularizedFeatureSource(src) for src in feature_sources
-        ])
-        configs.append(
-            CVPredictorConfig(
-                predictor=MLPPredictor(mlp_grouped_source),
-                name="mlp_grouped",
-                display_name=f"MLP ({mlp_grouped_source.name})",
+        # MLP with combined features
+        if len(feature_source_list) >= 2:
+            # Reuse the grouped source if available, otherwise create one
+            feature_sources = [source for _, source in feature_source_list]
+            mlp_grouped_source = GroupedFeatureSource([
+                RegularizedFeatureSource(src) for src in feature_sources
+            ])
+            configs.append(
+                CVPredictorConfig(
+                    predictor=MLPPredictor(mlp_grouped_source),
+                    name="mlp_grouped",
+                    display_name=f"MLP ({mlp_grouped_source.name})",
+                )
             )
-        )
 
     # Constant baseline (mean difficulty)
     configs.append(
@@ -466,6 +482,7 @@ def run_cross_validation(
     k: int = 5,
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
     include_feature_irt: bool = False,
+    include_mlp: bool = True,
     full_firt_l2_weight: float = 0.001,
     full_firt_l2_residual: float = 0.0001,
     expansion_mode: Optional[str] = None,
@@ -487,6 +504,8 @@ def run_cross_validation(
         metadata_loader: Optional callable to load task metadata
         include_feature_irt: Whether to include Feature-IRT joint learning methods.
             Defaults to False since they provide minimal improvement over Ridge.
+        include_mlp: Whether to include MLP predictors (default True).
+            Set to False for faster local execution (skips PyTorch training).
         expansion_mode: Override AUC expansion method ("binary", "expand", or None)
         binomial_responses: Original binomial responses, required for expansion_mode="expand"
             when data is binary (trained on sampled data)
@@ -551,6 +570,7 @@ def run_cross_validation(
     predictor_configs = build_cv_predictors(
         config, root, llm_judge_features=None,  # Auto-detect from CSV
         include_feature_irt=include_feature_irt,
+        include_mlp=include_mlp,
         full_firt_l2_weight=full_firt_l2_weight,
         full_firt_l2_residual=full_firt_l2_residual,
     )

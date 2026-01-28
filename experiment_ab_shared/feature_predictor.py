@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge, RidgeCV, LassoCV
 from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.preprocessing import StandardScaler
@@ -288,7 +289,8 @@ class DecisionTreePredictor:
     """
 
     # Default hyperparameter grids for grid search
-    DEFAULT_MAX_DEPTHS = [2, 3, 4, 5, 6, None]  # None = unlimited depth
+    # Note: Removed None (unlimited depth) to prevent overfitting
+    DEFAULT_MAX_DEPTHS = [2, 3, 4, 5, 6]
     DEFAULT_MIN_SAMPLES_SPLITS = [2, 5, 10, 20]
     DEFAULT_MIN_SAMPLES_LEAFS = [1, 2, 5, 10]
 
@@ -298,6 +300,7 @@ class DecisionTreePredictor:
         max_depths: Optional[List[Optional[int]]] = None,
         min_samples_splits: Optional[List[int]] = None,
         min_samples_leafs: Optional[List[int]] = None,
+        verbose: bool = False,
     ):
         """Initialize the decision tree predictor.
 
@@ -306,16 +309,20 @@ class DecisionTreePredictor:
             max_depths: List of max_depth values to try. None means unlimited.
             min_samples_splits: List of min_samples_split values to try.
             min_samples_leafs: List of min_samples_leaf values to try.
+            verbose: If True, print diagnostics during fit.
         """
         self.source = source
         self.max_depths = max_depths or self.DEFAULT_MAX_DEPTHS
         self.min_samples_splits = min_samples_splits or self.DEFAULT_MIN_SAMPLES_SPLITS
         self.min_samples_leafs = min_samples_leafs or self.DEFAULT_MIN_SAMPLES_LEAFS
+        self.verbose = verbose
 
         # Model state (set after fit())
         self._scaler: Optional[StandardScaler] = None
         self._model: Optional[DecisionTreeRegressor] = None
         self._best_params: Optional[Dict[str, Any]] = None
+        self._best_cv_score: Optional[float] = None
+        self._train_mse: Optional[float] = None
         self._is_fitted: bool = False
 
     @property
@@ -370,7 +377,19 @@ class DecisionTreePredictor:
 
         self._model = grid_search.best_estimator_
         self._best_params = grid_search.best_params_
+        self._best_cv_score = -grid_search.best_score_  # Convert back to positive MSE
         self._is_fitted = True
+
+        # Compute train MSE for overfitting diagnostic
+        train_preds = self._model.predict(X_scaled)
+        self._train_mse = float(np.mean((train_preds - y) ** 2))
+
+        if self.verbose:
+            print(f"      Tree: depth={self._model.get_depth()}, leaves={self._model.get_n_leaves()}")
+            print(f"      Best params: {self._best_params}")
+            print(f"      Train MSE: {self._train_mse:.4f}, CV MSE: {self._best_cv_score:.4f}")
+            gap = self._best_cv_score - self._train_mse
+            print(f"      Gap (CV - Train): {gap:+.4f} {'(overfitting)' if gap > 0.1 else ''}")
 
     def predict(self, task_ids: List[str]) -> Dict[str, float]:
         """Predict difficulty for the given tasks.
@@ -472,6 +491,138 @@ class DecisionTreePredictor:
             print("  Top features by importance:")
             for name, imp in info["top_features"][:10]:  # Show top 10
                 print(f"    {name}: {imp:.4f}")
+
+
+class RandomForestPredictor:
+    """Difficulty predictor using Random Forest regression.
+
+    Random Forest is an ensemble of decision trees that averages predictions,
+    which typically provides better generalization than a single tree.
+    More robust to overfitting than DecisionTreePredictor.
+
+    Uses fixed hyperparameters (no grid search) for speed. Random forests are
+    less sensitive to hyperparameters due to ensemble averaging.
+
+    Pipeline: features -> StandardScaler -> RandomForestRegressor -> predict
+    """
+
+    def __init__(
+        self,
+        source: TaskFeatureSource,
+        n_estimators: int = 50,
+        max_depth: Optional[int] = 5,
+        min_samples_split: int = 5,
+        min_samples_leaf: int = 2,
+        verbose: bool = False,
+    ):
+        """Initialize the random forest predictor.
+
+        Args:
+            source: TaskFeatureSource that provides features for tasks.
+            n_estimators: Number of trees in the forest.
+            max_depth: Maximum depth of each tree (default 5 to prevent overfitting).
+            min_samples_split: Minimum samples to split an internal node.
+            min_samples_leaf: Minimum samples in a leaf node.
+            verbose: If True, print diagnostics during fit.
+        """
+        self.source = source
+        self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.min_samples_leaf = min_samples_leaf
+        self.verbose = verbose
+
+        # Model state (set after fit())
+        self._scaler: Optional[StandardScaler] = None
+        self._model: Optional[RandomForestRegressor] = None
+        self._train_mse: Optional[float] = None
+        self._oob_score: Optional[float] = None
+        self._is_fitted: bool = False
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name (from feature source)."""
+        return f"{self.source.name} (Random Forest)"
+
+    def fit(self, task_ids: List[str], ground_truth_b: Union[np.ndarray, List[float]]) -> None:
+        """Fit the predictor on training data."""
+        y = np.asarray(ground_truth_b, dtype=np.float32)
+
+        if len(task_ids) != len(y):
+            raise ValueError(
+                f"task_ids ({len(task_ids)}) and ground_truth_b ({len(y)}) must have same length"
+            )
+
+        X = self.source.get_features(task_ids)
+        self._scaler = StandardScaler()
+        X_scaled = self._scaler.fit_transform(X)
+
+        self._model = RandomForestRegressor(
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            min_samples_split=self.min_samples_split,
+            min_samples_leaf=self.min_samples_leaf,
+            oob_score=True,  # Enable out-of-bag scoring
+            random_state=42,
+            n_jobs=-1,
+        )
+        self._model.fit(X_scaled, y)
+        self._is_fitted = True
+
+        # Compute train MSE
+        train_preds = self._model.predict(X_scaled)
+        self._train_mse = float(np.mean((train_preds - y) ** 2))
+        self._oob_score = self._model.oob_score_  # R² on out-of-bag samples
+
+        if self.verbose:
+            print(f"      RF: n_trees={self.n_estimators}, max_depth={self.max_depth}")
+            print(f"      Train MSE: {self._train_mse:.4f}, OOB R²: {self._oob_score:.4f}")
+
+    def predict(self, task_ids: List[str]) -> Dict[str, float]:
+        """Predict difficulty for the given tasks."""
+        if not self._is_fitted:
+            raise RuntimeError("Predictor must be fit before calling predict()")
+
+        X = self.source.get_features(task_ids)
+        X_scaled = self._scaler.transform(X)
+        predictions = self._model.predict(X_scaled)
+
+        return {task_id: float(pred) for task_id, pred in zip(task_ids, predictions)}
+
+    def get_feature_importances(self) -> Optional[Dict[str, float]]:
+        """Get feature importances from the fitted forest."""
+        if not self._is_fitted:
+            raise RuntimeError("Predictor must be fit before getting importances")
+
+        feature_names = self.source.feature_names
+        importances = self._model.feature_importances_
+
+        if feature_names is None:
+            return {f"feature_{i}": float(imp) for i, imp in enumerate(importances)}
+
+        return {name: float(imp) for name, imp in zip(feature_names, importances)}
+
+    def get_model_info(self) -> Dict[str, Any]:
+        """Get information about the fitted model."""
+        if not self._is_fitted:
+            return {"is_fitted": False}
+
+        info = {
+            "is_fitted": True,
+            "n_estimators": self.n_estimators,
+            "max_depth": self.max_depth,
+            "train_mse": self._train_mse,
+            "oob_r2": self._oob_score,
+            "n_features": self.source.feature_dim,
+            "feature_source": self.source.name,
+        }
+
+        importances = self.get_feature_importances()
+        if importances is not None:
+            sorted_imp = sorted(importances.items(), key=lambda x: x[1], reverse=True)
+            info["top_features"] = [(name, imp) for name, imp in sorted_imp if imp > 0.01]
+
+        return info
 
 
 class GroupedRidgePredictor:

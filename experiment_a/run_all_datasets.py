@@ -87,6 +87,7 @@ def run_single_dataset(
     k_folds: int = 5,
     n_jobs_methods: int = 1,
     n_jobs_folds: int = 1,
+    include_mlp: bool = True,
 ) -> Tuple[str, Dict[str, Any]]:
     """Run experiment_a on a single dataset and return results.
 
@@ -98,6 +99,7 @@ def run_single_dataset(
         k_folds: Number of CV folds.
         n_jobs_methods: Number of parallel jobs for method execution.
         n_jobs_folds: Number of parallel jobs for fold execution.
+        include_mlp: Whether to include MLP predictors (default True).
 
     Returns:
         Tuple of (dataset_name, results_dict).
@@ -155,6 +157,7 @@ def run_single_dataset(
             config, spec, root, k_folds,
             metadata_loader=None,
             include_feature_irt=False,
+            include_mlp=include_mlp,
             n_jobs_methods=n_jobs_methods,
             n_jobs_folds=n_jobs_folds,
         )
@@ -185,6 +188,7 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
         "embedding_predictor": "Embedding",
         "llm_judge_predictor": "LLM Judge",
         "llm_judge_tree": "LLM Judge (Tree)",
+        "llm_judge_rf": "LLM Judge (RF)",
         "grouped_ridge": "Grouped Ridge",
         "stacked_residual": "Stacked (Emb → LLM)",
         "mlp_embedding": "MLP (Emb)",
@@ -219,7 +223,7 @@ def format_results_table(
     """
     if methods is None:
         methods = ["Oracle", "Stacked (Emb → LLM)", "Grouped Ridge", "Embedding", "LLM Judge",
-                   "LLM Judge (Tree)", "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
+                   "LLM Judge (Tree)", "LLM Judge (RF)", "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
 
     # Build data rows first to calculate column widths
     data_rows = []
@@ -275,7 +279,7 @@ def save_results_csv(
 
     if methods is None:
         methods = ["Oracle", "Stacked (Emb → LLM)", "Grouped Ridge", "Embedding", "LLM Judge",
-                   "LLM Judge (Tree)", "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
+                   "LLM Judge (Tree)", "LLM Judge (RF)", "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
 
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -355,6 +359,12 @@ def main():
         default=1,
         help="Parallel jobs for folds within each method (default: 1 = sequential)",
     )
+    parser.add_argument(
+        "--mlp",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include MLP predictors (default: True). Use --no-mlp to skip for faster local runs.",
+    )
 
     args = parser.parse_args()
 
@@ -369,6 +379,7 @@ def main():
     print(f"Running Experiment A on {len(datasets_to_run)} datasets...")
     print(f"Unified judge features: {args.unified_judge}")
     print(f"K-folds: {args.k_folds}")
+    print(f"Include MLP: {args.mlp}")
     print(f"Parallelization: datasets={args.max_workers}, methods={args.n_jobs_methods}, folds={args.n_jobs_folds}")
     print()
 
@@ -386,6 +397,7 @@ def main():
                 k_folds=args.k_folds,
                 n_jobs_methods=args.n_jobs_methods,
                 n_jobs_folds=args.n_jobs_folds,
+                include_mlp=args.mlp,
             )
             metrics = extract_metrics(results)
             all_results[name] = metrics
@@ -411,6 +423,7 @@ def main():
                     args.k_folds,
                     args.n_jobs_methods,
                     args.n_jobs_folds,
+                    args.mlp,
                 ): config.name
                 for config in datasets_to_run
             }
