@@ -232,3 +232,6 @@ chris_output/llm_judge_features/swebench_full_combined/
 # Unified core features (filtered to 8 common features, regenerable)
 chris_output/llm_judge_features/*_unified_core/
 
+# Tensor analysis outputs (regenerable)
+chris_output/tensor_analysis/
+

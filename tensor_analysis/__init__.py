@@ -1,0 +1,1 @@
+"""Tensor analysis for response matrices with trajectory features."""
