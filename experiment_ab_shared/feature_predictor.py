@@ -27,8 +27,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from sklearn.linear_model import Ridge, RidgeCV, LassoCV
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeRegressor
 
 from experiment_ab_shared.feature_source import (
     TaskFeatureSource,
@@ -271,6 +272,206 @@ class FeatureBasedPredictor:
                 if info["method"] == "lasso" and abs(coef) < 1e-10:
                     continue
                 print(f"    {name}: {coef:+.4f}")
+
+
+class DecisionTreePredictor:
+    """Difficulty predictor using Decision Tree regression.
+
+    Unlike Ridge regression, Decision Trees can capture nonlinear relationships
+    and feature interactions. The tree is interpretable - you can see which
+    features are used for splits and at what thresholds.
+
+    Pipeline: features -> StandardScaler -> DecisionTreeRegressor -> predict
+
+    Hyperparameters are selected via inner CV using MSE, similar to Ridge's
+    alpha selection.
+    """
+
+    # Default hyperparameter grids for grid search
+    DEFAULT_MAX_DEPTHS = [2, 3, 4, 5, 6, None]  # None = unlimited depth
+    DEFAULT_MIN_SAMPLES_SPLITS = [2, 5, 10, 20]
+    DEFAULT_MIN_SAMPLES_LEAFS = [1, 2, 5, 10]
+
+    def __init__(
+        self,
+        source: TaskFeatureSource,
+        max_depths: Optional[List[Optional[int]]] = None,
+        min_samples_splits: Optional[List[int]] = None,
+        min_samples_leafs: Optional[List[int]] = None,
+    ):
+        """Initialize the decision tree predictor.
+
+        Args:
+            source: TaskFeatureSource that provides features for tasks.
+            max_depths: List of max_depth values to try. None means unlimited.
+            min_samples_splits: List of min_samples_split values to try.
+            min_samples_leafs: List of min_samples_leaf values to try.
+        """
+        self.source = source
+        self.max_depths = max_depths or self.DEFAULT_MAX_DEPTHS
+        self.min_samples_splits = min_samples_splits or self.DEFAULT_MIN_SAMPLES_SPLITS
+        self.min_samples_leafs = min_samples_leafs or self.DEFAULT_MIN_SAMPLES_LEAFS
+
+        # Model state (set after fit())
+        self._scaler: Optional[StandardScaler] = None
+        self._model: Optional[DecisionTreeRegressor] = None
+        self._best_params: Optional[Dict[str, Any]] = None
+        self._is_fitted: bool = False
+
+    @property
+    def name(self) -> str:
+        """Human-readable predictor name (from feature source)."""
+        return f"{self.source.name} (Decision Tree)"
+
+    def fit(self, task_ids: List[str], ground_truth_b: Union[np.ndarray, List[float]]) -> None:
+        """Fit the predictor on training data.
+
+        Uses GridSearchCV with 5-fold inner CV to select best hyperparameters
+        based on MSE.
+
+        Args:
+            task_ids: List of training task identifiers.
+            ground_truth_b: Ground truth difficulty values (IRT b parameters).
+
+        Raises:
+            ValueError: If task_ids and ground_truth_b have different lengths.
+            ValueError: If any task is missing from the feature source.
+        """
+        y = np.asarray(ground_truth_b, dtype=np.float32)
+
+        if len(task_ids) != len(y):
+            raise ValueError(
+                f"task_ids ({len(task_ids)}) and ground_truth_b ({len(y)}) must have same length"
+            )
+
+        # Get features
+        X = self.source.get_features(task_ids)
+
+        # Fit scaler
+        self._scaler = StandardScaler()
+        X_scaled = self._scaler.fit_transform(X)
+
+        # Grid search over hyperparameters
+        param_grid = {
+            "max_depth": self.max_depths,
+            "min_samples_split": self.min_samples_splits,
+            "min_samples_leaf": self.min_samples_leafs,
+        }
+
+        base_tree = DecisionTreeRegressor(random_state=42)
+        grid_search = GridSearchCV(
+            base_tree,
+            param_grid,
+            cv=5,
+            scoring="neg_mean_squared_error",  # GridSearchCV maximizes, so use neg MSE
+            n_jobs=-1,  # Parallelize
+        )
+        grid_search.fit(X_scaled, y)
+
+        self._model = grid_search.best_estimator_
+        self._best_params = grid_search.best_params_
+        self._is_fitted = True
+
+    def predict(self, task_ids: List[str]) -> Dict[str, float]:
+        """Predict difficulty for the given tasks.
+
+        Args:
+            task_ids: List of task identifiers to predict for.
+
+        Returns:
+            Dictionary mapping task_id -> predicted difficulty.
+
+        Raises:
+            RuntimeError: If predict() is called before fit().
+            ValueError: If any task is missing from the feature source.
+        """
+        if not self._is_fitted:
+            raise RuntimeError("Predictor must be fit before calling predict()")
+
+        X = self.source.get_features(task_ids)
+        X_scaled = self._scaler.transform(X)
+        predictions = self._model.predict(X_scaled)
+
+        return {task_id: float(pred) for task_id, pred in zip(task_ids, predictions)}
+
+    def get_feature_importances(self) -> Optional[Dict[str, float]]:
+        """Get feature importances from the fitted tree.
+
+        Returns:
+            Dictionary mapping feature_name -> importance, or None if
+            the feature source doesn't provide feature names.
+
+        Raises:
+            RuntimeError: If called before fit().
+        """
+        if not self._is_fitted:
+            raise RuntimeError("Predictor must be fit before getting importances")
+
+        feature_names = self.source.feature_names
+        importances = self._model.feature_importances_
+
+        if feature_names is None:
+            # Return indices as keys if no names available
+            return {f"feature_{i}": float(imp) for i, imp in enumerate(importances)}
+
+        return {name: float(imp) for name, imp in zip(feature_names, importances)}
+
+    def get_model_info(self) -> Dict[str, Any]:
+        """Get information about the fitted model.
+
+        Returns:
+            Dictionary with model information including:
+            - best_params: Selected hyperparameters
+            - n_features: Number of features
+            - tree_depth: Actual depth of fitted tree
+            - n_leaves: Number of leaf nodes
+            - feature_importances: Dict of feature -> importance (if available)
+        """
+        if not self._is_fitted:
+            return {"is_fitted": False}
+
+        info = {
+            "is_fitted": True,
+            "best_params": self._best_params,
+            "n_features": self.source.feature_dim,
+            "tree_depth": self._model.get_depth(),
+            "n_leaves": self._model.get_n_leaves(),
+            "feature_source": self.source.name,
+        }
+
+        # Add feature importances
+        importances = self.get_feature_importances()
+        if importances is not None:
+            # Sort by importance descending
+            sorted_imp = sorted(importances.items(), key=lambda x: x[1], reverse=True)
+            info["feature_importances"] = dict(sorted_imp)
+            # Top features (non-zero importance)
+            info["top_features"] = [
+                (name, imp) for name, imp in sorted_imp if imp > 0.01
+            ]
+
+        return info
+
+    def print_model_summary(self) -> None:
+        """Print a summary of the fitted model."""
+        info = self.get_model_info()
+
+        if not info["is_fitted"]:
+            print("Model not fitted yet")
+            return
+
+        print(f"  Feature source: {info['feature_source']}")
+        print(f"  Number of features: {info['n_features']}")
+        print(f"  Best hyperparameters:")
+        for param, value in info["best_params"].items():
+            print(f"    {param}: {value}")
+        print(f"  Tree depth: {info['tree_depth']}")
+        print(f"  Number of leaves: {info['n_leaves']}")
+
+        if "top_features" in info and info["top_features"]:
+            print("  Top features by importance:")
+            for name, imp in info["top_features"][:10]:  # Show top 10
+                print(f"    {name}: {imp:.4f}")
 
 
 class GroupedRidgePredictor:

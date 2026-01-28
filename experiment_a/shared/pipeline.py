@@ -27,6 +27,7 @@ from experiment_ab_shared.feature_source import (
 )
 from experiment_ab_shared.feature_predictor import (
     FeatureBasedPredictor,
+    DecisionTreePredictor,
     GroupedRidgePredictor,
     StackedResidualPredictor,
 )
@@ -227,6 +228,16 @@ def build_cv_predictors(
                     display_name="Full Feature-IRT (LLM Judge)",
                 )
             )
+
+        # LLM Judge with Decision Tree (nonlinear, interpretable)
+        tree_predictor = DecisionTreePredictor(source)
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(tree_predictor),
+                name="llm_judge_tree",
+                display_name="LLM Judge (Tree)",
+            )
+        )
 
     # Trajectory features predictor (Ridge regression)
     if "Trajectory" in source_by_name:

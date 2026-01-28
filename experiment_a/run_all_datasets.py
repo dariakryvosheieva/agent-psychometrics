@@ -178,6 +178,7 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
         "oracle": "Oracle",
         "embedding_predictor": "Embedding",
         "llm_judge_predictor": "LLM Judge",
+        "llm_judge_tree": "LLM Judge (Tree)",
         "grouped_ridge": "Grouped Ridge",
         "stacked_residual": "Stacked (Emb → LLM)",
         "mlp_embedding": "MLP (Emb)",
@@ -212,7 +213,7 @@ def format_results_table(
     """
     if methods is None:
         methods = ["Oracle", "Stacked (Emb → LLM)", "Grouped Ridge", "Embedding", "LLM Judge",
-                   "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
+                   "LLM Judge (Tree)", "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
 
     # Build data rows first to calculate column widths
     data_rows = []
@@ -268,7 +269,7 @@ def save_results_csv(
 
     if methods is None:
         methods = ["Oracle", "Stacked (Emb → LLM)", "Grouped Ridge", "Embedding", "LLM Judge",
-                   "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
+                   "LLM Judge (Tree)", "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
 
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)
