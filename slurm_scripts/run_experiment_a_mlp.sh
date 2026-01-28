@@ -49,7 +49,7 @@ echo ""
 echo "Running Experiment A on all datasets (parallel)..."
 python -m experiment_a.run_all_datasets \
     --output chris_output/experiment_a/mlp_results.csv \
-    --output_dir /tmp/experiment_a_mlp \
+    --output_dir chris_output/experiment_a/mlp_debug \
     --max_workers 4
 
 echo ""
