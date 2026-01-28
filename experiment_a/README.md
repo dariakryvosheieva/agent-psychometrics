@@ -292,10 +292,13 @@ Key differences from Grouped Ridge:
 
 ### 1. Embeddings (DeepSeek-R1-Distill-Qwen-32B)
 
-Pre-computed embeddings are configured by default:
-- SWE-bench Verified: `chris_output/experiment_a/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__merged.npz`
-- SWE-bench Pro: `out/swebench_pro/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__...npz`
-- TerminalBench: `chris_output/experiment_a_terminalbench/embeddings/embeddings__deepseek-ai__DeepSeek-R1-Distill-Qwen-32B__pool-lasttoken__maxlen8192.npz`
+Pre-computed embeddings are stored in the unified `embeddings/` directory at the repository root:
+- SWE-bench Verified: `embeddings/embeddings__...__princeton-nlp_SWE-bench_Verified__test__maxlen8192.npz`
+- SWE-bench Pro: `embeddings/embeddings__...__ScaleAI_SWE-bench_Pro__test__maxlen8192.npz`
+- TerminalBench: `embeddings/embeddings__...__idnorm_instance-v2__json_terminal_bench_tasks.jsonl__test__maxlen8192.npz`
+- GSO: `embeddings/embeddings__...__gso-bench_gso__test__maxlen8192.npz`
+
+Note: The `embeddings/` directory is git-ignored. Embeddings must be generated or copied separately.
 
 To generate new embeddings:
 ```bash
