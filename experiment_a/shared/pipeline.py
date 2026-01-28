@@ -312,27 +312,35 @@ def build_cv_predictors(
         )
 
     # MLP predictors (directly predict P(success) without IRT)
-    # MLP with Embedding features
+    # Uses GatedMLP (SwiGLU-style) to learn both linear (IRT-like) and nonlinear components
+    # MLP with Embedding features - smaller hidden size + dropout to combat overfitting
     if "Embedding" in source_by_name:
         configs.append(
             CVPredictorConfig(
-                predictor=MLPPredictor(source_by_name["Embedding"]),
+                predictor=MLPPredictor(
+                    source_by_name["Embedding"],
+                    hidden_size=32,  # Smaller to reduce overfitting
+                    dropout=0.3,     # Regularization for high-dim embeddings
+                ),
                 name="mlp_embedding",
                 display_name="MLP (Embedding)",
             )
         )
 
-    # MLP with LLM Judge features
+    # MLP with LLM Judge features - larger hidden size, no dropout (9 features)
     if "LLM Judge" in source_by_name:
         configs.append(
             CVPredictorConfig(
-                predictor=MLPPredictor(source_by_name["LLM Judge"], hidden_size=32),
+                predictor=MLPPredictor(
+                    source_by_name["LLM Judge"],
+                    hidden_size=64,  # Larger to give more capacity
+                ),
                 name="mlp_llm_judge",
                 display_name="MLP (LLM Judge)",
             )
         )
 
-    # MLP with combined features
+    # MLP with combined features - dropout for high-dim embedding component
     if len(feature_source_list) >= 2:
         # Reuse the grouped source if available, otherwise create one
         feature_sources = [source for _, source in feature_source_list]
@@ -341,7 +349,11 @@ def build_cv_predictors(
         ])
         configs.append(
             CVPredictorConfig(
-                predictor=MLPPredictor(mlp_grouped_source),
+                predictor=MLPPredictor(
+                    mlp_grouped_source,
+                    hidden_size=32,  # Smaller to reduce overfitting
+                    dropout=0.3,     # Regularization for combined high-dim features
+                ),
                 name="mlp_grouped",
                 display_name=f"MLP ({mlp_grouped_source.name})",
             )

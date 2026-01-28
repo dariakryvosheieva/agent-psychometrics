@@ -4,13 +4,17 @@ Unlike difficulty-based predictors that predict task difficulty (beta) and then
 use the IRT formula P = sigmoid(theta - beta), this predictor directly learns
 to map (agent_one_hot, task_features) -> P(success).
 
-Architecture:
+Architecture (GatedMLP with SwiGLU):
     Input: [agent_one_hot (n_agents) | task_features (feature_dim)]
-    -> Linear(input_dim, hidden_size)
-    -> ReLU
+    -> SwiGLU: Swish(xW_gate) * (xW_value)  [hidden_size units]
+    -> Dropout(p)  [optional]
     -> Linear(hidden_size, 1)
     -> Sigmoid
     Output: P(success) in [0, 1]
+
+The SwiGLU gating allows the model to learn both:
+- Linear components (IRT-like: θ_agent - β_task) through the value path
+- Nonlinear components through the gated path
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -45,22 +49,32 @@ def build_input_vector(
     return np.concatenate([agent_one_hot, task_features])
 
 
-class SimpleMLP(nn.Module):
-    """Simple 2-layer MLP with sigmoid output."""
+class GatedMLP(nn.Module):
+    """SwiGLU-style gated MLP with sigmoid output.
 
-    def __init__(self, input_dim: int, hidden_size: int):
+    Uses SwiGLU gating: output = Swish(xW_gate) * (xW_value)
+    This allows learning both linear (IRT-like) and nonlinear components.
+    """
+
+    def __init__(self, input_dim: int, hidden_size: int, dropout: float = 0.0):
         super().__init__()
-        self.fc1 = nn.Linear(input_dim, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, 1)
+        # SwiGLU: gate and value projections
+        self.W_gate = nn.Linear(input_dim, hidden_size)
+        self.W_value = nn.Linear(input_dim, hidden_size)
+        self.silu = nn.SiLU()  # Swish activation
+        self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
+        self.fc_out = nn.Linear(hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        x = self.sigmoid(x)
-        return x.squeeze(-1)
+        # SwiGLU: Swish(xW_gate) * (xW_value)
+        gate = self.silu(self.W_gate(x))
+        value = self.W_value(x)
+        h = gate * value
+        h = self.dropout(h)
+        out = self.fc_out(h)
+        out = self.sigmoid(out)
+        return out.squeeze(-1)
 
 
 class MLPPredictor:
@@ -80,6 +94,7 @@ class MLPPredictor:
         self,
         source: TaskFeatureSource,
         hidden_size: int = 64,
+        dropout: float = 0.0,
         learning_rate: float = 0.001,
         weight_decay: float = 0.01,
         n_epochs: int = 200,
@@ -89,7 +104,8 @@ class MLPPredictor:
 
         Args:
             source: TaskFeatureSource providing features for tasks.
-            hidden_size: Number of hidden units in the MLP.
+            hidden_size: Number of hidden units in the GatedMLP.
+            dropout: Dropout probability (0.0 = no dropout).
             learning_rate: Learning rate for Adam optimizer.
             weight_decay: L2 regularization strength (Adam weight_decay).
             n_epochs: Number of training epochs.
@@ -97,13 +113,14 @@ class MLPPredictor:
         """
         self.source = source
         self.hidden_size = hidden_size
+        self.dropout = dropout
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.n_epochs = n_epochs
         self.verbose = verbose
 
         # Model state (set after fit())
-        self._model: Optional[SimpleMLP] = None
+        self._model: Optional[GatedMLP] = None
         self._scaler: Optional[StandardScaler] = None
         self._agent_to_idx: Optional[Dict[str, int]] = None
         self._n_agents: int = 0
@@ -202,7 +219,7 @@ class MLPPredictor:
 
         # Create model
         input_dim = X.shape[1]
-        self._model = SimpleMLP(input_dim, self.hidden_size)
+        self._model = GatedMLP(input_dim, self.hidden_size, dropout=self.dropout)
 
         # Check for GPU
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
