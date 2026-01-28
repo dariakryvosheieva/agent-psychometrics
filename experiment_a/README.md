@@ -202,7 +202,7 @@ class CVPredictor(Protocol):
 |------|---------|
 | `dataset.py` | `ExperimentData` ABC with `BinaryExperimentData`, `BinomialExperimentData` |
 | `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource` |
-| `feature_predictor.py` | `FeatureBasedPredictor`, `GroupedRidgePredictor`, `StackedResidualPredictor` |
+| `feature_predictor.py` | `FeatureBasedPredictor`, `GroupedRidgePredictor`, `StackedResidualPredictor`, `DecisionTreePredictor`, `RandomForestPredictor` |
 | `predictor_base.py` | `DifficultyPredictorBase` ABC |
 | `evaluator.py` | `compute_auc()`, `compute_irt_probability()` |
 
@@ -288,6 +288,29 @@ Key differences from Grouped Ridge:
 - **Works best when sources are complementary**: Shows improvement on GSO (+0.4% over Embedding alone) but not on SWE-bench
 
 **When to use**: Stacked (Emb → LLM) is recommended for smaller datasets (like GSO) where it outperforms Grouped Ridge. For larger datasets (like SWE-bench), Grouped Ridge performs slightly better.
+
+### Decision Tree and Random Forest
+
+Tree-based methods for difficulty prediction. Both train on LLM judge features to predict IRT difficulty.
+
+**Decision Tree** (`LLM Judge (Tree)`):
+- Uses cross-validated hyperparameter search over `max_depth` values: [3, 5, 7, 10]
+- Simple, interpretable model but prone to overfitting
+
+**Random Forest** (`LLM Judge (RF)`):
+- Ensemble of 50 decision trees with fixed hyperparameters (no grid search for speed)
+- `max_depth=5`, `min_samples_split=5`, `min_samples_leaf=2`
+- More robust than single Decision Tree due to bagging and averaging
+- Uses `oob_score=True` for out-of-bag generalization estimate
+
+**Performance comparison** (SWE-bench Verified):
+| Method | Mean AUC | Std |
+|--------|----------|-----|
+| LLM Judge (Ridge) | 0.8163 | 0.0093 |
+| LLM Judge (RF) | 0.8145 | 0.0089 |
+| LLM Judge (Tree) | 0.7961 | 0.0151 |
+
+Random Forest performs comparably to Ridge regression while being more robust than a single Decision Tree.
 
 ### MLP Predictor (Direct Success Prediction)
 
@@ -464,6 +487,7 @@ python -m experiment_ab_shared.llm_judge aggregate --dataset swebench
 --dry_run             Show configuration without running
 --exclude_unsolved    Exclude tasks no agent solved
 --include_feature_irt Include Feature-IRT joint learning methods (off by default)
+--mlp / --no-mlp      Include/exclude MLP predictors (default: --mlp). Use --no-mlp for faster local runs without PyTorch training.
 ```
 
 ## Output
