@@ -21,9 +21,8 @@ echo "Node: $SLURMD_NODENAME"
 echo "Start time: $(date)"
 echo "============================================"
 
-# Load modules
-module load miniforge
-conda activate irt
+# Activate virtual environment
+source ~/model_irt/.venv/bin/activate
 
 # Set HuggingFace cache to scratch (avoid home quota issues)
 export HF_HOME="$HOME/orcd/scratch/.cache/huggingface"
