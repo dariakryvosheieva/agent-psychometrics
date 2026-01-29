@@ -656,6 +656,71 @@ This finding explains why SAD-IRT (which uses trajectory features differently) o
 - `experiment_b/shared/ordered_logit_predictor.py` - Model implementation
 - `experiment_b/rubric_correlation_eda.py` - Correlation validation plots
 
+## Frontier Feature Analysis
+
+The `frontier_feature_analysis.py` script analyzes how feature-difficulty correlations differ between frontier and non-frontier tasks.
+
+### Running the Analysis
+
+```bash
+source .venv/bin/activate
+python -m experiment_b.frontier_feature_analysis
+```
+
+### Features Analyzed
+
+| Source | Features | Count |
+|--------|----------|-------|
+| Rubric | Aggregated trajectory rubric scores (mean per task) | 10 |
+| LLM Judge | Task semantic features | 10 |
+| Trajectory | Per-agent assistant char count and message count | 2 |
+| Date | Logistic solve date (x0_days) | 1 |
+
+### Visualization Types
+
+**Continuous features** (rubric, trajectory, date): Scatter plots with trend line showing feature value vs oracle difficulty.
+
+**Discrete features** (LLM judge): Mean difficulty ± standard error at each ordinal level, with trend line fitted through the means. Values with no data are omitted.
+
+### Data Filtering
+
+#### Trajectory Features
+
+Trajectory features have extreme outliers from agents that produce very long outputs. The analysis clips to the 99th percentile of non-frontier task values:
+
+- **Threshold**: ~35,978 characters (99th percentile)
+- **Removed**: 5 tasks with values above threshold
+- **Impact**: Non-frontier r improves from 0.192 to 0.325
+
+#### Date Features
+
+Logistic solve dates have boundary artifacts from curve-fitting optimization:
+
+- **Valid range**: 0 to 1150 days
+- **Removed**: Tasks with x0_days < 0 (would require solving before benchmark) or > 1150 (never predicted solvable)
+- **Impact**: Non-frontier r improves from 0.894 to 0.939
+
+#### Per-Agent Trajectory Selection
+
+For trajectory features, the script tests all agents and selects the one with the strongest frontier task correlation (best-case scenario):
+
+| Feature | Best Agent | Non-Frontier r | Frontier r |
+|---------|------------|---------------|------------|
+| assistant_char_count | 20250716_openhands_kimi_k2 | 0.325 | -0.375 |
+| n_assistant_messages | 20250728_zai_glm4-5 | 0.361 | -0.424 |
+
+### Output Files
+
+```
+chris_output/experiment_b/frontier_analysis/
+├── correlation_comparison.csv   # All features with correlations
+├── findings.md                  # Summary table
+├── rubric/*.png                 # Rubric feature scatter plots
+├── llm_judge/*.png              # LLM judge mean+SE plots
+├── trajectory/*.png             # Trajectory scatter plots (best agent)
+└── x0_days.png                  # Date scatter plot
+```
+
 ## Related Experiments
 
 - **Experiment A**: Prior validation - tests how well static task features predict difficulty on held-out tasks

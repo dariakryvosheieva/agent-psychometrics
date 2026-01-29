@@ -237,3 +237,6 @@ chris_output/auditor_test*/
 chris_output/auditor_verification/
 chris_output/logistic_solve_dates/
 chris_output/pc2_analysis/
+chris_output/experiment_b/frontier_analysis/
+chris_output/auditor_pilot/
+embed_pca_vs_oracle_theta__model.csv
