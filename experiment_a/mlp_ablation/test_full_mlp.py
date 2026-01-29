@@ -1,19 +1,32 @@
 """Ablation study: Full MLP on embedding features.
 
 Tests the FullMLPPredictor which takes [agent_one_hot | task_features] as
-concatenated input through a hidden layer, unlike the IRT-style MLP.
+concatenated input through a hidden layer. This is the PRIMARY MLP experiment
+for trying to beat Ridge regression on embeddings.
+
+IMPORTANT: This uses FullMLPPredictor, NOT the IRT-style MLPPredictor.
+The IRT-style MLP (MLPPredictor) was only a sanity check to verify that
+the IRT formula works - it cannot exceed IRT performance by design.
+To beat Ridge, we need a more flexible architecture that can learn
+arbitrary agent-task interactions.
+
+Key insight: Ridge succeeds with alpha=1000-10000 for 5120-dim embeddings,
+so we need very strong L2 regularization (weight_decay=100-1000).
 
 Ablation dimensions:
-1. Hidden size: [32, 64, 128, 256]
-2. Weight decay: [0.1, 1.0, 10.0] (high values needed to prevent overfitting)
-3. Initialization: random vs IRT abilities
-4. Early stopping: with vs without
+1. Weight decay: [1.0, 10.0, 100.0, 1000.0] - MOST IMPORTANT
+2. Hidden size: [32, 64, 128, 256] with strong regularization
+3. Early stopping: prevents overfitting to training data
+4. All experiments use IRT ability initialization for stable agent representations
 
 Usage:
     python -m experiment_a.mlp_ablation.test_full_mlp
 
     # Quick test with fewer configs
     python -m experiment_a.mlp_ablation.test_full_mlp --quick
+
+    # Parallel execution on SLURM
+    sbatch experiment_a/mlp_ablation/slurm_full_mlp.sh
 """
 
 import argparse
@@ -127,34 +140,21 @@ def main():
     )
 
     # === Full MLP Experiments ===
+    # Goal: Beat Ridge (0.823 AUC) by learning agent-task interactions
+    # All experiments use IRT ability initialization for stable agent representations
+    # Key insight: Ridge succeeds with alpha=1000-10000, so we need very strong regularization
 
-    # Ablation parameters (higher weight decays based on IRT-MLP findings)
+    # Ablation parameters
     if args.quick:
         hidden_sizes = [64, 128]
-        weight_decays = [1.0, 10.0]
+        weight_decays = [10.0, 100.0]
     else:
         hidden_sizes = [32, 64, 128, 256]
-        weight_decays = [0.1, 1.0, 10.0]
+        # Much stronger regularization - Ridge uses alpha=1000-10000
+        weight_decays = [1.0, 10.0, 100.0, 1000.0]
 
-    # 1. Hidden size ablation (with weight_decay=1.0)
-    for hidden_size in hidden_sizes:
-        configs.append(
-            CVPredictorConfig(
-                predictor=FullMLPPredictor(
-                    embedding_source,
-                    hidden_size=hidden_size,
-                    weight_decay=1.0,
-                    learning_rate=learning_rate,
-                    n_epochs=n_epochs,
-                    init_from_irt=False,
-                    verbose=True,
-                ),
-                name=f"full_mlp_h{hidden_size}",
-                display_name=f"FullMLP (h={hidden_size})",
-            )
-        )
-
-    # 2. Weight decay ablation (with hidden_size=128)
+    # 1. Strong regularization sweep (PRIMARY EXPERIMENT)
+    # All use IRT init since it provides stable agent representations
     for wd in weight_decays:
         configs.append(
             CVPredictorConfig(
@@ -164,64 +164,62 @@ def main():
                     weight_decay=wd,
                     learning_rate=learning_rate,
                     n_epochs=n_epochs,
-                    init_from_irt=False,
+                    init_from_irt=True,
                     verbose=True,
                 ),
-                name=f"full_mlp_wd{wd}",
-                display_name=f"FullMLP (wd={wd})",
+                name=f"full_mlp_wd{wd}_irt",
+                display_name=f"FullMLP (wd={wd}, IRT)",
             )
         )
 
-    # 3. IRT initialization ablation (with weight_decay=1.0)
-    for hidden_size in [64, 128]:
-        # With IRT init
+    # 2. Hidden size ablation with strong regularization
+    for hidden_size in hidden_sizes:
         configs.append(
             CVPredictorConfig(
                 predictor=FullMLPPredictor(
                     embedding_source,
                     hidden_size=hidden_size,
-                    weight_decay=1.0,
+                    weight_decay=100.0,  # Strong reg
                     learning_rate=learning_rate,
                     n_epochs=n_epochs,
                     init_from_irt=True,
                     verbose=True,
                 ),
-                name=f"full_mlp_h{hidden_size}_irt",
-                display_name=f"FullMLP (h={hidden_size}, IRT init)",
+                name=f"full_mlp_h{hidden_size}_wd100_irt",
+                display_name=f"FullMLP (h={hidden_size}, wd=100, IRT)",
             )
         )
 
-    # 4. Early stopping ablation
-    for init_from_irt in [False, True]:
-        init_str = "irt" if init_from_irt else "random"
+    # 3. Early stopping with strong regularization
+    for wd in [10.0, 100.0]:
         configs.append(
             CVPredictorConfig(
                 predictor=FullMLPPredictor(
                     embedding_source,
                     hidden_size=128,
-                    weight_decay=1.0,
+                    weight_decay=wd,
                     learning_rate=learning_rate,
                     n_epochs=1000,  # More epochs since early stopping will cut it
-                    init_from_irt=init_from_irt,
+                    init_from_irt=True,
                     early_stopping=True,
                     val_fraction=0.1,
                     patience=30,
                     verbose=True,
                 ),
-                name=f"full_mlp_earlystop_{init_str}",
-                display_name=f"FullMLP early stop ({init_str})",
+                name=f"full_mlp_wd{wd}_irt_earlystop",
+                display_name=f"FullMLP (wd={wd}, IRT, early stop)",
             )
         )
 
-    # 5. Best config candidates (combining good settings)
+    # 4. Best config candidates (combining good settings)
     if not args.quick:
-        # Larger hidden + IRT init + early stopping
+        # Very strong regularization + early stopping
         configs.append(
             CVPredictorConfig(
                 predictor=FullMLPPredictor(
                     embedding_source,
-                    hidden_size=256,
-                    weight_decay=1.0,
+                    hidden_size=64,  # Smaller hidden to reduce params
+                    weight_decay=100.0,
                     learning_rate=learning_rate,
                     n_epochs=1000,
                     init_from_irt=True,
@@ -231,17 +229,17 @@ def main():
                     verbose=True,
                 ),
                 name="full_mlp_best_v1",
-                display_name="FullMLP (h=256, IRT, early stop)",
+                display_name="FullMLP (h=64, wd=100, IRT, early stop)",
             )
         )
 
-        # Higher regularization + early stopping
+        # Extreme regularization
         configs.append(
             CVPredictorConfig(
                 predictor=FullMLPPredictor(
                     embedding_source,
                     hidden_size=128,
-                    weight_decay=10.0,
+                    weight_decay=1000.0,
                     learning_rate=learning_rate,
                     n_epochs=1000,
                     init_from_irt=True,
@@ -251,35 +249,35 @@ def main():
                     verbose=True,
                 ),
                 name="full_mlp_best_v2",
-                display_name="FullMLP (h=128, wd=10, IRT, early stop)",
+                display_name="FullMLP (h=128, wd=1000, IRT, early stop)",
             )
         )
 
-        # Dropout experiment
+        # Dropout + strong reg
         configs.append(
             CVPredictorConfig(
                 predictor=FullMLPPredictor(
                     embedding_source,
                     hidden_size=128,
-                    dropout=0.3,
-                    weight_decay=1.0,
+                    dropout=0.5,
+                    weight_decay=100.0,
                     learning_rate=learning_rate,
                     n_epochs=n_epochs,
                     init_from_irt=True,
                     verbose=True,
                 ),
                 name="full_mlp_dropout",
-                display_name="FullMLP (h=128, dropout=0.3, IRT)",
+                display_name="FullMLP (h=128, dropout=0.5, wd=100, IRT)",
             )
         )
 
     # Filter configs by part if specified (for parallel execution)
     if args.part is not None:
         # Split configs roughly in half
-        # Part 1: Baselines + hidden size + weight decay ablations
-        # Part 2: IRT init + early stopping + best configs
-        part1_keywords = ["oracle", "constant", "ridge", "full_mlp_h32", "full_mlp_h64", "full_mlp_h128", "full_mlp_h256", "full_mlp_wd"]
-        part2_keywords = ["full_mlp_h64_irt", "full_mlp_h128_irt", "full_mlp_earlystop", "full_mlp_best", "full_mlp_dropout"]
+        # Part 1: Baselines + weight decay sweep
+        # Part 2: Hidden size + early stopping + best configs
+        part1_keywords = ["oracle", "constant", "ridge", "full_mlp_wd1.0", "full_mlp_wd10.0", "full_mlp_wd100.0", "full_mlp_wd1000.0"]
+        part2_keywords = ["full_mlp_h", "earlystop", "full_mlp_best", "full_mlp_dropout"]
 
         if args.part == 1:
             configs = [c for c in configs if any(kw in c.name for kw in part1_keywords)]

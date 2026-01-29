@@ -1,6 +1,37 @@
-# MLP Ablation Study: Training IRT-Style Neural Networks
+# MLP Ablation Study
 
-This directory contains ablation studies for training the `IRTStyleMLP` model, which learns `P(success) = sigmoid(θ_agent - β_task)` end-to-end with gradient descent.
+This directory contains ablation studies for MLP-based difficulty prediction.
+
+## ⚠️ Important: Two Architectures
+
+**IRT-Style MLP (`MLPPredictor`)** - SANITY CHECK ONLY
+- Architecture: `P = sigmoid(θ_agent - β_task)` — identical to IRT formula
+- By design, this CANNOT exceed IRT/Ridge performance
+- Was used only to verify that end-to-end BCE training works
+- **Do not use for experiments trying to beat baselines**
+
+**Full MLP (`FullMLPPredictor`)** - PRIMARY ARCHITECTURE
+- Architecture: `[agent_one_hot | features] → Hidden → P(success)`
+- Can learn arbitrary agent-task interactions
+- **Use this for experiments trying to beat Ridge regression**
+- Key finding: needs very strong regularization (`weight_decay=100-1000`)
+
+## Primary Experiment: Full MLP on Embeddings
+
+Run with:
+```bash
+sbatch experiment_a/mlp_ablation/slurm_full_mlp.sh
+```
+
+See `test_full_mlp.py` for the main experiment configuration.
+
+---
+
+# IRT-Style MLP (Sanity Check Documentation)
+
+The following documents the IRT-style MLP experiments, which were used to verify
+that the IRT approach works with gradient descent. These results are NOT the
+main experiments — they serve only as a sanity check.
 
 ## The Problem: Gradient Competition
 

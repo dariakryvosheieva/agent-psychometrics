@@ -1,13 +1,18 @@
-"""MLP predictor that directly predicts P(success) from (agent, task) pairs.
+"""MLP predictors for P(success) prediction from (agent, task) pairs.
 
-Architecture (IRTStyleMLP):
-    Mirrors the IRT formula: P = sigmoid(θ_agent - β_task)
-    - Agent pathway: agent_index → Embedding → θ (scalar ability per agent)
-    - Feature pathway: task_features → Linear → β (scalar difficulty)
-    - Output: sigmoid(θ - β)
+This module contains two MLP architectures:
 
-    This is structurally identical to IRT, just learned end-to-end with BCE loss
-    instead of maximum likelihood on the response matrix.
+1. IRTStyleMLP / MLPPredictor (SANITY CHECK ONLY):
+   - Mirrors the IRT formula: P = sigmoid(θ_agent - β_task)
+   - IMPORTANT: This was only used to verify the IRT approach works with BCE loss.
+   - By design, it CANNOT exceed IRT performance since it's structurally identical.
+   - DO NOT USE for experiments trying to beat Ridge/IRT baselines.
+
+2. SimpleMLP / FullMLPPredictor (PRIMARY ARCHITECTURE):
+   - Takes [agent_one_hot | task_features] through a hidden layer
+   - Can learn arbitrary agent-task interactions (not limited to θ - β)
+   - Use this for experiments trying to beat Ridge regression.
+   - Key: needs strong regularization (weight_decay=100-1000) for embeddings.
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -78,6 +83,10 @@ class SimpleMLP(nn.Module):
 
 class IRTStyleMLP(nn.Module):
     """IRT-style architecture that explicitly learns θ_agent - β_task.
+
+    IMPORTANT: This is a SANITY CHECK architecture only. It cannot exceed IRT
+    performance by design since it's structurally identical to IRT. Use
+    SimpleMLP/FullMLPPredictor instead for experiments trying to beat baselines.
 
     Mirrors the IRT formula: P = sigmoid(θ_agent - β_task)
     - Agent pathway: agent_one_hot → θ (learned ability per agent)
