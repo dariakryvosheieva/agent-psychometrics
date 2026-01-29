@@ -1999,6 +1999,7 @@ class AgentEmbeddingPredictor:
         n_epochs: int = 500,
         verbose: bool = False,
         init_from_irt: bool = True,
+        init_noise_scale: float = 0.0,
         early_stopping: bool = True,
         val_fraction: float = 0.1,
         patience: int = 30,
@@ -2015,6 +2016,7 @@ class AgentEmbeddingPredictor:
         self.n_epochs = n_epochs
         self.verbose = verbose
         self.init_from_irt = init_from_irt
+        self.init_noise_scale = init_noise_scale
         self.early_stopping = early_stopping
         self.val_fraction = val_fraction
         self.patience = patience
@@ -2110,8 +2112,13 @@ class AgentEmbeddingPredictor:
                         ability = float(data.train_abilities.loc[agent_id, "ability"])
                         # Initialize embedding to ability value (broadcast)
                         self._model.agent_embedding.weight.data[idx, :] = ability
+                # Add noise to break symmetry across dimensions
+                if self.init_noise_scale > 0:
+                    noise = torch.randn_like(self._model.agent_embedding.weight.data) * self.init_noise_scale
+                    self._model.agent_embedding.weight.data += noise
             if self.verbose:
-                print(f"   Initialized agent embeddings from IRT abilities")
+                noise_msg = f" + noise(σ={self.init_noise_scale})" if self.init_noise_scale > 0 else ""
+                print(f"   Initialized agent embeddings from IRT abilities{noise_msg}")
 
         agent_tensor = torch.tensor(agent_indices, dtype=torch.long, device=device)
         features_tensor = torch.tensor(features, dtype=torch.float32, device=device)
