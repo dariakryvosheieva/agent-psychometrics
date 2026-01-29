@@ -16,14 +16,80 @@ This directory contains ablation studies for MLP-based difficulty prediction.
 - **Use this for experiments trying to beat Ridge regression**
 - Key finding: needs very strong regularization (`weight_decay=100-1000`)
 
-## Primary Experiment: Full MLP on Embeddings
+## Primary Experiment: Agent Embedding MLP on Embeddings
 
-Run with:
-```bash
-sbatch experiment_a/mlp_ablation/slurm_full_mlp.sh
+### Best Architecture: AgentEmbeddingPredictor
+
+```python
+from experiment_a.shared.mlp_predictor import AgentEmbeddingPredictor
+
+predictor = AgentEmbeddingPredictor(
+    embedding_source,
+    agent_emb_dim=64,        # 64D agent embedding
+    hidden_sizes=[64, 64],   # Two hidden layers
+    dropout=0.0,
+    learning_rate=0.01,
+    weight_decay=0.2,
+    n_epochs=1000,
+    init_from_irt=True,      # Critical: initialize from IRT abilities
+    init_noise_scale=0.01,   # Small noise (optional, marginal benefit)
+    early_stopping=True,
+    val_fraction=0.1,
+    patience=30,
+)
 ```
 
-See `test_full_mlp.py` for the main experiment configuration.
+### Results on Embeddings (5120 dimensions)
+
+| Method | Test AUC | Train AUC | Gap |
+|--------|----------|-----------|-----|
+| Oracle (true β) | 0.944 | - | - |
+| **Ridge (target)** | **0.823** | - | - |
+| AgentEmb (IRT + noise σ=0.01) | 0.818 | 0.878 | +0.060 |
+| AgentEmb (IRT + noise σ=0.5) | 0.816 | 0.880 | +0.064 |
+| AgentEmb (IRT broadcast, no noise) | 0.812 | 0.878 | +0.066 |
+| AgentEmb (random init, 64D) | 0.726 | 0.789 | +0.063 |
+| AgentEmb (1D scalar, IRT init) | 0.722 | 0.787 | +0.065 |
+
+### Key Findings
+
+1. **IRT initialization is critical**: Random init (0.726) vs IRT init (0.818) = **9% gap**
+
+2. **64D > 1D even when embeddings collapse**: The 64D embedding with IRT broadcast (all dims identical) outperforms 1D scalar embedding by 9% (0.812 vs 0.722). This is because:
+   - The MLP's first layer has 64 different weights connecting the embedding to each hidden unit
+   - More parameters provide initial diversity in how agent information flows through the network
+   - Effective gradient scaling may differ with more input dimensions
+
+3. **Noise provides marginal benefit**: Small noise (σ=0.01) gives best result (0.818), but all noise scales are within ~0.6% of each other
+
+4. **Still ~0.5% below Ridge**: Best MLP (0.818) vs Ridge (0.823). Ridge's closed-form solution with optimal regularization remains superior for this task.
+
+### Architecture Details
+
+```
+Input: [task_embedding (5120D), agent_embedding (64D)] = 5184D
+  ↓
+Linear(5184, 64) + ReLU + Dropout
+  ↓
+Linear(64, 64) + ReLU + Dropout
+  ↓
+Linear(64, 1) + Sigmoid → P(success)
+```
+
+The agent embedding is initialized by broadcasting the IRT ability value to all 64 dimensions:
+```python
+# For each agent:
+embedding[agent_idx, :] = ability_value  # Same value in all 64 dims
+```
+
+### Why Ridge Still Wins
+
+Ridge regression benefits from:
+- Closed-form optimal solution (no local minima)
+- Automatic regularization via cross-validated alpha
+- No gradient competition between agent and task parameters
+
+The MLP's advantage (learning non-linear interactions) doesn't help because the task is approximately linear in the embedding space.
 
 ---
 
@@ -158,6 +224,10 @@ The IRT formula `P = sigmoid(θ - β)` has an identifiability issue: you can shi
 
 | File | Purpose |
 |------|---------|
+| `test_init_noise.py` | **Main experiment**: IRT init noise ablation + 1D vs 64D comparison |
+| `interaction_sweep_v2.py` | Balanced representation architectures (TaskBottleneck, CrossAttention, FeatureGated) |
+| `extract_agent_embeddings.py` | Extract learned 64D embeddings to CSV for visualization |
+| `plot_agent_embeddings.py` | PCA visualization of agent embeddings (run locally) |
 | `run_mlp_ablation.py` | Main ablation: baseline, frozen_irt, strong_reg, both_fixes |
 | `test_two_stage.py` | Two-stage training ablation |
 | `test_lr_ablation.py` | Learning rate scale ablation |
