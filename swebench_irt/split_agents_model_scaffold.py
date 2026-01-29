@@ -171,6 +171,9 @@ def _canonical_scaffold(s: str) -> str:
         # Avoid empty scaffolds: treat as explicit "no scaffold" category.
         return "NoScaffold"
     low = sl.lower()
+    # Verified convention: "Lingxi" refers to the Lingxi v1.5 scaffold.
+    if low in {"lingxi", "lingxi v1.5", "lingxi-v1.5", "lingxi_v1.5"}:
+        return "Lingxi v1.5"
     # Verified convention: merge "jules" scaffold into the canonical "google_jules".
     if low in {"jules", "google-jules", "google_jules"}:
         return "google_jules"
@@ -391,6 +394,16 @@ def split_agent_name(agent: str) -> Optional[tuple[str, str, str, str]]:
         raw = _strip_at_suffix(raw)
         if not raw:
             return None
+
+    # Dataset-specific exclusion: Refact.ai Agent uses multiple base models
+    # (see Verified metadata tags.model), so it should not be forced into a single (model, scaffold).
+    if "refact_agent" in raw.lower() or "refact-agent" in raw.lower():
+        return None
+
+    # Dataset-specific exclusion: Nemotron-CORTEXA uses multiple base models
+    # (see Verified metadata tags.model), so it should not be forced into a single (model, scaffold).
+    if "cortexa" in raw.lower():
+        return None
 
     # Dataset-specific special-case: this agent id contains a composite suffix
     # ("gpt4o-sonnet") that is not a base model token in our decomposition scheme.

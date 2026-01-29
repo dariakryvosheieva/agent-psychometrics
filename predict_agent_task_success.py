@@ -521,9 +521,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # -----------------------------
     p.add_argument("--write_rows_csv", type=str, default="", help="Optional CSV path to write expanded (agent, task, y) rows.")
     p.add_argument(
-        "--no_pca_embed_vs_oracle_theta",
+        "--pca",
         action="store_true",
-        help="Disable PCA diagnostics: PC2(model/scaffold learned embeddings) vs oracle IRT ability (theta).",
+        help="Enable PCA diagnostics: PC1/PC2(model/scaffold learned embeddings) vs oracle IRT ability (theta).",
     )
 
     args = p.parse_args(list(argv) if argv is not None else None)
@@ -617,6 +617,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pc1 = np.asarray(Z[:, 0], dtype=np.float64)
         pc2 = np.asarray(Z[:, 1], dtype=np.float64)
 
+        # Optional linear fit of PC2 on theta (handy for metadata; doesn't affect plots).
+        try:
+            if float(np.nanstd(theta)) > 0:
+                a2, b2 = np.polyfit(theta, pc2, deg=1)
+            else:
+                a2, b2 = float("nan"), float("nan")
+        except Exception:
+            a2, b2 = float("nan"), float("nan")
+
         def _pearson(x: np.ndarray, y: np.ndarray) -> float:
             if x.size < 2:
                 return float("nan")
@@ -635,25 +644,54 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             for i, th, a, b in zip(ids, theta.tolist(), pc1.tolist(), pc2.tolist()):
                 w.writerow([str(i), float(th), float(a), float(b)])
 
-        png_path = os.path.join(out_dir, f"embed_pc2_vs_oracle_theta__{str(entity)}.png")
+        png_pc1_path = os.path.join(out_dir, f"embed_pc1_vs_oracle_theta__{str(entity)}.png")
+        png_pc2_path = os.path.join(out_dir, f"embed_pc2_vs_oracle_theta__{str(entity)}.png")
         try:
             import matplotlib
 
             matplotlib.use("Agg")
             import matplotlib.pyplot as plt  # type: ignore
 
+            def _short_label(s: str, *, max_len: int = 28) -> str:
+                ss = str(s)
+                if len(ss) <= int(max_len):
+                    return ss
+                return ss[: int(max_len) - 1] + "…"
+
+            evr = getattr(pca, "explained_variance_ratio_", None)
+            evr1 = float(evr[0]) if isinstance(evr, np.ndarray) and evr.size >= 1 else float("nan")
+            evr2 = float(evr[1]) if isinstance(evr, np.ndarray) and evr.size >= 2 else float("nan")
+
+            plt.figure(figsize=(7, 5))
+            plt.scatter(theta, pc1, s=12, alpha=0.8)
+            plt.xlabel("Oracle IRT ability (theta)")
+            plt.ylabel("PCA dim 1 (learned embedding)")
+            plt.title(f"{str(entity)} embeddings: PC1 vs theta (r={r_pc1:.3f}, EVR1={evr1:.3f}, n={len(ids)})")
+            plt.tight_layout()
+            plt.savefig(png_pc1_path, dpi=200)
+            plt.close()
+
             plt.figure(figsize=(7, 5))
             plt.scatter(theta, pc2, s=12, alpha=0.8)
+            # Label points (n is typically small: ~40-50).
+            for x, yv, lab in zip(theta.tolist(), pc2.tolist(), ids):
+                plt.annotate(
+                    _short_label(str(lab)),
+                    (float(x), float(yv)),
+                    textcoords="offset points",
+                    xytext=(3, 3),
+                    fontsize=6,
+                    alpha=0.85,
+                )
             plt.xlabel("Oracle IRT ability (theta)")
             plt.ylabel("PCA dim 2 (learned embedding)")
-            evr = getattr(pca, "explained_variance_ratio_", None)
-            evr2 = float(evr[1]) if isinstance(evr, np.ndarray) and evr.size >= 2 else float("nan")
             plt.title(f"{str(entity)} embeddings: PC2 vs theta (r={r_pc2:.3f}, EVR2={evr2:.3f}, n={len(ids)})")
             plt.tight_layout()
-            plt.savefig(png_path, dpi=200)
+            plt.savefig(png_pc2_path, dpi=200)
             plt.close()
         except Exception as e:
-            png_path = ""
+            png_pc1_path = ""
+            png_pc2_path = ""
             plot_err = str(e)
         else:
             plot_err = ""
@@ -665,9 +703,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "n": int(len(ids)),
             "pearson_r_pc2_vs_theta": float(r_pc2),
             "pearson_r_pc1_vs_theta": float(r_pc1),
+            "pc2_on_theta_slope": float(a2),
             "explained_variance_ratio": (evr.tolist() if isinstance(evr, np.ndarray) else None),
             "csv_path": str(csv_path),
-            "png_path": str(png_path) if png_path else "",
+            # Backwards-compatible key (was PC2).
+            "png_path": str(png_pc2_path) if png_pc2_path else "",
+            "png_pc1_path": str(png_pc1_path) if png_pc1_path else "",
+            "png_pc2_path": str(png_pc2_path) if png_pc2_path else "",
             **({"plot_error": str(plot_err)} if plot_err else {}),
         }
 
@@ -1476,10 +1518,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except Exception:
         pass
 
-    print(json.dumps(metrics, indent=2, sort_keys=True))
+    # If PCA isn't requested, stop here (no final-train / no .pt bundle).
+    if not bool(getattr(args, "pca", False)):
+        print(json.dumps(metrics, indent=2, sort_keys=True))
+        meta_path = os.path.join(out_dir, "agent_task_success_embed_ms_metrics.json")
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=2, sort_keys=True)
+            f.write("\n")
+        print(f"Wrote metrics: {meta_path}")
+        return 0
 
     # -----------------------------
-    # Train final model on ALL data (and save)
+    # Train final model on ALL data (and save) [PCA only]
     # -----------------------------
     device = torch.device(str(args.device))
 
@@ -1525,7 +1575,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             _p(f"[progress] final-train epoch {_epoch + 1}/{int(args.epochs)} loss={avg:.4f}")
 
     # PCA diagnostics: learned embeddings vs oracle IRT theta.
-    if (not bool(getattr(args, "no_pca_embed_vs_oracle_theta", False))) and oracle_theta_by_model and oracle_theta_by_scaffold:
+    if oracle_theta_by_model and oracle_theta_by_scaffold:
         try:
             pca_diag = {
                 "model": _pca_pc2_vs_theta(
@@ -1548,6 +1598,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except Exception as e:
             pca_diag = {"enabled": True, "error": str(e)}
         metrics["embed_mlp_embedding_pca_vs_oracle_theta"] = pca_diag
+
+    # Now print the full JSON (including PCA diagnostics, if any).
+    print(json.dumps(metrics, indent=2, sort_keys=True))
 
     # Save bundle.
     bundle = {

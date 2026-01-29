@@ -15,8 +15,9 @@ export HF_HUB_ENABLE_HF_TRANSFER=1
 export PYTHONUNBUFFERED=1
 
 python -u predict_agent_task_success.py \
-  --train_benchmarks gso \
-  --gso_agent_results_jsonl out/chris_irt/gso.jsonl \
-  --out_dir out/agent_task_success_gso \
+  --train_benchmarks verified \
+  --verified_agent_results_jsonl out/chris_irt/swebench_verified_20251115_full.jsonl \
+  --out_dir out/agent_task_success_verified \
   --split_by task \
-  --embeddings_cache out/agent_task_success_gso/task_embeddings__qs_sol_instr_b7008f2d.npz
+  --embeddings_cache out/agent_task_success_verified/task_embeddings__qs_sol_instr_b7008f2d.npz \
+  --pca
