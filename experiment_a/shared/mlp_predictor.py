@@ -1997,6 +1997,7 @@ class AgentEmbeddingPredictor:
         learning_rate: float = 0.001,
         weight_decay: float = 0.01,
         n_epochs: int = 500,
+        batch_size: int = None,  # None = full-batch, otherwise mini-batch
         verbose: bool = False,
         init_from_irt: bool = True,
         init_noise_scale: float = 0.0,
@@ -2014,6 +2015,7 @@ class AgentEmbeddingPredictor:
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.n_epochs = n_epochs
+        self.batch_size = batch_size
         self.verbose = verbose
         self.init_from_irt = init_from_irt
         self.init_noise_scale = init_noise_scale
@@ -2159,14 +2161,36 @@ class AgentEmbeddingPredictor:
         epochs_without_improvement = 0
 
         self._model.train()
-        for epoch in range(self.n_epochs):
-            optimizer.zero_grad()
-            logits = self._model(train_agent, train_feat)
-            loss = criterion(logits, train_y)
-            loss.backward()
-            optimizer.step()
+        n_train = train_agent.shape[0]
 
-            loss_val = loss.item()
+        for epoch in range(self.n_epochs):
+            # Mini-batch or full-batch training
+            if self.batch_size is not None and self.batch_size < n_train:
+                # Mini-batch: shuffle and iterate through batches
+                perm = torch.randperm(n_train, device=device)
+                epoch_loss = 0.0
+                n_batches = 0
+                for start in range(0, n_train, self.batch_size):
+                    end = min(start + self.batch_size, n_train)
+                    batch_idx = perm[start:end]
+
+                    optimizer.zero_grad()
+                    logits = self._model(train_agent[batch_idx], train_feat[batch_idx])
+                    loss = criterion(logits, train_y[batch_idx])
+                    loss.backward()
+                    optimizer.step()
+
+                    epoch_loss += loss.item()
+                    n_batches += 1
+                loss_val = epoch_loss / n_batches
+            else:
+                # Full-batch training
+                optimizer.zero_grad()
+                logits = self._model(train_agent, train_feat)
+                loss = criterion(logits, train_y)
+                loss.backward()
+                optimizer.step()
+                loss_val = loss.item()
 
             if self.early_stopping:
                 self._model.eval()
