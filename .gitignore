@@ -226,6 +226,7 @@ chris_output/experiment_a/mlp_diagnostics/
 chris_output/experiment_a/mlp_gated_diagnostics/
 chris_output/experiment_a/mlp_lr_ablation/
 chris_output/experiment_a/mlp_two_stage/
+chris_output/experiment_a/mlp_embedding/
 
 # Experiment B timestamped result CSVs (regenerable)
 chris_output/experiment_b/results_*.csv
