@@ -1052,12 +1052,12 @@ class AgentEmbeddingModel(nn.Module):
             prev_dim = hidden_size
 
         layers.append(nn.Linear(prev_dim, 1))
-        layers.append(nn.Sigmoid())
+        # No sigmoid - use BCEWithLogitsLoss for numerical stability
 
         self.mlp = nn.Sequential(*layers)
 
     def forward(self, agent_indices: torch.Tensor, task_features: torch.Tensor) -> torch.Tensor:
-        """Forward pass.
+        """Forward pass. Returns logits (not probabilities).
 
         Args:
             agent_indices: Long tensor of shape (batch,) with agent indices
@@ -1065,7 +1065,7 @@ class AgentEmbeddingModel(nn.Module):
         """
         agent_emb = self.agent_embedding(agent_indices)  # (batch, agent_emb_dim)
         combined = torch.cat([agent_emb, task_features], dim=1)
-        return self.mlp(combined).squeeze(-1)
+        return self.mlp(combined).squeeze(-1)  # Returns logits
 
 
 class FullMLPPredictor:
@@ -2147,12 +2147,12 @@ class AgentEmbeddingPredictor:
             train_feat = features_tensor
             train_y = y_tensor
 
-        optimizer = torch.optim.Adam(
+        optimizer = torch.optim.AdamW(
             self._model.parameters(),
             lr=self.learning_rate,
             weight_decay=self.weight_decay,
         )
-        criterion = nn.BCELoss()
+        criterion = nn.BCEWithLogitsLoss()
 
         best_val_loss = float('inf')
         best_state_dict = None
@@ -2161,8 +2161,8 @@ class AgentEmbeddingPredictor:
         self._model.train()
         for epoch in range(self.n_epochs):
             optimizer.zero_grad()
-            y_pred = self._model(train_agent, train_feat)
-            loss = criterion(y_pred, train_y)
+            logits = self._model(train_agent, train_feat)
+            loss = criterion(logits, train_y)
             loss.backward()
             optimizer.step()
 
@@ -2171,8 +2171,8 @@ class AgentEmbeddingPredictor:
             if self.early_stopping:
                 self._model.eval()
                 with torch.no_grad():
-                    val_pred = self._model(val_agent, val_feat)
-                    val_loss = criterion(val_pred, val_y).item()
+                    val_logits = self._model(val_agent, val_feat)
+                    val_loss = criterion(val_logits, val_y).item()
                 self._model.train()
 
                 if val_loss < best_val_loss:
@@ -2198,10 +2198,11 @@ class AgentEmbeddingPredictor:
 
         self._is_fitted = True
 
-        # Compute train AUC
+        # Compute train AUC (model outputs logits, apply sigmoid)
         self._model.eval()
         with torch.no_grad():
-            y_pred_train = self._model(agent_tensor, features_tensor).cpu().numpy()
+            logits_train = self._model(agent_tensor, features_tensor)
+            y_pred_train = torch.sigmoid(logits_train).cpu().numpy()
         self._train_auc = roc_auc_score(y, y_pred_train) if len(np.unique(y)) > 1 else None
 
         if self.verbose:
@@ -2229,7 +2230,8 @@ class AgentEmbeddingPredictor:
         with torch.no_grad():
             agent_tensor = torch.tensor([agent_idx], dtype=torch.long, device=device)
             feat_tensor = torch.tensor(task_feat, dtype=torch.float32, device=device).unsqueeze(0)
-            prob = self._model(agent_tensor, feat_tensor).item()
+            logit = self._model(agent_tensor, feat_tensor)
+            prob = torch.sigmoid(logit).item()
         return prob
 
     def _cache_test_task_features(self, test_tasks: List[str]) -> None:
