@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=full_mlp
-#SBATCH --output=%x_%j_%a.out
-#SBATCH --error=%x_%j_%a.err
+#SBATCH --output=logs/full_mlp_%j_%a.out
+#SBATCH --error=logs/full_mlp_%j_%a.err
 #SBATCH --time=6:00:00
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:1
@@ -13,7 +13,7 @@
 #   Part 1: Baselines + hidden size + weight decay ablations
 #   Part 2: IRT init + early stopping + best configs
 #
-# Run with: sbatch experiment_a/mlp_ablation/slurm_full_mlp.sh
+# Run with: mkdir -p logs && sbatch experiment_a/mlp_ablation/slurm_full_mlp.sh
 # Results saved to: chris_output/experiment_a/mlp_embedding/full_mlp_results_part{1,2}.json
 
 set -e
@@ -27,6 +27,7 @@ echo "=========================================="
 
 # Setup environment
 cd ~/model_irt
+mkdir -p logs
 source .venv/bin/activate
 export HF_HOME="$HOME/orcd/scratch/.cache/huggingface"
 
