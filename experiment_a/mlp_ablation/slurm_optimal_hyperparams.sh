@@ -3,7 +3,7 @@
 #SBATCH --output=chris_output/experiment_a/mlp_ablation/optimal_hyperparams_%j.out
 #SBATCH --error=chris_output/experiment_a/mlp_ablation/optimal_hyperparams_%j.err
 #SBATCH --time=06:00:00
-#SBATCH --partition=sched_mit_psfc_gpu_r8
+#SBATCH --partition=mit_normal_gpu
 #SBATCH --gres=gpu:h200:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G

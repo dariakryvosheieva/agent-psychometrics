@@ -141,6 +141,8 @@ Frontier ability is linear over time (R² = 0.98 for 2PL).
 - If you find yourself copying code, refactor it into a shared module instead
 
 **MIT Engaging Cluster:**
+- **Partitions**: Use `mit_normal` for CPU tasks and `mit_normal_gpu` for GPU tasks
+- **GPUs**: Up to 2 H200 GPUs available (`--gres=gpu:h200:2`)
 - HuggingFace cache is stored on scratch to avoid home quota limits
 - Always set this in SLURM scripts: `export HF_HOME="$HOME/orcd/scratch/.cache/huggingface"`
 
