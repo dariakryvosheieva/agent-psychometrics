@@ -1,13 +1,7 @@
-"""Aggregate and display results from parallel MLP ablation runs.
+"""Aggregate and display results from Full MLP ablation runs.
 
 Usage:
     python -m experiment_a.mlp_ablation.aggregate_results
-
-    # For embedding MLP results
-    python -m experiment_a.mlp_ablation.aggregate_results --type embedding
-
-    # For full MLP results
-    python -m experiment_a.mlp_ablation.aggregate_results --type full
 """
 
 import argparse
@@ -94,32 +88,19 @@ def print_results_table(results: dict, title: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Aggregate MLP ablation results")
-    parser.add_argument("--type", choices=["full", "embedding", "both"], default="both",
-                        help="Which results to aggregate (default: both)")
+    parser = argparse.ArgumentParser(description="Aggregate Full MLP ablation results")
     parser.add_argument("--save", action="store_true",
                         help="Save aggregated results to a combined JSON file")
     args = parser.parse_args()
 
-    if args.type in ["full", "both"]:
-        results = load_and_merge("full_mlp_results")
-        if results:
-            print_results_table(results, "FULL MLP ABLATION RESULTS")
-            if args.save:
-                out_path = OUTPUT_DIR / "full_mlp_results_combined.json"
-                with open(out_path, "w") as f:
-                    json.dump(results, f, indent=2)
-                print(f"\nSaved combined results to: {out_path}")
-
-    if args.type in ["embedding", "both"]:
-        results = load_and_merge("embedding_mlp_results")
-        if results:
-            print_results_table(results, "EMBEDDING MLP (IRT-STYLE) ABLATION RESULTS")
-            if args.save:
-                out_path = OUTPUT_DIR / "embedding_mlp_results_combined.json"
-                with open(out_path, "w") as f:
-                    json.dump(results, f, indent=2)
-                print(f"\nSaved combined results to: {out_path}")
+    results = load_and_merge("full_mlp_results")
+    if results:
+        print_results_table(results, "FULL MLP ABLATION RESULTS")
+        if args.save:
+            out_path = OUTPUT_DIR / "full_mlp_results_combined.json"
+            with open(out_path, "w") as f:
+                json.dump(results, f, indent=2)
+            print(f"\nSaved combined results to: {out_path}")
 
 
 if __name__ == "__main__":
