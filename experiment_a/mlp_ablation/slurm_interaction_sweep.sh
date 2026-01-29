@@ -6,13 +6,12 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32G
 #SBATCH --partition=mit_normal_gpu
-#SBATCH --array=1-3
+#SBATCH --array=1-2
 
 # Interaction Architecture Sweep (Part 5)
 # Tests new ways to combine agent and task features:
-# - Part 1: Two-Tower, Bilinear
-# - Part 2: NCF, Multiplicative
-# - Part 3: Agent Embedding
+# - Part 1: Two-Tower, Bilinear, Multiplicative (baselines too)
+# - Part 2: NCF, Agent Embedding
 #
 # Run with: mkdir -p logs && sbatch experiment_a/mlp_ablation/slurm_interaction_sweep.sh
 

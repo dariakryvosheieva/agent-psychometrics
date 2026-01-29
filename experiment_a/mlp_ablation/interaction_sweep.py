@@ -14,9 +14,8 @@ that help beat Ridge regression.
 Usage:
     python -m experiment_a.mlp_ablation.interaction_sweep
     python -m experiment_a.mlp_ablation.interaction_sweep --quick
-    python -m experiment_a.mlp_ablation.interaction_sweep --part 1  # Two-Tower, Bilinear
-    python -m experiment_a.mlp_ablation.interaction_sweep --part 2  # NCF, Multiplicative
-    python -m experiment_a.mlp_ablation.interaction_sweep --part 3  # Agent Embedding
+    python -m experiment_a.mlp_ablation.interaction_sweep --part 1  # Two-Tower, Bilinear, Multiplicative
+    python -m experiment_a.mlp_ablation.interaction_sweep --part 2  # NCF, Agent Embedding
     sbatch experiment_a/mlp_ablation/slurm_interaction_sweep.sh
 """
 
@@ -63,7 +62,7 @@ def main():
     parser = argparse.ArgumentParser(description="Interaction architecture sweep")
     parser.add_argument("--quick", action="store_true", help="Quick test with fewer configs")
     parser.add_argument("--k_folds", type=int, default=5, help="Number of CV folds")
-    parser.add_argument("--part", type=int, choices=[1, 2, 3], help="Run specific part (1=Two-Tower/Bilinear, 2=NCF/Multiplicative, 3=AgentEmb)")
+    parser.add_argument("--part", type=int, choices=[1, 2], help="Run specific part (1=Two-Tower/Bilinear/Multiplicative, 2=NCF/AgentEmb)")
     args = parser.parse_args()
 
     config = ExperimentAConfig()
@@ -259,20 +258,15 @@ def main():
     if args.part is not None:
         baseline_names = ["oracle", "ridge", "fullmlp_64"]
         if args.part == 1:
-            # Part 1: Baselines + Two-Tower + Bilinear
-            part_prefixes = ["two_tower", "bilinear"]
+            # Part 1: Baselines + Two-Tower + Bilinear + Multiplicative
+            part_prefixes = ["two_tower", "bilinear", "multiplicative"]
             configs = [c for c in configs if c.name in baseline_names or any(c.name.startswith(p) for p in part_prefixes)]
-            print(f"Running Part 1: Baselines, Two-Tower, Bilinear")
+            print(f"Running Part 1: Baselines, Two-Tower, Bilinear, Multiplicative")
         elif args.part == 2:
-            # Part 2: NCF + Multiplicative
-            part_prefixes = ["ncf", "multiplicative"]
+            # Part 2: NCF + Agent Embedding
+            part_prefixes = ["ncf", "agent_emb"]
             configs = [c for c in configs if any(c.name.startswith(p) for p in part_prefixes)]
-            print(f"Running Part 2: NCF, Multiplicative")
-        elif args.part == 3:
-            # Part 3: Agent Embedding
-            part_prefixes = ["agent_emb"]
-            configs = [c for c in configs if any(c.name.startswith(p) for p in part_prefixes)]
-            print(f"Running Part 3: Agent Embedding")
+            print(f"Running Part 2: NCF, Agent Embedding")
 
     if args.quick:
         # Filter to just a few representative configs
