@@ -40,6 +40,7 @@ def run_inspect_batch(
     model: str,
     max_connections: int,
     log_dir: Path,
+    task_name: str = "auditor_task",
 ) -> bool:
     """Run Inspect evaluation for a batch of tasks.
 
@@ -49,6 +50,7 @@ def run_inspect_batch(
         model: Model to use for the auditor agent
         max_connections: Max parallel containers
         log_dir: Directory to store logs
+        task_name: Task function name (auditor_task or auditor_task_v2)
 
     Returns:
         True if successful, False otherwise
@@ -59,7 +61,7 @@ def run_inspect_batch(
     sample_ids_str = ",".join(sample_ids)
     cmd = [
         "inspect", "eval",
-        "experiment_a/auditor_agent/inspect_task.py@auditor_task",
+        f"experiment_a/auditor_agent/inspect_task.py@{task_name}",
         f"--model={model}",
         f"--max-connections={max_connections}",
         f"--log-dir={batch_log_dir}",
@@ -161,6 +163,13 @@ def main():
         action="store_true",
         help="Skip Docker cleanup between batches",
     )
+    parser.add_argument(
+        "--task",
+        type=str,
+        default="auditor_task",
+        choices=["auditor_task", "auditor_task_v2"],
+        help="Task to run (default: auditor_task)",
+    )
 
     args = parser.parse_args()
 
@@ -236,6 +245,7 @@ def main():
             args.model,
             args.max_connections,
             args.log_dir,
+            args.task,
         )
 
         if not success:

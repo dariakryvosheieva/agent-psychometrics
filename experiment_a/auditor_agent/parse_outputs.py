@@ -27,15 +27,24 @@ if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
 from experiment_a.auditor_agent.prompts import get_feature_names
+from experiment_a.auditor_agent.prompts_v2 import get_feature_names_v2
 
-EXPECTED_FEATURES = get_feature_names()
+EXPECTED_FEATURES_V1 = get_feature_names()
+EXPECTED_FEATURES_V2 = get_feature_names_v2()
+
+# Default to v1 for backwards compatibility
+EXPECTED_FEATURES = EXPECTED_FEATURES_V1
 
 
-def parse_completion(completion: str) -> dict[str, Any] | None:
+def parse_completion(
+    completion: str,
+    expected_features: list[str] | None = None,
+) -> dict[str, Any] | None:
     """Parse the completion to extract feature values.
 
     Args:
         completion: The model's completion text (should be JSON)
+        expected_features: List of feature names to extract
 
     Returns:
         Dict mapping feature names to values, or None if parsing failed
@@ -46,7 +55,7 @@ def parse_completion(completion: str) -> dict[str, Any] | None:
     # Try to parse as JSON directly
     try:
         data = json.loads(completion)
-        return extract_features_from_json(data)
+        return extract_features_from_json(data, expected_features)
     except json.JSONDecodeError:
         pass
 
@@ -55,12 +64,13 @@ def parse_completion(completion: str) -> dict[str, Any] | None:
     if code_match:
         try:
             data = json.loads(code_match.group(1))
-            return extract_features_from_json(data)
+            return extract_features_from_json(data, expected_features)
         except json.JSONDecodeError:
             pass
 
-    # Try to find raw JSON object
-    json_match = re.search(r'\{[^{}]*"test_runability"[^{}]*\}', completion, re.DOTALL)
+    # Try to find raw JSON object - look for first feature name as anchor
+    first_feature = (expected_features or EXPECTED_FEATURES)[0]
+    json_match = re.search(rf'\{{[^{{}}]*"{first_feature}"[^{{}}]*\}}', completion, re.DOTALL)
     if json_match:
         try:
             # This might be a partial match, try to find complete JSON
@@ -76,14 +86,17 @@ def parse_completion(completion: str) -> dict[str, Any] | None:
                         if depth == 0:
                             json_str = completion[start:start + i + 1]
                             data = json.loads(json_str)
-                            return extract_features_from_json(data)
+                            return extract_features_from_json(data, expected_features)
         except json.JSONDecodeError:
             pass
 
     return None
 
 
-def extract_features_from_json(data: dict[str, Any]) -> dict[str, Any]:
+def extract_features_from_json(
+    data: dict[str, Any],
+    expected_features: list[str] | None = None,
+) -> dict[str, Any]:
     """Extract feature values from parsed JSON.
 
     Handles two formats:
@@ -92,13 +105,17 @@ def extract_features_from_json(data: dict[str, Any]) -> dict[str, Any]:
 
     Args:
         data: Parsed JSON object
+        expected_features: List of feature names to extract (default: EXPECTED_FEATURES)
 
     Returns:
         Dict mapping feature names to integer values
     """
+    if expected_features is None:
+        expected_features = EXPECTED_FEATURES
+
     features = {}
 
-    for feature_name in EXPECTED_FEATURES:
+    for feature_name in expected_features:
         if feature_name not in data:
             features[feature_name] = None
             features[f"{feature_name}_reasoning"] = None
@@ -121,11 +138,15 @@ def extract_features_from_json(data: dict[str, Any]) -> dict[str, Any]:
     return features
 
 
-def parse_log_file(log_path: Path) -> list[dict[str, Any]]:
+def parse_log_file(
+    log_path: Path,
+    expected_features: list[str] | None = None,
+) -> list[dict[str, Any]]:
     """Parse a single log file and extract features for all samples.
 
     Args:
         log_path: Path to .eval log file
+        expected_features: List of feature names to extract
 
     Returns:
         List of dicts, each containing instance_id and feature values
@@ -146,7 +167,7 @@ def parse_log_file(log_path: Path) -> list[dict[str, Any]]:
             completion = sample.output.completion if sample.output else None
 
             if completion:
-                features = parse_completion(completion)
+                features = parse_completion(completion, expected_features)
                 if features:
                     result.update(features)
                 else:
@@ -162,11 +183,15 @@ def parse_log_file(log_path: Path) -> list[dict[str, Any]]:
     return results
 
 
-def parse_all_logs(log_dir: Path) -> pd.DataFrame:
+def parse_all_logs(
+    log_dir: Path,
+    expected_features: list[str] | None = None,
+) -> pd.DataFrame:
     """Parse all log files in a directory.
 
     Args:
         log_dir: Directory containing .eval log files
+        expected_features: List of feature names to extract
 
     Returns:
         DataFrame with instance_id and feature columns
@@ -178,7 +203,7 @@ def parse_all_logs(log_dir: Path) -> pd.DataFrame:
     print(f"Found {len(log_files)} log files in {log_dir}")
 
     for log_path in log_files:
-        results = parse_log_file(log_path)
+        results = parse_log_file(log_path, expected_features)
         all_results.extend(results)
 
     if not all_results:
@@ -197,7 +222,10 @@ def parse_all_logs(log_dir: Path) -> pd.DataFrame:
     return df
 
 
-def validate_results(df: pd.DataFrame) -> bool:
+def validate_results(
+    df: pd.DataFrame,
+    expected_features: list[str] | None = None,
+) -> bool:
     """Validate parsed results.
 
     Checks:
@@ -207,14 +235,18 @@ def validate_results(df: pd.DataFrame) -> bool:
 
     Args:
         df: DataFrame with parsed features
+        expected_features: List of feature names to validate
 
     Returns:
         True if validation passes, False otherwise
     """
+    if expected_features is None:
+        expected_features = EXPECTED_FEATURES
+
     is_valid = True
 
     # Check for expected feature columns
-    for feature in EXPECTED_FEATURES:
+    for feature in expected_features:
         if feature not in df.columns:
             print(f"FAIL: Missing feature column: {feature}")
             is_valid = False
@@ -240,7 +272,7 @@ def validate_results(df: pd.DataFrame) -> bool:
 
     # Print summary statistics
     print("\nFeature statistics:")
-    for feature in EXPECTED_FEATURES:
+    for feature in expected_features:
         if feature in df.columns:
             valid = df[feature].dropna()
             if len(valid) > 0:
@@ -270,11 +302,22 @@ def main():
         action="store_true",
         help="Validate parsed results",
     )
+    parser.add_argument(
+        "--version",
+        type=int,
+        choices=[1, 2],
+        default=1,
+        help="Feature version to parse (1 or 2, default: 1)",
+    )
 
     args = parser.parse_args()
 
+    # Select feature set based on version
+    expected_features = EXPECTED_FEATURES_V1 if args.version == 1 else EXPECTED_FEATURES_V2
+    print(f"Using v{args.version} features: {expected_features}")
+
     # Parse logs
-    df = parse_all_logs(args.log_dir)
+    df = parse_all_logs(args.log_dir, expected_features)
 
     if df.empty:
         print("No data to save!")
@@ -282,7 +325,7 @@ def main():
 
     # Validate if requested
     if args.validate:
-        valid = validate_results(df)
+        valid = validate_results(df, expected_features)
         if not valid:
             print("\nValidation failed!")
             sys.exit(1)
@@ -293,7 +336,7 @@ def main():
 
     # Select columns for output (instance_id + features + reasoning)
     output_cols = ["instance_id"]
-    for feature in EXPECTED_FEATURES:
+    for feature in expected_features:
         if feature in df.columns:
             output_cols.append(feature)
         reasoning_col = f"{feature}_reasoning"

@@ -43,6 +43,7 @@ from experiment_a.auditor_agent.prompts import (
     build_auditor_system_prompt,
     VERIFICATION_PROMPT,
 )
+from experiment_a.auditor_agent.prompts_v2 import build_auditor_system_prompt_v2
 
 
 def load_swebench_samples(
@@ -153,4 +154,46 @@ def auditor_task_mini(split: str = "test") -> Task:
     return auditor_task(
         dataset="MariusHobbhahn/swe-bench-verified-mini",
         split=split,
+    )
+
+
+@task
+def auditor_task_v2(
+    dataset: str = "princeton-nlp/SWE-bench_Verified",
+    split: str = "test",
+    max_attempts: int = 1,
+    message_limit: int = 50,
+) -> Task:
+    """Run the v2 auditor agent on SWE-bench tasks.
+
+    V2 features (kept from v1):
+    - entry_point_clarity, change_blast_radius, test_feedback_quality
+
+    V2 features (new):
+    - fix_localization, test_specificity, debugging_setup_ease
+
+    Args:
+        dataset: HuggingFace dataset name
+        split: Dataset split (default: test)
+        max_attempts: Max submissions (we only want 1 - the JSON output)
+        message_limit: Max total messages in conversation
+
+    Returns:
+        Inspect Task configured with v2 auditor agent
+    """
+    samples = load_swebench_samples(dataset, split)
+
+    auditor_agent = basic_agent(
+        init=system_message(build_auditor_system_prompt_v2()),
+        tools=[bash(timeout=120)],
+        max_attempts=max_attempts,
+        message_limit=message_limit,
+        submit_description="Submit your JSON audit report with all 6 features rated.",
+    )
+
+    return Task(
+        dataset=samples,
+        solver=auditor_agent,
+        scorer=None,
+        name="swe_bench_auditor_v2",
     )
