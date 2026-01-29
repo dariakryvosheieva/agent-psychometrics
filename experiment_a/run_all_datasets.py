@@ -35,6 +35,7 @@ class ExperimentADatasetSpec:
     config_class_name: str  # e.g., "ExperimentAConfig"
     spec_module: str  # e.g., "experiment_a.swebench.train_evaluate"
     unified_judge_path: Optional[Path]
+    env_features_path: Optional[Path]  # Path to environment features CSV
     extra_kwargs: Dict[str, Any]  # Additional config kwargs like exclude_unsolved=True
 
 
@@ -47,6 +48,7 @@ DATASETS = [
         config_class_name="ExperimentAConfig",  # Note: SWE-bench uses ExperimentAConfig
         spec_module="experiment_a.swebench.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv"),
+        env_features_path=Path("chris_output/env_features/swebench_verified/env_features.csv"),
         extra_kwargs={},
     ),
     ExperimentADatasetSpec(
@@ -56,6 +58,7 @@ DATASETS = [
         config_class_name="GSOConfig",
         spec_module="experiment_a.gso.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/gso_unified/llm_judge_features.csv"),
+        env_features_path=None,  # Not yet extracted for GSO
         extra_kwargs={"exclude_unsolved": True},  # Match Daria's setup
     ),
     ExperimentADatasetSpec(
@@ -65,6 +68,7 @@ DATASETS = [
         config_class_name="TerminalBenchConfig",
         spec_module="experiment_a.terminalbench.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/terminalbench_unified/llm_judge_features.csv"),
+        env_features_path=None,  # Not yet extracted for TerminalBench
         extra_kwargs={},
     ),
     ExperimentADatasetSpec(
@@ -74,6 +78,7 @@ DATASETS = [
         config_class_name="SWEBenchProConfig",
         spec_module="experiment_a.swebench_pro.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/swebench_pro_unified/llm_judge_features.csv"),
+        env_features_path=None,  # Not yet extracted for SWE-bench Pro
         extra_kwargs={},
     ),
 ]
@@ -145,6 +150,10 @@ def run_single_dataset(
                     "error": f"Unified judge features not found: {judge_path}"
                 }
 
+        # Add environment features if available
+        if dataset_config.env_features_path and dataset_config.env_features_path.exists():
+            config_kwargs["env_features_path"] = dataset_config.env_features_path
+
         if output_base:
             config_kwargs["output_dir"] = output_base / dataset_config.short_name
 
@@ -190,9 +199,13 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
         "oracle": "Oracle",
         "embedding_predictor": "Embedding",
         "llm_judge_predictor": "LLM Judge",
+        "env_predictor": "Environment",
         "llm_judge_tree": "LLM Judge (Tree)",
         "llm_judge_rf": "LLM Judge (RF)",
         "grouped_ridge": "Grouped Ridge",
+        "grouped_ridge_emb_env": "Emb + Env",
+        "grouped_ridge_llm_env": "LLM + Env",
+        "grouped_ridge_emb_llm": "Emb + LLM",
         "stacked_residual": "Stacked (Emb → LLM)",
         "mlp_embedding": "MLP (Emb)",
         "mlp_llm_judge": "MLP (Judge)",
@@ -225,8 +238,8 @@ def format_results_table(
         Formatted markdown table string with proper column alignment.
     """
     if methods is None:
-        methods = ["Oracle", "Stacked (Emb → LLM)", "Grouped Ridge", "Embedding", "LLM Judge",
-                   "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
+        methods = ["Oracle", "Grouped Ridge", "Emb + LLM", "Emb + Env", "LLM + Env",
+                   "Embedding", "LLM Judge", "Environment", "Baseline"]
 
     # Build data rows first to calculate column widths
     data_rows = []
@@ -281,8 +294,8 @@ def save_results_csv(
     import csv
 
     if methods is None:
-        methods = ["Oracle", "Stacked (Emb → LLM)", "Grouped Ridge", "Embedding", "LLM Judge",
-                   "MLP (Emb)", "MLP (Judge)", "MLP (Grouped)", "Baseline"]
+        methods = ["Oracle", "Grouped Ridge", "Emb + LLM", "Emb + Env", "LLM + Env",
+                   "Embedding", "LLM Judge", "Environment", "Baseline"]
 
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)

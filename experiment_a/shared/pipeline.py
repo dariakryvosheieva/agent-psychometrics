@@ -294,6 +294,49 @@ def build_cv_predictors(
                 )
             )
 
+    # Environment features predictor (Ridge regression)
+    if "Environment" in source_by_name:
+        source = source_by_name["Environment"]
+        difficulty_predictor = FeatureBasedPredictor(
+            source,
+            alphas=list(config.ridge_alphas),
+        )
+        configs.append(
+            CVPredictorConfig(
+                predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                name="env_predictor",
+                display_name="Environment",
+            )
+        )
+
+    # Pairwise grouped ridge predictors (all 2-source combinations)
+    # This helps identify which feature source combinations are most valuable
+    pairwise_sources = [
+        ("Embedding", "Environment"),
+        ("LLM Judge", "Environment"),
+        ("Embedding", "LLM Judge"),
+    ]
+    for src1_name, src2_name in pairwise_sources:
+        if src1_name in source_by_name and src2_name in source_by_name:
+            src1 = source_by_name[src1_name]
+            src2 = source_by_name[src2_name]
+            pairwise_grouped = GroupedFeatureSource([
+                RegularizedFeatureSource(src1),
+                RegularizedFeatureSource(src2),
+            ])
+            pairwise_predictor = GroupedRidgePredictor(pairwise_grouped)
+            # Create short display name: "Emb + Env", "LLM + Env", "Emb + LLM"
+            short_names = {"Embedding": "Emb", "LLM Judge": "LLM", "Environment": "Env"}
+            short1 = short_names.get(src1_name, src1_name)
+            short2 = short_names.get(src2_name, src2_name)
+            configs.append(
+                CVPredictorConfig(
+                    predictor=DifficultyPredictorAdapter(pairwise_predictor),
+                    name=f"grouped_ridge_{short1.lower()}_{short2.lower()}",
+                    display_name=f"Grouped Ridge ({short1} + {short2})",
+                )
+            )
+
     # Grouped Ridge predictor (combines all available sources with per-source regularization)
     if len(feature_source_list) >= 2:
         # Extract just the sources (without names) for GroupedFeatureSource
