@@ -110,6 +110,10 @@ class MLPPredictor:
         two_stage: bool = False,
         stage1_epochs: Optional[int] = None,
         stage2_agent_lr_scale: float = 0.1,
+        pca_dim: Optional[int] = None,
+        early_stopping: bool = False,
+        val_fraction: float = 0.1,
+        patience: int = 20,
     ):
         """Initialize IRT-style predictor.
 
@@ -134,6 +138,15 @@ class MLPPredictor:
                 This combines good initialization with joint adaptation.
             stage1_epochs: Epochs for stage 1. If None, uses n_epochs // 2.
             stage2_agent_lr_scale: Learning rate scale for agents in stage 2 (default 0.1).
+            pca_dim: If set, apply PCA dimensionality reduction to features before training.
+                PCA is fit on training tasks only to avoid data leakage. Useful for reducing
+                high-dimensional embeddings (e.g., 5120 -> 256) to balance with agent params.
+            early_stopping: If True, use validation-based early stopping. Holds out a fraction
+                of training data for validation and stops when validation loss stops improving.
+            val_fraction: Fraction of training data to hold out for validation (default: 0.1).
+                Only used if early_stopping=True.
+            patience: Number of epochs without improvement before stopping (default: 20).
+                Only used if early_stopping=True.
         """
         self.source = source
         self.hidden_size = hidden_size  # Unused but kept for compatibility
@@ -148,10 +161,15 @@ class MLPPredictor:
         self.two_stage = two_stage
         self.stage1_epochs = stage1_epochs if stage1_epochs is not None else n_epochs // 2
         self.stage2_agent_lr_scale = stage2_agent_lr_scale
+        self.pca_dim = pca_dim
+        self.early_stopping = early_stopping
+        self.val_fraction = val_fraction
+        self.patience = patience
 
         # Model state (set after fit())
         self._model: Optional[IRTStyleMLP] = None
         self._scaler: Optional[StandardScaler] = None
+        self._pca = None  # sklearn PCA object (if pca_dim is set)
         self._agent_to_idx: Optional[Dict[str, int]] = None
         self._n_agents: int = 0
         self._feature_dim: int = 0
@@ -180,8 +198,20 @@ class MLPPredictor:
         self._agent_to_idx = {agent: i for i, agent in enumerate(all_agents)}
         self._n_agents = len(all_agents)
 
-        # Get task features and fit scaler
+        # Get task features
         task_features = self.source.get_features(train_task_ids)
+
+        # Apply PCA if requested (fit on training data only)
+        if self.pca_dim is not None:
+            from sklearn.decomposition import PCA
+            actual_dim = min(self.pca_dim, task_features.shape[1], task_features.shape[0])
+            self._pca = PCA(n_components=actual_dim)
+            task_features = self._pca.fit_transform(task_features)
+            if self.verbose:
+                explained_var = sum(self._pca.explained_variance_ratio_)
+                print(f"   PCA: {self.source.feature_dim} -> {actual_dim} dims, explained variance: {explained_var:.3f}")
+
+        # Fit scaler on (possibly PCA-reduced) features
         self._scaler = StandardScaler()
         task_features_scaled = self._scaler.fit_transform(task_features)
         self._feature_dim = task_features_scaled.shape[1]
@@ -340,6 +370,32 @@ class MLPPredictor:
 
         else:
             # ===== SINGLE-STAGE TRAINING =====
+
+            # Split into train/val if early stopping enabled
+            if self.early_stopping:
+                n_samples = len(y)
+                n_val = max(1, int(n_samples * self.val_fraction))
+                n_train = n_samples - n_val
+
+                # Random permutation for split
+                perm = torch.randperm(n_samples)
+                train_idx = perm[:n_train]
+                val_idx = perm[n_train:]
+
+                train_agent = agent_tensor[train_idx]
+                train_feat = features_tensor[train_idx]
+                train_y = y_tensor[train_idx]
+                val_agent = agent_tensor[val_idx]
+                val_feat = features_tensor[val_idx]
+                val_y = y_tensor[val_idx]
+
+                if self.verbose:
+                    print(f"   Early stopping: {n_train} train, {n_val} val samples, patience={self.patience}")
+            else:
+                train_agent = agent_tensor
+                train_feat = features_tensor
+                train_y = y_tensor
+
             # Optimizer with per-parameter group regularization and learning rates
             if self.freeze_abilities:
                 # Only optimize difficulty layer when abilities are frozen
@@ -356,14 +412,20 @@ class MLPPredictor:
                     {'params': self._model.difficulty_layer.parameters(), 'lr': self.learning_rate, 'weight_decay': self.feature_weight_decay},
                 ])
 
+            # Early stopping state
+            best_val_loss = float('inf')
+            best_state_dict = None
+            epochs_without_improvement = 0
+            stopped_early = False
+
             # Training loop (full-batch)
             self._model.train()
             for epoch in range(self.n_epochs):
                 optimizer.zero_grad()
 
-                # Forward pass
-                y_pred = self._model(agent_tensor, features_tensor)
-                loss = criterion(y_pred, y_tensor)
+                # Forward pass on training data
+                y_pred = self._model(train_agent, train_feat)
+                loss = criterion(y_pred, train_y)
 
                 # Backward pass
                 loss.backward()
@@ -373,8 +435,38 @@ class MLPPredictor:
                 loss_val = loss.item()
                 self._training_losses.append(loss_val)
 
-                if self.verbose and (epoch + 1) % 50 == 0:
-                    print(f"      Epoch {epoch + 1}/{self.n_epochs}: Loss = {loss_val:.6f}")
+                # Early stopping check
+                if self.early_stopping:
+                    self._model.eval()
+                    with torch.no_grad():
+                        val_pred = self._model(val_agent, val_feat)
+                        val_loss = criterion(val_pred, val_y).item()
+                    self._model.train()
+
+                    if val_loss < best_val_loss:
+                        best_val_loss = val_loss
+                        best_state_dict = {k: v.clone() for k, v in self._model.state_dict().items()}
+                        epochs_without_improvement = 0
+                    else:
+                        epochs_without_improvement += 1
+
+                    if epochs_without_improvement >= self.patience:
+                        stopped_early = True
+                        if self.verbose:
+                            print(f"      Early stopping at epoch {epoch + 1} (val_loss={val_loss:.6f}, best={best_val_loss:.6f})")
+                        break
+
+                    if self.verbose and (epoch + 1) % 50 == 0:
+                        print(f"      Epoch {epoch + 1}/{self.n_epochs}: train_loss={loss_val:.6f}, val_loss={val_loss:.6f}")
+                else:
+                    if self.verbose and (epoch + 1) % 50 == 0:
+                        print(f"      Epoch {epoch + 1}/{self.n_epochs}: Loss = {loss_val:.6f}")
+
+            # Restore best model if early stopping was used
+            if self.early_stopping and best_state_dict is not None:
+                self._model.load_state_dict(best_state_dict)
+                if self.verbose and not stopped_early:
+                    print(f"   Completed {self.n_epochs} epochs, best val_loss={best_val_loss:.6f}")
 
         self._is_fitted = True
 
@@ -437,6 +529,11 @@ class MLPPredictor:
     def _cache_test_task_features(self, test_tasks: List[str]) -> None:
         """Cache scaled features for test tasks."""
         features = self.source.get_features(test_tasks)
+
+        # Apply PCA if it was used during training
+        if self._pca is not None:
+            features = self._pca.transform(features)
+
         features_scaled = self._scaler.transform(features)
 
         for i, task_id in enumerate(test_tasks):
@@ -457,4 +554,6 @@ class MLPPredictor:
     @property
     def name(self) -> str:
         """Human-readable predictor name."""
+        if self.pca_dim is not None:
+            return f"MLP (PCA-{self.pca_dim} {self.source.name})"
         return f"MLP ({self.source.name})"

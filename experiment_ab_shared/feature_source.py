@@ -307,6 +307,110 @@ class CSVFeatureSource(TaskFeatureSource):
         return X
 
 
+class PCAFeatureSource(TaskFeatureSource):
+    """Wraps a feature source and applies PCA dimensionality reduction.
+
+    This is useful for reducing high-dimensional embeddings (e.g., 5120-dim)
+    to a lower dimension that better balances with the number of agent parameters.
+
+    Example:
+        # Reduce 5120-dim embeddings to 256 dimensions
+        emb_source = EmbeddingFeatureSource(Path("embeddings.npz"))
+        pca_source = PCAFeatureSource(emb_source, n_components=256)
+        pca_source.fit(train_task_ids)  # Must call fit before get_features
+        X = pca_source.get_features(task_ids)  # (n_tasks, 256)
+    """
+
+    def __init__(
+        self,
+        source: TaskFeatureSource,
+        n_components: int = 256,
+        name: Optional[str] = None,
+    ):
+        """Initialize PCA wrapper.
+
+        Args:
+            source: The underlying feature source to reduce.
+            n_components: Number of PCA components to keep. If larger than
+                source.feature_dim, will use min(n_components, feature_dim).
+            name: Optional custom name (defaults to "PCA-{n_components}({source.name})").
+        """
+        from sklearn.decomposition import PCA
+
+        self._source = source
+        self._n_components = n_components
+        self._name = name or f"PCA-{n_components}({source.name})"
+        self._pca: Optional[PCA] = None
+        self._fitted = False
+        self._actual_components = 0
+
+    def fit(self, task_ids: List[str]) -> "PCAFeatureSource":
+        """Fit PCA on the given task features.
+
+        Must be called before get_features(). Typically called with training
+        task IDs to avoid data leakage.
+
+        Args:
+            task_ids: Task IDs to fit PCA on.
+
+        Returns:
+            self (for method chaining)
+        """
+        from sklearn.decomposition import PCA
+
+        X = self._source.get_features(task_ids)
+        actual_n = min(self._n_components, X.shape[1], X.shape[0])
+        self._pca = PCA(n_components=actual_n)
+        self._pca.fit(X)
+        self._fitted = True
+        self._actual_components = actual_n
+
+        return self
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def task_ids(self) -> List[str]:
+        return self._source.task_ids
+
+    @property
+    def feature_dim(self) -> int:
+        if not self._fitted:
+            return self._n_components  # Best guess before fitting
+        return self._actual_components
+
+    @property
+    def explained_variance_ratio(self) -> Optional[np.ndarray]:
+        """Return explained variance ratio per component after fitting."""
+        if self._pca is None:
+            return None
+        return self._pca.explained_variance_ratio_
+
+    def get_features(self, task_ids: List[str]) -> np.ndarray:
+        """Get PCA-transformed features for the given task IDs.
+
+        Args:
+            task_ids: List of task identifiers.
+
+        Returns:
+            Feature matrix of shape (len(task_ids), n_components).
+
+        Raises:
+            RuntimeError: If fit() was not called first.
+            ValueError: If any task_id is not found in the source.
+        """
+        if not self._fitted:
+            raise RuntimeError(
+                "PCAFeatureSource.fit() must be called before get_features(). "
+                "Call fit() with training task IDs first."
+            )
+
+        X = self._source.get_features(task_ids)
+        return self._pca.transform(X).astype(np.float32)
+
+
 @dataclass
 class RegularizedFeatureSource:
     """Associates any feature source with its regularization strength.
