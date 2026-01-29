@@ -102,8 +102,10 @@ class MLPPredictor:
         dropout: float = 0.0,
         learning_rate: float = 0.001,
         weight_decay: float = 0.01,
+        feature_weight_decay: Optional[float] = None,
         n_epochs: int = 200,
         verbose: bool = False,
+        freeze_abilities: bool = False,
     ):
         """Initialize IRT-style predictor.
 
@@ -112,17 +114,23 @@ class MLPPredictor:
             hidden_size: Unused (kept for API compatibility).
             dropout: Dropout probability on difficulty prediction (0.0 = no dropout).
             learning_rate: Learning rate for Adam optimizer.
-            weight_decay: L2 regularization strength (Adam weight_decay).
+            weight_decay: L2 regularization on agent abilities (Adam weight_decay).
+            feature_weight_decay: L2 regularization on feature weights. If None, uses weight_decay.
+                Use higher values (e.g., 1.0-10.0) for high-dim features like embeddings.
             n_epochs: Number of training epochs.
             verbose: Print training progress.
+            freeze_abilities: If True, initialize agent abilities from IRT and freeze them.
+                This isolates the difficulty layer learning and prevents agent memorization.
         """
         self.source = source
         self.hidden_size = hidden_size  # Unused but kept for compatibility
         self.dropout = dropout
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.feature_weight_decay = feature_weight_decay if feature_weight_decay is not None else weight_decay
         self.n_epochs = n_epochs
         self.verbose = verbose
+        self.freeze_abilities = freeze_abilities
 
         # Model state (set after fit())
         self._model: Optional[IRTStyleMLP] = None
@@ -216,6 +224,7 @@ class MLPPredictor:
         if self.verbose:
             print(f"   Training IRT-style MLP: {len(y)} samples")
             print(f"   Agents: {self._n_agents}, Feature dim: {self._feature_dim}")
+            print(f"   freeze_abilities={self.freeze_abilities}, weight_decay={self.weight_decay}, feature_weight_decay={self.feature_weight_decay}")
 
         # Create model
         self._model = IRTStyleMLP(self._n_agents, self._feature_dim, dropout=self.dropout)
@@ -227,17 +236,40 @@ class MLPPredictor:
         if self.verbose and device.type == "cuda":
             print(f"   Using GPU: {torch.cuda.get_device_name(0)}")
 
+        # Initialize agent abilities from IRT if requested
+        if self.freeze_abilities:
+            with torch.no_grad():
+                for agent_id, idx in self._agent_to_idx.items():
+                    if agent_id in data.train_abilities.index:
+                        ability = data.train_abilities.loc[agent_id, "ability"]
+                        self._model.agent_abilities.weight.data[idx, 0] = float(ability)
+                    else:
+                        # Default to 0 for agents without IRT abilities
+                        self._model.agent_abilities.weight.data[idx, 0] = 0.0
+            # Freeze agent abilities
+            self._model.agent_abilities.requires_grad_(False)
+            if self.verbose:
+                print(f"   Initialized and froze agent abilities from IRT")
+
         # Convert to tensors
         agent_tensor = torch.tensor(agent_indices, dtype=torch.long, device=device)
         features_tensor = torch.tensor(features, dtype=torch.float32, device=device)
         y_tensor = torch.tensor(y, dtype=torch.float32, device=device)
 
-        # Optimizer and loss
-        optimizer = torch.optim.Adam(
-            self._model.parameters(),
-            lr=self.learning_rate,
-            weight_decay=self.weight_decay,
-        )
+        # Optimizer with per-parameter group regularization
+        if self.freeze_abilities:
+            # Only optimize difficulty layer when abilities are frozen
+            optimizer = torch.optim.Adam(
+                self._model.difficulty_layer.parameters(),
+                lr=self.learning_rate,
+                weight_decay=self.feature_weight_decay,
+            )
+        else:
+            # Separate weight_decay for agent abilities vs feature weights
+            optimizer = torch.optim.Adam([
+                {'params': self._model.agent_abilities.parameters(), 'weight_decay': self.weight_decay},
+                {'params': self._model.difficulty_layer.parameters(), 'weight_decay': self.feature_weight_decay},
+            ], lr=self.learning_rate)
         criterion = nn.BCELoss()
 
         # Training loop (full-batch)
