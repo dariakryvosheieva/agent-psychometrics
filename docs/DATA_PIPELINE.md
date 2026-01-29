@@ -78,10 +78,47 @@ trajectory_data/unified_trajs/
 
 Each JSON file contains the agent's trajectory for one task in a unified format.
 
+## SWE-bench Bash-Only Dataset
+
+SWE-bench Bash-Only is a variant where agents are restricted to bash-only tool use. It uses the **same 500 tasks** as SWE-bench Verified, enabling apples-to-apples comparison.
+
+```
+experiments/evaluation/bash-only/<agent>/per_instance_details.json
+         ↓
+    swebench_irt/prep_swebench_bash_only.py
+         ↓
+clean_data/swebench_bash_only/swebench_bash_only.jsonl
+         ↓
+    swebench_irt/train.py (--dims 1 --model 1pl)
+         ↓
+clean_data/swebench_bash_only/1d/
+    ├── items.csv   (task difficulties)
+    └── abilities.csv (agent abilities)
+```
+
+**Dataset stats:**
+- **34 agents**
+- **500 tasks** (identical to SWE-bench Verified)
+- **17,000 observations** (complete matrix)
+
+**Prep command:**
+```bash
+python swebench_irt/prep_swebench_bash_only.py
+```
+
+**Input format** (`per_instance_details.json`):
+```json
+{
+  "django__django-12345": {"cost": 0.15, "api_calls": 28, "resolved": true},
+  "astropy__astropy-12907": {"cost": 0.35, "api_calls": 41, "resolved": false}
+}
+```
+
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `swebench_irt/prep_swebench.py` | Build JSONL response matrix |
+| `swebench_irt/prep_swebench.py` | Build JSONL response matrix (Verified) |
+| `swebench_irt/prep_swebench_bash_only.py` | Build JSONL response matrix (Bash-Only) |
 | `trajectory_upload/trajectory_converter.py` | Convert raw trajectories to unified format |
 | `experiments/` | Raw agent results (gitignored, has own .git) |
