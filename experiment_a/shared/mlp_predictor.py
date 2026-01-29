@@ -81,6 +81,76 @@ class SimpleMLP(nn.Module):
         return x.squeeze(-1)
 
 
+class DeepMLP(nn.Module):
+    """Deeper MLP with multiple hidden layers.
+
+    Architecture:
+        Input → Linear → ReLU → Dropout → Linear → ReLU → Dropout → ... → Linear → Sigmoid
+
+    Multiple narrower layers can regularize better than a single wide layer.
+    """
+
+    def __init__(
+        self,
+        input_dim: int,
+        hidden_sizes: List[int],
+        dropout: float = 0.0,
+    ):
+        super().__init__()
+        layers = []
+        prev_size = input_dim
+
+        for hidden_size in hidden_sizes:
+            layers.append(nn.Linear(prev_size, hidden_size))
+            layers.append(nn.ReLU())
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
+            prev_size = hidden_size
+
+        layers.append(nn.Linear(prev_size, 1))
+        layers.append(nn.Sigmoid())
+
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.network(x).squeeze(-1)
+
+
+class SwiGLUMLP(nn.Module):
+    """MLP using SwiGLU activation instead of ReLU.
+
+    SwiGLU: SwiGLU(x, W, V) = Swish(xW) ⊙ (xV)
+    where Swish(x) = x * sigmoid(x)
+
+    This is the activation used in modern LLMs like LLaMA and has been shown
+    to improve training dynamics.
+    """
+
+    def __init__(
+        self,
+        input_dim: int,
+        hidden_size: int,
+        dropout: float = 0.0,
+    ):
+        super().__init__()
+        # SwiGLU uses two projections: one for gate, one for value
+        self.gate_proj = nn.Linear(input_dim, hidden_size, bias=False)
+        self.up_proj = nn.Linear(input_dim, hidden_size, bias=False)
+        self.down_proj = nn.Linear(hidden_size, 1)
+        self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # SwiGLU: swish(gate) * up
+        gate = self.gate_proj(x)
+        gate = gate * torch.sigmoid(gate)  # Swish activation
+        up = self.up_proj(x)
+        hidden = gate * up
+        hidden = self.dropout(hidden)
+        out = self.down_proj(hidden)
+        return self.sigmoid(out).squeeze(-1)
+
+
 class IRTStyleMLP(nn.Module):
     """IRT-style architecture that explicitly learns θ_agent - β_task.
 
