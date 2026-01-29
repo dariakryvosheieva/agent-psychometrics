@@ -5,7 +5,7 @@
 #SBATCH --time=4:00:00
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
-#SBATCH --partition=sched_mit_psfc_gpu_r8
+#SBATCH --partition=mit_normal_gpu
 
 # MLP Ablation Study for Experiment A
 # Tests 4 conditions: baseline, frozen_irt, strong_reg, both_fixes
