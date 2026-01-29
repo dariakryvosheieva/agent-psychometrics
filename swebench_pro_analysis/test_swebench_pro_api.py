@@ -8,8 +8,8 @@ import httpx
 from pathlib import Path
 
 def load_api_key() -> str:
-    """Load Lunette API key from config file."""
-    config_path = Path.home() / ".lunette" / "config.json"
+    """Load API key from config file."""
+    config_path = Path.home() / ".config" / "docent" / "config.json"
     with open(config_path) as f:
         config = json.load(f)
     return config["api_key"]

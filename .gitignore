@@ -56,12 +56,6 @@ trajectory_data/unified_trajs/_blob_style/
 # Experiment B reference papers
 experiment_b/LLM judge inspiration papers/
 
-# Experiment A reference papers
-experiment_a/papers for inspiration for Lunette Grading of problems/
-
-# Lunette extracted features (large, regenerable from API)
-chris_output/experiment_b/lunette_features/
-
 # LLM judge extracted features (expensive to regenerate, large)
 chris_output/experiment_b/llm_judge_features/
 
@@ -75,11 +69,6 @@ chris_output/experiment_b/test_progression_features/
 chris_output/experiment_b/embedding_plus_*.json
 chris_output/experiment_b/experiment_b_results.json
 chris_output/experiment_b/experiment_b_mode_comparison*.json
-
-# Experiment A Lunette features (large, regenerable from API)
-chris_output/experiment_a/lunette_features/
-chris_output/experiment_a/lunette_features.csv
-chris_output/experiment_a/lunette_features_v2/
 
 # Experiment A LLM judge features (regenerable from API)
 chris_output/experiment_a/llm_judge_features/
@@ -106,9 +95,6 @@ chris_output/sandbox_test_results.json
 
 # Sandbox runs outputs
 chris_output/experiment_a/sandbox_runs/
-
-# Docker compose files
-lunette_utils/.compose.yaml
 
 # Overnight logs
 overnight.log

@@ -1,10 +1,9 @@
-"""Extract trajectory features using direct LLM API calls (no Lunette sandbox).
+"""Extract trajectory features using direct LLM API calls.
 
 This module provides semantic features extracted from agent trajectories using
-direct LLM API calls (Anthropic/OpenAI). It mirrors the interface of
-lunette_features.py for consistent evaluation in Experiment B.
+direct LLM API calls (Anthropic/OpenAI) for evaluation in Experiment B.
 
-Features are the same 14 dimensions as Lunette for direct comparison:
+Features (14 dimensions):
 - Primary output: llm_judge_difficulty_score (0-1)
 - Agentic competencies (1-4): backtracking_exploration, task_decomposition,
   observation_reading, self_verification
@@ -22,7 +21,7 @@ from typing import Dict, List, Optional
 import numpy as np
 
 
-# Feature names - same structure as lunette_features.py
+# Feature names
 LLM_JUDGE_FEATURE_NAMES = [
     # Primary output: LLM judge's difficulty prediction (0=easy, 1=hard)
     "llm_judge_difficulty_score",

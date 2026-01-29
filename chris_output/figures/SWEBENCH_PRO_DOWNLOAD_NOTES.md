@@ -25,8 +25,7 @@ The browser works because it sends authentication cookies/tokens automatically.
 
 ### Attempted APIs (For Reference)
 
-1. **Lunette API** (`https://lunette.dev/api/runs/{run_id}`) - ❌ 404 errors (wrong service)
-2. **Docent API** (correct!) - ✅ Found but ❌ Requires auth
+1. **Docent API** (correct!) - ✅ Found but ❌ Requires auth
 
 ## Storage Estimate (Based on Similar Data)
 
@@ -128,7 +127,7 @@ The CSV already contains the key information for IRT analysis:
 
 The `download_swebench_pro_trajectories.py` script is ready but needs:
 - Correct API endpoint documentation from Docent
-- Authentication method (if different from Lunette API key)
+- Authentication method
 - Possibly different data format/schema
 
 Once API access is resolved, the script can download all 9,729 trajectories with:

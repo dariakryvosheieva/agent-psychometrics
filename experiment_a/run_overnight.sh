@@ -106,4 +106,4 @@ GRADED_COUNT=$(ls -1 chris_output/experiment_a/sandbox_features/*.json 2>/dev/nu
 echo "Tasks graded: $GRADED_COUNT/500"
 echo ""
 echo "Next step - run evaluation:"
-echo "  python -m experiment_a.train_evaluate --lunette_features_path chris_output/experiment_a/sandbox_features/lunette_features.csv"
+echo "  python -m experiment_a.train_evaluate"

@@ -371,16 +371,19 @@ def plot_individual_logistic_fit(
     # Scatter actual data
     ax.scatter(days_arr, solves_arr, s=50, alpha=0.7, label="Pareto agent solves")
 
-    # Plot fitted curve if converged
-    if result.converged and np.isfinite(result.x0) and np.isfinite(result.k):
-        x_smooth = np.linspace(days_arr.min() - 50, days_arr.max() + 50, 200)
+    # Plot fitted curve if we have fit parameters (even if not "converged")
+    if np.isfinite(result.x0) and np.isfinite(result.k):
+        # Extend x-range to include x0 so we can see the full sigmoid
+        x_min = min(days_arr.min() - 50, result.x0 - 200)
+        x_max = max(days_arr.max() + 50, result.x0 + 200)
+        x_smooth = np.linspace(x_min, x_max, 300)
         y_smooth = logistic_function(x_smooth, result.k, result.x0)
         ax.plot(
             x_smooth,
             y_smooth,
             "r-",
             linewidth=2,
-            label=f"Logistic fit (x0={result.x0:.1f})",
+            label=f"Logistic fit (x0={result.x0:.1f}, k={result.k:.4f})",
         )
         ax.axvline(
             result.x0,

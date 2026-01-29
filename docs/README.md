@@ -24,8 +24,6 @@ This directory contains detailed documentation for the SWE-bench IRT project.
 
 | Guide | Location | Purpose |
 |-------|----------|---------|
-| **Lunette Integration** | [lunette_utils/LUNETTE.md](../lunette_utils/LUNETTE.md) | Lunette SDK setup, API usage, batch uploads |
-| **Batch Grading** | [trajectory_upload/LUNETTE_BATCH_GRADING.md](../trajectory_upload/LUNETTE_BATCH_GRADING.md) | Grade uploaded trajectories |
 | **MIT Engaging** | [MIT_ENGAGING_SETUP.md](../MIT_ENGAGING_SETUP.md) | Cluster setup for embedding generation |
 
 ## Research Proposal

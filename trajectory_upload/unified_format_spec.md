@@ -1,7 +1,7 @@
 # Unified Trajectory Format Specification
 
 ## Purpose
-This format normalizes all SWE-bench trajectory formats into a single JSON structure suitable for Lunette upload and analysis.
+This format normalizes all SWE-bench trajectory formats into a single JSON structure suitable for analysis.
 
 ## Schema
 
@@ -105,10 +105,3 @@ When `--filter` is applied, only edit-related messages are kept:
 - Code execution: python, pytest, make
 - Search results: grep/find_file/search_file with matches
 
-## Lunette Upload Format
-
-For Lunette, the unified format maps to:
-- `Trajectory.sample` = `task_id`
-- `Trajectory.messages` = `messages` (converted to SystemMessage/UserMessage/AssistantMessage)
-- `Trajectory.scores` = `{"resolved": ScalarScore(value=1.0 if resolved else 0.0)}`
-- `Trajectory.metadata` = `metadata`

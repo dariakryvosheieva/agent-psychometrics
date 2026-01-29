@@ -1,20 +1,26 @@
-"""Extract trajectory features for frontier tasks.
+"""Extract trajectory features for tasks.
 
-This script extracts features from agent trajectories on frontier tasks
-using the LLMFeatureExtractor infrastructure.
+This script extracts features from agent trajectories using the
+LLMFeatureExtractor infrastructure.
 
 Usage:
-    # Dry run (cost estimate)
-    python -m experiment_b.trajectory_features.extract_frontier_features --version v1 --dry-run
+    # Dry run on frontier tasks (cost estimate)
+    python -m experiment_b.trajectory_features.extract_frontier_features --version v2 --dry-run
 
-    # Run extraction
-    python -m experiment_b.trajectory_features.extract_frontier_features --version v1
+    # Extract from frontier tasks (default)
+    python -m experiment_b.trajectory_features.extract_frontier_features --version v2
 
-    # Run on specific tasks
-    python -m experiment_b.trajectory_features.extract_frontier_features --version v1 --limit 5
+    # Extract from custom task list (e.g., all-fail non-frontier tasks)
+    python -m experiment_b.trajectory_features.extract_frontier_features --version v2 \\
+        --task-list chris_output/trajectory_features/all_fail_nonfrontier_tasks.json \\
+        --output-dir chris_output/trajectory_features/nonfrontier_v2_openhands
+
+    # Limit number of tasks (useful for testing)
+    python -m experiment_b.trajectory_features.extract_frontier_features --version v2 --limit 5
 """
 
 import argparse
+import json
 from pathlib import Path
 
 from experiment_ab_shared.llm_judge.extractor import LLMFeatureExtractor
@@ -103,6 +109,12 @@ def main():
         action="store_true",
         help="Run extraction in parallel (faster but higher API load)",
     )
+    parser.add_argument(
+        "--task-list",
+        type=Path,
+        default=None,
+        help="JSON file containing list of task IDs to extract (default: frontier tasks)",
+    )
 
     args = parser.parse_args()
 
@@ -118,19 +130,27 @@ def main():
     print(f"Agent: {args.agent}")
     print(f"Output directory: {args.output_dir}")
 
-    # Load frontier tasks
-    print("\nLoading frontier tasks...")
-    frontier_tasks, oracle_items, pre_frontier, post_frontier = (
-        load_frontier_tasks_with_difficulties(config)
-    )
-    print(f"  Pre-frontier agents: {len(pre_frontier)}")
-    print(f"  Post-frontier agents: {len(post_frontier)}")
-    print(f"  Frontier tasks: {len(frontier_tasks)}")
+    # Load task list
+    if args.task_list:
+        # Use custom task list
+        print(f"\nLoading task list from {args.task_list}...")
+        with open(args.task_list) as f:
+            target_tasks = json.load(f)
+        print(f"  Loaded {len(target_tasks)} tasks from custom list")
+    else:
+        # Default: frontier tasks
+        print("\nLoading frontier tasks...")
+        target_tasks, oracle_items, pre_frontier, post_frontier = (
+            load_frontier_tasks_with_difficulties(config)
+        )
+        print(f"  Pre-frontier agents: {len(pre_frontier)}")
+        print(f"  Post-frontier agents: {len(post_frontier)}")
+        print(f"  Frontier tasks: {len(target_tasks)}")
 
     # Build task dictionaries
     print(f"\nLoading trajectories from {args.agent}...")
     task_dicts, missing = build_task_dicts(
-        frontier_tasks, args.agent, args.trajs_dir
+        target_tasks, args.agent, args.trajs_dir
     )
     print(f"  Built {len(task_dicts)} task dictionaries")
     if missing:

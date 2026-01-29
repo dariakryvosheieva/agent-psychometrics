@@ -69,7 +69,6 @@ python -m experiment_b.train_evaluate --dry_run
 | Prior only (embedding) | 0.6830 | 0.7383 | — | Baseline |
 | + Simple features | 0.7076 | **0.7444** | **+0.0062** | Best result |
 | + LLM judge features | 0.6929 | 0.7215 | -0.0168 | Overfits |
-| + Lunette features | 0.6846 | 0.7383 | +0.0000 | Too few |
 | + Trajectory embeddings | — | 0.7384 | +0.0002 | No improvement |
 
 **Key finding:** Simple trajectory features (message count, chars, resolve rate) provide a small but positive improvement. LLM judge features overfit and hurt validation. Trajectory embeddings provide no signal beyond the prior.
@@ -129,11 +128,7 @@ Features (v7):
 - **Failure modes (0-1)**: localization_failure, strategy_defect, implementation_defect, incomplete_repair, verification_failure
 - **Trajectory signals (0-1)**: agent_looping, agent_gave_up_early, agent_wrong_focus, context_overflow
 
-### 3. Lunette Features
-
-Uses Lunette API for grading. Requires trajectories to be uploaded first (see [LUNETTE.md](../lunette_utils/LUNETTE.md)).
-
-### 4. Embedding Features (Experimental)
+### 3. Embedding Features (Experimental)
 
 Uses VLM trajectory embeddings instead of hand-crafted features. See [embeddings/README.md](embeddings/README.md) for full documentation.
 
@@ -168,15 +163,10 @@ experiment_b/
 │   ├── train_evaluate.py          # Embedding training pipeline
 │   └── pca_ablation.py            # PCA ablation study
 │
-├── llm_judge/                     # LLM-as-judge approach
-│   ├── features_v1.py ... v7.py   # Feature extraction versions
-│   ├── compute_features_*.py      # Pre-compute scripts
-│   └── analyze_residuals.py       # Analysis scripts
-│
-└── lunette/                       # Lunette grading approach
-    ├── features.py                # Lunette feature extraction
-    ├── compute_features.py        # Pre-compute with Lunette API
-    └── structured_output.py       # Structured output utilities
+└── llm_judge/                     # LLM-as-judge approach
+    ├── features_v1.py ... v7.py   # Feature extraction versions
+    ├── compute_features_*.py      # Pre-compute scripts
+    └── analyze_residuals.py       # Analysis scripts
 ```
 
 ## Regression Modes

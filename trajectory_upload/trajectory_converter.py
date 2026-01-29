@@ -1,5 +1,5 @@
 """
-Convert SWE-bench trajectories from all formats to unified JSON for Lunette upload.
+Convert SWE-bench trajectories from all formats to unified JSON.
 
 Supported formats:
 - traj_sweagent: .traj files with {trajectory: [{action, observation}]}

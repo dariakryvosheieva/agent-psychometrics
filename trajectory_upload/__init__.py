@@ -1,1 +1,1 @@
-# Trajectory upload: converting and uploading SWE-bench trajectories to Lunette
+# Trajectory upload: converting SWE-bench trajectories to unified format

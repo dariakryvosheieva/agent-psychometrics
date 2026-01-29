@@ -1,1 +1,1 @@
-# Experiment C: Cost comparison of Lunette grading vs full agent runs
+# Experiment C: Agent token usage analysis

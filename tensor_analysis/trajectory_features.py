@@ -188,7 +188,7 @@ def extract_char_counts_verified(
 
         # Iterate over trajectory files, skipping special files starting with _
         for traj_file in sorted(agent_dir.glob("*.json")):
-            # Skip special files like _upload_summary.json, _lunette_uploads.json
+            # Skip special files like _upload_summary.json
             if traj_file.name.startswith("_"):
                 n_skipped += 1
                 continue

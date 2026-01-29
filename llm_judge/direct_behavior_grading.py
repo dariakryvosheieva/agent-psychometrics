@@ -1,8 +1,7 @@
 """
 Direct LLM-as-a-judge grading of agent behavioral signatures.
 
-This script grades filtered trajectories directly using the Anthropic API,
-without going through Lunette. Useful for quick iteration and testing.
+This script grades filtered trajectories directly using the Anthropic API.
 
 Usage:
     python llm_judge/direct_behavior_grading.py --num_tasks 20

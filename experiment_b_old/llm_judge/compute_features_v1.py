@@ -1,4 +1,4 @@
-"""Compute LLM judge features for trajectories (direct API, no Lunette sandbox).
+"""Compute LLM judge features for trajectories using direct API calls.
 
 This script uses direct LLM API calls (Anthropic/OpenAI) to extract semantic
 features from agent trajectories. It only computes features for the specific

@@ -22,7 +22,6 @@ model_irt/
 ├── experiment_sad_irt/     # SAD-IRT model for frontier difficulty
 ├── swebench_irt/           # IRT model training
 ├── llm_judge/              # LLM-as-judge for difficulty prediction
-├── lunette_utils/          # Lunette integration utilities
 ├── trajectory_upload/      # Trajectory conversion and upload
 ├── py_irt/                 # IRT library (local fork)
 ├── clean_data/             # Trained IRT models
@@ -72,7 +71,6 @@ pytest tests/test_irt_pipeline.py -v
 | [docs/DATA_PIPELINE.md](docs/DATA_PIPELINE.md) | Data flow |
 | [experiment_a/README.md](experiment_a/README.md) | Experiment A details |
 | [experiment_b/README.md](experiment_b/README.md) | Experiment B details |
-| [lunette_utils/LUNETTE.md](lunette_utils/LUNETTE.md) | Lunette integration |
 | [MIT_ENGAGING_SETUP.md](MIT_ENGAGING_SETUP.md) | Cluster setup |
 
 ## Key Results
@@ -87,7 +85,6 @@ pytest tests/test_irt_pipeline.py -v
 |--------|-----|
 | Oracle | 0.9447 |
 | Embedding | 0.8333 |
-| Lunette features | 0.7522 |
 | Baselines | ~0.72 |
 
 ### Experiment B: Frontier Task Difficulty Prediction
