@@ -13,10 +13,10 @@ OUTPUT_DIR = ROOT / "chris_output/experiment_a/mlp_embedding"
 
 
 def load_and_merge() -> dict:
-    """Load part1, part2, and part3 JSON files and merge them."""
+    """Load part1, part2, part3, and part4 JSON files and merge them."""
     results = {}
 
-    for part in [1, 2, 3]:
+    for part in [1, 2, 3, 4]:
         path = OUTPUT_DIR / f"architecture_sweep_part{part}.json"
         if path.exists():
             with open(path) as f:

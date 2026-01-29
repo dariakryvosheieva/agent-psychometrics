@@ -151,6 +151,81 @@ class SwiGLUMLP(nn.Module):
         return self.sigmoid(out).squeeze(-1)
 
 
+class DualPathMLP(nn.Module):
+    """Dual-path MLP that processes different feature sources separately before combining.
+
+    Architecture:
+        Embedding path: embeddings → Linear → ReLU → hidden_emb
+        Judge path: judge_features → Linear → ReLU → hidden_judge
+        Combined: [agent_one_hot | hidden_emb | hidden_judge] → Linear → ReLU → Linear → Sigmoid
+
+    This allows the network to learn different representations for each feature
+    type before combining them with agent information.
+    """
+
+    def __init__(
+        self,
+        n_agents: int,
+        emb_dim: int,
+        judge_dim: int,
+        emb_hidden: int = 64,
+        judge_hidden: int = 16,
+        combined_hidden: int = 32,
+        dropout: float = 0.0,
+    ):
+        super().__init__()
+        # Embedding path
+        self.emb_path = nn.Sequential(
+            nn.Linear(emb_dim, emb_hidden),
+            nn.ReLU(),
+            nn.Dropout(dropout) if dropout > 0 else nn.Identity(),
+        )
+
+        # Judge path
+        self.judge_path = nn.Sequential(
+            nn.Linear(judge_dim, judge_hidden),
+            nn.ReLU(),
+            nn.Dropout(dropout) if dropout > 0 else nn.Identity(),
+        )
+
+        # Combined path: agent_one_hot + both hidden representations
+        combined_input = n_agents + emb_hidden + judge_hidden
+        self.combined_path = nn.Sequential(
+            nn.Linear(combined_input, combined_hidden),
+            nn.ReLU(),
+            nn.Dropout(dropout) if dropout > 0 else nn.Identity(),
+            nn.Linear(combined_hidden, 1),
+            nn.Sigmoid(),
+        )
+
+        self.n_agents = n_agents
+        self.emb_dim = emb_dim
+        self.judge_dim = judge_dim
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass.
+
+        Args:
+            x: Input tensor of shape (batch, n_agents + emb_dim + judge_dim)
+               where the layout is [agent_one_hot | embeddings | judge_features]
+
+        Returns:
+            Probabilities of shape (batch,)
+        """
+        # Split input into components
+        agent_one_hot = x[:, :self.n_agents]
+        emb_features = x[:, self.n_agents:self.n_agents + self.emb_dim]
+        judge_features = x[:, self.n_agents + self.emb_dim:]
+
+        # Process each path
+        emb_hidden = self.emb_path(emb_features)
+        judge_hidden = self.judge_path(judge_features)
+
+        # Combine all
+        combined = torch.cat([agent_one_hot, emb_hidden, judge_hidden], dim=1)
+        return self.combined_path(combined).squeeze(-1)
+
+
 class IRTStyleMLP(nn.Module):
     """IRT-style architecture that explicitly learns θ_agent - β_task.
 

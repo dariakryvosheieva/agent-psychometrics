@@ -6,11 +6,12 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32G
 #SBATCH --partition=mit_normal_gpu
-#SBATCH --array=3
+#SBATCH --array=4
 
 # Architecture Sweep (Parallel Execution)
 # Part 1-2: DeepMLP, SwiGLU, and AUC-based early stopping (COMPLETED)
-# Part 3: Small DeepMLP architectures (128-128, 64-64, 32-32, etc.)
+# Part 3: Small DeepMLP architectures (COMPLETED - best: 64-64)
+# Part 4: Combined features (embeddings + judge) - single-path vs dual-path
 #
 # Run with: mkdir -p logs && sbatch experiment_a/mlp_ablation/slurm_architecture_sweep.sh
 

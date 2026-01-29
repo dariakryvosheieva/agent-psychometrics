@@ -1,27 +1,28 @@
-"""Architecture sweep: Test deeper networks and SwiGLU activation.
+"""Architecture sweep: Test deeper networks and combined features.
 
 Fixed from weight decay sweep:
 - weight_decay = 0.2 (best from previous sweep)
 - early_stopping = True
 - init_from_irt = True
 
-Varying:
-1. Network architecture: SimpleMLP, DeepMLP, SwiGLUMLP
-2. Hidden layer configurations
-3. Early stopping metric: loss vs AUC
+Parts:
+- Part 1-2: DeepMLP, SwiGLU variations (COMPLETED)
+- Part 3: Small architectures (COMPLETED - best: DeepMLP 64-64 at 0.8042)
+- Part 4: Combined features (embeddings + judge) with best architecture
 
 Usage:
     python -m experiment_a.mlp_ablation.architecture_sweep
     python -m experiment_a.mlp_ablation.architecture_sweep --part 1  # Part 1
     python -m experiment_a.mlp_ablation.architecture_sweep --part 2  # Part 2
     python -m experiment_a.mlp_ablation.architecture_sweep --part 3  # Part 3 (small architectures)
+    python -m experiment_a.mlp_ablation.architecture_sweep --part 4  # Part 4 (combined features)
     sbatch experiment_a/mlp_ablation/slurm_architecture_sweep.sh
 """
 
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -30,13 +31,15 @@ import torch.nn as nn
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
-from experiment_ab_shared.feature_source import EmbeddingFeatureSource, TaskFeatureSource
-from experiment_ab_shared.feature_predictor import FeatureBasedPredictor
+from experiment_ab_shared.feature_source import (
+    EmbeddingFeatureSource, TaskFeatureSource, CSVFeatureSource, GroupedFeatureSource
+)
+from experiment_ab_shared.feature_predictor import FeatureBasedPredictor, GroupedRidgePredictor
 from experiment_ab_shared.dataset import BinomialExperimentData, ExperimentData
 from experiment_a.shared.cross_validation import k_fold_split_tasks, run_cv, CVPredictor
 from experiment_a.shared.pipeline import CVPredictorConfig
 from experiment_a.shared.mlp_predictor import (
-    SimpleMLP, DeepMLP, SwiGLUMLP, build_input_vector
+    SimpleMLP, DeepMLP, SwiGLUMLP, DualPathMLP, build_input_vector
 )
 from experiment_a.shared.baselines import (
     OraclePredictor,
@@ -52,6 +55,187 @@ def extract_train_auc(predictor: CVPredictor, fold_idx: int) -> float | None:
     if hasattr(predictor, 'get_train_auc'):
         return predictor.get_train_auc()
     return None
+
+
+def train_mlp_with_early_stopping(
+    model: nn.Module,
+    X: np.ndarray,
+    y: np.ndarray,
+    learning_rate: float,
+    weight_decay: float,
+    n_epochs: int,
+    early_stopping: bool,
+    early_stopping_metric: str,
+    val_fraction: float,
+    patience: int,
+    verbose: bool,
+) -> Tuple[nn.Module, Optional[float]]:
+    """Train an MLP with optional early stopping.
+
+    Returns:
+        Tuple of (trained model, train_auc or None)
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    if verbose and device.type == "cuda":
+        print(f"   Using GPU: {torch.cuda.get_device_name(0)}")
+
+    X_tensor = torch.tensor(X, dtype=torch.float32, device=device)
+    y_tensor = torch.tensor(y, dtype=torch.float32, device=device)
+
+    # Split for early stopping
+    if early_stopping:
+        n_samples = len(y)
+        n_val = max(1, int(n_samples * val_fraction))
+        n_train = n_samples - n_val
+
+        perm = torch.randperm(n_samples)
+        train_idx = perm[:n_train]
+        val_idx = perm[n_train:]
+
+        train_X = X_tensor[train_idx]
+        train_y = y_tensor[train_idx]
+        val_X = X_tensor[val_idx]
+        val_y = y_tensor[val_idx]
+
+        if verbose:
+            print(f"   Early stopping ({early_stopping_metric}): {n_train} train, {n_val} val")
+    else:
+        train_X = X_tensor
+        train_y = y_tensor
+
+    # Optimizer and loss
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    criterion = nn.BCELoss()
+
+    # Early stopping state
+    best_metric = float('inf') if early_stopping_metric == "loss" else float('-inf')
+    best_state_dict = None
+    epochs_without_improvement = 0
+
+    # Training loop
+    model.train()
+    for epoch in range(n_epochs):
+        optimizer.zero_grad()
+        y_pred = model(train_X)
+        loss = criterion(y_pred, train_y)
+        loss.backward()
+        optimizer.step()
+
+        loss_val = loss.item()
+
+        if early_stopping:
+            model.eval()
+            with torch.no_grad():
+                val_pred = model(val_X)
+                val_loss = criterion(val_pred, val_y).item()
+
+                if early_stopping_metric == "auc":
+                    val_pred_np = val_pred.cpu().numpy()
+                    val_y_np = val_y.cpu().numpy()
+                    if len(np.unique(val_y_np)) > 1:
+                        val_auc = roc_auc_score(val_y_np, val_pred_np)
+                    else:
+                        val_auc = 0.5
+                    current_metric = val_auc
+                    improved = current_metric > best_metric
+                else:
+                    current_metric = val_loss
+                    improved = current_metric < best_metric
+
+            model.train()
+
+            if improved:
+                best_metric = current_metric
+                best_state_dict = {k: v.clone() for k, v in model.state_dict().items()}
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+
+            if epochs_without_improvement >= patience:
+                if verbose:
+                    print(f"      Early stopping at epoch {epoch + 1} ({early_stopping_metric}={current_metric:.4f})")
+                break
+
+            if verbose and (epoch + 1) % 50 == 0:
+                if early_stopping_metric == "auc":
+                    print(f"      Epoch {epoch + 1}: loss={loss_val:.4f}, val_auc={current_metric:.4f}")
+                else:
+                    print(f"      Epoch {epoch + 1}: loss={loss_val:.4f}, val_loss={current_metric:.4f}")
+        else:
+            if verbose and (epoch + 1) % 50 == 0:
+                print(f"      Epoch {epoch + 1}: loss={loss_val:.4f}")
+
+    # Restore best model
+    if early_stopping and best_state_dict is not None:
+        model.load_state_dict(best_state_dict)
+
+    # Compute train AUC
+    model.eval()
+    with torch.no_grad():
+        y_pred_train = model(X_tensor).cpu().numpy()
+    train_auc = roc_auc_score(y, y_pred_train) if len(np.unique(y)) > 1 else None
+
+    if verbose:
+        train_auc_str = f"{train_auc:.4f}" if train_auc else "N/A"
+        print(f"   Final: train_auc={train_auc_str}")
+
+    return model, train_auc
+
+
+def build_training_examples(
+    data: ExperimentData,
+    train_task_ids: List[str],
+    agent_to_idx: Dict[str, int],
+    task_to_features: Dict[str, np.ndarray],
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Build training (X, y) arrays from data.
+
+    Args:
+        data: Experiment data with responses
+        train_task_ids: List of training task IDs
+        agent_to_idx: Mapping from agent ID to index
+        task_to_features: Mapping from task ID to feature vector
+
+    Returns:
+        Tuple of (X, y) numpy arrays
+    """
+    X_list: List[np.ndarray] = []
+    y_list: List[float] = []
+    is_binomial = isinstance(data, BinomialExperimentData)
+    n_agents = len(agent_to_idx)
+    all_agents = list(agent_to_idx.keys())
+
+    for task_id in train_task_ids:
+        task_feat = task_to_features[task_id]
+        for agent_id in all_agents:
+            if agent_id not in data.responses:
+                continue
+            if task_id not in data.responses[agent_id]:
+                continue
+
+            agent_idx = agent_to_idx[agent_id]
+            x = build_input_vector(agent_idx, n_agents, task_feat)
+            response = data.responses[agent_id][task_id]
+
+            if is_binomial:
+                k = response["successes"]
+                n = response["trials"]
+                for _ in range(k):
+                    X_list.append(x)
+                    y_list.append(1.0)
+                for _ in range(n - k):
+                    X_list.append(x)
+                    y_list.append(0.0)
+            else:
+                X_list.append(x)
+                y_list.append(float(response))
+
+    if len(X_list) == 0:
+        raise ValueError("No training examples found")
+
+    return np.array(X_list, dtype=np.float32), np.array(y_list, dtype=np.float32)
 
 
 class FlexibleMLPPredictor:
@@ -147,7 +331,6 @@ class FlexibleMLPPredictor:
     def fit(self, data: ExperimentData, train_task_ids: List[str]) -> None:
         """Fit the MLP on training data."""
         self._task_feature_cache = {}
-        self._training_losses = []
 
         # Build agent-to-index mapping
         all_agents = data.get_all_agents()
@@ -166,41 +349,8 @@ class FlexibleMLPPredictor:
             for i, task_id in enumerate(train_task_ids)
         }
 
-        # Build training data
-        X_list: List[np.ndarray] = []
-        y_list: List[float] = []
-        is_binomial = isinstance(data, BinomialExperimentData)
-
-        for task_id in train_task_ids:
-            task_feat = task_to_features[task_id]
-            for agent_id in all_agents:
-                if agent_id not in data.responses:
-                    continue
-                if task_id not in data.responses[agent_id]:
-                    continue
-
-                agent_idx = self._agent_to_idx[agent_id]
-                x = build_input_vector(agent_idx, self._n_agents, task_feat)
-                response = data.responses[agent_id][task_id]
-
-                if is_binomial:
-                    k = response["successes"]
-                    n = response["trials"]
-                    for _ in range(k):
-                        X_list.append(x)
-                        y_list.append(1.0)
-                    for _ in range(n - k):
-                        X_list.append(x)
-                        y_list.append(0.0)
-                else:
-                    X_list.append(x)
-                    y_list.append(float(response))
-
-        if len(X_list) == 0:
-            raise ValueError("No training examples found")
-
-        X = np.array(X_list, dtype=np.float32)
-        y = np.array(y_list, dtype=np.float32)
+        # Build training data using helper
+        X, y = build_training_examples(data, train_task_ids, self._agent_to_idx, task_to_features)
 
         if self.verbose:
             print(f"   Training {self.architecture} MLP: {len(X)} samples")
@@ -212,129 +362,25 @@ class FlexibleMLPPredictor:
         input_dim = self._n_agents + self._feature_dim
         self._model = self._create_model(input_dim)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self._model = self._model.to(device)
-
-        if self.verbose and device.type == "cuda":
-            print(f"   Using GPU: {torch.cuda.get_device_name(0)}")
-
-        # Initialize agent weights from IRT
+        # Initialize agent weights from IRT (before training)
         if self.init_from_irt:
             self._init_agent_weights_from_irt(data)
 
-        # Convert to tensors
-        X_tensor = torch.tensor(X, dtype=torch.float32, device=device)
-        y_tensor = torch.tensor(y, dtype=torch.float32, device=device)
-
-        # Split for early stopping
-        if self.early_stopping:
-            n_samples = len(y)
-            n_val = max(1, int(n_samples * self.val_fraction))
-            n_train = n_samples - n_val
-
-            perm = torch.randperm(n_samples)
-            train_idx = perm[:n_train]
-            val_idx = perm[n_train:]
-
-            train_X = X_tensor[train_idx]
-            train_y = y_tensor[train_idx]
-            val_X = X_tensor[val_idx]
-            val_y = y_tensor[val_idx]
-
-            if self.verbose:
-                print(f"   Early stopping ({self.early_stopping_metric}): {n_train} train, {n_val} val")
-        else:
-            train_X = X_tensor
-            train_y = y_tensor
-
-        # Optimizer and loss
-        optimizer = torch.optim.Adam(
-            self._model.parameters(),
-            lr=self.learning_rate,
+        # Train model using helper
+        self._model, self._train_auc = train_mlp_with_early_stopping(
+            model=self._model,
+            X=X,
+            y=y,
+            learning_rate=self.learning_rate,
             weight_decay=self.weight_decay,
+            n_epochs=self.n_epochs,
+            early_stopping=self.early_stopping,
+            early_stopping_metric=self.early_stopping_metric,
+            val_fraction=self.val_fraction,
+            patience=self.patience,
+            verbose=self.verbose,
         )
-        criterion = nn.BCELoss()
-
-        # Early stopping state
-        best_metric = float('inf') if self.early_stopping_metric == "loss" else float('-inf')
-        best_state_dict = None
-        epochs_without_improvement = 0
-
-        # Training loop
-        self._model.train()
-        for epoch in range(self.n_epochs):
-            optimizer.zero_grad()
-            y_pred = self._model(train_X)
-            loss = criterion(y_pred, train_y)
-            loss.backward()
-            optimizer.step()
-
-            loss_val = loss.item()
-            self._training_losses.append(loss_val)
-
-            # Early stopping check
-            if self.early_stopping:
-                self._model.eval()
-                with torch.no_grad():
-                    val_pred = self._model(val_X)
-                    val_loss = criterion(val_pred, val_y).item()
-
-                    # Compute validation AUC if using AUC metric
-                    if self.early_stopping_metric == "auc":
-                        val_pred_np = val_pred.cpu().numpy()
-                        val_y_np = val_y.cpu().numpy()
-                        if len(np.unique(val_y_np)) > 1:
-                            val_auc = roc_auc_score(val_y_np, val_pred_np)
-                        else:
-                            val_auc = 0.5
-                        current_metric = val_auc
-                        improved = current_metric > best_metric
-                    else:
-                        current_metric = val_loss
-                        improved = current_metric < best_metric
-
-                self._model.train()
-
-                if improved:
-                    best_metric = current_metric
-                    best_state_dict = {k: v.clone() for k, v in self._model.state_dict().items()}
-                    epochs_without_improvement = 0
-                else:
-                    epochs_without_improvement += 1
-
-                if epochs_without_improvement >= self.patience:
-                    if self.verbose:
-                        metric_str = f"{self.early_stopping_metric}={current_metric:.4f}"
-                        print(f"      Early stopping at epoch {epoch + 1} ({metric_str})")
-                    break
-
-                if self.verbose and (epoch + 1) % 50 == 0:
-                    if self.early_stopping_metric == "auc":
-                        print(f"      Epoch {epoch + 1}: loss={loss_val:.4f}, val_auc={current_metric:.4f}")
-                    else:
-                        print(f"      Epoch {epoch + 1}: loss={loss_val:.4f}, val_loss={current_metric:.4f}")
-            else:
-                if self.verbose and (epoch + 1) % 50 == 0:
-                    print(f"      Epoch {epoch + 1}: loss={loss_val:.4f}")
-
-        # Restore best model
-        if self.early_stopping and best_state_dict is not None:
-            self._model.load_state_dict(best_state_dict)
-
         self._is_fitted = True
-
-        # Compute train AUC
-        self._model.eval()
-        with torch.no_grad():
-            y_pred_train = self._model(X_tensor).cpu().numpy()
-        if len(np.unique(y)) > 1:
-            self._train_auc = roc_auc_score(y, y_pred_train)
-        else:
-            self._train_auc = None
-
-        if self.verbose:
-            train_auc_str = f"{self._train_auc:.4f}" if self._train_auc else "N/A"
-            print(f"   Final: loss={self._training_losses[-1]:.4f}, train_auc={train_auc_str}")
 
     def predict_probability(self, data: ExperimentData, agent_id: str, task_id: str) -> float:
         """Predict success probability for a specific (agent, task) pair."""
@@ -375,14 +421,179 @@ class FlexibleMLPPredictor:
         return f"FlexMLP-{self.architecture}"
 
 
+class DualPathMLPPredictor:
+    """Dual-path MLP that processes embeddings and judge features separately.
+
+    Architecture:
+        Embedding path: embeddings → Linear → ReLU → hidden_emb
+        Judge path: judge_features → Linear → ReLU → hidden_judge
+        Combined: [agent_one_hot | hidden_emb | hidden_judge] → Linear → ReLU → Sigmoid
+    """
+
+    def __init__(
+        self,
+        embedding_source: TaskFeatureSource,
+        judge_source: TaskFeatureSource,
+        emb_hidden: int = 64,
+        judge_hidden: int = 16,
+        combined_hidden: int = 32,
+        dropout: float = 0.0,
+        learning_rate: float = 0.01,
+        weight_decay: float = 0.2,
+        n_epochs: int = 1000,
+        verbose: bool = False,
+        init_from_irt: bool = True,
+        early_stopping: bool = True,
+        val_fraction: float = 0.1,
+        patience: int = 30,
+    ):
+        self.embedding_source = embedding_source
+        self.judge_source = judge_source
+        self.emb_hidden = emb_hidden
+        self.judge_hidden = judge_hidden
+        self.combined_hidden = combined_hidden
+        self.dropout = dropout
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.n_epochs = n_epochs
+        self.verbose = verbose
+        self.init_from_irt = init_from_irt
+        self.early_stopping = early_stopping
+        self.val_fraction = val_fraction
+        self.patience = patience
+
+        self._model: Optional[nn.Module] = None
+        self._emb_scaler: Optional[StandardScaler] = None
+        self._judge_scaler: Optional[StandardScaler] = None
+        self._agent_to_idx: Optional[Dict[str, int]] = None
+        self._n_agents: int = 0
+        self._is_fitted: bool = False
+        self._train_auc: Optional[float] = None
+        self._emb_cache: Dict[str, np.ndarray] = {}
+        self._judge_cache: Dict[str, np.ndarray] = {}
+
+    def fit(self, data: ExperimentData, train_task_ids: List[str]) -> None:
+        """Fit the dual-path MLP on training data."""
+        self._emb_cache = {}
+        self._judge_cache = {}
+
+        # Build agent mapping
+        all_agents = data.get_all_agents()
+        self._agent_to_idx = {agent: i for i, agent in enumerate(all_agents)}
+        self._n_agents = len(all_agents)
+
+        # Scale features from both sources
+        emb_features = self.embedding_source.get_features(train_task_ids)
+        judge_features = self.judge_source.get_features(train_task_ids)
+
+        self._emb_scaler = StandardScaler()
+        self._judge_scaler = StandardScaler()
+        emb_scaled = self._emb_scaler.fit_transform(emb_features)
+        judge_scaled = self._judge_scaler.fit_transform(judge_features)
+
+        emb_dim = emb_scaled.shape[1]
+        judge_dim = judge_scaled.shape[1]
+
+        # Build task_to_features mapping (concatenated for build_training_examples)
+        task_to_features = {
+            task_id: np.concatenate([emb_scaled[i], judge_scaled[i]])
+            for i, task_id in enumerate(train_task_ids)
+        }
+
+        # Build training data
+        X, y = build_training_examples(data, train_task_ids, self._agent_to_idx, task_to_features)
+
+        if self.verbose:
+            print(f"   Training DualPathMLP: {len(X)} samples")
+            print(f"   Emb dims: {emb_dim}, Judge dims: {judge_dim}")
+            print(f"   Hidden: emb={self.emb_hidden}, judge={self.judge_hidden}, comb={self.combined_hidden}")
+
+        # Create model
+        self._model = DualPathMLP(
+            n_agents=self._n_agents,
+            emb_dim=emb_dim,
+            judge_dim=judge_dim,
+            emb_hidden=self.emb_hidden,
+            judge_hidden=self.judge_hidden,
+            combined_hidden=self.combined_hidden,
+            dropout=self.dropout,
+        )
+
+        # Initialize agent weights from IRT
+        if self.init_from_irt:
+            with torch.no_grad():
+                first_layer = self._model.combined_path[0]
+                for agent_id, idx in self._agent_to_idx.items():
+                    if agent_id in data.train_abilities.index:
+                        ability = float(data.train_abilities.loc[agent_id, "ability"])
+                        first_layer.weight.data[:, idx] = ability
+            if self.verbose:
+                print(f"   Initialized agent weights from IRT abilities")
+
+        # Train model
+        self._model, self._train_auc = train_mlp_with_early_stopping(
+            model=self._model,
+            X=X,
+            y=y,
+            learning_rate=self.learning_rate,
+            weight_decay=self.weight_decay,
+            n_epochs=self.n_epochs,
+            early_stopping=self.early_stopping,
+            early_stopping_metric="loss",
+            val_fraction=self.val_fraction,
+            patience=self.patience,
+            verbose=self.verbose,
+        )
+        self._is_fitted = True
+
+    def predict_probability(self, data: ExperimentData, agent_id: str, task_id: str) -> float:
+        """Predict success probability."""
+        if not self._is_fitted:
+            raise RuntimeError("Predictor must be fit first")
+
+        if task_id not in self._emb_cache:
+            self._cache_test_task_features(data.test_tasks)
+
+        agent_idx = self._agent_to_idx[agent_id]
+        emb_feat = self._emb_cache[task_id]
+        judge_feat = self._judge_cache[task_id]
+
+        # Build input: [agent_one_hot | emb | judge]
+        x = build_input_vector(agent_idx, self._n_agents, np.concatenate([emb_feat, judge_feat]))
+
+        device = next(self._model.parameters()).device
+        self._model.eval()
+        with torch.no_grad():
+            x_tensor = torch.tensor(x, dtype=torch.float32, device=device).unsqueeze(0)
+            prob = self._model(x_tensor).item()
+        return prob
+
+    def _cache_test_task_features(self, test_tasks: List[str]) -> None:
+        """Cache scaled features for test tasks."""
+        emb_features = self.embedding_source.get_features(test_tasks)
+        judge_features = self.judge_source.get_features(test_tasks)
+        emb_scaled = self._emb_scaler.transform(emb_features)
+        judge_scaled = self._judge_scaler.transform(judge_features)
+        for i, task_id in enumerate(test_tasks):
+            self._emb_cache[task_id] = emb_scaled[i]
+            self._judge_cache[task_id] = judge_scaled[i]
+
+    def get_train_auc(self) -> Optional[float]:
+        return self._train_auc
+
+    @property
+    def name(self) -> str:
+        return "DualPathMLP"
+
+
 ROOT = Path(__file__).parent.parent.parent
 
 
 def main():
     parser = argparse.ArgumentParser(description="Architecture sweep for MLP")
     parser.add_argument("--k_folds", type=int, default=5, help="Number of CV folds")
-    parser.add_argument("--part", type=int, choices=[1, 2, 3], default=None,
-                        help="Run only part 1, 2, or 3 (for parallel execution)")
+    parser.add_argument("--part", type=int, choices=[1, 2, 3, 4], default=None,
+                        help="Run only part 1, 2, 3, or 4 (for parallel execution)")
     args = parser.parse_args()
 
     config = ExperimentAConfig()
@@ -578,10 +789,13 @@ def main():
         configs_to_run = all_configs[len(all_configs)//2:]
     elif args.part == 3:
         configs_to_run = small_configs
+    elif args.part == 4:
+        # Part 4: Combined features comparison (single-path vs dual-path)
+        configs_to_run = []  # Will handle separately below
     else:
         configs_to_run = all_configs + small_configs
 
-    # Build CVPredictorConfig objects
+    # Build CVPredictorConfig objects for Parts 1-3
     for cfg in configs_to_run:
         configs.append(CVPredictorConfig(
             predictor=FlexibleMLPPredictor(
@@ -601,6 +815,112 @@ def main():
             ),
             name=cfg["name"],
             display_name=cfg["display"],
+        ))
+
+    # Part 4: Combined features (embeddings + judge) - single-path vs dual-path
+    if args.part == 4:
+        llm_judge_path = ROOT / config.llm_judge_features_path
+        if not llm_judge_path.exists():
+            raise FileNotFoundError(f"LLM judge features not found: {llm_judge_path}")
+
+        llm_judge_source = CSVFeatureSource(llm_judge_path, name="LLM Judge")
+        combined_source = GroupedFeatureSource([embedding_source, llm_judge_source])
+
+        print(f"Embedding dims: {embedding_source.feature_dim}")
+        print(f"Judge dims: {llm_judge_source.feature_dim}")
+        print(f"Combined dims: {combined_source.feature_dim}")
+
+        # Baselines
+        configs.append(CVPredictorConfig(
+            predictor=OraclePredictor(),
+            name="oracle",
+            display_name="Oracle (true β)",
+        ))
+        configs.append(CVPredictorConfig(
+            predictor=DifficultyPredictorAdapter(
+                FeatureBasedPredictor(embedding_source, alphas=config.ridge_alphas)
+            ),
+            name="ridge_emb",
+            display_name="Ridge (Embedding only)",
+        ))
+        configs.append(CVPredictorConfig(
+            predictor=DifficultyPredictorAdapter(
+                FeatureBasedPredictor(llm_judge_source, alphas=config.ridge_alphas)
+            ),
+            name="ridge_judge",
+            display_name="Ridge (Judge only)",
+        ))
+        configs.append(CVPredictorConfig(
+            predictor=DifficultyPredictorAdapter(
+                GroupedRidgePredictor(combined_source)
+            ),
+            name="grouped_ridge",
+            display_name="GroupedRidge (Emb + Judge)",
+        ))
+
+        # Single-path: Best architecture (64-64) with concatenated features
+        configs.append(CVPredictorConfig(
+            predictor=FlexibleMLPPredictor(
+                combined_source,
+                architecture="deep",
+                hidden_sizes=[64, 64],
+                dropout=0.0,
+                learning_rate=learning_rate,
+                weight_decay=weight_decay,
+                n_epochs=n_epochs,
+                init_from_irt=True,
+                early_stopping=True,
+                early_stopping_metric="loss",
+                val_fraction=0.1,
+                patience=30,
+                verbose=True,
+            ),
+            name="single_path_64-64",
+            display_name="SinglePath DeepMLP (64-64, combined)",
+        ))
+
+        # Dual-path: Separate processing for each feature type
+        configs.append(CVPredictorConfig(
+            predictor=DualPathMLPPredictor(
+                embedding_source=embedding_source,
+                judge_source=llm_judge_source,
+                emb_hidden=64,
+                judge_hidden=16,
+                combined_hidden=32,
+                dropout=0.0,
+                learning_rate=learning_rate,
+                weight_decay=weight_decay,
+                n_epochs=n_epochs,
+                init_from_irt=True,
+                early_stopping=True,
+                val_fraction=0.1,
+                patience=30,
+                verbose=True,
+            ),
+            name="dual_path_64-16-32",
+            display_name="DualPath (emb=64, judge=16, comb=32)",
+        ))
+
+        # Dual-path variant: Larger judge path
+        configs.append(CVPredictorConfig(
+            predictor=DualPathMLPPredictor(
+                embedding_source=embedding_source,
+                judge_source=llm_judge_source,
+                emb_hidden=64,
+                judge_hidden=32,
+                combined_hidden=32,
+                dropout=0.0,
+                learning_rate=learning_rate,
+                weight_decay=weight_decay,
+                n_epochs=n_epochs,
+                init_from_irt=True,
+                early_stopping=True,
+                val_fraction=0.1,
+                patience=30,
+                verbose=True,
+            ),
+            name="dual_path_64-32-32",
+            display_name="DualPath (emb=64, judge=32, comb=32)",
         ))
 
     if args.part is not None:
