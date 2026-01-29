@@ -362,7 +362,49 @@ To generate new embeddings:
 python -m experiment_a.generate_embeddings --backbone "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 ```
 
-### 2. LLM Judge Features
+### 2. Environment Features (NEW)
+
+Deterministic features extracted from SWE-bench task environments by running bash commands inside Docker containers. These features capture repository structure, codebase statistics, and git history.
+
+**Location**: `experiment_a/env_features/`
+
+**34 features extracted**:
+- **File system**: `env_total_files`, `env_total_dirs`, `env_dir_depth_max`
+- **Python files**: `env_python_files`, `env_python_loc`, `env_init_files`
+- **Test infrastructure**: `env_test_files`, `env_test_dirs`, `env_conftest_files`, `env_has_pytest_ini`, `env_has_tox`
+- **Build config**: `env_has_setup_py`, `env_has_setup_cfg`, `env_has_pyproject`, `env_has_makefile`, `env_has_dockerfile`
+- **Dependencies**: `env_requirements_count`, `env_has_requirements`
+- **Git stats**: `env_git_commits_total`, `env_git_branches`, `env_git_tags`, `env_git_contributors`
+- **Documentation**: `env_doc_files`, `env_has_readme`, `env_has_docs_dir`, `env_sphinx_conf`
+- **Code complexity proxies**: `env_class_count`, `env_function_count`, `env_import_count`, `env_todo_count`
+- **Other files**: `env_json_files`, `env_yaml_files`, `env_config_files`, `env_shell_scripts`
+
+**Usage**:
+```bash
+# Run full extraction with batching (processes 10 tasks at a time, cleans up Docker between batches)
+python -m experiment_a.env_features.run_extraction \
+    --batch_size 10 \
+    --max_connections 10 \
+    --output_dir chris_output/env_features/swebench_verified/
+
+# Resume interrupted extraction (automatically skips completed samples)
+python -m experiment_a.env_features.run_extraction --output_dir chris_output/env_features/swebench_verified/
+
+# Just aggregate existing logs to CSV
+python -m experiment_a.env_features.run_extraction --aggregate_only
+```
+
+**Output**: `chris_output/env_features/swebench_verified/env_features.csv`
+
+**Architecture**:
+- Uses Inspect AI framework with deterministic solver (no LLM calls)
+- Each task runs in its own Docker container (`swebench/sweb.eval.x86_64.{instance_id}`)
+- Batched processing with Docker cleanup between batches to prevent memory overflow
+- Supports resuming interrupted runs
+
+See [experiment_a/env_features/README.md](env_features/README.md) for detailed documentation.
+
+### 3. LLM Judge Features
 
 Semantic features extracted via LLM structured output:
 

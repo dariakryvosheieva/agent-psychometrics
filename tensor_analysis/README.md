@@ -10,6 +10,7 @@ Extends binary response matrices (agents × tasks → 0/1) with trajectory-level
 | `eda.py` | Distribution analysis and visualization |
 | `response_matrix.py` | PCA analysis on response matrices |
 | `tensor_decomposition.py` | CP/Tucker tensor decomposition on (agents × tasks × features) |
+| `per_agent_correlation.py` | Per-agent correlation analysis (char count vs IRT difficulty) |
 
 ## Data Coverage
 
@@ -112,6 +113,37 @@ The second dimension is NOT the Guttman artifact — it captures real variance i
 
 Note: PCA on binary responses alone DOES show the Guttman effect. But when trajectory length is included as a second feature, it captures genuine agent-level variance.
 
+### Per-Agent Correlation Analysis
+
+The tensor decomposition found aggregate correlation between trajectory length and task difficulty (r = −0.958 for Task Factor 1). We investigated whether this holds at the **per-agent level** and critically, whether it persists on **frontier tasks**.
+
+**All Tasks (n=500):**
+
+| Metric | Value |
+|--------|-------|
+| Mean r | **+0.205** |
+| Median r | +0.210 |
+| Std | 0.132 |
+| Range | [−0.38, +0.47] |
+| Significant (p<0.05) | 41/44 (93%) |
+| Negative & significant | 1/44 (2%) |
+
+Within each agent, longer trajectories correlate with **harder** tasks (positive r).
+
+**Frontier Tasks Only (n=34, zero_pre definition):**
+
+| Metric | Value |
+|--------|-------|
+| Mean r | **−0.099** |
+| Median r | −0.097 |
+| Std | 0.135 |
+| Range | [−0.36, +0.23] |
+| Significant (p<0.05) | 2/43 (5%) |
+
+**Key Finding:** The correlation **disappears on frontier tasks**. This confirms the same phenomenon found in Experiment B's ordered logit IRT analysis: trajectory features from pre-frontier agents cannot distinguish between frontier tasks because all agents fail on them. The trajectories are all similarly long/failed, providing no signal to differentiate "more impossible" from "less impossible" tasks.
+
+**Implication:** Per-agent trajectory length features will NOT help predict difficulty for frontier tasks in Experiment B.
+
 **SWE-bench Pro (10 × 398 × 2):**
 
 | Method | Rank/Size | Explained Variance |
@@ -141,6 +173,9 @@ python -m tensor_analysis.response_matrix
 
 # Run tensor decomposition
 python -m tensor_analysis.tensor_decomposition
+
+# Run per-agent correlation analysis
+python -m tensor_analysis.per_agent_correlation
 ```
 
 ## Output Files
@@ -149,6 +184,10 @@ All outputs saved to `chris_output/tensor_analysis/`:
 
 - `swebench_verified_char_counts.csv` - Character counts (44 agents × 500 tasks)
 - `swebench_pro_char_counts.csv` - Character counts (10 agents × 398 tasks)
+- `per_agent_correlations_all_tasks.csv` - Per-agent correlation results (all 500 tasks)
+- `per_agent_correlations_frontier.csv` - Per-agent correlation results (34 frontier tasks)
+- `per_agent_correlation_histograms.png` - Side-by-side histograms of r values
+- `agent_char_count_features.csv` - Z-score normalized feature matrix (500 × 44)
 - `pca_results.json` - PCA explained variance and agent scores
 - `plots/` - EDA and PCA visualizations
 - `decomposition/` - Tensor decomposition results:
