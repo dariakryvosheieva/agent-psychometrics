@@ -71,7 +71,7 @@ Run with: `python -m experiment_a.run_all_datasets`
 | Grouped Ridge (LLM + Env) | 0.8291 | 0.0143 |
 | Stacked (Emb → LLM) | 0.8291 | 0.0179 |
 | Embedding | 0.8230 | 0.0193 |
-| LLM Judge (no solution) | 0.7745 | 0.0165 |
+| LLM Judge (no solution + auditor) | 0.8005 | 0.0175 |
 | LLM Judge (problem only) | 0.7707 | 0.0189 |
 | Environment | 0.7186 | 0.0082 |
 | Constant (mean b) | 0.7146 | 0.0083 |
@@ -527,19 +527,19 @@ Embeddings are generated with a prompt containing `question_statement + solution
 
 LLM judge features have three variants:
 - **Full** (13 features): All task info including gold patch + 3 auditor features
-- **No Solution** (7 features): Problem + tests + repo (no patch, no auditor)
-- **Problem Only** (7 features): Problem statement only (no auditor)
+- **No Solution + Auditor** (10 features): Problem + tests + repo + env exploration (no patch)
+- **Problem Only** (7 features): Problem statement only (no env access)
 
 | Variant | Features | AUC | Δ vs Full |
 |---------|----------|-----|-----------|
 | Full (LLM + Auditor) | 13 | **0.8303** | - |
-| No Solution | 7 | 0.7745 | -6.7% |
+| No Solution + Auditor | 10 | 0.8005 | -3.6% |
 | Problem Only | 7 | 0.7707 | -7.2% |
 
 **Key findings**:
-- **Auditor features add significant value**: Full variant (0.8303) outperforms no-solution (0.7745) by +6.7%
-- **Solution information matters**: Knowing the gold patch helps (no-solution → full adds +5.6%)
-- **Auditor features complement solution info**: The 3 auditor features (entry_point_clarity, change_blast_radius, fix_localization) contribute to the improvement by capturing environment-interactive signals not available from static analysis
+- **Solution information contributes ~3%**: Full (0.8303) vs No Solution + Auditor (0.8005)
+- **Environment exploration contributes ~3%**: No Solution + Auditor (0.8005) vs Problem Only (0.7707)
+- **Auditor features are valuable without solution**: Adding auditor to no_solution improved AUC from 0.7745 → 0.8005 (+2.6%)
 
 To run the ablation across all datasets:
 ```bash
