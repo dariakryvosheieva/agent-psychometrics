@@ -80,7 +80,7 @@ Each JSON file contains the agent's trajectory for one task in a unified format.
 
 ## SWE-bench Bash-Only Dataset
 
-SWE-bench Bash-Only is a variant where agents are restricted to bash-only tool use. It uses the **same 500 tasks** as SWE-bench Verified, enabling apples-to-apples comparison.
+SWE-bench Bash-Only is a variant where agents are restricted to bash-only tool use via the [mini-SWE-agent](https://github.com/SWE-agent/mini-swe-agent) scaffold. It uses the **same 500 tasks** as SWE-bench Verified, enabling apples-to-apples comparison.
 
 ```
 experiments/evaluation/bash-only/<agent>/per_instance_details.json
@@ -91,15 +91,26 @@ clean_data/swebench_bash_only/swebench_bash_only.jsonl
          ↓
     swebench_irt/train.py (--dims 1 --model 1pl)
          ↓
-clean_data/swebench_bash_only/1d/
+clean_data/swebench_bash_only/1d_1pl/
     ├── items.csv   (task difficulties)
     └── abilities.csv (agent abilities)
 ```
 
 **Dataset stats:**
-- **34 agents**
+- **26 agents** (after exclusions)
 - **500 tasks** (identical to SWE-bench Verified)
-- **17,000 observations** (complete matrix)
+- **13,000 observations** (complete matrix)
+
+**Excluded agents:**
+
+The prep script excludes agents with known data quality issues:
+
+| Agent | Reason |
+|-------|--------|
+| v0.0.0 scaffold agents (5) | Early scaffold version with bugs; results not comparable to v1.x+ |
+| gemini-2.0-flash, gemini-2.5-flash, gpt-4.1 | Missing `per_instance_details.json` files |
+
+See `EXCLUDED_AGENTS` in `prep_swebench_bash_only.py` for the full list.
 
 **Prep command:**
 ```bash
