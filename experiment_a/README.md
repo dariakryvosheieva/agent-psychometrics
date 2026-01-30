@@ -487,38 +487,28 @@ Embeddings are generated with a prompt containing `question_statement + solution
 
 **Key finding**: Solution information in the embedding prompt contributes +2.5% to +9.9% AUC improvement, with the largest impact on GSO and SWE-bench Verified.
 
-#### LLM Judge Ablation (SWE-bench Verified)
+#### LLM Judge Ablation (All Datasets)
 
 LLM judge features have three variants:
 - **Full** (9 features): All task info including gold patch
-- **No Solution** (7 features): Problem + tests + repo (no patch) - drops `solution_complexity`, `integration_complexity`
+- **No Solution** (7 features): Problem + tests + repo (no patch) - drops `solution_complexity` and dataset-specific feature (`integration_complexity` for code, `tooling_complexity` for terminal)
 - **Problem Only** (7 features): Problem statement only
 
-| Variant | LLM Judge AUC | Std | Δ vs Full |
-|---------|---------------|-----|-----------|
-| Full (9 features) | 0.8163 | 0.0118 | baseline |
-| No Solution (7 features) | 0.7745 | 0.0165 | -5.1% |
-| Problem Only (7 features) | 0.7707 | 0.0189 | -5.6% |
+| Dataset | Full (9 feat) | No Solution (7 feat) | Problem Only (7 feat) | Δ Full→No Sol |
+|---------|---------------|----------------------|-----------------------|---------------|
+| SWE-bench Verified | 0.8163 | 0.7745 | 0.7707 | -5.1% |
+| SWE-bench Pro | 0.7212 | 0.6962 | 0.6897 | -3.5% |
+| GSO | 0.7333 | 0.7236 | 0.7249 | -1.3% |
+| TerminalBench | 0.7700 | **0.7766** | 0.7740 | **+0.9%** |
 
-**Key finding**: Solution information contributes ~5% AUC improvement for LLM judge features, less than the 8% for embeddings. The "No Solution" variant retains most predictive power since it still has access to test specifications and repo metadata.
+**Key findings**:
+- Solution information contributes 1-5% AUC improvement for most datasets
+- **TerminalBench anomaly**: The no-solution variant (0.7766) *outperforms* the full version (0.7700). Further investigation shows that both `tooling_complexity` and `solution_complexity` hurt performance on this small dataset (88 tasks), likely due to overfitting
 
-To run the ablation:
+To run the ablation across all datasets:
 ```bash
-# Extract no-solution features
-python -m experiment_ab_shared.llm_judge extract \
-    --dataset swebench_unified_no_solution \
-    --parallel --concurrency 10 \
-    --provider anthropic --model claude-opus-4-5-20251101
-
-# Extract problem-only features
-python -m experiment_ab_shared.llm_judge extract \
-    --dataset swebench_unified_problem_only \
-    --parallel --concurrency 10 \
-    --provider anthropic --model claude-opus-4-5-20251101
-
-# Compare all variants in a single run
-python -m experiment_a.swebench.train_evaluate \
-    --llm_judge_paths "chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv,chris_output/llm_judge_features/swebench_unified_no_solution/llm_judge_features.csv,chris_output/llm_judge_features/swebench_unified_problem_only/llm_judge_features.csv"
+# Run all datasets with judge ablation
+python -m experiment_a.run_all_datasets --judge_ablation --sequential
 ```
 
 To extract features:
