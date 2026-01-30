@@ -35,6 +35,8 @@ class ExperimentADatasetSpec:
     config_class_name: str  # e.g., "ExperimentAConfig"
     spec_module: str  # e.g., "experiment_a.swebench.train_evaluate"
     unified_judge_path: Optional[Path]
+    unified_judge_no_solution_path: Optional[Path]  # For ablation study
+    unified_judge_problem_only_path: Optional[Path]  # For ablation study
     env_features_path: Optional[Path]  # Path to environment features CSV
     extra_kwargs: Dict[str, Any]  # Additional config kwargs like exclude_unsolved=True
 
@@ -48,6 +50,8 @@ DATASETS = [
         config_class_name="ExperimentAConfig",  # Note: SWE-bench uses ExperimentAConfig
         spec_module="experiment_a.swebench.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv"),
+        unified_judge_no_solution_path=Path("chris_output/llm_judge_features/swebench_unified_no_solution/llm_judge_features.csv"),
+        unified_judge_problem_only_path=Path("chris_output/llm_judge_features/swebench_unified_problem_only/llm_judge_features.csv"),
         env_features_path=Path("chris_output/env_features/swebench_verified/env_features.csv"),
         extra_kwargs={},
     ),
@@ -58,6 +62,8 @@ DATASETS = [
         config_class_name="GSOConfig",
         spec_module="experiment_a.gso.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/gso_unified/llm_judge_features.csv"),
+        unified_judge_no_solution_path=Path("chris_output/llm_judge_features/gso_unified_no_solution/llm_judge_features.csv"),
+        unified_judge_problem_only_path=Path("chris_output/llm_judge_features/gso_unified_problem_only/llm_judge_features.csv"),
         env_features_path=None,  # Not yet extracted for GSO
         extra_kwargs={"exclude_unsolved": True},  # Match Daria's setup
     ),
@@ -68,6 +74,8 @@ DATASETS = [
         config_class_name="TerminalBenchConfig",
         spec_module="experiment_a.terminalbench.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/terminalbench_unified/llm_judge_features.csv"),
+        unified_judge_no_solution_path=Path("chris_output/llm_judge_features/terminalbench_unified_no_solution/llm_judge_features.csv"),
+        unified_judge_problem_only_path=Path("chris_output/llm_judge_features/terminalbench_unified_problem_only/llm_judge_features.csv"),
         env_features_path=None,  # Not yet extracted for TerminalBench
         extra_kwargs={},
     ),
@@ -78,6 +86,8 @@ DATASETS = [
         config_class_name="SWEBenchProConfig",
         spec_module="experiment_a.swebench_pro.train_evaluate",
         unified_judge_path=Path("chris_output/llm_judge_features/swebench_pro_unified/llm_judge_features.csv"),
+        unified_judge_no_solution_path=Path("chris_output/llm_judge_features/swebench_pro_unified_no_solution/llm_judge_features.csv"),
+        unified_judge_problem_only_path=Path("chris_output/llm_judge_features/swebench_pro_unified_problem_only/llm_judge_features.csv"),
         env_features_path=None,  # Not yet extracted for SWE-bench Pro
         extra_kwargs={},
     ),
@@ -94,6 +104,7 @@ def run_single_dataset(
     n_jobs_folds: int = 1,
     include_mlp: bool = False,
     include_trees: bool = False,
+    judge_ablation: bool = False,
     extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None,
     extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
@@ -107,8 +118,9 @@ def run_single_dataset(
         k_folds: Number of CV folds.
         n_jobs_methods: Number of parallel jobs for method execution.
         n_jobs_folds: Number of parallel jobs for fold execution.
-        include_mlp: Whether to include MLP predictors (default True).
+        include_mlp: Whether to include MLP predictors (default False).
         include_trees: Whether to include tree-based predictors (default False).
+        judge_ablation: Whether to include no-solution and problem-only LLM judge ablations.
         extra_embeddings_paths: Additional embedding paths for ablation studies.
         extra_llm_judge_paths: Additional LLM judge paths for ablation studies.
 
@@ -160,6 +172,19 @@ def run_single_dataset(
 
         if output_base:
             config_kwargs["output_dir"] = output_base / dataset_config.short_name
+
+        # Add ablation paths if requested
+        if judge_ablation:
+            ablation_paths = []
+            if dataset_config.unified_judge_no_solution_path and dataset_config.unified_judge_no_solution_path.exists():
+                ablation_paths.append(("no_solution", dataset_config.unified_judge_no_solution_path))
+            if dataset_config.unified_judge_problem_only_path and dataset_config.unified_judge_problem_only_path.exists():
+                ablation_paths.append(("problem_only", dataset_config.unified_judge_problem_only_path))
+            if ablation_paths:
+                if extra_llm_judge_paths:
+                    extra_llm_judge_paths = list(extra_llm_judge_paths) + ablation_paths
+                else:
+                    extra_llm_judge_paths = ablation_paths
 
         config = config_class(**config_kwargs)
 
@@ -217,6 +242,9 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
         "mlp_llm_judge": "MLP (Judge)",
         "mlp_grouped": "MLP (Grouped)",
         "constant_baseline": "Baseline",
+        # Ablation study predictors
+        "llm_judge_no_solution": "LLM (no sol)",
+        "llm_judge_problem_only": "LLM (prob only)",
     }
 
     cv_results = results.get("cv_results", {})
@@ -244,8 +272,8 @@ def format_results_table(
         Formatted markdown table string with proper column alignment.
     """
     if methods is None:
-        methods = ["Oracle", "Grouped Ridge", "Emb + LLM", "Emb + Env", "LLM + Env",
-                   "Embedding", "LLM Judge", "Environment", "Baseline"]
+        methods = ["Oracle", "Grouped Ridge", "Embedding", "LLM Judge",
+                   "LLM (no sol)", "LLM (prob only)", "Baseline"]
 
     # Build data rows first to calculate column widths
     data_rows = []
@@ -300,8 +328,8 @@ def save_results_csv(
     import csv
 
     if methods is None:
-        methods = ["Oracle", "Grouped Ridge", "Emb + LLM", "Emb + Env", "LLM + Env",
-                   "Embedding", "LLM Judge", "Environment", "Baseline"]
+        methods = ["Oracle", "Grouped Ridge", "Embedding", "LLM Judge",
+                   "LLM (no sol)", "LLM (prob only)", "Baseline"]
 
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -394,6 +422,11 @@ def main():
         help="Include tree-based predictors (default: False). Use --trees to include Decision Tree and Random Forest.",
     )
     parser.add_argument(
+        "--judge_ablation",
+        action="store_true",
+        help="Include LLM judge ablation variants (no-solution, problem-only) for each dataset.",
+    )
+    parser.add_argument(
         "--llm_judge_paths",
         type=str,
         default=None,
@@ -446,7 +479,7 @@ def main():
     print(f"Running Experiment A on {len(datasets_to_run)} datasets...")
     print(f"Unified judge features: {args.unified_judge}")
     print(f"K-folds: {args.k_folds}")
-    print(f"Include MLP: {args.mlp}, Include trees: {args.trees}")
+    print(f"Include MLP: {args.mlp}, Include trees: {args.trees}, Judge ablation: {args.judge_ablation}")
     print(f"Parallelization: datasets={args.max_workers}, methods={args.n_jobs_methods}, folds={args.n_jobs_folds}")
     if extra_embeddings_paths:
         print(f"Extra embedding paths: {[name for name, _ in extra_embeddings_paths]}")
@@ -470,6 +503,7 @@ def main():
                 n_jobs_folds=args.n_jobs_folds,
                 include_mlp=args.mlp,
                 include_trees=args.trees,
+                judge_ablation=args.judge_ablation,
                 extra_embeddings_paths=extra_embeddings_paths,
                 extra_llm_judge_paths=extra_llm_judge_paths,
             )
@@ -499,6 +533,7 @@ def main():
                     args.n_jobs_folds,
                     args.mlp,
                     args.trees,
+                    args.judge_ablation,
                     extra_embeddings_paths,
                     extra_llm_judge_paths,
                 ): config.name

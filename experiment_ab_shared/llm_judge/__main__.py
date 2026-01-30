@@ -82,14 +82,42 @@ def load_swebench_tasks() -> List[Dict[str, Any]]:
     return tasks
 
 
+def _normalize_swebench_pro_task_id(task_id: str) -> str:
+    """Normalize SWE-bench Pro task IDs to match IRT format.
+
+    SWE-bench Pro task IDs from HuggingFace have the format:
+        instance_<repo>__<repo>-<commit>-v<version>
+
+    But the IRT data uses the format:
+        <repo>__<repo>-<commit>
+
+    This function normalizes to the IRT format by:
+    1. Removing 'instance_' prefix
+    2. Removing version suffix (-v<hex> or -vnan)
+    """
+    import re
+
+    # Remove instance_ prefix
+    if task_id.startswith('instance_'):
+        task_id = task_id[9:]
+
+    # Remove version suffix (format: -v followed by 'nan' or hex chars at end)
+    task_id = re.sub(r'-v(nan|[a-f0-9]+)$', '', task_id)
+
+    return task_id
+
+
 def load_swebench_pro_tasks() -> List[Dict[str, Any]]:
     """Load SWE-bench Pro dataset from HuggingFace.
 
     Data source: ScaleAI/SWE-bench_Pro
 
+    Note: Task IDs are normalized to match the IRT data format by removing
+    the 'instance_' prefix and version suffix.
+
     Returns:
         List of task dictionaries with fields:
-        - instance_id: Task identifier
+        - instance_id: Task identifier (normalized)
         - repo: Repository name
         - problem_statement: Issue description
         - patch: Gold solution patch
@@ -108,8 +136,10 @@ def load_swebench_pro_tasks() -> List[Dict[str, Any]]:
 
     tasks = []
     for item in ds:
+        # Normalize task ID to match IRT format
+        normalized_id = _normalize_swebench_pro_task_id(item["instance_id"])
         tasks.append({
-            "instance_id": item["instance_id"],
+            "instance_id": normalized_id,
             "repo": item["repo"],
             "problem_statement": item["problem_statement"],
             "patch": item["patch"],
