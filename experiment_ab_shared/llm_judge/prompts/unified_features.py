@@ -281,3 +281,28 @@ Respond with ONLY a JSON object. No markdown, no extra text.
     "tooling_complexity": <1-5>,
     "reasoning": "<2-3 sentence summary of the key difficulty factors>"
 }}"""
+
+
+# =============================================================================
+# No-Solution Features (for ablation study)
+# =============================================================================
+
+# 7 features: CORE_FEATURES minus solution_complexity
+# (solution_complexity and dataset-specific features require the gold patch)
+NO_SOLUTION_FEATURES = [f for f in CORE_FEATURES if f.name != "solution_complexity"]
+NO_SOLUTION_FEATURE_NAMES = [f.name for f in NO_SOLUTION_FEATURES]
+
+OUTPUT_FORMAT_7_FEATURES = """## OUTPUT FORMAT
+
+Respond with ONLY a JSON object. No markdown, no extra text.
+
+{{
+    "solution_hint": <0-3>,
+    "problem_clarity": <1-5>,
+    "domain_knowledge_required": <1-5>,
+    "logical_reasoning_required": <1-5>,
+    "atypicality": <1-5>,
+    "verification_difficulty": <1-5>,
+    "standard_pattern_available": <0 or 1>,
+    "reasoning": "<2-3 sentence summary of the key difficulty factors>"
+}}"""

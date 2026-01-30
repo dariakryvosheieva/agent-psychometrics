@@ -15,8 +15,10 @@ from typing import Any, Dict
 from experiment_ab_shared.llm_judge.prompt_config import PromptConfig
 from experiment_ab_shared.llm_judge.prompts.unified_features import (
     CODE_DATASET_FEATURES,
+    NO_SOLUTION_FEATURES,
     COMPLETENESS_INSTRUCTION,
     OUTPUT_FORMAT_9_FEATURES_CODE,
+    OUTPUT_FORMAT_7_FEATURES,
     SOLUTION_HINT_SCALE,
     PROBLEM_CLARITY_SCALE,
     SOLUTION_COMPLEXITY_SCALE_CODE,
@@ -147,4 +149,153 @@ SWEBENCH_PRO_UNIFIED_CONFIG = PromptConfig(
     task_id_field="instance_id",
     truncation_limits={},  # No truncation needed with Claude Opus 4.5's 200K context
     format_prompt_fn=format_swebench_pro_unified_prompt,
+)
+
+
+# =============================================================================
+# No-Solution Variant (for ablation study)
+# =============================================================================
+
+SWEBENCH_PRO_UNIFIED_NO_SOLUTION_PROMPT_TEMPLATE = """You are analyzing a SWE-bench Pro coding task to predict its difficulty.
+This is a BUG FIX task in a Python repository. You do not have access to the solution patch.
+
+{completeness_instruction}
+
+## TASK INFORMATION
+
+**Instance ID:** {{instance_id}}
+**Repository:** {{repo}}
+**Version:** {{version}}
+
+**Problem Statement:**
+{{problem_statement}}
+
+**Tests that should pass after fix (FAIL_TO_PASS):**
+{{fail_to_pass}}
+
+**Regression tests (PASS_TO_PASS):**
+{{pass_to_pass}}
+
+{{hints_section}}
+
+## FEATURES TO EVALUATE
+
+{solution_hint_scale}
+
+{problem_clarity_scale}
+
+{domain_knowledge_scale}
+
+{logical_reasoning_scale}
+
+{atypicality_scale}
+
+{verification_difficulty_scale}
+
+{standard_pattern_scale}
+
+{output_format}
+""".format(
+    completeness_instruction=COMPLETENESS_INSTRUCTION,
+    solution_hint_scale=SOLUTION_HINT_SCALE,
+    problem_clarity_scale=PROBLEM_CLARITY_SCALE,
+    domain_knowledge_scale=DOMAIN_KNOWLEDGE_SCALE_CODE,
+    logical_reasoning_scale=LOGICAL_REASONING_SCALE,
+    atypicality_scale=ATYPICALITY_SCALE,
+    verification_difficulty_scale=VERIFICATION_DIFFICULTY_SCALE,
+    standard_pattern_scale=STANDARD_PATTERN_SCALE,
+    output_format=OUTPUT_FORMAT_7_FEATURES,
+)
+
+
+def format_swebench_pro_unified_no_solution_prompt(task: Dict[str, Any]) -> str:
+    """Format the prompt without the gold patch."""
+    hints_text = task.get("hints_text", "") or ""
+    hints_section = f"**Hints:**\n{hints_text}" if hints_text and hints_text.strip() else ""
+
+    fail_to_pass = task.get("fail_to_pass") or task.get("FAIL_TO_PASS") or "[]"
+    pass_to_pass = task.get("pass_to_pass") or task.get("PASS_TO_PASS") or "[]"
+
+    return SWEBENCH_PRO_UNIFIED_NO_SOLUTION_PROMPT_TEMPLATE.format(
+        instance_id=task.get("instance_id", ""),
+        repo=task.get("repo", ""),
+        version=task.get("version", "unknown"),
+        problem_statement=task.get("problem_statement", "") or "",
+        fail_to_pass=fail_to_pass,
+        pass_to_pass=pass_to_pass,
+        hints_section=hints_section,
+    )
+
+
+SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG = PromptConfig(
+    name="swebench_pro_unified_no_solution",
+    features=NO_SOLUTION_FEATURES,
+    prompt_template=SWEBENCH_PRO_UNIFIED_NO_SOLUTION_PROMPT_TEMPLATE,
+    task_id_field="instance_id",
+    truncation_limits={},
+    format_prompt_fn=format_swebench_pro_unified_no_solution_prompt,
+)
+
+
+# =============================================================================
+# Problem-Only Variant (for ablation study)
+# =============================================================================
+
+SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_PROMPT_TEMPLATE = """You are analyzing a SWE-bench Pro coding task to predict its difficulty.
+This is a BUG FIX task in a Python repository. You only have access to the problem statement.
+
+{completeness_instruction}
+
+## TASK INFORMATION
+
+**Instance ID:** {{instance_id}}
+
+**Problem Statement:**
+{{problem_statement}}
+
+## FEATURES TO EVALUATE
+
+{solution_hint_scale}
+
+{problem_clarity_scale}
+
+{domain_knowledge_scale}
+
+{logical_reasoning_scale}
+
+{atypicality_scale}
+
+{verification_difficulty_scale}
+
+{standard_pattern_scale}
+
+{output_format}
+""".format(
+    completeness_instruction=COMPLETENESS_INSTRUCTION,
+    solution_hint_scale=SOLUTION_HINT_SCALE,
+    problem_clarity_scale=PROBLEM_CLARITY_SCALE,
+    domain_knowledge_scale=DOMAIN_KNOWLEDGE_SCALE_CODE,
+    logical_reasoning_scale=LOGICAL_REASONING_SCALE,
+    atypicality_scale=ATYPICALITY_SCALE,
+    verification_difficulty_scale=VERIFICATION_DIFFICULTY_SCALE,
+    standard_pattern_scale=STANDARD_PATTERN_SCALE,
+    output_format=OUTPUT_FORMAT_7_FEATURES,
+)
+
+
+def format_swebench_pro_unified_problem_only_prompt(task: Dict[str, Any]) -> str:
+    """Format the prompt with only problem statement."""
+    return SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_PROMPT_TEMPLATE.format(
+        instance_id=task.get("instance_id", ""),
+        problem_statement=task.get("problem_statement", "") or "",
+    )
+
+
+SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG = PromptConfig(
+    name="swebench_pro_unified_problem_only",
+    features=NO_SOLUTION_FEATURES,
+    prompt_template=SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_PROMPT_TEMPLATE,
+    task_id_field="instance_id",
+    truncation_limits={},
+    format_prompt_fn=format_swebench_pro_unified_problem_only_prompt,
 )

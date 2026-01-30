@@ -470,6 +470,57 @@ Both approaches yield comparable results (within ~0.005 AUC noise). Dataset-spec
 
 **Recommendation**: Unified features are now the default for consistency across datasets. Use `--no-unified_judge` if you need dataset-specific features for slightly better per-dataset performance.
 
+### Ablation Study: Solution Information Contribution
+
+To measure how much the solution patch contributes to feature quality, we ran ablation experiments removing solution information from both embeddings and LLM judge features.
+
+#### Embedding Ablation (No Solution in Prompt)
+
+Embeddings are generated with a prompt containing `question_statement + solution + instruction`. The "no solution" variant removes the solution from the prompt.
+
+| Dataset | With Solution | No Solution | Δ AUC |
+|---------|---------------|-------------|-------|
+| SWE-bench Verified | 0.823 | 0.756 | -0.067 (-8.1%) |
+| SWE-bench Pro | 0.747 | 0.728 | -0.019 (-2.5%) |
+| TerminalBench | 0.804 | 0.784 | -0.020 (-2.5%) |
+| GSO | 0.728 | 0.656 | -0.072 (-9.9%) |
+
+**Key finding**: Solution information in the embedding prompt contributes +2.5% to +9.9% AUC improvement, with the largest impact on GSO and SWE-bench Verified.
+
+#### LLM Judge Ablation (SWE-bench Verified)
+
+LLM judge features have three variants:
+- **Full** (9 features): All task info including gold patch
+- **No Solution** (7 features): Problem + tests + repo (no patch) - drops `solution_complexity`, `integration_complexity`
+- **Problem Only** (7 features): Problem statement only
+
+| Variant | LLM Judge AUC | Std | Δ vs Full |
+|---------|---------------|-----|-----------|
+| Full (9 features) | 0.8163 | 0.0118 | baseline |
+| No Solution (7 features) | 0.7745 | 0.0165 | -5.1% |
+| Problem Only (7 features) | 0.7707 | 0.0189 | -5.6% |
+
+**Key finding**: Solution information contributes ~5% AUC improvement for LLM judge features, less than the 8% for embeddings. The "No Solution" variant retains most predictive power since it still has access to test specifications and repo metadata.
+
+To run the ablation:
+```bash
+# Extract no-solution features
+python -m experiment_ab_shared.llm_judge extract \
+    --dataset swebench_unified_no_solution \
+    --parallel --concurrency 10 \
+    --provider anthropic --model claude-opus-4-5-20251101
+
+# Extract problem-only features
+python -m experiment_ab_shared.llm_judge extract \
+    --dataset swebench_unified_problem_only \
+    --parallel --concurrency 10 \
+    --provider anthropic --model claude-opus-4-5-20251101
+
+# Compare all variants in a single run
+python -m experiment_a.swebench.train_evaluate \
+    --llm_judge_paths "chris_output/llm_judge_features/swebench_unified/llm_judge_features.csv,chris_output/llm_judge_features/swebench_unified_no_solution/llm_judge_features.csv,chris_output/llm_judge_features/swebench_unified_problem_only/llm_judge_features.csv"
+```
+
 To extract features:
 ```bash
 # SWE-bench features
@@ -531,7 +582,7 @@ python -m experiment_ab_shared.llm_judge aggregate --dataset swebench
 --dry_run             Show configuration without running
 --exclude_unsolved    Exclude tasks no agent solved
 --include_feature_irt Include Feature-IRT joint learning methods (off by default)
---mlp / --no-mlp      Include/exclude MLP predictors (default: --mlp). Use --no-mlp for faster local runs without PyTorch training.
+--mlp / --no-mlp      Include/exclude MLP predictors (default: --no-mlp). Use --mlp to include PyTorch-based MLP predictors.
 --trees / --no-trees  Include/exclude tree-based predictors (default: --no-trees). Use --trees to include Decision Tree and Random Forest.
 ```
 

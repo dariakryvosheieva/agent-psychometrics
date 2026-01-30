@@ -114,10 +114,12 @@ def build_cv_predictors(
     root: Path,
     llm_judge_features: Optional[List[str]] = None,
     include_feature_irt: bool = False,
-    include_mlp: bool = True,
+    include_mlp: bool = False,
     include_trees: bool = False,
     full_firt_l2_weight: float = 0.001,
     full_firt_l2_residual: float = 0.0001,
+    extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None,
+    extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None,
 ) -> List[CVPredictorConfig]:
     """Build list of CVPredictor configurations for cross-validation.
 
@@ -133,6 +135,10 @@ def build_cv_predictors(
             Set to False for faster local execution (skips PyTorch training).
         include_trees: Whether to include tree-based predictors (Decision Tree, Random Forest).
             Defaults to False since they don't consistently outperform Ridge.
+        extra_embeddings_paths: List of (name, path) tuples for additional embedding
+            sources to compare (ablation study). Each gets its own Ridge predictor.
+        extra_llm_judge_paths: List of (name, path) tuples for additional LLM judge
+            sources to compare (ablation study). Each gets its own Ridge predictor.
 
     Returns:
         List of CVPredictorConfig objects with pre-instantiated predictors.
@@ -180,6 +186,38 @@ def build_cv_predictors(
 
     # Build a dict for easy lookup by source name
     source_by_name = {name: source for name, source in feature_source_list}
+
+    # Add extra embedding sources (for ablation studies)
+    if extra_embeddings_paths:
+        for name, path in extra_embeddings_paths:
+            emb_source = EmbeddingFeatureSource(path)
+            difficulty_predictor = FeatureBasedPredictor(
+                emb_source,
+                alphas=list(config.ridge_alphas),
+            )
+            configs.append(
+                CVPredictorConfig(
+                    predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                    name=f"embedding_{name}",
+                    display_name=f"Embedding ({name})",
+                )
+            )
+
+    # Add extra LLM judge sources (for ablation studies)
+    if extra_llm_judge_paths:
+        for name, path in extra_llm_judge_paths:
+            judge_source = CSVFeatureSource(path, feature_cols=None)  # Auto-detect cols
+            difficulty_predictor = FeatureBasedPredictor(
+                judge_source,
+                alphas=list(config.ridge_alphas),
+            )
+            configs.append(
+                CVPredictorConfig(
+                    predictor=DifficultyPredictorAdapter(difficulty_predictor),
+                    name=f"llm_judge_{name}",
+                    display_name=f"LLM Judge ({name})",
+                )
+            )
 
     # Embedding predictor (Ridge regression)
     if "Embedding" in source_by_name:
@@ -536,7 +574,7 @@ def run_cross_validation(
     k: int = 5,
     metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
     include_feature_irt: bool = False,
-    include_mlp: bool = True,
+    include_mlp: bool = False,
     include_trees: bool = False,
     full_firt_l2_weight: float = 0.001,
     full_firt_l2_residual: float = 0.0001,
@@ -545,6 +583,8 @@ def run_cross_validation(
     diagnostics_extractors: Optional[Dict[str, Callable]] = None,
     n_jobs_methods: int = 1,
     n_jobs_folds: int = 1,
+    extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None,
+    extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None,
 ) -> Dict[str, Any]:
     """Run the evaluation pipeline with k-fold cross-validation.
 
@@ -571,6 +611,10 @@ def run_cross_validation(
             Results are stored in CrossValidationResult.fold_diagnostics.
         n_jobs_methods: Number of parallel jobs for method execution. 1 = sequential.
         n_jobs_folds: Number of parallel jobs for fold execution within each method.
+        extra_embeddings_paths: List of (name, path) tuples for additional embedding
+            sources to compare (ablation study).
+        extra_llm_judge_paths: List of (name, path) tuples for additional LLM judge
+            sources to compare (ablation study).
 
     Returns:
         Dict with CV results for each method
@@ -629,6 +673,8 @@ def run_cross_validation(
         include_feature_irt=include_feature_irt,
         include_mlp=include_mlp,
         include_trees=include_trees,
+        extra_embeddings_paths=extra_embeddings_paths,
+        extra_llm_judge_paths=extra_llm_judge_paths,
         full_firt_l2_weight=full_firt_l2_weight,
         full_firt_l2_residual=full_firt_l2_residual,
     )
@@ -825,10 +871,22 @@ def create_main_parser(experiment_name: str, default_output_dir: str) -> argpars
         help="Path to pre-computed embeddings .npz file",
     )
     parser.add_argument(
+        "--embeddings_paths",
+        type=str,
+        default=None,
+        help="Comma-separated list of embedding paths to compare (ablation study)",
+    )
+    parser.add_argument(
         "--llm_judge_features_path",
         type=str,
         default=None,
         help="Path to LLM judge features CSV file",
+    )
+    parser.add_argument(
+        "--llm_judge_paths",
+        type=str,
+        default=None,
+        help="Comma-separated list of LLM judge paths to compare (ablation study)",
     )
     parser.add_argument(
         "--llm_judge_max_features",
@@ -968,9 +1026,42 @@ def run_experiment_main(
         use_binary = args.binary
         spec = spec_factory(use_binary)
 
+    # Parse extra feature paths for ablation studies
+    extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None
+    extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None
+
+    if args.embeddings_paths:
+        extra_embeddings_paths = []
+        for path_str in args.embeddings_paths.split(","):
+            path_str = path_str.strip()
+            if path_str:
+                path = root / Path(path_str)
+                # Extract a short name from the path
+                name = Path(path_str).stem
+                # If it has double underscores, use the last part as name
+                if "__" in name:
+                    parts = name.split("__")
+                    # Try to find a meaningful part (e.g., "no_solution")
+                    name = parts[-1] if parts[-1] else parts[-2]
+                extra_embeddings_paths.append((name, path))
+
+    if args.llm_judge_paths:
+        extra_llm_judge_paths = []
+        for path_str in args.llm_judge_paths.split(","):
+            path_str = path_str.strip()
+            if path_str:
+                path = root / Path(path_str)
+                # Use parent directory name as the variant name
+                name = Path(path_str).parent.name
+                extra_llm_judge_paths.append((name, path))
+
     if args.dry_run:
         print("DRY RUN - Configuration:")
         print(json.dumps(config.to_dict(), indent=2))
+        if extra_embeddings_paths:
+            print(f"\nExtra embedding paths: {extra_embeddings_paths}")
+        if extra_llm_judge_paths:
+            print(f"Extra LLM judge paths: {extra_llm_judge_paths}")
         return
 
     # Create metadata loader if factory provided
@@ -984,6 +1075,8 @@ def run_experiment_main(
         include_feature_irt=args.include_feature_irt,
         full_firt_l2_weight=args.full_firt_l2_weight,
         full_firt_l2_residual=args.full_firt_l2_residual,
+        extra_embeddings_paths=extra_embeddings_paths,
+        extra_llm_judge_paths=extra_llm_judge_paths,
     )
     output_filename = f"experiment_a_cv{args.k_folds}_results.json"
 

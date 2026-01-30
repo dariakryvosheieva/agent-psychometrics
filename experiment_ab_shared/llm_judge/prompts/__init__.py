@@ -23,10 +23,26 @@ from experiment_ab_shared.llm_judge.prompts.terminalbench_v2 import TERMINALBENC
 from experiment_ab_shared.llm_judge.prompts.gso import GSO_CONFIG
 
 # Unified prompts (standardized features across all datasets)
-from experiment_ab_shared.llm_judge.prompts.swebench_unified import SWEBENCH_UNIFIED_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_unified import SWEBENCH_PRO_UNIFIED_CONFIG
-from experiment_ab_shared.llm_judge.prompts.terminalbench_unified import TERMINALBENCH_UNIFIED_CONFIG
-from experiment_ab_shared.llm_judge.prompts.gso_unified import GSO_UNIFIED_CONFIG
+from experiment_ab_shared.llm_judge.prompts.swebench_unified import (
+    SWEBENCH_UNIFIED_CONFIG,
+    SWEBENCH_UNIFIED_NO_SOLUTION_CONFIG,
+    SWEBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
+)
+from experiment_ab_shared.llm_judge.prompts.swebench_pro_unified import (
+    SWEBENCH_PRO_UNIFIED_CONFIG,
+    SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG,
+    SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG,
+)
+from experiment_ab_shared.llm_judge.prompts.terminalbench_unified import (
+    TERMINALBENCH_UNIFIED_CONFIG,
+    TERMINALBENCH_UNIFIED_NO_SOLUTION_CONFIG,
+    TERMINALBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
+)
+from experiment_ab_shared.llm_judge.prompts.gso_unified import (
+    GSO_UNIFIED_CONFIG,
+    GSO_UNIFIED_NO_SOLUTION_CONFIG,
+    GSO_UNIFIED_PROBLEM_ONLY_CONFIG,
+)
 
 # Registry of all available prompt configurations
 _PROMPT_CONFIGS: Dict[str, PromptConfig] = {
@@ -47,9 +63,17 @@ _PROMPT_CONFIGS: Dict[str, PromptConfig] = {
     "gso": GSO_CONFIG,
     # Unified prompts (standardized features for fair comparison)
     "swebench_unified": SWEBENCH_UNIFIED_CONFIG,
+    "swebench_unified_no_solution": SWEBENCH_UNIFIED_NO_SOLUTION_CONFIG,
+    "swebench_unified_problem_only": SWEBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
     "swebench_pro_unified": SWEBENCH_PRO_UNIFIED_CONFIG,
+    "swebench_pro_unified_no_solution": SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG,
+    "swebench_pro_unified_problem_only": SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG,
     "terminalbench_unified": TERMINALBENCH_UNIFIED_CONFIG,
+    "terminalbench_unified_no_solution": TERMINALBENCH_UNIFIED_NO_SOLUTION_CONFIG,
+    "terminalbench_unified_problem_only": TERMINALBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
     "gso_unified": GSO_UNIFIED_CONFIG,
+    "gso_unified_no_solution": GSO_UNIFIED_NO_SOLUTION_CONFIG,
+    "gso_unified_problem_only": GSO_UNIFIED_PROBLEM_ONLY_CONFIG,
 }
 
 
@@ -118,7 +142,15 @@ __all__ = [
     "GSO_CONFIG",
     # Unified prompts
     "SWEBENCH_UNIFIED_CONFIG",
+    "SWEBENCH_UNIFIED_NO_SOLUTION_CONFIG",
+    "SWEBENCH_UNIFIED_PROBLEM_ONLY_CONFIG",
     "SWEBENCH_PRO_UNIFIED_CONFIG",
+    "SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG",
+    "SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG",
     "TERMINALBENCH_UNIFIED_CONFIG",
+    "TERMINALBENCH_UNIFIED_NO_SOLUTION_CONFIG",
+    "TERMINALBENCH_UNIFIED_PROBLEM_ONLY_CONFIG",
     "GSO_UNIFIED_CONFIG",
+    "GSO_UNIFIED_NO_SOLUTION_CONFIG",
+    "GSO_UNIFIED_PROBLEM_ONLY_CONFIG",
 ]

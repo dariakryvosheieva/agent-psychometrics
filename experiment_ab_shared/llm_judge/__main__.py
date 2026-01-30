@@ -308,17 +308,17 @@ def load_tasks_for_dataset(
     repo_path: Optional[Path] = None,
 ) -> List[Dict[str, Any]]:
     """Load tasks for a built-in dataset."""
-    if dataset in ("swebench", "swebench_v2", "swebench_v3", "swebench_v4", "swebench_v5", "swebench_v6", "swebench_selected", "swebench_unified"):
-        # swebench_v2/v3/v4/v5/v6/selected and swebench_unified use same data as swebench, just different prompts
+    if dataset in ("swebench", "swebench_v2", "swebench_v3", "swebench_v4", "swebench_v5", "swebench_v6", "swebench_selected", "swebench_unified", "swebench_unified_no_solution", "swebench_unified_problem_only"):
+        # swebench_v2/v3/v4/v5/v6/selected and swebench_unified variants use same data as swebench, just different prompts
         return load_swebench_tasks()
-    elif dataset in ("swebench_pro", "swebench_pro_v2", "swebench_pro_v3", "swebench_pro_v4", "swebench_pro_v5", "swebench_pro_unified"):
-        # V2/V3/V4/V5/unified use same data as swebench_pro, just different prompts
+    elif dataset in ("swebench_pro", "swebench_pro_v2", "swebench_pro_v3", "swebench_pro_v4", "swebench_pro_v5", "swebench_pro_unified", "swebench_pro_unified_no_solution", "swebench_pro_unified_problem_only"):
+        # V2/V3/V4/V5/unified variants use same data as swebench_pro, just different prompts
         return load_swebench_pro_tasks()
-    elif dataset in ("terminalbench", "terminalbench_v2", "terminalbench_unified"):
-        # terminalbench_v2 and terminalbench_unified use same data as terminalbench, just different prompts
+    elif dataset in ("terminalbench", "terminalbench_v2", "terminalbench_unified", "terminalbench_unified_no_solution", "terminalbench_unified_problem_only"):
+        # terminalbench_v2 and terminalbench_unified variants use same data as terminalbench, just different prompts
         return load_terminalbench_tasks(items_path, repo_path)
-    elif dataset in ("gso", "gso_unified"):
-        # gso_unified uses same data as gso, just different prompt
+    elif dataset in ("gso", "gso_unified", "gso_unified_no_solution", "gso_unified_problem_only"):
+        # gso_unified variants use same data as gso, just different prompts
         return load_gso_tasks()
     else:
         raise ValueError(f"Unknown dataset: {dataset}")

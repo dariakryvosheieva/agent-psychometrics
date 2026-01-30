@@ -92,8 +92,10 @@ def run_single_dataset(
     k_folds: int = 5,
     n_jobs_methods: int = 1,
     n_jobs_folds: int = 1,
-    include_mlp: bool = True,
+    include_mlp: bool = False,
     include_trees: bool = False,
+    extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None,
+    extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     """Run experiment_a on a single dataset and return results.
 
@@ -107,6 +109,8 @@ def run_single_dataset(
         n_jobs_folds: Number of parallel jobs for fold execution.
         include_mlp: Whether to include MLP predictors (default True).
         include_trees: Whether to include tree-based predictors (default False).
+        extra_embeddings_paths: Additional embedding paths for ablation studies.
+        extra_llm_judge_paths: Additional LLM judge paths for ablation studies.
 
     Returns:
         Tuple of (dataset_name, results_dict).
@@ -172,6 +176,8 @@ def run_single_dataset(
             include_trees=include_trees,
             n_jobs_methods=n_jobs_methods,
             n_jobs_folds=n_jobs_folds,
+            extra_embeddings_paths=extra_embeddings_paths,
+            extra_llm_judge_paths=extra_llm_judge_paths,
         )
         return dataset_config.name, results
 
@@ -378,14 +384,26 @@ def main():
     parser.add_argument(
         "--mlp",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Include MLP predictors (default: True). Use --no-mlp to skip for faster local runs.",
+        default=False,
+        help="Include MLP predictors (default: False). Use --mlp to include PyTorch-based MLP predictors.",
     )
     parser.add_argument(
         "--trees",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Include tree-based predictors (default: False). Use --trees to include Decision Tree and Random Forest.",
+    )
+    parser.add_argument(
+        "--llm_judge_paths",
+        type=str,
+        default=None,
+        help="Comma-separated list of LLM judge paths to compare (ablation study)",
+    )
+    parser.add_argument(
+        "--embeddings_paths",
+        type=str,
+        default=None,
+        help="Comma-separated list of embedding paths to compare (ablation study)",
     )
 
     args = parser.parse_args()
@@ -398,11 +416,42 @@ def main():
             if d.short_name in args.datasets
         ]
 
+    # Parse extra feature paths for ablation studies
+    extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None
+    extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None
+
+    if args.embeddings_paths:
+        extra_embeddings_paths = []
+        for path_str in args.embeddings_paths.split(","):
+            path_str = path_str.strip()
+            if path_str:
+                path = Path(path_str)
+                # Extract a short name from the path
+                name = path.stem
+                if "__" in name:
+                    parts = name.split("__")
+                    name = parts[-1] if parts[-1] else parts[-2]
+                extra_embeddings_paths.append((name, path))
+
+    if args.llm_judge_paths:
+        extra_llm_judge_paths = []
+        for path_str in args.llm_judge_paths.split(","):
+            path_str = path_str.strip()
+            if path_str:
+                path = Path(path_str)
+                # Use parent directory name as the variant name
+                name = path.parent.name
+                extra_llm_judge_paths.append((name, path))
+
     print(f"Running Experiment A on {len(datasets_to_run)} datasets...")
     print(f"Unified judge features: {args.unified_judge}")
     print(f"K-folds: {args.k_folds}")
     print(f"Include MLP: {args.mlp}, Include trees: {args.trees}")
     print(f"Parallelization: datasets={args.max_workers}, methods={args.n_jobs_methods}, folds={args.n_jobs_folds}")
+    if extra_embeddings_paths:
+        print(f"Extra embedding paths: {[name for name, _ in extra_embeddings_paths]}")
+    if extra_llm_judge_paths:
+        print(f"Extra LLM judge paths: {[name for name, _ in extra_llm_judge_paths]}")
     print()
 
     all_results: Dict[str, Dict[str, Optional[float]]] = {}
@@ -421,6 +470,8 @@ def main():
                 n_jobs_folds=args.n_jobs_folds,
                 include_mlp=args.mlp,
                 include_trees=args.trees,
+                extra_embeddings_paths=extra_embeddings_paths,
+                extra_llm_judge_paths=extra_llm_judge_paths,
             )
             metrics = extract_metrics(results)
             all_results[name] = metrics
@@ -448,6 +499,8 @@ def main():
                     args.n_jobs_folds,
                     args.mlp,
                     args.trees,
+                    extra_embeddings_paths,
+                    extra_llm_judge_paths,
                 ): config.name
                 for config in datasets_to_run
             }
