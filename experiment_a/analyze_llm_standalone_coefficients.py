@@ -10,6 +10,7 @@ Key difference from stacked analysis:
 Usage:
     python -m experiment_a.analyze_llm_standalone_coefficients
     python -m experiment_a.analyze_llm_standalone_coefficients --dataset swebench
+    python -m experiment_a.analyze_llm_standalone_coefficients --dataset swebench --llm_path chris_output/llm_judge_features/swebench_ablation_controlled_v3/4_full_15.csv --latex --plot
 """
 
 import argparse
@@ -46,6 +47,38 @@ from experiment_a.gso.config import GSOConfig
 from experiment_a.terminalbench.config import TerminalBenchConfig
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+# Feature source mapping for categorizing features by their information source
+FEATURE_SOURCES = {
+    # Solution Patch (2) - require the gold solution patch
+    "solution_complexity": "Solution Patch",
+    "integration_complexity": "Solution Patch",
+    # Environment/Auditor (3) - require shell access to task environment
+    "entry_point_clarity": "Environment",
+    "fix_localization": "Environment",
+    "change_blast_radius": "Environment",
+    # Test Patch (2) - derived from test patch diff
+    "test_comprehensiveness": "Test Patch",
+    "test_assertion_complexity": "Test Patch",
+    "test_edge_case_coverage": "Test Patch",
+    # Problem Statement - derived from problem statement only
+    "solution_hint": "Problem Statement",
+    "problem_clarity": "Problem Statement",
+    "domain_knowledge_required": "Problem Statement",
+    "logical_reasoning_required": "Problem Statement",
+    "atypicality": "Problem Statement",
+    "verification_difficulty": "Problem Statement",
+    "standard_pattern_available": "Problem Statement",
+    "error_specificity": "Problem Statement",
+    "reproduction_clarity": "Problem Statement",
+    "expected_behavior_clarity": "Problem Statement",
+    "debugging_complexity": "Problem Statement",
+    "codebase_scope": "Problem Statement",
+    "information_completeness": "Problem Statement",
+    "similar_issue_likelihood": "Problem Statement",
+    "backwards_compatibility_risk": "Problem Statement",
+}
 
 
 # Dataset configurations with unified feature paths
@@ -132,6 +165,7 @@ def run_analysis_for_dataset(
     dataset_name: str,
     k_folds: int = 5,
     verbose: bool = True,
+    llm_path_override: Optional[Path] = None,
 ) -> DatasetResults:
     """Run CV and extract coefficients for one dataset."""
 
@@ -142,14 +176,16 @@ def run_analysis_for_dataset(
     irt_cache_dir = dataset_info["irt_cache_dir"]
     unified_llm_path = dataset_info["unified_llm_path"]
 
-    # Create config with unified LLM features
-    config = config_class(llm_judge_features_path=unified_llm_path)
+    # Use override path if provided, otherwise use default
+    llm_judge_path = llm_path_override if llm_path_override else ROOT / unified_llm_path
+
+    # Create config with LLM features path
+    config = config_class(llm_judge_features_path=llm_judge_path)
 
     # Resolve paths
     abilities_path = ROOT / config.abilities_path
     items_path = ROOT / config.items_path
     responses_path = ROOT / config.responses_path
-    llm_judge_path = ROOT / unified_llm_path
 
     if verbose:
         print(f"\n{'='*70}")
@@ -583,6 +619,138 @@ def save_results(
     print(f"\nResults saved to: {output_path}")
 
 
+def generate_latex_table(
+    coef_analysis: CoefficientAnalysis,
+    output_path: Path,
+    caption: str = "LLM Judge feature coefficients for SWE-bench Verified, ranked by magnitude.",
+    label: str = "tab:llm_judge_coefficients",
+) -> str:
+    """Generate LaTeX table of coefficients ranked by magnitude.
+
+    Returns the LaTeX string and also writes to file.
+    """
+    feature_names = coef_analysis.feature_names
+    mean_coef = coef_analysis.mean_coef
+
+    # Sort by absolute coefficient
+    indices = np.argsort(np.abs(mean_coef))[::-1]
+
+    # Build LaTeX table
+    lines = [
+        r"\begin{table}[htbp]",
+        r"\centering",
+        f"\\caption{{{caption}}}",
+        f"\\label{{{label}}}",
+        r"\begin{tabular}{clcc}",
+        r"\toprule",
+        r"Rank & Feature & Coefficient & Source \\",
+        r"\midrule",
+    ]
+
+    for rank, idx in enumerate(indices, 1):
+        name = feature_names[idx]
+        coef = mean_coef[idx]
+        source = FEATURE_SOURCES.get(name, "Unknown")
+
+        # Escape underscores for LaTeX
+        name_escaped = name.replace("_", r"\_")
+
+        # Format coefficient with sign
+        coef_str = f"{coef:+.3f}"
+
+        lines.append(f"{rank} & {name_escaped} & {coef_str} & {source} \\\\")
+
+    lines.extend([
+        r"\bottomrule",
+        r"\end{tabular}",
+        r"\end{table}",
+    ])
+
+    latex_str = "\n".join(lines)
+
+    # Write to file
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w") as f:
+        f.write(latex_str)
+
+    print(f"\nLaTeX table saved to: {output_path}")
+    return latex_str
+
+
+def generate_source_bar_graph(
+    coef_analysis: CoefficientAnalysis,
+    output_path: Path,
+    title: str = "Mean Coefficient Magnitude by Feature Source",
+) -> None:
+    """Generate bar graph showing mean |coefficient| by feature source."""
+    import matplotlib.pyplot as plt
+
+    feature_names = coef_analysis.feature_names
+    mean_coef = coef_analysis.mean_coef
+
+    # Group coefficients by source
+    source_coefs: Dict[str, List[float]] = {
+        "Problem Statement": [],
+        "Environment": [],
+        "Test Patch": [],
+        "Solution Patch": [],
+    }
+
+    for name, coef in zip(feature_names, mean_coef):
+        source = FEATURE_SOURCES.get(name, "Unknown")
+        if source in source_coefs:
+            source_coefs[source].append(abs(coef))
+
+    # Calculate mean and std for each source
+    sources = ["Problem Statement", "Environment", "Test Patch", "Solution Patch"]
+    means = []
+    stds = []
+    counts = []
+
+    for source in sources:
+        coefs = source_coefs[source]
+        if coefs:
+            means.append(np.mean(coefs))
+            stds.append(np.std(coefs))
+            counts.append(len(coefs))
+        else:
+            means.append(0)
+            stds.append(0)
+            counts.append(0)
+
+    # Create bar plot
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    colors = ['#2ecc71', '#3498db', '#e74c3c', '#9b59b6']  # Green, Blue, Red, Purple
+    x = np.arange(len(sources))
+
+    bars = ax.bar(x, means, yerr=stds, capsize=5, color=colors, edgecolor='black', linewidth=1)
+
+    # Add count labels on bars
+    for i, (bar, count, mean) in enumerate(zip(bars, counts, means)):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + stds[i] + 0.01,
+                f'n={count}', ha='center', va='bottom', fontsize=10)
+
+    ax.set_xlabel('Feature Source', fontsize=12)
+    ax.set_ylabel('Mean |Coefficient|', fontsize=12)
+    ax.set_title(title, fontsize=14)
+    ax.set_xticks(x)
+    ax.set_xticklabels(sources, fontsize=11)
+
+    # Add grid
+    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+    ax.set_axisbelow(True)
+
+    plt.tight_layout()
+
+    # Save
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+
+    print(f"Bar graph saved to: {output_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Analyze standalone LLM Judge coefficients across datasets"
@@ -606,6 +774,28 @@ def main():
         default=str(ROOT / "chris_output" / "llm_standalone_coefficient_analysis.json"),
         help="Output path for JSON results",
     )
+    parser.add_argument(
+        "--llm_path",
+        type=str,
+        default=None,
+        help="Override LLM Judge features path (e.g., ablation CSV)",
+    )
+    parser.add_argument(
+        "--latex",
+        action="store_true",
+        help="Generate LaTeX table of coefficients",
+    )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Generate bar graph of coefficients by source",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default=str(ROOT / "chris_output" / "llm_judge_coefficient_analysis"),
+        help="Output directory for LaTeX and plots",
+    )
     args = parser.parse_args()
 
     # Load existing residual rankings for comparison
@@ -614,6 +804,11 @@ def main():
         print("Loaded residual rankings from stacked_coefficient_analysis.json")
     else:
         print("No residual rankings available for comparison")
+
+    # Parse custom LLM path if provided
+    llm_path_override = Path(args.llm_path) if args.llm_path else None
+    if llm_path_override:
+        print(f"Using custom LLM features path: {llm_path_override}")
 
     # Run analysis
     datasets_to_run = [args.dataset] if args.dataset else list(DATASETS.keys())
@@ -624,6 +819,7 @@ def main():
             dataset_name,
             k_folds=args.k_folds,
             verbose=True,
+            llm_path_override=llm_path_override,
         )
 
     # Print results
@@ -634,6 +830,33 @@ def main():
 
     # Save results
     save_results(results, residual_rankings, Path(args.output_path))
+
+    # Generate LaTeX table and/or bar graph if requested
+    output_dir = Path(args.output_dir)
+    if args.latex or args.plot:
+        for dataset_name, result in results.items():
+            if args.latex:
+                latex_path = output_dir / f"{dataset_name}_coefficients.tex"
+                latex_str = generate_latex_table(
+                    result.coefficient_analysis,
+                    latex_path,
+                    caption=f"LLM Judge feature coefficients for {result.display_name}, ranked by magnitude. "
+                            f"Coefficients are standardized (effect per 1-SD change in feature).",
+                    label=f"tab:{dataset_name}_coefficients",
+                )
+                # Also print LaTeX to console
+                print(f"\n{'='*70}")
+                print(f"LATEX TABLE: {result.display_name}")
+                print(f"{'='*70}")
+                print(latex_str)
+
+            if args.plot:
+                plot_path = output_dir / f"{dataset_name}_source_importance.png"
+                generate_source_bar_graph(
+                    result.coefficient_analysis,
+                    plot_path,
+                    title=f"Mean Coefficient Magnitude by Source ({result.display_name})",
+                )
 
 
 if __name__ == "__main__":

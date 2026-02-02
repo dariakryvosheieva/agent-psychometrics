@@ -737,12 +737,18 @@ python -m experiment_a.analyze_llm_standalone_coefficients
 
 # Run for single dataset (faster for testing)
 python -m experiment_a.analyze_llm_standalone_coefficients --dataset swebench
+
+# Use custom LLM features (e.g., ablation CSV) with LaTeX and plot output
+python -m experiment_a.analyze_llm_standalone_coefficients --dataset swebench \
+    --llm_path chris_output/llm_judge_features/swebench_ablation_controlled_v3/4_full_15.csv \
+    --latex --plot
 ```
 
 This script:
 1. Extracts coefficients from standalone LLM Judge Ridge predictor
 2. Compares rankings with residual form (from stacked predictor)
 3. Shows which features matter more for direct prediction vs. error correction
+4. Optionally generates LaTeX tables (`--latex`) and bar graphs (`--plot`) by feature source
 
 **Key differences:**
 - **Standalone**: LLM Judge directly predicts task difficulty (β)
