@@ -45,10 +45,10 @@ class SWEBenchProConfig:
         default_factory=lambda: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
     )
 
-    # LLM Judge predictor config (v5 with deterministic features)
+    # LLM Judge predictor config
+    # Default: 8 unified LLM features (same across all datasets except SWE-bench Verified)
     llm_judge_features_path: Optional[Path] = Path(
-        "chris_output/experiment_a_swebench_pro/llm_judge_features_v5/"
-        "llm_judge_features_with_deterministic.csv"
+        "chris_output/llm_judge_features/experiment_a_defaults/swebench_pro.csv"
     )
     llm_judge_max_features: Optional[int] = None  # None = use all features
 

@@ -49,13 +49,13 @@ DATASETS = [
         config_module="experiment_a.swebench.config",
         config_class_name="ExperimentAConfig",  # Note: SWE-bench uses ExperimentAConfig
         spec_module="experiment_a.swebench.train_evaluate",
-        # Combined LLM judge (10 features) + auditor (3 features) = 13 features
-        unified_judge_path=Path("chris_output/experiment_a/llm_judge_features/llm_judge_plus_auditor.csv"),
+        # 15 features from ablation study (includes auditor features: entry_point_clarity, fix_localization, change_blast_radius)
+        unified_judge_path=Path("chris_output/llm_judge_features/experiment_a_defaults/swebench.csv"),
         # Ablation: no_solution includes auditor (env exploration doesn't need solution)
         unified_judge_no_solution_path=Path("chris_output/experiment_a/llm_judge_features/llm_judge_no_solution_plus_auditor.csv"),
         # Ablation: problem_only stays pure (no env access)
         unified_judge_problem_only_path=Path("chris_output/llm_judge_features/swebench_unified_problem_only/llm_judge_features.csv"),
-        env_features_path=Path("chris_output/env_features/swebench_verified/env_features.csv"),
+        env_features_path=None,  # Auditor features already included in the 15-feature unified_judge_path
         extra_kwargs={},
     ),
     ExperimentADatasetSpec(
@@ -64,7 +64,8 @@ DATASETS = [
         config_module="experiment_a.gso.config",
         config_class_name="GSOConfig",
         spec_module="experiment_a.gso.train_evaluate",
-        unified_judge_path=Path("chris_output/llm_judge_features/gso_unified/llm_judge_features.csv"),
+        # 8 unified LLM features (same across all datasets except SWE-bench Verified)
+        unified_judge_path=Path("chris_output/llm_judge_features/experiment_a_defaults/gso.csv"),
         unified_judge_no_solution_path=Path("chris_output/llm_judge_features/gso_unified_no_solution/llm_judge_features.csv"),
         unified_judge_problem_only_path=Path("chris_output/llm_judge_features/gso_unified_problem_only/llm_judge_features.csv"),
         env_features_path=None,  # Not yet extracted for GSO
@@ -76,7 +77,8 @@ DATASETS = [
         config_module="experiment_a.terminalbench.config",
         config_class_name="TerminalBenchConfig",
         spec_module="experiment_a.terminalbench.train_evaluate",
-        unified_judge_path=Path("chris_output/llm_judge_features/terminalbench_unified/llm_judge_features.csv"),
+        # 8 unified LLM features (same across all datasets except SWE-bench Verified)
+        unified_judge_path=Path("chris_output/llm_judge_features/experiment_a_defaults/terminalbench.csv"),
         unified_judge_no_solution_path=Path("chris_output/llm_judge_features/terminalbench_unified_no_solution/llm_judge_features.csv"),
         unified_judge_problem_only_path=Path("chris_output/llm_judge_features/terminalbench_unified_problem_only/llm_judge_features.csv"),
         env_features_path=None,  # Not yet extracted for TerminalBench
@@ -88,7 +90,8 @@ DATASETS = [
         config_module="experiment_a.swebench_pro.config",
         config_class_name="SWEBenchProConfig",
         spec_module="experiment_a.swebench_pro.train_evaluate",
-        unified_judge_path=Path("chris_output/llm_judge_features/swebench_pro_unified/llm_judge_features.csv"),
+        # 8 unified LLM features (same across all datasets except SWE-bench Verified)
+        unified_judge_path=Path("chris_output/llm_judge_features/experiment_a_defaults/swebench_pro.csv"),
         unified_judge_no_solution_path=Path("chris_output/llm_judge_features/swebench_pro_unified_no_solution/llm_judge_features.csv"),
         unified_judge_problem_only_path=Path("chris_output/llm_judge_features/swebench_pro_unified_problem_only/llm_judge_features.csv"),
         env_features_path=None,  # Not yet extracted for SWE-bench Pro

@@ -51,7 +51,7 @@ class ExperimentAConfig:
     # (7 problem_orig + 8 problem_ext + 3 auditor + 3 test + 2 solution)
     # See experiment_a/README.md for ablation study details
     llm_judge_features_path: Optional[Path] = Path(
-        "chris_output/llm_judge_features/swebench_ablation_controlled_v3/4_full_15.csv"
+        "chris_output/llm_judge_features/experiment_a_defaults/swebench.csv"
     )
     llm_judge_max_features: Optional[int] = None  # None = use all features
 
