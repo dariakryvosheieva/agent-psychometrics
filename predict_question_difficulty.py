@@ -201,104 +201,19 @@ DIFFICULTY_INSTRUCTION = (
 # LLM-judge feature definitions
 # -----------------------------
 
-# SWE-bench Verified judge features.
-VERIFIED_JUDGE_FEATURE_NAMES: List[str] = [
-    "fix_in_description",
+# Unified judge feature schema used by the CSVs under `llm_judge/features/*.csv`.
+# (Some legacy per-item JSONs may contain extra keys like `integration_complexity` or
+# `tooling_complexity`; this pipeline ignores those and uses only the columns below.)
+JUDGE_FEATURE_NAMES: List[str] = [
+    "solution_hint",
     "problem_clarity",
-    "error_message_provided",
-    "reproduction_steps",
-    "fix_locality",
+    "solution_complexity",
     "domain_knowledge_required",
-    "fix_complexity",
     "logical_reasoning_required",
     "atypicality",
-]
-
-# SWE-bench Pro judge features (different schema).
-PRO_JUDGE_FEATURE_NAMES: List[str] = [
-    "fix_complexity",
     "verification_difficulty",
     "standard_pattern_available",
-    "integration_complexity",
 ]
-
-# Terminal-Bench judge features (different schema again).
-TERMINAL_BENCH_JUDGE_FEATURE_NAMES: List[str] = [
-    "solution_in_instruction",
-    "task_clarity",
-    "solution_size",
-    "domain_knowledge_required",
-    "task_complexity",
-    "logical_reasoning_required",
-    "atypicality",
-    "tooling_complexity",
-]
-
-# GSO judge features (used when pointing --judge_features_dir at `.../features/gso`).
-# The per-item JSON schema differs from Verified/Pro/Terminal-Bench, so infer the
-# exact set of keys from the directory to avoid drifting schemas.
-_GSO_JUDGE_FEATURE_NAMES_CACHE: Dict[str, List[str]] = {}
-
-
-def _infer_gso_judge_feature_names(features_dir: str) -> List[str]:
-    """
-    Infer canonical GSO judge feature keys from a GSO judge-features directory.
-
-    Notes:
-    - Filters out summary JSONs like `compute_stats_*.json`.
-    - Ignores metadata keys like `_task_id` and free-text `reasoning`.
-    """
-    root = os.path.abspath(str(features_dir or "").strip())
-    if not root:
-        return []
-    if root in _GSO_JUDGE_FEATURE_NAMES_CACHE:
-        return _GSO_JUDGE_FEATURE_NAMES_CACHE[root]
-
-    try:
-        names = [x for x in os.listdir(root) if x.endswith(".json")]
-    except Exception:
-        names = []
-
-    def _is_candidate(fn: str) -> bool:
-        s = str(fn or "")
-        if not s.endswith(".json"):
-            return False
-        if s.startswith("compute_stats_"):
-            return False
-        if s.startswith("correlation"):
-            return False
-        if s in {"correlation_analysis.json"}:
-            return False
-        return True
-
-    cands = [fn for fn in names if _is_candidate(fn)]
-    # Prefer typical GSO task-id filenames: "<org>__<repo>-<hash>.json"
-    cands.sort(key=lambda fn: (0 if ("__" in fn and "-" in fn) else 1, fn))
-
-    inferred: List[str] = []
-    for fn in cands:
-        p = os.path.join(root, fn)
-        try:
-            with open(p, "r", encoding="utf-8") as f:
-                obj = json.load(f)
-        except Exception:
-            continue
-        if not isinstance(obj, dict):
-            continue
-        keys: List[str] = []
-        for k in obj.keys():
-            if not isinstance(k, str):
-                continue
-            kk = k.strip()
-            if not kk or kk.startswith("_") or kk == "reasoning":
-                continue
-            keys.append(kk)
-        if keys:
-            inferred = sorted(set(keys))
-            break
-
-    _GSO_JUDGE_FEATURE_NAMES_CACHE[root] = inferred
-    return inferred
 
 # Match ID normalization used when building the IRT dataset from agent runs:
 # - strip leading "instance_"
@@ -322,25 +237,6 @@ def save_json(path: str, obj: dict) -> None:
     ensure_dir(os.path.dirname(path) or ".")
     with open(path, "w") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
-
-
-def _rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    # Backwards compatible with older scikit-learn versions (no `squared=` kwarg).
-    mse = mean_squared_error(y_true, y_pred)
-    return float(np.sqrt(mse))
-
-
-def _pearsonr(x: np.ndarray, y: np.ndarray) -> float:
-    x = np.asarray(x, dtype=np.float64)
-    y = np.asarray(y, dtype=np.float64)
-    if x.size == 0:
-        return float("nan")
-    x = x - x.mean()
-    y = y - y.mean()
-    denom = (np.sqrt((x * x).sum()) * np.sqrt((y * y).sum()))
-    if denom <= 0:
-        return float("nan")
-    return float((x * y).sum() / denom)
 
 
 def stable_split_ids(ids: Sequence[str], test_fraction: float, seed: int) -> Tuple[List[int], List[int]]:
@@ -987,6 +883,7 @@ def embed_items(
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
+    tokenizer.truncation_side = "left"
 
     if torch_dtype == "auto":
         dtype_arg = "auto"
@@ -1261,6 +1158,96 @@ def save_regression_weights(
 # -----------------------------
 
 _JUDGE_INDEX_CACHE: Dict[str, Dict[str, str]] = {}
+_JUDGE_CSV_HEADER_CACHE: Dict[str, List[str]] = {}
+_JUDGE_CSV_CACHE: Dict[Tuple[str, Tuple[str, ...]], Dict[str, np.ndarray]] = {}
+
+
+def _looks_like_csv_path(p: str) -> bool:
+    s = str(p or "").strip().lower()
+    return bool(s.endswith(".csv"))
+
+
+def _load_judge_csv_feature_names(features_csv: str) -> List[str]:
+    """
+    Read a judge-features CSV header and return feature column names (excluding `instance_id`).
+    """
+    root = os.path.abspath(str(features_csv))
+    if root in _JUDGE_CSV_HEADER_CACHE:
+        return list(_JUDGE_CSV_HEADER_CACHE[root])
+
+    if not os.path.exists(root):
+        raise FileNotFoundError(f"Judge features CSV not found: {features_csv!r}")
+    if not os.path.isfile(root):
+        raise ValueError(f"Expected a judge features CSV file path, got: {features_csv!r}")
+
+    with open(root, "r", encoding="utf-8", newline="") as f:
+        r = csv.reader(f)
+        header = next(r, [])
+    header = [str(x).strip() for x in header if str(x).strip()]
+    if not header or "instance_id" not in header:
+        raise ValueError(f"Judge features CSV missing required header column 'instance_id': {features_csv!r}")
+    feats = [h for h in header if h != "instance_id"]
+    _JUDGE_CSV_HEADER_CACHE[root] = feats
+    return list(feats)
+
+
+def _load_judge_csv_vectors(
+    features_csv: str,
+    *,
+    feature_names: Sequence[str],
+) -> Dict[str, np.ndarray]:
+    """
+    Load a judge-features CSV into a mapping from normalized instance_id -> float32 vector.
+    Rows with missing/blank/non-numeric feature values are skipped.
+    """
+    root = os.path.abspath(str(features_csv))
+    key = (root, tuple([str(x) for x in feature_names]))
+    if key in _JUDGE_CSV_CACHE:
+        return _JUDGE_CSV_CACHE[key]
+
+    if not os.path.exists(root):
+        raise FileNotFoundError(f"Judge features CSV not found: {features_csv!r}")
+    if not os.path.isfile(root):
+        raise ValueError(f"Expected a judge features CSV file path, got: {features_csv!r}")
+
+    out: Dict[str, np.ndarray] = {}
+    with open(root, "r", encoding="utf-8", newline="") as f:
+        r = csv.DictReader(f)
+        fieldnames = list(r.fieldnames or [])
+        if "instance_id" not in fieldnames:
+            raise ValueError(f"Judge features CSV missing required column 'instance_id': {features_csv!r}")
+        missing_cols = [k for k in feature_names if k not in fieldnames]
+        if missing_cols:
+            raise ValueError(
+                f"Judge features CSV missing columns {missing_cols!r} (have {fieldnames!r}): {features_csv!r}"
+            )
+        for row in r:
+            iid_raw = str((row.get("instance_id") or "")).strip()
+            if not iid_raw:
+                continue
+            iid = normalize_swebench_item_id(iid_raw) or iid_raw
+            xs: List[float] = []
+            ok = True
+            for k in feature_names:
+                v = row.get(str(k), "")
+                if v is None:
+                    ok = False
+                    break
+                s = str(v).strip()
+                if s == "":
+                    ok = False
+                    break
+                try:
+                    xs.append(float(s))
+                except Exception:
+                    ok = False
+                    break
+            if not ok:
+                continue
+            out[iid] = np.asarray(xs, dtype=np.float32)
+
+    _JUDGE_CSV_CACHE[key] = out
+    return out
 
 
 def _build_judge_index(features_dir: str) -> Dict[str, str]:
@@ -1274,6 +1261,15 @@ def _build_judge_index(features_dir: str) -> Dict[str, str]:
     root = os.path.abspath(str(features_dir))
     if root in _JUDGE_INDEX_CACHE:
         return _JUDGE_INDEX_CACHE[root]
+
+    # CSV-backed judge features: no JSON index needed.
+    if _looks_like_csv_path(features_dir):
+        if not os.path.exists(root):
+            raise FileNotFoundError(f"Judge features CSV not found: {features_dir!r}")
+        if not os.path.isfile(root):
+            raise ValueError(f"Expected a judge features CSV file path, got: {features_dir!r}")
+        _JUDGE_INDEX_CACHE[root] = {}
+        return {}
 
     idx: Dict[str, str] = {}
     try:
@@ -1291,24 +1287,6 @@ def _build_judge_index(features_dir: str) -> Dict[str, str]:
     return idx
 
 
-def _infer_judge_schema(features_dir: str) -> str:
-    """
-    Heuristic schema inference:
-    - Pro judge features live under `.../llm_judge/features/pro/...`
-    - Verified judge features live under `.../llm_judge/features/verified/...`
-    - Terminal-Bench judge features live under `.../llm_judge/features/terminal_bench/...`
-    - GSO judge features live under `.../llm_judge/features/gso/...`
-    """
-    p = os.path.abspath(str(features_dir)).replace("\\", "/").lower()
-    if "/features/pro" in p or p.endswith("/pro"):
-        return "pro"
-    if "/features/gso" in p or p.endswith("/gso"):
-        return "gso"
-    if "/features/terminal_bench" in p or p.endswith("/terminal_bench") or p.endswith("/terminal-bench"):
-        return "terminal_bench"
-    return "verified"
-
-
 def _load_judge_vector(
     task_id: str,
     *,
@@ -1319,6 +1297,12 @@ def _load_judge_vector(
     tid = str(task_id or "").strip()
     if not tid:
         return None
+
+    # CSV path: fast lookup from preloaded mapping.
+    if _looks_like_csv_path(features_dir):
+        m = _load_judge_csv_vectors(features_dir, feature_names=feature_names)
+        norm = normalize_swebench_item_id(tid) or tid
+        return m.get(norm, None)
 
     # 1) exact match
     p = os.path.join(str(features_dir), f"{tid}.json")
@@ -1661,14 +1645,14 @@ def _run_with_judge_features(
     if not include_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
-            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
+            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} items "
             f"(agent_results={args.agent_results})"
         )
     else:
         eligible = list(overlap_ids)
         if zero_success_set:
             print(
-                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
+                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} items "
                 f"(agent_results={args.agent_results})"
             )
     if not eligible:
@@ -1680,20 +1664,10 @@ def _run_with_judge_features(
     if not feat_dir:
         raise ValueError("--judge_features_dir must be set when --method=combined is used.")
     idx = _build_judge_index(feat_dir)
-    schema = _infer_judge_schema(feat_dir)
-    if schema == "pro":
-        judge_feature_names = PRO_JUDGE_FEATURE_NAMES
-    elif schema == "gso":
-        judge_feature_names = _infer_gso_judge_feature_names(feat_dir)
-        if not judge_feature_names:
-            raise RuntimeError(
-                f"Inferred 0 GSO judge feature names from judge_features_dir={feat_dir!r}. "
-                "Expected per-item JSONs with numeric feature keys (and optional metadata like `_task_id`)."
-            )
-    elif schema == "terminal_bench":
-        judge_feature_names = TERMINAL_BENCH_JUDGE_FEATURE_NAMES
+    if _looks_like_csv_path(feat_dir):
+        judge_feature_names = _load_judge_csv_feature_names(feat_dir)
     else:
-        judge_feature_names = VERIFIED_JUDGE_FEATURE_NAMES
+        judge_feature_names = JUDGE_FEATURE_NAMES
 
     outer_cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
     fold_aucs: List[float] = []
@@ -2105,20 +2079,10 @@ def _run_judge_only(
         raise ValueError("--judge_features_dir must be set when --method=judge is used.")
 
     idx = _build_judge_index(feat_dir)
-    schema = _infer_judge_schema(feat_dir)
-    if schema == "pro":
-        judge_feature_names = PRO_JUDGE_FEATURE_NAMES
-    elif schema == "gso":
-        judge_feature_names = _infer_gso_judge_feature_names(feat_dir)
-        if not judge_feature_names:
-            raise RuntimeError(
-                f"Inferred 0 GSO judge feature names from judge_features_dir={feat_dir!r}. "
-                "Expected per-item JSONs with numeric feature keys (and optional metadata like `_task_id`)."
-            )
-    elif schema == "terminal_bench":
-        judge_feature_names = TERMINAL_BENCH_JUDGE_FEATURE_NAMES
+    if _looks_like_csv_path(feat_dir):
+        judge_feature_names = _load_judge_csv_feature_names(feat_dir)
     else:
-        judge_feature_names = VERIFIED_JUDGE_FEATURE_NAMES
+        judge_feature_names = JUDGE_FEATURE_NAMES
 
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
@@ -2129,14 +2093,14 @@ def _run_judge_only(
     if exclude_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
-            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
+            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} items "
             f"(agent_results={args.agent_results})"
         )
     else:
         eligible = list(overlap_ids)
         if zero_success_set:
             print(
-                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
+                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} items "
                 f"(agent_results={args.agent_results})"
             )
     if not eligible:
@@ -2508,8 +2472,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument(
         "--judge_features_dir",
         type=str,
-        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/llm_judge/features/verified",
-        help="Directory with per-task LLM-judge feature JSONs (<task_id>.json).",
+        default="llm_judge/features/verified_full.csv",
+        help="Judge features (CSV like llm_judge/features/verified_full.csv, or directory of per-task JSONs).",
     )
     p.add_argument(
         "--ridge_alpha_emb",
@@ -2715,14 +2679,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not include_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
-            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
+            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} items "
             f"(agent_results={args.agent_results})"
         )
     else:
         eligible = list(overlap_ids)
         if zero_success_set:
             print(
-                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} overlapped items "
+                f"Including zero-success items in CV/IRT: {len(zero_success_set)}/{len(overlap_ids)} items "
                 f"(agent_results={args.agent_results})"
             )
 

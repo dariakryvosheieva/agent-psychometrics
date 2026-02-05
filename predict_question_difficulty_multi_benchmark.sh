@@ -16,8 +16,10 @@ export PYTHONUNBUFFERED=1
 
 python -u predict_question_difficulty_multi_benchmark.py \
   --trust_remote_code \
-  --train_benchmarks verified,terminal_bench,gso \
-  --ood_benchmark pro \
-  --method judge \
+  --train_benchmarks terminal_bench \
+  --out_dir out/irt_agent_terminal_bench \
+  --method combined \
+  --split_by agent \
+  --min_models_per_scaffold 1 \
   --include_zero_success \
   --overwrite

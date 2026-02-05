@@ -23,12 +23,19 @@ The rest of the pipeline is identical:
   - Default: split items once into train vs zero-success, train IRT on train,
     fit a regressor from embeddings -> item difficulty, and **save learned weights**
     (no evaluation).
-  - Optional (`--eval_mode=id`): K-fold CV over items. For each fold,
-    train IRT on train-fold items only (no leakage), fit a regressor, predict held-out
-    item difficulties, and evaluate held-out AUROC using the fold's IRT abilities.
-  - Optional (`--eval_mode=ood`, default): do the default training-only flow, then
-    additionally evaluate ROC-AUC on a 4th benchmark using the learned shared IRT
-    (model+scaffold) abilities and the learned regressor weights.
+  - Optional in-distribution evaluation (`--split_by=task`): K-fold CV holding out items.
+    For each fold, train IRT on train-fold items only (no leakage), fit a regressor,
+    predict held-out item difficulties, and evaluate held-out AUROC using the fold's
+    IRT abilities.
+  - Optional out-of-distribution evaluation (`--split_by=benchmark`, default): do the
+    default training-only flow, then additionally evaluate ROC-AUC on a 4th benchmark
+    selected by `--ood_benchmark`, using the learned shared IRT (model+scaffold)
+    abilities and the learned regressor weights.
+  - No evaluation (`--split_by=none`): train on all eligible items and save weights.
+  - Additional in-distribution variants:
+    - `--split_by=agent`: hold out agents (subjects) and score AUROC on held-out agents.
+    - `--split_by=observation`: hold out individual observations (agent,item) and
+      score AUROC on held-out observations.
 """
 
 from __future__ import annotations
@@ -40,11 +47,12 @@ import json
 import math
 import os
 import re
+import shutil
 import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple
+from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple
 
 
 # Reuse all the "shared" logic (embeddings, regression, caching, etc.) from the
@@ -95,6 +103,116 @@ def _iter_jsonl(path: str) -> Iterator[dict]:
                 yield json.loads(s)
             except Exception:
                 continue
+
+
+def evaluate_ood_auroc_agent_irt(
+    *,
+    ood_benchmark: str,
+    ood_agent_results_jsonl: str,
+    ood_normalize_item_ids: bool,
+    z_by_item: Dict[str, float],
+    theta_by_agent: Dict[str, float],
+) -> Tuple[float, dict]:
+    """
+    OOD AUROC for an agent-level 1D 1PL IRT oracle/baseline:
+      p(success | agent, item) = sigmoid(theta_agent - b_item)
+    """
+    bench = str(ood_benchmark or "").strip()
+    if not bench:
+        raise ValueError("ood_benchmark was empty")
+
+    scores: List[float] = []
+    labels: List[int] = []
+    n_subjects_total = 0
+    n_subjects_used = 0
+    n_obs_total = 0
+    n_obs_scored = 0
+    n_obs_skipped_no_theta = 0
+    n_obs_skipped_no_item = 0
+
+    for sid, resp in iter_subject_responses_jsonl_generic(ood_agent_results_jsonl, normalize_item_ids=bool(ood_normalize_item_ids)):
+        n_subjects_total += 1
+        agent_key = str(sid)
+        th = theta_by_agent.get(str(agent_key), None)
+        if th is None:
+            n_obs_skipped_no_theta += int(len(resp))
+            n_obs_total += int(len(resp))
+            continue
+        n_subjects_used += 1
+        for item_id, y_obs in resp.items():
+            n_obs_total += 1
+            z = z_by_item.get(str(item_id), None)
+            if z is None:
+                n_obs_skipped_no_item += 1
+                continue
+            scores.append(_sigmoid(float(th) - float(z)))
+            labels.append(int(y_obs))
+            n_obs_scored += 1
+
+    auc = float(base._compute_binary_auroc(scores, labels))
+    meta = {
+        "subjects_total": int(n_subjects_total),
+        "subjects_used": int(n_subjects_used),
+        "items_predicted": int(len(z_by_item)),
+        "obs_total": int(n_obs_total),
+        "obs_scored": int(n_obs_scored),
+        "obs_skipped_no_theta": int(n_obs_skipped_no_theta),
+        "obs_skipped_no_item": int(n_obs_skipped_no_item),
+        "labels_pos": int(sum(int(x) for x in labels)),
+        "labels_neg": int(len(labels) - int(sum(int(x) for x in labels))),
+    }
+    return auc, meta
+
+
+def _stable_group_kfold(groups: Sequence[str], *, n_splits: int, seed: int) -> List[Tuple[set, set]]:
+    """
+    Deterministic group K-fold split using hashing (mirrors `predict_agent_task_success.py`).
+
+    Returns a list of (train_group_set, test_group_set) for each fold.
+    """
+    k = int(n_splits)
+    if k < 2:
+        raise ValueError("--cv_folds must be >= 2 for cross-validation")
+    uniq = sorted(set([str(g) for g in groups if str(g).strip()]))
+    if len(uniq) < k:
+        raise RuntimeError(
+            f"Not enough unique groups ({len(uniq)}) for {k}-fold CV. Try a smaller --cv_folds or different --split_by."
+        )
+
+    xs: List[Tuple[float, str]] = []
+    for g in uniq:
+        h = hashlib.md5((g + f"::{int(seed)}").encode("utf-8")).hexdigest()
+        x = int(h[:8], 16) / float(16**8)
+        xs.append((x, g))
+    xs.sort()
+    ordered = [g for _, g in xs]
+
+    folds: List[List[str]] = [[] for _ in range(k)]
+    for i, g in enumerate(ordered):
+        folds[i % k].append(g)
+
+    out: List[Tuple[set, set]] = []
+    all_set = set(ordered)
+    for j in range(k):
+        test = set(folds[j])
+        train = set([g for g in all_set if g not in test])
+        out.append((train, test))
+    return out
+
+
+def _fold_id_for_group(group_id: str, *, n_splits: int, seed: int) -> int:
+    """
+    Assign a deterministic fold id in {1..k} for `group_id`.
+
+    Used for observation-level splitting without materializing huge group sets.
+    """
+    k = int(n_splits)
+    if k < 2:
+        raise ValueError("--cv_folds must be >= 2 for cross-validation")
+    g = str(group_id or "")
+    h = hashlib.md5((g + f"::{int(seed)}").encode("utf-8")).hexdigest()
+    x = int(h[:8], 16)
+    return int(x % k) + 1
 
 
 def iter_subject_responses_jsonl_generic(
@@ -182,54 +300,89 @@ def _sigmoid(x: float) -> float:
 
 
 # -----------------------------
-# Judge feature schema (per benchmark)
+# Judge feature schema (unified)
 # -----------------------------
-VERIFIED_JUDGE_FEATURE_NAMES: List[str] = [
-    "fix_in_description",
+#
+# New unified judge features live in:
+#   llm_judge/features/{verified,pro,terminal_bench,gso}
+JUDGE_FEATURE_NAMES: List[str] = [
+    "solution_hint",
     "problem_clarity",
-    "error_message_provided",
-    "reproduction_steps",
-    "fix_locality",
+    "solution_complexity",
     "domain_knowledge_required",
-    "fix_complexity",
     "logical_reasoning_required",
     "atypicality",
-]
-
-# SWE-bench Pro judge features (different schema).
-PRO_JUDGE_FEATURE_NAMES: List[str] = [
-    "fix_complexity",
     "verification_difficulty",
     "standard_pattern_available",
-    "integration_complexity",
-]
-
-# Terminal-Bench judge features (different schema again).
-TERMINAL_BENCH_JUDGE_FEATURE_NAMES: List[str] = [
-    "solution_in_instruction",
-    "task_clarity",
-    "solution_size",
-    "domain_knowledge_required",
-    "task_complexity",
-    "logical_reasoning_required",
-    "atypicality",
-    "tooling_complexity",
-]
-
-# GSO judge features.
-GSO_JUDGE_FEATURE_NAMES: List[str] = [
-    "solution_in_problem",
-    "problem_clarity",
-    "fix_complexity",
-    "verification_difficulty",
-    "standard_pattern_available",
-    "integration_complexity",
-    "domain_knowledge_required",
-    "atypicality",
 ]
 
 
 _JUDGE_INDEX_CACHE: Dict[Tuple[str, bool], Dict[str, str]] = {}
+_JUDGE_CSV_CACHE: Dict[Tuple[str, bool, Tuple[str, ...]], Dict[str, "base.np.ndarray"]] = {}
+
+
+def _looks_like_csv_path(p: str) -> bool:
+    s = str(p or "").strip().lower()
+    return bool(s.endswith(".csv"))
+
+
+def _load_judge_csv_vectors(
+    features_csv: str,
+    *,
+    feature_names: Sequence[str],
+    normalize_item_ids: bool,
+) -> Dict[str, "base.np.ndarray"]:
+    """
+    Load a judge-features CSV into a mapping from (maybe-normalized) instance_id -> float32 vector.
+
+    Expected schema: a header row containing `instance_id` and numeric feature columns.
+    """
+    root = os.path.abspath(str(features_csv))
+    key = (root, bool(normalize_item_ids), tuple([str(x) for x in feature_names]))
+    if key in _JUDGE_CSV_CACHE:
+        return _JUDGE_CSV_CACHE[key]
+
+    if not os.path.exists(root):
+        raise FileNotFoundError(f"Judge features CSV not found: {features_csv!r}")
+
+    out: Dict[str, "base.np.ndarray"] = {}
+    with open(root, "r", encoding="utf-8", newline="") as f:
+        r = csv.DictReader(f)
+        fieldnames = list(r.fieldnames or [])
+        if "instance_id" not in fieldnames:
+            raise ValueError(f"Judge features CSV missing required column 'instance_id': {features_csv!r}")
+        missing_cols = [k for k in feature_names if k not in fieldnames]
+        if missing_cols:
+            raise ValueError(
+                f"Judge features CSV missing columns {missing_cols!r} (have {fieldnames!r}): {features_csv!r}"
+            )
+        for row in r:
+            iid_raw = str((row.get("instance_id") or "")).strip()
+            if not iid_raw:
+                continue
+            iid = base.normalize_swebench_item_id(iid_raw) if bool(normalize_item_ids) else iid_raw
+            xs: List[float] = []
+            ok = True
+            for k in feature_names:
+                v = row.get(str(k), "")
+                if v is None:
+                    ok = False
+                    break
+                s = str(v).strip()
+                if s == "":
+                    ok = False
+                    break
+                try:
+                    xs.append(float(s))
+                except Exception:
+                    ok = False
+                    break
+            if not ok:
+                continue
+            out[iid] = base.np.asarray(xs, dtype=base.np.float32)
+
+    _JUDGE_CSV_CACHE[key] = out
+    return out
 
 
 def _build_judge_index(features_dir: str, *, normalize_item_ids: bool) -> Dict[str, str]:
@@ -244,6 +397,15 @@ def _build_judge_index(features_dir: str, *, normalize_item_ids: bool) -> Dict[s
     key = (root, bool(normalize_item_ids))
     if key in _JUDGE_INDEX_CACHE:
         return _JUDGE_INDEX_CACHE[key]
+
+    # CSV-backed judge features: no JSON index needed.
+    if _looks_like_csv_path(features_dir):
+        if not os.path.exists(root):
+            raise FileNotFoundError(f"Judge features CSV not found: {features_dir!r}")
+        if not os.path.isfile(root):
+            raise ValueError(f"Expected a CSV file path for judge features, got: {features_dir!r}")
+        _JUDGE_INDEX_CACHE[key] = {}
+        return {}
 
     idx: Dict[str, str] = {}
     try:
@@ -270,12 +432,20 @@ def _load_judge_vector(
     normalize_item_ids: bool,
 ):
     """
-    Load judge feature vector for `item_id` from `<features_dir>/<item_id>.json`,
-    with an index fallback (important for Pro `instance_...-v...` filenames).
+    Load judge feature vector for `item_id` from either:
+    - a judge-features CSV (`features_dir` ends with `.csv`), or
+    - per-item judge JSONs under a directory (`<features_dir>/<item_id>.json`),
+      with an index fallback (important for Pro `instance_...-v...` filenames).
     """
     tid = str(item_id or "").strip()
     if not tid:
         return None
+
+    # CSV path: fast lookup from preloaded mapping.
+    if _looks_like_csv_path(features_dir):
+        m = _load_judge_csv_vectors(features_dir, feature_names=feature_names, normalize_item_ids=normalize_item_ids)
+        key = base.normalize_swebench_item_id(tid) if bool(normalize_item_ids) else tid
+        return m.get(key, None)
 
     # 1) exact match
     p = os.path.join(str(features_dir), f"{tid}.json")
@@ -524,6 +694,221 @@ def save_regression_weights_block_ridge(
     return weights_json, weights_npz
 
 
+def _fit_stacked_residual(
+    *,
+    X_emb,
+    X_judge,
+    y,
+    regressor_name: str,
+    alpha_emb: float,
+    alpha_judge: float,
+    alphas_emb,
+    alphas_judge,
+    inner_splits: int,
+    seed: int,
+):
+    """
+    Two-stage stacked predictor:
+      1) Fit embedding model to predict y
+      2) Fit judge model to predict residual (y - y_hat_emb)
+      3) Final prediction: y_hat = y_hat_emb + y_hat_resid
+
+    This mirrors `experiment_ab_shared.feature_predictor.StackedResidualPredictor`:
+    - selects alpha(s) via inner CV without residual leakage by re-fitting the base model per fold
+    - fits final Ridge models on full training data
+    """
+    X_emb = base.np.asarray(X_emb, dtype=base.np.float64)
+    X_judge = base.np.asarray(X_judge, dtype=base.np.float64)
+    y = base.np.asarray(y, dtype=base.np.float64).reshape(-1)
+    if X_emb.shape[0] != X_judge.shape[0] or X_emb.shape[0] != y.shape[0]:
+        raise ValueError(f"Row mismatch: X_emb={X_emb.shape} X_judge={X_judge.shape} y={y.shape}")
+    n = int(y.shape[0])
+    if n < 2:
+        raise ValueError("Need at least 2 training rows for stacked fit.")
+
+    reg = str(regressor_name or "").strip().lower()
+    if reg not in {"ridge", "ridge_cv"}:
+        raise ValueError(f"stacked method requires regressor ridge or ridge_cv (got {regressor_name!r}).")
+
+    k = int(min(int(inner_splits), max(2, n)))
+    cv = base.KFold(n_splits=k, shuffle=True, random_state=int(seed))
+
+    # -----------------------------
+    # Stage 1: select base alpha (embeddings -> y)
+    # -----------------------------
+    if reg == "ridge":
+        best_alpha_emb = float(alpha_emb)
+    else:
+        best_alpha_emb = None
+        best_mse = float("inf")
+        for a in base.np.asarray(alphas_emb, dtype=base.np.float64).reshape(-1):
+            a = float(a)
+            mse_sum = 0.0
+            n_folds = 0
+            for tr, va in cv.split(y):
+                scaler = base.StandardScaler(with_mean=True, with_std=True)
+                Xtr = scaler.fit_transform(X_emb[tr])
+                Xva = scaler.transform(X_emb[va])
+                m = base.Ridge(alpha=float(a), fit_intercept=True, random_state=None)
+                m.fit(Xtr, y[tr])
+                p = m.predict(Xva)
+                err = y[va] - p
+                mse_sum += float(base.np.mean(err * err))
+                n_folds += 1
+            mse = mse_sum / max(1, n_folds)
+            if mse < best_mse:
+                best_mse = float(mse)
+                best_alpha_emb = float(a)
+        if best_alpha_emb is None:
+            raise RuntimeError("Failed to select base alpha for stacked model.")
+
+    # Fit final base model on full data
+    emb_scaler = base.StandardScaler(with_mean=True, with_std=True)
+    X_emb_s = emb_scaler.fit_transform(X_emb)
+    base_model = base.Ridge(alpha=float(best_alpha_emb), fit_intercept=True, random_state=None)
+    base_model.fit(X_emb_s, y)
+    yhat_base = base.np.asarray(base_model.predict(X_emb_s), dtype=base.np.float64).reshape(-1)
+    resid = y - yhat_base
+
+    # -----------------------------
+    # Stage 2: select residual alpha (judge -> residual)
+    # IMPORTANT: avoid leakage by re-fitting base model per fold when computing residuals.
+    # -----------------------------
+    if reg == "ridge":
+        best_alpha_judge = float(alpha_judge)
+    else:
+        best_alpha_judge = None
+        best_mse = float("inf")
+        for a in base.np.asarray(alphas_judge, dtype=base.np.float64).reshape(-1):
+            a = float(a)
+            mse_sum = 0.0
+            n_folds = 0
+            for tr, va in cv.split(y):
+                # Fit base on training fold
+                emb_scaler_fold = base.StandardScaler(with_mean=True, with_std=True)
+                Xemb_tr = emb_scaler_fold.fit_transform(X_emb[tr])
+                Xemb_va = emb_scaler_fold.transform(X_emb[va])
+                base_fold = base.Ridge(alpha=float(best_alpha_emb), fit_intercept=True, random_state=None)
+                base_fold.fit(Xemb_tr, y[tr])
+                yhat_tr = base_fold.predict(Xemb_tr)
+                yhat_va = base_fold.predict(Xemb_va)
+                resid_tr = y[tr] - yhat_tr
+                resid_va = y[va] - yhat_va
+
+                # Fit residual model on judge features
+                judge_scaler_fold = base.StandardScaler(with_mean=True, with_std=True)
+                Xj_tr = judge_scaler_fold.fit_transform(X_judge[tr])
+                Xj_va = judge_scaler_fold.transform(X_judge[va])
+                m = base.Ridge(alpha=float(a), fit_intercept=True, random_state=None)
+                m.fit(Xj_tr, resid_tr)
+                p = m.predict(Xj_va)
+                err = resid_va - p
+                mse_sum += float(base.np.mean(err * err))
+                n_folds += 1
+            mse = mse_sum / max(1, n_folds)
+            if mse < best_mse:
+                best_mse = float(mse)
+                best_alpha_judge = float(a)
+        if best_alpha_judge is None:
+            raise RuntimeError("Failed to select residual alpha for stacked model.")
+
+    # Fit final residual model on full data
+    judge_scaler = base.StandardScaler(with_mean=True, with_std=True)
+    X_judge_s = judge_scaler.fit_transform(X_judge)
+    residual_model = base.Ridge(alpha=float(best_alpha_judge), fit_intercept=True, random_state=None)
+    residual_model.fit(X_judge_s, resid)
+
+    return {
+        "base_model": base_model,
+        "residual_model": residual_model,
+        "emb_scaler": emb_scaler,
+        "judge_scaler": judge_scaler,
+        "alpha_emb": float(best_alpha_emb),
+        "alpha_judge": float(best_alpha_judge),
+        "n_emb": int(X_emb.shape[1]),
+        "n_judge": int(X_judge.shape[1]),
+    }
+
+
+def _predict_stacked_residual(state, *, X_emb, X_judge):
+    X_emb = base.np.asarray(X_emb, dtype=base.np.float64)
+    X_judge = base.np.asarray(X_judge, dtype=base.np.float64)
+    X_emb_s = state["emb_scaler"].transform(X_emb)
+    X_judge_s = state["judge_scaler"].transform(X_judge)
+    yhat_base = base.np.asarray(state["base_model"].predict(X_emb_s), dtype=base.np.float64).reshape(-1)
+    yhat_resid = base.np.asarray(state["residual_model"].predict(X_judge_s), dtype=base.np.float64).reshape(-1)
+    return (yhat_base + yhat_resid).reshape(-1)
+
+
+def save_regression_weights_stacked_residual(
+    *,
+    out_dir: str,
+    state,
+    judge_feature_names: Sequence[str],
+    metadata: dict,
+) -> Tuple[str, str]:
+    """
+    Save a minimal representation of the stacked (embedding -> residual-from-judge) model.
+
+    Writes:
+      - regression_weights.json (metadata)
+      - regression_weights.npz  (arrays for both stages + scaler stats)
+    """
+    base.ensure_dir(str(out_dir))
+
+    emb_scaler = state["emb_scaler"]
+    judge_scaler = state["judge_scaler"]
+    emb_mean = base.np.asarray(getattr(emb_scaler, "mean_", []), dtype=base.np.float32).reshape(-1)
+    emb_scale = base.np.asarray(getattr(emb_scaler, "scale_", []), dtype=base.np.float32).reshape(-1)
+    judge_mean = base.np.asarray(getattr(judge_scaler, "mean_", []), dtype=base.np.float32).reshape(-1)
+    judge_scale = base.np.asarray(getattr(judge_scaler, "scale_", []), dtype=base.np.float32).reshape(-1)
+
+    base_coef = base.np.asarray(getattr(state["base_model"], "coef_", []), dtype=base.np.float32).reshape(-1)
+    base_intercept = base.np.asarray([float(getattr(state["base_model"], "intercept_", 0.0))], dtype=base.np.float32)
+    resid_coef = base.np.asarray(getattr(state["residual_model"], "coef_", []), dtype=base.np.float32).reshape(-1)
+    resid_intercept = base.np.asarray([float(getattr(state["residual_model"], "intercept_", 0.0))], dtype=base.np.float32)
+
+    if int(base_coef.size) != int(state["n_emb"]):
+        raise RuntimeError(f"base coef dim mismatch: got {int(base_coef.size)} expected {int(state['n_emb'])}")
+    if int(resid_coef.size) != int(state["n_judge"]):
+        raise RuntimeError(f"residual coef dim mismatch: got {int(resid_coef.size)} expected {int(state['n_judge'])}")
+
+    weights_npz = os.path.join(str(out_dir), "regression_weights.npz")
+    base.np.savez_compressed(
+        weights_npz,
+        base_coef=base_coef,
+        base_intercept=base_intercept,
+        residual_coef=resid_coef,
+        residual_intercept=resid_intercept,
+        alpha_emb=base.np.asarray([float(state["alpha_emb"])], dtype=base.np.float32),
+        alpha_judge=base.np.asarray([float(state["alpha_judge"])], dtype=base.np.float32),
+        emb_scaler_mean=emb_mean,
+        emb_scaler_scale=emb_scale,
+        judge_scaler_mean=judge_mean,
+        judge_scaler_scale=judge_scale,
+        judge_feature_names=base.np.asarray(list(judge_feature_names), dtype=object),
+        n_emb=base.np.asarray([int(state["n_emb"])], dtype=base.np.int64),
+        n_judge=base.np.asarray([int(state["n_judge"])], dtype=base.np.int64),
+    )
+
+    weights_json = os.path.join(str(out_dir), "regression_weights.json")
+    meta = dict(metadata or {})
+    meta.update(
+        {
+            "regressor": "stacked_residual",
+            "n_emb": int(state["n_emb"]),
+            "n_judge": int(state["n_judge"]),
+            "alpha_emb": float(state["alpha_emb"]),
+            "alpha_judge": float(state["alpha_judge"]),
+            "judge_feature_names": list(judge_feature_names),
+            "weights_npz": str(weights_npz),
+        }
+    )
+    with open(weights_json, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2, sort_keys=True)
+    return weights_json, weights_npz
+
+
 def evaluate_ood_auroc(
     *,
     ood_agent_results_jsonl: str,
@@ -577,16 +962,11 @@ def evaluate_ood_auroc(
         model_name: Optional[str] = None
         scaffold_name: Optional[str] = None
 
-        # If caller requests a fixed scaffold (e.g. GSO => OpenHands, Pro => SWE-agent 1.0),
-        # treat the subject_id as a model string and canonicalize it using shared rules.
+        # If caller requests a fixed scaffold (e.g. GSO => OpenHands), treat the subject_id
+        # as a model string and canonicalize it using shared parsing rules.
         if assume_scaffold:
-            used_model_only = True
             try:
-                if bool(ood_treat_as_pro) and hasattr(split_mod, "canonicalize_pro_model"):
-                    # Pro convention: subject_id is a model string; canonicalize so paper/date variants collapse.
-                    model_name = str(split_mod.canonicalize_pro_model(str(sid)))  # type: ignore[attr-defined]
-                else:
-                    model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
+                model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
             except Exception:
                 model_name = str(sid)
             try:
@@ -693,6 +1073,7 @@ def compute_empirical_success_prob_by_model(
     all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
     agent_to_ms_pair: Dict[str, Tuple[str, str]],
     train_item_ids: Set[str],
+    keep_agent_keys: Optional[Set[str]] = None,
 ) -> Tuple[Dict[str, float], dict]:
     """
     Compute per-model empirical success probabilities on the *training* item set:
@@ -712,12 +1093,15 @@ def compute_empirical_success_prob_by_model(
     n_obs_skipped_not_train_item = 0
 
     train_set = set([str(x) for x in train_item_ids])
+    keep_agents = set([str(x) for x in keep_agent_keys]) if keep_agent_keys is not None else None
 
     for bench, sid, resp in all_responses_tagged:
         n_subjects += 1
         bench_s = str(bench)
         sid_s = str(sid)
         key = f"{bench_s}::{sid_s}"
+        if keep_agents is not None and key not in keep_agents:
+            continue
 
         model_name: Optional[str] = None
         pair = agent_to_ms_pair.get(key, None)
@@ -769,6 +1153,62 @@ def compute_empirical_success_prob_by_model(
     return probs, meta
 
 
+def compute_empirical_solve_rate_by_item(
+    *,
+    all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
+    train_item_ids: Set[str],
+    keep_agent_keys: Optional[Set[str]] = None,
+) -> Tuple[Dict[str, float], dict]:
+    """
+    Compute per-item empirical solve rates on the *training* subset:
+
+      p_hat(item) = (# successes) / (# attempts)  over all responses with item_id in train_item_ids.
+    """
+    # item_id -> (n_obs, n_success)
+    counts: Dict[str, List[int]] = defaultdict(lambda: [0, 0])
+    n_subjects = 0
+    n_obs_total = 0
+    n_obs_used = 0
+    n_obs_skipped_not_train_item = 0
+
+    train_set = set([str(x) for x in train_item_ids])
+    keep_agents = set([str(x) for x in keep_agent_keys]) if keep_agent_keys is not None else None
+
+    for bench, sid, resp in all_responses_tagged:
+        n_subjects += 1
+        bench_s = str(bench)
+        sid_s = str(sid)
+        key = f"{bench_s}::{sid_s}"
+        if keep_agents is not None and key not in keep_agents:
+            continue
+
+        for item_id, y_obs in resp.items():
+            n_obs_total += 1
+            tid = str(item_id)
+            if tid not in train_set:
+                n_obs_skipped_not_train_item += 1
+                continue
+            counts[tid][0] += 1
+            counts[tid][1] += int(y_obs)
+            n_obs_used += 1
+
+    probs: Dict[str, float] = {}
+    for iid, (n, k) in counts.items():
+        if int(n) <= 0:
+            continue
+        probs[str(iid)] = float(k) / float(n)
+
+    meta = {
+        "subjects_total": int(n_subjects),
+        "items_total": int(len(counts)),
+        "items_with_prob": int(len(probs)),
+        "obs_total": int(n_obs_total),
+        "obs_used": int(n_obs_used),
+        "obs_skipped_not_train_item": int(n_obs_skipped_not_train_item),
+    }
+    return probs, meta
+
+
 def evaluate_empirical_model_success_auroc(
     *,
     agent_results_jsonl: str,
@@ -776,14 +1216,12 @@ def evaluate_empirical_model_success_auroc(
     treat_as_pro: bool,
     ood_default_scaffold: Optional[str],
     p_success_by_model: Dict[str, float],
-    theta_by_scaffold: Dict[str, float],
 ) -> Tuple[float, dict]:
     """
     Evaluate AUROC using constant-per-model predicted probabilities p_success_by_model[model].
 
-    This baseline ignores scaffold in the *score* (it is constant per model), but it uses the
-    same OOD skipping policy as the main method: a subject is skipped unless BOTH its model
-    and scaffold are recognized (present in the learned training thetas / baseline tables).
+    This baseline ignores scaffold entirely: for each subject we predict its base LLM's
+    empirical training success rate, regardless of scaffold.
     """
     filt = _import_swebench_irt_module("filter_subjects_by_scaffold_count")
     split_mod = _import_swebench_irt_module("split_agents_model_scaffold")
@@ -796,7 +1234,6 @@ def evaluate_empirical_model_success_auroc(
     n_obs_scored = 0
     n_obs_skipped_no_theta = 0
     n_obs_skipped_unfamiliar_model = 0
-    n_obs_skipped_unfamiliar_scaffold = 0
     n_obs_skipped_bad_score = 0
 
     for sid, resp in iter_subject_responses_jsonl_generic(str(agent_results_jsonl), normalize_item_ids=bool(normalize_item_ids)):
@@ -805,44 +1242,31 @@ def evaluate_empirical_model_success_auroc(
         assume_scaffold = str(ood_default_scaffold or "").strip()
 
         model_name: Optional[str] = None
-        scaffold_name: Optional[str] = None
         if assume_scaffold:
+            # Treat the subject_id as a model string when the held-out benchmark lacks scaffold info.
             try:
-                if bool(treat_as_pro) and hasattr(split_mod, "canonicalize_pro_model"):
-                    model_name = str(split_mod.canonicalize_pro_model(str(sid)))  # type: ignore[attr-defined]
-                else:
-                    model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
+                model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
             except Exception:
                 model_name = str(sid)
-            try:
-                scaffold_name = str(split_mod._canonical_scaffold(str(assume_scaffold)))  # type: ignore[attr-defined]
-            except Exception:
-                scaffold_name = str(assume_scaffold)
         else:
-            # Prefer canonical (model, scaffold) parsing; no fallbacks beyond that because
-            # we intentionally skip when scaffold is unknown/unavailable.
+            # Prefer parsing using the same shared subject parsing rules, but allow fallbacks
+            # since scaffold is irrelevant for this baseline.
             try:
                 m = filt._model_for_subject(sid, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
             except Exception:
                 m = None
-            try:
-                sc = filt._scaffold_for_subject(sid, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
-            except Exception:
-                sc = None
             model_name = str(m) if m is not None else None
-            scaffold_name = str(sc) if sc is not None else None
+            if not model_name:
+                try:
+                    model_name = str(split_mod._canonical_model(str(sid)))  # type: ignore[attr-defined]
+                except Exception:
+                    model_name = str(sid)
 
         model_name = str(model_name or "").strip() or None
-        scaffold_name = str(scaffold_name or "").strip() or None
 
         if model_name is None:
             n_obs_total += int(len(resp))
             n_obs_skipped_unfamiliar_model += int(len(resp))
-            n_obs_skipped_no_theta += int(len(resp))
-            continue
-        if scaffold_name is None:
-            n_obs_total += int(len(resp))
-            n_obs_skipped_unfamiliar_scaffold += int(len(resp))
             n_obs_skipped_no_theta += int(len(resp))
             continue
 
@@ -850,11 +1274,6 @@ def evaluate_empirical_model_success_auroc(
         if p is None:
             n_obs_total += int(len(resp))
             n_obs_skipped_unfamiliar_model += int(len(resp))
-            n_obs_skipped_no_theta += int(len(resp))
-            continue
-        if theta_by_scaffold.get(str(scaffold_name), None) is None:
-            n_obs_total += int(len(resp))
-            n_obs_skipped_unfamiliar_scaffold += int(len(resp))
             n_obs_skipped_no_theta += int(len(resp))
             continue
 
@@ -880,7 +1299,6 @@ def evaluate_empirical_model_success_auroc(
         "obs_scored": int(n_obs_scored),
         "obs_skipped_no_theta": int(n_obs_skipped_no_theta),
         "obs_skipped_unfamiliar_model": int(n_obs_skipped_unfamiliar_model),
-        "obs_skipped_unfamiliar_scaffold": int(n_obs_skipped_unfamiliar_scaffold),
         "obs_skipped_bad_score": int(n_obs_skipped_bad_score),
         "labels_pos": int(n_pos),
         "labels_neg": int(n_neg),
@@ -1042,6 +1460,103 @@ def _import_swebench_irt_module(module_name: str):
     return __import__(str(module_name))
 
 
+def train_standard_irt_1pl_agents(
+    *,
+    all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
+    keep_item_ids: Set[str],
+    epochs: int,
+    device: str,
+    seed: int,
+    out_dir: str,
+    keep_agent_keys: Optional[Set[str]] = None,
+    keep_obs_fn: Optional[Callable[[str, str, str], bool]] = None,
+) -> Tuple[Dict[str, float], Dict[str, float]]:
+    """
+    Train a *standard* 1D 1PL (Rasch) IRT model with:
+      - subject := subject_id
+      - item := task id
+
+    This matches the IRT training setup used in `predict_question_difficulty.py`:
+      - write a response-matrix JSONL and train `py_irt` 1D 1PL with hierarchical priors
+      - train `py_irt` 1D 1PL with hierarchical priors
+      - write the same artifacts
+
+    Missing-response policy:
+      - If `keep_obs_fn is None` (normal training on observed runs): write a *dense* response dict
+        over `keep_item_ids`, filling missing with 0 (exactly like `predict_question_difficulty.py`).
+      - If `keep_obs_fn is not None` (observation-level CV): write a *sparse* response dict
+        containing ONLY observed responses that pass `keep_obs_fn`. This treats held-out
+        observations as missing, not failures.
+
+    Artifacts (same as `predict_question_difficulty.py::train_irt_1pl`):
+      - parameters.json
+      - best_parameters.json
+      - abilities.csv  (subject_id, theta)
+      - items.csv      (item_id, b)
+      - train_responses.jsonl (input matrix used for IRT)
+    """
+    outp = str(out_dir or "").strip()
+    if not outp:
+        raise ValueError("out_dir was empty")
+
+    # Overwrite policy (match single-benchmark folds): clear previous artifacts.
+    if os.path.exists(outp):
+        shutil.rmtree(outp, ignore_errors=True)
+    base.ensure_dir(outp)
+
+    items = sorted([str(x) for x in keep_item_ids if str(x).strip()])
+    if not items:
+        raise ValueError("keep_item_ids was empty")
+    item_set = set(items)
+    keep_agents = set([str(x) for x in keep_agent_keys]) if keep_agent_keys is not None else None
+
+    # Build subject->responses restricted to items (+ optional observation filter).
+    subj_to_present: Dict[str, Dict[str, int]] = defaultdict(dict)
+    for bench, sid, resp in all_responses_tagged:
+        bench_s = str(bench)
+        sid_s = str(sid)
+        agent_key = sid_s
+        if keep_agents is not None and str(agent_key) not in keep_agents:
+            continue
+        for item_id, y_obs in resp.items():
+            tid = str(item_id)
+            if tid not in item_set:
+                continue
+            if keep_obs_fn is not None and not bool(keep_obs_fn(bench_s, sid_s, tid)):
+                continue
+            subj_to_present[agent_key][tid] = int(y_obs)
+
+    train_jsonl = os.path.join(outp, "train_responses.jsonl")
+    n_subjects_written = 0
+    with open(train_jsonl, "w", encoding="utf-8") as f:
+        for subj in sorted(subj_to_present.keys()):
+            present = subj_to_present.get(subj, {})
+            if not present:
+                continue
+            if keep_obs_fn is None:
+                # Match base policy: write complete response dict over `items`, filling missing with 0.
+                out_resp = {tid: int(present.get(tid, 0)) for tid in items}
+            else:
+                # Observation-level CV: keep missing responses as missing (do NOT fill with 0).
+                out_resp = {tid: int(v) for tid, v in present.items()}
+            f.write(json.dumps({"subject_id": str(subj), "responses": out_resp}) + "\n")
+            n_subjects_written += 1
+    if n_subjects_written <= 0:
+        raise RuntimeError("After filtering, there were 0 observations to train standard IRT on.")
+
+    # Use the exact single-benchmark IRT trainer for standard IRT artifacts.
+    # Note: this applies `base.normalize_swebench_item_id` when extracting item ids from
+    # py_irt outputs (same behavior as the single-benchmark script).
+    theta_by_subject, diff_by_item = base.train_irt_1pl(
+        responses_jsonl=str(train_jsonl),
+        epochs=int(epochs),
+        device=str(device),
+        seed=int(seed),
+        out_dir=str(outp),
+    )
+    return theta_by_subject, diff_by_item
+
+
 def filter_subjects_by_min_models_per_scaffold(
     *,
     input_jsonl: str,
@@ -1139,7 +1654,7 @@ def filter_subjects_gso_model_only(
     input_jsonl: str,
     output_jsonl: str,
     min_models_per_scaffold: int,
-    assumed_scaffold: Optional[str] = None,
+    assumed_scaffold: str = "OpenHands",
 ) -> None:
     """
     Filter GSO-style response matrices where subject_id is typically a *model name only*.
@@ -1163,8 +1678,6 @@ def filter_subjects_gso_model_only(
 
     # Canonicalize model labels using the shared splitter conventions when available.
     split_mod = _import_swebench_irt_module("split_agents_model_scaffold")
-    if not assumed_scaffold:
-        assumed_scaffold = str(getattr(split_mod, "GSO_ASSUMED_SCAFFOLD", "OpenHands"))
     models: Set[str] = set()
     rows: List[dict] = []
     for r in _iter_jsonl(in_path):
@@ -1348,6 +1861,228 @@ def build_multibench_obs_for_items(
         terminal_bench_item_ids=set([iid for iid in item_ids if iid in set(obs_full.terminal_bench_item_ids)]),
         gso_item_ids=set([iid for iid in item_ids if iid in set(getattr(obs_full, "gso_item_ids", set()))]),
         agent_split_df=obs_full.agent_split_df,
+    )
+
+
+def build_multibench_obs_from_tagged_responses(
+    *,
+    all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
+    agent_to_ms_pair: Dict[str, Tuple[str, str]],
+    obs_full_agent_split_df,
+    keep_item_ids: Set[str],
+    keep_agent_keys: Optional[Set[str]] = None,
+    keep_obs_fn: Optional[Callable[[str, str, str], bool]] = None,
+):
+    """
+    Build a `train_model_scaffold_shared.MultiBenchObs` from the original tagged
+    response matrices, with optional filtering by agent and/or (agent,item) observation.
+
+    Note: `obs_full` does not retain agent ids per observation row (only model/scaffold),
+    so agent/observation splits must be constructed from the original tagged responses.
+    """
+    import torch
+
+    keep_items = set([str(x) for x in keep_item_ids if str(x).strip()])
+    if not keep_items:
+        raise ValueError("keep_item_ids was empty")
+
+    keep_agents = set([str(x) for x in keep_agent_keys]) if keep_agent_keys is not None else None
+
+    rows: List[Tuple[str, str, str, int]] = []  # (model, scaffold, item_id, y)
+    used_agents: List[Tuple[str, str, str, str]] = []  # (benchmark, agent, model, scaffold)
+    seen_agents: Set[Tuple[str, str]] = set()
+
+    verified_item_ids: Set[str] = set()
+    pro_item_ids: Set[str] = set()
+    terminal_item_ids: Set[str] = set()
+    gso_item_ids: Set[str] = set()
+
+    for bench, sid, resp in all_responses_tagged:
+        bench_s = str(bench)
+        sid_s = str(sid)
+        agent_key = f"{bench_s}::{sid_s}"
+        if keep_agents is not None and agent_key not in keep_agents:
+            continue
+        pair = agent_to_ms_pair.get(agent_key, None)
+        if pair is None:
+            continue
+        model_name, scaffold = pair
+
+        ak = (bench_s, sid_s)
+        if ak not in seen_agents:
+            seen_agents.add(ak)
+            used_agents.append((bench_s, sid_s, str(model_name), str(scaffold)))
+
+        for item_id, y_obs in resp.items():
+            tid = str(item_id)
+            if tid not in keep_items:
+                continue
+            if keep_obs_fn is not None and not bool(keep_obs_fn(bench_s, sid_s, tid)):
+                continue
+            rows.append((str(model_name), str(scaffold), tid, int(y_obs)))
+            if bench_s == "verified":
+                verified_item_ids.add(tid)
+            elif bench_s == "pro":
+                pro_item_ids.add(tid)
+            elif bench_s == "terminal_bench":
+                terminal_item_ids.add(tid)
+            elif bench_s == "gso":
+                gso_item_ids.add(tid)
+
+    if not rows:
+        raise RuntimeError("After filtering, there were 0 observations to train IRT on.")
+
+    model_ids = sorted(set([m for m, _, _, _ in rows]))
+    scaffold_ids = sorted(set([s for _, s, _, _ in rows]))
+    item_ids = sorted(set([t for _, _, t, _ in rows]))
+    model_to_idx = {m: i for i, m in enumerate(model_ids)}
+    scaffold_to_idx = {s: i for i, s in enumerate(scaffold_ids)}
+    item_to_idx = {t: i for i, t in enumerate(item_ids)}
+
+    m_list: List[int] = []
+    s_list: List[int] = []
+    i_list: List[int] = []
+    y_list: List[int] = []
+    for m, s, t, yv in rows:
+        m_list.append(int(model_to_idx[m]))
+        s_list.append(int(scaffold_to_idx[s]))
+        i_list.append(int(item_to_idx[t]))
+        y_list.append(int(yv))
+
+    if not m_list:
+        raise RuntimeError("After indexing, there were 0 observations to train IRT on.")
+
+    agent_split_df = obs_full_agent_split_df
+    try:
+        import pandas as pd  # type: ignore
+
+        agent_split_df = pd.DataFrame(
+            [{"benchmark": b, "agent": a, "model": m, "scaffold": sc} for (b, a, m, sc) in used_agents]
+        )
+    except Exception:
+        agent_split_df = obs_full_agent_split_df
+
+    ms = _import_shared_irt_module()
+    return ms.MultiBenchObs(
+        model_idx=torch.tensor(m_list, dtype=torch.long),
+        scaffold_idx=torch.tensor(s_list, dtype=torch.long),
+        item_idx=torch.tensor(i_list, dtype=torch.long),
+        y=torch.tensor(y_list, dtype=torch.float),
+        model_ids=model_ids,
+        scaffold_ids=scaffold_ids,
+        item_ids=item_ids,
+        verified_item_ids=verified_item_ids,
+        pro_item_ids=pro_item_ids,
+        terminal_bench_item_ids=terminal_item_ids,
+        gso_item_ids=gso_item_ids,
+        agent_split_df=agent_split_df,
+    )
+
+
+def build_agent_only_obs_from_tagged_responses(
+    *,
+    all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
+    obs_full_agent_split_df,
+    keep_item_ids: Set[str],
+    keep_agent_keys: Optional[Set[str]] = None,
+    keep_obs_fn: Optional[Callable[[str, str, str], bool]] = None,
+):
+    """
+    Build a `train_model_scaffold_shared.MultiBenchObs` for a 1D 1PL IRT baseline that
+    treats each agent as an atomic subject (no model/scaffold decomposition).
+
+    We implement this by using:
+      - "model" dimension := agent_key = "<benchmark>::<subject_id>"
+      - "scaffold" dimension := a single constant id ("__BASE__")
+      - items := task ids
+    """
+    import torch
+
+    keep_items = set([str(x) for x in keep_item_ids if str(x).strip()])
+    if not keep_items:
+        raise ValueError("keep_item_ids was empty")
+
+    keep_agents = set([str(x) for x in keep_agent_keys]) if keep_agent_keys is not None else None
+
+    rows: List[Tuple[str, str, int]] = []  # (agent_key, item_id, y)
+    used_agents: List[Tuple[str, str, str]] = []  # (benchmark, agent, agent_key)
+    seen_agents: Set[Tuple[str, str]] = set()
+
+    verified_item_ids: Set[str] = set()
+    pro_item_ids: Set[str] = set()
+    terminal_item_ids: Set[str] = set()
+    gso_item_ids: Set[str] = set()
+
+    for bench, sid, resp in all_responses_tagged:
+        bench_s = str(bench)
+        sid_s = str(sid)
+        agent_key = f"{bench_s}::{sid_s}"
+        if keep_agents is not None and agent_key not in keep_agents:
+            continue
+
+        ak = (bench_s, sid_s)
+        if ak not in seen_agents:
+            seen_agents.add(ak)
+            used_agents.append((bench_s, sid_s, agent_key))
+
+        for item_id, y_obs in resp.items():
+            tid = str(item_id)
+            if tid not in keep_items:
+                continue
+            if keep_obs_fn is not None and not bool(keep_obs_fn(bench_s, sid_s, tid)):
+                continue
+            rows.append((agent_key, tid, int(y_obs)))
+            if bench_s == "verified":
+                verified_item_ids.add(tid)
+            elif bench_s == "pro":
+                pro_item_ids.add(tid)
+            elif bench_s == "terminal_bench":
+                terminal_item_ids.add(tid)
+            elif bench_s == "gso":
+                gso_item_ids.add(tid)
+
+    if not rows:
+        raise RuntimeError("After filtering, there were 0 observations to train agent-only IRT on.")
+
+    agent_ids = sorted(set([a for a, _, _ in rows]))
+    item_ids = sorted(set([t for _, t, _ in rows]))
+    agent_to_idx = {a: i for i, a in enumerate(agent_ids)}
+    item_to_idx = {t: i for i, t in enumerate(item_ids)}
+
+    m_list: List[int] = []
+    s_list: List[int] = []
+    i_list: List[int] = []
+    y_list: List[int] = []
+    for a, t, yv in rows:
+        m_list.append(int(agent_to_idx[a]))
+        s_list.append(0)
+        i_list.append(int(item_to_idx[t]))
+        y_list.append(int(yv))
+
+    agent_split_df = obs_full_agent_split_df
+    try:
+        import pandas as pd  # type: ignore
+
+        agent_split_df = pd.DataFrame(
+            [{"benchmark": b, "agent": a, "model": k, "scaffold": "__BASE__"} for (b, a, k) in used_agents]
+        )
+    except Exception:
+        agent_split_df = obs_full_agent_split_df
+
+    ms = _import_shared_irt_module()
+    return ms.MultiBenchObs(
+        model_idx=torch.tensor(m_list, dtype=torch.long),
+        scaffold_idx=torch.tensor(s_list, dtype=torch.long),
+        item_idx=torch.tensor(i_list, dtype=torch.long),
+        y=torch.tensor(y_list, dtype=torch.float),
+        model_ids=agent_ids,
+        scaffold_ids=["__BASE__"],
+        item_ids=item_ids,
+        verified_item_ids=verified_item_ids,
+        pro_item_ids=pro_item_ids,
+        terminal_bench_item_ids=terminal_item_ids,
+        gso_item_ids=gso_item_ids,
+        agent_split_df=agent_split_df,
     )
 
 
@@ -1574,13 +2309,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--method",
         type=str,
         default="embedding",
-        choices=["embedding", "judge", "combined"],
+        choices=["embedding", "judge", "combined", "stacked"],
         help=(
             "Which features to use for difficulty prediction. "
             "'embedding' (default) trains ridge/linear on the embedding vector only (historical default). "
             "'combined' concatenates embedding + LLM-judge features and trains a joint (block) ridge with "
             "separate penalties for embedding vs judge blocks. "
-            "'judge' trains ridge on judge features only (no embeddings)."
+            "'judge' trains ridge on judge features only (no embeddings). "
+            "'stacked' fits embeddings first, then uses judge features to predict the residual (final = base + residual)."
         ),
     )
     p.add_argument(
@@ -1606,26 +2342,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument(
         "--verified_judge_features_dir",
         type=str,
-        default="llm_judge/features/verified",
-        help="Directory with per-item Verified judge feature JSONs (<item_id>.json).",
+        default="llm_judge/features/verified_full.csv",
+        help="Verified judge features (CSV like llm_judge/features/verified.csv, or directory of per-item JSONs).",
     )
     p.add_argument(
         "--pro_judge_features_dir",
         type=str,
-        default="llm_judge/features/pro",
-        help="Directory with per-item Pro judge feature JSONs (often instance_<id>-v... .json).",
+        default="llm_judge/features/pro.csv",
+        help="Pro judge features (CSV like llm_judge/features/pro.csv, or directory of per-item JSONs).",
     )
     p.add_argument(
         "--terminal_bench_judge_features_dir",
         type=str,
-        default="llm_judge/features/terminal_bench",
-        help="Directory with per-item Terminal-Bench judge feature JSONs (<task_id>.json).",
+        default="llm_judge/features/terminal_bench.csv",
+        help="Terminal-Bench judge features (CSV like llm_judge/features/terminal_bench.csv, or directory of per-item JSONs).",
     )
     p.add_argument(
         "--gso_judge_features_dir",
         type=str,
-        default="llm_judge/features/gso",
-        help="Directory with per-item GSO judge feature JSONs (<item_id>.json).",
+        default="llm_judge/features/gso.csv",
+        help="GSO judge features (CSV like llm_judge/features/gso.csv, or directory of per-item JSONs).",
     )
 
     p.add_argument(
@@ -1666,15 +2402,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
 
     p.add_argument(
-        "--eval_mode",
+        "--split_by",
         type=str,
-        default="ood",
-        choices=["id", "ood"],
+        default="benchmark",
+        choices=["benchmark", "task", "agent", "observation", "none"],
         help=(
-            "Evaluation mode. ID runs the existing in-distribution K-fold CV + AUROC pipeline (previously "
-            "--evaluate_in_distribution). OOD (default) runs the default training-only flow, then additionally "
-            "evaluates AUROC on a single OOD benchmark selected by --ood_benchmark using the learned shared "
-            "IRT abilities and regressor weights."
+            "How to split for evaluation. "
+            "'benchmark' (default): train on --train_benchmarks and "
+            "evaluate AUROC on a held-out benchmark selected by --ood_benchmark. "
+            "'task': K-fold CV holding out items/tasks. "
+            "'agent' holds out agents/subjects (in-distribution). "
+            "'observation' holds out individual observations (agent,item) (in-distribution). "
+            "'none' disables evaluation and uses all eligible items as training data (no baseline/oracle)."
         ),
     )
 
@@ -1715,24 +2454,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Feature selection / method
     # -----------------------------
     method = str(getattr(args, "method", "embedding") or "embedding").strip().lower()
-    if method not in {"embedding", "judge", "combined"}:
+    if method not in {"embedding", "judge", "combined", "stacked"}:
         raise ValueError(f"Unknown --method: {getattr(args, 'method', None)!r}")
 
+    split_by_raw = str(getattr(args, "split_by", "benchmark") or "benchmark").strip().lower()
+    if split_by_raw not in {"benchmark", "task", "agent", "observation", "none"}:
+        raise ValueError(f"Unknown --split_by: {getattr(args, 'split_by', None)!r}")
+    split_by = str(split_by_raw)
+
     train_benchmarks = _parse_benchmark_list(str(args.train_benchmarks))
+    if len(train_benchmarks) < 1:
+        raise ValueError("--train_benchmarks must include at least 1 benchmark.")
+
     ood_benchmark_raw = str(getattr(args, "ood_benchmark", "") or "").strip()
-    disable_eval = (ood_benchmark_raw == "")
+    disable_benchmark_eval = (split_by == "benchmark") and (ood_benchmark_raw == "")
     ood_benchmark: Optional[str] = None
-    if not disable_eval:
-        ood_benchmark = _canon_benchmark_name(ood_benchmark_raw)
-    if len(train_benchmarks) < 2:
-        raise ValueError(
-            f"--train_benchmarks must include at least 2 benchmarks (got {train_benchmarks}). "
-            "Allowed: Verified, Pro, Terminal-Bench, GSO."
-        )
-    if ood_benchmark is not None and ood_benchmark in set(train_benchmarks):
-        raise ValueError(
-            f"--ood_benchmark={ood_benchmark!r} must not be present in --train_benchmarks={train_benchmarks}."
-        )
+    if not disable_benchmark_eval:
+        ood_benchmark = _canon_benchmark_name(ood_benchmark_raw) if ood_benchmark_raw else None
+
+    if split_by == "benchmark" and not disable_benchmark_eval:
+        if ood_benchmark is None:
+            raise ValueError(
+                "--ood_benchmark is required when --split_by=benchmark "
+                "(or pass --ood_benchmark '' to disable evaluation)."
+            )
+        if ood_benchmark in set(train_benchmarks):
+            raise ValueError(
+                f"--ood_benchmark={ood_benchmark!r} must not be present in --train_benchmarks={train_benchmarks}."
+            )
 
     irt_model = str(args.irt_model or "1d_1pl").strip().lower()
     if irt_model not in {"1d_1pl", "2d_1pl"}:
@@ -1776,6 +2525,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     agent_results_filtered_by_bench: Dict[str, str] = {}
     for b in ["verified", "pro", "terminal_bench", "gso"]:
         agent_results_filtered_by_bench[b] = ""
+
+    # Always define these (used later in metrics metadata).
+    verified_agent_results_raw = ""
+    pro_agent_results_raw = ""
+    terminal_agent_results_raw = ""
+    gso_agent_results_raw = ""
 
     def _require_path_for_train(b: str) -> str:
         pth = str(agent_results_raw_by_bench.get(b, "") or "").strip()
@@ -1826,9 +2581,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             input_jsonl=gso_agent_results_raw,
             output_jsonl=gso_agent_results,
             min_models_per_scaffold=int(args.min_models_per_scaffold),
-            assumed_scaffold=str(
-                getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "GSO_ASSUMED_SCAFFOLD", "OpenHands")
-            ),
+            assumed_scaffold="OpenHands",
         )
 
     # -----------------------------
@@ -1866,7 +2619,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # Zero-success items across the full multi-benchmark response pool.
     # (We reuse the same helper, with a lightly-adapted input.)
-    flat_for_zero_success: List[Tuple[str, Dict[str, int]]] = [(f"{b}::{sid}", resp) for b, sid, resp in all_responses_tagged]
+    flat_for_zero_success: List[Tuple[str, Dict[str, int]]] = [(str(sid), resp) for _, sid, resp in all_responses_tagged]
     zero_success_ids = base.compute_zero_success_items(flat_for_zero_success)
     zero_success_set = set(zero_success_ids)
     exclude_zero_success = not bool(args.include_zero_success)
@@ -1922,9 +2675,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     emb_cache = str(args.embeddings_cache or "").strip()
 
     # -----------------------------
-    # Load or compute embeddings (only for embedding/combined methods)
+    # Load or compute embeddings (for methods that use embeddings)
     # -----------------------------
-    if method in {"embedding", "combined"}:
+    # For --split_by=agent/observation/none we do IRT-only flows: never embed.
+    if (split_by not in {"agent", "observation", "none"}) and method in {"embedding", "combined", "stacked"}:
         if not emb_cache:
             # Historically, we encoded lots of config into the cache filename. On many
             # filesystems, individual path components are limited (often 255 bytes),
@@ -2178,7 +2932,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if exclude_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
-            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} overlapped items "
+            f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} items "
             f"(agent_results_by_benchmark={ {k: v for k, v in agent_results_filtered_by_bench.items() if str(v).strip()} })"
         )
     else:
@@ -2186,7 +2940,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not eligible:
         raise RuntimeError("After filtering, no items remain for CV/IRT.")
 
-    if method in {"embedding", "combined"}:
+    # Only build the embedding design matrix for task-level CV / benchmark-eval flows that
+    # actually use regressors. For IRT-only modes (agent/observation/none), never touch X.
+    if (split_by not in {"agent", "observation", "none"}) and method in {"embedding", "combined", "stacked"}:
         Xy = base.np.stack([X[id_to_row[tid]] for tid in eligible], axis=0).astype(base.np.float32)
 
     # -----------------------------
@@ -2299,61 +3055,277 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # `method` was validated near argument parsing.
     use_joint = method == "combined"
-    use_judge = method in {"judge", "combined"}
+    use_judge = method in {"judge", "combined", "stacked"}
 
     # Constraints: judge-based methods require ridge/ridge_cv (block ridge for combined; ridge on judge for judge-only).
-    if use_judge and str(regressor_name) not in {"ridge", "ridge_cv"}:
+    # For --split_by=agent/observation/none, we do IRT-only flows (no regression), so do not apply regressor constraints.
+    if (split_by not in {"agent", "observation", "none"}) and use_judge and str(regressor_name) not in {"ridge", "ridge_cv"}:
         raise ValueError(f"--method={method!r} requires --regressor to be ridge or ridge_cv (linear is not supported).")
-
-    # Normalize early; argparse choices are lowercase.
-    eval_mode = str(args.eval_mode or "ood").strip().lower()
-    if eval_mode not in {"id", "ood"}:
-        raise ValueError(f"Unknown --eval_mode: {args.eval_mode!r}")
-    if disable_eval:
-        # User explicitly requested no evaluation by passing --ood_benchmark "".
-        # We still run the default training-only flow and save regression weights.
-        eval_mode = "train"
 
     # -----------------------------
     # Oracle IRT (ID eval only): fit IRT on ALL eligible items (train + test).
     # This intentionally leaks fold test items; it is meant as an upper bound.
     # -----------------------------
-    oracle_theta_by_model: Dict[str, float] = {}
-    oracle_theta_by_scaffold: Dict[str, float] = {}
+    oracle_theta_by_agent: Dict[str, float] = {}
     oracle_diff_by_item: Dict[str, float] = {}
-    if eval_mode == "id":
+    if split_by in {"task", "agent", "observation"}:
         print("Training oracle IRT on all eligible items (train+test; leakage).")
         base.set_torch_determinism(False)
         base.seed_everything(int(args.seed), deterministic=False)
-        obs_oracle = build_multibench_obs_for_items(obs_full=obs_full, keep_item_ids=list(eligible))
-        oracle_theta_by_model, oracle_theta_by_scaffold, oracle_diff_by_item = train_irt_model_scaffold_1pl(
-            obs_train=obs_oracle,
-            irt_model=str(irt_model),
+        oracle_theta_by_agent, oracle_diff_by_item = train_standard_irt_1pl_agents(
+            all_responses_tagged=all_responses_tagged,
+            keep_item_ids=set(eligible),
             epochs=int(args.irt_epochs),
             device=str(args.irt_device),
             seed=int(args.seed),
-            lr=float(args.irt_lr),
-            out_dir=os.path.join(str(args.out_dir), "irt_oracle_full", _irt_out_dir_name(irt_model)),
+            out_dir=os.path.join(str(args.out_dir), "irt_oracle_full_agent_1pl"),
         )
         base.set_torch_determinism(True)
         print(
             "Oracle IRT training complete. "
-            f"labeled_items={len(oracle_diff_by_item)} models={len(oracle_theta_by_model)} scaffolds={len(oracle_theta_by_scaffold)}"
+            f"labeled_items={len(oracle_diff_by_item)} agents={len(oracle_theta_by_agent)}"
         )
 
-    if eval_mode == "id" and method == "combined":
+    # -----------------------------
+    # IRT-only evaluation for agent/observation splits
+    # -----------------------------
+    if split_by in {"agent", "observation"}:
+        # For these splits, we do NOT load task features or train regressors. We only:
+        #  - fit shared (model+scaffold) IRT parameters on the training subset
+        #  - use IRT item difficulties (b) for scoring
+        #  - evaluate AUROC on held-out agents or held-out observations
+        agent_folds: List[Tuple[set, set]] = []
+        if split_by == "agent":
+            agent_keys_all = [f"{b}::{sid}" for b, sid, _ in all_responses_tagged]
+            agent_folds = _stable_group_kfold(agent_keys_all, n_splits=int(args.cv_folds), seed=int(args.seed))
+            fold_iter = list(enumerate(agent_folds, start=1))
+        else:
+            fold_iter = list(enumerate([None] * int(args.cv_folds), start=1))
+
+        cv_test_auc_folds: List[float] = []
+        cv_test_auc_folds_empirical_model: List[float] = []
+        cv_test_auc_folds_oracle_irt: List[float] = []
+        cv_test_n_obs_folds: List[int] = []
+
+        for fold, fold_payload in fold_iter:
+            if split_by == "agent":
+                train_agents, test_agents = fold_payload
+            else:
+                train_agents, test_agents = None, None
+
+            # Baselines on the fold training subset.
+            # - split_by=agent: empirical per-task solve rate on training agents.
+            # - split_by=observation: baseline is an agent-only IRT (see below).
+            p_emp_by_item: Dict[str, float] = {}
+            if split_by == "agent":
+                p_emp_by_item, _ = compute_empirical_solve_rate_by_item(
+                    all_responses_tagged=all_responses_tagged,
+                    train_item_ids=set(eligible),
+                    keep_agent_keys=set(train_agents or []),
+                )
+
+            fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
+            base.ensure_dir(fold_root)
+            if split_by == "agent":
+                base.save_json(os.path.join(fold_root, "train_agents.json"), {"agents": sorted(list(train_agents or []))})
+                base.save_json(os.path.join(fold_root, "test_agents.json"), {"agents": sorted(list(test_agents or []))})
+            else:
+                base.save_json(
+                    os.path.join(fold_root, "split.json"),
+                    {"split_by": str(split_by), "fold": int(fold), "cv_folds": int(args.cv_folds)},
+                )
+
+            # Train shared IRT with no leakage.
+            base.set_torch_determinism(False)
+            base.seed_everything(int(args.seed), deterministic=False)
+
+            if split_by == "agent":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_agent_keys=set(train_agents or []),
+                )
+                keep_obs_train = None
+            else:
+                def _keep_obs_train(b: str, a: str, t: str) -> bool:
+                    key = f"{b}::{a}::{t}"
+                    return int(_fold_id_for_group(key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold)
+
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,
+                )
+                keep_obs_train = _keep_obs_train
+
+            theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
+                obs_train=obs_train,
+                irt_model=str(irt_model),
+                epochs=int(args.irt_epochs),
+                device=str(args.irt_device),
+                seed=int(args.seed),
+                lr=float(args.irt_lr),
+                out_dir=os.path.join(fold_root, _irt_out_dir_name(irt_model)),
+            )
+            base.set_torch_determinism(True)
+
+            if not theta_by_model or not theta_by_scaffold:
+                raise RuntimeError(f"Fold {fold}: IRT produced 0 model/scaffold thetas (unexpected).")
+            if not diff_by_item:
+                raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
+
+            # Baseline IRT for held-out observations: standard agent-only 1PL.
+            baseline_theta_by_agent: Dict[str, float] = {}
+            baseline_b_by_item: Dict[str, float] = {}
+            if split_by == "observation":
+                if keep_obs_train is None:
+                    raise RuntimeError("Internal error: missing keep_obs_train for --split_by=observation")
+                base.set_torch_determinism(False)
+                base.seed_everything(int(args.seed), deterministic=False)
+                baseline_theta_by_agent, baseline_b_by_item = train_standard_irt_1pl_agents(
+                    all_responses_tagged=all_responses_tagged,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=keep_obs_train,
+                    epochs=int(args.irt_epochs),
+                    device=str(args.irt_device),
+                    seed=int(args.seed),
+                    out_dir=os.path.join(fold_root, "irt_agent_baseline_1pl"),
+                )
+                base.set_torch_determinism(True)
+
+            # Evaluate AUROC on held-out observations.
+            scores: List[float] = []
+            labels: List[int] = []
+            scores_emp: List[float] = []
+            labels_emp: List[int] = []
+            scores_oracle: List[float] = []
+            labels_oracle: List[int] = []
+
+            for bench, sid, resp in all_responses_tagged:
+                if split_by == "agent":
+                    if f"{bench}::{sid}" not in set(test_agents or []):
+                        continue
+                for item_id, y_obs in resp.items():
+                    if split_by == "observation":
+                        obs_key = f"{bench}::{sid}::{item_id}"
+                        if int(_fold_id_for_group(obs_key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold):
+                            continue
+
+                    pair = agent_to_ms_pair.get(f"{bench}::{sid}", None)
+                    if pair is None:
+                        continue
+                    model_name, scaffold = pair
+                    tm = theta_by_model.get(model_name, None)
+                    ts = theta_by_scaffold.get(scaffold, None)
+                    if tm is None or ts is None:
+                        continue
+                    b = diff_by_item.get(str(item_id), None)
+                    if b is None:
+                        continue
+                    th = float(tm) + float(ts)
+                    scores.append(_sigmoid(th - float(b)))
+                    labels.append(int(y_obs))
+
+                    # Baseline.
+                    if split_by == "observation":
+                        th_a = baseline_theta_by_agent.get(str(sid), None)
+                        b_a = baseline_b_by_item.get(str(item_id), None)
+                        if th_a is not None and b_a is not None:
+                            scores_emp.append(_sigmoid(float(th_a) - float(b_a)))
+                            labels_emp.append(int(y_obs))
+                    else:
+                        # split_by=agent: predict empirical training solve rate for this task.
+                        p_item = p_emp_by_item.get(str(item_id), None)
+                        if p_item is not None:
+                            scores_emp.append(float(p_item))
+                            labels_emp.append(int(y_obs))
+
+                    # Oracle standard IRT (agent-level; leakage).
+                    th_o = oracle_theta_by_agent.get(str(sid), None)
+                    b_o = oracle_diff_by_item.get(str(item_id), None)
+                    if th_o is not None and b_o is not None:
+                        scores_oracle.append(_sigmoid(float(th_o) - float(b_o)))
+                        labels_oracle.append(int(y_obs))
+
+            fold_auc = float(base._compute_binary_auroc(scores, labels))
+            fold_auc_emp = float(base._compute_binary_auroc(scores_emp, labels_emp))
+            fold_auc_oracle = float(base._compute_binary_auroc(scores_oracle, labels_oracle))
+            cv_test_auc_folds.append(float(fold_auc))
+            cv_test_auc_folds_empirical_model.append(float(fold_auc_emp))
+            cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
+            cv_test_n_obs_folds.append(int(len(labels)))
+
+            baseline_label = "irt_train" if split_by == "observation" else "emp_item"
+            print(
+                f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} baseline={baseline_label} "
+                f"oracle_irt_auc={fold_auc_oracle} n_obs={len(labels)}"
+            )
+
+        auc_arr = base.np.asarray(cv_test_auc_folds, dtype=base.np.float64)
+        auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
+        auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
+        print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std} split_by={split_by}")
+        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
+
+        baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
+        baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
+        baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
+        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_item"
+        print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
+
+        oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
+        oracle_auc_mean = float(base.np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
+        oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
+        print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
+
+        metrics = {
+            "method": str(method),
+            "split_by": str(split_by),
+            "irt_only": True,
+            "irt_model": str(irt_model),
+            "irt_epochs": int(args.irt_epochs),
+            "irt_device": str(args.irt_device),
+            "irt_seed": int(args.seed),
+            "cv_folds": int(args.cv_folds),
+            "cv_test_auc_mean": float(auc_mean),
+            "cv_test_auc_std": float(auc_std),
+            "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
+            "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
+            "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_item_solve_rate"),
+            "cv_test_auc_mean_baseline": float(baseline_auc_mean),
+            "cv_test_auc_std_baseline": float(baseline_auc_std),
+            "cv_test_auc_folds_baseline": [float(x) for x in cv_test_auc_folds_empirical_model],
+            "cv_test_auc_mean_oracle_irt": float(oracle_auc_mean),
+            "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
+            "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
+        }
+        base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
+        print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
+        return 0
+
+    if split_by == "task" and method == "combined":
         # -----------------------------
         # K-fold CV over items (joint block-ridge: embeddings + judge features)
         # -----------------------------
-        outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        outer_cv = None
+        agent_folds: List[Tuple[set, set]] = []
+        if split_by == "task":
+            outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        elif split_by == "agent":
+            agent_keys_all = [f"{b}::{sid}" for b, sid, _ in all_responses_tagged]
+            agent_folds = _stable_group_kfold(agent_keys_all, n_splits=int(args.cv_folds), seed=int(args.seed))
         cv_test_auc_folds: List[float] = []
         cv_test_auc_folds_embedding_only: List[float] = []
         cv_test_auc_folds_empirical_model: List[float] = []
         cv_test_auc_folds_oracle_irt: List[float] = []
         cv_test_n_obs_folds: List[int] = []
         cv_test_n_items_scored_folds: List[int] = []
-        yhat_oof = base.np.full((int(len(eligible)),), base.np.nan, dtype=base.np.float64)
-        fold_of_item = base.np.full((int(len(eligible)),), -1, dtype=base.np.int32)
+        yhat_oof = base.np.full((int(len(eligible)),), base.np.nan, dtype=base.np.float64) if split_by == "task" else None
+        fold_of_item = base.np.full((int(len(eligible)),), -1, dtype=base.np.int32) if split_by == "task" else None
 
         eligible_index = {tid: i for i, tid in enumerate(eligible)}
 
@@ -2362,16 +3334,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         terminal_item_set = set(obs_full.terminal_bench_item_ids)
         gso_item_set = set(getattr(obs_full, "gso_item_ids", set()))
 
-        # Judge feature vector is a fixed concat of per-benchmark schemas.
-        verified_off = 0
-        pro_off = verified_off + int(len(VERIFIED_JUDGE_FEATURE_NAMES))
-        terminal_off = pro_off + int(len(PRO_JUDGE_FEATURE_NAMES))
-        judge_dim = terminal_off + int(len(TERMINAL_BENCH_JUDGE_FEATURE_NAMES))
-        judge_feature_names_full: List[str] = (
-            [f"verified::{k}" for k in VERIFIED_JUDGE_FEATURE_NAMES]
-            + [f"pro::{k}" for k in PRO_JUDGE_FEATURE_NAMES]
-            + [f"terminal_bench::{k}" for k in TERMINAL_BENCH_JUDGE_FEATURE_NAMES]
-        )
+        judge_dim = int(len(JUDGE_FEATURE_NAMES))
+        judge_feature_names_full: List[str] = list(JUDGE_FEATURE_NAMES)
 
         verified_feat_dir = str(args.verified_judge_features_dir)
         pro_feat_dir = str(args.pro_judge_features_dir)
@@ -2384,89 +3348,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         def _judge_full_vec_for_item(item_id: str):
             tid = str(item_id)
-            x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
             if tid in verified_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=verified_feat_dir,
-                    feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=verified_idx,
                     normalize_item_ids=True,
                 )
-                if v is None:
-                    return None
-                x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in pro_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=pro_feat_dir,
-                    feature_names=PRO_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=pro_idx,
                     normalize_item_ids=True,
                 )
-                if v is None:
-                    return None
-                x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in terminal_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=terminal_feat_dir,
-                    feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=terminal_idx,
                     normalize_item_ids=False,
                 )
-                if v is None:
-                    return None
-                x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in gso_item_set and gso_feat_dir:
-                # GSO schema differs; map overlapping keys into the fixed V/P/T judge vector.
-                obj = None
-                try:
-                    p = os.path.join(str(gso_feat_dir), f"{tid}.json")
-                    if not os.path.exists(p):
-                        key = base.normalize_swebench_item_id(tid)
-                        p = gso_idx.get(str(key), "")
-                    if p and os.path.exists(p):
-                        with open(p, "r", encoding="utf-8") as f:
-                            tmp = json.load(f)
-                        if isinstance(tmp, dict):
-                            obj = tmp
-                except Exception:
-                    obj = None
-                if isinstance(obj, dict):
-                    gso_keys = list(GSO_JUDGE_FEATURE_NAMES)
-                    if gso_keys:
-                        gso_alias = {"solution_in_problem": "solution_in_instruction"}
-                        vpos = {k: i for i, k in enumerate(VERIFIED_JUDGE_FEATURE_NAMES)}
-                        ppos = {k: i for i, k in enumerate(PRO_JUDGE_FEATURE_NAMES)}
-                        tpos = {k: i for i, k in enumerate(TERMINAL_BENCH_JUDGE_FEATURE_NAMES)}
-                        n_set = 0
-                        for k in gso_keys:
-                            if k not in obj:
-                                n_set = 0
-                                break
-                            kk = gso_alias.get(str(k), str(k))
-                            try:
-                                fv = float(obj.get(k))
-                            except Exception:
-                                n_set = 0
-                                break
-                            if kk in ppos:
-                                x[pro_off + int(ppos[kk])] = float(fv)
-                                n_set += 1
-                            elif kk in vpos:
-                                x[verified_off + int(vpos[kk])] = float(fv)
-                                n_set += 1
-                            elif kk in tpos:
-                                x[terminal_off + int(tpos[kk])] = float(fv)
-                                n_set += 1
-                            else:
-                                continue
-                        if n_set > 0:
-                            return x
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=gso_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=gso_idx,
+                    normalize_item_ids=True,
+                )
+                return v
             return None
 
         best_fold_auc = -float("inf")
@@ -2476,22 +3393,77 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         fold_alpha_judge: List[float] = []
 
         dummy = base.np.zeros((int(len(eligible)), 1), dtype=base.np.float32)
-        for fold, (tr, te) in enumerate(outer_cv.split(dummy), start=1):
-            train_items = [eligible[int(i)] for i in tr.tolist()]
-            test_items = [eligible[int(i)] for i in te.tolist()]
+        if split_by == "task":
+            fold_iter = list(enumerate(outer_cv.split(dummy), start=1))  # type: ignore[union-attr]
+        elif split_by == "agent":
+            fold_iter = list(enumerate(agent_folds, start=1))
+        else:
+            fold_iter = list(enumerate([None] * int(args.cv_folds), start=1))
+
+        for fold, fold_payload in fold_iter:
+            if split_by == "task":
+                tr, te = fold_payload
+                train_items = [eligible[int(i)] for i in tr.tolist()]
+                test_items = [eligible[int(i)] for i in te.tolist()]
+                train_agents = None
+                test_agents = None
+            elif split_by == "agent":
+                train_agents, test_agents = fold_payload
+                train_items = list(eligible)
+                test_items = list(eligible)
+            else:
+                train_items = list(eligible)
+                test_items = list(eligible)
+                train_agents = None
+                test_agents = None
 
             fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
             base.ensure_dir(fold_root)
 
-            # Save train/test item lists (debugging / provenance).
-            base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
-            base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            # Save split provenance.
+            if split_by == "task":
+                base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
+                base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            elif split_by == "agent":
+                base.save_json(os.path.join(fold_root, "train_agents.json"), {"agents": sorted(list(train_agents or []))})
+                base.save_json(os.path.join(fold_root, "test_agents.json"), {"agents": sorted(list(test_agents or []))})
+            else:
+                base.save_json(
+                    os.path.join(fold_root, "split.json"),
+                    {"split_by": str(split_by), "fold": int(fold), "cv_folds": int(args.cv_folds)},
+                )
 
             # IRT on train items only (no leakage).
             base.set_torch_determinism(False)
             base.seed_everything(int(args.seed), deterministic=False)
 
-            obs_train = build_multibench_obs_for_items(obs_full=obs_full, keep_item_ids=train_items)
+            if split_by == "task":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(train_items),
+                )
+            elif split_by == "agent":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_agent_keys=set(train_agents or []),
+                )
+            else:
+                def _keep_obs_train(b: str, a: str, t: str) -> bool:
+                    key = f"{b}::{a}::{t}"
+                    return int(_fold_id_for_group(key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold)
+
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,
+                )
             theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
                 obs_train=obs_train,
                 irt_model=str(irt_model),
@@ -2509,6 +3481,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise RuntimeError(f"Fold {fold}: IRT produced 0 model/scaffold thetas (unexpected).")
             if not diff_by_item:
                 raise RuntimeError(f"Fold {fold}: IRT produced 0 item difficulties (unexpected).")
+
+            # Baseline IRT for held-out observations: 1D 1PL treating agents as atomic units.
+            baseline_theta_by_agent: Dict[str, float] = {}
+            baseline_b_by_item: Dict[str, float] = {}
+            if split_by == "observation":
+                base.set_torch_determinism(False)
+                base.seed_everything(int(args.seed), deterministic=False)
+                if "_keep_obs_train" not in locals():
+                    raise RuntimeError("Internal error: _keep_obs_train missing for --split_by=observation")
+                baseline_theta_by_agent, baseline_b_by_item = train_standard_irt_1pl_agents(
+                    all_responses_tagged=all_responses_tagged,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,  # type: ignore[name-defined]
+                    epochs=int(args.irt_epochs),
+                    device=str(args.irt_device),
+                    seed=int(args.seed),
+                    out_dir=os.path.join(fold_root, "irt_agent_baseline_1pl"),
+                )
+                base.set_torch_determinism(True)
 
             train_labeled = [tid for tid in train_items if tid in diff_by_item]
             if len(train_labeled) < 2:
@@ -2531,7 +3522,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             p_emp_by_model, _ = compute_empirical_success_prob_by_model(
                 all_responses_tagged=all_responses_tagged,
                 agent_to_ms_pair=agent_to_ms_pair,
-                train_item_ids=set(train_items),
+                train_item_ids=set(train_items if split_by == "task" else eligible),
+                keep_agent_keys=set(train_agents or []) if split_by == "agent" else None,
             )
 
             # Joint block-ridge training uses only train items with judge features available.
@@ -2598,26 +3590,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             fold_alpha_emb.append(float(joint_state["alpha_emb"]))
             fold_alpha_judge.append(float(joint_state["alpha_judge"]))
 
-            # Predict held-out items where judge features exist.
+            # Predict held-out item difficulties.
+            #
+            # For --split_by=agent/observation: use IRT-trained item difficulties from the fold's
+            # training data (diff_by_item) rather than regressor-predicted difficulties.
             final_pred_by_item: Dict[str, float] = {}
             n_missing_judge = 0
-            for tid in test_items:
-                jv = _judge_full_vec_for_item(tid)
-                if jv is None:
-                    n_missing_judge += 1
-                    continue
-                x_emb = X[id_to_row[tid]].reshape(1, -1).astype(base.np.float32)
-                x_j = base.np.asarray(jv, dtype=base.np.float32).reshape(1, -1)
-                final_pred_by_item[tid] = float(_predict_block_ridge(joint_state, X_emb=x_emb, X_judge=x_j)[0])
+            if split_by in {"agent", "observation"}:
+                final_pred_by_item = {str(tid): float(b) for tid, b in diff_by_item.items()}
+                # Keep embedding-only "baseline" on the same target (IRT difficulties) so the
+                # downstream scoring code can reuse z/z_emb plumbing.
+                emb_pred_by_item_test = dict(final_pred_by_item)
+                n_missing_judge = 0
+            else:
+                for tid in test_items:
+                    jv = _judge_full_vec_for_item(tid)
+                    if jv is None:
+                        n_missing_judge += 1
+                        continue
+                    x_emb = X[id_to_row[tid]].reshape(1, -1).astype(base.np.float32)
+                    x_j = base.np.asarray(jv, dtype=base.np.float32).reshape(1, -1)
+                    final_pred_by_item[tid] = float(_predict_block_ridge(joint_state, X_emb=x_emb, X_judge=x_j)[0])
 
-            # Fill OOF predictions (NaN if missing judge).
-            for tid in test_items:
-                i = eligible_index.get(tid, None)
-                if i is None:
-                    continue
-                fold_of_item[int(i)] = int(fold)
-                if tid in final_pred_by_item:
-                    yhat_oof[int(i)] = float(final_pred_by_item[tid])
+            # Fill OOF predictions (task split only; NaN if missing judge).
+            if split_by == "task":
+                for tid in test_items:
+                    i = eligible_index.get(tid, None)
+                    if i is None:
+                        continue
+                    fold_of_item[int(i)] = int(fold)
+                    if tid in final_pred_by_item:
+                        yhat_oof[int(i)] = float(final_pred_by_item[tid])
 
             # Held-out AUROC: score only items with final predictions (judge present),
             # and compare embedding-only vs final on the exact same obs set.
@@ -2632,6 +3635,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             test_set = set(test_items)
 
             for bench, sid, resp in all_responses_tagged:
+                if split_by == "agent":
+                    if f"{bench}::{sid}" not in set(test_agents or []):
+                        continue
                 key = f"{bench}::{sid}"
                 pair = agent_to_ms_pair.get(key, None)
                 if pair is None:
@@ -2643,8 +3649,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     continue
                 th = float(tm) + float(ts)
                 for item_id, y_obs in resp.items():
-                    if item_id not in test_set:
-                        continue
+                    if split_by == "task":
+                        if item_id not in test_set:
+                            continue
+                    elif split_by == "observation":
+                        obs_key = f"{bench}::{sid}::{item_id}"
+                        if int(_fold_id_for_group(obs_key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold):
+                            continue
                     if item_id not in scored_items:
                         continue
                     z = final_pred_by_item.get(item_id, None)
@@ -2655,18 +3666,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     scores_emb.append(_sigmoid(th - float(z_emb)))
                     labels.append(int(y_obs))
 
-                    # Empirical model success probability (skip unfamiliar models).
-                    p_emp = p_emp_by_model.get(str(model_name), None)
-                    if p_emp is not None:
-                        scores_emp.append(float(p_emp))
-                        labels_emp.append(int(y_obs))
+                    # Baseline.
+                    # - Default: empirical model success probability (skip unfamiliar models).
+                    # - For --split_by=observation: 1D 1PL IRT treating agents as atomic units.
+                    if split_by == "observation":
+                        th_a = baseline_theta_by_agent.get(str(sid), None)
+                        b_a = baseline_b_by_item.get(str(item_id), None)
+                        if th_a is not None and b_a is not None:
+                            scores_emp.append(_sigmoid(float(th_a) - float(b_a)))
+                            labels_emp.append(int(y_obs))
+                    else:
+                        p_emp = p_emp_by_model.get(str(model_name), None)
+                        if p_emp is not None:
+                            scores_emp.append(float(p_emp))
+                            labels_emp.append(int(y_obs))
 
-                    # Oracle IRT score: uses IRT trained on all items (includes fold test items).
-                    tm_o = oracle_theta_by_model.get(model_name, None)
-                    ts_o = oracle_theta_by_scaffold.get(scaffold, None)
+                    # Oracle IRT score: agent-level 1D 1PL IRT trained on all eligible items (leakage).
+                    th_o = oracle_theta_by_agent.get(str(sid), None)
                     b_o = oracle_diff_by_item.get(item_id, None)
-                    if tm_o is not None and ts_o is not None and b_o is not None:
-                        scores_oracle.append(_sigmoid((float(tm_o) + float(ts_o)) - float(b_o)))
+                    if th_o is not None and b_o is not None:
+                        scores_oracle.append(_sigmoid(float(th_o) - float(b_o)))
                         labels_oracle.append(int(y_obs))
 
             fold_auc = float(base._compute_binary_auroc(scores_final, labels))
@@ -2680,8 +3699,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_n_obs_folds.append(int(len(labels)))
             cv_test_n_items_scored_folds.append(int(len(scored_items)))
 
+            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
             print(
-                f"Fold {fold:02d}: auc={fold_auc} emp_model_auc={fold_auc_emp} "
+                f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} baseline={baseline_label} "
                 f"oracle_irt_auc={fold_auc_oracle} missing_judge={n_missing_judge}"
             )
             if fold_auc == fold_auc and fold_auc > best_fold_auc:
@@ -2704,9 +3724,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
         print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
+        baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
+        baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
+        baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
+        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
+        print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
+        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
+
         # Save regression weights from the best fold.
         weights_meta = {
-            "eval_mode": "id",
+            "split_by": str(split_by),
             "script": os.path.abspath(__file__),
             "method": "combined",
             "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
@@ -2738,7 +3765,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
         metrics = {
-            "eval_mode": "id",
+            "split_by": str(split_by),
+            "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
             "method": "combined",
             "n_items_total": int(len(task_ids)),
             "n_items_with_responses": int(len(overlap_ids)),
@@ -2790,27 +3818,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         }
         base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
-        # Write per-item predictions (OOF CV; NaNs are written as missing_judge).
-        pred_path = os.path.join(args.out_dir, "predictions.csv")
-        with open(pred_path, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
-            w.writeheader()
-            for i, tid in enumerate(eligible):
-                v = float(yhat_oof[int(i)])
-                fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
-                split = "cv_val" if (v == v) else "missing_judge"
-                w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split, "fold": fold_id})
-
-        print(f"Wrote predictions: {pred_path}")
+        if split_by == "task":
+            # Write per-item predictions (OOF CV; NaNs are written as missing_judge).
+            pred_path = os.path.join(args.out_dir, "predictions.csv")
+            with open(pred_path, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+                w.writeheader()
+                for i, tid in enumerate(eligible):
+                    v = float(yhat_oof[int(i)])
+                    fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
+                    split_s = "cv_val" if (v == v) else "missing_judge"
+                    w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split_s, "fold": fold_id})
+            print(f"Wrote predictions: {pred_path}")
         print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
         print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
         return 0
 
-    if eval_mode == "id" and method == "judge":
+    if split_by == "task" and method == "stacked":
         # -----------------------------
-        # K-fold CV over items (judge-only ridge: LLM-judge features)
+        # K-fold CV over items (stacked: embedding base + judge residual correction)
         # -----------------------------
-        outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        outer_cv = None
+        agent_folds: List[Tuple[set, set]] = []
+        if split_by == "task":
+            outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        elif split_by == "agent":
+            agent_keys_all = [f"{b}::{sid}" for b, sid, _ in all_responses_tagged]
+            agent_folds = _stable_group_kfold(agent_keys_all, n_splits=int(args.cv_folds), seed=int(args.seed))
         cv_test_auc_folds: List[float] = []
         cv_test_auc_folds_empirical_model: List[float] = []
         cv_test_auc_folds_oracle_irt: List[float] = []
@@ -2826,16 +3860,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         terminal_item_set = set(obs_full.terminal_bench_item_ids)
         gso_item_set = set(getattr(obs_full, "gso_item_ids", set()))
 
-        # Judge feature vector is a fixed concat of per-benchmark schemas.
-        verified_off = 0
-        pro_off = verified_off + int(len(VERIFIED_JUDGE_FEATURE_NAMES))
-        terminal_off = pro_off + int(len(PRO_JUDGE_FEATURE_NAMES))
-        judge_dim = terminal_off + int(len(TERMINAL_BENCH_JUDGE_FEATURE_NAMES))
-        judge_feature_names_full: List[str] = (
-            [f"verified::{k}" for k in VERIFIED_JUDGE_FEATURE_NAMES]
-            + [f"pro::{k}" for k in PRO_JUDGE_FEATURE_NAMES]
-            + [f"terminal_bench::{k}" for k in TERMINAL_BENCH_JUDGE_FEATURE_NAMES]
-        )
+        judge_dim = int(len(JUDGE_FEATURE_NAMES))
+        judge_feature_names_full: List[str] = list(JUDGE_FEATURE_NAMES)
 
         verified_feat_dir = str(args.verified_judge_features_dir)
         pro_feat_dir = str(args.pro_judge_features_dir)
@@ -2848,118 +3874,602 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         def _judge_full_vec_for_item(item_id: str):
             tid = str(item_id)
-            x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
             if tid in verified_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=verified_feat_dir,
-                    feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=verified_idx,
                     normalize_item_ids=True,
                 )
-                if v is None:
-                    return None
-                x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in pro_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=pro_feat_dir,
-                    feature_names=PRO_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=pro_idx,
                     normalize_item_ids=True,
                 )
-                if v is None:
-                    return None
-                x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in terminal_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=terminal_feat_dir,
-                    feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=terminal_idx,
                     normalize_item_ids=False,
                 )
-                if v is None:
-                    return None
-                x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in gso_item_set and gso_feat_dir:
-                # GSO schema differs; map overlapping keys into the fixed V/P/T judge vector.
-                obj = None
-                try:
-                    pth = os.path.join(str(gso_feat_dir), f"{tid}.json")
-                    if not os.path.exists(pth):
-                        key = base.normalize_swebench_item_id(tid)
-                        pth = gso_idx.get(str(key), "")
-                    if pth and os.path.exists(pth):
-                        with open(pth, "r", encoding="utf-8") as f:
-                            tmp = json.load(f)
-                        if isinstance(tmp, dict):
-                            obj = tmp
-                except Exception:
-                    obj = None
-                if isinstance(obj, dict):
-                    gso_keys = list(GSO_JUDGE_FEATURE_NAMES)
-                    if gso_keys:
-                        gso_alias = {"solution_in_problem": "solution_in_instruction"}
-                        vpos = {k: i for i, k in enumerate(VERIFIED_JUDGE_FEATURE_NAMES)}
-                        ppos = {k: i for i, k in enumerate(PRO_JUDGE_FEATURE_NAMES)}
-                        tpos = {k: i for i, k in enumerate(TERMINAL_BENCH_JUDGE_FEATURE_NAMES)}
-                        n_set = 0
-                        for k in gso_keys:
-                            if k not in obj:
-                                n_set = 0
-                                break
-                            kk = gso_alias.get(str(k), str(k))
-                            try:
-                                fv = float(obj.get(k))
-                            except Exception:
-                                n_set = 0
-                                break
-                            if kk in ppos:
-                                x[pro_off + int(ppos[kk])] = float(fv)
-                                n_set += 1
-                            elif kk in vpos:
-                                x[verified_off + int(vpos[kk])] = float(fv)
-                                n_set += 1
-                            elif kk in tpos:
-                                x[terminal_off + int(tpos[kk])] = float(fv)
-                                n_set += 1
-                            else:
-                                continue
-                        if n_set > 0:
-                            return x
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=gso_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=gso_idx,
+                    normalize_item_ids=True,
+                )
+                return v
+            return None
+
+        best_fold_auc = -float("inf")
+        best_fold = -1
+        best_state = None
+
+        # Per-fold selected alphas (diagnostics)
+        fold_alpha_emb: List[float] = []
+        fold_alpha_judge: List[float] = []
+
+        if split_by == "task":
+            fold_iter = list(enumerate(outer_cv.split(Xy), start=1))  # type: ignore[union-attr]
+        elif split_by == "agent":
+            fold_iter = list(enumerate(agent_folds, start=1))
+        else:
+            fold_iter = list(enumerate([None] * int(args.cv_folds), start=1))
+
+        for fold, fold_payload in fold_iter:
+            if split_by == "task":
+                tr, te = fold_payload
+                train_items = [eligible[int(i)] for i in tr.tolist()]
+                test_items = [eligible[int(i)] for i in te.tolist()]
+                train_agents = None
+                test_agents = None
+            elif split_by == "agent":
+                train_agents, test_agents = fold_payload
+                train_items = list(eligible)
+                test_items = list(eligible)
+            else:
+                train_items = list(eligible)
+                test_items = list(eligible)
+                train_agents = None
+                test_agents = None
+
+            # Empirical baseline on fold train items (ignore scaffold).
+            p_emp_by_model, _ = compute_empirical_success_prob_by_model(
+                all_responses_tagged=all_responses_tagged,
+                agent_to_ms_pair=agent_to_ms_pair,
+                train_item_ids=set(train_items if split_by == "task" else eligible),
+                keep_agent_keys=set(train_agents or []) if split_by == "agent" else None,
+            )
+
+            fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
+            base.ensure_dir(fold_root)
+            if split_by == "task":
+                base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
+                base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            elif split_by == "agent":
+                base.save_json(os.path.join(fold_root, "train_agents.json"), {"agents": sorted(list(train_agents or []))})
+                base.save_json(os.path.join(fold_root, "test_agents.json"), {"agents": sorted(list(test_agents or []))})
+            else:
+                base.save_json(
+                    os.path.join(fold_root, "split.json"),
+                    {"split_by": str(split_by), "fold": int(fold), "cv_folds": int(args.cv_folds)},
+                )
+
+            # IRT on train items only (no leakage).
+            base.set_torch_determinism(False)
+            base.seed_everything(int(args.seed), deterministic=False)
+            if split_by == "task":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(train_items),
+                )
+            elif split_by == "agent":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_agent_keys=set(train_agents or []),
+                )
+            else:
+                def _keep_obs_train(b: str, a: str, t: str) -> bool:
+                    key = f"{b}::{a}::{t}"
+                    return int(_fold_id_for_group(key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold)
+
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,
+                )
+            theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
+                obs_train=obs_train,
+                irt_model=str(irt_model),
+                epochs=int(args.irt_epochs),
+                device=str(args.irt_device),
+                seed=int(args.seed),
+                lr=float(args.irt_lr),
+                out_dir=os.path.join(fold_root, _irt_out_dir_name(irt_model)),
+            )
+            base.set_torch_determinism(True)
+
+            train_labeled = [tid for tid in train_items if tid in diff_by_item]
+            if len(train_labeled) < 2:
+                raise RuntimeError(
+                    f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties; cannot fit regressor."
+                )
+
+            # Build training matrices: require judge features (like judge/combined modes).
+            emb_rows: List[base.np.ndarray] = []
+            judge_rows: List[base.np.ndarray] = []
+            y_rows: List[float] = []
+            train_items_used: List[str] = []
+            missing_emb_train = 0
+            for tid in train_labeled:
+                jv = _judge_full_vec_for_item(tid)
+                if jv is None:
+                    continue
+                if tid not in id_to_row:
+                    missing_emb_train += 1
+                    continue
+                emb_rows.append(base.np.asarray(X[id_to_row[tid]], dtype=base.np.float32).reshape(-1))
+                judge_rows.append(base.np.asarray(jv, dtype=base.np.float32).reshape(-1))
+                y_rows.append(float(diff_by_item[tid]))
+                train_items_used.append(str(tid))
+            if len(train_items_used) < 2:
+                raise RuntimeError(
+                    f"Fold {fold}: only {len(train_items_used)} items had judge features; cannot fit stacked regressor."
+                )
+            if missing_emb_train > 0:
+                print(
+                    f"Fold {fold}: skipped {int(missing_emb_train)} labeled items with judge features "
+                    "but missing embeddings."
+                )
+
+            X_emb_train = base.np.stack(emb_rows, axis=0).astype(base.np.float32)
+            X_judge_train = base.np.stack(judge_rows, axis=0).astype(base.np.float32)
+            y_train = base.np.asarray(y_rows, dtype=base.np.float32)
+
+            # Resolve alpha settings for stacked
+            ae_fixed = float(args.ridge_alpha_emb) if (float(getattr(args, "ridge_alpha_emb", float("nan"))) == float(getattr(args, "ridge_alpha_emb", float("nan")))) else float(args.ridge_alpha)
+            aj_fixed = float(args.ridge_alpha_judge) if (float(getattr(args, "ridge_alpha_judge", float("nan"))) == float(getattr(args, "ridge_alpha_judge", float("nan")))) else float(args.ridge_alpha)
+            ae_grid = _parse_alpha_list(str(args.ridge_alphas_emb).strip()) if str(args.ridge_alphas_emb or "").strip() else _parse_alpha_list(str(args.ridge_alphas))
+            aj_grid = _parse_alpha_list(str(args.ridge_alphas_judge).strip()) if str(args.ridge_alphas_judge or "").strip() else _parse_alpha_list(str(args.ridge_alphas))
+
+            st = _fit_stacked_residual(
+                X_emb=X_emb_train,
+                X_judge=X_judge_train,
+                y=y_train,
+                regressor_name=str(regressor_name),
+                alpha_emb=float(ae_fixed),
+                alpha_judge=float(aj_fixed),
+                alphas_emb=ae_grid,
+                alphas_judge=aj_grid,
+                inner_splits=int(args.inner_splits),
+                seed=int(args.seed) + 5000 + int(fold),
+            )
+            fold_alpha_emb.append(float(st["alpha_emb"]))
+            fold_alpha_judge.append(float(st["alpha_judge"]))
+
+            # Predict on test items (only those with judge features)
+            test_ids_used: List[str] = []
+            test_emb_rows: List[base.np.ndarray] = []
+            test_judge_rows: List[base.np.ndarray] = []
+            missing_emb_test = 0
+            for tid in test_items:
+                jv = _judge_full_vec_for_item(tid)
+                if jv is None:
+                    continue
+                if tid not in id_to_row:
+                    missing_emb_test += 1
+                    continue
+                test_ids_used.append(str(tid))
+                test_emb_rows.append(base.np.asarray(X[id_to_row[tid]], dtype=base.np.float32).reshape(-1))
+                test_judge_rows.append(base.np.asarray(jv, dtype=base.np.float32).reshape(-1))
+            if missing_emb_test > 0:
+                print(
+                    f"Fold {fold}: skipped {int(missing_emb_test)} test items with judge features "
+                    "but missing embeddings."
+                )
+
+            z_by_item: Dict[str, float] = {}
+            if test_ids_used:
+                X_emb_test = base.np.stack(test_emb_rows, axis=0).astype(base.np.float32)
+                X_judge_test = base.np.stack(test_judge_rows, axis=0).astype(base.np.float32)
+                pred = _predict_stacked_residual(st, X_emb=X_emb_test, X_judge=X_judge_test).astype(base.np.float64)
+                for tid, z in zip(test_ids_used, pred.tolist()):
+                    z_by_item[str(tid)] = float(z)
+                    if split_by == "task":
+                        yhat_oof[int(eligible_index[str(tid)])] = float(z)
+                        fold_of_item[int(eligible_index[str(tid)])] = int(fold)
+            if split_by in {"agent", "observation"}:
+                # For agent/observation splits, evaluate using IRT item difficulties from training data.
+                z_by_item = {str(tid): float(b) for tid, b in diff_by_item.items()}
+
+            # Baseline IRT for held-out observations: 1D 1PL treating agents as atomic units.
+            baseline_theta_by_agent: Dict[str, float] = {}
+            baseline_b_by_item: Dict[str, float] = {}
+            if split_by == "observation":
+                base.set_torch_determinism(False)
+                base.seed_everything(int(args.seed), deterministic=False)
+                if "_keep_obs_train" not in locals():
+                    raise RuntimeError("Internal error: _keep_obs_train missing for --split_by=observation")
+                baseline_theta_by_agent, baseline_b_by_item = train_standard_irt_1pl_agents(
+                    all_responses_tagged=all_responses_tagged,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,  # type: ignore[name-defined]
+                    epochs=int(args.irt_epochs),
+                    device=str(args.irt_device),
+                    seed=int(args.seed),
+                    out_dir=os.path.join(fold_root, "irt_agent_baseline_1pl"),
+                )
+                base.set_torch_determinism(True)
+
+            # Held-out AUROC on fold test observations (skip items without judge features).
+            scores: List[float] = []
+            labels: List[int] = []
+            scores_emp: List[float] = []
+            labels_emp: List[int] = []
+            scores_oracle: List[float] = []
+            labels_oracle: List[int] = []
+
+            test_set = set(test_items)
+            for bench, sid, resp in all_responses_tagged:
+                if split_by == "agent":
+                    if f"{bench}::{sid}" not in set(test_agents or []):
+                        continue
+                key = f"{bench}::{sid}"
+                pair = agent_to_ms_pair.get(key, None)
+                if pair is None:
+                    continue
+                model_name, scaffold = pair
+                tm = theta_by_model.get(model_name, None)
+                ts = theta_by_scaffold.get(scaffold, None)
+                if tm is None or ts is None:
+                    continue
+                th = float(tm) + float(ts)
+                for item_id, y_obs in resp.items():
+                    if split_by == "task":
+                        if item_id not in test_set:
+                            continue
+                    elif split_by == "observation":
+                        obs_key = f"{bench}::{sid}::{item_id}"
+                        if int(_fold_id_for_group(obs_key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold):
+                            continue
+                    z = z_by_item.get(item_id, None)
+                    if z is None:
+                        continue
+                    scores.append(1.0 / (1.0 + math.exp(-(th - float(z)))))
+                    labels.append(int(y_obs))
+
+                    # Baseline.
+                    if split_by == "observation":
+                        th_a = baseline_theta_by_agent.get(str(sid), None)
+                        b_a = baseline_b_by_item.get(str(item_id), None)
+                        if th_a is not None and b_a is not None:
+                            scores_emp.append(_sigmoid(float(th_a) - float(b_a)))
+                            labels_emp.append(int(y_obs))
+                    else:
+                        p_emp = p_emp_by_model.get(str(model_name), None)
+                        if p_emp is not None:
+                            scores_emp.append(float(p_emp))
+                            labels_emp.append(int(y_obs))
+
+                    th_o = oracle_theta_by_agent.get(str(sid), None)
+                    b_o = oracle_diff_by_item.get(item_id, None)
+                    if th_o is not None and b_o is not None:
+                        scores_oracle.append(_sigmoid(float(th_o) - float(b_o)))
+                        labels_oracle.append(int(y_obs))
+
+            fold_auc = float(base._compute_binary_auroc(scores, labels))
+            fold_auc_emp = float(base._compute_binary_auroc(scores_emp, labels_emp))
+            fold_auc_oracle = float(base._compute_binary_auroc(scores_oracle, labels_oracle))
+            cv_test_auc_folds.append(float(fold_auc))
+            cv_test_auc_folds_empirical_model.append(float(fold_auc_emp))
+            cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
+            cv_test_n_obs_folds.append(int(len(labels)))
+            cv_test_n_items_scored_folds.append(int(len(z_by_item)))
+
+            if fold_auc == fold_auc and fold_auc > best_fold_auc:
+                best_fold_auc = float(fold_auc)
+                best_fold = int(fold)
+                best_state = st
+
+        if best_state is None or best_fold < 1:
+            raise RuntimeError("Failed to select a best CV fold stacked model by ROC-AUC (all folds NaN?).")
+
+        auc_arr = base.np.asarray(cv_test_auc_folds, dtype=base.np.float64)
+        auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
+        auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
+        print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
+        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
+
+        oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
+        oracle_auc_mean = float(base.np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
+        oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
+        print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
+        print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
+
+        baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
+        baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
+        baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
+        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
+        print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
+        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
+
+        weights_meta = {
+            "script": os.path.abspath(__file__),
+            "method": "stacked",
+            "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
+            "min_models_per_scaffold": int(args.min_models_per_scaffold),
+            "seed": int(args.seed),
+            "deterministic": True,
+            "irt_seeded": True,
+            "irt_deterministic": False,
+            "cv_n_splits": int(args.cv_folds),
+            "cv_best_auc_fold": int(best_fold),
+            "cv_best_auc": float(best_fold_auc),
+            "irt_model": str(irt_model_label),
+            "regressor": str(regressor_name),
+            "ridge_alpha": float(args.ridge_alpha),
+            "ridge_alphas": str(args.ridge_alphas),
+            "ridge_alphas_emb": str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas),
+            "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
+            "inner_splits": int(args.inner_splits),
+            "verified_judge_features_dir": str(args.verified_judge_features_dir),
+            "pro_judge_features_dir": str(args.pro_judge_features_dir),
+            "terminal_bench_judge_features_dir": str(args.terminal_bench_judge_features_dir),
+            "judge_feature_names": list(judge_feature_names_full),
+        }
+        weights_json, weights_npz = save_regression_weights_stacked_residual(
+            out_dir=str(args.out_dir),
+            state=best_state,
+            judge_feature_names=judge_feature_names_full,
+            metadata=weights_meta,
+        )
+
+        metrics = {
+            "split_by": str(split_by),
+            "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
+            "method": "stacked",
+            "n_items_total": int(len(task_ids)),
+            "n_items_with_responses": int(len(overlap_ids)),
+            "n_items_eligible_cv_irt": int(len(eligible)),
+            "exclude_zero_success": bool(exclude_zero_success),
+            "n_items_zero_success_in_responses": int(len(zero_success_ids)),
+            "embedding_dim": int(Xy.shape[1]),
+            "judge_feature_dim": int(judge_dim),
+            "seed": int(args.seed),
+            "deterministic": True,
+            "irt_seeded": True,
+            "irt_deterministic": False,
+            "cv_n_splits": int(args.cv_folds),
+            "cv_best_auc_fold": int(best_fold),
+            "cv_best_auc": float(best_fold_auc),
+            "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
+            "cv_test_auc_mean": float(auc_mean),
+            "cv_test_auc_std": float(auc_std),
+            "cv_test_auc_folds_empirical_model_success": [float(x) for x in cv_test_auc_folds_empirical_model],
+            "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
+            "cv_test_auc_oracle_irt_mean": float(oracle_auc_mean),
+            "cv_test_auc_oracle_irt_std": float(oracle_auc_std),
+            "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
+            "cv_test_n_items_scored_folds": [int(x) for x in cv_test_n_items_scored_folds],
+            "cv_selected_alpha_emb_folds": [float(x) for x in fold_alpha_emb],
+            "cv_selected_alpha_judge_folds": [float(x) for x in fold_alpha_judge],
+            "irt_epochs": int(args.irt_epochs),
+            "irt_device": str(args.irt_device),
+            "irt_lr": float(args.irt_lr),
+            "irt_model": str(irt_model_label),
+            "regressor": str(regressor_name),
+            "ridge_alpha": float(args.ridge_alpha),
+            "ridge_alphas": str(args.ridge_alphas),
+            "inner_splits": int(args.inner_splits),
+            "dataset_sources": str(dataset_sources_str),
+            "verified_agent_results_raw": str(verified_agent_results_raw),
+            "pro_agent_results_raw": str(pro_agent_results_raw),
+            "terminal_bench_agent_results_raw": str(terminal_agent_results_raw),
+            "instruction": str(args.instruction),
+            "instruction_signature": instr_sig,
+            "batch_size": int(args.batch_size),
+            "device_map": str(args.device_map),
+            "torch_dtype": str(args.torch_dtype),
+            "attn_implementation": str(args.attn_implementation),
+            "embeddings_cache": emb_cache,
+            "regression_weights_json": str(weights_json),
+            "regression_weights_npz": str(weights_npz),
+        }
+        base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
+
+        if split_by == "task":
+            pred_path = os.path.join(args.out_dir, "predictions.csv")
+            with open(pred_path, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+                w.writeheader()
+                for i, tid in enumerate(eligible):
+                    v = float(yhat_oof[int(i)])
+                    fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
+                    split_s = "cv_val" if (v == v) else "missing_judge"
+                    w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split_s, "fold": fold_id})
+            print(f"Wrote predictions: {pred_path}")
+        print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
+        print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
+        return 0
+
+    if split_by == "task" and method == "judge":
+        # -----------------------------
+        # K-fold CV over items (judge-only ridge: LLM-judge features)
+        # -----------------------------
+        outer_cv = None
+        agent_folds: List[Tuple[set, set]] = []
+        if split_by == "task":
+            outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        elif split_by == "agent":
+            agent_keys_all = [f"{b}::{sid}" for b, sid, _ in all_responses_tagged]
+            agent_folds = _stable_group_kfold(agent_keys_all, n_splits=int(args.cv_folds), seed=int(args.seed))
+        cv_test_auc_folds: List[float] = []
+        cv_test_auc_folds_empirical_model: List[float] = []
+        cv_test_auc_folds_oracle_irt: List[float] = []
+        cv_test_n_obs_folds: List[int] = []
+        cv_test_n_items_scored_folds: List[int] = []
+        yhat_oof = base.np.full((int(len(eligible)),), base.np.nan, dtype=base.np.float64)
+        fold_of_item = base.np.full((int(len(eligible)),), -1, dtype=base.np.int32)
+
+        eligible_index = {tid: i for i, tid in enumerate(eligible)}
+
+        verified_item_set = set(obs_full.verified_item_ids)
+        pro_item_set = set(obs_full.pro_item_ids)
+        terminal_item_set = set(obs_full.terminal_bench_item_ids)
+        gso_item_set = set(getattr(obs_full, "gso_item_ids", set()))
+
+        judge_dim = int(len(JUDGE_FEATURE_NAMES))
+        judge_feature_names_full: List[str] = list(JUDGE_FEATURE_NAMES)
+
+        verified_feat_dir = str(args.verified_judge_features_dir)
+        pro_feat_dir = str(args.pro_judge_features_dir)
+        terminal_feat_dir = str(args.terminal_bench_judge_features_dir)
+        verified_idx = _build_judge_index(verified_feat_dir, normalize_item_ids=True)
+        pro_idx = _build_judge_index(pro_feat_dir, normalize_item_ids=True)
+        terminal_idx = _build_judge_index(terminal_feat_dir, normalize_item_ids=False)
+        gso_feat_dir = str(getattr(args, "gso_judge_features_dir", "") or "").strip()
+        gso_idx = _build_judge_index(gso_feat_dir, normalize_item_ids=True) if (gso_item_set and gso_feat_dir) else {}
+
+        def _judge_full_vec_for_item(item_id: str):
+            tid = str(item_id)
+            if tid in verified_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=verified_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=verified_idx,
+                    normalize_item_ids=True,
+                )
+                return v
+            if tid in pro_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=pro_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=pro_idx,
+                    normalize_item_ids=True,
+                )
+                return v
+            if tid in terminal_item_set:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=terminal_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=terminal_idx,
+                    normalize_item_ids=False,
+                )
+                return v
+            if tid in gso_item_set and gso_feat_dir:
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=gso_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=gso_idx,
+                    normalize_item_ids=True,
+                )
+                return v
             return None
 
         best_fold_auc = -float("inf")
         best_fold = -1
         best_model = None
 
-        for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
-            train_items = [eligible[int(i)] for i in tr.tolist()]
-            test_items = [eligible[int(i)] for i in te.tolist()]
+        if split_by == "task":
+            fold_iter = list(enumerate(outer_cv.split(Xy), start=1))  # type: ignore[union-attr]
+        elif split_by == "agent":
+            fold_iter = list(enumerate(agent_folds, start=1))
+        else:
+            fold_iter = list(enumerate([None] * int(args.cv_folds), start=1))
+
+        for fold, fold_payload in fold_iter:
+            if split_by == "task":
+                tr, te = fold_payload
+                train_items = [eligible[int(i)] for i in tr.tolist()]
+                test_items = [eligible[int(i)] for i in te.tolist()]
+                train_agents = None
+                test_agents = None
+            elif split_by == "agent":
+                train_agents, test_agents = fold_payload
+                train_items = list(eligible)
+                test_items = list(eligible)
+            else:
+                train_items = list(eligible)
+                test_items = list(eligible)
+                train_agents = None
+                test_agents = None
 
             # Empirical model-success baseline on fold train items (ignore scaffold).
             p_emp_by_model, _ = compute_empirical_success_prob_by_model(
                 all_responses_tagged=all_responses_tagged,
                 agent_to_ms_pair=agent_to_ms_pair,
-                train_item_ids=set(train_items),
+                train_item_ids=set(train_items if split_by == "task" else eligible),
+                keep_agent_keys=set(train_agents or []) if split_by == "agent" else None,
             )
 
             fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
             base.ensure_dir(fold_root)
 
-            # Save train/test item lists (debugging / provenance).
-            base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
-            base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            if split_by == "task":
+                base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
+                base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            elif split_by == "agent":
+                base.save_json(os.path.join(fold_root, "train_agents.json"), {"agents": sorted(list(train_agents or []))})
+                base.save_json(os.path.join(fold_root, "test_agents.json"), {"agents": sorted(list(test_agents or []))})
+            else:
+                base.save_json(
+                    os.path.join(fold_root, "split.json"),
+                    {"split_by": str(split_by), "fold": int(fold), "cv_folds": int(args.cv_folds)},
+                )
 
             # IRT on train items only (no leakage).
             base.set_torch_determinism(False)
             base.seed_everything(int(args.seed), deterministic=False)
 
-            obs_train = build_multibench_obs_for_items(obs_full=obs_full, keep_item_ids=train_items)
+            if split_by == "task":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(train_items),
+                )
+            elif split_by == "agent":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_agent_keys=set(train_agents or []),
+                )
+            else:
+                def _keep_obs_train(b: str, a: str, t: str) -> bool:
+                    key = f"{b}::{a}::{t}"
+                    return int(_fold_id_for_group(key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold)
+
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,
+                )
             theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
                 obs_train=obs_train,
                 irt_model=str(irt_model),
@@ -3007,35 +4517,63 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             m = _make_model(n_train=int(len(judge_train_items_used)), fold_seed=int(args.seed) + int(fold))
             m.fit(X_judge_train, y_judge_train)
 
-            # Predict held-out items where judge features exist.
+            # Predict held-out item difficulties.
+            #
+            # For --split_by=agent/observation: use IRT-trained item difficulties from the fold's
+            # training data (diff_by_item) rather than regressor-predicted difficulties.
             final_pred_by_item: Dict[str, float] = {}
             n_missing_judge = 0
-            test_items_used: List[str] = []
-            test_rows: List[base.np.ndarray] = []
-            for tid in test_items:
-                jv = _judge_full_vec_for_item(tid)
-                if jv is None:
-                    n_missing_judge += 1
-                    continue
-                test_items_used.append(tid)
-                test_rows.append(base.np.asarray(jv, dtype=base.np.float32).reshape(-1))
-            if test_items_used:
-                X_judge_test = base.np.stack(test_rows, axis=0).astype(base.np.float32)
-                pred = m.predict(X_judge_test).astype(base.np.float64)
-                for tid, z in zip(test_items_used, pred.tolist()):
-                    final_pred_by_item[tid] = float(z)
+            if split_by in {"agent", "observation"}:
+                final_pred_by_item = {str(tid): float(b) for tid, b in diff_by_item.items()}
+                n_missing_judge = 0
+            else:
+                test_items_used: List[str] = []
+                test_rows: List[base.np.ndarray] = []
+                for tid in test_items:
+                    jv = _judge_full_vec_for_item(tid)
+                    if jv is None:
+                        n_missing_judge += 1
+                        continue
+                    test_items_used.append(tid)
+                    test_rows.append(base.np.asarray(jv, dtype=base.np.float32).reshape(-1))
+                if test_items_used:
+                    X_judge_test = base.np.stack(test_rows, axis=0).astype(base.np.float32)
+                    pred = m.predict(X_judge_test).astype(base.np.float64)
+                    for tid, z in zip(test_items_used, pred.tolist()):
+                        final_pred_by_item[tid] = float(z)
 
-            # Fill OOF predictions (NaN if missing judge).
-            for tid in test_items:
-                i = eligible_index.get(tid, None)
-                if i is None:
-                    continue
-                fold_of_item[int(i)] = int(fold)
-                if tid in final_pred_by_item:
-                    yhat_oof[int(i)] = float(final_pred_by_item[tid])
+            # Fill OOF predictions (task split only; NaN if missing judge).
+            if split_by == "task":
+                for tid in test_items:
+                    i = eligible_index.get(tid, None)
+                    if i is None:
+                        continue
+                    fold_of_item[int(i)] = int(fold)
+                    if tid in final_pred_by_item:
+                        yhat_oof[int(i)] = float(final_pred_by_item[tid])
 
             # Held-out AUROC: score only items with judge predictions.
             scored_items = set(final_pred_by_item.keys())
+
+            # Baseline IRT for held-out observations: 1D 1PL treating agents as atomic units.
+            baseline_theta_by_agent: Dict[str, float] = {}
+            baseline_b_by_item: Dict[str, float] = {}
+            if split_by == "observation":
+                base.set_torch_determinism(False)
+                base.seed_everything(int(args.seed), deterministic=False)
+                if "_keep_obs_train" not in locals():
+                    raise RuntimeError("Internal error: _keep_obs_train missing for --split_by=observation")
+                baseline_theta_by_agent, baseline_b_by_item = train_standard_irt_1pl_agents(
+                    all_responses_tagged=all_responses_tagged,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,  # type: ignore[name-defined]
+                    epochs=int(args.irt_epochs),
+                    device=str(args.irt_device),
+                    seed=int(args.seed),
+                    out_dir=os.path.join(fold_root, "irt_agent_baseline_1pl"),
+                )
+                base.set_torch_determinism(True)
+
             scores: List[float] = []
             labels: List[int] = []
             scores_emp: List[float] = []
@@ -3045,6 +4583,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             test_set = set(test_items)
 
             for bench, sid, resp in all_responses_tagged:
+                if split_by == "agent":
+                    if f"{bench}::{sid}" not in set(test_agents or []):
+                        continue
                 key = f"{bench}::{sid}"
                 pair = agent_to_ms_pair.get(key, None)
                 if pair is None:
@@ -3056,8 +4597,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     continue
                 th = float(tm) + float(ts)
                 for item_id, y_obs in resp.items():
-                    if item_id not in test_set:
-                        continue
+                    if split_by == "task":
+                        if item_id not in test_set:
+                            continue
+                    elif split_by == "observation":
+                        obs_key = f"{bench}::{sid}::{item_id}"
+                        if int(_fold_id_for_group(obs_key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold):
+                            continue
                     if item_id not in scored_items:
                         continue
                     z = final_pred_by_item.get(item_id, None)
@@ -3066,16 +4612,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     scores.append(_sigmoid(th - float(z)))
                     labels.append(int(y_obs))
 
-                    p_emp = p_emp_by_model.get(str(model_name), None)
-                    if p_emp is not None:
-                        scores_emp.append(float(p_emp))
-                        labels_emp.append(int(y_obs))
+                    # Baseline.
+                    if split_by == "observation":
+                        th_a = baseline_theta_by_agent.get(str(sid), None)
+                        b_a = baseline_b_by_item.get(str(item_id), None)
+                        if th_a is not None and b_a is not None:
+                            scores_emp.append(_sigmoid(float(th_a) - float(b_a)))
+                            labels_emp.append(int(y_obs))
+                    else:
+                        p_emp = p_emp_by_model.get(str(model_name), None)
+                        if p_emp is not None:
+                            scores_emp.append(float(p_emp))
+                            labels_emp.append(int(y_obs))
 
-                    tm_o = oracle_theta_by_model.get(model_name, None)
-                    ts_o = oracle_theta_by_scaffold.get(scaffold, None)
+                    th_o = oracle_theta_by_agent.get(str(sid), None)
                     b_o = oracle_diff_by_item.get(item_id, None)
-                    if tm_o is not None and ts_o is not None and b_o is not None:
-                        scores_oracle.append(_sigmoid((float(tm_o) + float(ts_o)) - float(b_o)))
+                    if th_o is not None and b_o is not None:
+                        scores_oracle.append(_sigmoid(float(th_o) - float(b_o)))
                         labels_oracle.append(int(y_obs))
 
             fold_auc = float(base._compute_binary_auroc(scores, labels))
@@ -3087,8 +4640,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_n_obs_folds.append(int(len(labels)))
             cv_test_n_items_scored_folds.append(int(len(scored_items)))
 
+            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
             print(
-                f"Fold {fold:02d}: auc={fold_auc} emp_model_auc={fold_auc_emp} "
+                f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} baseline={baseline_label} "
                 f"oracle_irt_auc={fold_auc_oracle} missing_judge={n_missing_judge}"
             )
             if fold_auc == fold_auc and fold_auc > best_fold_auc:
@@ -3111,6 +4665,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
         print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
+        baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
+        baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
+        baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
+        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
+        print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
+        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
+
         # Save regression weights from the best fold.
         model = best_model
 
@@ -3121,7 +4682,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ridge_alpha = None
 
         weights_meta = {
-            "eval_mode": "id",
             "method": "judge",
             "script": os.path.abspath(__file__),
             "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
@@ -3153,7 +4713,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
         metrics = {
-            "eval_mode": "id",
+            "split_by": str(split_by),
+            "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
             "method": "judge",
             "n_items_total": int(len(task_ids)),
             "n_items_with_responses": int(len(overlap_ids)),
@@ -3190,27 +4751,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         }
         base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
-        # Write per-item predictions (OOF CV; NaNs are written as missing_judge).
-        pred_path = os.path.join(args.out_dir, "predictions.csv")
-        with open(pred_path, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
-            w.writeheader()
-            for i, tid in enumerate(eligible):
-                v = float(yhat_oof[int(i)])
-                fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
-                split = "cv_val" if (v == v) else "missing_judge"
-                w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split, "fold": fold_id})
-
-        print(f"Wrote predictions: {pred_path}")
+        if split_by == "task":
+            # Write per-item predictions (OOF CV; NaNs are written as missing_judge).
+            pred_path = os.path.join(args.out_dir, "predictions.csv")
+            with open(pred_path, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+                w.writeheader()
+                for i, tid in enumerate(eligible):
+                    v = float(yhat_oof[int(i)])
+                    fold_id = int(fold_of_item[int(i)]) if int(fold_of_item[int(i)]) > 0 else ""
+                    split_s = "cv_val" if (v == v) else "missing_judge"
+                    w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split_s, "fold": fold_id})
+            print(f"Wrote predictions: {pred_path}")
         print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
         print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
         return 0
 
-    if eval_mode == "id":
+    if split_by == "task":
         # -----------------------------
-        # K-fold CV over items (existing in-distribution evaluation)
+        # K-fold CV (in-distribution evaluation)
         # -----------------------------
-        outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        outer_cv = None
+        agent_folds: List[Tuple[set, set]] = []
+        if split_by == "task":
+            outer_cv = base.KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
+        elif split_by == "agent":
+            agent_keys_all = [f"{b}::{sid}" for b, sid, _ in all_responses_tagged]
+            agent_folds = _stable_group_kfold(agent_keys_all, n_splits=int(args.cv_folds), seed=int(args.seed))
         cv_test_auc_folds: List[float] = []
         cv_test_auc_folds_empirical_model: List[float] = []
         cv_test_auc_folds_oracle_irt: List[float] = []
@@ -3222,29 +4789,84 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         best_fold = -1
         best_model = None
 
-        for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
-            train_items = [eligible[int(i)] for i in tr.tolist()]
-            test_items = [eligible[int(i)] for i in te.tolist()]
+        if split_by == "task":
+            fold_iter = list(enumerate(outer_cv.split(Xy), start=1))  # type: ignore[union-attr]
+        elif split_by == "agent":
+            fold_iter = list(enumerate(agent_folds, start=1))
+        else:
+            fold_iter = list(enumerate([None] * int(args.cv_folds), start=1))
+
+        for fold, fold_payload in fold_iter:
+            if split_by == "task":
+                tr, te = fold_payload
+                train_items = [eligible[int(i)] for i in tr.tolist()]
+                test_items = [eligible[int(i)] for i in te.tolist()]
+                train_agents = None
+                test_agents = None
+            elif split_by == "agent":
+                train_agents, test_agents = fold_payload
+                train_items = list(eligible)
+                test_items = list(eligible)
+            else:
+                train_items = list(eligible)
+                test_items = list(eligible)
+                train_agents = None
+                test_agents = None
 
             # Empirical model-success baseline on fold train items (ignore scaffold).
             p_emp_by_model, _ = compute_empirical_success_prob_by_model(
                 all_responses_tagged=all_responses_tagged,
                 agent_to_ms_pair=agent_to_ms_pair,
-                train_item_ids=set(train_items),
+                train_item_ids=set(train_items if split_by == "task" else eligible),
+                keep_agent_keys=set(train_agents or []) if split_by == "agent" else None,
             )
 
             fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
             base.ensure_dir(fold_root)
 
-            # Save train/test item lists (debugging / provenance).
-            base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
-            base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            if split_by == "task":
+                base.save_json(os.path.join(fold_root, "train_items.json"), {"items": list(train_items)})
+                base.save_json(os.path.join(fold_root, "test_items.json"), {"items": list(test_items)})
+            elif split_by == "agent":
+                base.save_json(os.path.join(fold_root, "train_agents.json"), {"agents": sorted(list(train_agents or []))})
+                base.save_json(os.path.join(fold_root, "test_agents.json"), {"agents": sorted(list(test_agents or []))})
+            else:
+                base.save_json(
+                    os.path.join(fold_root, "split.json"),
+                    {"split_by": str(split_by), "fold": int(fold), "cv_folds": int(args.cv_folds)},
+                )
 
             # IRT on train items only (no leakage).
             base.set_torch_determinism(False)
             base.seed_everything(int(args.seed), deterministic=False)
 
-            obs_train = build_multibench_obs_for_items(obs_full=obs_full, keep_item_ids=train_items)
+            if split_by == "task":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(train_items),
+                )
+            elif split_by == "agent":
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_agent_keys=set(train_agents or []),
+                )
+            else:
+                def _keep_obs_train(b: str, a: str, t: str) -> bool:
+                    key = f"{b}::{a}::{t}"
+                    return int(_fold_id_for_group(key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold)
+
+                obs_train = build_multibench_obs_from_tagged_responses(
+                    all_responses_tagged=all_responses_tagged,
+                    agent_to_ms_pair=agent_to_ms_pair,
+                    obs_full_agent_split_df=obs_full.agent_split_df,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,
+                )
             theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
                 obs_train=obs_train,
                 irt_model=str(irt_model),
@@ -3278,11 +4900,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             X_test = base.np.stack([X[id_to_row[tid]] for tid in test_items], axis=0).astype(base.np.float32)
             pred = m.predict(X_test).astype(base.np.float64)
-            yhat_oof[te] = pred
-            fold_of_item[te] = int(fold)
+            if split_by == "task" and yhat_oof is not None and fold_of_item is not None:
+                yhat_oof[te] = pred
+                fold_of_item[te] = int(fold)
 
             # Held-out AUROC using held-out items only, with theta_model+theta_scaffold from fold's IRT.
             z_by_item = {tid: float(z) for tid, z in zip(test_items, pred.tolist())}
+            if split_by in {"agent", "observation"}:
+                # For agent/observation splits, evaluate using IRT item difficulties from training data.
+                z_by_item = {str(tid): float(b) for tid, b in diff_by_item.items()}
+
+            # Baseline IRT for held-out observations: 1D 1PL treating agents as atomic units.
+            baseline_theta_by_agent: Dict[str, float] = {}
+            baseline_b_by_item: Dict[str, float] = {}
+            if split_by == "observation":
+                base.set_torch_determinism(False)
+                base.seed_everything(int(args.seed), deterministic=False)
+                if "_keep_obs_train" not in locals():
+                    raise RuntimeError("Internal error: _keep_obs_train missing for --split_by=observation")
+                baseline_theta_by_agent, baseline_b_by_item = train_standard_irt_1pl_agents(
+                    all_responses_tagged=all_responses_tagged,
+                    keep_item_ids=set(eligible),
+                    keep_obs_fn=_keep_obs_train,  # type: ignore[name-defined]
+                    epochs=int(args.irt_epochs),
+                    device=str(args.irt_device),
+                    seed=int(args.seed),
+                    out_dir=os.path.join(fold_root, "irt_agent_baseline_1pl"),
+                )
+                base.set_torch_determinism(True)
             scores: List[float] = []
             labels: List[int] = []
             scores_emp: List[float] = []
@@ -3292,6 +4937,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             test_set = set(test_items)
 
             for bench, sid, resp in all_responses_tagged:
+                if split_by == "agent":
+                    if f"{bench}::{sid}" not in set(test_agents or []):
+                        continue
                 key = f"{bench}::{sid}"
                 pair = agent_to_ms_pair.get(key, None)
                 if pair is None:
@@ -3303,24 +4951,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     continue
                 th = float(tm) + float(ts)
                 for item_id, y_obs in resp.items():
-                    if item_id not in test_set:
-                        continue
+                    if split_by == "task":
+                        if item_id not in test_set:
+                            continue
+                    elif split_by == "observation":
+                        obs_key = f"{bench}::{sid}::{item_id}"
+                        if int(_fold_id_for_group(obs_key, n_splits=int(args.cv_folds), seed=int(args.seed))) != int(fold):
+                            continue
                     z = z_by_item.get(item_id, None)
                     if z is None:
                         continue
                     scores.append(1.0 / (1.0 + math.exp(-(th - float(z)))))
                     labels.append(int(y_obs))
 
-                    p_emp = p_emp_by_model.get(str(model), None)
-                    if p_emp is not None:
-                        scores_emp.append(float(p_emp))
-                        labels_emp.append(int(y_obs))
+                    # Baseline.
+                    if split_by == "observation":
+                        th_a = baseline_theta_by_agent.get(str(sid), None)
+                        b_a = baseline_b_by_item.get(str(item_id), None)
+                        if th_a is not None and b_a is not None:
+                            scores_emp.append(_sigmoid(float(th_a) - float(b_a)))
+                            labels_emp.append(int(y_obs))
+                    else:
+                        p_emp = p_emp_by_model.get(str(model), None)
+                        if p_emp is not None:
+                            scores_emp.append(float(p_emp))
+                            labels_emp.append(int(y_obs))
 
-                    tm_o = oracle_theta_by_model.get(model, None)
-                    ts_o = oracle_theta_by_scaffold.get(scaffold, None)
+                    th_o = oracle_theta_by_agent.get(str(sid), None)
                     b_o = oracle_diff_by_item.get(item_id, None)
-                    if tm_o is not None and ts_o is not None and b_o is not None:
-                        scores_oracle.append(_sigmoid((float(tm_o) + float(ts_o)) - float(b_o)))
+                    if th_o is not None and b_o is not None:
+                        scores_oracle.append(_sigmoid(float(th_o) - float(b_o)))
                         labels_oracle.append(int(y_obs))
 
             fold_auc = float(base._compute_binary_auroc(scores, labels))
@@ -3335,8 +4995,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 best_fold = int(fold)
                 best_model = m
 
-        if base.np.isnan(yhat_oof).any() or (fold_of_item < 0).any():
-            raise RuntimeError("KFold CV produced incomplete out-of-fold predictions (unexpected).")
+        if split_by == "task":
+            if yhat_oof is None or fold_of_item is None:
+                raise RuntimeError("Internal error: expected OOF arrays for --split_by=task.")
+            if base.np.isnan(yhat_oof).any() or (fold_of_item < 0).any():
+                raise RuntimeError("KFold CV produced incomplete out-of-fold predictions (unexpected).")
         if best_model is None or best_fold < 1:
             raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
 
@@ -3352,6 +5015,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
         print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
+        baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
+        baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
+        baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
+        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
+        print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
+        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
+
         # Use the best-fold model for saving weights + predicting excluded items.
         model = best_model
 
@@ -3363,7 +5033,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ridge_alpha = None
 
         metrics = {
-            "eval_mode": "id",
+            "split_by": str(split_by),
+            "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
             "n_items_total": int(len(task_ids)),
             "n_items_with_responses": int(len(overlap_ids)),
             "n_items_eligible_cv_irt": int(len(eligible)),
@@ -3417,7 +5088,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         }
 
         weights_meta = {
-            "eval_mode": "id",
             "script": os.path.abspath(__file__),
             "backbone": str(args.backbone),
             "trust_remote_code": bool(args.trust_remote_code),
@@ -3472,34 +5142,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
-        # Write per-item predictions (OOF CV + optional zero_success rows).
-        pred_path = os.path.join(args.out_dir, "predictions.csv")
-        with open(pred_path, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
-            w.writeheader()
+        if split_by == "task":
+            if yhat_oof is None or fold_of_item is None:
+                raise RuntimeError("Internal error: expected OOF arrays for --split_by=task.")
+            # Write per-item predictions (OOF CV + optional zero_success rows).
+            pred_path = os.path.join(args.out_dir, "predictions.csv")
+            with open(pred_path, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+                w.writeheader()
 
-            for i, tid in enumerate(eligible):
-                w.writerow(
-                    {
-                        "item_id": tid,
-                        "diff_pred": float(yhat_oof[i]),
-                        "split": "cv_val",
-                        "fold": int(fold_of_item[i]),
-                    }
-                )
-
-            if yhat_zero is not None and zero_embedded:
-                for tid, score in zip(zero_embedded, yhat_zero.tolist()):
+                for i, tid in enumerate(eligible):
                     w.writerow(
                         {
                             "item_id": tid,
-                            "diff_pred": float(score),
-                            "split": "zero_success",
-                            "fold": "",
+                            "diff_pred": float(yhat_oof[i]),
+                            "split": "cv_val",
+                            "fold": int(fold_of_item[i]),
                         }
                     )
 
-        print(f"Wrote predictions: {pred_path}")
+                if yhat_zero is not None and zero_embedded:
+                    for tid, score in zip(zero_embedded, yhat_zero.tolist()):
+                        w.writerow(
+                            {
+                                "item_id": tid,
+                                "diff_pred": float(score),
+                                "split": "zero_success",
+                                "fold": "",
+                            }
+                        )
+            print(f"Wrote predictions: {pred_path}")
         print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
         return 0
 
@@ -3534,6 +5206,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         f"models={len(theta_by_model)} scaffolds={len(theta_by_scaffold)}"
     )
 
+    # For --split_by=none, we intentionally stop after fitting shared IRT.
+    # No embeddings, no judge features, no regressors, no predictions.
+    if split_by == "none":
+        metrics = {
+            "method": str(method),
+            "split_by": str(split_by),
+            "irt_only": True,
+            "irt_model": str(irt_model),
+            "irt_epochs": int(args.irt_epochs),
+            "irt_device": str(args.irt_device),
+            "irt_seed": int(args.seed),
+            "items_train": int(len(train_items)),
+            "labeled_items": int(len(diff_by_item)),
+            "models": int(len(theta_by_model)),
+            "scaffolds": int(len(theta_by_scaffold)),
+            "irt_out_dir": os.path.join(str(args.out_dir), _irt_out_dir_name(irt_model)),
+        }
+        base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
+        print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
+        return 0
+
     train_labeled = [tid for tid in train_items if tid in diff_by_item]
     if len(train_labeled) < 2:
         raise RuntimeError(
@@ -3546,6 +5239,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     model = None
     joint_state = None
+    stacked_state = None
     judge_feature_names_full: List[str] = []
     judge_dim = 0
 
@@ -3567,15 +5261,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         terminal_item_set = set(obs_full.terminal_bench_item_ids)
         gso_item_set = set(getattr(obs_full, "gso_item_ids", set()))
 
-        verified_off = 0
-        pro_off = verified_off + int(len(VERIFIED_JUDGE_FEATURE_NAMES))
-        terminal_off = pro_off + int(len(PRO_JUDGE_FEATURE_NAMES))
-        judge_dim = terminal_off + int(len(TERMINAL_BENCH_JUDGE_FEATURE_NAMES))
-        judge_feature_names_full = (
-            [f"verified::{k}" for k in VERIFIED_JUDGE_FEATURE_NAMES]
-            + [f"pro::{k}" for k in PRO_JUDGE_FEATURE_NAMES]
-            + [f"terminal_bench::{k}" for k in TERMINAL_BENCH_JUDGE_FEATURE_NAMES]
-        )
+        judge_dim = int(len(JUDGE_FEATURE_NAMES))
+        judge_feature_names_full = list(JUDGE_FEATURE_NAMES)
 
         verified_feat_dir = str(args.verified_judge_features_dir)
         pro_feat_dir = str(args.pro_judge_features_dir)
@@ -3588,93 +5275,48 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         def _judge_full_vec_for_item(item_id: str):
             tid = str(item_id)
-            x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
             if tid in verified_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=verified_feat_dir,
-                    feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=verified_idx,
                     normalize_item_ids=True,
                 )
-                if v is None:
-                    return None
-                x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in pro_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=pro_feat_dir,
-                    feature_names=PRO_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=pro_idx,
                     normalize_item_ids=True,
                 )
-                if v is None:
-                    return None
-                x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in terminal_item_set:
                 v = _load_judge_vector(
                     tid,
                     features_dir=terminal_feat_dir,
-                    feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
+                    feature_names=JUDGE_FEATURE_NAMES,
                     index=terminal_idx,
                     normalize_item_ids=False,
                 )
-                if v is None:
-                    return None
-                x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
+                return v
             if tid in gso_item_set and gso_feat_dir:
-                obj = None
-                try:
-                    p = os.path.join(str(gso_feat_dir), f"{tid}.json")
-                    if not os.path.exists(p):
-                        key = base.normalize_swebench_item_id(tid)
-                        p = gso_idx.get(str(key), "")
-                    if p and os.path.exists(p):
-                        with open(p, "r", encoding="utf-8") as f:
-                            tmp = json.load(f)
-                        if isinstance(tmp, dict):
-                            obj = tmp
-                except Exception:
-                    obj = None
-                if isinstance(obj, dict):
-                    gso_keys = list(GSO_JUDGE_FEATURE_NAMES)
-                    if gso_keys:
-                        gso_alias = {"solution_in_problem": "solution_in_instruction"}
-                        vpos = {k: i for i, k in enumerate(VERIFIED_JUDGE_FEATURE_NAMES)}
-                        ppos = {k: i for i, k in enumerate(PRO_JUDGE_FEATURE_NAMES)}
-                        tpos = {k: i for i, k in enumerate(TERMINAL_BENCH_JUDGE_FEATURE_NAMES)}
-                        n_set = 0
-                        for k in gso_keys:
-                            if k not in obj:
-                                n_set = 0
-                                break
-                            kk = gso_alias.get(str(k), str(k))
-                            try:
-                                fv = float(obj.get(k))
-                            except Exception:
-                                n_set = 0
-                                break
-                            if kk in ppos:
-                                x[pro_off + int(ppos[kk])] = float(fv)
-                                n_set += 1
-                            elif kk in vpos:
-                                x[verified_off + int(vpos[kk])] = float(fv)
-                                n_set += 1
-                            elif kk in tpos:
-                                x[terminal_off + int(tpos[kk])] = float(fv)
-                                n_set += 1
-                            else:
-                                continue
-                        if n_set > 0:
-                            return x
+                v = _load_judge_vector(
+                    tid,
+                    features_dir=gso_feat_dir,
+                    feature_names=JUDGE_FEATURE_NAMES,
+                    index=gso_idx,
+                    normalize_item_ids=True,
+                )
+                return v
             return None
 
         joint_judge_train_rows = []
         joint_y_train_rows = []
         joint_train_items_used: List[str] = []
+        missing_emb = 0
         for i, tid in enumerate(train_labeled, start=1):
             if i == 1 or i % 200 == 0 or i == len(train_labeled):
                 print(
@@ -3684,12 +5326,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             jv = _judge_full_vec_for_item(tid)
             if jv is None:
                 continue
+            # For methods that require embeddings, skip items without an embedding row.
+            # This can happen if the embedding cache was built from a task list that
+            # didn't include every labeled id (or if an item couldn't be embedded).
+            if method in {"combined", "stacked"} and (tid not in id_to_row):
+                missing_emb += 1
+                continue
             joint_judge_train_rows.append(base.np.asarray(jv, dtype=base.np.float32))
             joint_y_train_rows.append(float(diff_by_item[tid]))
             joint_train_items_used.append(tid)
         if len(joint_train_items_used) < 2:
             raise RuntimeError(
                 f"Training-only mode: only {len(joint_train_items_used)} train items had judge features; cannot fit judge-based regressor."
+            )
+        if missing_emb > 0 and method in {"combined", "stacked"}:
+            print(
+                f"NOTE: Skipped {int(missing_emb)}/{len(train_labeled)} labeled items with judge features "
+                f"but missing embeddings (method={method})."
             )
         print(f"Judge features loaded for {len(joint_train_items_used)}/{len(train_labeled)} labeled items.")
 
@@ -3700,6 +5353,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(f"Fitting judge-only ridge (regressor={regressor_name}).")
             model = _make_model(n_train=int(len(joint_train_items_used)), fold_seed=int(args.seed))
             model.fit(X_judge_joint_train, y_joint_train)
+        elif method == "stacked":
+            print(f"Fitting stacked residual model (Emb → Judge residual; regressor={regressor_name}).")
+            X_emb_joint_train = base.np.stack(
+                [X[id_to_row[tid]].astype(base.np.float32) for tid in joint_train_items_used], axis=0
+            ).astype(base.np.float32)
+
+            ae_fixed = float(args.ridge_alpha_emb) if (float(getattr(args, "ridge_alpha_emb", float("nan"))) == float(getattr(args, "ridge_alpha_emb", float("nan")))) else float(args.ridge_alpha)
+            aj_fixed = float(args.ridge_alpha_judge) if (float(getattr(args, "ridge_alpha_judge", float("nan"))) == float(getattr(args, "ridge_alpha_judge", float("nan")))) else float(args.ridge_alpha)
+            ae_grid = _parse_alpha_list(str(args.ridge_alphas_emb).strip()) if str(args.ridge_alphas_emb or "").strip() else _parse_alpha_list(str(args.ridge_alphas))
+            aj_grid = _parse_alpha_list(str(args.ridge_alphas_judge).strip()) if str(args.ridge_alphas_judge or "").strip() else _parse_alpha_list(str(args.ridge_alphas))
+
+            stacked_state = _fit_stacked_residual(
+                X_emb=X_emb_joint_train,
+                X_judge=X_judge_joint_train,
+                y=y_joint_train,
+                regressor_name=str(regressor_name),
+                alpha_emb=float(ae_fixed),
+                alpha_judge=float(aj_fixed),
+                alphas_emb=ae_grid,
+                alphas_judge=aj_grid,
+                inner_splits=int(args.inner_splits),
+                seed=int(args.seed) + 5000,
+            )
         else:
             # combined: block ridge over [embeddings, judge] with separate penalties.
             print(f"Fitting joint block-ridge (regressor={regressor_name}).")
@@ -3752,8 +5428,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ridge_alpha = None
 
     weights_meta = {
-        "eval_mode": str(eval_mode),
         "method": str(method),
+        "split_by": str(split_by),
+        "disable_benchmark_eval": bool(disable_benchmark_eval),
+        "ood_benchmark": (str(ood_benchmark) if ood_benchmark is not None else ""),
         "script": os.path.abspath(__file__),
         "backbone": str(args.backbone),
         "trust_remote_code": bool(args.trust_remote_code),
@@ -3812,6 +5490,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             feature_dim=int(judge_dim),
             metadata=weights_meta,
         )
+    elif method == "stacked":
+        if stacked_state is None:
+            raise RuntimeError("Internal error: stacked_state was None after stacked training.")
+        weights_meta.update(
+            {
+                "ridge_alpha": float(args.ridge_alpha),
+                "ridge_alphas": str(args.ridge_alphas),
+                "ridge_alphas_emb": str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas),
+                "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
+                "verified_judge_features_dir": str(args.verified_judge_features_dir),
+                "pro_judge_features_dir": str(args.pro_judge_features_dir),
+                "terminal_bench_judge_features_dir": str(args.terminal_bench_judge_features_dir),
+                "judge_feature_names": list(judge_feature_names_full),
+                "judge_feature_dim": int(judge_dim),
+            }
+        )
+        save_regression_weights_stacked_residual(
+            out_dir=str(args.out_dir),
+            state=stacked_state,
+            judge_feature_names=judge_feature_names_full,
+            metadata=weights_meta,
+        )
     else:
         if joint_state is None:
             raise RuntimeError("Internal error: joint_state was None after joint training.")
@@ -3838,7 +5538,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # -----------------------------
     # OOD evaluation: 4th benchmark AUROC using learned thetas + regressor
     # -----------------------------
-    if eval_mode == "ood":
+    if split_by == "benchmark" and not disable_benchmark_eval:
         # Resolve which benchmark to treat as OOD, and its required data sources.
         ood_key = str(ood_benchmark)
 
@@ -3862,9 +5562,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ood_agent_results = str(args.pro_agent_results or "").strip()
             ood_normalize_item_ids = True
             ood_treat_as_pro = True
-            ood_default_scaffold = str(
-                getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "SWEBENCH_PRO_ASSUMED_SCAFFOLD", "SWE-agent 1.0")
-            )
+            ood_default_scaffold = None
             ood_feat_dir = str(getattr(args, "pro_judge_features_dir", "") or "").strip()
             ood_dataset_name = str(args.pro_dataset_name or "").strip()
             ood_split = str(args.pro_split)
@@ -3878,9 +5576,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ood_agent_results = str(args.gso_agent_results or "").strip()
             ood_normalize_item_ids = True
             ood_treat_as_pro = False
-            ood_default_scaffold = str(
-                getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "GSO_ASSUMED_SCAFFOLD", "OpenHands")
-            )
+            ood_default_scaffold = "OpenHands"
             ood_feat_dir = str(getattr(args, "gso_judge_features_dir", "") or "").strip()
             ood_dataset_name = str(args.gso_dataset_name or "").strip()
             ood_split = str(args.gso_split)
@@ -3933,7 +5629,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Load OOD tasks (statement+solution) only when we need embeddings.
         ood_items: List[base.ItemRecord] = []
         ood_missing: List[str] = []
-        if method in {"embedding", "combined"}:
+        if method in {"embedding", "combined", "stacked"}:
             if ood_key in {"verified", "pro"}:
                 if not ood_dataset_name:
                     raise ValueError(f"OOD benchmark {ood_key!r} requires dataset_name to load tasks.")
@@ -3976,96 +5672,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         def _ood_judge_full_vec_for_item(item_id: str):
             """
-            Load OOD judge vector from a single directory and map to the fixed full vector of size `judge_dim`.
+            Load OOD judge vector from a single directory.
             Returns None if not found/parsable.
             """
             tid = str(item_id)
-            x = base.np.zeros((int(judge_dim),), dtype=base.np.float32)
-
-            # First try the GSO OOD schema (default `--*_judge_features_dir` for gso).
-            obj = None
-            try:
-                pth = os.path.join(str(ood_feat_dir_effective), f"{tid}.json")
-                if not os.path.exists(pth):
-                    key = base.normalize_swebench_item_id(tid) if bool(ood_normalize_item_ids) else tid
-                    pth = ood_idx.get(str(key), "")
-                if pth and os.path.exists(pth):
-                    with open(pth, "r", encoding="utf-8") as f:
-                        tmp = json.load(f)
-                    if isinstance(tmp, dict):
-                        obj = tmp
-            except Exception:
-                obj = None
-
-            if isinstance(obj, dict):
-                gso_keys = list(GSO_JUDGE_FEATURE_NAMES)
-                if gso_keys:
-                    gso_alias = {"solution_in_problem": "solution_in_instruction"}
-                    vpos = {k: i for i, k in enumerate(VERIFIED_JUDGE_FEATURE_NAMES)}
-                    ppos = {k: i for i, k in enumerate(PRO_JUDGE_FEATURE_NAMES)}
-                    tpos = {k: i for i, k in enumerate(TERMINAL_BENCH_JUDGE_FEATURE_NAMES)}
-                    n_set = 0
-                    for k in gso_keys:
-                        if k not in obj:
-                            n_set = 0
-                            break
-                        kk = gso_alias.get(str(k), str(k))
-                        try:
-                            fv = float(obj.get(k))
-                        except Exception:
-                            n_set = 0
-                            break
-                        if kk in ppos:
-                            x[pro_off + int(ppos[kk])] = float(fv)
-                            n_set += 1
-                        elif kk in vpos:
-                            x[verified_off + int(vpos[kk])] = float(fv)
-                            n_set += 1
-                        elif kk in tpos:
-                            x[terminal_off + int(tpos[kk])] = float(fv)
-                            n_set += 1
-                        else:
-                            continue
-                    if n_set > 0:
-                        return x
-
-            v = _load_judge_vector(
+            return _load_judge_vector(
                 tid,
                 features_dir=ood_feat_dir_effective,
-                feature_names=VERIFIED_JUDGE_FEATURE_NAMES,
+                feature_names=JUDGE_FEATURE_NAMES,
                 index=ood_idx,
                 normalize_item_ids=bool(ood_normalize_item_ids),
             )
-            if v is not None:
-                x[verified_off:pro_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
-
-            v = _load_judge_vector(
-                tid,
-                features_dir=ood_feat_dir_effective,
-                feature_names=PRO_JUDGE_FEATURE_NAMES,
-                index=ood_idx,
-                normalize_item_ids=bool(ood_normalize_item_ids),
-            )
-            if v is not None:
-                x[pro_off:terminal_off] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
-
-            v = _load_judge_vector(
-                tid,
-                features_dir=ood_feat_dir_effective,
-                feature_names=TERMINAL_BENCH_JUDGE_FEATURE_NAMES,
-                index=ood_idx,
-                normalize_item_ids=bool(ood_normalize_item_ids),
-            )
-            if v is not None:
-                x[terminal_off:] = base.np.asarray(v, dtype=base.np.float32).reshape(-1)
-                return x
-
-            return None
 
         z_by_item: Dict[str, float] = {}
-        if method in {"embedding", "combined"}:
+        if method in {"embedding", "combined", "stacked"}:
             # Embed OOD items using the same backbone/settings.
             ood_ids_sorted, ood_emb_by_id, _, _ = base.embed_items(
                 items=list(ood_items),
@@ -4086,7 +5706,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if method == "embedding":
                 z_pred = model.predict(X_ood).astype(base.np.float64)
                 z_by_item = {iid: float(z) for iid, z in zip(ood_ids_sorted, z_pred.tolist())}
-            else:
+            elif method == "combined":
                 if joint_state is None:
                     raise RuntimeError("Internal error: joint_state was None for OOD evaluation in combined mode.")
                 if int(judge_dim) != int(joint_state["n_judge"]):
@@ -4113,6 +5733,34 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 X_emb_ood_used = base.np.stack(ood_emb_rows, axis=0).astype(base.np.float32)
                 X_judge_ood_used = base.np.stack(ood_judge_rows, axis=0).astype(base.np.float32)
                 z_pred_used = _predict_block_ridge(joint_state, X_emb=X_emb_ood_used, X_judge=X_judge_ood_used).astype(base.np.float64)
+                z_by_item = {iid: float(z) for iid, z in zip(ood_ids_used, z_pred_used.tolist())}
+            else:
+                # stacked: behave like combined wrt needing judge features, but prediction is base + residual.
+                if stacked_state is None:
+                    raise RuntimeError("Internal error: stacked_state was None for OOD evaluation in stacked mode.")
+                if int(judge_dim) != int(stacked_state["n_judge"]):
+                    raise RuntimeError("Stacked: internal judge_dim mismatch vs trained model (cannot predict).")
+
+                ood_ids_used: List[str] = []
+                ood_emb_rows: List[base.np.ndarray] = []
+                ood_judge_rows: List[base.np.ndarray] = []
+                for iid in ood_ids_sorted:
+                    jv = _ood_judge_full_vec_for_item(iid) if ood_feat_dir else None
+                    if jv is None:
+                        continue
+                    ood_ids_used.append(str(iid))
+                    ood_emb_rows.append(base.np.asarray(ood_emb_by_id[iid], dtype=base.np.float32).reshape(-1))
+                    ood_judge_rows.append(base.np.asarray(jv, dtype=base.np.float32).reshape(-1))
+
+                if not ood_ids_used:
+                    raise RuntimeError(
+                        "OOD benchmark: 0 items had OOD judge features; cannot run stacked prediction. "
+                        "Provide per-item judge feature JSONs or run with --method=embedding."
+                    )
+
+                X_emb_ood_used = base.np.stack(ood_emb_rows, axis=0).astype(base.np.float32)
+                X_judge_ood_used = base.np.stack(ood_judge_rows, axis=0).astype(base.np.float32)
+                z_pred_used = _predict_stacked_residual(stacked_state, X_emb=X_emb_ood_used, X_judge=X_judge_ood_used).astype(base.np.float64)
                 z_by_item = {iid: float(z) for iid, z in zip(ood_ids_used, z_pred_used.tolist())}
         else:
             # Judge-only: do not embed OOD items; only predict items with judge features.
@@ -4167,7 +5815,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             treat_as_pro=bool(ood_treat_as_pro),
             ood_default_scaffold=ood_default_scaffold,
             p_success_by_model=p_emp_by_model,
-            theta_by_scaffold=theta_by_scaffold,
         )
         print(f"Baseline: {ood_emp_auc}")
         try:
@@ -4207,9 +5854,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     input_jsonl=str(ood_agent_results),
                     output_jsonl=str(ood_oracle_filtered),
                     min_models_per_scaffold=int(args.min_models_per_scaffold),
-                    assumed_scaffold=str(
-                        getattr(_import_swebench_irt_module("split_agents_model_scaffold"), "GSO_ASSUMED_SCAFFOLD", "OpenHands")
-                    ),
+                    assumed_scaffold="OpenHands",
                 )
             else:
                 filter_subjects_by_min_models_per_scaffold(
@@ -4240,8 +5885,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 gso_path=ms.resolve_path(oracle_gso_path) if oracle_gso_path else None,
             )
 
-            # Train oracle IRT on the union of training items and the OOD items we predicted (z_by_item keys).
-            oracle_items = sorted(set([str(x) for x in list(train_items)]) | set([str(x) for x in list(z_by_item.keys())]))
+            # Train oracle IRT (model+scaffold decomposition) on *all* available items across the
+            # included benchmarks (including the held-out benchmark; intentional leakage).
+            oracle_items = sorted(set([str(x) for x in list(obs_oracle_full.item_ids)]))
             base.set_torch_determinism(False)
             base.seed_everything(int(args.seed), deterministic=False)
             obs_oracle = build_multibench_obs_for_items(obs_full=obs_oracle_full, keep_item_ids=oracle_items)
@@ -4283,7 +5929,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         base.save_json(
             os.path.join(str(args.out_dir), "metrics.json"),
             {
-                "eval_mode": "ood",
                 "method": str(method),
                 "ood_benchmark": str(ood_key),
                 "auc": float(ood_auc),

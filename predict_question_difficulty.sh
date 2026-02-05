@@ -20,4 +20,6 @@ python predict_question_difficulty.py \
   --agent_results "out/chris_irt/swebench_verified_20251115_full.jsonl" \
   --out_dir "out/swebench_verified" \
   --include_zero_success \
+  --method embedding \
+  --backbone meta-llama/Llama-3.2-11B-Vision-Instruct \
   --overwrite
