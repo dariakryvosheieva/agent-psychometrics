@@ -31,6 +31,11 @@ python -m experiment_a.run_all_datasets --no-unified_judge
 # Export results to CSV
 python -m experiment_a.run_all_datasets --output results.csv
 
+# Run Feature-IRT variant (joint training instead of Ridge)
+python -m experiment_a.run_feature_irt
+python -m experiment_a.run_feature_irt --datasets swebench gso
+python -m experiment_a.run_feature_irt --sequential
+
 # Run individual datasets
 python -m experiment_a.swebench.train_evaluate
 python -m experiment_a.swebench_pro.train_evaluate
@@ -58,6 +63,22 @@ Run with: `python -m experiment_a.run_all_datasets`
 - **Grouped Ridge (Emb+LLM) is best**: Outperforms single sources on all datasets
 - **Test patch features help**: Adding 3 test quality features improved SWE-bench Grouped Ridge from 0.8331 → 0.8415 (+1.0%)
 - **Combining features helps**: Grouped Ridge outperforms single sources (+0.5% to +1.8%)
+
+### Feature-IRT Results (Joint Training)
+
+Run with: `python -m experiment_a.run_feature_irt`
+
+| Dataset | Oracle | Feature-IRT (Emb+LLM) | Feature-IRT (LLM) | Feature-IRT (Emb) | Baseline |
+|---------|--------|----------------------|-------------------|-------------------|----------|
+| SWE-bench Verified | 0.9441 | **0.8394** | 0.8371 | 0.8237 | 0.7146 |
+| GSO | 0.8516 | 0.7454 | 0.7345 | **0.7470** | 0.7262 |
+| TerminalBench | 0.8995 | 0.7857 | 0.7742 | **0.7976** | 0.7076 |
+| SWE-bench Pro | 0.9183 | 0.7240 | 0.7114 | **0.7560** | 0.6567 |
+
+**Key findings**:
+- **Feature-IRT performs similarly to Ridge** in Experiment A (task holdout) because it must generalize to unseen test tasks using only feature weights
+- **Embedding alone often outperforms combined** in Feature-IRT, suggesting the joint optimization may overfit to LLM features on some datasets
+- **Per-source regularization**: Feature-IRT uses per-source L2 grids (Emb: [100, 1000, 10000], LLM: [0.01, 0.1, 1, 10]) with internal CV for selection
 
 ### SWE-bench Verified (5-Fold Cross-Validation)
 
@@ -211,8 +232,15 @@ class CVPredictor(Protocol):
 |------|---------|
 | `pipeline.py` | `ExperimentSpec`, `CVPredictorConfig`, `run_experiment_main()` |
 | `cross_validation.py` | `CVPredictor` protocol, `run_cv()`, `k_fold_split_tasks()` |
-| `baselines.py` | `OraclePredictor`, `ConstantPredictor`, `AgentOnlyPredictor`, `DifficultyPredictorAdapter`, `FeatureIRTCVPredictor` |
+| `baselines.py` | `OraclePredictor`, `ConstantPredictor`, `AgentOnlyPredictor`, `DifficultyPredictorAdapter`, `FeatureIRTCVPredictor` (with per-source L2 regularization) |
 | `mlp_predictor.py` | `MLPPredictor` - direct success prediction via neural network |
+
+### Multi-Dataset Scripts (`experiment_a/`)
+
+| File | Purpose |
+|------|---------|
+| `run_all_datasets.py` | Run Ridge-based predictors on all datasets (default) |
+| `run_feature_irt.py` | Run Feature-IRT (joint training) on all datasets |
 
 ### SWE-bench Verified (`experiment_a/swebench/`)
 
@@ -267,7 +295,13 @@ Key differences from Ridge:
 - Learns from response patterns (IRT likelihood), not frozen IRT difficulties
 - Agent abilities are jointly optimized with feature weights
 - Supports both Bernoulli (binary) and Binomial (multi-trial) likelihoods
-- Uses internal 3-fold CV to select `l2_weight` from `[0.01, 0.1, 1.0, 10.0]` (similar to RidgeCV)
+- Uses internal 3-fold CV to select L2 weights (similar to RidgeCV)
+
+**Per-source regularization**: When using `GroupedFeatureSource` (combined embeddings + LLM), applies different L2 penalties per source:
+- High-dim embeddings: `l2_emb ∈ [100, 1000, 10000]` (strong regularization)
+- Low-dim LLM features: `l2_llm ∈ [0.01, 0.1, 1, 10]` (weak regularization)
+- Loss: `weight_reg = l2_emb * ||w_emb||² + l2_llm * ||w_llm||²`
+- Internal CV selects best (l2_emb, l2_llm) combination
 
 **Note**: In Experiment A (task holdout), Feature-IRT performs similarly to Ridge because it must generalize to unseen test tasks using only feature weights. This is unlike Experiment B (agent holdout) where Feature-IRT can leverage jointly-learned abilities across all tasks.
 
