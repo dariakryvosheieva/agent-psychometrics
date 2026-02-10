@@ -72,17 +72,7 @@ FEATURE_CONFIGS = [
     FeatureConfig("solution_completeness_mean", "Rubric: Solution Completeness", "rubric"),
     FeatureConfig("edge_case_handling_mean", "Rubric: Edge Case Handling", "rubric"),
     FeatureConfig("test_verification_mean", "Rubric: Test Verification", "rubric"),
-    # LLM Judge features (10 features, per-task)
-    FeatureConfig("fix_in_description", "LLM Judge: Fix in Description", "llm_judge"),
-    FeatureConfig("problem_clarity", "LLM Judge: Problem Clarity", "llm_judge"),
-    FeatureConfig("error_message_provided", "LLM Judge: Error Message Provided", "llm_judge"),
-    FeatureConfig("reproduction_steps", "LLM Judge: Reproduction Steps", "llm_judge"),
-    FeatureConfig("fix_locality", "LLM Judge: Fix Locality", "llm_judge"),
-    FeatureConfig("domain_knowledge_required", "LLM Judge: Domain Knowledge", "llm_judge"),
-    FeatureConfig("fix_complexity", "LLM Judge: Fix Complexity", "llm_judge"),
-    FeatureConfig("logical_reasoning_required", "LLM Judge: Logical Reasoning", "llm_judge"),
-    FeatureConfig("atypicality", "LLM Judge: Atypicality", "llm_judge"),
-    FeatureConfig("integration_complexity", "LLM Judge: Integration Complexity", "llm_judge"),
+    # LLM Judge features are loaded dynamically from the CSV in main()
     # Per-agent trajectory features (find best-case agent)
     FeatureConfig(
         "assistant_char_count", "Trajectory: Assistant Char Count", "trajectory", per_agent=True
@@ -117,7 +107,11 @@ def load_llm_judge_features(config: SWEBenchConfig) -> pd.DataFrame:
     if path is None or not path.exists():
         raise FileNotFoundError(f"LLM judge features not found at {path}")
     df = pd.read_csv(path)
-    df = df.set_index("_instance_id")
+    # Handle both old format (_instance_id) and new format (instance_id)
+    if "_instance_id" in df.columns:
+        df = df.set_index("_instance_id")
+    elif "instance_id" in df.columns:
+        df = df.set_index("instance_id")
     return df
 
 
@@ -651,15 +645,9 @@ def create_summary_grids(output_dir: Path) -> None:
     rubric_paths = [rubric_dir / f"{f}.png" for f in rubric_features]
     create_grid(rubric_paths, output_dir / "rubric_grid.png", ncols=2)
 
-    # LLM Judge features (10 features -> 5x2 grid)
+    # LLM Judge features (dynamically discover from output directory)
     llm_dir = output_dir / "llm_judge"
-    llm_features = [
-        "fix_in_description", "problem_clarity", "error_message_provided",
-        "reproduction_steps", "fix_locality", "domain_knowledge_required",
-        "fix_complexity", "logical_reasoning_required", "atypicality",
-        "integration_complexity"
-    ]
-    llm_paths = [llm_dir / f"{f}.png" for f in llm_features]
+    llm_paths = sorted(llm_dir.glob("*.png")) if llm_dir.exists() else []
     create_grid(llm_paths, output_dir / "llm_judge_grid.png", ncols=2)
 
     # Trajectory features (2 features -> 1x2 grid)
@@ -731,6 +719,12 @@ def main():
     llm_judge_features = load_llm_judge_features(config)
     print(f"  LLM judge features: {llm_judge_features.shape}")
 
+    # Generate LLM judge feature configs dynamically from loaded columns
+    llm_judge_feature_configs = [
+        FeatureConfig(col, f"LLM Judge: {col.replace('_', ' ').title()}", "llm_judge")
+        for col in llm_judge_features.columns
+    ]
+
     char_counts = load_trajectory_char_counts()
     print(f"  Trajectory char counts: {char_counts.shape}")
 
@@ -744,7 +738,10 @@ def main():
 
     results = []
 
-    for feature_config in FEATURE_CONFIGS:
+    # Combine static configs with dynamically loaded LLM judge features
+    all_feature_configs = FEATURE_CONFIGS + llm_judge_feature_configs
+
+    for feature_config in all_feature_configs:
         print(f"\n{feature_config.display_name}...")
 
         if feature_config.source == "rubric":
