@@ -1,13 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=swe_embed
-#SBATCH --output=logs/swebench_embeddings_%A_%a.out
-#SBATCH --error=logs/swebench_embeddings_%A_%a.err
 #SBATCH --time=04:00:00
 #SBATCH --partition=mit_normal_gpu
-#SBATCH --account=mit_general
 #SBATCH --gres=gpu:h200:1
 #SBATCH --mem=100G
-#SBATCH --cpus-per-task=8
 #SBATCH --array=0-1
 
 # SWE-bench Verified Embeddings Generation
@@ -58,7 +53,7 @@ echo "  Task range: $START_IDX to $((START_IDX + N_INPUTS - 1))"
 echo ""
 
 # Set up environment
-cd ~/model_irt
+cd /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship
 source .venv/bin/activate
 
 # Use scratch for HuggingFace cache (avoid home quota limits)
