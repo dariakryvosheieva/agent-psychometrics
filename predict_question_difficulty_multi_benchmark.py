@@ -52,7 +52,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple
+from typing import Callable, Dict, Iterator, List, Optional, Sequence, Set, Tuple
 
 
 # Reuse all the "shared" logic (embeddings, regression, caching, etc.) from the
@@ -295,8 +295,59 @@ def load_all_responses_terminal(path: str) -> List[Tuple[str, Dict[str, int]]]:
 
 
 def _sigmoid(x: float) -> float:
-    # Stable enough for typical theta/z ranges in this repo.
-    return 1.0 / (1.0 + math.exp(-float(x)))
+    # Numerically stable sigmoid.
+    v = float(x)
+    if v >= 0.0:
+        z = math.exp(-v)
+        return 1.0 / (1.0 + z)
+    z = math.exp(v)
+    return z / (1.0 + z)
+
+
+THETA_COMBINE_CHOICES: Tuple[str, ...] = (
+    # Historical / default (logit additivity).
+    "sum",
+    # Interaction-style alternatives.
+    "product",
+    "sum_product",
+    # Simple nonlinear “gates”.
+    "max",
+    "min",
+    # Scale-preserving alternative to sum.
+    "mean",
+    # Nonlinear magnitude mix (with sign from sum).
+    "l2",
+)
+
+
+def _combine_model_scaffold_theta(theta_model: float, theta_scaffold: float, *, combine: str) -> float:
+    """
+    Combine model + scaffold abilities into a single scalar used for scoring:
+      p(success | model, scaffold, item) = sigmoid(combine(theta_model, theta_scaffold) - b_item)
+    """
+    tm = float(theta_model)
+    ts = float(theta_scaffold)
+    c = str(combine or "").strip().lower()
+    if c == "sum":
+        return tm + ts
+    if c == "product":
+        # Use magnitude from interaction, but align sign with the additive direction.
+        # This avoids the "two negatives => positive" issue of a raw product.
+        s = 1.0 if (tm + ts) >= 0.0 else -1.0
+        return s * abs(tm * ts)
+    if c == "sum_product":
+        return tm + ts + (tm * ts)
+    if c == "max":
+        return max(tm, ts)
+    if c == "min":
+        return min(tm, ts)
+    if c == "mean":
+        return 0.5 * (tm + ts)
+    if c == "l2":
+        # Preserve sign based on the additive direction, but combine magnitudes like an L2 norm.
+        s = 1.0 if (tm + ts) >= 0.0 else -1.0
+        return s * float(math.hypot(tm, ts))
+    raise ValueError(f"Unknown theta combine form {combine!r}. Expected one of {list(THETA_COMBINE_CHOICES)!r}.")
 
 
 # -----------------------------
@@ -314,6 +365,7 @@ JUDGE_FEATURE_NAMES: List[str] = [
     "atypicality",
     "verification_difficulty",
     "standard_pattern_available",
+    "codebase_scope"
 ]
 
 
@@ -918,10 +970,11 @@ def evaluate_ood_auroc(
     z_by_item: Dict[str, float],
     theta_by_model: Dict[str, float],
     theta_by_scaffold: Dict[str, float],
+    theta_combine: str = "sum",
 ) -> Tuple[float, dict]:
     """
     Evaluate ROC-AUC on an out-of-distribution response matrix using:
-      p(success) = sigmoid((theta_model + theta_scaffold) - z_item_pred)
+      p(success) = sigmoid(combine(theta_model, theta_scaffold) - z_item_pred)
     """
     filt = _import_swebench_irt_module("filter_subjects_by_scaffold_count")
     split_mod = _import_swebench_irt_module("split_agents_model_scaffold")
@@ -1014,7 +1067,7 @@ def evaluate_ood_auroc(
             n_obs_skipped_no_theta += int(len(resp))
             continue
 
-        th = float(tm) + float(ts)
+        th = _combine_model_scaffold_theta(float(tm), float(ts), combine=str(theta_combine))
 
         if th is None:
             n_obs_skipped_no_theta += int(len(resp))
@@ -1489,7 +1542,6 @@ def train_standard_irt_1pl_agents(
         observations as missing, not failures.
 
     Artifacts (same as `predict_question_difficulty.py::train_irt_1pl`):
-      - parameters.json
       - best_parameters.json
       - abilities.csv  (subject_id, theta)
       - items.csv      (item_id, b)
@@ -1562,6 +1614,7 @@ def filter_subjects_by_min_models_per_scaffold(
     input_jsonl: str,
     output_jsonl: str,
     min_models_per_scaffold: int,
+    benchmark: Optional[str] = None,
     treat_as_pro: bool,
 ) -> None:
     """
@@ -1589,6 +1642,54 @@ def filter_subjects_by_min_models_per_scaffold(
     base.ensure_dir(os.path.dirname(out_path) or ".")
 
     filt = _import_swebench_irt_module("filter_subjects_by_scaffold_count")
+    split_mod = _import_swebench_irt_module("split_agents_model_scaffold")
+    bench = str(benchmark or "").strip().lower().replace("-", "_")
+
+    def _terminal_bench_row_to_model_scaffold(r: dict) -> Optional[Tuple[str, str]]:
+        """
+        Terminal-Bench 2.0 leaderboard scrape schema support.
+
+        Preferred schema:
+          - r["model"] -> model (base LLM)          [pretty]
+          - r["agent"] -> scaffold/agent name      [pretty]
+
+        Back-compat (current scrape output in this repo):
+          - r["date"]  -> model (base LLM)          [pretty]
+          - r["model"] -> scaffold/agent name       [pretty]
+          - r["agent"] is a numeric rank string
+        """
+        # Prefer the explicit (model, agent) fields when they look non-rank-like.
+        m1 = str(r.get("model", "") or "").strip()
+        a1 = str(r.get("agent", "") or "").strip()
+        if m1 and a1 and not a1.isdigit():
+            model_raw, scaffold_raw = m1, a1
+        else:
+            # Fallback to the repo's current scrape output: ("date" is the LLM, "model" is the agent name)
+            m2 = str(r.get("date", "") or "").strip()
+            sc2 = m1
+            if not (m2 and sc2):
+                return None
+            model_raw, scaffold_raw = m2, sc2
+
+        # Exclude multi-model bundles (cannot be decomposed into a single base model).
+        low = str(model_raw).strip().lower()
+        if ("," in model_raw) or (low == "multiple") or ("multiple" in low and low == "multiple"):
+            return None
+
+        # Canonicalize using the shared conventions (now “pretty-name” preserving).
+        try:
+            model_can = str(split_mod._canonical_model(str(model_raw)))  # type: ignore[attr-defined]
+        except Exception:
+            model_can = str(model_raw)
+        try:
+            scaffold_can = str(split_mod._canonical_scaffold(str(scaffold_raw)))  # type: ignore[attr-defined]
+        except Exception:
+            scaffold_can = str(scaffold_raw)
+        model_can = str(model_can or "").strip()
+        scaffold_can = str(scaffold_can or "").strip()
+        if not model_can or not scaffold_can:
+            return None
+        return model_can, scaffold_can
 
     # No-op mode (but still drop invalid rows).
     if k <= 0:
@@ -1610,8 +1711,14 @@ def filter_subjects_by_min_models_per_scaffold(
     scaffolds_to_models: Dict[str, Set[str]] = defaultdict(set)
     for r in _iter_jsonl(in_path):
         subj = str(r.get("subject_id", "") or "").strip()
-        sc = filt._scaffold_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
-        m = filt._model_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
+        if bench == "terminal_bench":
+            ms = _terminal_bench_row_to_model_scaffold(r)
+            if ms is None:
+                continue
+            m, sc = ms
+        else:
+            sc = filt._scaffold_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
+            m = filt._model_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
         if sc is None or m is None:
             continue
         scaffolds_to_models[str(sc)].add(str(m))
@@ -1626,8 +1733,15 @@ def filter_subjects_by_min_models_per_scaffold(
         for r in _iter_jsonl(in_path):
             total += 1
             subj = str(r.get("subject_id", "") or "").strip()
-            sc = filt._scaffold_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
-            m = filt._model_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
+            if bench == "terminal_bench":
+                ms = _terminal_bench_row_to_model_scaffold(r)
+                if ms is None:
+                    dropped_unsplittable += 1
+                    continue
+                m, sc = ms
+            else:
+                sc = filt._scaffold_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
+                m = filt._model_for_subject(subj, treat_as_pro=bool(treat_as_pro))  # type: ignore[attr-defined]
             if sc is None or m is None:
                 dropped_unsplittable += 1
                 continue
@@ -1757,7 +1871,15 @@ def normalize_responses_jsonl(
                 except Exception:
                     out_resp[tid] = 1 if v else 0
             if out_resp:
-                f.write(json.dumps({"subject_id": sid, "responses": out_resp}) + "\n")
+                out_obj: Dict[str, object] = {"subject_id": sid, "responses": out_resp}
+                # Preserve Terminal-Bench per-subject model/scaffold metadata when present.
+                # The shared IRT loader can use these fields for (model, scaffold) decomposition
+                # instead of parsing `subject_id`.
+                if b == "terminal_bench":
+                    for k in ["model", "agent", "date"]:
+                        if k in obj:
+                            out_obj[k] = obj.get(k)
+                f.write(json.dumps(out_obj) + "\n")
 
 
 def iter_terminal_bench_items_from_jsonl(*, path: str) -> Iterator[base.ItemRecord]:
@@ -1802,7 +1924,6 @@ def build_multibench_obs_for_items(
     import torch
 
     keep: List[str] = [str(x) for x in keep_item_ids if str(x).strip()]
-    keep_set = set(keep)
     if not keep:
         raise ValueError("keep_item_ids was empty")
 
@@ -2203,6 +2324,34 @@ def train_irt_model_scaffold_1pl(
     theta_by_model: Dict[str, float] = {str(mid): float(theta_m[i]) for i, mid in enumerate(obs_dev.model_ids)}
     theta_by_scaffold: Dict[str, float] = {str(sid): float(theta_s[i]) for i, sid in enumerate(obs_dev.scaffold_ids)}
     diff_by_item: Dict[str, float] = {str(iid): float(b_out[i]) for i, iid in enumerate(obs_dev.item_ids)}
+
+    # Persist the centered abilities/difficulties as CSVs for easy downstream use.
+    # `ms.save_outputs(...)` may write additional artifacts, but these filenames are
+    # what we rely on elsewhere.
+    try:
+        with open(outp / "model_abilities.csv", "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=["model_id", "theta"])
+            w.writeheader()
+            for mid in sorted(theta_by_model.keys()):
+                w.writerow({"model_id": str(mid), "theta": float(theta_by_model[mid])})
+    except Exception:
+        pass
+    try:
+        with open(outp / "scaffold_abilities.csv", "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=["scaffold_id", "theta"])
+            w.writeheader()
+            for sid in sorted(theta_by_scaffold.keys()):
+                w.writerow({"scaffold_id": str(sid), "theta": float(theta_by_scaffold[sid])})
+    except Exception:
+        pass
+    try:
+        with open(outp / "items.csv", "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=["item_id", "b"])
+            w.writeheader()
+            for iid in sorted(diff_by_item.keys()):
+                w.writerow({"item_id": str(iid), "b": float(diff_by_item[iid])})
+    except Exception:
+        pass
     return theta_by_model, theta_by_scaffold, diff_by_item
 
 
@@ -2283,6 +2432,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         choices=["1d_1pl", "2d_1pl"],
         help="IRT model family for training. Default is 1D 1PL (Rasch).",
     )
+    p.add_argument(
+        "--theta_combine",
+        type=str,
+        default="sum",
+        choices=list(THETA_COMBINE_CHOICES),
+        help=(
+            "Functional form used to combine base LLM and scaffold abilities when scoring: "
+            "p(success)=sigmoid(combine(theta_model, theta_scaffold)-b_item). "
+            "Default 'sum' matches the historical Rasch-style additive logit."
+        ),
+    )
 
     # -----------------------------
     # Embedding model settings
@@ -2342,7 +2502,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument(
         "--verified_judge_features_dir",
         type=str,
-        default="llm_judge/features/verified_full.csv",
+        default="llm_judge/features/verified.csv",
         help="Verified judge features (CSV like llm_judge/features/verified.csv, or directory of per-item JSONs).",
     )
     p.add_argument(
@@ -2548,6 +2708,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             input_jsonl=verified_agent_results_raw,
             output_jsonl=verified_agent_results,
             min_models_per_scaffold=int(args.min_models_per_scaffold),
+            benchmark="verified",
             treat_as_pro=False,
         )
 
@@ -2559,6 +2720,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             input_jsonl=pro_agent_results_raw,
             output_jsonl=pro_agent_results,
             min_models_per_scaffold=int(args.min_models_per_scaffold),
+            benchmark="pro",
             treat_as_pro=True,
         )
 
@@ -2570,6 +2732,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             input_jsonl=terminal_agent_results_raw,
             output_jsonl=terminal_agent_results,
             min_models_per_scaffold=int(args.min_models_per_scaffold),
+            benchmark="terminal_bench",
             treat_as_pro=False,
         )
 
@@ -3066,6 +3229,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Oracle IRT (ID eval only): fit IRT on ALL eligible items (train + test).
     # This intentionally leaks fold test items; it is meant as an upper bound.
     # -----------------------------
+    oracle_root = os.path.join(str(args.out_dir), "irt_oracle")
     oracle_theta_by_agent: Dict[str, float] = {}
     oracle_diff_by_item: Dict[str, float] = {}
     if split_by in {"task", "agent", "observation"}:
@@ -3078,7 +3242,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             epochs=int(args.irt_epochs),
             device=str(args.irt_device),
             seed=int(args.seed),
-            out_dir=os.path.join(str(args.out_dir), "irt_oracle_full_agent_1pl"),
+            out_dir=os.path.join(str(oracle_root), "agent_1pl"),
         )
         base.set_torch_determinism(True)
         print(
@@ -3226,7 +3390,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     b = diff_by_item.get(str(item_id), None)
                     if b is None:
                         continue
-                    th = float(tm) + float(ts)
+                    th = _combine_model_scaffold_theta(float(tm), float(ts), combine=str(args.theta_combine))
                     scores.append(_sigmoid(th - float(b)))
                     labels.append(int(y_obs))
 
@@ -3269,7 +3433,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
         auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std} split_by={split_by}")
-        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
 
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
@@ -3647,7 +3810,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ts = theta_by_scaffold.get(scaffold, None)
                 if tm is None or ts is None:
                     continue
-                th = float(tm) + float(ts)
+                th = _combine_model_scaffold_theta(float(tm), float(ts), combine=str(args.theta_combine))
                 for item_id, y_obs in resp.items():
                     if split_by == "task":
                         if item_id not in test_set:
@@ -3716,20 +3879,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
         auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
-        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
         oracle_auc_mean = float(base.np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
         oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
-        print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
         baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
-        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
 
         # Save regression weights from the best fold.
         weights_meta = {
@@ -4141,7 +4301,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ts = theta_by_scaffold.get(scaffold, None)
                 if tm is None or ts is None:
                     continue
-                th = float(tm) + float(ts)
+                th = _combine_model_scaffold_theta(float(tm), float(ts), combine=str(args.theta_combine))
                 for item_id, y_obs in resp.items():
                     if split_by == "task":
                         if item_id not in test_set:
@@ -4153,7 +4313,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     z = z_by_item.get(item_id, None)
                     if z is None:
                         continue
-                    scores.append(1.0 / (1.0 + math.exp(-(th - float(z)))))
+                    scores.append(_sigmoid(th - float(z)))
                     labels.append(int(y_obs))
 
                     # Baseline.
@@ -4184,6 +4344,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_n_obs_folds.append(int(len(labels)))
             cv_test_n_items_scored_folds.append(int(len(z_by_item)))
 
+            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
+            print(
+                f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} baseline={baseline_label} "
+                f"oracle_irt_auc={fold_auc_oracle} n_obs={len(labels)} n_items_scored={len(z_by_item)}"
+            )
             if fold_auc == fold_auc and fold_auc > best_fold_auc:
                 best_fold_auc = float(fold_auc)
                 best_fold = int(fold)
@@ -4196,20 +4361,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
         auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
-        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
         oracle_auc_mean = float(base.np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
         oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
-        print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
         baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
-        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
 
         weights_meta = {
             "script": os.path.abspath(__file__),
@@ -4595,7 +4757,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ts = theta_by_scaffold.get(scaffold, None)
                 if tm is None or ts is None:
                     continue
-                th = float(tm) + float(ts)
+                th = _combine_model_scaffold_theta(float(tm), float(ts), combine=str(args.theta_combine))
                 for item_id, y_obs in resp.items():
                     if split_by == "task":
                         if item_id not in test_set:
@@ -4657,20 +4819,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
         auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
-        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
         oracle_auc_mean = float(base.np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
         oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
-        print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
         baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
-        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
 
         # Save regression weights from the best fold.
         model = best_model
@@ -4949,7 +5108,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ts = theta_by_scaffold.get(scaffold, None)
                 if tm is None or ts is None:
                     continue
-                th = float(tm) + float(ts)
+                th = _combine_model_scaffold_theta(float(tm), float(ts), combine=str(args.theta_combine))
                 for item_id, y_obs in resp.items():
                     if split_by == "task":
                         if item_id not in test_set:
@@ -4961,7 +5120,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     z = z_by_item.get(item_id, None)
                     if z is None:
                         continue
-                    scores.append(1.0 / (1.0 + math.exp(-(th - float(z)))))
+                    scores.append(_sigmoid(th - float(z)))
                     labels.append(int(y_obs))
 
                     # Baseline.
@@ -4990,6 +5149,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_auc_folds_empirical_model.append(float(fold_auc_emp))
             cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
             cv_test_n_obs_folds.append(int(len(labels)))
+            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
+            print(
+                f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} baseline={baseline_label} "
+                f"oracle_irt_auc={fold_auc_oracle} n_obs={len(labels)}"
+            )
             if fold_auc == fold_auc and fold_auc > best_fold_auc:
                 best_fold_auc = float(fold_auc)
                 best_fold = int(fold)
@@ -5007,20 +5171,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         auc_mean = float(base.np.nanmean(auc_arr)) if auc_arr.size else float("nan")
         auc_std = float(base.np.nanstd(auc_arr, ddof=0)) if auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV test ROC-AUC: mean={auc_mean} std={auc_std}")
-        print("Per-fold ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds]))
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
         oracle_auc_mean = float(base.np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
         oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
-        print("Per-fold oracle IRT ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_oracle_irt]))
 
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
         baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std} baseline={baseline_label}")
-        print("Per-fold baseline ROC-AUC: " + ", ".join([str(x) for x in cv_test_auc_folds_empirical_model]))
 
         # Use the best-fold model for saving weights + predicting excluded items.
         model = best_model
@@ -5800,6 +5961,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             z_by_item=z_by_item,
             theta_by_model=theta_by_model,
             theta_by_scaffold=theta_by_scaffold,
+            theta_combine=str(args.theta_combine),
         )
         print(f"OOD ROC-AUC (4th benchmark): {ood_auc}  (agent_results={ood_agent_results})")
 
@@ -5898,7 +6060,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 device=str(args.irt_device),
                 seed=int(args.seed),
                 lr=float(args.irt_lr),
-                out_dir=os.path.join(str(args.out_dir), "irt_oracle_full_including_ood", _irt_out_dir_name(irt_model)),
+                out_dir=os.path.join(str(oracle_root), "including_ood", _irt_out_dir_name(irt_model)),
             )
             base.set_torch_determinism(True)
 
@@ -5915,6 +6077,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 z_by_item=z_oracle_by_item,
                 theta_by_model=oracle_theta_by_model_ood,
                 theta_by_scaffold=oracle_theta_by_scaffold_ood,
+                theta_combine=str(args.theta_combine),
             )
             print(f"Oracle: {ood_oracle_auc}")
         except Exception as e:
@@ -5931,6 +6094,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             {
                 "method": str(method),
                 "ood_benchmark": str(ood_key),
+                "theta_combine": str(args.theta_combine),
                 "auc": float(ood_auc),
                 "empirical_model_success_auc": float(ood_emp_auc),
                 "oracle_irt_auc": float(ood_oracle_auc),

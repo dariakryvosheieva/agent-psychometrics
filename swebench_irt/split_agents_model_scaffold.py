@@ -199,6 +199,30 @@ def _canonical_model(m: str) -> str:
     if not ml:
         return ml
     leaf = _model_leaf(ml)
+    # Merge known "pretty-name" aliases before the pretty-name preservation rule below.
+    # This prevents accidental fragmentation when two human-readable variants refer to the same base model.
+    pretty_low = leaf.strip().lower()
+    # Canonicalize Claude v4+ ordering: "Claude <ver> <size>" -> "Claude <size> <ver>".
+    # Apply before the "pretty name preservation" rule, otherwise we'd lock in the non-canonical order.
+    m_pretty = re.fullmatch(r"claude\s+(\d+(?:\.\d+)?)\s+(sonnet|opus|haiku)\s*", pretty_low)
+    if m_pretty is not None:
+        ver = m_pretty.group(1)
+        size = m_pretty.group(2)
+        major = int(ver.split(".", 1)[0])
+        if major >= 4:
+            return f"Claude {size.title()} {ver}"
+    if pretty_low in {"claude 4.5 sonnet", "claude 4.5 connet"}:
+        return "Claude Sonnet 4.5"
+    if pretty_low in {"claude 4.5 opus"}:
+        return "Claude Opus 4.5"
+    # Merge Kimi K2 into Kimi K2 Instruct (analysis convention).
+    if pretty_low in {"kimi k2", "kimi k2 instruct"}:
+        return "Kimi K2 Instruct"
+    # If the source is already using a “pretty” name (e.g. Terminal-Bench columns like
+    # "Claude Sonnet 4.5", "Claude Opus 4.6", "GPT-5.3-Codex"), preserve it verbatim.
+    # This avoids lossy re-canon (e.g. dropping "5.3" or changing separator style).
+    if any(ch.isupper() for ch in leaf) and ((" " in leaf) or bool(re.match(r"GPT-\d", leaf))):
+        return leaf
     # Normalize separators: many exports use underscores; some use spaces in "pretty" names.
     # Treat spaces like hyphens so canonicalization is stable across sources.
     low = re.sub(r"\s+", "-", leaf.lower().replace("_", "-"))
@@ -243,30 +267,35 @@ def _canonical_model(m: str) -> str:
 
     # Claude 4.5 family (Terminal-Bench uses hyphenated tokens)
     if re.fullmatch(r"claude-sonnet-4-5", low):
-        return "claude-sonnet-4-5"
+        return "Claude Sonnet 4.5"
     if re.fullmatch(r"claude-4[-_]?5-sonnet", low) or re.fullmatch(r"claude-4-5-sonnet", low):
-        return "claude-sonnet-4-5"
+        return "Claude Sonnet 4.5"
     if re.fullmatch(r"claude-haiku-4-5", low):
-        return "Claude 4.5 Haiku"
+        return "Claude Haiku 4.5"
     # Opus variants seen in Terminal-Bench / OOD exports.
     # IMPORTANT: keep 4 vs 4.5 distinct.
     # Some datasets use "claude-4-opus" while others use "claude-opus-4" for the same model.
     if re.fullmatch(r"claude-4-opus", low) or re.fullmatch(r"claude-4[-_]?0-opus", low):
-        return "Claude 4 Opus"
+        return "Claude Opus 4"
     if re.fullmatch(r"claude-opus-4", low):
-        return "Claude 4 Opus"
-    if re.fullmatch(r"claude-opus-4-5(?:[-_]?\\d{8})?", low) or re.fullmatch(r"claude-opus-4\.5", low):
-        return "Claude 4.5 Opus"
+        return "Claude Opus 4"
+    if (
+        re.fullmatch(r"claude-opus-4-5(?:[-_]?\\d{8})?", low)
+        or re.fullmatch(r"claude-opus-4\.5", low)
+        or re.fullmatch(r"claude-4[-_]?5-opus", low)
+        or re.fullmatch(r"claude-4-5-opus", low)
+    ):
+        return "Claude Opus 4.5"
     if re.fullmatch(r"claude-opus-4-1", low) or re.fullmatch(r"claude-opus-4\.1", low):
         return "Claude Opus 4.1"
 
     # Claude 4 Sonnet naming variants seen in OOD exports (e.g. GSO)
     if re.fullmatch(r"claude-sonnet-4", low):
-        return "Claude 4 Sonnet"
+        return "Claude Sonnet 4"
 
     # Claude Sonnet 4.5 dot variant (e.g. "claude-sonnet-4.5")
     if re.fullmatch(r"claude-sonnet-4\.5", low):
-        return "claude-sonnet-4-5"
+        return "Claude Sonnet 4.5"
 
     # Gemini 3 naming variants in some OOD exports
     if low == "gemini-3-flash":
@@ -329,7 +358,7 @@ def _canonical_model(m: str) -> str:
     # - claude-4-sonnet-20250514
     # - claude_4_sonnet  (becomes claude-4-sonnet after '_' -> '-')
     if re.fullmatch(r"claude-4-sonnet(?:-\d{8})?(?:-updated)?", low) or low == "claude4sonnet":
-        return "Claude 4 Sonnet"
+        return "Claude Sonnet 4"
     # Normalize Amazon Nova Premier v1.0 variants
     # Examples:
     # - amazon.nova-premier-v1.0
@@ -357,7 +386,7 @@ def _canonical_model(m: str) -> str:
         "claude-2": "Claude 2",
         "claude3opus": "Claude 3 Opus",
         "claude-3-opus": "Claude 3 Opus",
-        "kimi-k2": "Kimi K2",
+        "kimi-k2": "Kimi K2 Instruct",
     }
     return mapping.get(low, leaf)
 
@@ -672,9 +701,18 @@ def canonicalize_pro_model(model_name: str) -> str:
     base = re.sub(_PRO_TRAILING_SUFFIX_RE, "", raw).strip()
     low = base.lower()
 
-    # Merge "Claude Sonnet 4" and "Claude 4 Sonnet" -> Verified's "Claude 4 Sonnet".
-    if low in {"claude 4 sonnet", "claude sonnet 4"}:
-        return "Claude 4 Sonnet"
+    # Canonicalize Claude v4+ ordering: "Claude <ver> <size>" -> "Claude <size> <ver>".
+    m_pretty = re.fullmatch(r"claude\s+(\d+(?:\.\d+)?)\s+(sonnet|opus|haiku)\s*", low)
+    if m_pretty is not None:
+        ver = m_pretty.group(1)
+        size = m_pretty.group(2)
+        major = int(ver.split(".", 1)[0])
+        if major >= 4:
+            return f"Claude {size.title()} {ver}"
+
+    # Merge "Claude Sonnet 4" and "Claude 4 Sonnet" -> canonical "Claude Sonnet 4".
+    if low in {"claude sonnet 4"}:
+        return "Claude Sonnet 4"
 
     # Merge Gemini 2.5 Pro Preview variants (paper/debug) -> a single label.
     if low == "gemini 2.5 pro preview":
@@ -694,7 +732,7 @@ def canonicalize_pro_model(model_name: str) -> str:
 
     # Merge Claude 4.5 Sonnet with Verified's token (kept as-is in Verified results).
     if low in {"claude 4.5 sonnet", "claude 4.5 connet"}:
-        return "claude-sonnet-4-5"
+        return "Claude Sonnet 4.5"
 
     # Merge Kimi (paper) with Verified's "kimi_k2_instruct".
     if low == "kimi":
@@ -717,7 +755,7 @@ def _read_pro_agents_results_jsonl(path: Path) -> list[str]:
                 continue
             records.append(json.loads(s))
 
-    prefer_paper_models = {"Claude 4 Sonnet", "Gemini 2.5 Pro Preview"}
+    prefer_paper_models = {"Claude Sonnet 4", "Gemini 2.5 Pro Preview"}
     pro_is_paper = {str(r["subject_id"]): ("paper" in str(r["subject_id"]).lower()) for r in records}
     pro_canon = {str(r["subject_id"]): canonicalize_pro_model(str(r["subject_id"])) for r in records}
     have_paper_for_model = {
@@ -732,6 +770,58 @@ def _read_pro_agents_results_jsonl(path: Path) -> list[str]:
             continue
         out.append(subj)
     return out
+
+
+def _read_terminal_bench_subjects_and_ms_jsonl(path: Path) -> tuple[list[str], dict[str, tuple[str, str]]]:
+    """
+    Read Terminal-Bench 2.0 leaderboard scrape JSONL.
+
+    Returns:
+      - list of subject_id strings (agent ids used in response matrices)
+      - mapping {subject_id: (model, scaffold)} using canonical “pretty” names
+
+    Preferred schema:
+      - obj["model"] -> model (base LLM)           [pretty]
+      - obj["agent"] -> scaffold/agent name       [pretty]
+
+    Back-compat (current scrape output in this repo):
+      - obj["date"]  -> model (base LLM)           [pretty]
+      - obj["model"] -> scaffold/agent name        [pretty]
+      - obj["agent"] is a numeric rank string
+    """
+    agents: list[str] = []
+    ms_by_agent: dict[str, tuple[str, str]] = {}
+    with path.open("r") as f:
+        for line in f:
+            s = (line or "").strip()
+            if not s:
+                continue
+            obj = json.loads(s)
+            sid = str(obj.get("subject_id", "") or "").strip()
+            if not sid:
+                continue
+            agents.append(sid)
+
+            m1 = str(obj.get("model", "") or "").strip()
+            a1 = str(obj.get("agent", "") or "").strip()
+            if m1 and a1 and not a1.isdigit():
+                model_raw, scaffold_raw = m1, a1
+            else:
+                m2 = str(obj.get("date", "") or "").strip()
+                sc2 = m1
+                if not (m2 and sc2):
+                    continue
+                model_raw, scaffold_raw = m2, sc2
+
+            low = str(model_raw).strip().lower()
+            if "," in model_raw or low == "multiple":
+                continue
+
+            model = _canonical_model(model_raw)
+            scaffold = _canonical_scaffold(scaffold_raw)
+            if model and scaffold:
+                ms_by_agent[sid] = (str(model), str(scaffold))
+    return agents, ms_by_agent
 
 
 def main() -> None:
@@ -781,6 +871,14 @@ def main() -> None:
     terminal_bench_agents = (
         _read_agents_results_jsonl(terminal_bench_results_jsonl) if terminal_bench_results_jsonl else []
     )
+    terminal_bench_ms_by_agent: dict[str, tuple[str, str]] = {}
+    if terminal_bench_results_jsonl is not None:
+        try:
+            terminal_bench_agents, terminal_bench_ms_by_agent = _read_terminal_bench_subjects_and_ms_jsonl(
+                terminal_bench_results_jsonl
+            )
+        except Exception:
+            terminal_bench_ms_by_agent = {}
 
     # Union of names (we record source(s) per agent).
     sources_by_agent: dict[str, set[str]] = {}
@@ -805,6 +903,8 @@ def main() -> None:
         if "pro_results_jsonl" in sources:
             model = canonicalize_pro_model(agent)
             scaffold = SWEBENCH_PRO_ASSUMED_SCAFFOLD
+        elif "terminal_bench_results_jsonl" in sources and agent in terminal_bench_ms_by_agent:
+            model, scaffold = terminal_bench_ms_by_agent[agent]
         else:
             split = split_agent_name(agent)
             if split is None:
