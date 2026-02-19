@@ -221,6 +221,9 @@ def _canonical_model(m: str) -> str:
     # Merge spaced Qwen3 Coder labels into Terminal-Bench canonical.
     if pretty_low in {"qwen 3 coder 480b", "qwen3 coder 480b"}:
         return "Qwen3-Coder-480B-A35B-Instruct"
+    # Merge GPT-5 Codex spacing variants into hyphenated canonical.
+    if pretty_low in {"gpt-5 codex", "gpt-5-codex"}:
+        return "GPT-5-Codex"
     # Normalize GLM pretty labels to the canonical "GLM <ver>" format.
     if pretty_low in {"glm-4.5", "glm 4.5", "glm4-5", "glm4.5", "glm-4-5"}:
         return "GLM 4.5"
@@ -259,10 +262,10 @@ def _canonical_model(m: str) -> str:
         # Preserve Codex variants
         if "codex" in low:
             if "codex-mini" in low:
-                return f"{gpt5_base} Codex Mini"
+                return f"{gpt5_base}-Codex Mini"
             if "codex-max" in low:
-                return f"{gpt5_base} Codex Max"
-            return f"{gpt5_base} Codex"
+                return f"{gpt5_base}-Codex Max"
+            return f"{gpt5_base}-Codex"
         return gpt5_base
 
     # OpenAI open-weight family (keep sizes distinct; Pro "GPT OSS" treated as 120B)
@@ -747,7 +750,7 @@ def canonicalize_pro_model(model_name: str) -> str:
 
     # Merge GPT-5 Codex naming variants.
     if low in {"gpt 5 codex", "gpt-5-codex", "gpt-5 codex", "gpt5-codex", "gpt5 codex"}:
-        return "GPT-5 Codex"
+        return "GPT-5-Codex"
 
     # Treat Pro "GPT OSS" as the 120B model.
     if low == "gpt oss" or low == "gpt-oss" or low == "gptoss":
