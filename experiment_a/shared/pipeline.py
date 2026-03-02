@@ -9,7 +9,7 @@ The experiments differ only in:
 """
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -46,22 +46,6 @@ from experiment_a.shared.baselines import (
     OraclePredictor,
     DifficultyPredictorAdapter,
 )
-@dataclass
-class ExperimentSpec:
-    """Specification for an experiment.
-
-    Attributes:
-        name: Human-readable experiment name (e.g., "SWE-bench", "TerminalBench")
-        is_binomial: Whether responses are binomial (True) or binary (False)
-        irt_cache_dir: Directory for caching fold-specific IRT models
-    """
-
-    name: str
-    is_binomial: bool
-    irt_cache_dir: Path
-
-
-# Import CVPredictor protocol for type hints
 from experiment_a.shared.cross_validation import CVPredictor
 
 
@@ -111,7 +95,7 @@ def build_cv_predictors(
     LLM judge feature columns are auto-detected from the CSV.
 
     Args:
-        config: Experiment configuration (ExperimentAConfig or TerminalBenchConfig)
+        config: Experiment configuration (ExperimentAConfig)
         root: Root directory for resolving relative paths
         extra_embeddings_paths: List of (name, path) tuples for additional embedding
             sources to compare (ablation study).
@@ -227,7 +211,6 @@ def build_cv_predictors(
 
 def run_cross_validation(
     config: Any,
-    spec: ExperimentSpec,
     root: Path,
     k: int = 5,
     expansion_mode: Optional[str] = None,
@@ -242,8 +225,8 @@ def run_cross_validation(
     Uses the unified run_cv function for ALL predictors including baselines.
 
     Args:
-        config: Experiment configuration
-        spec: Experiment specification
+        config: Experiment configuration (ExperimentAConfig with display_name,
+            is_binomial, irt_cache_dir, and all data paths)
         root: Root directory for resolving relative paths
         k: Number of folds
         expansion_mode: Override AUC expansion method ("binary", "expand", or None)
@@ -264,7 +247,7 @@ def run_cross_validation(
         Dict with CV results for each method
     """
     print("=" * 60)
-    print(f"EXPERIMENT A: {k}-FOLD CROSS-VALIDATION - {spec.name}")
+    print(f"EXPERIMENT A: {k}-FOLD CROSS-VALIDATION - {config.display_name}")
     print("=" * 60)
 
     # Resolve paths relative to root
@@ -278,12 +261,12 @@ def run_cross_validation(
 
     # Optionally filter unsolved tasks before generating folds
     if config.exclude_unsolved:
-        if spec.is_binomial:
+        if config.is_binomial:
             responses = _load_binomial_responses(responses_path)
         else:
             responses = _load_binary_responses(responses_path)
         all_task_ids, n_excluded = filter_unsolved_tasks(
-            all_task_ids, responses, spec.is_binomial
+            all_task_ids, responses, config.is_binomial
         )
         print(f"\nExcluded {n_excluded} unsolved tasks ({len(all_task_ids)} remaining)")
 
@@ -304,8 +287,8 @@ def run_cross_validation(
             fold_idx=fold_idx,
             k_folds=k,
             split_seed=config.split_seed,
-            is_binomial=spec.is_binomial,
-            irt_cache_dir=spec.irt_cache_dir,
+            is_binomial=config.is_binomial,
+            irt_cache_dir=root / config.irt_cache_dir,
             exclude_unsolved=config.exclude_unsolved,
         )
 
@@ -318,7 +301,7 @@ def run_cross_validation(
     )
 
     # Determine if we should compute binomial metrics
-    compute_pass_rate_mse = spec.is_binomial
+    compute_pass_rate_mse = config.is_binomial
 
     # Results dict
     cv_results: Dict[str, CrossValidationResult] = {}
@@ -350,7 +333,7 @@ def run_cross_validation(
 
     # Print summary
     print("\n" + "=" * 75)
-    print(f"SUMMARY: {spec.name} ({k}-FOLD CROSS-VALIDATION)")
+    print(f"SUMMARY: {config.display_name} ({k}-FOLD CROSS-VALIDATION)")
     print("=" * 75)
 
     # Sort by mean AUC descending

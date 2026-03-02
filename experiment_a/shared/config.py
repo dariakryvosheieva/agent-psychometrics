@@ -2,8 +2,6 @@
 
 All datasets share the same config structure. Per-dataset defaults are stored
 in DATASET_DEFAULTS and accessed via ExperimentAConfig.for_dataset().
-
-TerminalBenchConfig extends ExperimentAConfig with binary/binomial mode support.
 """
 
 from dataclasses import dataclass, asdict, field
@@ -11,10 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-# Per-dataset defaults. Used by ExperimentAConfig.for_dataset() and build_spec().
-# Each entry contains config field defaults plus experiment spec metadata:
-#   - display_name: Human-readable name for output (e.g., "SWE-bench Verified")
-#   - is_binomial: Whether responses are binomial (True) or binary (False)
+# Per-dataset defaults. Used by ExperimentAConfig.for_dataset().
 # The irt_cache_dir is derived from output_dir / "irt_splits".
 DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
     "swebench": {
@@ -87,17 +82,6 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-# Fields in DATASET_DEFAULTS that are spec metadata, not config fields
-_SPEC_FIELDS = {"display_name", "is_binomial"}
-
-# TerminalBench binary mode paths (collapsed: any success out of 5 = 1)
-_TB_BINARY_DEFAULTS = {
-    "abilities_path": Path("chris_output/terminal_bench_2.0/1d_1pl/abilities.csv"),
-    "items_path": Path("chris_output/terminal_bench_2.0/1d_1pl/items.csv"),
-    "responses_path": Path("data/terminal_bench/terminal_bench_2.0.jsonl"),
-    "output_dir": Path("chris_output/experiment_a_terminalbench_binary"),
-}
-
 _PATH_FIELDS = {
     "abilities_path", "items_path", "responses_path",
     "output_dir", "embeddings_path", "llm_judge_features_path",
@@ -112,6 +96,8 @@ class ExperimentAConfig:
     dataset-specific defaults. Fields can be overridden via constructor kwargs.
     """
 
+    display_name: str = ""
+    is_binomial: bool = False
     abilities_path: Path = Path("")
     items_path: Path = Path("")
     responses_path: Path = Path("")
@@ -125,6 +111,11 @@ class ExperimentAConfig:
     llm_judge_features_path: Optional[Path] = None
     exclude_unsolved: bool = False
 
+    @property
+    def irt_cache_dir(self) -> Path:
+        """Directory for caching fold-specific IRT models."""
+        return self.output_dir / "irt_splits"
+
     @classmethod
     def for_dataset(cls, dataset: str, **overrides) -> "ExperimentAConfig":
         """Create a config with dataset-specific defaults.
@@ -137,11 +128,7 @@ class ExperimentAConfig:
             raise ValueError(
                 f"Unknown dataset: {dataset}. Valid: {list(DATASET_DEFAULTS.keys())}"
             )
-        # Filter out spec metadata fields — only pass config fields
-        defaults = {
-            k: v for k, v in DATASET_DEFAULTS[dataset].items()
-            if k not in _SPEC_FIELDS
-        }
+        defaults = dict(DATASET_DEFAULTS[dataset])
         defaults.update(overrides)
         return cls(**defaults)
 
@@ -167,56 +154,3 @@ class ExperimentAConfig:
         return cls(**converted)
 
 
-def build_spec(dataset: str, root: Path) -> "ExperimentSpec":
-    """Build an ExperimentSpec from the dataset registry.
-
-    Args:
-        dataset: Dataset short name (e.g., "swebench", "gso").
-        root: Project root directory (for resolving irt_cache_dir).
-
-    Returns:
-        ExperimentSpec for the dataset.
-    """
-    from experiment_a.shared.pipeline import ExperimentSpec
-
-    if dataset not in DATASET_DEFAULTS:
-        raise ValueError(
-            f"Unknown dataset: {dataset}. Valid: {list(DATASET_DEFAULTS.keys())}"
-        )
-    defaults = DATASET_DEFAULTS[dataset]
-    return ExperimentSpec(
-        name=defaults["display_name"],
-        is_binomial=defaults["is_binomial"],
-        irt_cache_dir=root / defaults["output_dir"] / "irt_splits",
-    )
-
-
-@dataclass
-class TerminalBenchConfig(ExperimentAConfig):
-    """TerminalBench-specific config with binary/binomial mode support.
-
-    Extends ExperimentAConfig with:
-    - use_binary: Switch between binomial (default) and binary modes
-    - repo_path: Path to cloned terminal-bench repo (for task.yaml + solution.sh)
-    """
-
-    use_binary: bool = False
-    repo_path: Path = Path("terminal-bench")
-
-    def __post_init__(self):
-        """Switch data paths when use_binary=True."""
-        if self.use_binary:
-            tb_defaults = DATASET_DEFAULTS["terminalbench"]
-            for field_name, binary_path in _TB_BINARY_DEFAULTS.items():
-                if getattr(self, field_name) == tb_defaults[field_name]:
-                    setattr(self, field_name, binary_path)
-
-    @classmethod
-    def for_dataset(cls, dataset: str = "terminalbench", **overrides) -> "TerminalBenchConfig":
-        """Create a TerminalBench config with defaults."""
-        defaults = {
-            k: v for k, v in DATASET_DEFAULTS.get(dataset, DATASET_DEFAULTS["terminalbench"]).items()
-            if k not in _SPEC_FIELDS
-        }
-        defaults.update(overrides)
-        return cls(**defaults)

@@ -73,20 +73,11 @@ def run_single_dataset(
     Returns:
         Tuple of (dataset_display_name, results_dict).
     """
-    from experiment_a.shared.config import (
-        DATASET_DEFAULTS, ExperimentAConfig, TerminalBenchConfig, build_spec,
-    )
+    from experiment_a.shared.config import ExperimentAConfig
     from experiment_a.shared.pipeline import run_cross_validation
-
-    defaults = DATASET_DEFAULTS[dataset]
-    display_name = defaults["display_name"]
-    spec = build_spec(dataset, ROOT)
 
     # Build config overrides
     config_kwargs: Dict[str, Any] = {}
-
-    if output_base:
-        config_kwargs["output_dir"] = output_base / dataset
 
     # Add ablation paths if requested
     if judge_ablation and dataset in JUDGE_ABLATION_PATHS:
@@ -100,11 +91,10 @@ def run_single_dataset(
             else:
                 extra_llm_judge_paths = ablation_paths
 
-    # Use TerminalBenchConfig for terminalbench, base config otherwise
-    config_class = TerminalBenchConfig if dataset == "terminalbench" else ExperimentAConfig
     try:
-        config = config_class.for_dataset(dataset, **config_kwargs)
+        config = ExperimentAConfig.for_dataset(dataset, **config_kwargs)
     except Exception as e:
+        display_name = DATASET_DEFAULTS[dataset]["display_name"]
         return display_name, {"error": f"Config error: {e}"}
 
     # Set up coefficient extraction if requested
@@ -116,7 +106,7 @@ def run_single_dataset(
     # Run the experiment
     try:
         results = run_cross_validation(
-            config, spec, ROOT, k_folds,
+            config, ROOT, k_folds,
             extra_embeddings_paths=extra_embeddings_paths,
             extra_llm_judge_paths=extra_llm_judge_paths,
             diagnostics_extractors=diagnostics_extractors,
@@ -136,7 +126,7 @@ def run_single_dataset(
                 coeffs = [d for d in fold_diagnostics if d is not None]
                 if coeffs:
                     print(f"\n{'=' * 80}")
-                    print(f"LLM JUDGE COEFFICIENT ANALYSIS — {display_name}")
+                    print(f"LLM JUDGE COEFFICIENT ANALYSIS — {config.display_name}")
                     print(f"{'=' * 80}")
                     print_coefficient_table(coeffs)
 
@@ -146,14 +136,14 @@ def run_single_dataset(
                         save_coefficient_bar_chart(
                             coeffs,
                             chart_dir / "coefficient_bar_chart.png",
-                            title=f"Mean Coefficient Magnitude ({display_name})",
+                            title=f"Mean Coefficient Magnitude ({config.display_name})",
                         )
 
-        return display_name, results
+        return config.display_name, results
 
     except Exception as e:
         import traceback
-        return display_name, {"error": f"Execution error: {e}\n{traceback.format_exc()}"}
+        return config.display_name, {"error": f"Execution error: {e}\n{traceback.format_exc()}"}
 
 
 def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:

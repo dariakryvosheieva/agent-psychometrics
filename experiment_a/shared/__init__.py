@@ -4,7 +4,6 @@ This module provides the pipeline orchestration specific to Experiment A.
 """
 
 from experiment_a.shared.pipeline import (
-    ExperimentSpec,
     CVPredictorConfig,
     build_cv_predictors,
     run_cross_validation,
@@ -27,7 +26,6 @@ from experiment_a.shared.feature_irt import (
 
 __all__ = [
     # Pipeline
-    "ExperimentSpec",
     "CVPredictorConfig",
     "build_cv_predictors",
     "run_cross_validation",
