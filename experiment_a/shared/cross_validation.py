@@ -245,7 +245,7 @@ def _run_single_fold(
     }
 
 
-def run_cv(
+def evaluate_predictor_cv(
     predictor: CVPredictor,
     folds: List[Tuple[List[str], List[str]]],
     load_fold_data: Callable[[List[str], List[str], int], ExperimentData],

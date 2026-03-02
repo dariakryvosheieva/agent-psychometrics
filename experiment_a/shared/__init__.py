@@ -6,13 +6,13 @@ This module provides the pipeline orchestration specific to Experiment A.
 from experiment_a.shared.pipeline import (
     CVPredictorConfig,
     build_cv_predictors,
-    run_cross_validation,
+    cross_validate_all_predictors,
 )
 from experiment_a.shared.cross_validation import (
     CVPredictor,
     CrossValidationResult,
     k_fold_split_tasks,
-    run_cv,
+    evaluate_predictor_cv,
 )
 from experiment_a.shared.baselines import (
     ConstantPredictor,
@@ -28,12 +28,12 @@ __all__ = [
     # Pipeline
     "CVPredictorConfig",
     "build_cv_predictors",
-    "run_cross_validation",
+    "cross_validate_all_predictors",
     # Cross-validation
     "CVPredictor",
     "CrossValidationResult",
     "k_fold_split_tasks",
-    "run_cv",
+    "evaluate_predictor_cv",
     # Baseline predictors
     "ConstantPredictor",
     "OraclePredictor",

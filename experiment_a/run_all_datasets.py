@@ -74,7 +74,7 @@ def run_single_dataset(
         Tuple of (dataset_display_name, results_dict).
     """
     from experiment_a.shared.config import ExperimentAConfig
-    from experiment_a.shared.pipeline import run_cross_validation
+    from experiment_a.shared.pipeline import cross_validate_all_predictors
 
     # Build config overrides
     config_kwargs: Dict[str, Any] = {}
@@ -105,7 +105,7 @@ def run_single_dataset(
 
     # Run the experiment
     try:
-        results = run_cross_validation(
+        results = cross_validate_all_predictors(
             config, ROOT, k_folds,
             extra_embeddings_paths=extra_embeddings_paths,
             extra_llm_judge_paths=extra_llm_judge_paths,
@@ -150,7 +150,7 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
     """Extract key metrics from experiment results.
 
     Args:
-        results: Raw results dictionary from run_cross_validation.
+        results: Raw results dictionary from cross_validate_all_predictors.
 
     Returns:
         Dictionary mapping method name -> mean AUC.

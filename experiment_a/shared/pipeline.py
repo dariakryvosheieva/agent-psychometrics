@@ -38,7 +38,7 @@ from experiment_ab_shared.dataset import (
 
 from experiment_a.shared.cross_validation import (
     k_fold_split_tasks,
-    run_cv,
+    evaluate_predictor_cv,
     CrossValidationResult,
 )
 from experiment_a.shared.baselines import (
@@ -209,7 +209,7 @@ def build_cv_predictors(
     return configs
 
 
-def run_cross_validation(
+def cross_validate_all_predictors(
     config: Any,
     root: Path,
     k: int = 5,
@@ -315,7 +315,7 @@ def run_cross_validation(
         if diagnostics_extractors and pc.name in diagnostics_extractors:
             extractor = diagnostics_extractors[pc.name]
 
-        cv_results[pc.name] = run_cv(
+        cv_results[pc.name] = evaluate_predictor_cv(
             pc.predictor,
             folds,
             load_fold_data,

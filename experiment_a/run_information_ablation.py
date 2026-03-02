@@ -27,7 +27,7 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
 from experiment_a.shared.config import ExperimentAConfig
-from experiment_a.shared.pipeline import run_cross_validation
+from experiment_a.shared.pipeline import cross_validate_all_predictors
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -212,7 +212,7 @@ def run_experiment(embeddings_path: Path, llm_judge_path: Path, k_folds: int) ->
     )
 
     # Run cross-validation directly
-    cv_output = run_cross_validation(config, ROOT, k=k_folds)
+    cv_output = cross_validate_all_predictors(config, ROOT, k=k_folds)
     cv_results = cv_output["cv_results"]
 
     # Extract results from the cv_results dict

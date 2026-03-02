@@ -117,7 +117,7 @@ def make_llm_coef_extractor():
     """Create a diagnostics extractor for LLM Judge Ridge coefficients.
 
     Returns a callback suitable for use as a diagnostics_extractor in
-    run_cross_validation(). The callback extracts coefficients from a
+    cross_validate_all_predictors(). The callback extracts coefficients from a
     DifficultyPredictorAdapter wrapping a FeatureBasedPredictor.
 
     Returns:

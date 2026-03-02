@@ -24,7 +24,7 @@ from experiment_a.shared import (
     OraclePredictor,
     DifficultyPredictorAdapter,
     JointTrainingCVPredictor,
-    run_cv,
+    evaluate_predictor_cv,
     k_fold_split_tasks,
 )
 
@@ -42,6 +42,6 @@ __all__ = [
     "OraclePredictor",
     "DifficultyPredictorAdapter",
     "JointTrainingCVPredictor",
-    "run_cv",
+    "evaluate_predictor_cv",
     "k_fold_split_tasks",
 ]
