@@ -51,8 +51,6 @@ JUDGE_ABLATION_PATHS: Dict[str, Dict[str, Path]] = {
 
 def run_single_dataset(
     dataset: str,
-    use_unified_judge: bool = False,
-    unified_judge_suffix: str = "",
     output_base: Optional[Path] = None,
     k_folds: int = 5,
     n_jobs_methods: int = 1,
@@ -67,8 +65,6 @@ def run_single_dataset(
 
     Args:
         dataset: Dataset short name (e.g., "swebench", "gso").
-        use_unified_judge: Whether to use unified judge features.
-        unified_judge_suffix: Suffix to append to unified judge directory (e.g., '_core').
         output_base: Base directory for outputs.
         k_folds: Number of CV folds.
         n_jobs_methods: Number of parallel jobs for method execution.
@@ -94,17 +90,6 @@ def run_single_dataset(
     # Build config overrides
     config_kwargs: Dict[str, Any] = {}
 
-    if not use_unified_judge:
-        config_kwargs["llm_judge_features_path"] = None
-    elif unified_judge_suffix:
-        # Modify the default judge path with the suffix
-        judge_path = defaults["llm_judge_features_path"]
-        parent_with_suffix = judge_path.parent.parent / (judge_path.parent.name + unified_judge_suffix)
-        judge_path = parent_with_suffix / judge_path.name
-        if not judge_path.exists():
-            return display_name, {"error": f"Unified judge features not found: {judge_path}"}
-        config_kwargs["llm_judge_features_path"] = judge_path
-
     if output_base:
         config_kwargs["output_dir"] = output_base / dataset
 
@@ -120,7 +105,7 @@ def run_single_dataset(
             else:
                 extra_llm_judge_paths = ablation_paths
 
-    # Use TerminalBenchConfig for terminalbench (supports binary mode), base config otherwise
+    # Use TerminalBenchConfig for terminalbench, base config otherwise
     config_class = TerminalBenchConfig if dataset == "terminalbench" else ExperimentAConfig
     try:
         config = config_class.for_dataset(dataset, **config_kwargs)
@@ -137,7 +122,6 @@ def run_single_dataset(
     try:
         results = run_cross_validation(
             config, spec, ROOT, k_folds,
-            metadata_loader=None,
             n_jobs_methods=n_jobs_methods,
             n_jobs_folds=n_jobs_folds,
             extra_embeddings_paths=extra_embeddings_paths,
@@ -310,18 +294,6 @@ def main():
         description="Run Experiment A on all datasets and produce summary table"
     )
     parser.add_argument(
-        "--unified_judge",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Use unified LLM judge features (default: True). Use --no-unified_judge for dataset-specific features.",
-    )
-    parser.add_argument(
-        "--unified_judge_suffix",
-        type=str,
-        default="",
-        help="Suffix to append to unified judge directory names (e.g., '_core' for filtered features).",
-    )
-    parser.add_argument(
         "--output",
         type=Path,
         help="Output CSV file path (optional)",
@@ -436,7 +408,6 @@ def main():
     training_method = "Feature-IRT (joint training)" if args.feature_irt else "Ridge regression"
     print(f"Running Experiment A on {len(datasets_to_run)} datasets...")
     print(f"Training method: {training_method}")
-    print(f"Unified judge features: {args.unified_judge}")
     print(f"K-folds: {args.k_folds}")
     print(f"Judge ablation: {args.judge_ablation}")
     print(f"Parallelization: datasets={args.max_workers}, methods={args.n_jobs_methods}, folds={args.n_jobs_folds}")
@@ -455,8 +426,6 @@ def main():
             print(f"Running {display_name}...")
             name, results = run_single_dataset(
                 dataset,
-                use_unified_judge=args.unified_judge,
-                unified_judge_suffix=args.unified_judge_suffix,
                 output_base=args.output_dir,
                 k_folds=args.k_folds,
                 n_jobs_methods=args.n_jobs_methods,
@@ -485,8 +454,6 @@ def main():
                 executor.submit(
                     run_single_dataset,
                     dataset,
-                    use_unified_judge=args.unified_judge,
-                    unified_judge_suffix=args.unified_judge_suffix,
                     output_base=args.output_dir,
                     k_folds=args.k_folds,
                     n_jobs_methods=args.n_jobs_methods,

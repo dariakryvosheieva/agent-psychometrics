@@ -123,7 +123,6 @@ class ExperimentAConfig:
         default_factory=lambda: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0]
     )
     llm_judge_features_path: Optional[Path] = None
-    llm_judge_max_features: Optional[int] = None
     exclude_unsolved: bool = False
 
     @classmethod

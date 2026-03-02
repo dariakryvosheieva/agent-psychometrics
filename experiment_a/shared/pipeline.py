@@ -9,11 +9,10 @@ The experiments differ only in:
 - Metadata loading (TerminalBench loads task data from repo)
 """
 
-import argparse
 import json
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -29,7 +28,6 @@ from experiment_ab_shared.feature_predictor import (
     GroupedRidgePredictor,
 )
 from experiment_ab_shared import (
-    load_dataset,
     load_dataset_for_fold,
     convert_numpy,
     filter_unsolved_tasks,
@@ -262,7 +260,6 @@ def run_cross_validation(
     spec: ExperimentSpec,
     root: Path,
     k: int = 5,
-    metadata_loader: Optional[Callable[[List[str]], Dict[str, Any]]] = None,
     expansion_mode: Optional[str] = None,
     binomial_responses: Optional[Dict[str, Dict[str, Dict[str, int]]]] = None,
     diagnostics_extractors: Optional[Dict[str, Callable]] = None,
@@ -282,7 +279,6 @@ def run_cross_validation(
         spec: Experiment specification
         root: Root directory for resolving relative paths
         k: Number of folds
-        metadata_loader: Optional callable to load task metadata
         expansion_mode: Override AUC expansion method ("binary", "expand", or None)
         binomial_responses: Original binomial responses, required for expansion_mode="expand"
             when data is binary (trained on sampled data)
@@ -345,7 +341,6 @@ def run_cross_validation(
             split_seed=config.split_seed,
             is_binomial=spec.is_binomial,
             irt_cache_dir=spec.irt_cache_dir,
-            metadata_loader=metadata_loader,
             exclude_unsolved=config.exclude_unsolved,
         )
 
@@ -467,257 +462,3 @@ def run_cross_validation(
     }
 
 
-def create_main_parser(experiment_name: str, default_output_dir: str) -> argparse.ArgumentParser:
-    """Create the common argument parser for experiment main functions.
-
-    Args:
-        experiment_name: Name of the experiment for help text
-        default_output_dir: Default output directory path
-
-    Returns:
-        Configured ArgumentParser
-    """
-    parser = argparse.ArgumentParser(
-        description=f"Run Experiment A: Prior Validation (IRT AUC) on {experiment_name}"
-    )
-    parser.add_argument(
-        "--k_folds",
-        type=int,
-        default=5,
-        help="Number of folds for cross-validation (default: 5)",
-    )
-    parser.add_argument(
-        "--split_seed",
-        type=int,
-        default=0,
-        help="Random seed for train/test split (default: 0)",
-    )
-    parser.add_argument(
-        "--embeddings_path",
-        type=str,
-        default=None,
-        help="Path to pre-computed embeddings .npz file",
-    )
-    parser.add_argument(
-        "--embeddings_paths",
-        type=str,
-        default=None,
-        help="Comma-separated list of embedding paths to compare (ablation study)",
-    )
-    parser.add_argument(
-        "--llm_judge_features_path",
-        type=str,
-        default=None,
-        help="Path to LLM judge features CSV file",
-    )
-    parser.add_argument(
-        "--llm_judge_paths",
-        type=str,
-        default=None,
-        help="Comma-separated list of LLM judge paths to compare (ablation study)",
-    )
-    parser.add_argument(
-        "--llm_judge_max_features",
-        type=int,
-        default=None,
-        help="Max features to select for LLM Judge (default: None = all)",
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=str,
-        default=default_output_dir,
-        help=f"Output directory (default: {default_output_dir})",
-    )
-    parser.add_argument(
-        "--items_path",
-        type=str,
-        default=None,
-        help="Path to IRT items.csv (overrides config default)",
-    )
-    parser.add_argument(
-        "--abilities_path",
-        type=str,
-        default=None,
-        help="Path to IRT abilities.csv (overrides config default)",
-    )
-    parser.add_argument(
-        "--dry_run",
-        action="store_true",
-        help="Show configuration without running",
-    )
-    parser.add_argument(
-        "--exclude_unsolved",
-        action="store_true",
-        help="Exclude tasks that no agent has solved from both train and test sets",
-    )
-    parser.add_argument(
-        "--binary",
-        action="store_true",
-        help="Use collapsed binary data (any success = 1) instead of binomial (k/n successes). "
-             "Only applies to TerminalBench experiments.",
-    )
-    parser.add_argument(
-        "--coefficients",
-        action="store_true",
-        help="Extract and display LLM Judge Ridge coefficients (Table 10 / Figure 3).",
-    )
-    return parser
-
-
-def run_experiment_main(
-    dataset: str,
-    spec: ExperimentSpec,
-    root: Path,
-    config_class: Optional[Type] = None,
-    metadata_loader_factory: Optional[Callable[[Any], Callable[[List[str]], Dict[str, Any]]]] = None,
-    spec_factory: Optional[Callable[[bool], ExperimentSpec]] = None,
-) -> None:
-    """Shared main entry point for experiments.
-
-    Args:
-        dataset: Dataset short name (e.g., "swebench", "gso", "terminalbench").
-            Used to look up default config values via ExperimentAConfig.for_dataset().
-        spec: Experiment specification (used if spec_factory is None)
-        root: Root directory for the project
-        config_class: Config class to use. If None, uses ExperimentAConfig.
-            TerminalBench passes TerminalBenchConfig for binary mode support.
-        metadata_loader_factory: Optional factory that takes config and returns a metadata loader.
-            This is used by TerminalBench to create a loader that uses config.repo_path.
-        spec_factory: Optional factory that takes use_binary flag and returns ExperimentSpec.
-            If provided, this is used instead of the static spec parameter. This allows
-            TerminalBench to dynamically choose between binomial and binary modes.
-    """
-    from experiment_a.shared.config import ExperimentAConfig as _DefaultConfig
-
-    if config_class is None:
-        config_class = _DefaultConfig
-
-    default_config = config_class.for_dataset(dataset)
-    parser = create_main_parser(spec.name, str(default_config.output_dir))
-    args = parser.parse_args()
-
-    # Build config kwargs from args - only override if CLI arg is provided
-    config_kwargs: Dict[str, Any] = {
-        "split_seed": args.split_seed,
-        "output_dir": Path(args.output_dir),
-        "exclude_unsolved": args.exclude_unsolved,
-    }
-
-    # Handle --binary flag for TerminalBench (default is binomial)
-    if hasattr(args, "binary") and args.binary:
-        config_kwargs["use_binary"] = True
-
-    # Only override paths if explicitly provided via CLI
-    if args.embeddings_path is not None:
-        config_kwargs["embeddings_path"] = Path(args.embeddings_path)
-    if args.llm_judge_features_path is not None:
-        config_kwargs["llm_judge_features_path"] = Path(args.llm_judge_features_path)
-    if args.llm_judge_max_features is not None:
-        config_kwargs["llm_judge_max_features"] = args.llm_judge_max_features
-    if args.items_path:
-        config_kwargs["items_path"] = Path(args.items_path)
-    if args.abilities_path:
-        config_kwargs["abilities_path"] = Path(args.abilities_path)
-
-    config = config_class.for_dataset(dataset, **config_kwargs)
-
-    # Get the appropriate spec (dynamic if factory provided, static otherwise)
-    # Default is binomial (use_binary=False), --binary flag switches to binary mode
-    if spec_factory is not None and hasattr(args, "binary"):
-        use_binary = args.binary
-        spec = spec_factory(use_binary)
-
-    # Parse extra feature paths for ablation studies
-    extra_embeddings_paths: Optional[List[Tuple[str, Path]]] = None
-    extra_llm_judge_paths: Optional[List[Tuple[str, Path]]] = None
-
-    if args.embeddings_paths:
-        extra_embeddings_paths = []
-        for path_str in args.embeddings_paths.split(","):
-            path_str = path_str.strip()
-            if path_str:
-                path = root / Path(path_str)
-                # Extract a short name from the path
-                name = Path(path_str).stem
-                # If it has double underscores, use the last part as name
-                if "__" in name:
-                    parts = name.split("__")
-                    # Try to find a meaningful part (e.g., "no_solution")
-                    name = parts[-1] if parts[-1] else parts[-2]
-                extra_embeddings_paths.append((name, path))
-
-    if args.llm_judge_paths:
-        extra_llm_judge_paths = []
-        for path_str in args.llm_judge_paths.split(","):
-            path_str = path_str.strip()
-            if path_str:
-                path = root / Path(path_str)
-                # Use parent directory name as the variant name
-                name = Path(path_str).parent.name
-                extra_llm_judge_paths.append((name, path))
-
-    if args.dry_run:
-        print("DRY RUN - Configuration:")
-        print(json.dumps(config.to_dict(), indent=2))
-        if extra_embeddings_paths:
-            print(f"\nExtra embedding paths: {extra_embeddings_paths}")
-        if extra_llm_judge_paths:
-            print(f"Extra LLM judge paths: {extra_llm_judge_paths}")
-        return
-
-    # Create metadata loader if factory provided
-    metadata_loader = None
-    if metadata_loader_factory is not None:
-        metadata_loader = metadata_loader_factory(config)
-
-    # Set up coefficient extraction if requested
-    diagnostics_extractors = None
-    if args.coefficients:
-        from experiment_a.shared.coefficient_analysis import make_llm_coef_extractor
-        diagnostics_extractors = make_llm_coef_extractor()
-
-    # Run cross-validation
-    results = run_cross_validation(
-        config, spec, root, args.k_folds, metadata_loader,
-        extra_embeddings_paths=extra_embeddings_paths,
-        extra_llm_judge_paths=extra_llm_judge_paths,
-        diagnostics_extractors=diagnostics_extractors,
-    )
-
-    # Print coefficient analysis if requested
-    if args.coefficients:
-        from experiment_a.shared.coefficient_analysis import (
-            print_coefficient_table,
-            save_coefficient_bar_chart,
-        )
-        cv_results = results.get("cv_results", {})
-        llm_result = cv_results.get("llm_judge")
-        if llm_result is not None:
-            fold_diagnostics = llm_result.get("fold_diagnostics", [])
-            coeffs = [d for d in fold_diagnostics if d is not None]
-            if coeffs:
-                print(f"\n{'=' * 80}")
-                print("LLM JUDGE COEFFICIENT ANALYSIS")
-                print(f"{'=' * 80}")
-                print_coefficient_table(coeffs)
-
-                output_dir = root / config.output_dir
-                output_dir.mkdir(parents=True, exist_ok=True)
-                save_coefficient_bar_chart(
-                    coeffs,
-                    output_dir / "coefficient_bar_chart.png",
-                    title=f"Mean Coefficient Magnitude by Feature Source ({spec.name})",
-                )
-
-    output_filename = f"experiment_a_cv{args.k_folds}_results.json"
-
-    # Save results
-    output_dir = root / config.output_dir
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / output_filename
-
-    results = convert_numpy(results)
-
-    with open(output_path, "w") as f:
-        json.dump(results, f, indent=2)
-    print(f"\nResults saved to: {output_path}")
