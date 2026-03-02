@@ -15,7 +15,7 @@ import numpy as np
 
 from experiment_ab_shared.dataset import ExperimentData
 from experiment_ab_shared.evaluator import compute_irt_probability
-from experiment_ab_shared.predictor_base import DifficultyPredictorBase
+from experiment_ab_shared.feature_predictor import DifficultyPredictorBase
 
 
 class DifficultyPredictorAdapter:

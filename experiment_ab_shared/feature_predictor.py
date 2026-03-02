@@ -1,8 +1,9 @@
-"""Unified feature-based difficulty predictor.
+"""Feature-based difficulty predictors and base class.
 
-This module provides predictor classes that work with any TaskFeatureSource.
-The predictors use StandardScaler + RidgeCV regression, which is sufficient for
-both high-dimensional embeddings and low-dimensional semantic features.
+This module provides:
+- DifficultyPredictorBase: Abstract base class for difficulty predictors
+- FeatureBasedPredictor: Source-agnostic Ridge/Lasso regression predictor
+- GroupedRidgePredictor: Per-group L2 penalties via feature pre-scaling
 
 Example usage:
     from experiment_ab_shared.feature_source import EmbeddingFeatureSource
@@ -22,6 +23,7 @@ Example usage:
 """
 
 import itertools
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -35,6 +37,44 @@ from experiment_ab_shared.feature_source import (
     CSVFeatureSource,
     GroupedFeatureSource,
 )
+
+
+class DifficultyPredictorBase(ABC):
+    """Abstract base class for all difficulty predictors.
+
+    All predictors must implement:
+    - fit(): Train on tasks with known difficulties
+    - predict(): Predict difficulties for new tasks
+    - name: Human-readable predictor name
+    """
+
+    @abstractmethod
+    def fit(self, task_ids: List[str], ground_truth_b: np.ndarray) -> None:
+        """Train on tasks with known IRT difficulties.
+
+        Args:
+            task_ids: List of task identifiers
+            ground_truth_b: Array of ground truth difficulty values (b parameters)
+        """
+        ...
+
+    @abstractmethod
+    def predict(self, task_ids: List[str]) -> Dict[str, float]:
+        """Predict difficulty for tasks.
+
+        Args:
+            task_ids: List of task identifiers
+
+        Returns:
+            Dict mapping task_id to predicted difficulty
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Human-readable predictor name."""
+        ...
 
 
 class FeatureBasedPredictor:

@@ -28,11 +28,9 @@ from experiment_ab_shared.feature_source import (
     GroupedFeatureSource,
 )
 from experiment_ab_shared.feature_predictor import (
+    DifficultyPredictorBase,
     FeatureBasedPredictor,
     GroupedRidgePredictor,
-)
-from experiment_ab_shared.predictor_base import (
-    DifficultyPredictorBase,
 )
 from experiment_ab_shared.train_irt_split import (
     get_or_train_split_irt,
