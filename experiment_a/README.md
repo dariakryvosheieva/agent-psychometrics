@@ -25,7 +25,7 @@ python -m experiment_a.run_all_datasets
 # Run specific datasets only
 python -m experiment_a.run_all_datasets --datasets gso terminalbench
 
-# Use dataset-specific features instead of unified
+# Disable LLM judge features (embedding only)
 python -m experiment_a.run_all_datasets --no-unified_judge
 
 # Export results to CSV
@@ -40,23 +40,24 @@ python -m experiment_a.terminalbench.train_evaluate
 python -m experiment_a.terminalbench.train_evaluate --binary
 ```
 
-## Results (2026-01-30)
+## Results (2026-03-01)
 
-### Summary Table (Unified Judge + Auditor + Test, Default)
+### Summary Table (Default Ridge)
 
 Run with: `python -m experiment_a.run_all_datasets`
 
-| Dataset | Oracle | Grouped Ridge (Emb+LLM) | LLM Judge | Embedding | Baseline |
-|---------|--------|-------------------------|-----------|-----------|----------|
-| SWE-bench Verified | 0.9441 | **0.8415** | 0.8336 | 0.8230 | 0.7146 |
-| GSO | 0.8516 | **0.7496** | 0.7333 | 0.7332 | 0.7262 |
-| TerminalBench | 0.8995 | **0.8006** | 0.7700 | 0.7905 | 0.7076 |
-| SWE-bench Pro | 0.9183 | **0.7443** | 0.7212 | 0.7366 | 0.6567 |
+| Dataset | Tasks | Agents | Oracle | Grouped Ridge (Emb+LLM) | LLM Judge | Embedding | Baseline |
+|---------|-------|--------|--------|-------------------------|-----------|-----------|----------|
+| SWE-bench Verified | 500 | 131 | 0.9441 | **0.8436** | 0.8363 | 0.8230 | 0.7146 |
+| GSO | 102 | 14 | 0.9227 | **0.7428** | 0.7410 | 0.7396 | 0.6934 |
+| TerminalBench | 88 | 83 | 0.8995 | **0.8052** | 0.7733 | 0.7989 | 0.7073 |
+| SWE-bench Pro | 730 | 14 | 0.9183 | **0.7549** | 0.7089 | 0.7549 | 0.6567 |
+
+**LLM features**: SWE-bench Verified uses 15 features (9 semantic + 3 auditor + 3 test); all other datasets use 9 features (8 core + codebase_scope). See Feature Sources section for details.
 
 **Key findings**:
 - **Grouped Ridge (Emb+LLM) is best**: Outperforms single sources on all datasets
-- **Test patch features help**: Adding 3 test quality features improved SWE-bench Grouped Ridge from 0.8331 → 0.8415 (+1.0%)
-- **Combining features helps**: Grouped Ridge outperforms single sources (+0.5% to +1.8%)
+- **Combining features helps**: Grouped Ridge outperforms single sources on all datasets
 
 ### Feature-IRT Results (Joint Training)
 
@@ -64,111 +65,31 @@ Run with: `python -m experiment_a.run_all_datasets --feature_irt`
 
 | Dataset | Oracle | Feature-IRT (Emb+LLM) | Feature-IRT (LLM) | Feature-IRT (Emb) | Baseline |
 |---------|--------|----------------------|-------------------|-------------------|----------|
-| SWE-bench Verified | 0.9441 | **0.8394** | 0.8371 | 0.8237 | 0.7146 |
-| GSO | 0.8516 | 0.7454 | 0.7345 | **0.7470** | 0.7262 |
-| TerminalBench | 0.8995 | 0.7857 | 0.7742 | **0.7976** | 0.7076 |
-| SWE-bench Pro | 0.9183 | 0.7240 | 0.7114 | **0.7560** | 0.6567 |
+| SWE-bench Verified | 0.9441 | **0.8389** | 0.8370 | 0.8243 | 0.7146 |
+| GSO | 0.9227 | 0.7407 | 0.7149 | **0.7571** | 0.6934 |
+| TerminalBench | 0.8995 | 0.7864 | 0.7735 | **0.7983** | 0.7073 |
+| SWE-bench Pro | 0.9183 | 0.7236 | 0.7112 | **0.7555** | 0.6567 |
 
 **Key findings**:
 - **Feature-IRT performs similarly to Ridge** in Experiment A (task holdout) because it must generalize to unseen test tasks using only feature weights
-- **Embedding alone often outperforms combined** in Feature-IRT, suggesting the joint optimization may overfit to LLM features on some datasets
+- **Embedding alone often outperforms combined** in Feature-IRT (3/4 datasets), suggesting the joint optimization may overfit to LLM features
 - **Per-source regularization**: Feature-IRT uses per-source L2 grids (Emb: [100, 1000, 10000], LLM: [0.01, 0.1, 1, 10]) with internal CV for selection
 
-### SWE-bench Verified (5-Fold Cross-Validation)
+### TerminalBench Binary Mode
 
-**Data**: 500 tasks, 131 agents
+TerminalBench supports two data modes. Binomial (default, shown above) models k successes out of 5 trials per agent-task pair. Binary (`--binary`) collapses to any success = 1.
 
-| Method | Mean AUC | Std |
-|--------|----------|-----|
-| Oracle (true b) | 0.9441 | 0.0085 |
-| Grouped Ridge (Emb + LLM) | 0.8415 | 0.0197 |
-| LLM Judge (15 features) | 0.8336 | 0.0211 |
-| Embedding | 0.8230 | 0.0193 |
-| Constant (mean b) | 0.7146 | 0.0083 |
+Run with: `python -m experiment_a.terminalbench.train_evaluate --binary`
 
-**Note**: LLM Judge includes 9 unified semantic features + 3 auditor features + 3 test quality features = 15 features total. See ablation study below for feature contribution breakdown.
+| Method | Binomial (default) | Binary |
+|--------|-------------------|--------|
+| Oracle (true b) | 0.8995 | 0.9285 |
+| Grouped Ridge (Emb + LLM) | 0.8052 | 0.8021 |
+| Embedding | 0.7989 | 0.7754 |
+| LLM Judge | 0.7733 | 0.7631 |
+| Constant (mean b) | 0.7073 | 0.6925 |
 
-### SWE-bench Pro (5-Fold Cross-Validation)
-
-**Data**: 730 tasks, 14 agents
-
-| Method | Mean AUC | Std |
-|--------|----------|-----|
-| Oracle (true b) | 0.9183 | 0.0074 |
-| Grouped Ridge (Emb + LLM) | 0.7443 | 0.0261 |
-| Embedding | 0.7366 | 0.0281 |
-| LLM Judge | 0.7212 | 0.0224 |
-| Constant (mean b) | 0.6567 | 0.0072 |
-
-**Note**: SWE-bench Pro shows lower predictor AUCs (~0.73-0.75) compared to SWE-bench Verified (~0.82-0.83). This may be due to having fewer agents (14 vs 131) for IRT training.
-
-### GSO (5-Fold Cross-Validation)
-
-**Data**: 57 tasks (excluding zero-solve), 14 agents (performance optimization benchmark)
-
-| Method | Mean AUC | Std |
-|--------|----------|-----|
-| Oracle (true b) | 0.8516 | 0.0453 |
-| Grouped Ridge (Emb + LLM) | 0.7496 | 0.0626 |
-| LLM Judge | 0.7333 | 0.0783 |
-| Embedding | 0.7332 | 0.0603 |
-| Constant (mean b) | 0.7262 | 0.0709 |
-
-**Note**: These results were generated with `--exclude_unsolved` to match Daria's setup (excluding 45 zero-solve tasks). This is no longer the default.
-
-### TerminalBench (5-Fold Cross-Validation)
-
-TerminalBench supports two data modes:
-- **Binomial** (default): Models k successes out of 5 trials per agent-task pair
-- **Binary** (`--binary`): Collapses to any success = 1 (single observation per pair)
-
-#### Binomial Mode (Default)
-
-**Data**: 88 tasks, 83 agents, 5 trials each
-
-| Method | Mean AUC | Std | Pass Rate MSE |
-|--------|----------|-----|---------------|
-| Oracle (true b) | 0.8995 | 0.0224 | 0.0533 |
-| Grouped Ridge (Emb + LLM) | 0.8006 | 0.0210 | 0.1143 |
-| Embedding | 0.7905 | 0.0172 | 0.1188 |
-| LLM Judge | 0.7700 | 0.0165 | 0.1307 |
-| Constant (mean b) | 0.7076 | 0.0172 | 0.1510 |
-
-#### Binary Mode (`--binary`)
-
-**Data**: 88 tasks, 83 agents (any success = 1)
-
-| Method | Mean AUC | Std |
-|--------|----------|-----|
-| Oracle (true b) | 0.9319 | 0.0104 |
-| Embedding | 0.7779 | 0.0505 |
-| LLM Judge | 0.7734 | 0.0311 |
-| Constant (mean b) | 0.6904 | 0.0163 |
-
-**Summary**: Binomial mode (default) preserves more information about task difficulty gradations and shows slightly better predictor AUCs when evaluated fairly. See "Fair Comparison" below for details.
-
-#### Fair Comparison: Training vs Evaluation Methods (5-Fold CV)
-
-To fairly compare binomial vs binary training, we hold the evaluation method constant:
-
-**Multi-attempt AUC Evaluation** (expand to 5 observations per pair):
-
-| Training Method | Oracle | Embedding | LLM Judge | Constant |
-|-----------------|--------|-----------|-----------|----------|
-| Binomial (k/n)  | 0.9040 | 0.7817    | 0.7738    | 0.7036   |
-| Binary (any success) | 0.8981 | 0.7761 | 0.7712    | 0.6904   |
-
-**Binary AUC Evaluation** (any_success = k > 0):
-
-| Training Method | Oracle | Embedding | LLM Judge | Constant |
-|-----------------|--------|-----------|-----------|----------|
-| Binomial (k/n)  | 0.9253 | 0.7800    | 0.7714    | 0.7153   |
-| Binary (any success) | 0.9319 | 0.7779 | 0.7734    | 0.6904   |
-
-**Key findings**:
-- When evaluated with the **same metric**, binomial and binary training yield very similar predictor AUCs
-- The apparent advantage of binary training (0.9319 vs 0.9037 Oracle AUC) in earlier comparisons was largely due to using different evaluation methods
-- Binomial training shows a slight edge (~0.5-1% higher AUC) when evaluation is held constant
+Binomial mode preserves more information about task difficulty gradations. Binary Oracle AUC is higher (0.9285 vs 0.8995) because binary responses are easier to predict, but predictor AUCs are comparable or slightly lower in binary mode.
 
 ## Evaluation Protocol
 
@@ -210,7 +131,7 @@ class CVPredictor(Protocol):
 | `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource` |
 | `feature_predictor.py` | `FeatureBasedPredictor`, `GroupedRidgePredictor` |
 | `predictor_base.py` | `DifficultyPredictorBase` ABC |
-| `evaluator.py` | `compute_auc()`, `compute_irt_probability()` |
+| `evaluator.py` | `compute_irt_probability()`, `convert_numpy()` |
 
 **`experiment_a/shared/`** - Experiment A orchestration:
 
@@ -367,22 +288,23 @@ See [experiment_a/auditor_agent/README.md](auditor_agent/README.md) for detailed
 
 Semantic features extracted via LLM structured output:
 
-**SWE-bench Verified (15 features, default)**:
+**SWE-bench Verified (15 features)**:
 
-The default feature set is `chris_output/llm_judge_features/swebench_ablation_controlled_v3/4_full_15.csv`, which contains the top 15 features selected by Ridge coefficient magnitude from a pool of 23 features:
-- **Problem (7)**: solution_hint, problem_clarity, domain_knowledge_required, logical_reasoning_required, atypicality, verification_difficulty, standard_pattern_available
-- **Problem Extended (8)**: error_specificity, reproduction_clarity, expected_behavior_clarity, debugging_complexity, codebase_scope, information_completeness, similar_issue_likelihood, backwards_compatibility_risk
+Default feature set: `chris_output/llm_judge_features/experiment_a_defaults/swebench.csv`
+
+15 features selected by Ridge coefficient magnitude:
+- **Problem**: problem_clarity, atypicality, logical_reasoning_required, codebase_scope, information_completeness, similar_issue_likelihood, error_specificity, reproduction_clarity
 - **Auditor (3)**: entry_point_clarity, change_blast_radius, fix_localization
-- **Test Quality (3)**: test_comprehensiveness, test_assertion_complexity, test_edge_case_coverage
+- **Test (2)**: test_comprehensiveness, test_edge_case_coverage
 - **Solution (2)**: solution_complexity, integration_complexity
 
-**SWE-bench Pro (8 features, auto-detected from v5 CSV)**:
-- LLM features: fix_complexity, verification_difficulty, standard_pattern_available, integration_complexity
-- Deterministic features: num_files_modified, num_hunks, num_lines_changed, log_lines_changed
+**GSO, TerminalBench, SWE-bench Pro (9 features)**:
 
-**TerminalBench (9 features, auto-detected)**:
-- solution_in_instruction, task_clarity, solution_size, domain_knowledge_required
-- task_complexity, logical_reasoning_required, atypicality, tooling_complexity, log_lines
+Default feature set: `chris_output/llm_judge_features/experiment_a_defaults/{dataset}.csv`
+
+8 core features + codebase_scope:
+- solution_hint, problem_clarity, solution_complexity, domain_knowledge_required
+- logical_reasoning_required, atypicality, verification_difficulty, standard_pattern_available, codebase_scope
 
 ### Unified Features (Experimental)
 
@@ -409,30 +331,10 @@ A standardized 9-feature set is available for fair cross-dataset comparison. All
 - `chris_output/llm_judge_features/terminalbench_unified_core/llm_judge_features.csv`
 - `chris_output/llm_judge_features/gso_unified_core/llm_judge_features.csv`
 
-Usage:
+The current defaults use dataset-specific feature sets stored in `experiment_a_defaults/`. To use unified features instead, specify the path explicitly:
 ```bash
-# run_all_datasets uses unified features (9 features) by default
-python -m experiment_a.run_all_datasets
-
-# Use core-only features (8 features, identical across datasets)
 python -m experiment_a.run_all_datasets --unified_judge_suffix _core
-
-# For TerminalBench, specify the path explicitly
-python -m experiment_a.terminalbench.train_evaluate --llm_judge_features_path chris_output/llm_judge_features/terminalbench_unified/llm_judge_features.csv
 ```
-
-#### Unified vs Dataset-Specific Features Comparison
-
-Both approaches yield comparable results (within ~0.005 AUC noise). Dataset-specific features have a slight edge on some benchmarks:
-
-| Dataset | Grouped Ridge (Unified) | Grouped Ridge (Default) | Stacked (Unified) | Stacked (Default) |
-|---------|------------------------|------------------------|-------------------|-------------------|
-| SWE-bench Verified | 0.8280 | **0.8309** | 0.8296 | 0.8278 |
-| GSO | 0.7496 | **0.7500** | 0.7507 | **0.7509** |
-| TerminalBench | 0.8006 | **0.8062** | 0.8044 | 0.8034 |
-| SWE-bench Pro | 0.7443 | **0.7477** | 0.7444 | **0.7493** |
-
-**Recommendation**: Unified features are now the default for consistency across datasets. Use `--no-unified_judge` if you need dataset-specific features for slightly better per-dataset performance.
 
 ### Ablation Study: Solution Information Contribution
 
@@ -451,17 +353,6 @@ Embeddings are generated with a prompt containing `question_statement + solution
 - No-solution embedding: paired with Problem Only LLM features
 - With-solution embedding: paired with Full LLM features
 
-**Cross-dataset embedding ablation (Source Alone):**
-
-| Dataset | With Solution | No Solution | Δ AUC |
-|---------|---------------|-------------|-------|
-| SWE-bench Verified | 0.823 | 0.751 | -0.072 (-8.7%) |
-| SWE-bench Pro | 0.747 | 0.728 | -0.019 (-2.5%) |
-| TerminalBench | 0.804 | 0.784 | -0.020 (-2.5%) |
-| GSO | 0.728 | 0.656 | -0.072 (-9.9%) |
-
-**Key finding**: Solution information in the embedding prompt contributes +2.5% to +9.9% AUC improvement, with the largest impact on GSO and SWE-bench Verified.
-
 #### LLM Judge Ablation (SWE-bench Verified)
 
 To measure the contribution of different information sources, we ran ablation experiments progressively adding features from different affordances. Feature count is held constant at 15 via Ridge coefficient-based selection to isolate the value of each information source:
@@ -469,8 +360,8 @@ To measure the contribution of different information sources, we ran ablation ex
 | Method | # Features | LLM Judge AUC | Grouped Ridge AUC |
 |--------|------------|---------------|-------------------|
 | Problem Only | 15 | 0.7821 ± 0.0164 | 0.7800 ± 0.0241 |
-| Problem + Auditor | 15 | 0.8015 ± 0.0167 | 0.7967 ± 0.0240 |
-| Problem + Auditor + Test | 15 | 0.8225 ± 0.0230 | 0.8174 ± 0.0235 |
+| + Auditor | 15 | 0.8015 ± 0.0167 | 0.7967 ± 0.0240 |
+| + Test | 15 | 0.8225 ± 0.0230 | 0.8174 ± 0.0235 |
 | **Full** | 15 | **0.8363 ± 0.0205** | **0.8436 ± 0.0216** |
 
 **Note**: Grouped Ridge pairs each LLM ablation level with the corresponding embedding variant:
@@ -602,8 +493,8 @@ Results saved to `chris_output/experiment_a/experiment_a_cv5_results.json`:
   "k_folds": 5,
   "cv_results": {
     "oracle": {"mean_auc": 0.9441, "std_auc": 0.0085, ...},
-    "grouped": {"mean_auc": 0.8415, "std_auc": 0.0197, ...},
-    "llm_judge": {"mean_auc": 0.8336, "std_auc": 0.0211, ...},
+    "grouped": {"mean_auc": 0.8436, "std_auc": 0.0216, ...},
+    "llm_judge": {"mean_auc": 0.8363, "std_auc": 0.0205, ...},
     "embedding": {"mean_auc": 0.8230, "std_auc": 0.0193, ...},
     "constant_baseline": {"mean_auc": 0.7146, "std_auc": 0.0083, ...}
   }

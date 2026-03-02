@@ -673,16 +673,8 @@ def run_experiment_main(
     # Set up coefficient extraction if requested
     diagnostics_extractors = None
     if args.coefficients:
-        from experiment_a.shared.coefficient_analysis import extract_llm_coefficients
-
-        def _extract_llm_coefs(predictor, fold_idx):
-            """Extract coefficients from the inner DifficultyPredictorAdapter."""
-            inner = getattr(predictor, "_predictor", None)
-            if inner is not None and hasattr(inner, "_is_fitted") and inner._is_fitted:
-                return extract_llm_coefficients(inner)
-            return None
-
-        diagnostics_extractors = {"llm_judge": _extract_llm_coefs}
+        from experiment_a.shared.coefficient_analysis import make_llm_coef_extractor
+        diagnostics_extractors = make_llm_coef_extractor()
 
     # Run cross-validation
     results = run_cross_validation(

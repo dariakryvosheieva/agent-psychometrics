@@ -113,6 +113,25 @@ def print_coefficient_table(
             print(f"{source:<25} {np.mean(vals):>12.3f} {len(vals):>12}")
 
 
+def make_llm_coef_extractor():
+    """Create a diagnostics extractor for LLM Judge Ridge coefficients.
+
+    Returns a callback suitable for use as a diagnostics_extractor in
+    run_cross_validation(). The callback extracts coefficients from a
+    DifficultyPredictorAdapter wrapping a FeatureBasedPredictor.
+
+    Returns:
+        Dict mapping predictor name to extractor callback.
+    """
+    def _extract(predictor, fold_idx):
+        inner = getattr(predictor, "_predictor", None)
+        if inner is not None and hasattr(inner, "_is_fitted") and inner._is_fitted:
+            return extract_llm_coefficients(inner)
+        return None
+
+    return {"llm_judge": _extract}
+
+
 def save_coefficient_bar_chart(
     coeffs_by_fold: List[Dict[str, Any]],
     output_path: Path,

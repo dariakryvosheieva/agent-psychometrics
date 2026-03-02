@@ -207,8 +207,9 @@ def run_experiment(embeddings_path: Path, llm_judge_path: Path, k_folds: int) ->
     Returns:
         Dict with AUC results for each predictor type
     """
-    # Create config with the specified paths
-    config = ExperimentAConfig(
+    # Create config with SWE-bench defaults, overriding feature paths
+    config = ExperimentAConfig.for_dataset(
+        "swebench",
         embeddings_path=embeddings_path,
         llm_judge_features_path=llm_judge_path,
     )

@@ -17,13 +17,8 @@ from experiment_ab_shared.dataset import (
     expand_response_for_auc,
 )
 from experiment_ab_shared.evaluator import (
-    compute_auc,
     compute_irt_probability,
     convert_numpy,
-    evaluate_single_predictor,
-    run_evaluation_pipeline,
-    PredictorConfig,
-    PredictorResult,
 )
 from experiment_ab_shared.feature_source import (
     TaskFeatureSource,
@@ -38,8 +33,6 @@ from experiment_ab_shared.feature_predictor import (
 )
 from experiment_ab_shared.predictor_base import (
     DifficultyPredictorBase,
-    ConstantPredictor,
-    GroundTruthPredictor,
 )
 from experiment_ab_shared.train_irt_split import (
     get_or_train_split_irt,
@@ -58,13 +51,8 @@ __all__ = [
     "filter_unsolved_tasks",
     "expand_response_for_auc",
     # Evaluator
-    "compute_auc",
     "compute_irt_probability",
     "convert_numpy",
-    "evaluate_single_predictor",
-    "run_evaluation_pipeline",
-    "PredictorConfig",
-    "PredictorResult",
     # Feature sources
     "TaskFeatureSource",
     "EmbeddingFeatureSource",
@@ -76,8 +64,6 @@ __all__ = [
     "GroupedRidgePredictor",
     # Predictor base classes
     "DifficultyPredictorBase",
-    "ConstantPredictor",
-    "GroundTruthPredictor",
     # IRT training
     "get_or_train_split_irt",
     "get_split_cache_dir",
