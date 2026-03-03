@@ -35,9 +35,8 @@ python -m experiment_a.run_all_datasets --output results.csv
 python -m experiment_a.run_all_datasets --feature_irt
 python -m experiment_a.run_all_datasets --feature_irt --datasets swebench gso
 
-# Run TerminalBench individually (supports --binary flag)
-python -m experiment_a.terminalbench.train_evaluate
-python -m experiment_a.terminalbench.train_evaluate --binary
+# Run a single dataset
+python -m experiment_a.run_all_datasets --datasets terminalbench
 ```
 
 ## Results (2026-03-01)
@@ -78,8 +77,6 @@ Run with: `python -m experiment_a.run_all_datasets --feature_irt`
 ### TerminalBench Binary Mode
 
 TerminalBench supports two data modes. Binomial (default, shown above) models k successes out of 5 trials per agent-task pair. Binary (`--binary`) collapses to any success = 1.
-
-Run with: `python -m experiment_a.terminalbench.train_evaluate --binary`
 
 | Method | Binomial (default) | Binary |
 |--------|-------------------|--------|
@@ -129,17 +126,16 @@ class CVPredictor(Protocol):
 |------|---------|
 | `dataset.py` | `ExperimentData` ABC with `BinaryExperimentData`, `BinomialExperimentData` |
 | `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource` |
-| `feature_predictor.py` | `FeatureBasedPredictor`, `GroupedRidgePredictor` |
-| `predictor_base.py` | `DifficultyPredictorBase` ABC |
+| `feature_predictor.py` | `DifficultyPredictorBase` ABC, `FeatureBasedPredictor`, `GroupedRidgePredictor` |
 | `evaluator.py` | `compute_irt_probability()`, `convert_numpy()` |
 
 **`experiment_a/shared/`** - Experiment A orchestration:
 
 | File | Purpose |
 |------|---------|
-| `config.py` | `ExperimentAConfig`, `TerminalBenchConfig`, `DATASET_DEFAULTS` registry, `build_spec()` |
-| `pipeline.py` | `ExperimentSpec`, `CVPredictorConfig`, `run_cross_validation()`, `run_experiment_main()` |
-| `cross_validation.py` | `CVPredictor` protocol, `run_cv()`, `k_fold_split_tasks()` |
+| `config.py` | `ExperimentAConfig`, `DATASET_DEFAULTS` registry |
+| `pipeline.py` | `CVPredictorConfig`, `cross_validate_all_predictors()`, `build_cv_predictors()` |
+| `cross_validation.py` | `CVPredictor` protocol, `evaluate_predictor_cv()`, `k_fold_split_tasks()` |
 | `baselines.py` | `OraclePredictor`, `ConstantPredictor`, `DifficultyPredictorAdapter` |
 | `feature_irt.py` | `JointTrainingCVPredictor` (with per-source L2 regularization), `feature_irt_predictor_factory()` |
 | `coefficient_analysis.py` | `extract_llm_coefficients()`, `print_coefficient_table()`, `save_coefficient_bar_chart()` |
@@ -150,12 +146,6 @@ class CVPredictor(Protocol):
 |------|---------|
 | `run_all_datasets.py` | Run all datasets with Ridge (default) or Feature-IRT (`--feature_irt`) |
 | `run_information_ablation.py` | Run information source ablation study (SWE-bench Verified) |
-
-### TerminalBench (`experiment_a/terminalbench/`)
-
-| File | Purpose |
-|------|---------|
-| `train_evaluate.py` | Single-dataset entry point with binary/binomial mode and repo metadata loading |
 
 ## Methods
 

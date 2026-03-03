@@ -131,7 +131,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
 │                                                                                  │
 │  k_fold_split_tasks(task_ids, k=5) → [(train_ids, test_ids), ...]               │
 │                                                                                  │
-│  run_cv(predictor, folds, load_fold_data):                                       │
+│  evaluate_predictor_cv(predictor, folds, load_fold_data):                         │
 │  ┌─────────────────────────────────────────────────────────────────────────┐    │
 │  │  For each fold:                                                          │    │
 │  │  ┌─────────────────────────────────────────────────────────────────┐    │    │
@@ -153,7 +153,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
 │                       (experiment_a/shared/pipeline.py)                          │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                  │
-│  run_cross_validation(config, spec):                                             │
+│  cross_validate_all_predictors(config):                                           │
 │                                                                                  │
 │  1. Load oracle IRT ─────────────────────────────────────────────────────────►  │
 │                                                                                  │
@@ -166,7 +166,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
 │     ├── DifficultyPredictorAdapter(GroupedRidgePredictor(emb + llm))            │
 │     └── ConstantPredictor                                                        │
 │                                                                                  │
-│  4. For each predictor: run_cv() ────────────────────────────────────────────►  │
+│  4. For each predictor: evaluate_predictor_cv() ────────────────────────────►  │
 │                                                                                  │
 │  5. Save results to JSON ────────────────────────────────────────────────────►  │
 │                                                                                  │
@@ -204,7 +204,8 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
           ▼
 ┌────────────────────┐
 │  Cross-Validation  │  5-fold CV with train-only IRT per fold
-│  run_cv()          │  Collects predictions, computes AUC
+│  evaluate_predictor│  Collects predictions, computes AUC
+│  _cv()            │
 └─────────┬──────────┘
           ▼
 ┌────────────────────┐
@@ -217,7 +218,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
 
 | Component | File |
 |-----------|------|
-| Entry point | `train_evaluate.py` |
+| Entry point | `run_all_datasets.py` |
 | Pipeline orchestration | `shared/pipeline.py` |
 | CV framework | `shared/cross_validation.py` |
 | Baselines/Oracle | `shared/baselines.py` |

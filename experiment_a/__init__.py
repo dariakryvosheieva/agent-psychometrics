@@ -3,9 +3,8 @@
 Evaluates how well a difficulty predictor can predict agent success on held-out
 tasks using the 1PL IRT model.
 
-Entry points:
-- python -m experiment_a.swebench.train_evaluate  # SWE-bench
-- python -m experiment_a.terminalbench.train_evaluate  # TerminalBench
+Entry point:
+- python -m experiment_a.run_all_datasets
 """
 
 # Re-export core classes from shared modules for convenience
