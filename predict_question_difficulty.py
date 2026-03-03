@@ -1,92 +1,38 @@
-#!/usr/bin/env python3
-"""
-Embed SWE-bench-style tasks using inputs of the form:
-
-  question statement + solution + instruction
-
-and fit a regression model to predict per-question difficulty.
-
-This script trains an IRT model **per CV fold** (no leakage):
-
-For each of K folds over items/tasks:
-  - Train an IRT model (1PL) using ONLY responses for items in the K-1 training folds.
-  - Use the IRT-trained item difficulties (b) on the training items as supervision to fit a
-    regression model from embeddings -> difficulty.
-  - Predict difficulty for the held-out fold items (out-of-fold predictions).
-  - Evaluate held-out ROC-AUC on the held-out fold using:
-        p(success) = sigmoid(theta_subject - z_item_pred)
-    where theta_subject comes from the fold's IRT training (fit on train items only).
-
-We intentionally do NOT compute R^2 on held-out items since they do not have IRT-derived
-difficulty parameters from that fold's IRT training (no leakage).
-
-Example:
-  python /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/predict_question_difficulty.py \
-    --dataset_name princeton-nlp/SWE-bench_Verified --split test \
-    --agent_results /path/to/subject_responses.jsonl \
-    --cv_folds 5 \
-    --irt_epochs 5000 --irt_device cuda \
-    --backbone Qwen/Qwen2.5-Coder-14B --max_length 1024 --batch_size 1 --device_map auto \
-    --out_dir /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/qwen25coder14b_irt_cv
-"""
 
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 import csv
+import sys
 import hashlib
+import inspect
 import json
+import math
 import os
 import random
 import re
 import shutil
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Sequence, Set, Tuple
-
-
-def _require(pkg: str) -> None:
-    try:
-        __import__(pkg)
-    except Exception as e:
-        raise RuntimeError(
-            f"Missing dependency '{pkg}'. Please install requirements (see "
-            f"`fulcrum/fellowship/trajectory_embedding_requirements.txt`). Original error: {e}"
-        ) from e
-
-
-_require("numpy")
-_require("torch")
-_require("transformers")
-_require("tqdm")
-_require("sklearn")
-_require("datasets")
-_require("huggingface_hub")
+from typing import Any, Dict, Iterator, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
 import torch
-from datasets import load_dataset  # type: ignore
+from datasets import load_dataset
 from huggingface_hub import hf_hub_download
 from sklearn.linear_model import LinearRegression, Ridge, RidgeCV
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
+from torchmetrics import AUROC
 from transformers import AutoConfig, AutoModel, AutoTokenizer, FineGrainedFP8Config, PreTrainedTokenizerFast
-import inspect
-from typing import Any
-import math
 
+import pyro
+from py_irt.config import IrtConfig
+from py_irt.training import IrtModelTrainer
 
 def seed_everything(seed: int, *, deterministic: bool) -> None:
-    """
-    Best-effort reproducibility across python/numpy/torch/transformers.
-
-    Notes:
-    - Some GPU kernels (e.g. flash attention) can be nondeterministic.
-    - PYTHONHASHSEED is set best-effort (it is most reliable when set before process start).
-    """
     s = int(seed)
     try:
         os.environ.setdefault("PYTHONHASHSEED", str(s))
@@ -102,9 +48,8 @@ def seed_everything(seed: int, *, deterministic: bool) -> None:
         except Exception:
             pass
 
-    # Transformers helper (if available).
     try:
-        from transformers import set_seed as _hf_set_seed  # type: ignore
+        from transformers import set_seed as _hf_set_seed
 
         _hf_set_seed(s)
     except Exception:
@@ -112,7 +57,7 @@ def seed_everything(seed: int, *, deterministic: bool) -> None:
 
     if deterministic:
         set_torch_determinism(True)
-        # Reduce numeric drift from TF32 on Ampere+ GPUs.
+
         try:
             torch.backends.cuda.matmul.allow_tf32 = False
         except Exception:
@@ -122,11 +67,7 @@ def seed_everything(seed: int, *, deterministic: bool) -> None:
         except Exception:
             pass
 
-
 def set_torch_determinism(enabled: bool) -> None:
-    """
-    Toggle PyTorch deterministic algorithm behavior (best-effort).
-    """
     on = bool(enabled)
     try:
         torch.use_deterministic_algorithms(on, warn_only=True)
@@ -143,17 +84,7 @@ def set_torch_determinism(enabled: bool) -> None:
     except Exception:
         pass
 
-
 def _load_tokenizer(backbone: str, *, trust_remote_code: bool) -> Any:
-    """
-    Load a tokenizer for `backbone`.
-
-    Some model repos publish a `tokenizer_config.json` with a legacy/removed
-    tokenizer class name (e.g. `"tokenizer_class": "TokenizersBackend"`), which
-    causes `AutoTokenizer.from_pretrained()` to fail even though a usable
-    `tokenizer.json` is present. In that case, fall back to loading the fast
-    tokenizer directly from `tokenizer.json`.
-    """
     try:
         return AutoTokenizer.from_pretrained(backbone, trust_remote_code=trust_remote_code)
     except ValueError as e:
@@ -161,7 +92,6 @@ def _load_tokenizer(backbone: str, *, trust_remote_code: bool) -> Any:
         if "TokenizersBackend" not in msg:
             raise
 
-        # Fallback: instantiate a fast tokenizer directly from tokenizer.json.
         tok_json = hf_hub_download(repo_id=backbone, filename="tokenizer.json")
         tok_cfg_path = None
         try:
@@ -183,27 +113,18 @@ def _load_tokenizer(backbone: str, *, trust_remote_code: bool) -> Any:
                 if isinstance(cfg.get("extra_special_tokens"), list):
                     extra_special_tokens = [str(x) for x in cfg["extra_special_tokens"]]
             except Exception:
-                # If parsing fails, proceed with defaults from tokenizer.json.
                 pass
 
         tok = PreTrainedTokenizerFast(**tok_kwargs)
         if extra_special_tokens:
-            # Prefer marking existing tokens as special; if any are missing, HF will add them.
+
             tok.additional_special_tokens = extra_special_tokens
         return tok
-
 
 DIFFICULTY_INSTRUCTION = (
     "How difficult is the above task for a coding agent? Please output one floating-point number from 0 (very easy) to 1 (very hard). Your difficulty score:\n"
 )
 
-# -----------------------------
-# LLM-judge feature definitions
-# -----------------------------
-
-# Unified judge feature schema used by the CSVs under `llm_judge/features/*.csv`.
-# (Some legacy per-item JSONs may contain extra keys like `integration_complexity` or
-# `tooling_complexity`; this pipeline ignores those and uses only the columns below.)
 JUDGE_FEATURE_NAMES: List[str] = [
     "solution_hint",
     "problem_clarity",
@@ -215,11 +136,54 @@ JUDGE_FEATURE_NAMES: List[str] = [
     "standard_pattern_available",
 ]
 
-# Match ID normalization used when building the IRT dataset from agent runs:
-# - strip leading "instance_"
-# - strip trailing "-v..." (including "-vc<hash>" and "-vnan")
 _V_SUFFIX_RE = re.compile(r"-v.*$")
 
+def _canon_benchmark_name(name: str) -> str:
+    s = str(name or "").strip().lower().replace("-", "_")
+    if s == "terminalbench":
+        s = "terminal_bench"
+    if s not in {"verified", "pro", "terminal_bench", "gso"}:
+        raise ValueError(f"Unknown benchmark name: {name!r}. Allowed: verified, pro, terminal-bench, gso.")
+    return s
+
+def _get_benchmark_defaults(benchmark: str) -> Dict[str, str]:
+    b = _canon_benchmark_name(benchmark)
+    base = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) or ".")
+    defaults: Dict[str, str] = {
+        "verified": {
+            "dataset_name": "princeton-nlp/SWE-bench_Verified",
+            "dataset_path": "",
+            "split": "test",
+            "agent_results": os.path.join(base, "out/chris_irt/swebench_verified_20251115_full.jsonl"),
+            "judge_features_dir": os.path.join(base, "llm_judge/features/verified.csv"),
+            "out_dir": os.path.join(base, "out/swebench_verified"),
+        },
+        "pro": {
+            "dataset_name": "ScaleAI/SWE-bench_Pro",
+            "dataset_path": "",
+            "split": "test",
+            "agent_results": os.path.join(base, "out/chris_irt/swebench_pro.jsonl"),
+            "judge_features_dir": os.path.join(base, "llm_judge/features/pro.csv"),
+            "out_dir": os.path.join(base, "out/swebench_pro"),
+        },
+        "terminal_bench": {
+            "dataset_name": "",
+            "dataset_path": os.path.join(base, "out/chris_irt/terminal_bench_tasks.jsonl"),
+            "split": "train",
+            "agent_results": os.path.join(base, "out/chris_irt/terminal_bench_2.0.jsonl"),
+            "judge_features_dir": os.path.join(base, "llm_judge/features/terminal_bench.csv"),
+            "out_dir": os.path.join(base, "out/terminal_bench"),
+        },
+        "gso": {
+            "dataset_name": "gso-bench/gso",
+            "dataset_path": "",
+            "split": "test",
+            "agent_results": os.path.join(base, "out/chris_irt/gso.jsonl"),
+            "judge_features_dir": os.path.join(base, "llm_judge/features/gso.csv"),
+            "out_dir": os.path.join(base, "out/gso"),
+        },
+    }
+    return defaults[b]
 
 def normalize_swebench_item_id(raw_item_id: str) -> str:
     s = str(raw_item_id or "").strip()
@@ -228,21 +192,15 @@ def normalize_swebench_item_id(raw_item_id: str) -> str:
     s = _V_SUFFIX_RE.sub("", s)
     return s.strip()
 
-
 def ensure_dir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
-
 
 def save_json(path: str, obj: dict) -> None:
     ensure_dir(os.path.dirname(path) or ".")
     with open(path, "w") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
 
-
 def stable_split_ids(ids: Sequence[str], test_fraction: float, seed: int) -> Tuple[List[int], List[int]]:
-    """
-    Deterministic split by hashing ids. Returns train indices, test indices.
-    """
     if not (0.0 < test_fraction < 1.0):
         raise ValueError("test_fraction must be between 0 and 1")
 
@@ -260,14 +218,7 @@ def stable_split_ids(ids: Sequence[str], test_fraction: float, seed: int) -> Tup
     train = [i for i in range(len(ids)) if i not in test_set]
     return train, test
 
-
 def iter_subject_responses_jsonl(path: str) -> Iterator[Tuple[str, Dict[str, int]]]:
-    """
-    Yield (subject_id, responses) from a JSONL file with schema:
-      {"subject_id": "...", "responses": {"task_id": 0/1, ...}}
-
-    Normalizes item ids.
-    """
     p = str(path or "").strip()
     if not p:
         return
@@ -296,22 +247,14 @@ def iter_subject_responses_jsonl(path: str) -> Iterator[Tuple[str, Dict[str, int
             if out:
                 yield sid, out
 
-
 def load_all_responses(path: str) -> List[Tuple[str, Dict[str, int]]]:
-    """
-    Materialize all responses from a JSONL, normalizing item ids.
-    """
     out: List[Tuple[str, Dict[str, int]]] = []
     for sid, resp in iter_subject_responses_jsonl(path):
         if resp:
             out.append((sid, resp))
     return out
 
-
 def compute_zero_success_items(all_responses: List[Tuple[str, Dict[str, int]]]) -> List[str]:
-    """
-    Items with 0 successes across all provided subjects.
-    """
     counts: Dict[str, int] = {}
     seen: Set[str] = set()
     for _, resp in all_responses:
@@ -320,22 +263,12 @@ def compute_zero_success_items(all_responses: List[Tuple[str, Dict[str, int]]]) 
             counts[tid] = counts.get(tid, 0) + int(v)
     return sorted([tid for tid in seen if counts.get(tid, 0) == 0])
 
-
 def write_filtered_responses_jsonl(
     *,
     all_responses: List[Tuple[str, Dict[str, int]]],
     item_ids: Sequence[str],
     out_path: str,
 ) -> Tuple[int, int]:
-    """
-    Write a py_irt-compatible JSONL with responses restricted to `item_ids`.
-
-    Policy:
-    - Include only subjects with at least one observed response among `item_ids`.
-    - Write a complete response dict over `item_ids`, filling missing with 0.
-
-    Returns: (n_subjects_written, n_items)
-    """
     ensure_dir(os.path.dirname(out_path) or ".")
     items = [normalize_swebench_item_id(x) for x in list(item_ids)]
     items = [x for x in items if x]
@@ -352,35 +285,30 @@ def write_filtered_responses_jsonl(
             n_written += 1
     return n_written, len(items)
 
-
 def _compute_binary_auroc(scores: List[float], labels: List[int]) -> float:
-    """
-    ROC-AUC over binary labels. Returns NaN if undefined (e.g. only one class present).
-    Mirrors `auroc.py`'s behavior.
-    """
     if len(scores) == 0:
         return float("nan")
     uniq = set(int(x) for x in labels)
     if len(uniq) < 2:
         return float("nan")
-    _require("torchmetrics")
-    from torchmetrics import AUROC  # type: ignore
-
     auroc = AUROC(task="binary")
     s = torch.tensor(scores, dtype=torch.float32)
     y = torch.tensor(labels, dtype=torch.long)
     return float(auroc(s, y).item())
 
-
 def _sigmoid(x: float) -> float:
-    return 1.0 / (1.0 + math.exp(-float(x)))
-
+    v = float(x)
+    if v >= 0.0:
+        z = math.exp(-v)
+        return 1.0 / (1.0 + z)
+    z = math.exp(v)
+    return z / (1.0 + z)
 
 def last_token_pool(last_hidden_state: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-    # last_hidden_state: [B, T, H], attention_mask: [B, T]
-    lengths = attention_mask.sum(dim=1).clamp(min=1)  # [B]
+
+    lengths = attention_mask.sum(dim=1).clamp(min=1)
     idx = (lengths - 1).view(-1, 1, 1).expand(-1, 1, last_hidden_state.size(-1))
-    return last_hidden_state.gather(dim=1, index=idx).squeeze(1)  # [B, H]
+    return last_hidden_state.gather(dim=1, index=idx).squeeze(1)
 
 def train_irt_1pl(
     *,
@@ -390,19 +318,6 @@ def train_irt_1pl(
     seed: int,
     out_dir: str,
 ) -> Tuple[Dict[str, float], Dict[str, float]]:
-    """
-    Train a 1PL IRT model via `py_irt` on the provided response JSONL.
-
-    Returns:
-      - theta_by_subject
-      - diff_by_item (b)
-    """
-    _require("pyro")
-    import pyro  # type: ignore
-
-    from py_irt.config import IrtConfig  # type: ignore
-    from py_irt.training import IrtModelTrainer  # type: ignore
-
     ensure_dir(str(out_dir))
     pyro.clear_param_store()
 
@@ -437,7 +352,6 @@ def train_irt_1pl(
         if tid:
             diff_by_item[tid] = float(diff[i])
 
-    # Also write abilities.csv / items.csv for inspection.
     with open(os.path.join(out_dir, "abilities.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["subject_id", "theta"])
         w.writeheader()
@@ -452,26 +366,12 @@ def train_irt_1pl(
 
     return theta_by_subject, diff_by_item
 
-
 def train_oracle_irt_1pl_and_save(
     *,
     args: argparse.Namespace,
     all_responses: List[Tuple[str, Dict[str, int]]],
     item_ids: Sequence[str],
 ) -> Tuple[Dict[str, Any], Dict[str, float], Dict[str, float]]:
-    """
-    Train a single "oracle" 1PL IRT model on the full provided `item_ids` pool and
-    save artifacts under:
-
-      <out_dir>/oracle_irt_1pl/
-        - train_responses.jsonl
-        - best_parameters.json
-        - abilities.csv   (subject_id, theta)
-        - items.csv       (item_id, b)
-
-    This is analysis-only (it can leak across CV folds if `item_ids` includes the full
-    eligible set), and is NOT used for CV scoring or regression fitting.
-    """
     oracle_dir = os.path.join(str(args.out_dir), "oracle_irt_1pl")
     if os.path.exists(oracle_dir):
         shutil.rmtree(oracle_dir, ignore_errors=True)
@@ -494,7 +394,6 @@ def train_oracle_irt_1pl_and_save(
         print("WARNING: --irt_device=cuda requested but CUDA is unavailable; falling back to cpu for oracle IRT.")
         irt_device = "cpu"
 
-    # Fixed IRT policy: seeded RNG, but torch determinism OFF for IRT only.
     set_torch_determinism(False)
     seed_everything(int(args.seed), deterministic=False)
     theta_by_subject, diff_by_item = train_irt_1pl(
@@ -520,36 +419,20 @@ def train_oracle_irt_1pl_and_save(
     }
     return meta, theta_by_subject, diff_by_item
 
-
 def prompt_signature(instruction: str) -> str:
-    """
-    Short signature for the *actual* prompt formatting used for embeddings.
-    """
     h = hashlib.sha1(str(instruction).encode("utf-8")).hexdigest()[:8]
     return f"qs_sol_instr_{h}"
 
-
 def _sanitize_text(s: str) -> str:
-    # Replace any literal ASCII control characters (0x00-0x1F) with spaces.
-    # This helps avoid rare tokenizer/model issues and keeps cache reproducible.
+
     return "".join((" " if (ord(ch) < 32 and ch not in ("\n", "\t")) else ch) for ch in (s or ""))
 
-
 def format_qs_solution_instruction(*, question_statement: str, solution: str, instruction: str) -> str:
-    """
-    Format model input with the requested ordering:
-      question statement + solution + instruction
-    """
     qs = _sanitize_text(str(question_statement or "")).strip()
     sol = _sanitize_text(str(solution or "")).strip()
     instr = _sanitize_text(str(instruction or "")).strip()
     return f"Task statement:\n{qs}\n\nSolution:\n{sol}\n\n{instr}".strip()
 
-
-# GSO (and other OOD-style) benchmarks can store the task statement as a *test script*
-# (`prob_script`) which is meant to be wrapped into a fixed "spec test" prompt template
-# before embedding. This mirrors the multi-benchmark script's behavior so embeddings are
-# identical by construction.
 _GSO_PROMPT_TEMPLATE = """I’ve uploaded a python code repository in the directory workspace_dir_name. Consider the
 following test script showing an example usage of the repository:
 <test_script>
@@ -572,18 +455,12 @@ time the example, then execute it with python /workspace/<filename.py>.
 4. Rebuild and rerun your script to confirm that performance has improved.
 """
 
-
 def _wrap_gso_problem_statement(prob_script: str) -> str:
     return _GSO_PROMPT_TEMPLATE.format(SPEC_TEST=str(prob_script or "").strip())
 
-
 def _is_gso_dataset(*, dataset_name: str, dataset_path: str) -> bool:
-    """
-    Heuristic: detect GSO-style datasets (e.g. HF `gso-bench/gso` or local `...gso...jsonl`).
-    """
     s = " ".join([str(dataset_name or ""), str(dataset_path or "")]).lower()
     return ("gso-bench" in s) or bool(re.search(r"(^|[^a-z0-9])gso([^a-z0-9]|$)", s))
-
 
 @dataclass(frozen=True)
 class ItemRecord:
@@ -591,14 +468,12 @@ class ItemRecord:
     question_statement: str
     solution: str
 
-
 def iter_swebench_verified_items(*, dataset_name: str, split: str) -> Iterator[ItemRecord]:
     ds = load_dataset(str(dataset_name), split=str(split))
     n_total = len(ds)
     if n_total == 0:
         raise RuntimeError(f"Loaded empty dataset: {dataset_name} split={split}")
 
-    # Try to extract the solution patch robustly across variants.
     solution_keys = ["patch", "gold_patch", "resolved_patch", "solution", "diff", "fix_patch"]
     for i in range(int(n_total)):
         row = ds[int(i)]
@@ -614,10 +489,9 @@ def iter_swebench_verified_items(*, dataset_name: str, split: str) -> Iterator[I
                 sol = s
                 break
         if not item_id:
-            # If missing instance_id, fall back to a stable synthetic id.
+
             item_id = f"row_{int(i)}"
         yield ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
-
 
 def iter_swebench_items(
     *,
@@ -625,20 +499,6 @@ def iter_swebench_items(
     split: str,
     dataset_path: str,
 ) -> Iterator[ItemRecord]:
-    """
-    Load SWE-bench-style tasks and yield ItemRecords.
-
-    Supports exactly one source:
-    - HuggingFace dataset hub: pass --dataset_name <org/name>
-    - Local JSON/JSONL via datasets: pass --dataset_path /path/to/file.jsonl
-
-    Field extraction is best-effort:
-    - item_id: instance_id | task_id | id
-    - question_statement: problem_statement | statement | description
-        - GSO-style tasks: `prob_script` (wrapped into a fixed prompt template)
-    - solution/patch: patch | gold_patch | resolved_patch | solution | diff | fix_patch
-        - GSO-style tasks: `gt_diff`
-    """
     dataset_name = str(dataset_name or "").strip()
     dataset_path = str(dataset_path or "").strip()
     if bool(dataset_name) and bool(dataset_path):
@@ -702,10 +562,9 @@ def iter_swebench_items(
                 sol = s
                 break
         if not item_id:
-            # If missing id, fall back to a stable synthetic id within the dataset.
+
             item_id = f"row_{int(i)}"
         yield ItemRecord(item_id=item_id, question_statement=qs, solution=sol)
-
 
 def load_items_by_ids(
     *,
@@ -714,12 +573,6 @@ def load_items_by_ids(
     dataset_path: str,
     item_ids: Sequence[str],
 ) -> Tuple[List[ItemRecord], List[str]]:
-    """
-    Load SWE-bench-style tasks and return ItemRecords for a specific set of item_ids.
-
-    - Preserves the order of `item_ids`.
-    - Returns (items_found_in_order, missing_ids).
-    """
     want = [normalize_swebench_item_id(x) for x in list(item_ids)]
     want = [x for x in want if str(x).strip()]
     want_set = set(want)
@@ -756,7 +609,7 @@ def load_items_by_ids(
         qs_keys = ["prob_script"] + qs_keys
 
     found: Dict[str, ItemRecord] = {}
-    # Scan dataset once; stop early when all requested ids have been found.
+
     for i in range(n_total):
         row = ds[int(i)]
         item_id = ""
@@ -802,35 +655,20 @@ def load_items_by_ids(
     missing = [tid for tid in want if tid not in found]
     return items, missing
 
-
 def _try_load_model_class(backbone: str, *, trust_remote_code: bool, model_kwargs: dict):
-    """
-    Load a HF model in a way that supports both LMs and VLMs.
 
-    Why: some VLM checkpoints (e.g. Qwen3-VL) are stored under a *generation* class, so
-    loading via plain AutoModel can produce partially-uninitialized weights (bad embeddings).
-    """
-    # Some remote-code checkpoints expect symbols that may have been renamed across
-    # transformers versions. Provide minimal shims so imports succeed.
-    #
-    # Example seen in practice: moonshotai/Kimi-VL remote code importing
-    # `from transformers.activations import PytorchGELUTanh` while newer transformers
-    # exposes `GELUTanh`.
     try:
-        import transformers.activations as _act  # type: ignore
+        import transformers.activations as _act
 
         if not hasattr(_act, "PytorchGELUTanh") and hasattr(_act, "GELUTanh"):
-            _act.PytorchGELUTanh = _act.GELUTanh  # type: ignore[attr-defined]
+            _act.PytorchGELUTanh = _act.GELUTanh
     except Exception:
-        # Best-effort only; failure here should not prevent loading other model types.
+
         pass
 
-    # Prefer the modern image-text-to-text wrapper, then the deprecated vision2seq,
-    # then CausalLM, then bare AutoModel. We import lazily so older transformers
-    # versions still work.
     errors = []
     try:
-        from transformers import AutoModelForImageTextToText  # type: ignore
+        from transformers import AutoModelForImageTextToText
 
         return AutoModelForImageTextToText.from_pretrained(
             backbone, trust_remote_code=trust_remote_code, **model_kwargs
@@ -838,13 +676,13 @@ def _try_load_model_class(backbone: str, *, trust_remote_code: bool, model_kwarg
     except Exception as e:
         errors.append(("AutoModelForImageTextToText", e))
     try:
-        from transformers import AutoModelForVision2Seq  # type: ignore
+        from transformers import AutoModelForVision2Seq
 
         return AutoModelForVision2Seq.from_pretrained(backbone, trust_remote_code=trust_remote_code, **model_kwargs)
     except Exception as e:
         errors.append(("AutoModelForVision2Seq", e))
     try:
-        from transformers import AutoModelForCausalLM  # type: ignore
+        from transformers import AutoModelForCausalLM
 
         return AutoModelForCausalLM.from_pretrained(backbone, trust_remote_code=trust_remote_code, **model_kwargs)
     except Exception as e:
@@ -859,27 +697,18 @@ def _try_load_model_class(backbone: str, *, trust_remote_code: bool, model_kwarg
     )
     raise RuntimeError(msg)
 
-
 def _select_text_submodel(model: torch.nn.Module) -> torch.nn.Module:
-    """
-    For VLM wrappers, prefer the language/text tower for text-only embedding.
-    """
     for attr in ("language_model", "text_model"):
         m = getattr(model, attr, None)
         if isinstance(m, torch.nn.Module):
             return m
-    # Many HF *ForCausalLM wrappers store the base model on `.model`.
+
     m = getattr(model, "model", None)
     if isinstance(m, torch.nn.Module) and hasattr(m, "get_input_embeddings"):
         return m
     return model
 
-
 def _get_hidden_states_tuple(outputs):
-    """
-    Best-effort extraction of a tuple/list of per-layer hidden states from HF outputs.
-    Returns None if not available.
-    """
     for attr in ("hidden_states", "encoder_hidden_states", "decoder_hidden_states"):
         if hasattr(outputs, attr):
             hs = getattr(outputs, attr)
@@ -887,16 +716,9 @@ def _get_hidden_states_tuple(outputs):
                 return hs
     return None
 
-
 def _extract_hidden_state(outputs, *, embedding_layer: int) -> torch.Tensor:
-    """
-    Normalize different HF output types to a [B, T, H] hidden state tensor.
-
-    If embedding_layer == -1, uses the last layer by default.
-    """
     layer = int(embedding_layer)
 
-    # Fast path: if caller wants "last" and last_hidden_state is provided, use it.
     if layer == -1 and hasattr(outputs, "last_hidden_state") and outputs.last_hidden_state is not None:
         return outputs.last_hidden_state
     if layer == -1 and hasattr(outputs, "encoder_last_hidden_state") and outputs.encoder_last_hidden_state is not None:
@@ -912,7 +734,6 @@ def _extract_hidden_state(outputs, *, embedding_layer: int) -> torch.Tensor:
                 f"Try a value in [-{len(hs)}, {len(hs)-1}] or use --embedding_layer -1 for last."
             ) from e
 
-    # If hidden_states weren't present, we can still sometimes use last_hidden_state for the last layer.
     if layer == -1 and hasattr(outputs, "last_hidden_state") and outputs.last_hidden_state is not None:
         return outputs.last_hidden_state
     if layer == -1 and hasattr(outputs, "encoder_last_hidden_state") and outputs.encoder_last_hidden_state is not None:
@@ -923,7 +744,6 @@ def _extract_hidden_state(outputs, *, embedding_layer: int) -> torch.Tensor:
         "Try using --embedding_layer -1, and ensure the model supports output_hidden_states=True "
         "(and consider --trust_remote_code / a different backbone)."
     )
-
 
 def embed_items(
     *,
@@ -938,13 +758,6 @@ def embed_items(
     instruction: str,
     embedding_layer: int,
 ) -> Tuple[List[str], Dict[str, np.ndarray], Dict[str, int], int]:
-    """
-    Returns:
-      - ids_sorted
-      - embeddings_by_id: {item_id -> embedding}
-      - counts_by_id: {item_id -> text_len_chars}
-      - embedding_dim
-    """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = _load_tokenizer(backbone, trust_remote_code=trust_remote_code)
     if tokenizer.pad_token_id is None:
@@ -963,8 +776,6 @@ def embed_items(
     else:
         raise ValueError(f"Unknown torch_dtype: {torch_dtype}")
 
-    # transformers v5 prefers `dtype`; older versions used `torch_dtype`.
-    # Use the signature to stay compatible across versions.
     fp_params = inspect.signature(AutoModel.from_pretrained).parameters
     if "dtype" in fp_params:
         model_kwargs = {"dtype": dtype_arg}
@@ -975,14 +786,6 @@ def embed_items(
     if attn_implementation and attn_implementation != "auto":
         model_kwargs["attn_implementation"] = attn_implementation
 
-    # Some backbones (e.g. Devstral/Mistral3) ship pre-quantized FP8 weights.
-    # On many HPC clusters, Triton can't JIT-compile its small CUDA/Python helper
-    # because system Python headers aren't installed (missing `Python.h`), causing
-    # a crash at first FP8 matmul. If this model advertises FP8 quantization, we
-    # dequantize to bf16 during loading to avoid Triton entirely.
-    #
-    # Note: `quantization_config` is accepted via **kwargs in transformers, so it
-    # typically won't appear in the function signature.
     try:
         cfg = AutoConfig.from_pretrained(backbone, trust_remote_code=trust_remote_code)
         qc = getattr(cfg, "quantization_config", None)
@@ -996,10 +799,8 @@ def embed_items(
     if device_map in ("", "none", None):
         model.to(device)
 
-    # For VLMs / generation wrappers, embed using the text tower when possible.
     text_model = _select_text_submodel(model)
-    # Disable KV caching for embedding forward passes. Some remote-code models
-    # (e.g. Kimi-VL) can be incompatible with newer transformers cache objects.
+
     for m in (model, text_model):
         cfg = getattr(m, "config", None)
         if cfg is not None and hasattr(cfg, "use_cache"):
@@ -1049,13 +850,8 @@ def embed_items(
         input_ids = input_ids.to(embed_device)
         attention_mask = attention_mask.to(embed_device)
 
-        # Requesting `output_hidden_states=True` makes HF retain *all* layers'
-        # activations, which can explode VRAM for long contexts. If the caller
-        # only wants the last layer (embedding_layer=-1), prefer `last_hidden_state`
-        # and do NOT request hidden_states unless needed.
         want_hidden_states = int(embedding_layer) != -1
 
-        # inference_mode is a bit faster/lower-overhead than no_grad for pure inference.
         with torch.inference_mode():
             fwd_kwargs = dict(
                 input_ids=input_ids,
@@ -1063,21 +859,20 @@ def embed_items(
                 return_dict=True,
                 output_hidden_states=bool(want_hidden_states),
             )
-            # Avoid transformers DynamicCache / past_key_values codepaths unless needed.
+
             try:
-                sig = inspect.signature(text_model.forward)  # type: ignore[attr-defined]
+                sig = inspect.signature(text_model.forward)
                 if "use_cache" in sig.parameters:
                     fwd_kwargs["use_cache"] = False
             except Exception:
-                # If we can't introspect, best-effort: many models accept use_cache anyway.
+
                 fwd_kwargs["use_cache"] = False
 
             out = text_model(**fwd_kwargs)
             try:
                 h = _extract_hidden_state(out, embedding_layer=int(embedding_layer))
             except RuntimeError:
-                # Some wrappers don't populate last_hidden_state reliably unless
-                # hidden_states are requested. Fall back to a second forward pass.
+
                 if not want_hidden_states:
                     fwd_kwargs["output_hidden_states"] = True
                     out = text_model(**fwd_kwargs)
@@ -1085,7 +880,7 @@ def embed_items(
                 else:
                     raise
             pooled = last_token_pool(h, attention_mask)
-            pooled = pooled.detach().float().cpu().numpy()  # [B, H]
+            pooled = pooled.detach().float().cpu().numpy()
 
         embedding_dim = int(pooled.shape[1])
         for rid, vec, txt in zip(batch_ids, pooled, batch_texts):
@@ -1112,20 +907,11 @@ def embed_items(
     ids_sorted = sorted(per_id.keys())
     return ids_sorted, per_id, counts, int(embedding_dim)
 
-
 def _npz_scalar(value, default=None):
-    """
-    Robustly convert an NPZ entry to a Python scalar.
-
-    Handles common patterns like:
-    - np.array([x])  -> x
-    - np.array(x)    -> x
-    - ["x"] / [x]    -> x
-    """
     if value is None:
         return default
     try:
-        import numpy as _np  # local import; numpy is required already
+        import numpy as _np
 
         if isinstance(value, _np.ndarray):
             if value.shape == ():
@@ -1143,11 +929,9 @@ def _npz_scalar(value, default=None):
         return list(value)
     return value
 
-
 def _as_1d_float32(x: object) -> np.ndarray:
     a = np.asarray(x, dtype=np.float64).reshape(-1)
     return a.astype(np.float32, copy=False)
-
 
 def _as_float(x: object) -> float:
     try:
@@ -1156,8 +940,7 @@ def _as_float(x: object) -> float:
             return float("nan")
         return float(v[0])
     except Exception:
-        return float(x)  # type: ignore[arg-type]
-
+        return float(x)
 
 def save_regression_weights(
     *,
@@ -1167,13 +950,6 @@ def save_regression_weights(
     feature_dim: int,
     metadata: dict,
 ) -> Tuple[str, str]:
-    """
-    Save a minimal, sklearn-version-agnostic representation of the trained regressor.
-
-    Writes:
-      - regression_weights.json (metadata)
-      - regression_weights.npz  (arrays: coef, intercept, scaler_mean, scaler_scale)
-    """
     ensure_dir(out_dir)
 
     uses_scaler = False
@@ -1193,7 +969,7 @@ def save_regression_weights(
             coef = _as_1d_float32(getattr(reg, "coef_"))
             intercept = np.array([_as_float(getattr(reg, "intercept_"))], dtype=np.float32)
     else:
-        # LinearRegression (no scaler in this script).
+
         if hasattr(model, "coef_") and hasattr(model, "intercept_"):
             coef = _as_1d_float32(getattr(model, "coef_"))
             intercept = np.array([_as_float(getattr(model, "intercept_"))], dtype=np.float32)
@@ -1236,25 +1012,15 @@ def save_regression_weights(
     save_json(weights_json, meta)
     return weights_json, weights_npz
 
-
-# -----------------------------
-# Judge feature + block-ridge
-# -----------------------------
-
-_JUDGE_INDEX_CACHE: Dict[str, Dict[str, str]] = {}
+_JUDGE_INDEX_CACHE: Dict[Tuple[str, bool], Dict[str, str]] = {}
 _JUDGE_CSV_HEADER_CACHE: Dict[str, List[str]] = {}
-_JUDGE_CSV_CACHE: Dict[Tuple[str, Tuple[str, ...]], Dict[str, np.ndarray]] = {}
-
+_JUDGE_CSV_CACHE: Dict[Tuple[str, bool, Tuple[str, ...]], Dict[str, np.ndarray]] = {}
 
 def _looks_like_csv_path(p: str) -> bool:
     s = str(p or "").strip().lower()
     return bool(s.endswith(".csv"))
 
-
 def _load_judge_csv_feature_names(features_csv: str) -> List[str]:
-    """
-    Read a judge-features CSV header and return feature column names (excluding `instance_id`).
-    """
     root = os.path.abspath(str(features_csv))
     if root in _JUDGE_CSV_HEADER_CACHE:
         return list(_JUDGE_CSV_HEADER_CACHE[root])
@@ -1274,18 +1040,14 @@ def _load_judge_csv_feature_names(features_csv: str) -> List[str]:
     _JUDGE_CSV_HEADER_CACHE[root] = feats
     return list(feats)
 
-
 def _load_judge_csv_vectors(
     features_csv: str,
     *,
     feature_names: Sequence[str],
+    normalize_item_ids: bool = True,
 ) -> Dict[str, np.ndarray]:
-    """
-    Load a judge-features CSV into a mapping from normalized instance_id -> float32 vector.
-    Rows with missing/blank/non-numeric feature values are skipped.
-    """
     root = os.path.abspath(str(features_csv))
-    key = (root, tuple([str(x) for x in feature_names]))
+    key = (root, bool(normalize_item_ids), tuple([str(x) for x in feature_names]))
     if key in _JUDGE_CSV_CACHE:
         return _JUDGE_CSV_CACHE[key]
 
@@ -1309,7 +1071,7 @@ def _load_judge_csv_vectors(
             iid_raw = str((row.get("instance_id") or "")).strip()
             if not iid_raw:
                 continue
-            iid = normalize_swebench_item_id(iid_raw) or iid_raw
+            iid = (normalize_swebench_item_id(iid_raw) or iid_raw) if normalize_item_ids else iid_raw
             xs: List[float] = []
             ok = True
             for k in feature_names:
@@ -1333,26 +1095,18 @@ def _load_judge_csv_vectors(
     _JUDGE_CSV_CACHE[key] = out
     return out
 
-
-def _build_judge_index(features_dir: str) -> Dict[str, str]:
-    """
-    Build a mapping from normalized task id -> JSON file path.
-
-    Why: some judge JSONs are stored with filenames like:
-      instance_<id>-v<hash>.json
-    while the rest of this pipeline uses normalized ids (drops `instance_` and `-v...`).
-    """
+def _build_judge_index(features_dir: str, *, normalize_item_ids: bool = True) -> Dict[str, str]:
     root = os.path.abspath(str(features_dir))
-    if root in _JUDGE_INDEX_CACHE:
-        return _JUDGE_INDEX_CACHE[root]
+    key = (root, bool(normalize_item_ids))
+    if key in _JUDGE_INDEX_CACHE:
+        return _JUDGE_INDEX_CACHE[key]
 
-    # CSV-backed judge features: no JSON index needed.
     if _looks_like_csv_path(features_dir):
         if not os.path.exists(root):
             raise FileNotFoundError(f"Judge features CSV not found: {features_dir!r}")
         if not os.path.isfile(root):
             raise ValueError(f"Expected a judge features CSV file path, got: {features_dir!r}")
-        _JUDGE_INDEX_CACHE[root] = {}
+        _JUDGE_INDEX_CACHE[key] = {}
         return {}
 
     idx: Dict[str, str] = {}
@@ -1362,14 +1116,13 @@ def _build_judge_index(features_dir: str) -> Dict[str, str]:
         names = []
     for fn in names:
         stem = fn[:-5]
-        norm = normalize_swebench_item_id(stem)
+        norm = (normalize_swebench_item_id(stem) or stem) if normalize_item_ids else str(stem).strip()
         if not norm:
             continue
         idx.setdefault(norm, os.path.join(root, fn))
 
-    _JUDGE_INDEX_CACHE[root] = idx
+    _JUDGE_INDEX_CACHE[key] = idx
     return idx
-
 
 def _load_judge_vector(
     task_id: str,
@@ -1377,22 +1130,20 @@ def _load_judge_vector(
     features_dir: str,
     feature_names: Sequence[str],
     index: Dict[str, str],
+    normalize_item_ids: bool = True,
 ) -> Optional[np.ndarray]:
     tid = str(task_id or "").strip()
     if not tid:
         return None
 
-    # CSV path: fast lookup from preloaded mapping.
     if _looks_like_csv_path(features_dir):
-        m = _load_judge_csv_vectors(features_dir, feature_names=feature_names)
-        norm = normalize_swebench_item_id(tid) or tid
+        m = _load_judge_csv_vectors(features_dir, feature_names=feature_names, normalize_item_ids=normalize_item_ids)
+        norm = (normalize_swebench_item_id(tid) or tid) if normalize_item_ids else tid
         return m.get(norm, None)
 
-    # 1) exact match
     p = os.path.join(str(features_dir), f"{tid}.json")
     if not os.path.exists(p):
-        # 2) normalized lookup (for filenames with -v... suffix)
-        norm = normalize_swebench_item_id(tid)
+        norm = (normalize_swebench_item_id(tid) or tid) if normalize_item_ids else tid
         p = index.get(norm, "")
         if not p or not os.path.exists(p):
             return None
@@ -1413,7 +1164,6 @@ def _load_judge_vector(
             return None
     return np.asarray(xs, dtype=np.float32)
 
-
 def _parse_alpha_list(s: str) -> np.ndarray:
     try:
         xs = [float(x.strip()) for x in str(s or "").split(",") if x.strip()]
@@ -1426,7 +1176,6 @@ def _parse_alpha_list(s: str) -> np.ndarray:
         raise ValueError(f"All alphas must be > 0; got {arr.tolist()}")
     return arr
 
-
 def _fit_block_ridge(
     *,
     X_emb: np.ndarray,
@@ -1435,17 +1184,6 @@ def _fit_block_ridge(
     alpha_emb: float,
     alpha_judge: float,
 ) -> dict:
-    """
-    Fit a ridge model with different penalties per feature block:
-      min ||y - X_emb w_emb - X_judge w_judge||^2 + alpha_emb||w_emb||^2 + alpha_judge||w_judge||^2
-
-    Implemented by:
-      - standardizing each block
-      - scaling each block by 1/sqrt(alpha_block)
-      - fitting sklearn Ridge(alpha=1.0) on the transformed design
-    """
-    from sklearn.linear_model import Ridge
-
     ae = float(alpha_emb)
     aj = float(alpha_judge)
     if not (ae > 0 and aj > 0):
@@ -1476,7 +1214,6 @@ def _fit_block_ridge(
         "n_judge": int(X_judge.shape[1]),
     }
 
-
 def _predict_block_ridge(state: dict, *, X_emb: np.ndarray, X_judge: np.ndarray) -> np.ndarray:
     X_emb = np.asarray(X_emb, dtype=np.float64)
     X_judge = np.asarray(X_judge, dtype=np.float64)
@@ -1492,18 +1229,7 @@ def _predict_block_ridge(state: dict, *, X_emb: np.ndarray, X_judge: np.ndarray)
     pred = state["ridge"].predict(X_t)
     return np.asarray(pred, dtype=np.float64).reshape(-1)
 
-
 def _decompose_block_ridge_single(state: dict, *, x_emb_raw: np.ndarray, x_judge_raw: np.ndarray) -> Dict[str, float]:
-    """
-    Decompose prediction into embedding vs judge contributions.
-
-    Returns both:
-      - **raw_dot**: dot products against raw feature vectors
-      - **std_contrib**: contributions in standardized space (exactly what the model computes pre-intercept)
-
-    In raw space:
-      yhat = intercept_raw + dot(w_emb_raw, x_emb_raw) + dot(w_judge_raw, x_judge_raw)
-    """
     ridge = state["ridge"]
     coef = np.asarray(getattr(ridge, "coef_", []), dtype=np.float64).reshape(-1)
     if coef.size == 0:
@@ -1521,7 +1247,6 @@ def _decompose_block_ridge_single(state: dict, *, x_emb_raw: np.ndarray, x_judge
     x_emb_raw = np.asarray(x_emb_raw, dtype=np.float64).reshape(1, -1)
     x_judge_raw = np.asarray(x_judge_raw, dtype=np.float64).reshape(1, -1)
 
-    # Standardized-space contributions (exactly matches training feature construction).
     x_emb_s = emb_scaler.transform(x_emb_raw)[0]
     x_judge_s = judge_scaler.transform(x_judge_raw)[0]
     w_emb_std = w_emb_t / math.sqrt(alpha_emb)
@@ -1530,7 +1255,6 @@ def _decompose_block_ridge_single(state: dict, *, x_emb_raw: np.ndarray, x_judge
     judge_contrib_std = float(np.dot(x_judge_s, w_judge_std))
     intercept_model = float(getattr(ridge, "intercept_", 0.0))
 
-    # Raw-space effective weights (dot-products with raw feature components).
     emb_scale = np.asarray(getattr(emb_scaler, "scale_", None), dtype=np.float64).reshape(-1)
     judge_scale = np.asarray(getattr(judge_scaler, "scale_", None), dtype=np.float64).reshape(-1)
     emb_mean = np.asarray(getattr(emb_scaler, "mean_", None), dtype=np.float64).reshape(-1)
@@ -1559,7 +1283,6 @@ def _decompose_block_ridge_single(state: dict, *, x_emb_raw: np.ndarray, x_judge
         "judge_dot_raw": float(judge_dot_raw),
     }
 
-
 def _select_block_alphas_inner_cv(
     *,
     X_emb: np.ndarray,
@@ -1569,11 +1292,8 @@ def _select_block_alphas_inner_cv(
     alphas_judge: np.ndarray,
     inner_splits: int,
     seed: int,
+    verbose: bool = False,
 ) -> Tuple[float, float, float]:
-    """
-    Select (alpha_emb, alpha_judge) via inner KFold minimizing MSE.
-    Re-fits scalers per inner split to avoid leakage.
-    """
     X_emb = np.asarray(X_emb, dtype=np.float64)
     X_judge = np.asarray(X_judge, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64).reshape(-1)
@@ -1584,8 +1304,11 @@ def _select_block_alphas_inner_cv(
     best_ae: Optional[float] = None
     best_aj: Optional[float] = None
     best_mse: float = float("inf")
+    total = int(len(alphas_emb)) * int(len(alphas_judge))
+    seen = 0
     for ae in alphas_emb:
         for aj in alphas_judge:
+            seen += 1
             mse_sum = 0.0
             n_folds = 0
             for tr, va in inner_cv.split(y):
@@ -1605,16 +1328,16 @@ def _select_block_alphas_inner_cv(
                 best_mse = float(mse)
                 best_ae = float(ae)
                 best_aj = float(aj)
+            if verbose and (seen == 1 or seen % 10 == 0 or seen == total):
+                print(
+                    f"Block-ridge inner CV: tried {seen}/{total} (alpha_emb={float(ae):g}, alpha_judge={float(aj):g}) "
+                    f"mse={float(mse):.6g} best_mse={float(best_mse):.6g}"
+                )
     if best_ae is None or best_aj is None:
         raise RuntimeError("Inner CV failed to select block alphas.")
     return float(best_ae), float(best_aj), float(best_mse)
 
-
 def _extract_block_ridge_raw_weights(state: dict) -> Tuple[np.ndarray, np.ndarray, float]:
-    """
-    Return (w_emb_raw, w_judge_raw, intercept_raw) so that:
-      yhat = intercept_raw + dot(w_emb_raw, x_emb_raw) + dot(w_judge_raw, x_judge_raw)
-    """
     ridge = state["ridge"]
     coef = np.asarray(getattr(ridge, "coef_", []), dtype=np.float64).reshape(-1)
     if coef.size == 0:
@@ -1645,7 +1368,6 @@ def _extract_block_ridge_raw_weights(state: dict) -> Tuple[np.ndarray, np.ndarra
     intercept_raw = intercept_model - float(np.dot(emb_mean, w_emb_raw)) - float(np.dot(judge_mean, w_judge_raw))
     return w_emb_raw.astype(np.float32, copy=False), w_judge_raw.astype(np.float32, copy=False), float(intercept_raw)
 
-
 def save_regression_weights_block_ridge(
     *,
     out_dir: str,
@@ -1653,13 +1375,6 @@ def save_regression_weights_block_ridge(
     judge_feature_names: Sequence[str],
     metadata: dict,
 ) -> Tuple[str, str]:
-    """
-    Save a minimal representation of the *joint* block-ridge.
-
-    Writes:
-      - regression_weights.json (metadata)
-      - regression_weights.npz  (arrays: coef_emb_raw, coef_judge_raw, intercept_raw, judge_feature_names, plus scaler stats)
-    """
     ensure_dir(out_dir)
     w_emb_raw, w_judge_raw, intercept_raw = _extract_block_ridge_raw_weights(state)
 
@@ -1703,7 +1418,6 @@ def save_regression_weights_block_ridge(
     save_json(weights_json, meta)
     return weights_json, weights_npz
 
-
 def _run_with_judge_features(
     *,
     args: argparse.Namespace,
@@ -1714,13 +1428,6 @@ def _run_with_judge_features(
     all_responses: List[Tuple[str, Dict[str, int]]],
     overlap_ids: List[str],
 ) -> int:
-    """
-    Combined (embeddings+judge) path: mirror `predict_question_difficulty_combined_features.py`.
-    """
-    _require("sklearn")
-    from sklearn.metrics import roc_auc_score
-
-    # IMPORTANT: match embedding-only behavior for zero-success items.
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
     include_zero_success = bool(getattr(args, "include_zero_success", False))
@@ -1789,7 +1496,6 @@ def _run_with_judge_features(
         fold_root = os.path.join(str(args.out_dir), "irt_folds", f"fold_{int(fold):02d}")
         ensure_dir(fold_root)
 
-        # Match combined_features behavior: always retrain IRT and overwrite irt_1pl artifacts.
         irt_dir = os.path.join(str(fold_root), "irt_1pl")
         if os.path.exists(irt_dir):
             shutil.rmtree(irt_dir, ignore_errors=True)
@@ -1806,7 +1512,6 @@ def _run_with_judge_features(
             print("WARNING: --irt_device=cuda requested but CUDA is unavailable; falling back to cpu for IRT.")
             irt_device = "cpu"
 
-        # Mirror base/combined policy: determinism OFF during IRT only.
         set_torch_determinism(False)
         seed_everything(int(args.seed), deterministic=False)
         theta_by_subject, diff_by_item = train_irt_1pl(
@@ -1825,7 +1530,6 @@ def _run_with_judge_features(
         if len(train_labeled) < 2:
             raise RuntimeError(f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties.")
 
-        # Embeddings-only baseline ridge (for debug/comparability).
         seed_everything(int(args.seed) + int(fold), deterministic=True)
         X_train = np.stack([X[id_to_row[tid]] for tid in train_labeled], axis=0).astype(np.float32)
         y_train = np.array([float(diff_by_item[tid]) for tid in train_labeled], dtype=np.float32)
@@ -1834,7 +1538,7 @@ def _run_with_judge_features(
         if reg == "linear":
             raise ValueError("--regressor=linear is not supported when --method=combined is used.")
         emb_model = None
-        # Use the same ridge builder as the embedding-only path for baseline.
+
         emb_model = Pipeline(
             steps=[
                 ("scaler", StandardScaler(with_mean=True, with_std=True)),
@@ -1842,7 +1546,7 @@ def _run_with_judge_features(
             ]
         )
         if reg == "ridge_cv":
-            # Match combined_features: RidgeCV(alphas=..., cv=inner_cv) with shuffle.
+
             alphas = np.array(
                 [float(x.strip()) for x in str(args.ridge_alphas).split(",") if x.strip()],
                 dtype=np.float64,
@@ -1862,7 +1566,6 @@ def _run_with_judge_features(
         emb_pred_test = emb_model.predict(X_test).astype(np.float32)
         emb_pred_by_item_test = {tid: float(z) for tid, z in zip(test_items, emb_pred_test.tolist())}
 
-        # Joint block-ridge: train on items that have judge features.
         joint_emb_train_rows: List[np.ndarray] = []
         joint_judge_train_rows: List[np.ndarray] = []
         joint_y_train_rows: List[float] = []
@@ -1923,7 +1626,6 @@ def _run_with_judge_features(
         fold_alpha_emb.append(float(joint_state["alpha_emb"]))
         fold_alpha_judge.append(float(joint_state["alpha_judge"]))
 
-        # Evaluate on held-out fold.
         final_pred_by_item: Dict[str, float] = {}
         contrib_by_item: Dict[str, Dict[str, float]] = {}
         n_missing_judge = 0
@@ -1949,17 +1651,15 @@ def _run_with_judge_features(
                     "judge_contrib_std": float(contrib["judge_contrib_std"]),
                 }
             except Exception:
-                # Analysis-only; do not fail prediction if decomposition fails.
+
                 pass
 
-        # Save per-item decomposition for this fold (test items only), mirroring combined_features.
         try:
             ensure_dir(fold_root)
             save_json(os.path.join(str(fold_root), "block_contributions_test_items.json"), contrib_by_item)
         except Exception:
             pass
 
-        # Fill OOF predictions for this fold's test items (NaN if missing judge).
         for tid in test_items:
             i = eligible_index.get(tid, None)
             if i is None:
@@ -1968,7 +1668,6 @@ def _run_with_judge_features(
             if tid in final_pred_by_item:
                 yhat_oof[int(i)] = float(final_pred_by_item[tid])
 
-        # Score only items with judge predictions.
         scored_items = set(final_pred_by_item.keys())
         scores_final: List[float] = []
         scores_emb: List[float] = []
@@ -2033,7 +1732,7 @@ def _run_with_judge_features(
             except Exception:
                 pass
 
-        print(f"Fold {fold:02d}: auc={fold_auc} oracle_irt_auc={fold_auc_oracle} missing_judge={n_missing_judge}")
+        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle} missing_judge={n_missing_judge}")
 
     auc_arr = np.asarray(fold_aucs, dtype=np.float64)
     auc_mean = float(np.nanmean(auc_arr)) if auc_arr.size else float("nan")
@@ -2077,7 +1776,6 @@ def _run_with_judge_features(
         metadata=weights_meta,
     )
 
-    # Predict on zero-success items (excluded from CV/IRT, if requested).
     exclude_zero_success = bool(not include_zero_success)
     zero_embedded = [tid for tid in task_ids if tid in zero_success_set] if exclude_zero_success else []
     yhat_zero: Dict[str, float] = {}
@@ -2109,46 +1807,13 @@ def _run_with_judge_features(
     save_json(
         metrics_out,
         {
-            "script": os.path.abspath(__file__),
-            "embeddings_cache": str(emb_cache),
-            "agent_results": str(args.agent_results),
-            "judge_features_dir": str(args.judge_features_dir),
-            "judge_feature_schema": str(schema),
-            "judge_feature_names": list(judge_feature_names),
-            "cv_folds": int(args.cv_folds),
-            "seed": int(args.seed),
-            "zero_success_tasks": str(zero_success_mode),
-            "include_zero_success": bool(include_zero_success),
-            # Backwards-compatible key (older analysis scripts may expect it).
-            "exclude_zero_success": bool(exclude_zero_success),
             "n_items_total": int(len(task_ids)),
             "n_items_with_responses": int(len(overlap_ids)),
             "n_items_eligible_cv": int(len(eligible)),
-            "n_items_zero_success_in_responses": int(len(zero_success_ids)),
-            "regressor": str(args.regressor),
-            "ridge_alpha": float(args.ridge_alpha),
-            "ridge_alphas": str(args.ridge_alphas),
-            "inner_splits": int(args.inner_splits),
-            "ridge_alpha_emb": (
-                float(getattr(args, "ridge_alpha_emb", float("nan")))
-                if math.isfinite(float(getattr(args, "ridge_alpha_emb", float("nan"))))
-                else float(args.ridge_alpha)
-            ),
-            "ridge_alpha_judge": (
-                float(getattr(args, "ridge_alpha_judge", float("nan")))
-                if math.isfinite(float(getattr(args, "ridge_alpha_judge", float("nan"))))
-                else float(args.ridge_alpha)
-            ),
-            "ridge_alphas_emb": str(getattr(args, "ridge_alphas_emb", "") or "").strip() or str(args.ridge_alphas),
-            "ridge_alphas_judge": str(getattr(args, "ridge_alphas_judge", "") or "").strip() or str(args.ridge_alphas),
-            "cv_selected_alpha_emb_folds": [float(x) for x in fold_alpha_emb],
-            "cv_selected_alpha_judge_folds": [float(x) for x in fold_alpha_judge],
+            "exclude_zero_success": bool(exclude_zero_success),
+            "seed": int(args.seed),
             "cv_best_auc_fold": int(best_fold),
             "cv_best_auc": float(best_fold_auc),
-            "regression_weights_json": str(weights_json),
-            "regression_weights_npz": str(weights_npz),
-            "predictions_csv": str(pred_path),
-            "n_items_zero_success_predicted": int(len(yhat_zero)),
             "cv_test_auc_folds": [float(x) for x in fold_aucs],
             "cv_test_auc_mean": float(auc_mean),
             "cv_test_auc_std": float(auc_std),
@@ -2156,9 +1821,9 @@ def _run_with_judge_features(
             "cv_test_auc_mean_oracle_irt": float(oracle_auc_mean),
             "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
             "cv_test_auc_folds_embedding_only": [float(x) for x in fold_aucs_embedding_only],
-            "cv_test_n_obs_folds": [int(x) for x in fold_n_obs],
-            "cv_test_n_items_scored_folds": [int(x) for x in fold_n_items_scored],
-            **oracle_meta,
+            "regression_weights_json": str(weights_json),
+            "regression_weights_npz": str(weights_npz),
+            "oracle_irt_dir": str(oracle_meta.get("oracle_irt_dir", "")),
         },
     )
 
@@ -2166,7 +1831,6 @@ def _run_with_judge_features(
     print(f"Wrote predictions: {pred_path}")
     print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
     return 0
-
 
 def _run_judge_only(
     *,
@@ -2180,12 +1844,6 @@ def _run_judge_only(
     split: str,
     instruction_signature: str,
 ) -> int:
-    """
-    Judge-only path: use LLM-judge feature vectors only (no embeddings).
-    Mirrors the embedding-only K-fold CV + IRT + AUROC pipeline, but with judge features as X.
-    """
-    _require("sklearn")
-
     method = "judge"
     regressor_name = str(args.regressor or "ridge_cv").strip()
     if regressor_name == "linear":
@@ -2224,7 +1882,6 @@ def _run_judge_only(
     if not eligible:
         raise RuntimeError("After filtering, no items remain for CV/IRT.")
 
-    # Build judge feature matrix for eligible items (drop items missing judge features).
     eligible_used: List[str] = []
     judge_rows: List[np.ndarray] = []
     for tid in eligible:
@@ -2380,7 +2037,7 @@ def _run_judge_only(
         cv_test_auc_folds.append(float(fold_auc))
         cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
         cv_test_n_obs_folds.append(int(len(labels)))
-        print(f"Fold {fold:02d}: auc={fold_auc} oracle_irt_auc={fold_auc_oracle} n_obs={len(labels)}")
+        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle} n_obs={len(labels)}")
         if fold_auc == fold_auc and fold_auc > best_fold_auc:
             best_fold_auc = float(fold_auc)
             best_fold = int(fold)
@@ -2442,7 +2099,6 @@ def _run_judge_only(
         metadata=weights_meta,
     )
 
-    # Predict on zero-success items (excluded from CV/IRT), if requested.
     zero_items: List[str] = []
     yhat_zero: Optional[np.ndarray] = None
     if exclude_zero_success and zero_success_set:
@@ -2463,25 +2119,12 @@ def _run_judge_only(
             print("NOTE: zero-success ids provided, but none had judge features; nothing to predict.")
 
     metrics = {
-        "script": os.path.abspath(__file__),
         "method": method,
-        "judge_features_dir": str(feat_dir),
-        "judge_feature_schema": str(schema),
-        "judge_feature_names": list(judge_feature_names),
         "n_items_total": int(len(task_ids)),
         "n_items_with_responses": int(len(overlap_ids)),
         "n_items_eligible_cv_irt": int(len(eligible)),
-        "zero_success_tasks": str(zero_success_mode),
-        "include_zero_success": bool(include_zero_success),
-        # Backwards-compatible key (older analysis scripts may expect it).
         "exclude_zero_success": bool(exclude_zero_success),
-        "n_items_zero_success_in_responses": int(len(zero_success_ids)),
-        "judge_dim": int(Xy.shape[1]),
         "seed": int(args.seed),
-        "deterministic": True,
-        "irt_seeded": True,
-        "irt_deterministic": False,
-        "cv_n_splits": int(args.cv_folds),
         "cv_best_auc_fold": int(best_fold),
         "cv_best_auc": float(best_fold_auc),
         "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
@@ -2490,24 +2133,10 @@ def _run_judge_only(
         "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
         "cv_test_auc_mean_oracle_irt": float(oracle_auc_mean),
         "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
-        "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
-        "irt_epochs": int(args.irt_epochs),
-        "irt_device": str(args.irt_device),
-        "regressor": regressor_name,
-        "ridge_alpha": ridge_alpha,
-        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
-        "inner_splits": int(args.inner_splits),
-        "dataset_sources": str(dataset_sources_str),
-        "dataset_name": (dataset_name or None),
-        "dataset_path": (dataset_path or None),
-        "split": str(split),
-        "agent_results": str(args.agent_results),
-        "instruction_signature": str(instruction_signature),
         "regression_weights_json": str(weights_json),
         "regression_weights_npz": str(weights_npz),
-        "n_items_zero_success_predicted": int(0 if yhat_zero is None else int(np.asarray(yhat_zero).size)),
+        "oracle_irt_dir": str(oracle_meta.get("oracle_irt_dir", "")),
     }
-    metrics.update(dict(oracle_meta))
     save_json(os.path.join(str(args.out_dir), "metrics.json"), metrics)
 
     pred_path = os.path.join(str(args.out_dir), "predictions.csv")
@@ -2524,10 +2153,19 @@ def _run_judge_only(
     print(f"Wrote predictions: {pred_path}")
     return 0
 
-
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
 
+    p.add_argument(
+        "--benchmark",
+        type=str,
+        default="",
+        help=(
+            "Benchmark name to infer dataset, agent_results, judge_features_dir, out_dir. "
+            "One of: verified, pro, terminal-bench, gso. If set, overrides --dataset_name, --dataset_path, "
+            "--agent_results, --judge_features_dir, --out_dir with standard paths for that benchmark."
+        ),
+    )
     p.add_argument(
         "--dataset_name",
         type=str,
@@ -2545,7 +2183,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
     p.add_argument("--seed", type=int, default=0)
-    # Fixed policy: we always seed non-IRT steps deterministically.
 
     p.add_argument("--backbone", type=str, default="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B")
     p.add_argument("--trust_remote_code", action="store_true")
@@ -2586,7 +2223,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     p.add_argument("--irt_epochs", type=int, default=5000)
     p.add_argument("--irt_device", type=str, default="cuda", help="Device for IRT training (cuda or cpu).")
-    # Fixed IRT policy: we seed IRT, but keep torch determinism disabled during IRT for stability.
+
     p.add_argument(
         "--method",
         type=str,
@@ -2616,12 +2253,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Inner CV splits for RidgeCV (used when --regressor=ridge_cv). Will be capped by train size; must be >=2.",
     )
 
-    # Judge feature settings (used by --method=judge/combined)
     p.add_argument(
         "--judge_features_dir",
         type=str,
-        default="llm_judge/features/verified_full.csv",
-        help="Judge features (CSV like llm_judge/features/verified_full.csv, or directory of per-task JSONs).",
+        default="",
+        help=(
+            "Judge features (CSV like llm_judge/features/verified_full.csv, or directory of per-task JSONs)."
+        ),
     )
     p.add_argument(
         "--ridge_alpha_emb",
@@ -2654,6 +2292,32 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
 
     args = p.parse_args(argv)
+    raw_argv = list(argv) if argv is not None else []
+    if not raw_argv:
+        raw_argv = list(sys.argv[1:])
+    argv_str = " " + " ".join(str(x) for x in raw_argv) + " " if raw_argv else ""
+
+    def _was_passed(flag: str) -> bool:
+        return f" {flag}" in argv_str or f" {flag}=" in argv_str
+
+    benchmark_spec = str(getattr(args, "benchmark", "") or "").strip()
+    if benchmark_spec:
+        defaults = _get_benchmark_defaults(benchmark_spec)
+        if not _was_passed("--dataset_name"):
+            args.dataset_name = defaults["dataset_name"]
+        if not _was_passed("--dataset_path"):
+            args.dataset_path = defaults["dataset_path"]
+        if not _was_passed("--split"):
+            args.split = defaults["split"]
+        if not _was_passed("--agent_results"):
+            args.agent_results = defaults["agent_results"]
+        if not _was_passed("--judge_features_dir"):
+            args.judge_features_dir = defaults["judge_features_dir"]
+        if not _was_passed("--out_dir"):
+            args.out_dir = defaults["out_dir"]
+        print(f"Using benchmark={benchmark_spec}: dataset={'path=' + args.dataset_path if args.dataset_path else 'name=' + args.dataset_name}, "
+              f"agent_results={args.agent_results}, out_dir={args.out_dir}")
+
     ensure_dir(args.out_dir)
     seed_everything(int(args.seed), deterministic=True)
 
@@ -2670,10 +2334,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     instr_sig = prompt_signature(str(args.instruction))
     emb_cache = ""
+
+    if method in {"judge", "combined"}:
+        feat_dir = str(getattr(args, "judge_features_dir", "") or "").strip()
+
     if method == "judge":
         if str(args.embeddings_cache or "").strip():
             print("NOTE: --method=judge ignores --embeddings_cache (no embedding is performed).")
-        # For judge-only mode, we still need the item id universe to align with agent_results.
+
         items = list(
             iter_swebench_items(
                 dataset_name=str(dataset_name),
@@ -2681,25 +2349,41 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 dataset_path=str(dataset_path),
             )
         )
-        ids_sorted = sorted([normalize_swebench_item_id(str(it.get("item_id", "")).strip()) for it in items if str(it.get("item_id", "")).strip()])
+        ids_sorted = sorted(
+            normalize_swebench_item_id(str(it.item_id).strip())
+            for it in items
+            if str(it.item_id).strip()
+        )
         task_ids = ids_sorted
         X = None
         id_to_row = {tid: i for i, tid in enumerate(task_ids)}
     else:
-        # Cache path derived from key settings (embeddings / combined modes).
+
         safe_backbone = str(args.backbone).replace("/", "__")
-        ds_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(dataset_sources_str))[:64]
-        split_flag = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(args.split))[:32]
         layer_flag = "" if int(args.embedding_layer) == -1 else f"__layer{int(args.embedding_layer)}"
         idnorm_flag = "__idnorm_instance-v1"
         emb_cache = str(args.embeddings_cache or "").strip()
         if not emb_cache:
-            emb_cache = os.path.join(
-                args.out_dir,
-                f"embeddings__{safe_backbone}__pool-lasttoken{layer_flag}__qs-sol-instr__{instr_sig}{idnorm_flag}__{ds_flag}__{split_flag}__maxlen{int(args.max_length)}.npz",
-            )
+            cache_meta = {
+                "backbone": str(args.backbone),
+                "max_length": int(args.max_length),
+                "batch_size": int(args.batch_size),
+                "device_map": str(args.device_map),
+                "torch_dtype": str(args.torch_dtype),
+                "attn_implementation": str(args.attn_implementation),
+                "instruction": str(args.instruction),
+                "instruction_sig": str(instr_sig),
+                "embedding_layer": int(args.embedding_layer),
+                "normalize_item_ids": True,
+                "idnorm_flag": idnorm_flag,
+                "dataset_sources": str(dataset_sources_str),
+                "split": str(args.split),
+            }
+            cache_key = hashlib.sha1(json.dumps(cache_meta, sort_keys=True).encode("utf-8")).hexdigest()[:12]
+            model_short = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(safe_backbone))[:48].strip("_") or "model"
+            short_basename = f"embeddings__{model_short}__{cache_key}__maxlen{int(args.max_length)}.npz"
+            emb_cache = os.path.join(args.out_dir, short_basename)
 
-        # Load or compute embeddings.
         if os.path.exists(emb_cache) and not args.overwrite and not str(args.embeddings_cache or "").strip():
             data = np.load(emb_cache, allow_pickle=True)
             task_ids = [str(x) for x in list(data["task_ids"].tolist())]
@@ -2729,7 +2413,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 f"Loaded embeddings cache (explicit): {emb_cache} (n={len(task_ids)}, dim={X.shape[1]}, counts_kind={counts_kind or 'unknown'}, embedding_layer={cached_layer})"
             )
         else:
-            # Collect items to embed.
+
             items = list(
                 iter_swebench_items(
                     dataset_name=str(dataset_name),
@@ -2780,7 +2464,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
             task_ids = ids_sorted
 
-    # Align embeddings with response JSONL items.
     id_to_row = {tid: i for i, tid in enumerate(task_ids)}
 
     all_responses = load_all_responses(str(args.agent_results))
@@ -2890,7 +2573,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         raise AssertionError(f"Unhandled regressor: {regressor_name}")
 
-    # K-fold CV over items. Each fold trains IRT on the K-1 training folds only.
     outer_cv = KFold(n_splits=int(args.cv_folds), shuffle=True, random_state=int(args.seed))
     cv_test_auc_folds: List[float] = []
     cv_test_auc_folds_oracle_irt: List[float] = []
@@ -2921,7 +2603,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print("WARNING: --irt_device=cuda requested but CUDA is unavailable; falling back to cpu for IRT.")
             irt_device = "cpu"
 
-        # Fixed IRT policy: seeded RNG, but torch determinism OFF for IRT only.
         set_torch_determinism(False)
         seed_everything(int(args.seed), deterministic=False)
 
@@ -2932,7 +2613,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             seed=int(args.seed),
             out_dir=os.path.join(fold_root, "irt_1pl"),
         )
-        # Restore global determinism setting after IRT.
+
         set_torch_determinism(True)
         if not theta_by_subject:
             raise RuntimeError(f"Fold {fold}: IRT produced 0 subject thetas (unexpected).")
@@ -2945,7 +2626,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 f"Fold {fold}: only {len(train_labeled)} train items had IRT difficulties; cannot fit regressor."
             )
 
-        # Seed post-IRT for any downstream randomness (sklearn CV shuffles, etc).
         seed_everything(int(args.seed) + int(fold), deterministic=True)
 
         X_train = np.stack([X[id_to_row[tid]] for tid in train_labeled], axis=0).astype(np.float32)
@@ -2959,7 +2639,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         yhat_oof[te] = pred
         fold_of_item[te] = int(fold)
 
-        # Held-out AUROC using held-out items only, with theta from fold's IRT.
         z_by_item = {tid: float(z) for tid, z in zip(test_items, pred.tolist())}
         scores: List[float] = []
         labels: List[int] = []
@@ -2991,7 +2670,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cv_test_auc_folds.append(float(fold_auc))
         cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
         cv_test_n_obs_folds.append(int(len(labels)))
-        print(f"Fold {fold:02d}: auc={fold_auc} oracle_irt_auc={fold_auc_oracle} n_obs={len(labels)}")
+        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle} n_obs={len(labels)}")
         if fold_auc == fold_auc and fold_auc > best_fold_auc:
             best_fold_auc = float(fold_auc)
             best_fold = int(fold)
@@ -3012,7 +2691,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     oracle_auc_std = float(np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
     print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
 
-    # Use the best-fold model for saving weights + predicting excluded items.
     model = best_model
 
     ridge_alpha = None
@@ -3026,17 +2704,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "n_items_total": int(len(task_ids)),
         "n_items_with_responses": int(len(overlap_ids)),
         "n_items_eligible_cv_irt": int(len(eligible)),
-        "zero_success_tasks": str(zero_success_mode),
-        "include_zero_success": bool(include_zero_success),
-        # Backwards-compatible key (older analysis scripts may expect it).
         "exclude_zero_success": bool(str(zero_success_mode) == "exclude"),
-        "n_items_zero_success_in_responses": int(len(zero_success_ids)),
-        "embedding_dim": int(Xy.shape[1]),
         "seed": int(args.seed),
-        "deterministic": True,
-        "irt_seeded": True,
-        "irt_deterministic": False,
-        "cv_n_splits": int(args.cv_folds),
         "cv_best_auc_fold": int(best_fold),
         "cv_best_auc": float(best_fold_auc),
         "cv_test_auc_folds": [float(x) for x in cv_test_auc_folds],
@@ -3045,34 +2714,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
         "cv_test_auc_mean_oracle_irt": float(oracle_auc_mean),
         "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
-        "cv_test_n_obs_folds": [int(x) for x in cv_test_n_obs_folds],
-        "irt_epochs": int(args.irt_epochs),
-        "irt_device": str(args.irt_device),
-        "regressor": regressor_name,
-        "ridge_alpha": ridge_alpha,
-        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
-        "inner_splits": int(args.inner_splits),
-        "backbone": str(args.backbone),
-        "pooling": "last_token_of_hidden_state",
-        "embedding_layer": int(args.embedding_layer),
-        "max_length": int(args.max_length),
-        "dataset_sources": str(dataset_sources_str),
-        "dataset_name": (dataset_name or None),
-        "dataset_path": (dataset_path or None),
-        "split": str(args.split),
-        "agent_results": str(args.agent_results),
-        "instruction": str(args.instruction),
-        "instruction_signature": instr_sig,
-        "batch_size": int(args.batch_size),
-        "device_map": str(args.device_map),
-        "torch_dtype": str(args.torch_dtype),
-        "attn_implementation": str(args.attn_implementation),
-        "embeddings_cache": emb_cache,
+        "oracle_irt_dir": str(oracle_meta.get("oracle_irt_dir", "")),
     }
-    metrics.update(dict(oracle_meta))
 
-    # Save regression weights (coef/intercept + optional StandardScaler stats) for reuse.
-    # This is intentionally a minimal representation so it can be applied without sklearn.
     weights_meta = {
         "script": os.path.abspath(__file__),
         "backbone": str(args.backbone),
@@ -3110,9 +2754,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         feature_dim=int(Xy.shape[1]),
         metadata=weights_meta,
     )
-    metrics.update({"regression_weights_json": weights_json, "regression_weights_npz": weights_npz})
+    metrics["regression_weights_json"] = weights_json
+    metrics["regression_weights_npz"] = weights_npz
 
-    # Predict on zero-success items (excluded from CV/IRT, if requested).
     zero_embedded: List[str] = []
     yhat_zero: Optional[np.ndarray] = None
     if str(zero_success_mode) == "exclude" and zero_success_set:
@@ -3123,21 +2767,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         else:
             print("NOTE: zero-success ids provided, but none were present in embedded task_ids; nothing to predict.")
 
-    metrics.update(
-        {
-            "n_items_zero_success_embedded": int(len(zero_embedded)),
-            "n_items_zero_success_predicted": int(0 if yhat_zero is None else int(np.asarray(yhat_zero).size)),
-        }
-    )
     save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
-    # Write per-item predictions (OOF CV + optional zero_success rows).
     pred_path = os.path.join(args.out_dir, "predictions.csv")
     with open(pred_path, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
         w.writeheader()
 
-        # Eligible rows: one per item with out-of-fold prediction.
         for i, tid in enumerate(eligible):
             w.writerow(
                 {
@@ -3148,7 +2784,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 }
             )
 
-        # Zero-success rows (separate split label).
         if yhat_zero is not None and zero_embedded:
             for tid, score in zip(zero_embedded, yhat_zero.tolist()):
                 w.writerow(
@@ -3160,7 +2795,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     }
                 )
 
-    # Print a sorted list to stdout for convenience.
     if yhat_zero is not None and zero_embedded:
         pairs = list(zip(zero_embedded, yhat_zero.tolist()))
         pairs.sort(key=lambda kv: float(kv[1]), reverse=True)
@@ -3175,8 +2809,5 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"Wrote predictions: {pred_path}")
     return 0
 
-
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

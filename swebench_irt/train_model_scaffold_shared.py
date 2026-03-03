@@ -1,57 +1,9 @@
-"""
-Train a 1D IRT model on multiple benchmarks with *shared* model and scaffold abilities.
-
-Use case (Fulcrum SWE-bench + Terminal-Bench):
-----------------------------
-We want one shared set of (theta_model, theta_scaffold) that explains agent performance
-across multiple benchmarks (e.g., SWE-bench Verified, SWE-bench Pro, Terminal-Bench 2.0), while keeping
-*item parameters* benchmark-specific (because the tasks differ).
-
-Model:
-  p(y=1 | m, s, i) = sigmoid( a_i * ( theta_model[m] + theta_scaffold[s] - b_i ) )
-
-2D 1PL:
-  p(y=1 | m, s, i) = sigmoid( sum_d ( theta_model[m, d] + theta_scaffold[s, d] - b_i[d] ) )
-
-where items i are identified by their task name / instance id. We assume the
-benchmarks provide distinct task names, so explicit benchmark prefixes are not needed.
-
-Input format:
--------------
-Each benchmark is a JSONL with one record per subject/agent:
-  {"subject_id": "<agent_or_model_name>", "responses": {"<instance_id>": 0|1, ...}}
-
-Notes for SWE-bench Pro:
-------------------------
-In the Pro JSONL used here, `subject_id` is a model name (not a dated agent id).
-Per analysis convention:
-  - All Pro subjects are assigned scaffold="SWE-agent 1.0"
-  - Pro model names are canonicalized/merged so they align with Verified where desired:
-      * Merge "Claude 4 Sonnet" paper+dated variants -> "Claude 4 Sonnet"
-      * Merge "Gemini 2.5 Pro Preview" paper+debug variants -> "Gemini 2.5 Pro Preview"
-      * "GPT-5" -> "GPT-5" (merges with Verified)
-      * "Claude 4 Sonnet" -> "Claude 4 Sonnet" (merges with Verified)
-      * "Claude 4.5 Sonnet" -> "claude-sonnet-4-5" (merges with Verified's token)
-      * "Kimi" -> "kimi_k2_instruct" (merges with Verified)
-
-Usage:
-------
-python fulcrum/fellowship/swebench_irt/train_multibench_shared_model_scaffold.py \
-  --verified_path fulcrum/fellowship/out/chris_irt/swebench_verified_20251115_full.jsonl \
-  --pro_path fulcrum/fellowship/out/chris_irt/swebench_pro.jsonl \
-  --terminal_bench_path fulcrum/fellowship/out/chris_irt/terminal_bench_2.0.jsonl \
-  --output_dir clean_data/training_results_shared_verified_pro \
-  --epochs 5000 \
-  --model 1pl
-"""
-
 from __future__ import annotations
 
 import argparse
 import json
 import os
 import random
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Optional
@@ -73,12 +25,6 @@ def resolve_path(path_str: str) -> Path:
 
 
 def resolve_output_dir(path_str: str) -> Path:
-    """
-    Match swebench_irt/train.py behavior:
-    - absolute paths used as-is
-    - relative paths with separators resolved from repo ROOT
-    - bare names go under chris_output/clean_data/<name>
-    """
     p = Path(path_str).expanduser()
     if p.is_absolute():
         return p
@@ -94,7 +40,6 @@ def set_seed(seed: int) -> None:
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
-
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     try:
@@ -112,83 +57,23 @@ def _iter_jsonl(path: Path) -> Iterable[dict]:
             yield json.loads(line)
 
 
-"""
-Verified agent splitting conventions.
+try:
+    from .split_agents_model_scaffold import (
+        _canonical_model,
+        _canonical_scaffold,
+        canonicalize_pro_model,
+        split_agent_name,
+        _version_scaffold_for_agent,
+    )
+except ImportError:
+    from split_agents_model_scaffold import (
+        _canonical_model,
+        _canonical_scaffold,
+        canonicalize_pro_model,
+        split_agent_name,
+        _version_scaffold_for_agent,
+    )
 
-IMPORTANT: to keep conventions exactly aligned with `split_agents_model_scaffold.py`
-and downstream analyses (e.g. auroc_model_scaffold.py), we import the splitter
-from that script rather than duplicating logic here.
-"""
-
-from split_agents_model_scaffold import (  # type: ignore
-    _canonical_model,
-    _canonical_scaffold,
-    split_agent_name,
-    _version_scaffold_for_agent,
-)
-
-
-# -----------------------------
-# Pro model canonicalization
-# -----------------------------
-
-_PRO_TRAILING_SUFFIX_RE = re.compile(r"\s+(?:--|-)\s+.+$")  # strip " - paper", " - 10132025", " -- debug-oct22", ...
-
-
-def canonicalize_pro_model(model_name: str) -> str:
-    """
-    Canonicalize SWE-bench Pro `subject_id` model strings so they align with Verified
-    naming conventions where requested.
-    """
-    raw = (model_name or "").strip()
-    if not raw:
-        return raw
-
-    # Remove paper/date/debug-ish suffixes (analysis convention).
-    base = re.sub(_PRO_TRAILING_SUFFIX_RE, "", raw).strip()
-
-    low = base.lower()
-
-    # Merge "Claude Sonnet 4" and "Claude 4 Sonnet" -> Verified's "Claude 4 Sonnet".
-    if low in {"claude 4 sonnet", "claude sonnet 4"}:
-        return "Claude 4 Sonnet"
-
-    # Merge Gemini 2.5 Pro Preview variants (paper/debug) -> a single label.
-    if low == "gemini 2.5 pro preview":
-        return "Gemini 2.5 Pro Preview"
-
-    # Merge GPT-5 (base) with Verified.
-    if low == "gpt-5" or low == "gpt 5":
-        return "GPT-5"
-
-    # Merge GPT-5 Codex naming variants.
-    if low in {"gpt 5 codex", "gpt-5-codex", "gpt-5 codex", "gpt5-codex", "gpt5 codex"}:
-        return "GPT-5 Codex"
-
-    # Treat Pro "GPT OSS" as the 120B model (matches Verified/Terminal-Bench canon).
-    if low == "gpt oss" or low == "gpt-oss" or low == "gptoss":
-        return "GPT OSS 120B"
-
-    # Merge GLM-4.5 variants (if present in Pro exports)
-    if low in {"glm4-5", "glm-4.5", "glm-4-5"}:
-        return "GLM-4.5"
-
-    # Merge Claude 4.5 Sonnet with Verified's token (kept as-is in Verified results).
-    # NOTE: user request mentions "Claude 4.5 Connet" (typo) — we handle Sonnet here.
-    if low in {"claude 4.5 sonnet", "claude 4.5 connet"}:
-        return "claude-sonnet-4-5"
-
-    # Merge Kimi (paper) with Verified's "kimi_k2_instruct".
-    if low == "kimi":
-        return "kimi_k2_instruct"
-
-    # Default: return the stripped base name.
-    return base
-
-
-# -----------------------------
-# Data loading (multi-benchmark)
-# -----------------------------
 
 @dataclass(frozen=True)
 class MultiBenchObs:
@@ -218,15 +103,6 @@ def load_multibench_split_irt_data(
     gso_path: Optional[Path] = None,
     gso_default_scaffold: str = "OpenHands",
 ) -> MultiBenchObs:
-    """
-    Load multiple benchmark JSONLs and share model/scaffold vocab across all.
-
-    Supported benchmarks:
-    - Verified: subject_id is an agent id; split into (model, scaffold) via split_agent_name
-    - Pro: subject_id is a model name; assigns scaffold="SWE-agent 1.0"
-    - Terminal-Bench: subject_id is an agent id; split into (model, scaffold) via split_agent_name
-    - GSO: subject_id is typically a model name; assigns scaffold=gso_default_scaffold
-    """
     agent_rows: list[dict] = []
     model_set: set[str] = set()
     scaffold_set: set[str] = set()
@@ -235,18 +111,13 @@ def load_multibench_split_irt_data(
     pro_item_ids: set[str] = set()
     terminal_bench_item_ids: set[str] = set()
     gso_item_ids: set[str] = set()
-
-    # Pre-load Pro records so we can enforce "prefer paper" for specific models.
     pro_records = list(_iter_jsonl(pro_path))
-
-    # For these canonical models, if a "paper" variant exists, drop the non-paper variants.
-    prefer_paper_models = {"Claude 4 Sonnet", "Gemini 2.5 Pro Preview"}
+    prefer_paper_models = {"Claude Sonnet 4", "Gemini 2.5 Pro"}
     pro_is_paper = {str(r["subject_id"]): ("paper" in str(r["subject_id"]).lower()) for r in pro_records}
     pro_canon = {str(r["subject_id"]): canonicalize_pro_model(str(r["subject_id"])) for r in pro_records}
     have_paper_for_model = {
         m for subj, m in pro_canon.items() if (m in prefer_paper_models and pro_is_paper.get(subj, False))
     }
-
     filtered_pro_records: list[dict] = []
     for r in pro_records:
         subj = str(r["subject_id"])
@@ -254,8 +125,6 @@ def load_multibench_split_irt_data(
         if m in have_paper_for_model and m in prefer_paper_models and not pro_is_paper.get(subj, False):
             continue
         filtered_pro_records.append(r)
-
-    # Pass 1: build vocabs and per-agent splits
     for r in _iter_jsonl(verified_path):
         agent = str(r["subject_id"])
         split = split_agent_name(agent)
@@ -263,7 +132,6 @@ def load_multibench_split_irt_data(
             continue
         model, scaffold, model_raw, scaffold_raw = split
         scaffold = _version_scaffold_for_agent(agent, scaffold)
-
         model_set.add(model)
         scaffold_set.add(scaffold)
         agent_rows.append(
@@ -278,14 +146,12 @@ def load_multibench_split_irt_data(
         )
         verified_item_ids.update(str(it) for it in r["responses"].keys())
         item_set.update(str(it) for it in r["responses"].keys())
-
     for r in filtered_pro_records:
         agent = str(r["subject_id"])
         model_raw = agent
         scaffold_raw = "SWE-agent 1.0"
         model = canonicalize_pro_model(agent)
         scaffold = "SWE-agent 1.0"
-
         model_set.add(model)
         scaffold_set.add(scaffold)
         agent_rows.append(
@@ -300,16 +166,32 @@ def load_multibench_split_irt_data(
         )
         pro_item_ids.update(str(it) for it in r["responses"].keys())
         item_set.update(str(it) for it in r["responses"].keys())
-
     if terminal_bench_path is not None:
+
+        def _terminal_bench_row_to_model_scaffold(r: dict) -> Optional[tuple[str, str, str, str]]:
+            m1 = str(r.get("model", "") or "").strip()
+            a1 = str(r.get("agent", "") or "").strip()
+            if m1 and a1 and not a1.isdigit():
+                model_raw, scaffold_raw = m1, a1
+            else:
+                m2 = str(r.get("date", "") or "").strip()
+                sc2 = m1
+                if not (m2 and sc2):
+                    return None
+                model_raw, scaffold_raw = m2, sc2
+            low = str(model_raw).strip().lower()
+            if "," in model_raw or low == "multiple":
+                return None
+            model = _canonical_model(model_raw)
+            scaffold = _canonical_scaffold(scaffold_raw)
+            return (model, scaffold, model_raw, scaffold_raw)
+
         for r in _iter_jsonl(terminal_bench_path):
             agent = str(r["subject_id"])
-            split = split_agent_name(agent)
-            if split is None:
+            ms = _terminal_bench_row_to_model_scaffold(r)
+            if ms is None:
                 continue
-            model, scaffold, model_raw, scaffold_raw = split
-            scaffold = _version_scaffold_for_agent(agent, scaffold)
-
+            model, scaffold, model_raw, scaffold_raw = ms
             model_set.add(model)
             scaffold_set.add(scaffold)
             agent_rows.append(
@@ -324,7 +206,6 @@ def load_multibench_split_irt_data(
             )
             terminal_bench_item_ids.update(str(it) for it in r["responses"].keys())
             item_set.update(str(it) for it in r["responses"].keys())
-
     if gso_path is not None:
         scaffold_raw = str(gso_default_scaffold or "").strip() or "OpenHands"
         scaffold = _canonical_scaffold(scaffold_raw)
@@ -332,7 +213,6 @@ def load_multibench_split_irt_data(
             agent = str(r["subject_id"])
             model_raw = agent
             model = _canonical_model(agent)
-
             model_set.add(model)
             scaffold_set.add(scaffold)
             agent_rows.append(
@@ -347,29 +227,22 @@ def load_multibench_split_irt_data(
             )
             gso_item_ids.update(str(it) for it in r["responses"].keys())
             item_set.update(str(it) for it in r["responses"].keys())
-
     model_ids = sorted(model_set)
     scaffold_ids = sorted(scaffold_set)
     item_ids = sorted(item_set)
-
     model_to_idx = {m: i for i, m in enumerate(model_ids)}
     scaffold_to_idx = {s: i for i, s in enumerate(scaffold_ids)}
     item_to_idx = {it: i for i, it in enumerate(item_ids)}
-
-    # Map agent to (model_idx, scaffold_idx)
     agent_to_pair: dict[str, tuple[int, int]] = {}
     for row in agent_rows:
         agent_to_pair[_agent_key(row["benchmark"], row["agent"])] = (
             model_to_idx[row["model"]],
             scaffold_to_idx[row["scaffold"]],
         )
-
-    # Pass 2: build observation arrays
     m_list: list[int] = []
     s_list: list[int] = []
     i_list: list[int] = []
     y_list: list[int] = []
-
     for r in _iter_jsonl(verified_path):
         benchmark = "verified"
         agent = str(r["subject_id"])
@@ -383,7 +256,6 @@ def load_multibench_split_irt_data(
             s_list.append(s_idx)
             i_list.append(item_to_idx[it])
             y_list.append(int(y))
-
     for r in filtered_pro_records:
         benchmark = "pro"
         agent = str(r["subject_id"])
@@ -397,7 +269,6 @@ def load_multibench_split_irt_data(
             s_list.append(s_idx)
             i_list.append(item_to_idx[it])
             y_list.append(int(y))
-
     if terminal_bench_path is not None:
         for r in _iter_jsonl(terminal_bench_path):
             benchmark = "terminal_bench"
@@ -412,7 +283,6 @@ def load_multibench_split_irt_data(
                 s_list.append(s_idx)
                 i_list.append(item_to_idx[it])
                 y_list.append(int(y))
-
     if gso_path is not None:
         for r in _iter_jsonl(gso_path):
             benchmark = "gso"
@@ -427,9 +297,7 @@ def load_multibench_split_irt_data(
                 s_list.append(s_idx)
                 i_list.append(item_to_idx[it])
                 y_list.append(int(y))
-
     agent_split_df = pd.DataFrame(agent_rows).sort_values(["benchmark", "model", "scaffold", "agent"])
-
     return MultiBenchObs(
         model_idx=torch.tensor(m_list, dtype=torch.long),
         scaffold_idx=torch.tensor(s_list, dtype=torch.long),
@@ -446,38 +314,26 @@ def load_multibench_split_irt_data(
     )
 
 
-# -----------------------------
-# Pyro models (same as train_model_scaffold.py)
-# -----------------------------
-
 class ModelScaffold1PL:
-    """1D Rasch (1PL) with theta_model + theta_scaffold."""
-
     def __init__(self, num_models: int, num_scaffolds: int, num_items: int):
         self.num_models = num_models
         self.num_scaffolds = num_scaffolds
         self.num_items = num_items
 
     def model(self, m_idx, s_idx, items, y):
-        # IMPORTANT: keep all tensors on the same device as observations `y`.
-        # Otherwise, indexing (theta[m_idx]) can fail when obs/indices are on CUDA.
         one = y.new_tensor(1.0)
         zero = y.new_tensor(0.0)
-
         sigma_theta_m = pyro.sample("sigma_theta_model", dist.HalfNormal(one))
         sigma_theta_s = pyro.sample("sigma_theta_scaffold", dist.HalfNormal(one))
         sigma_b = pyro.sample("sigma_b", dist.HalfNormal(one))
-
         with pyro.plate("models", self.num_models):
             theta_m_raw = pyro.sample("theta_model_raw", dist.Normal(zero, sigma_theta_m))
         with pyro.plate("scaffolds", self.num_scaffolds):
             theta_s_raw = pyro.sample("theta_scaffold_raw", dist.Normal(zero, sigma_theta_s))
         with pyro.plate("items", self.num_items):
             b = pyro.sample("b", dist.Normal(zero, sigma_b))
-
         theta_m = theta_m_raw - theta_m_raw.mean()
         theta_s = theta_s_raw - theta_s_raw.mean()
-
         with pyro.plate("obs", y.size(0)):
             logits = (theta_m[m_idx] + theta_s[s_idx]) - b[items]
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
@@ -491,11 +347,9 @@ class ModelScaffold1PL:
             "sigma_theta_scaffold_q", torch.tensor(1.0, device=dev), constraint=constraints.positive
         )
         sigma_b_q = pyro.param("sigma_b_q", torch.tensor(1.0, device=dev), constraint=constraints.positive)
-
         pyro.sample("sigma_theta_model", dist.Delta(sigma_theta_m_q))
         pyro.sample("sigma_theta_scaffold", dist.Delta(sigma_theta_s_q))
         pyro.sample("sigma_b", dist.Delta(sigma_b_q))
-
         loc_theta_m = pyro.param("loc_theta_model_raw", torch.zeros(self.num_models, device=dev))
         scale_theta_m = pyro.param(
             "scale_theta_model_raw",
@@ -510,7 +364,6 @@ class ModelScaffold1PL:
         )
         loc_b = pyro.param("loc_b", torch.zeros(self.num_items, device=dev))
         scale_b = pyro.param("scale_b", torch.ones(self.num_items, device=dev), constraint=constraints.positive)
-
         with pyro.plate("models", self.num_models):
             pyro.sample("theta_model_raw", dist.Normal(loc_theta_m, scale_theta_m))
         with pyro.plate("scaffolds", self.num_scaffolds):
@@ -520,8 +373,6 @@ class ModelScaffold1PL:
 
 
 class ModelScaffold2PL:
-    """1D 2PL with theta_model + theta_scaffold and positive discrimination."""
-
     def __init__(self, num_models: int, num_scaffolds: int, num_items: int):
         self.num_models = num_models
         self.num_scaffolds = num_scaffolds
@@ -530,13 +381,11 @@ class ModelScaffold2PL:
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
         zero = y.new_tensor(0.0)
-
         sigma_theta_m = pyro.sample("sigma_theta_model", dist.HalfNormal(one))
         sigma_theta_s = pyro.sample("sigma_theta_scaffold", dist.HalfNormal(one))
         sigma_b = pyro.sample("sigma_b", dist.HalfNormal(one))
         mu_log_a = pyro.sample("mu_log_a", dist.Normal(zero, one))
         sigma_log_a = pyro.sample("sigma_log_a", dist.HalfNormal(one))
-
         with pyro.plate("models", self.num_models):
             theta_m_raw = pyro.sample("theta_model_raw", dist.Normal(zero, sigma_theta_m))
         with pyro.plate("scaffolds", self.num_scaffolds):
@@ -544,10 +393,8 @@ class ModelScaffold2PL:
         with pyro.plate("items", self.num_items):
             b = pyro.sample("b", dist.Normal(zero, sigma_b))
             a = pyro.sample("a", dist.LogNormal(mu_log_a, sigma_log_a))
-
         theta_m = theta_m_raw - theta_m_raw.mean()
         theta_s = theta_s_raw - theta_s_raw.mean()
-
         with pyro.plate("obs", y.size(0)):
             logits = a[items] * ((theta_m[m_idx] + theta_s[s_idx]) - b[items])
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
@@ -564,13 +411,11 @@ class ModelScaffold2PL:
         loc_mu_log_a = pyro.param("loc_mu_log_a", torch.tensor(0.0, device=dev))
         scale_mu_log_a = pyro.param("scale_mu_log_a", torch.tensor(1.0, device=dev), constraint=constraints.positive)
         sigma_log_a_q = pyro.param("sigma_log_a_q", torch.tensor(1.0, device=dev), constraint=constraints.positive)
-
         pyro.sample("sigma_theta_model", dist.Delta(sigma_theta_m_q))
         pyro.sample("sigma_theta_scaffold", dist.Delta(sigma_theta_s_q))
         pyro.sample("sigma_b", dist.Delta(sigma_b_q))
         pyro.sample("mu_log_a", dist.Normal(loc_mu_log_a, scale_mu_log_a))
         pyro.sample("sigma_log_a", dist.Delta(sigma_log_a_q))
-
         loc_theta_m = pyro.param("loc_theta_model_raw", torch.zeros(self.num_models, device=dev))
         scale_theta_m = pyro.param(
             "scale_theta_model_raw",
@@ -585,10 +430,8 @@ class ModelScaffold2PL:
         )
         loc_b = pyro.param("loc_b", torch.zeros(self.num_items, device=dev))
         scale_b = pyro.param("scale_b", torch.ones(self.num_items, device=dev), constraint=constraints.positive)
-
         loc_a = pyro.param("loc_log_a", torch.zeros(self.num_items, device=dev))
         scale_a = pyro.param("scale_log_a", torch.ones(self.num_items, device=dev), constraint=constraints.positive)
-
         with pyro.plate("models", self.num_models):
             pyro.sample("theta_model_raw", dist.Normal(loc_theta_m, scale_theta_m))
         with pyro.plate("scaffolds", self.num_scaffolds):
@@ -599,8 +442,6 @@ class ModelScaffold2PL:
 
 
 class ModelScaffold2D1PL:
-    """2D 1PL (Rasch) with theta_model + theta_scaffold and 2D item difficulty."""
-
     def __init__(self, num_models: int, num_scaffolds: int, num_items: int, dims: int = 2):
         if dims != 2:
             raise ValueError("ModelScaffold2D1PL currently supports dims=2 only.")
@@ -610,11 +451,6 @@ class ModelScaffold2D1PL:
         self.dims = dims
 
     def model(self, m_idx, s_idx, items, y):
-        # Dimension-wise hierarchical scales (independent across dims).
-        #
-        # IMPORTANT: keep priors on the same device as `y`. Otherwise when the guide
-        # proposes CUDA values (via Delta over CUDA params), the model's prior
-        # log_prob can error with "found at least two devices, cuda:0 and cpu!".
         one = y.new_tensor(1.0)
         sigma_theta_m = pyro.sample(
             "sigma_theta_model", dist.HalfNormal(one).expand([self.dims]).to_event(1)
@@ -623,7 +459,6 @@ class ModelScaffold2D1PL:
             "sigma_theta_scaffold", dist.HalfNormal(one).expand([self.dims]).to_event(1)
         )
         sigma_b = pyro.sample("sigma_b", dist.HalfNormal(one).expand([self.dims]).to_event(1))
-
         zero = y.new_zeros(self.dims)
         with pyro.plate("models", self.num_models):
             theta_m_raw = pyro.sample("theta_model_raw", dist.Normal(zero, sigma_theta_m).to_event(1))
@@ -631,13 +466,9 @@ class ModelScaffold2D1PL:
             theta_s_raw = pyro.sample("theta_scaffold_raw", dist.Normal(zero, sigma_theta_s).to_event(1))
         with pyro.plate("items", self.num_items):
             b = pyro.sample("b", dist.Normal(zero, sigma_b).to_event(1))
-
-        # Center each dimension for identifiability.
         theta_m = theta_m_raw - theta_m_raw.mean(dim=0, keepdim=True)
         theta_s = theta_s_raw - theta_s_raw.mean(dim=0, keepdim=True)
-
         with pyro.plate("obs", y.size(0)):
-            # (N, D) -> (N,) logits via equal-weight sum across dims (no discrimination).
             logits = ((theta_m[m_idx] + theta_s[s_idx]) - b[items]).sum(-1)
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
@@ -650,11 +481,9 @@ class ModelScaffold2D1PL:
             "sigma_theta_scaffold_q", torch.ones(self.dims, device=dev), constraint=constraints.positive
         )
         sigma_b_q = pyro.param("sigma_b_q", torch.ones(self.dims, device=dev), constraint=constraints.positive)
-
         pyro.sample("sigma_theta_model", dist.Delta(sigma_theta_m_q).to_event(1))
         pyro.sample("sigma_theta_scaffold", dist.Delta(sigma_theta_s_q).to_event(1))
         pyro.sample("sigma_b", dist.Delta(sigma_b_q).to_event(1))
-
         loc_theta_m = pyro.param("loc_theta_model_raw", torch.zeros(self.num_models, self.dims, device=dev))
         scale_theta_m = pyro.param(
             "scale_theta_model_raw",
@@ -673,7 +502,6 @@ class ModelScaffold2D1PL:
         scale_b = pyro.param(
             "scale_b", torch.ones(self.num_items, self.dims, device=dev), constraint=constraints.positive
         )
-
         with pyro.plate("models", self.num_models):
             pyro.sample("theta_model_raw", dist.Normal(loc_theta_m, scale_theta_m).to_event(1))
         with pyro.plate("scaffolds", self.num_scaffolds):
@@ -688,7 +516,6 @@ def train_svi(model_fn, guide_fn, obs: MultiBenchObs, epochs: int, lr: float = 0
 
     optimizer = ClippedAdam({"lr": lr, "betas": (0.9, 0.999), "clip_norm": 5.0})
     svi = SVI(model_fn, guide_fn, optimizer, loss=Trace_ELBO())
-
     losses: list[float] = []
     for ep in range(1, epochs + 1):
         loss = float(svi.step(obs.model_idx, obs.scaffold_idx, obs.item_idx, obs.y))
@@ -708,10 +535,8 @@ def _centered_loc(loc_raw: torch.Tensor) -> torch.Tensor:
 
 def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
-
     b_loc = pyro.param("loc_b").detach().cpu().numpy()
     b_scale = pyro.param("scale_b").detach().cpu().numpy()
-
     if model_type == "2d_1pl":
         if b_loc.ndim != 2 or b_loc.shape[1] != 2:
             raise ValueError(f"Expected loc_b shape (num_items, 2) for 2d_1pl, got {b_loc.shape}")
@@ -735,7 +560,6 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
         items_df["a_mean"] = np.exp(a_loc + 0.5 * (a_scale**2))
     items_df.to_csv(out_dir / "items.csv")
 
-    # Also write per-benchmark item views.
     def _write_items_subset(item_ids: set[str], out_name: str) -> None:
         if not item_ids:
             return
@@ -748,11 +572,9 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
     _write_items_subset(obs.pro_item_ids, "items_pro.csv")
     _write_items_subset(obs.terminal_bench_item_ids, "items_terminal_bench.csv")
     _write_items_subset(getattr(obs, "gso_item_ids", set()), "items_gso.csv")
-
     theta_m_loc_raw = pyro.param("loc_theta_model_raw").detach().cpu()
     theta_m_scale = pyro.param("scale_theta_model_raw").detach().cpu()
     theta_m_loc = _centered_loc(theta_m_loc_raw)
-
     if model_type == "2d_1pl":
         if theta_m_loc.ndim != 2 or theta_m_loc.shape[1] != 2:
             raise ValueError(
@@ -775,11 +597,9 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
             {"theta": theta_m_loc.numpy(), "theta_std": theta_m_scale.numpy()}, index=obs.model_ids
         ).sort_values("theta", ascending=False)
         model_df.to_csv(out_dir / "model_abilities.csv")
-
     theta_s_loc_raw = pyro.param("loc_theta_scaffold_raw").detach().cpu()
     theta_s_scale = pyro.param("scale_theta_scaffold_raw").detach().cpu()
     theta_s_loc = _centered_loc(theta_s_loc_raw)
-
     if model_type == "2d_1pl":
         if theta_s_loc.ndim != 2 or theta_s_loc.shape[1] != 2:
             raise ValueError(
@@ -802,8 +622,6 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
             {"theta": theta_s_loc.numpy(), "theta_std": theta_s_scale.numpy()}, index=obs.scaffold_ids
         ).sort_values("theta", ascending=False)
         scaffold_df.to_csv(out_dir / "scaffold_abilities.csv")
-    # NOTE: Intentionally do not write agent_splits.csv (contains per-agent metadata that
-    # isn't needed for downstream analyses and can be large/noisy).
 
 
 def main() -> None:
@@ -860,18 +678,15 @@ def main() -> None:
         help="Learning rate for SVI (default: 0.01)",
     )
     args = parser.parse_args()
-
     if args.seed is not None:
         os.environ.setdefault("PYTHONHASHSEED", str(args.seed))
         set_seed(args.seed)
-
     verified_path = resolve_path(args.verified_path)
     pro_path = resolve_path(args.pro_path)
     terminal_bench_path = resolve_path(args.terminal_bench_path) if args.terminal_bench_path else None
     gso_path = resolve_path(args.gso_path) if str(args.gso_path or "").strip() else None
     out_root = resolve_output_dir(args.output_dir)
     out_root.mkdir(parents=True, exist_ok=True)
-
     print(f"Loading Verified from: {verified_path}")
     print(f"Loading Pro from:       {pro_path}")
     if terminal_bench_path is not None:
@@ -885,8 +700,6 @@ def main() -> None:
         gso_path=gso_path,
         gso_default_scaffold=str(args.gso_default_scaffold or "").strip() or "OpenHands",
     )
-
-    # Quick breakdown
     by_bench = obs.agent_split_df.groupby("benchmark")["agent"].nunique().to_dict()
     print(
         "Included subjects:",
@@ -894,9 +707,7 @@ def main() -> None:
         f"(by benchmark: {by_bench})  models={len(obs.model_ids)} scaffolds={len(obs.scaffold_ids)} items={len(obs.item_ids)}",
     )
     print(f"Observations: {obs.y.numel():,}")
-
     pyro.clear_param_store()
-
     if args.model == "1pl":
         model_obj = ModelScaffold1PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids))
         subdir = "1d_1pl"
@@ -906,11 +717,9 @@ def main() -> None:
     else:
         model_obj = ModelScaffold2D1PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids), dims=2)
         subdir = "2d_1pl"
-
     out_dir = out_root / subdir
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"Training {args.model.upper()} model... output -> {out_dir}")
-
     _ = train_svi(model_obj.model, model_obj.guide, obs, epochs=args.epochs, lr=args.lr)
     save_outputs(out_dir=out_dir, obs=obs, model_type=args.model)
     print("Done.")
@@ -918,4 +727,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
