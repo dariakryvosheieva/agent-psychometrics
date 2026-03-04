@@ -19,11 +19,19 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from urllib.error import URLError
+from urllib.request import urlopen
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 
 _TOP_LEVEL_KEY_RE = re.compile(r"^[A-Za-z0-9_]+:\s*")
+_REMOTE_TEST_SOURCES = {
+    "headless-terminal": {
+        "tests/test.sh": "https://raw.githubusercontent.com/harbor-framework/terminal-bench-2/main/headless-terminal/tests/test.sh",
+        "tests/test_outputs.py": "https://raw.githubusercontent.com/harbor-framework/terminal-bench-2/main/headless-terminal/tests/test_outputs.py",
+    }
+}
 
 
 def normalize_text(s: str) -> str:
@@ -169,6 +177,34 @@ def extract_tests_from_task_dir(task_dir: Path) -> str:
     return normalize_text(s) if s.strip() else ""
 
 
+def _fetch_utf8_text(url: str) -> str:
+    try:
+        with urlopen(url, timeout=30) as resp:
+            raw = resp.read()
+    except URLError as e:
+        raise RuntimeError(f"Failed fetching remote test file: {url}") from e
+    return normalize_newlines_preserve_whitespace(raw.decode("utf-8"))
+
+
+def extract_tests_with_remote_fallback(task_id: str, task_path: Path) -> str:
+    tests = extract_tests_from_task_dir(task_path)
+    if tests:
+        return tests
+
+    remote_files = _REMOTE_TEST_SOURCES.get(task_id)
+    if not remote_files:
+        return ""
+
+    chunks: List[str] = []
+    for rel, url in sorted(remote_files.items()):
+        body = _fetch_utf8_text(url)
+        if not body.strip():
+            raise RuntimeError(f"Remote test file was empty for task '{task_id}': {url}")
+        chunks.append(f"### {rel}\n{body}")
+
+    return normalize_text("\n\n".join(chunks))
+
+
 def load_task_list(meta_json_path: Path) -> List[str]:
     meta = json.loads(meta_json_path.read_text(encoding="utf-8"))
     task_list = meta.get("task_list")
@@ -231,7 +267,7 @@ def main() -> int:
             if patch:
                 patches_found += 1
 
-        tests = extract_tests_from_task_dir(task_path)
+        tests = extract_tests_with_remote_fallback(tid, task_path)
         if tests:
             tests_found += 1
 
