@@ -1732,7 +1732,7 @@ def _run_with_judge_features(
             except Exception:
                 pass
 
-        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle} missing_judge={n_missing_judge}")
+        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle}")
 
     auc_arr = np.asarray(fold_aucs, dtype=np.float64)
     auc_mean = float(np.nanmean(auc_arr)) if auc_arr.size else float("nan")
@@ -1742,7 +1742,7 @@ def _run_with_judge_features(
     oracle_auc_arr = np.asarray(fold_aucs_oracle_irt, dtype=np.float64)
     oracle_auc_mean = float(np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
     oracle_auc_std = float(np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
-    print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
+    print(f"{int(args.cv_folds)}-fold CV oracle ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
 
     if best_joint_state is None or best_fold < 1:
         raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
@@ -2037,7 +2037,7 @@ def _run_judge_only(
         cv_test_auc_folds.append(float(fold_auc))
         cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
         cv_test_n_obs_folds.append(int(len(labels)))
-        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle} n_obs={len(labels)}")
+        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle}")
         if fold_auc == fold_auc and fold_auc > best_fold_auc:
             best_fold_auc = float(fold_auc)
             best_fold = int(fold)
@@ -2056,7 +2056,7 @@ def _run_judge_only(
     oracle_auc_arr = np.asarray(cv_test_auc_folds_oracle_irt, dtype=np.float64)
     oracle_auc_mean = float(np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
     oracle_auc_std = float(np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
-    print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
+    print(f"{int(args.cv_folds)}-fold CV oracle ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
 
     model = best_model
     ridge_alpha = None
@@ -2670,7 +2670,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cv_test_auc_folds.append(float(fold_auc))
         cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
         cv_test_n_obs_folds.append(int(len(labels)))
-        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle} n_obs={len(labels)}")
+        print(f"Fold {fold:02d}: auc={fold_auc} oracle_auc={fold_auc_oracle}")
         if fold_auc == fold_auc and fold_auc > best_fold_auc:
             best_fold_auc = float(fold_auc)
             best_fold = int(fold)
@@ -2689,7 +2689,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     oracle_auc_arr = np.asarray(cv_test_auc_folds_oracle_irt, dtype=np.float64)
     oracle_auc_mean = float(np.nanmean(oracle_auc_arr)) if oracle_auc_arr.size else float("nan")
     oracle_auc_std = float(np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
-    print(f"{int(args.cv_folds)}-fold CV oracle IRT ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
+    print(f"{int(args.cv_folds)}-fold CV oracle ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
 
     model = best_model
 
