@@ -209,7 +209,7 @@ def scrape_all_agents(headless: bool = True, delay: float = 1.0, limit: int | No
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Scrape Terminal Bench and convert to IRT format")
-    parser.add_argument("--output", type=str, default="out/chris_irt/terminal_bench_2.0.jsonl")
+    parser.add_argument("--output", type=str, default="out/chris_irt/terminal_bench.jsonl")
     parser.add_argument("--threshold", type=str, default="majority", choices=["any", "majority", "all"])
     parser.add_argument("--delay", type=float, default=0.5)
     parser.add_argument("--no-headless", action="store_true")
