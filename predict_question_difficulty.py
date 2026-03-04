@@ -1487,7 +1487,6 @@ def _run_with_judge_features(
     best_fold_auc = -float("inf")
     best_fold = -1
     best_joint_state: Optional[dict] = None
-    best_fold_root = ""
 
     for fold, (tr, te) in enumerate(outer_cv.split(Xy), start=1):
         train_items = [eligible[int(i)] for i in tr.tolist()]
@@ -1721,7 +1720,6 @@ def _run_with_judge_features(
             best_fold_auc = float(fold_auc)
             best_fold = int(fold)
             best_joint_state = joint_state
-            best_fold_root = str(fold_root)
 
         if bool(getattr(args, "debug", False)):
             try:
@@ -1746,35 +1744,6 @@ def _run_with_judge_features(
 
     if best_joint_state is None or best_fold < 1:
         raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
-
-    weights_meta = {
-        "script": os.path.abspath(__file__),
-        "id_normalization": "strip instance_ prefix; strip -v.* suffix",
-        "zero_success_tasks": str(zero_success_mode),
-        "include_zero_success": bool(include_zero_success),
-        "seed": int(args.seed),
-        "deterministic": True,
-        "cv_n_splits": int(args.cv_folds),
-        "cv_best_auc_fold": int(best_fold),
-        "cv_best_auc": float(best_fold_auc),
-        "best_fold_root": str(best_fold_root),
-        "embeddings_cache": str(emb_cache),
-        "agent_results": str(args.agent_results),
-        "judge_features_dir": str(args.judge_features_dir),
-        "judge_feature_schema": str(schema),
-        "regressor": str(args.regressor),
-        "ridge_alpha": float(args.ridge_alpha),
-        "ridge_alphas": str(args.ridge_alphas),
-        "ridge_alphas_emb": str(getattr(args, "ridge_alphas_emb", "") or "").strip() or str(args.ridge_alphas),
-        "ridge_alphas_judge": str(getattr(args, "ridge_alphas_judge", "") or "").strip() or str(args.ridge_alphas),
-        "inner_splits": int(args.inner_splits),
-    }
-    weights_json, weights_npz = save_regression_weights_block_ridge(
-        out_dir=str(args.out_dir),
-        state=best_joint_state,
-        judge_feature_names=judge_feature_names,
-        metadata=weights_meta,
-    )
 
     exclude_zero_success = bool(not include_zero_success)
     zero_embedded = [tid for tid in task_ids if tid in zero_success_set] if exclude_zero_success else []
@@ -1821,15 +1790,12 @@ def _run_with_judge_features(
             "cv_test_auc_mean_oracle_irt": float(oracle_auc_mean),
             "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
             "cv_test_auc_folds_embedding_only": [float(x) for x in fold_aucs_embedding_only],
-            "regression_weights_json": str(weights_json),
-            "regression_weights_npz": str(weights_npz),
             "oracle_irt_dir": str(oracle_meta.get("oracle_irt_dir", "")),
         },
     )
 
     print(f"Wrote metrics: {metrics_out}")
     print(f"Wrote predictions: {pred_path}")
-    print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
     return 0
 
 def _run_judge_only(
@@ -2059,45 +2025,6 @@ def _run_judge_only(
     print(f"{int(args.cv_folds)}-fold CV oracle ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
 
     model = best_model
-    ridge_alpha = None
-    if regressor_name in ("ridge", "ridge_cv"):
-        try:
-            ridge_alpha = float(model.named_steps["ridge"].alpha_)
-        except Exception:
-            ridge_alpha = None
-
-    weights_meta = {
-        "script": os.path.abspath(__file__),
-        "method": method,
-        "judge_features_dir": str(feat_dir),
-        "judge_feature_schema": str(schema),
-        "judge_feature_names": list(judge_feature_names),
-        "dataset_sources": str(dataset_sources_str),
-        "dataset_name": (dataset_name or None),
-        "dataset_path": (dataset_path or None),
-        "split": str(split),
-        "instruction_signature": str(instruction_signature),
-        "agent_results": str(args.agent_results),
-        "zero_success_tasks": str(zero_success_mode),
-        "include_zero_success": bool(include_zero_success),
-        "seed": int(args.seed),
-        "deterministic": True,
-        "irt_seeded": True,
-        "irt_deterministic": False,
-        "cv_n_splits": int(args.cv_folds),
-        "cv_best_auc_fold": int(best_fold),
-        "cv_best_auc": float(best_fold_auc),
-        "ridge_alpha": ridge_alpha,
-        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
-        "inner_splits": int(args.inner_splits),
-    }
-    weights_json, weights_npz = save_regression_weights(
-        out_dir=str(args.out_dir),
-        model=model,
-        regressor_name=str(regressor_name),
-        feature_dim=int(Xy.shape[1]),
-        metadata=weights_meta,
-    )
 
     zero_items: List[str] = []
     yhat_zero: Optional[np.ndarray] = None
@@ -2133,8 +2060,6 @@ def _run_judge_only(
         "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
         "cv_test_auc_mean_oracle_irt": float(oracle_auc_mean),
         "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
-        "regression_weights_json": str(weights_json),
-        "regression_weights_npz": str(weights_npz),
         "oracle_irt_dir": str(oracle_meta.get("oracle_irt_dir", "")),
     }
     save_json(os.path.join(str(args.out_dir), "metrics.json"), metrics)
@@ -2693,13 +2618,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     model = best_model
 
-    ridge_alpha = None
-    if regressor_name in ("ridge", "ridge_cv"):
-        try:
-            ridge_alpha = float(model.named_steps["ridge"].alpha_)
-        except Exception:
-            ridge_alpha = None
-
     metrics = {
         "n_items_total": int(len(task_ids)),
         "n_items_with_responses": int(len(overlap_ids)),
@@ -2716,46 +2634,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "cv_test_auc_std_oracle_irt": float(oracle_auc_std),
         "oracle_irt_dir": str(oracle_meta.get("oracle_irt_dir", "")),
     }
-
-    weights_meta = {
-        "script": os.path.abspath(__file__),
-        "backbone": str(args.backbone),
-        "trust_remote_code": bool(args.trust_remote_code),
-        "pooling": "last_token_of_hidden_state",
-        "embedding_layer": int(args.embedding_layer),
-        "max_length": int(args.max_length),
-        "instruction": str(args.instruction),
-        "instruction_signature": str(instr_sig),
-        "device_map": str(args.device_map),
-        "torch_dtype": str(args.torch_dtype),
-        "attn_implementation": str(args.attn_implementation),
-        "dataset_sources": str(dataset_sources_str),
-        "dataset_name": (dataset_name or None),
-        "dataset_path": (dataset_path or None),
-        "split": str(args.split),
-        "id_normalization": "strip instance_ prefix; strip -v.* suffix",
-        "zero_success_tasks": str(zero_success_mode),
-        "include_zero_success": bool(include_zero_success),
-        "seed": int(args.seed),
-        "deterministic": True,
-        "irt_seeded": True,
-        "irt_deterministic": False,
-        "cv_n_splits": int(args.cv_folds),
-        "cv_best_auc_fold": int(best_fold),
-        "cv_best_auc": float(best_fold_auc),
-        "ridge_alpha": ridge_alpha,
-        "ridge_alphas_searched": [float(x) for x in np.asarray(alphas).tolist()],
-        "inner_splits": int(args.inner_splits),
-    }
-    weights_json, weights_npz = save_regression_weights(
-        out_dir=str(args.out_dir),
-        model=model,
-        regressor_name=str(regressor_name),
-        feature_dim=int(Xy.shape[1]),
-        metadata=weights_meta,
-    )
-    metrics["regression_weights_json"] = weights_json
-    metrics["regression_weights_npz"] = weights_npz
 
     zero_embedded: List[str] = []
     yhat_zero: Optional[np.ndarray] = None

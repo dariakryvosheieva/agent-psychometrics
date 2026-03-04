@@ -2596,37 +2596,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         oracle_auc_std = float(base.np.nanstd(oracle_auc_arr, ddof=0)) if oracle_auc_arr.size else float("nan")
         print(f"{int(args.cv_folds)}-fold CV oracle ROC-AUC: mean={oracle_auc_mean} std={oracle_auc_std}")
 
-        weights_meta = {
-            "split_by": str(split_by),
-            "script": os.path.abspath(__file__),
-            "method": "combined",
-            "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
-            "seed": int(args.seed),
-            "deterministic": True,
-            "irt_seeded": True,
-            "irt_deterministic": False,
-            "cv_n_splits": int(args.cv_folds),
-            "cv_best_auc_fold": int(best_fold),
-            "cv_best_auc": float(best_fold_auc),
-            "irt_model": str(irt_model_label),
-            "regressor": str(regressor_name),
-            "ridge_alpha": float(args.ridge_alpha),
-            "ridge_alphas": str(args.ridge_alphas),
-            "ridge_alphas_emb": str(args.ridge_alphas_emb or "").strip() or str(args.ridge_alphas),
-            "ridge_alphas_judge": str(args.ridge_alphas_judge or "").strip() or str(args.ridge_alphas),
-            "inner_splits": int(args.inner_splits),
-            "verified_judge_features_dir": str(args.verified_judge_features_dir),
-            "pro_judge_features_dir": str(args.pro_judge_features_dir),
-            "terminal_bench_judge_features_dir": str(args.terminal_bench_judge_features_dir),
-            "judge_feature_names": list(judge_feature_names_full),
-        }
-        weights_json, weights_npz = base.save_regression_weights_block_ridge(
-            out_dir=str(args.out_dir),
-            state=best_joint_state,
-            judge_feature_names=judge_feature_names_full,
-            metadata=weights_meta,
-        )
-
         metrics = {
             "split_by": str(split_by),
             "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
@@ -2646,13 +2615,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
             "cv_test_auc_oracle_irt_mean": float(oracle_auc_mean),
             "cv_test_auc_oracle_irt_std": float(oracle_auc_std),
-            "regression_weights_json": str(weights_json),
-            "regression_weights_npz": str(weights_npz),
         }
         base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
         if split_by == "task":
-
             pred_path = os.path.join(args.out_dir, "predictions.csv")
             with open(pred_path, "w", newline="") as f:
                 w = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
@@ -2664,7 +2630,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split_s, "fold": fold_id})
             print(f"Wrote predictions: {pred_path}")
         print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
-        print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
         return 0
 
     if split_by == "task" and method == "judge":
@@ -3013,42 +2978,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         model = best_model
 
-        ridge_alpha = None
-        try:
-            ridge_alpha = float(model.named_steps["ridge"].alpha_)
-        except Exception:
-            ridge_alpha = None
-
-        weights_meta = {
-            "method": "judge",
-            "script": os.path.abspath(__file__),
-            "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
-            "seed": int(args.seed),
-            "deterministic": True,
-            "irt_seeded": True,
-            "irt_deterministic": False,
-            "cv_n_splits": int(args.cv_folds),
-            "cv_best_auc_fold": int(best_fold),
-            "cv_best_auc": float(best_fold_auc),
-            "irt_model": str(irt_model_label),
-            "regressor": str(regressor_name),
-            "ridge_alpha": ridge_alpha,
-            "ridge_alphas_searched": [float(x) for x in base.np.asarray(alphas).tolist()],
-            "inner_splits": int(args.inner_splits),
-            "verified_judge_features_dir": str(args.verified_judge_features_dir),
-            "pro_judge_features_dir": str(args.pro_judge_features_dir),
-            "terminal_bench_judge_features_dir": str(args.terminal_bench_judge_features_dir),
-            "judge_feature_names": list(judge_feature_names_full),
-            "judge_feature_dim": int(judge_dim),
-        }
-        weights_json, weights_npz = base.save_regression_weights(
-            out_dir=str(args.out_dir),
-            model=model,
-            regressor_name=str(regressor_name),
-            feature_dim=int(judge_dim),
-            metadata=weights_meta,
-        )
-
         metrics = {
             "split_by": str(split_by),
             "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
@@ -3067,8 +2996,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "cv_test_auc_folds_oracle_irt": [float(x) for x in cv_test_auc_folds_oracle_irt],
             "cv_test_auc_oracle_irt_mean": float(oracle_auc_mean),
             "cv_test_auc_oracle_irt_std": float(oracle_auc_std),
-            "regression_weights_json": str(weights_json),
-            "regression_weights_npz": str(weights_npz),
         }
         base.save_json(os.path.join(args.out_dir, "metrics.json"), metrics)
 
@@ -3085,7 +3012,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     w.writerow({"item_id": tid, "diff_pred": (v if v == v else ""), "split": split_s, "fold": fold_id})
             print(f"Wrote predictions: {pred_path}")
         print(f"Wrote metrics: {os.path.join(args.out_dir, 'metrics.json')}")
-        print(f"Wrote regression weights: {weights_json} (arrays in {weights_npz})")
         return 0
 
     if split_by == "task":
@@ -3338,13 +3264,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         model = best_model
 
-        ridge_alpha = None
-        if regressor_name in ("ridge", "ridge_cv"):
-            try:
-                ridge_alpha = float(model.named_steps["ridge"].alpha_)
-            except Exception:
-                ridge_alpha = None
-
         metrics = {
             "split_by": str(split_by),
             "baseline_type": ("irt_agent_1pl" if str(split_by) == "observation" else "empirical_model_success"),
@@ -3363,42 +3282,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "cv_test_auc_oracle_irt_mean": float(oracle_auc_mean),
             "cv_test_auc_oracle_irt_std": float(oracle_auc_std),
         }
-
-        weights_meta = {
-            "script": os.path.abspath(__file__),
-            "backbone": str(args.backbone),
-            "trust_remote_code": bool(args.trust_remote_code),
-            "pooling": "last_token_of_hidden_state",
-            "embedding_layer": int(args.embedding_layer),
-            "max_length": int(args.max_length),
-            "instruction": str(args.instruction),
-            "instruction_signature": str(instr_sig),
-            "device_map": str(args.device_map),
-            "torch_dtype": str(args.torch_dtype),
-            "attn_implementation": str(args.attn_implementation),
-            "dataset_sources": str(dataset_sources_str),
-            "id_normalization": "Verified/Pro: strip instance_ prefix; strip -v.* suffix. Terminal-Bench: identity.",
-            "seed": int(args.seed),
-            "deterministic": True,
-            "irt_seeded": True,
-            "irt_deterministic": False,
-            "cv_n_splits": int(args.cv_folds),
-            "cv_best_auc_fold": int(best_fold),
-            "cv_best_auc": float(best_fold_auc),
-            "ridge_alpha": ridge_alpha,
-            "ridge_alphas_searched": [float(x) for x in base.np.asarray(alphas).tolist()],
-            "inner_splits": int(args.inner_splits),
-            "irt_model": str(irt_model_label),
-        }
-        weights_json, weights_npz = base.save_regression_weights(
-            out_dir=str(args.out_dir),
-            model=model,
-            regressor_name=str(regressor_name),
-            feature_dim=int(Xy.shape[1]),
-            metadata=weights_meta,
-        )
-        metrics["regression_weights_json"] = weights_json
-        metrics["regression_weights_npz"] = weights_npz
 
         zero_embedded: List[str] = []
         yhat_zero: Optional[base.np.ndarray] = None
