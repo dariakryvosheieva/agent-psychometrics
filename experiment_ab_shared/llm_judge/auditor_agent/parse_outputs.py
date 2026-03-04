@@ -5,10 +5,10 @@ the 6 difficulty-related features into a CSV file for use in Experiment A.
 
 Usage:
     # Parse logs and create CSV
-    python -m experiment_a.auditor_agent.parse_outputs --log_dir chris_output/auditor_runs
+    python -m experiment_ab_shared.llm_judge.auditor_agent.parse_outputs --log_dir chris_output/auditor_runs
 
     # Validate parsed results
-    python -m experiment_a.auditor_agent.parse_outputs --log_dir chris_output/auditor_runs --validate
+    python -m experiment_ab_shared.llm_judge.auditor_agent.parse_outputs --log_dir chris_output/auditor_runs --validate
 """
 
 import argparse
@@ -22,22 +22,16 @@ import pandas as pd
 from inspect_ai.log import read_eval_log
 
 # Add project root to path
-_project_root = Path(__file__).parent.parent.parent
+_project_root = Path(__file__).parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from experiment_a.auditor_agent.prompts import get_feature_names
-from experiment_a.auditor_agent.prompts_v2 import get_feature_names_v2
-from experiment_a.auditor_agent.prompts_v3 import get_feature_names_v3
-from experiment_a.auditor_agent.prompts_v4 import get_feature_names_v4
+from experiment_ab_shared.llm_judge.auditor_agent.prompts_v4 import get_feature_names_v4
 
-EXPECTED_FEATURES_V1 = get_feature_names()
-EXPECTED_FEATURES_V2 = get_feature_names_v2()
-EXPECTED_FEATURES_V3 = get_feature_names_v3()
 EXPECTED_FEATURES_V4 = get_feature_names_v4()
 
-# Default to v1 for backwards compatibility
-EXPECTED_FEATURES = EXPECTED_FEATURES_V1
+# Default to V4 (current version)
+EXPECTED_FEATURES = EXPECTED_FEATURES_V4
 
 
 def parse_completion(
@@ -306,20 +300,10 @@ def main():
         action="store_true",
         help="Validate parsed results",
     )
-    parser.add_argument(
-        "--version",
-        type=int,
-        choices=[1, 2, 3, 4],
-        default=1,
-        help="Feature version to parse (1, 2, 3, or 4, default: 1)",
-    )
-
     args = parser.parse_args()
 
-    # Select feature set based on version
-    version_map = {1: EXPECTED_FEATURES_V1, 2: EXPECTED_FEATURES_V2, 3: EXPECTED_FEATURES_V3, 4: EXPECTED_FEATURES_V4}
-    expected_features = version_map[args.version]
-    print(f"Using v{args.version} features: {expected_features}")
+    expected_features = EXPECTED_FEATURES_V4
+    print(f"Using v4 features: {expected_features}")
 
     # Parse logs
     df = parse_all_logs(args.log_dir, expected_features)

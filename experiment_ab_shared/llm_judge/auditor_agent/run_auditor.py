@@ -7,19 +7,19 @@ termination).
 
 Usage:
     # Run on SWE-bench Verified (default)
-    python -m experiment_a.auditor_agent.run_auditor --dataset swebench
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench
 
     # Run on Terminal Bench
-    python -m experiment_a.auditor_agent.run_auditor --dataset terminalbench
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset terminalbench
 
     # Run on GSO with small batch for testing
-    python -m experiment_a.auditor_agent.run_auditor --dataset gso --limit 2
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset gso --limit 2
 
     # Custom batch size and model
-    python -m experiment_a.auditor_agent.run_auditor --dataset swebench --batch_size 5
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench --batch_size 5
 
     # Just aggregate existing logs to CSV (skip running)
-    python -m experiment_a.auditor_agent.run_auditor --dataset swebench --aggregate_only
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench --aggregate_only
 """
 
 import argparse
@@ -31,12 +31,12 @@ import pandas as pd
 from datasets import load_dataset
 
 # Add project root to path
-_project_root = Path(__file__).parent.parent.parent
+_project_root = Path(__file__).parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from experiment_a.sandbox_utils import run_docker_cleanup
-from experiment_a.auditor_agent.parse_outputs import (
+from experiment_ab_shared.llm_judge.sandbox_utils import run_docker_cleanup
+from experiment_ab_shared.llm_judge.auditor_agent.parse_outputs import (
     parse_all_logs,
     validate_results,
     EXPECTED_FEATURES_V4,
@@ -45,24 +45,24 @@ from experiment_a.auditor_agent.parse_outputs import (
 # Dataset configurations: maps dataset name to inspect task path, ID source, etc.
 DATASET_CONFIGS = {
     "swebench": {
-        "inspect_task": "experiment_a/auditor_agent/inspect_task.py@auditor_task_v4",
+        "inspect_task": "experiment_ab_shared/llm_judge/auditor_agent/inspect_tasks.py@auditor_task_v4",
         "hf_dataset": "princeton-nlp/SWE-bench_Verified",
         "id_field": "instance_id",
         "log_dir_name": "swebench_verified_v4",
     },
     "swebench_pro": {
-        "inspect_task": "experiment_a/swebench_pro/inspect_task.py@auditor_task_v4_swebench_pro",
+        "inspect_task": "experiment_ab_shared/llm_judge/auditor_agent/inspect_tasks.py@auditor_task_v4_swebench_pro",
         "hf_dataset": "ScaleAI/SWE-bench_Pro",
         "id_field": "instance_id",
         "log_dir_name": "swebench_pro_v4",
     },
     "terminalbench": {
-        "inspect_task": "experiment_a/terminalbench/inspect_task.py@auditor_task_v4_terminalbench",
+        "inspect_task": "experiment_ab_shared/llm_judge/auditor_agent/inspect_tasks.py@auditor_task_v4_terminalbench",
         "items_csv": "data/terminalbench/irt/1d_1pl/items.csv",
         "log_dir_name": "terminalbench_v4",
     },
     "gso": {
-        "inspect_task": "experiment_a/gso/inspect_task.py@auditor_task_v4_gso",
+        "inspect_task": "experiment_ab_shared/llm_judge/auditor_agent/inspect_tasks.py@auditor_task_v4_gso",
         "hf_dataset": "gso-bench/gso",
         "id_field": "instance_id",
         "log_dir_name": "gso_v4",

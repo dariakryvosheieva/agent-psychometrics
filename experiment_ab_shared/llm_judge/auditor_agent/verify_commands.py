@@ -7,10 +7,10 @@ This script:
 
 Usage:
     # Run verification on a specific instance
-    python -m experiment_a.auditor_agent.verify_commands --instance_id django__django-11099
+    python -m experiment_ab_shared.llm_judge.auditor_agent.verify_commands --instance_id django__django-11099
 
     # Just run manual commands (no agent)
-    python -m experiment_a.auditor_agent.verify_commands --instance_id django__django-11099 --manual_only
+    python -m experiment_ab_shared.llm_judge.auditor_agent.verify_commands --instance_id django__django-11099 --manual_only
 """
 
 import argparse
@@ -21,11 +21,11 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-_project_root = Path(__file__).parent.parent.parent
+_project_root = Path(__file__).parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from experiment_a.sandbox_utils import get_swebench_image_name
+from experiment_ab_shared.llm_judge.sandbox_utils import get_swebench_image_name
 
 
 def run_command_in_docker(instance_id: str, command: str) -> tuple[bool, str, str]:
@@ -108,7 +108,7 @@ def run_agent_verification(instance_id: str, model: str = "anthropic/claude-opus
     # Run inspect eval with verification task
     cmd = [
         "inspect", "eval",
-        "experiment_a/auditor_agent/inspect_task.py@auditor_verification",
+        "experiment_ab_shared/llm_judge/auditor_agent/inspect_tasks.py@auditor_verification",
         f"--model={model}",
         f"--sample-id={instance_id}",
         "--log-dir=chris_output/auditor_verification",

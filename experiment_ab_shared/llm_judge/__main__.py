@@ -44,10 +44,8 @@ logger = logging.getLogger(__name__)
 # Default output directories per dataset
 DEFAULT_OUTPUT_DIRS = {
     "swebench": Path("chris_output/experiment_a/llm_judge_features"),
-    "swebench_v2": Path("chris_output/experiment_a/llm_judge_features_v2"),
     "swebench_pro": Path("chris_output/experiment_a_swebench_pro/llm_judge_features"),
     "terminalbench": Path("chris_output/experiment_a_terminalbench/llm_judge_features"),
-    "terminalbench_v2": Path("chris_output/experiment_a_terminalbench/llm_judge_features_v2"),
     "gso": Path("chris_output/gso_llm_judge_features"),
 }
 
@@ -324,119 +322,16 @@ def load_tasks_for_dataset(
     repo_path: Optional[Path] = None,
 ) -> List[Dict[str, Any]]:
     """Load tasks for a built-in dataset."""
-    if dataset in ("swebench", "swebench_v2", "swebench_v3", "swebench_v4", "swebench_v5", "swebench_v6", "swebench_selected", "swebench_unified", "swebench_unified_no_solution", "swebench_unified_problem_only", "swebench_with_test", "swebench_test_quality_with_solution", "swebench_test_quality_no_solution", "swebench_problem_extended"):
-        # swebench_v2/v3/v4/v5/v6/selected, swebench_unified variants, swebench_with_test, swebench_test_quality, and swebench_problem_extended use same data as swebench, just different prompts
+    if dataset in ("swebench", "swebench_with_test", "swebench_test_quality_with_solution", "swebench_test_quality_no_solution"):
         return load_swebench_tasks()
-    elif dataset in ("swebench_pro", "swebench_pro_v2", "swebench_pro_v3", "swebench_pro_v4", "swebench_pro_v5", "swebench_pro_unified", "swebench_pro_unified_no_solution", "swebench_pro_unified_problem_only", "swebench_pro_new_features"):
-        # V2/V3/V4/V5/unified/new_features variants use same data as swebench_pro, just different prompts
+    elif dataset == "swebench_pro":
         return load_swebench_pro_tasks()
-    elif dataset in ("terminalbench", "terminalbench_v2", "terminalbench_unified", "terminalbench_unified_no_solution", "terminalbench_unified_problem_only", "terminalbench_new_features"):
-        # terminalbench_v2, terminalbench_unified, and terminalbench_new_features variants use same data as terminalbench, just different prompts
+    elif dataset == "terminalbench":
         return load_terminalbench_tasks(items_path, repo_path)
-    elif dataset in ("gso", "gso_unified", "gso_unified_no_solution", "gso_unified_problem_only", "gso_new_features"):
-        # gso_unified and gso_new_features variants use same data as gso, just different prompts
+    elif dataset == "gso":
         return load_gso_tasks()
     else:
         raise ValueError(f"Unknown dataset: {dataset}")
-
-
-def _add_deterministic_features_to_csv(
-    csv_path: Path,
-    tasks: List[Dict[str, Any]],
-    dataset_name: str,
-) -> None:
-    """Add deterministic features (from patch/solution) to the CSV.
-
-    Args:
-        csv_path: Path to the LLM Judge features CSV
-        tasks: List of task dictionaries (with patch or solution fields)
-        dataset_name: Dataset name to determine which features to compute
-    """
-    import pandas as pd
-
-    from experiment_ab_shared.llm_judge.deterministic_features import (
-        SWEBENCH_DETERMINISTIC_FEATURES,
-        TERMINALBENCH_DETERMINISTIC_FEATURES,
-        compute_patch_features,
-        compute_solution_features,
-    )
-
-    print(f"\nAdding deterministic features to {csv_path}...")
-
-    # Load existing CSV
-    df = pd.read_csv(csv_path)
-
-    # Build task lookup by ID
-    is_swebench = "swebench" in dataset_name
-    is_gso = "gso" in dataset_name  # Matches both "gso" and "gso_unified"
-    if is_swebench or is_gso:
-        task_id_field = "instance_id"
-        feature_names = SWEBENCH_DETERMINISTIC_FEATURES
-    else:
-        task_id_field = "task_id"
-        feature_names = TERMINALBENCH_DETERMINISTIC_FEATURES
-
-    task_lookup = {t[task_id_field]: t for t in tasks}
-
-    # Detect the task ID column in the CSV
-    csv_task_id_col = None
-    for col in ["_instance_id", "instance_id", "_task_id", "task_id"]:
-        if col in df.columns:
-            csv_task_id_col = col
-            break
-
-    if csv_task_id_col is None:
-        raise ValueError(f"Could not find task ID column in CSV: {df.columns.tolist()}")
-
-    # Compute deterministic features for each row
-    det_features_list = []
-    errors = []
-
-    for idx, row in df.iterrows():
-        task_id = row[csv_task_id_col]
-        # Strip "instance_" prefix if present to match task lookup
-        clean_id = task_id.replace("instance_", "") if isinstance(task_id, str) else task_id
-
-        # Find task in lookup
-        task = task_lookup.get(task_id) or task_lookup.get(clean_id)
-        if task is None:
-            errors.append(f"Task {task_id} not found in task data")
-            det_features_list.append({f: None for f in feature_names})
-            continue
-
-        try:
-            if is_swebench:
-                patch = task.get("patch", "")
-                features = compute_patch_features(patch)
-            elif is_gso:
-                # GSO uses gt_diff as the patch field
-                patch = task.get("gt_diff", "")
-                features = compute_patch_features(patch)
-            else:
-                solution = task.get("solution", "")
-                features = compute_solution_features(solution)
-            det_features_list.append(features)
-        except ValueError as e:
-            errors.append(f"Task {task_id}: {e}")
-            det_features_list.append({f: None for f in feature_names})
-
-    if errors:
-        error_summary = "\n".join(errors[:10])
-        if len(errors) > 10:
-            error_summary += f"\n... and {len(errors) - 10} more errors"
-        raise ValueError(
-            f"Failed to compute deterministic features for {len(errors)} tasks:\n{error_summary}"
-        )
-
-    # Add deterministic features to DataFrame
-    det_df = pd.DataFrame(det_features_list)
-    for col in det_df.columns:
-        df[col] = det_df[col].values
-
-    # Save augmented CSV
-    df.to_csv(csv_path, index=False)
-    print(f"Added {len(feature_names)} deterministic features: {feature_names}")
-    print(f"Saved augmented CSV: {csv_path}")
 
 
 def cmd_extract(args: argparse.Namespace) -> None:
@@ -511,9 +406,6 @@ def cmd_extract(args: argparse.Namespace) -> None:
             task_ids=task_ids,
         )
 
-    # Add deterministic features if requested
-    if args.add_deterministic and csv_path and csv_path.exists():
-        _add_deterministic_features_to_csv(csv_path, tasks, dataset_name)
 
 
 def cmd_aggregate(args: argparse.Namespace) -> None:
@@ -602,29 +494,6 @@ def cmd_compare(args: argparse.Namespace) -> None:
         seed=args.seed,
         interactive=args.interactive,
     )
-
-
-def cmd_deterministic(args: argparse.Namespace) -> None:
-    """Handle the 'deterministic' subcommand."""
-    from experiment_ab_shared.llm_judge.extract_pipeline import (
-        extract_deterministic_features_only,
-    )
-
-    extract_deterministic_features_only(args.dataset, Path(args.output))
-
-
-def cmd_verify(args: argparse.Namespace) -> None:
-    """Handle the 'verify' subcommand."""
-    from experiment_ab_shared.llm_judge.extract_pipeline import (
-        _load_tasks_for_dataset,
-        _get_task_id,
-        verify_extraction_complete,
-    )
-
-    tasks = _load_tasks_for_dataset(args.dataset)
-    task_ids = [_get_task_id(t, args.dataset) for t in tasks]
-    status = verify_extraction_complete(Path(args.output_dir), task_ids)
-    status.print_report()
 
 
 def cmd_correlations(args: argparse.Namespace) -> None:
@@ -737,12 +606,6 @@ def _setup_extract_parser(subparsers) -> None:
         type=int,
         default=10,
         help="Max concurrent API calls when --parallel is used (default: 10)",
-    )
-    parser.add_argument(
-        "--add-deterministic",
-        action="store_true",
-        dest="add_deterministic",
-        help="Add deterministic features (from patch or solution) to the output CSV",
     )
 
 
@@ -860,47 +723,6 @@ def _setup_compare_parser(subparsers) -> None:
     )
 
 
-def _setup_deterministic_parser(subparsers) -> None:
-    """Setup the 'deterministic' subcommand parser."""
-    parser = subparsers.add_parser(
-        "deterministic",
-        help="Extract deterministic features only (no LLM calls)",
-    )
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        required=True,
-        help="Dataset name",
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        required=True,
-        help="Output CSV path",
-    )
-
-
-def _setup_verify_parser(subparsers) -> None:
-    """Setup the 'verify' subcommand parser."""
-    parser = subparsers.add_parser(
-        "verify",
-        help="Verify extraction completeness",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        required=True,
-        dest="output_dir",
-        help="Directory containing JSON files",
-    )
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        required=True,
-        help="Dataset name",
-    )
-
-
 def _setup_correlations_parser(subparsers) -> None:
     """Setup the 'correlations' subcommand parser."""
     parser = subparsers.add_parser(
@@ -953,8 +775,6 @@ def main():
     _setup_aggregate_parser(subparsers)
     _setup_quick_eval_parser(subparsers)
     _setup_compare_parser(subparsers)
-    _setup_deterministic_parser(subparsers)
-    _setup_verify_parser(subparsers)
     _setup_correlations_parser(subparsers)
 
     args = parser.parse_args()
@@ -972,8 +792,6 @@ def main():
         "aggregate": cmd_aggregate,
         "quick_eval": cmd_quick_eval,
         "compare": cmd_compare,
-        "deterministic": cmd_deterministic,
-        "verify": cmd_verify,
         "correlations": cmd_correlations,
     }
 

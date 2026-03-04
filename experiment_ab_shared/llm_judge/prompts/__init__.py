@@ -6,43 +6,6 @@ Provides a unified way to access prompt configurations for different datasets.
 from typing import Dict, List
 
 from experiment_ab_shared.llm_judge.prompt_config import PromptConfig
-from experiment_ab_shared.llm_judge.prompts.swebench import SWEBENCH_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_pro import SWEBENCH_PRO_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_v2 import SWEBENCH_PRO_V2_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_v3 import SWEBENCH_PRO_V3_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_v4 import SWEBENCH_PRO_V4_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_v5 import SWEBENCH_PRO_V5_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_v2 import SWEBENCH_V2_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_v3 import SWEBENCH_V3_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_v4 import SWEBENCH_V4_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_v5 import SWEBENCH_V5_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_v6 import SWEBENCH_V6_CONFIG
-from experiment_ab_shared.llm_judge.prompts.swebench_selected import SWEBENCH_SELECTED_CONFIG
-from experiment_ab_shared.llm_judge.prompts.terminalbench import TERMINALBENCH_CONFIG
-from experiment_ab_shared.llm_judge.prompts.terminalbench_v2 import TERMINALBENCH_V2_CONFIG
-from experiment_ab_shared.llm_judge.prompts.gso import GSO_CONFIG
-
-# Unified prompts (standardized features across all datasets)
-from experiment_ab_shared.llm_judge.prompts.swebench_unified import (
-    SWEBENCH_UNIFIED_CONFIG,
-    SWEBENCH_UNIFIED_NO_SOLUTION_CONFIG,
-    SWEBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
-)
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_unified import (
-    SWEBENCH_PRO_UNIFIED_CONFIG,
-    SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG,
-    SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG,
-)
-from experiment_ab_shared.llm_judge.prompts.terminalbench_unified import (
-    TERMINALBENCH_UNIFIED_CONFIG,
-    TERMINALBENCH_UNIFIED_NO_SOLUTION_CONFIG,
-    TERMINALBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
-)
-from experiment_ab_shared.llm_judge.prompts.gso_unified import (
-    GSO_UNIFIED_CONFIG,
-    GSO_UNIFIED_NO_SOLUTION_CONFIG,
-    GSO_UNIFIED_PROBLEM_ONLY_CONFIG,
-)
 
 # Test patch features (SWE-bench with test patch analysis)
 from experiment_ab_shared.llm_judge.prompts.swebench_with_test import (
@@ -55,63 +18,13 @@ from experiment_ab_shared.llm_judge.prompts.swebench_test_quality_no_solution im
     SWEBENCH_TEST_QUALITY_NO_SOLUTION_CONFIG,
 )
 
-# Extended problem-only features (8 additional features for ablation)
-from experiment_ab_shared.llm_judge.prompts.swebench_problem_extended import (
-    SWEBENCH_PROBLEM_EXTENDED_CONFIG,
-)
-
-# New features (7 additional features to extend existing 8 core features)
-from experiment_ab_shared.llm_judge.prompts.swebench_pro_new_features import (
-    SWEBENCH_PRO_NEW_FEATURES_CONFIG,
-)
-from experiment_ab_shared.llm_judge.prompts.gso_new_features import (
-    GSO_NEW_FEATURES_CONFIG,
-)
-from experiment_ab_shared.llm_judge.prompts.terminalbench_new_features import (
-    TERMINALBENCH_NEW_FEATURES_CONFIG,
-)
-
 # Registry of all available prompt configurations
 _PROMPT_CONFIGS: Dict[str, PromptConfig] = {
-    "swebench": SWEBENCH_CONFIG,
-    "swebench_pro": SWEBENCH_PRO_CONFIG,
-    "swebench_pro_v2": SWEBENCH_PRO_V2_CONFIG,
-    "swebench_pro_v3": SWEBENCH_PRO_V3_CONFIG,
-    "swebench_pro_v4": SWEBENCH_PRO_V4_CONFIG,
-    "swebench_pro_v5": SWEBENCH_PRO_V5_CONFIG,
-    "swebench_v2": SWEBENCH_V2_CONFIG,
-    "swebench_v3": SWEBENCH_V3_CONFIG,
-    "swebench_v4": SWEBENCH_V4_CONFIG,
-    "swebench_v5": SWEBENCH_V5_CONFIG,
-    "swebench_v6": SWEBENCH_V6_CONFIG,
-    "swebench_selected": SWEBENCH_SELECTED_CONFIG,
-    "terminalbench": TERMINALBENCH_CONFIG,
-    "terminalbench_v2": TERMINALBENCH_V2_CONFIG,
-    "gso": GSO_CONFIG,
-    # Unified prompts (standardized features for fair comparison)
-    "swebench_unified": SWEBENCH_UNIFIED_CONFIG,
-    "swebench_unified_no_solution": SWEBENCH_UNIFIED_NO_SOLUTION_CONFIG,
-    "swebench_unified_problem_only": SWEBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
-    "swebench_pro_unified": SWEBENCH_PRO_UNIFIED_CONFIG,
-    "swebench_pro_unified_no_solution": SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG,
-    "swebench_pro_unified_problem_only": SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG,
-    "terminalbench_unified": TERMINALBENCH_UNIFIED_CONFIG,
-    "terminalbench_unified_no_solution": TERMINALBENCH_UNIFIED_NO_SOLUTION_CONFIG,
-    "terminalbench_unified_problem_only": TERMINALBENCH_UNIFIED_PROBLEM_ONLY_CONFIG,
-    "gso_unified": GSO_UNIFIED_CONFIG,
-    "gso_unified_no_solution": GSO_UNIFIED_NO_SOLUTION_CONFIG,
-    "gso_unified_problem_only": GSO_UNIFIED_PROBLEM_ONLY_CONFIG,
     # Test patch features
     "swebench_with_test": SWEBENCH_WITH_TEST_CONFIG,
     # NOTE: swebench_test_quality included solution in prompt - use _no_solution for clean ablation
     "swebench_test_quality_with_solution": SWEBENCH_TEST_QUALITY_CONFIG,  # DEPRECATED: has solution leakage
     "swebench_test_quality_no_solution": SWEBENCH_TEST_QUALITY_NO_SOLUTION_CONFIG,  # Clean version for ablation
-    # Extended problem-only features
-    "swebench_problem_extended": SWEBENCH_PROBLEM_EXTENDED_CONFIG,
-    # New features (7 additional features to extend existing 8 core)
-    "swebench_pro_new_features": SWEBENCH_PRO_NEW_FEATURES_CONFIG,
-    "gso_new_features": GSO_NEW_FEATURES_CONFIG,
-    "terminalbench_new_features": TERMINALBENCH_NEW_FEATURES_CONFIG,
 }
 
 
@@ -119,7 +32,7 @@ def get_prompt_config(name: str) -> PromptConfig:
     """Get a prompt configuration by name.
 
     Args:
-        name: Dataset name (e.g., "swebench", "terminalbench")
+        name: Dataset name (e.g., "swebench_with_test", "swebench_test_quality_no_solution")
 
     Returns:
         PromptConfig for the specified dataset
@@ -163,42 +76,8 @@ __all__ = [
     "get_prompt_config",
     "list_datasets",
     "register_prompt_config",
-    "SWEBENCH_CONFIG",
-    "SWEBENCH_PRO_CONFIG",
-    "SWEBENCH_PRO_V2_CONFIG",
-    "SWEBENCH_PRO_V3_CONFIG",
-    "SWEBENCH_PRO_V4_CONFIG",
-    "SWEBENCH_PRO_V5_CONFIG",
-    "SWEBENCH_V2_CONFIG",
-    "SWEBENCH_V3_CONFIG",
-    "SWEBENCH_V4_CONFIG",
-    "SWEBENCH_V5_CONFIG",
-    "SWEBENCH_V6_CONFIG",
-    "SWEBENCH_SELECTED_CONFIG",
-    "TERMINALBENCH_CONFIG",
-    "TERMINALBENCH_V2_CONFIG",
-    "GSO_CONFIG",
-    # Unified prompts
-    "SWEBENCH_UNIFIED_CONFIG",
-    "SWEBENCH_UNIFIED_NO_SOLUTION_CONFIG",
-    "SWEBENCH_UNIFIED_PROBLEM_ONLY_CONFIG",
-    "SWEBENCH_PRO_UNIFIED_CONFIG",
-    "SWEBENCH_PRO_UNIFIED_NO_SOLUTION_CONFIG",
-    "SWEBENCH_PRO_UNIFIED_PROBLEM_ONLY_CONFIG",
-    "TERMINALBENCH_UNIFIED_CONFIG",
-    "TERMINALBENCH_UNIFIED_NO_SOLUTION_CONFIG",
-    "TERMINALBENCH_UNIFIED_PROBLEM_ONLY_CONFIG",
-    "GSO_UNIFIED_CONFIG",
-    "GSO_UNIFIED_NO_SOLUTION_CONFIG",
-    "GSO_UNIFIED_PROBLEM_ONLY_CONFIG",
     # Test patch features
     "SWEBENCH_WITH_TEST_CONFIG",
     "SWEBENCH_TEST_QUALITY_CONFIG",
     "SWEBENCH_TEST_QUALITY_NO_SOLUTION_CONFIG",
-    # Extended problem-only
-    "SWEBENCH_PROBLEM_EXTENDED_CONFIG",
-    # New features (7 additional)
-    "SWEBENCH_PRO_NEW_FEATURES_CONFIG",
-    "GSO_NEW_FEATURES_CONFIG",
-    "TERMINALBENCH_NEW_FEATURES_CONFIG",
 ]
