@@ -1971,7 +1971,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         raise AssertionError(f"Unhandled regressor: {regressor_name}")
 
-    use_joint = method == "combined"
     use_judge = method in {"judge", "combined"}
 
     if (split_by not in {"agent", "observation", "none"}) and use_judge and str(regressor_name) not in {"ridge", "ridge_cv"}:
@@ -2156,8 +2155,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_auc_folds_empirical_model.append(float(fold_auc_emp))
             cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
             cv_test_n_obs_folds.append(int(len(labels)))
-
-            baseline_label = "irt_train" if split_by == "observation" else "emp_item"
             print(
                 f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} oracle_auc={fold_auc_oracle}"
             )
@@ -2170,7 +2167,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
-        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_item"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std}")
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
@@ -2567,8 +2563,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
             cv_test_n_obs_folds.append(int(len(labels)))
             cv_test_n_items_scored_folds.append(int(len(scored_items)))
-
-            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
             print(
                 f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} oracle_auc={fold_auc_oracle}"
             )
@@ -2588,7 +2582,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
-        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std}")
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
@@ -2948,7 +2941,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_n_obs_folds.append(int(len(labels)))
             cv_test_n_items_scored_folds.append(int(len(scored_items)))
 
-            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
             print(
                 f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} oracle_auc={fold_auc_oracle}"
             )
@@ -2968,7 +2960,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
-        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std}")
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
@@ -3229,7 +3220,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cv_test_auc_folds_empirical_model.append(float(fold_auc_emp))
             cv_test_auc_folds_oracle_irt.append(float(fold_auc_oracle))
             cv_test_n_obs_folds.append(int(len(labels)))
-            baseline_label = "irt_train" if split_by == "observation" else "emp_model"
             print(
                 f"Fold {fold:02d}: auc={fold_auc} baseline_auc={fold_auc_emp} oracle_auc={fold_auc_oracle}"
             )
@@ -3254,7 +3244,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         baseline_auc_arr = base.np.asarray(cv_test_auc_folds_empirical_model, dtype=base.np.float64)
         baseline_auc_mean = float(base.np.nanmean(baseline_auc_arr)) if baseline_auc_arr.size else float("nan")
         baseline_auc_std = float(base.np.nanstd(baseline_auc_arr, ddof=0)) if baseline_auc_arr.size else float("nan")
-        baseline_label = "irt_agent_1pl" if str(split_by) == "observation" else "emp_model"
         print(f"{int(args.cv_folds)}-fold CV baseline ROC-AUC: mean={baseline_auc_mean} std={baseline_auc_std}")
 
         oracle_auc_arr = base.np.asarray(cv_test_auc_folds_oracle_irt, dtype=base.np.float64)
