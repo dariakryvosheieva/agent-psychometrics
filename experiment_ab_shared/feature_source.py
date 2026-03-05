@@ -569,9 +569,8 @@ def build_feature_sources(
     embeddings_path: Optional[Path] = None,
     llm_judge_path: Optional[Path] = None,
     llm_judge_feature_cols: Optional[List[str]] = None,
-    trajectory_features_path: Optional[Path] = None,
+    trajectory_features_path: Optional[Path] = None,  # Experiment B only; not used in Experiment A
     trajectory_feature_cols: Optional[List[str]] = None,
-    auditor_features_path: Optional[Path] = None,
     verbose: bool = True,
 ) -> List[Tuple[str, TaskFeatureSource]]:
     """Build list of available feature sources from paths.
@@ -583,10 +582,11 @@ def build_feature_sources(
         llm_judge_path: Path to LLM judge features CSV (None to skip)
         llm_judge_feature_cols: Optional list of feature columns for LLM Judge.
             If None, auto-detects numeric columns from CSV.
-        trajectory_features_path: Path to trajectory features CSV (None to skip)
+        trajectory_features_path: Path to trajectory features CSV (None to skip).
+            Only used in Experiment B; Experiment A callers should pre-merge any
+            extra feature sources into the judge CSV before passing it in.
         trajectory_feature_cols: Optional list of feature columns for trajectory.
             If None, auto-detects numeric columns from CSV.
-        auditor_features_path: Path to auditor agent features CSV (None to skip)
         verbose: Print messages about missing paths (default True)
 
     Returns:
@@ -616,13 +616,5 @@ def build_feature_sources(
         ))
     elif verbose and trajectory_features_path:
         print(f"\nTrajectory features not found: {trajectory_features_path}")
-
-    if auditor_features_path and auditor_features_path.exists():
-        sources.append((
-            "Auditor",
-            CSVFeatureSource(auditor_features_path, name="Auditor"),
-        ))
-    elif verbose and auditor_features_path:
-        print(f"\nAuditor features not found: {auditor_features_path}")
 
     return sources
