@@ -15,7 +15,6 @@ from typing import Any, Callable, Dict, List, Optional
 import pandas as pd
 
 from experiment_ab_shared.feature_source import (
-    RegularizedFeatureSource,
     GroupedFeatureSource,
     build_feature_sources,
 )
@@ -149,8 +148,8 @@ def build_cv_predictors(
     # Grouped predictor (Embedding + LLM Judge with per-source regularization)
     if "Embedding" in source_by_name and "LLM Judge" in source_by_name:
         grouped_source = GroupedFeatureSource([
-            RegularizedFeatureSource(source_by_name["Embedding"]),
-            RegularizedFeatureSource(source_by_name["LLM Judge"]),
+            source_by_name["Embedding"],
+            source_by_name["LLM Judge"],
         ])
         predictor = predictor_factory("Grouped", grouped_source, config)
         configs.append(

@@ -49,7 +49,6 @@ from experiment_b.shared.data_preparation import (
 from experiment_ab_shared.feature_source import (
     TaskFeatureSource,
     GroupedFeatureSource,
-    RegularizedFeatureSource,
 )
 
 
@@ -375,24 +374,24 @@ def run_single_dataset(
             # Two-source combinations with Embedding
             if "Embedding" in source_dict and "LLM Judge" in source_dict:
                 combined_source = GroupedFeatureSource([
-                    RegularizedFeatureSource(source_dict["Embedding"]),
-                    RegularizedFeatureSource(source_dict["LLM Judge"]),
+                    source_dict["Embedding"],
+                    source_dict["LLM Judge"],
                 ])
                 feature_configs.append(("Embedding + LLM Judge", combined_source))
 
             if "Embedding" in source_dict and "Trajectory" in source_dict:
                 combined_source = GroupedFeatureSource([
-                    RegularizedFeatureSource(source_dict["Embedding"]),
-                    RegularizedFeatureSource(source_dict["Trajectory"]),
+                    source_dict["Embedding"],
+                    source_dict["Trajectory"],
                 ])
                 feature_configs.append(("Embedding + Trajectory", combined_source))
 
             # Three-source combination
             if "Embedding" in source_dict and "LLM Judge" in source_dict and "Trajectory" in source_dict:
                 combined_source = GroupedFeatureSource([
-                    RegularizedFeatureSource(source_dict["Embedding"]),
-                    RegularizedFeatureSource(source_dict["LLM Judge"]),
-                    RegularizedFeatureSource(source_dict["Trajectory"]),
+                    source_dict["Embedding"],
+                    source_dict["LLM Judge"],
+                    source_dict["Trajectory"],
                 ])
                 feature_configs.append(("Embedding + LLM Judge + Trajectory", combined_source))
 

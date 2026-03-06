@@ -325,14 +325,13 @@ class GroupedRidgePredictor:
 
     Example:
         from experiment_ab_shared.feature_source import (
-            GroupedFeatureSource, RegularizedFeatureSource,
-            EmbeddingFeatureSource, CSVFeatureSource,
+            GroupedFeatureSource, EmbeddingFeatureSource, CSVFeatureSource,
         )
 
         # Create grouped source
         grouped = GroupedFeatureSource([
-            RegularizedFeatureSource(EmbeddingFeatureSource(path1), alpha=1000.0),
-            RegularizedFeatureSource(CSVFeatureSource(path2), alpha=1.0),
+            EmbeddingFeatureSource(path1),
+            CSVFeatureSource(path2),
         ])
 
         # Create predictor (will grid search over per-source alphas)

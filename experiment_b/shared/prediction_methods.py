@@ -24,7 +24,6 @@ from experiment_ab_shared.feature_source import (
     TaskFeatureSource,
     EmbeddingFeatureSource,
     CSVFeatureSource,
-    RegularizedFeatureSource,
     GroupedFeatureSource,
     build_feature_sources as _build_feature_sources,
 )
@@ -170,14 +169,7 @@ class FeatureIRTPredictor:
         if not self._is_grouped_source():
             return None
 
-        if self.per_source_alphas is not None:
-            return self.per_source_alphas
-
-        # Fall back to source's group_alphas
-        return {
-            src.name: alpha
-            for src, alpha in zip(self.source.sources, self.source.group_alphas)
-        }
+        return self.per_source_alphas
 
     def _preprocess_features(
         self, X: np.ndarray, task_ids: List[str], fit_scaler: bool = True
@@ -909,10 +901,7 @@ def collect_grouped_ridge_predictions(
 
     for source_combo in all_combinations:
         # Build grouped source from this combination
-        reg_sources = [
-            RegularizedFeatureSource(source) for _, source in source_combo
-        ]
-        combined = GroupedFeatureSource(reg_sources)
+        combined = GroupedFeatureSource([source for _, source in source_combo])
 
         method_name = f"Grouped Ridge ({combined.name})"
         print(f"\nTraining {method_name}...")

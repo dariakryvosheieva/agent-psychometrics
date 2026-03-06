@@ -22,7 +22,6 @@ from experiment_ab_shared.feature_source import (
     TaskFeatureSource,
     EmbeddingFeatureSource,
     CSVFeatureSource,
-    RegularizedFeatureSource,
     GroupedFeatureSource,
 )
 from experiment_ab_shared.feature_predictor import (
@@ -51,7 +50,6 @@ __all__ = [
     "TaskFeatureSource",
     "EmbeddingFeatureSource",
     "CSVFeatureSource",
-    "RegularizedFeatureSource",
     "GroupedFeatureSource",
     # Feature-based predictors
     "FeatureBasedPredictor",

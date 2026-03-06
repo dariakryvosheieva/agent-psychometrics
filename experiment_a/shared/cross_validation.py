@@ -82,7 +82,6 @@ def k_fold_split_tasks(
     """K-fold split using sklearn KFold.
 
     Uses sklearn's standard KFold implementation for splitting tasks.
-    This is more standard and well-tested than custom hash-based splitting.
 
     Args:
         task_ids: List of task identifiers

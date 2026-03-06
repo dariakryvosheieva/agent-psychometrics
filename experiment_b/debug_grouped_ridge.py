@@ -27,7 +27,6 @@ from experiment_b.shared import (
     build_feature_sources,
 )
 from experiment_ab_shared.feature_source import (
-    RegularizedFeatureSource,
     GroupedFeatureSource,
 )
 from experiment_ab_shared.feature_predictor import (
@@ -64,8 +63,7 @@ def run_coefficient_analysis(
 
     for source_combo in all_combinations:
         # Build grouped source
-        reg_sources = [RegularizedFeatureSource(source) for _, source in source_combo]
-        combined = GroupedFeatureSource(reg_sources)
+        combined = GroupedFeatureSource([source for _, source in source_combo])
 
         combo_name = combined.name
         print(f"\n--- Grouped Ridge ({combo_name}) ---")
