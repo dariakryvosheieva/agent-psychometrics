@@ -1,29 +1,21 @@
 """Auditor agent prompts - Version 4 (multi-dataset superset).
 
-Superset of 8 features designed to work across all datasets:
-- SWE-bench Verified & Pro (bug fixes)
-- Terminal Bench (terminal automation)
-- GSO (performance optimization)
+Superset of 8 environment-level features designed to work across all datasets.
+Feature definitions live in the central feature registry; this module builds
+the auditor system prompt from those definitions.
 
-Includes 3 proven V3 features + 5 new environment-level features.
-Ridge regression selects the relevant subset per dataset.
-
-V3 features retained (strong correlation with IRT difficulty on SWE-bench):
-- fix_localization (-0.587) - strongest predictor
-- entry_point_clarity (-0.502)
-- change_blast_radius (+0.502)
-
-New features for broader coverage:
-- environment_setup_complexity
-- implementation_language_complexity
-- testing_infrastructure_quality
-- dependency_complexity
-- codebase_scale
+Features:
+- fix_localization, entry_point_clarity, change_blast_radius
+- environment_setup_complexity, implementation_language_complexity,
+  testing_infrastructure_quality, dependency_complexity, codebase_scale
 """
+
+from experiment_ab_shared.llm_judge.feature_registry import get_features_by_level
+from experiment_ab_shared.llm_judge.prompt_config import InfoLevel
 
 # Task type contexts for the system prompt
 TASK_TYPE_CONTEXTS = {
-    "swebench": (
+    "swebench_verified": (
         "You are auditing a **bug-fix** task in a Python repository. "
         "The /testbed directory contains the project codebase with a known bug. "
         "The problem statement describes the bug, and there are failing tests "
@@ -50,104 +42,23 @@ TASK_TYPE_CONTEXTS = {
     ),
 }
 
-# The 8 features for V4 auditor
-AUDITOR_FEATURES_V4 = {
-    # === Retained from V3 (proven on SWE-bench) ===
-    "fix_localization": {
-        "description": "How spread out is the likely solution?",
-        "scale": {
-            1: "Solution requires changes across many modules/packages",
-            2: "Solution spans multiple files across different directories",
-            3: "Solution spans 2-3 files in the same module",
-            4: "Solution is in 1-2 closely related files",
-            5: "Solution is contained to a single function/method",
-        },
-    },
-    "entry_point_clarity": {
-        "description": "How easy is it to find where the problem manifests?",
-        "scale": {
-            1: "No clear entry point, requires deep architecture knowledge",
-            2: "Entry point exists but buried in abstraction layers",
-            3: "Entry point findable with moderate searching",
-            4: "Problem statement or tests hint at the location",
-            5: "Clear from problem statement exactly which file/function",
-        },
-    },
-    "change_blast_radius": {
-        "description": "How many components would be affected by changes? (Higher = harder)",
-        "scale": {
-            1: "Isolated change, no downstream effects",
-            2: "Minor coupling, 1-2 related files to consider",
-            3: "Moderate coupling, changes affect a subsystem",
-            4: "High coupling, changes ripple across modules",
-            5: "Core/shared code, changes affect entire codebase",
-        },
-    },
-    # === New features for multi-dataset coverage ===
-    "environment_setup_complexity": {
-        "description": "How complex is the runtime/tooling environment?",
-        "scale": {
-            1: "Standard single-directory project, ready to run out of the box",
-            2: "Minor configuration needed, clear project structure",
-            3: "Multiple services or components, custom configurations",
-            4: "Complex orchestration, specialized dependencies, non-trivial build steps",
-            5: "Exotic environment, multi-container setup, hardware-specific requirements",
-        },
-    },
-    "implementation_language_complexity": {
-        "description": "How complex is the primary language/tech stack for the solution?",
-        "scale": {
-            1: "Pure Python or simple shell commands",
-            2: "Python with standard libraries, basic scripting",
-            3: "Mixed languages (Python + build tools), moderately complex shell",
-            4: "Compiled languages (C/C++), complex build systems, framework-specific patterns",
-            5: "Multi-language (C/Rust + Python bindings), SIMD/assembly, exotic toolchains",
-        },
-    },
-    "testing_infrastructure_quality": {
-        "description": "How good is the testing/validation setup for verifying a solution?",
-        "scale": {
-            1: "No test framework, no way to validate changes",
-            2: "Basic tests exist but hard to run or incomplete",
-            3: "Standard test framework, moderate coverage",
-            4: "Good test coverage, easy to run tests, clear pass/fail signals",
-            5: "Comprehensive test suite, fast feedback loops, detailed error messages",
-        },
-    },
-    "dependency_complexity": {
-        "description": "How complex are the project dependencies?",
-        "scale": {
-            1: "No external dependencies, standard library only",
-            2: "Few well-known dependencies (e.g., requests, numpy)",
-            3: "Moderate number of standard packages",
-            4: "Many dependencies, some specialized or version-sensitive",
-            5: "Complex dependency tree, C extensions, system-level deps, version conflicts",
-        },
-    },
-    "codebase_scale": {
-        "description": "How large/complex is the codebase the agent needs to work with?",
-        "scale": {
-            1: "Tiny project (<100 files, <5K lines)",
-            2: "Small project (100-500 files)",
-            3: "Medium project (500-2000 files)",
-            4: "Large project (2000-10000 files)",
-            5: "Massive project (10000+ files, complex module structure)",
-        },
-    },
-}
+# Environment features from registry (cached at module load)
+_ENV_FEATURES = get_features_by_level(InfoLevel.ENVIRONMENT)
 
 
 def get_feature_names_v4() -> list[str]:
-    """Return list of feature names in consistent order."""
-    return list(AUDITOR_FEATURES_V4.keys())
+    """Return list of environment feature names in consistent order."""
+    return [f.name for f in _ENV_FEATURES]
 
 
-def build_auditor_system_prompt_v4(task_type: str = "swebench") -> str:
+def build_auditor_system_prompt_v4(task_type: str = "swebench_verified") -> str:
     """Build the system prompt for the V4 auditor agent.
 
+    Reads feature definitions from the central registry (InfoLevel.ENVIRONMENT)
+    and builds scale text dynamically.
+
     Args:
-        task_type: One of "swebench", "swebench_pro", "terminalbench", "gso".
-            Controls the task-type-specific context in the prompt.
+        task_type: One of "swebench_verified", "swebench_pro", "terminalbench", "gso".
 
     Returns:
         Complete system prompt string.
@@ -163,27 +74,23 @@ def build_auditor_system_prompt_v4(task_type: str = "swebench") -> str:
 
     task_context = TASK_TYPE_CONTEXTS[task_type]
 
-    # Build feature descriptions
+    # Build feature descriptions from registry
     feature_sections = []
-    for name, info in AUDITOR_FEATURES_V4.items():
-        lines = [f"### {name}"]
-        lines.append(f"**{info['description']}**")
-        lines.append("")
-        for score, desc in info["scale"].items():
-            lines.append(f"- {score}: {desc}")
-        feature_sections.append("\n".join(lines))
+    for feat in _ENV_FEATURES:
+        # Environment features use "default" scale text (universal across datasets)
+        feature_sections.append(feat.get_scale_text("default"))
 
     features_text = "\n\n".join(feature_sections)
 
     # Build example JSON
     example_features = []
-    for name in AUDITOR_FEATURES_V4:
+    for feat in _ENV_FEATURES:
         example_features.append(
-            f'  "{name}": {{"value": 3, "reasoning": "Brief explanation"}}'
+            f'  "{feat.name}": {{"value": 3, "reasoning": "Brief explanation"}}'
         )
     example_json = "{\n" + ",\n".join(example_features) + "\n}"
 
-    num_features = len(AUDITOR_FEATURES_V4)
+    num_features = len(_ENV_FEATURES)
 
     return f"""You are a codebase auditor evaluating task environments for difficulty prediction. Your job is to explore the environment and rate it on {num_features} difficulty-related axes.
 

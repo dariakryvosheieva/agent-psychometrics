@@ -7,7 +7,7 @@ termination).
 
 Usage:
     # Run on SWE-bench Verified (default)
-    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench_verified
 
     # Run on Terminal Bench
     python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset terminalbench
@@ -16,10 +16,10 @@ Usage:
     python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset gso --limit 2
 
     # Custom batch size and model
-    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench --batch_size 5
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench_verified --batch_size 5
 
     # Just aggregate existing logs to CSV (skip running)
-    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench --aggregate_only
+    python -m experiment_ab_shared.llm_judge.auditor_agent.run_auditor --dataset swebench_verified --aggregate_only
 """
 
 import argparse
@@ -44,7 +44,7 @@ from experiment_ab_shared.llm_judge.auditor_agent.parse_outputs import (
 
 # Dataset configurations: maps dataset name to inspect task path, ID source, etc.
 DATASET_CONFIGS = {
-    "swebench": {
+    "swebench_verified": {
         "inspect_task": "experiment_ab_shared/llm_judge/auditor_agent/inspect_tasks.py@auditor_task_v4",
         "hf_dataset": "princeton-nlp/SWE-bench_Verified",
         "id_field": "instance_id",
@@ -213,9 +213,9 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        default="swebench",
+        default="swebench_verified",
         choices=list(DATASET_CONFIGS.keys()),
-        help="Dataset to run on (default: swebench)",
+        help="Dataset to run on (default: swebench_verified)",
     )
     parser.add_argument(
         "--batch_size",

@@ -7,7 +7,8 @@ These features focus on observable trajectory patterns based on analysis
 of easy vs hard frontier tasks.
 """
 
-from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition, PromptConfig
+from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition
+from experiment_b.trajectory_features.simple_extractor import TrajectoryPromptConfig as PromptConfig
 
 # V1 Features: Trajectory-based features derived from qualitative analysis
 # Key insight: Hard tasks show more "fix-break-revise" cycles and test regressions

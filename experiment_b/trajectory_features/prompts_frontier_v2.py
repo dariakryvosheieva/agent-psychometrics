@@ -6,7 +6,8 @@ Reduced to 3 features based on initial correlation analysis:
 - conceptual_pivot_count
 """
 
-from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition, PromptConfig
+from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition
+from experiment_b.trajectory_features.simple_extractor import TrajectoryPromptConfig as PromptConfig
 
 FRONTIER_V2_FEATURES = [
     FeatureDefinition(

@@ -5,7 +5,8 @@ This version adds a feature to capture when agents appear to succeed
 which may indicate hidden task complexity.
 """
 
-from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition, PromptConfig
+from experiment_ab_shared.llm_judge.prompt_config import FeatureDefinition
+from experiment_b.trajectory_features.simple_extractor import TrajectoryPromptConfig as PromptConfig
 
 FRONTIER_V3_FEATURES = [
     FeatureDefinition(

@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from experiment_ab_shared.llm_judge.extractor import LLMFeatureExtractor
+from experiment_b.trajectory_features.simple_extractor import SimpleFeatureExtractor
 from experiment_b.swebench.config import SWEBenchConfig
 from experiment_b.trajectory_features.prompts_frontier_v1 import get_frontier_v1_config
 from experiment_b.trajectory_features.utils import (
@@ -118,7 +118,7 @@ def main():
     print(f"\nExtracting features...")
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    extractor = LLMFeatureExtractor(
+    extractor = SimpleFeatureExtractor(
         prompt_config=prompt_config,
         output_dir=args.output_dir,
         provider="anthropic",

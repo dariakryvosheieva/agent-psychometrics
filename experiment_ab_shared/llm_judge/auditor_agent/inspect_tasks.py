@@ -133,7 +133,7 @@ def load_hf_samples_with_sandbox(
 def auditor_task_v4(
     dataset: str = "princeton-nlp/SWE-bench_Verified",
     split: str = "test",
-    task_type: str = "swebench",
+    task_type: str = "swebench_verified",
     max_attempts: int = 1,
     message_limit: int = 50,
 ) -> Task:
@@ -150,7 +150,7 @@ def auditor_task_v4(
     Args:
         dataset: HuggingFace dataset name.
         split: Dataset split (default: test).
-        task_type: One of "swebench", "swebench_pro", "terminalbench", "gso".
+        task_type: One of "swebench_verified", "swebench_pro", "terminalbench", "gso".
         max_attempts: Max submissions (we only want 1 - the JSON output).
         message_limit: Max total messages in conversation.
     """

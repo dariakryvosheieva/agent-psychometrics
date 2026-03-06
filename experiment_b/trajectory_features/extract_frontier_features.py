@@ -23,7 +23,7 @@ import argparse
 import json
 from pathlib import Path
 
-from experiment_ab_shared.llm_judge.extractor import LLMFeatureExtractor
+from experiment_b.trajectory_features.simple_extractor import SimpleFeatureExtractor
 from experiment_b.swebench.config import SWEBenchConfig
 from experiment_b.trajectory_features.utils import (
     build_task_dicts,
@@ -157,7 +157,7 @@ def main():
         print(f"  Warning: {len(missing)} trajectories not found")
 
     # Create extractor
-    extractor = LLMFeatureExtractor(
+    extractor = SimpleFeatureExtractor(
         prompt_config=prompt_config,
         output_dir=args.output_dir,
         provider=args.provider,

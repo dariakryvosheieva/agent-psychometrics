@@ -1,11 +1,29 @@
-"""Prompt configuration for LLM judge feature extraction.
+"""Core data types for LLM judge feature extraction.
 
-This module defines the PromptConfig and FeatureDefinition dataclasses that
-configure how features are extracted from different datasets.
+- InfoLevel: what task information a feature requires
+- FeatureDefinition: a single extractable feature with scale text and info level
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from enum import Enum
+from typing import Any, Dict
+
+
+class InfoLevel(Enum):
+    """What task information a feature needs access to.
+
+    Features are grouped by info level during extraction so that each group's
+    prompt contains only the appropriate task data. Levels are cumulative:
+    - PROBLEM: only problem statement
+    - ENVIRONMENT: problem + shell exploration (auditor agent, no tests/solution)
+    - TEST: problem + test/evaluation artifact (no solution)
+    - SOLUTION: problem + tests + gold solution
+    """
+
+    PROBLEM = "problem"
+    ENVIRONMENT = "environment"
+    TEST = "test"
+    SOLUTION = "solution"
 
 
 @dataclass
@@ -13,105 +31,42 @@ class FeatureDefinition:
     """Definition of a single feature to extract.
 
     Attributes:
-        name: Feature name (e.g., "fix_complexity")
+        name: Feature name (e.g., "solution_complexity")
         min_value: Minimum valid value (e.g., 1)
         max_value: Maximum valid value (e.g., 5)
         description: Human-readable description for documentation
+        info_level: What task information this feature requires
+        scale_text: Per-variant rubric text for prompts. Keys are variant names
+            ("default", "code", "terminal", "optimization"). The variant is
+            selected based on the dataset being processed.
     """
 
     name: str
     min_value: int
     max_value: int
     description: str = ""
+    info_level: InfoLevel = InfoLevel.PROBLEM
+    scale_text: Dict[str, str] = field(default_factory=dict)
+
+    def get_scale_text(self, variant: str = "default") -> str:
+        """Get the rubric text for a given dataset variant.
+
+        Falls back to "default" if the requested variant is not found.
+
+        Raises:
+            KeyError: If neither the requested variant nor "default" exists.
+        """
+        if variant in self.scale_text:
+            return self.scale_text[variant]
+        if "default" in self.scale_text:
+            return self.scale_text["default"]
+        raise KeyError(
+            f"No scale text for variant '{variant}' in feature '{self.name}'. "
+            f"Available: {list(self.scale_text.keys())}"
+        )
 
     def validate(self, value: Any) -> bool:
         """Check if a value is valid for this feature."""
         if not isinstance(value, (int, float)):
             return False
         return self.min_value <= value <= self.max_value
-
-
-@dataclass
-class PromptConfig:
-    """Configuration for LLM judge feature extraction.
-
-    This dataclass encapsulates all dataset-specific configuration:
-    - Feature definitions (names, scales)
-    - Prompt template with placeholders
-    - Task ID field name
-    - Truncation limits for long fields
-
-    Attributes:
-        name: Dataset name (e.g., "swebench", "terminalbench")
-        features: List of feature definitions
-        prompt_template: The prompt string with {placeholders}
-        task_id_field: Field name for task ID (e.g., "instance_id", "task_id")
-        truncation_limits: Max characters for each field (e.g., {"problem_statement": 12000})
-        format_prompt_fn: Optional custom formatting function
-    """
-
-    name: str
-    features: List[FeatureDefinition]
-    prompt_template: str
-    task_id_field: str
-    truncation_limits: Dict[str, int] = field(default_factory=dict)
-    format_prompt_fn: Optional[Callable[[Dict[str, Any]], str]] = None
-
-    def get_feature_names(self) -> List[str]:
-        """Return list of feature names for CSV columns."""
-        return [f.name for f in self.features]
-
-    def format_prompt(self, task: Dict[str, Any]) -> str:
-        """Format the prompt template with task data.
-
-        If a custom format_prompt_fn is provided, it will be used.
-        Otherwise, the prompt_template is formatted with task fields,
-        applying truncation limits.
-
-        Args:
-            task: Task dictionary with fields matching template placeholders
-
-        Returns:
-            Formatted prompt string
-        """
-        if self.format_prompt_fn is not None:
-            return self.format_prompt_fn(task)
-
-        # Apply truncation limits
-        truncated_task = {}
-        for key, value in task.items():
-            if isinstance(value, str) and key in self.truncation_limits:
-                limit = self.truncation_limits[key]
-                truncated_task[key] = value[:limit] if len(value) > limit else value
-            else:
-                truncated_task[key] = value
-
-        return self.prompt_template.format(**truncated_task)
-
-    def validate_response(self, data: Dict[str, Any]) -> bool:
-        """Validate that extracted features match the schema.
-
-        Args:
-            data: Parsed JSON response from LLM
-
-        Returns:
-            True if at least one expected feature is present and valid
-        """
-        feature_names = self.get_feature_names()
-        has_valid_feature = False
-
-        for feature in self.features:
-            if feature.name in data:
-                if feature.validate(data[feature.name]):
-                    has_valid_feature = True
-
-        return has_valid_feature
-
-    def get_metadata_fields(self) -> List[str]:
-        """Return list of metadata field names to include in output."""
-        return [
-            f"_{self.task_id_field}",  # Internal task ID field
-            "_model",
-            "_provider",
-            "_extracted_at",
-        ]
