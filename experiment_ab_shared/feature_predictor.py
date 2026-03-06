@@ -358,27 +358,6 @@ class GroupedRidgePredictor:
             X_out[:, slice_i] = X_out[:, slice_i] / np.sqrt(alpha_i)
         return X_out
 
-    def _fit_scalers(
-        self, X: np.ndarray
-    ) -> Tuple[Dict[str, StandardScaler], np.ndarray]:
-        """Fit per-source StandardScalers on X and return them with the scaled matrix."""
-        scalers: Dict[str, StandardScaler] = {}
-        X_std = np.empty_like(X)
-        for source, slice_obj in zip(self.source.sources, self.source.group_slices):
-            scaler = StandardScaler()
-            X_std[:, slice_obj] = scaler.fit_transform(X[:, slice_obj])
-            scalers[source.name] = scaler
-        return scalers, X_std
-
-    def _apply_scalers(
-        self, X: np.ndarray, scalers: Dict[str, StandardScaler]
-    ) -> np.ndarray:
-        """Apply pre-fitted per-source StandardScalers to X."""
-        X_std = np.empty_like(X)
-        for source, slice_obj in zip(self.source.sources, self.source.group_slices):
-            X_std[:, slice_obj] = scalers[source.name].transform(X[:, slice_obj])
-        return X_std
-
     def fit(self, task_ids: List[str], ground_truth_b: Union[np.ndarray, List[float]]) -> None:
         """Fit the predictor on training data.
 
@@ -412,7 +391,7 @@ class GroupedRidgePredictor:
         # independently. This is important when combining high-dim (embeddings) and
         # low-dim (LLM) sources, as a single scaler would have statistics dominated
         # by the high-dim source.
-        self._per_source_scalers, X_std = self._fit_scalers(X)
+        self._per_source_scalers, X_std = self.source.fit_scalers(X)
 
         if self._fixed_alphas is not None:
             # Use fixed alphas directly (no grid search)
@@ -434,8 +413,8 @@ class GroupedRidgePredictor:
                     X_train, X_val = X[train_idx], X[val_idx]
                     y_train, y_val = y[train_idx], y[val_idx]
 
-                    fold_scalers, X_train_std = self._fit_scalers(X_train)
-                    X_val_std = self._apply_scalers(X_val, fold_scalers)
+                    fold_scalers, X_train_std = self.source.fit_scalers(X_train)
+                    X_val_std = self.source.apply_scalers(X_val, fold_scalers)
 
                     X_train_scaled = self._apply_group_scaling(X_train_std, alpha_combo)
                     X_val_scaled = self._apply_group_scaling(X_val_std, alpha_combo)
@@ -480,7 +459,7 @@ class GroupedRidgePredictor:
 
         X = self.source.get_features(task_ids)
 
-        X_std = self._apply_scalers(X, self._per_source_scalers)
+        X_std = self.source.apply_scalers(X, self._per_source_scalers)
         alphas = tuple(self._best_alphas[s.name] for s in self.source.sources)
         X_scaled = self._apply_group_scaling(X_std, alphas)
 

@@ -151,26 +151,17 @@ class JointTrainingCVPredictor:
             For single sources, scalers_dict has key "_single".
         """
         if self._is_grouped:
-            out_scalers: Dict[str, StandardScaler] = {}
-            features_scaled = np.empty_like(features)
-            for source, slice_obj in zip(self.source.sources, self.source.group_slices):
-                if fit:
-                    scaler = StandardScaler()
-                    features_scaled[:, slice_obj] = scaler.fit_transform(features[:, slice_obj])
-                    out_scalers[source.name] = scaler
-                else:
-                    scaler = scalers[source.name]
-                    features_scaled[:, slice_obj] = scaler.transform(features[:, slice_obj])
-                    out_scalers[source.name] = scaler
-            return features_scaled, out_scalers
+            if fit:
+                fitted_scalers, X_std = self.source.fit_scalers(features)
+                return X_std, fitted_scalers
+            else:
+                return self.source.apply_scalers(features, scalers), scalers
         else:
             if fit:
                 scaler = StandardScaler()
-                features_scaled = scaler.fit_transform(features)
-                return features_scaled, {"_single": scaler}
+                return scaler.fit_transform(features), {"_single": scaler}
             else:
-                scaler = scalers["_single"]
-                return scaler.transform(features), scalers
+                return scalers["_single"].transform(features), scalers
 
     def _prepare_data(
         self,

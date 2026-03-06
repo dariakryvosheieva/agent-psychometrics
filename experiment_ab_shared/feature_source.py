@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 
 class TaskFeatureSource(ABC):
@@ -404,6 +405,35 @@ class GroupedFeatureSource(TaskFeatureSource):
 
         # Concatenate along feature dimension
         return np.concatenate(feature_matrices, axis=1)
+
+    def fit_scalers(
+        self, X: np.ndarray
+    ) -> Tuple[Dict[str, StandardScaler], np.ndarray]:
+        """Fit per-source StandardScalers on X and return them with the scaled matrix.
+
+        Scalers are fit independently per source so that high-dim sources (e.g.
+        embeddings) don't dominate the statistics of low-dim sources (e.g. LLM
+        judge features).
+
+        Returns:
+            (scalers, X_std) where scalers maps source_name -> fitted StandardScaler.
+        """
+        scalers: Dict[str, StandardScaler] = {}
+        X_std = np.empty_like(X)
+        for source, slice_obj in zip(self._sources, self._group_slices):
+            scaler = StandardScaler()
+            X_std[:, slice_obj] = scaler.fit_transform(X[:, slice_obj])
+            scalers[source.name] = scaler
+        return scalers, X_std
+
+    def apply_scalers(
+        self, X: np.ndarray, scalers: Dict[str, StandardScaler]
+    ) -> np.ndarray:
+        """Apply pre-fitted per-source StandardScalers to X."""
+        X_std = np.empty_like(X)
+        for source, slice_obj in zip(self._sources, self._group_slices):
+            X_std[:, slice_obj] = scalers[source.name].transform(X[:, slice_obj])
+        return X_std
 
 
 def build_feature_sources(
