@@ -4,35 +4,16 @@ The standard experiment_a pipeline uses IRT difficulties computed on ALL tasks,
 which creates data leakage: the ground truth `b` values for training the
 difficulty predictor are influenced by test task responses.
 
-This script trains a separate IRT model on just the train tasks, producing
-uncontaminated difficulty estimates for use as training targets.
-
-Usage:
-    # Dry run to see what would be done
-    python -m experiment_a.train_irt_split --dry_run
-
-    # Train IRT on train split (80% of tasks)
-    python -m experiment_a.train_irt_split
-
-    # Use custom split parameters
-    python -m experiment_a.train_irt_split --test_fraction 0.2 --split_seed 42
-
-    # Force retrain even if cached model exists
-    python -m experiment_a.train_irt_split --force
+This module trains a separate IRT model on just the train tasks for each
+k-fold CV split, producing uncontaminated difficulty estimates for use as
+training targets.
 """
 
-import argparse
 import json
-import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import pandas as pd
-
-# Add parent to path for imports
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
 
 def set_torch_determinism(enabled: bool) -> None:
@@ -63,36 +44,27 @@ def set_torch_determinism(enabled: bool) -> None:
 
 def get_split_cache_dir(
     output_base: Path,
-    test_fraction: float,
     split_seed: int,
+    fold_idx: int,
+    k_folds: int,
     model_type: str = "1pl",
-    fold_idx: Optional[int] = None,
-    k_folds: Optional[int] = None,
     exclude_unsolved: bool = False,
 ) -> Path:
-    """Get the cache directory for a specific split configuration.
+    """Get the cache directory for a specific k-fold split configuration.
 
     Args:
         output_base: Base output directory
-        test_fraction: Test fraction (e.g., 0.2)
         split_seed: Split random seed
+        fold_idx: Fold index (0 to k-1)
+        k_folds: Total number of folds
         model_type: IRT model type
-        fold_idx: For k-fold CV, the fold index (0 to k-1)
-        k_folds: For k-fold CV, the total number of folds
         exclude_unsolved: Whether unsolved tasks were filtered out
 
     Returns:
         Path to cache directory for this configuration
     """
-    suffix = ""
-    if exclude_unsolved:
-        suffix += "_filtered"
-    if fold_idx is not None and k_folds is not None:
-        # k-fold cross-validation naming
-        split_name = f"seed{split_seed}_fold{fold_idx}of{k_folds}_{model_type}{suffix}"
-    else:
-        # Single holdout naming (legacy)
-        split_name = f"seed{split_seed}_test{int(test_fraction*100)}pct_{model_type}{suffix}"
+    suffix = "_filtered" if exclude_unsolved else ""
+    split_name = f"seed{split_seed}_fold{fold_idx}of{k_folds}_{model_type}{suffix}"
     return output_base / split_name / "1d"
 
 
@@ -201,42 +173,37 @@ def save_filtered_responses(
 def get_or_train_split_irt(
     responses_path: Path,
     output_base: Path,
-    test_fraction: float = 0.2,
+    train_tasks: List[str],
+    fold_idx: int,
+    k_folds: int,
     split_seed: int = 0,
     model_type: str = "1pl",
     epochs: int = 2000,
     force_retrain: bool = False,
     dry_run: bool = False,
-    train_tasks: Optional[List[str]] = None,
-    fold_idx: Optional[int] = None,
-    k_folds: Optional[int] = None,
     exclude_unsolved: bool = False,
 ) -> Path:
-    """Get cached IRT model or train a new one for the specified split.
-
-    For k-fold cross-validation, provide train_tasks, fold_idx, and k_folds.
-    For single holdout (legacy), omit these parameters.
+    """Get cached IRT model or train a new one for the specified k-fold split.
 
     Args:
         responses_path: Path to full response matrix JSONL
         output_base: Base directory for cached IRT models
-        test_fraction: Fraction of tasks to hold out (ignored if train_tasks provided)
-        split_seed: Random seed for split
+        train_tasks: Explicit list of train task IDs for this fold
+        fold_idx: Fold index (0 to k-1)
+        k_folds: Total number of folds
+        split_seed: Random seed for split (used for cache naming)
         model_type: IRT model type ("1pl" or "2pl")
         epochs: Training epochs
         force_retrain: If True, retrain even if cached
         dry_run: If True, just print what would be done
-        train_tasks: For k-fold CV, the explicit list of train task IDs
-        fold_idx: For k-fold CV, the fold index (0 to k-1)
-        k_folds: For k-fold CV, the total number of folds
         exclude_unsolved: If True, unsolved tasks were filtered out (affects cache key)
 
     Returns:
         Path to IRT output directory (contains abilities.csv, items.csv, split_info.json)
     """
     cache_dir = get_split_cache_dir(
-        output_base, test_fraction, split_seed, model_type,
-        fold_idx=fold_idx, k_folds=k_folds, exclude_unsolved=exclude_unsolved
+        output_base, split_seed, fold_idx, k_folds,
+        model_type=model_type, exclude_unsolved=exclude_unsolved
     )
 
     # Check for cached model
@@ -253,7 +220,6 @@ def get_or_train_split_irt(
         else:
             print(f"Found cached IRT model at {cache_dir}")
             print(f"  Split seed: {cached_info.get('split_seed')}")
-            print(f"  Test fraction: {cached_info.get('test_fraction')}")
             print(f"  Train tasks: {cached_info.get('n_train_tasks')}")
             print(f"  Test tasks: {cached_info.get('n_test_tasks')}")
             return cache_dir
@@ -360,8 +326,9 @@ def get_or_train_split_irt(
 
     # Save split info for cache validation
     split_info = {
-        "test_fraction": test_fraction,
         "split_seed": split_seed,
+        "fold_idx": fold_idx,
+        "k_folds": k_folds,
         "n_train_tasks": len(train_tasks),
         "n_test_tasks": len(test_tasks),
         "train_tasks": train_tasks,
@@ -382,76 +349,3 @@ def get_or_train_split_irt(
     print("=" * 60)
 
     return cache_dir
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Train IRT model on train tasks only to avoid data leakage"
-    )
-    parser.add_argument(
-        "--responses_path",
-        type=Path,
-        default=Path("data/swebench_verified/responses.jsonl"),
-        help="Path to full response matrix JSONL",
-    )
-    parser.add_argument(
-        "--output_dir",
-        type=Path,
-        default=Path("chris_output/experiment_a/irt_splits"),
-        help="Output directory for split IRT models",
-    )
-    parser.add_argument(
-        "--test_fraction",
-        type=float,
-        default=0.2,
-        help="Fraction of tasks for test set",
-    )
-    parser.add_argument(
-        "--split_seed",
-        type=int,
-        default=0,
-        help="Random seed for train/test split",
-    )
-    parser.add_argument(
-        "--model_type",
-        type=str,
-        default="1pl",
-        choices=["1pl", "2pl"],
-        help="IRT model type",
-    )
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        default=2000,
-        help="Training epochs",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force retrain even if cached model exists",
-    )
-    parser.add_argument(
-        "--dry_run",
-        action="store_true",
-        help="Show what would be done without training",
-    )
-    args = parser.parse_args()
-
-    # Resolve paths relative to ROOT
-    responses_path = ROOT / args.responses_path
-    output_dir = ROOT / args.output_dir
-
-    get_or_train_split_irt(
-        responses_path=responses_path,
-        output_base=output_dir,
-        test_fraction=args.test_fraction,
-        split_seed=args.split_seed,
-        model_type=args.model_type,
-        epochs=args.epochs,
-        force_retrain=args.force,
-        dry_run=args.dry_run,
-    )
-
-
-if __name__ == "__main__":
-    main()

@@ -98,8 +98,6 @@ class ExperimentData:
         return list(self.train_abilities.index)
 
 
-# Keep alias for backwards compatibility with existing code
-
 def _load_abilities(abilities_path: Path) -> pd.DataFrame:
     """Load agent abilities from IRT model."""
     df = pd.read_csv(abilities_path, index_col=0)

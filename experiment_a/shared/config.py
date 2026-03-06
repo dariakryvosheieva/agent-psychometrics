@@ -115,7 +115,6 @@ class ExperimentAConfig:
     items_path: Path = Path("")
     responses_path: Path = Path("")
     output_dir: Path = Path("")
-    test_fraction: float = 0.2
     split_seed: int = 0
     embeddings_path: Optional[Path] = None
     ridge_alphas: List[float] = field(
