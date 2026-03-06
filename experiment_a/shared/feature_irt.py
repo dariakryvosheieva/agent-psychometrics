@@ -11,12 +11,28 @@ import itertools
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
 from experiment_ab_shared.dataset import ExperimentData
 from experiment_ab_shared.evaluator import compute_irt_probability
 from experiment_ab_shared.feature_source import TaskFeatureSource, GroupedFeatureSource
+
+
+
+def _empirical_ability_init(
+    agent_ids: List[str],
+    responses_binary: Dict[str, Dict[str, int]],
+) -> np.ndarray:
+    """Empirical agent ability initialisation from per-agent success rates (logit scale)."""
+    eps = 1e-3
+    init = np.zeros(len(agent_ids), dtype=np.float32)
+    for i, agent_id in enumerate(agent_ids):
+        agent_resp = responses_binary.get(agent_id, {})
+        total = len(agent_resp)
+        if total > 0:
+            acc = max(eps, min(1 - eps, sum(agent_resp.values()) / total))
+            init[i] = np.log(acc / (1 - acc))
+    return init
 
 
 def feature_irt_predictor_factory(source_name, source, config):
@@ -188,6 +204,36 @@ class JointTrainingCVPredictor:
             'agent_ids_with_responses': list(responses_binary.keys()),
         }
 
+    def _build_response_tensor(
+        self,
+        agent_ids_with_responses: List[str],
+        task_ids: List[str],
+        responses_binary: Dict[str, Dict[str, int]],
+    ):
+        """Build response matrix tensor and mask for IRT training/evaluation.
+
+        Args:
+            agent_ids_with_responses: Ordered list of agent IDs.
+            task_ids: Ordered list of task IDs.
+            responses_binary: Response data {agent_id: {task_id: 0|1}}.
+
+        Returns:
+            Tuple of (response_tensor, mask) where response_tensor is float32
+            with NaN for missing entries and mask is the boolean observed-entry mask.
+        """
+        import torch
+
+        n_agents = len(agent_ids_with_responses)
+        n_tasks = len(task_ids)
+        response_matrix = np.full((n_agents, n_tasks), np.nan)
+        for i, agent_id in enumerate(agent_ids_with_responses):
+            for j, task_id in enumerate(task_ids):
+                if task_id in responses_binary.get(agent_id, {}):
+                    response_matrix[i, j] = responses_binary[agent_id][task_id]
+        response_tensor = torch.tensor(response_matrix, dtype=torch.float32)
+        mask = ~torch.isnan(response_tensor)
+        return response_tensor, mask
+
     def _fit_single(
         self,
         features_scaled: np.ndarray,
@@ -213,8 +259,6 @@ class JointTrainingCVPredictor:
 
         agent_ids_with_responses = prepared_data['agent_ids_with_responses']
         responses_binary = prepared_data['responses_binary']
-        n_agents = len(agent_ids_with_responses)
-        n_tasks = len(task_ids)
         device = "cpu"
 
         # Prepare per-group L2 weights and slices for grouped sources
@@ -227,43 +271,17 @@ class JointTrainingCVPredictor:
             group_slices = None
             group_l2_weights = None
 
-        # Build response matrix
-        response_matrix = np.full((n_agents, n_tasks), np.nan)
-        for i, agent_id in enumerate(agent_ids_with_responses):
-            for j, task_id in enumerate(task_ids):
-                if task_id in responses_binary.get(agent_id, {}):
-                    response_matrix[i, j] = responses_binary[agent_id][task_id]
+        response_tensor, mask = self._build_response_tensor(
+            agent_ids_with_responses, task_ids, responses_binary
+        )
 
-        response_tensor = torch.tensor(response_matrix, dtype=torch.float32, device=device)
-        mask = ~torch.isnan(response_tensor)
+        # Agent abilities always initialised from empirical success rates
+        theta_init = _empirical_ability_init(agent_ids_with_responses, responses_binary)
 
-        # Compute empirical task pass rate for initialization
-        eps = 1e-3
-        task_difficulty_init = np.zeros(n_tasks)
-        for j, task_id in enumerate(task_ids):
-            successes = sum(
-                1 for r in responses_binary.values() if r.get(task_id, None) == 1
-            )
-            total = sum(1 for r in responses_binary.values() if task_id in r)
-            if total > 0:
-                acc = max(eps, min(1 - eps, successes / total))
-                task_difficulty_init[j] = -np.log(acc / (1 - acc))
-
-        # Compute empirical agent ability
-        theta_init = np.zeros(n_agents, dtype=np.float32)
-        for i, agent_id in enumerate(agent_ids_with_responses):
-            agent_resp = responses_binary.get(agent_id, {})
-            correct = sum(agent_resp.values())
-            total = len(agent_resp)
-            if total > 0:
-                acc = max(eps, min(1 - eps, correct / total))
-                theta_init[i] = np.log(acc / (1 - acc))
-
-        # Warm-start feature weights via Ridge regression
-        ridge = Ridge(alpha=1.0)
-        ridge.fit(features_scaled, task_difficulty_init)
-        w_init = ridge.coef_.astype(np.float32)
-        bias_init = float(ridge.intercept_)
+        # Small random init for feature weights; zero bias
+        n_features = features_scaled.shape[1]
+        w_init = (np.random.randn(n_features) * 0.01).astype(np.float32)
+        bias_init = 0.0
 
         # Convert to PyTorch tensors
         features_tensor = torch.tensor(features_scaled, dtype=torch.float32, device=device)
@@ -359,21 +377,14 @@ class JointTrainingCVPredictor:
         if not agent_ids_with_responses:
             return float('inf')
 
-        n_agents = len(agent_ids_with_responses)
-        n_tasks = len(task_ids)
         device = "cpu"
 
         # Compute difficulties
         diff = features_scaled @ weights + bias
 
-        response_matrix = np.full((n_agents, n_tasks), np.nan)
-        for i, agent_id in enumerate(agent_ids_with_responses):
-            for j, task_id in enumerate(task_ids):
-                if task_id in responses_binary.get(agent_id, {}):
-                    response_matrix[i, j] = responses_binary[agent_id][task_id]
-
-        response_tensor = torch.tensor(response_matrix, dtype=torch.float32, device=device)
-        mask = ~torch.isnan(response_tensor)
+        response_tensor, mask = self._build_response_tensor(
+            agent_ids_with_responses, task_ids, responses_binary
+        )
 
         if mask.sum() == 0:
             return float('inf')

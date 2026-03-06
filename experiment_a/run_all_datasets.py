@@ -271,7 +271,6 @@ def main():
         action="store_true",
         help="Use Feature-IRT (joint training) instead of Ridge regression.",
     )
-
     args = parser.parse_args()
 
     # Filter datasets if specified
