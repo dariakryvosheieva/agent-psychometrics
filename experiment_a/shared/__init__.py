@@ -14,7 +14,7 @@ from experiment_a.shared.cross_validation import (
     k_fold_split_tasks,
     evaluate_predictor_cv,
 )
-from experiment_a.shared.baselines import (
+from experiment_a.shared.difficulty_predictors import (
     ConstantPredictor,
     OraclePredictor,
     DifficultyPredictorAdapter,
@@ -34,7 +34,7 @@ __all__ = [
     "CrossValidationResult",
     "k_fold_split_tasks",
     "evaluate_predictor_cv",
-    # Baseline predictors
+    # Difficulty predictors
     "ConstantPredictor",
     "OraclePredictor",
     "DifficultyPredictorAdapter",

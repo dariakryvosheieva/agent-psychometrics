@@ -1,11 +1,11 @@
-"""Baseline predictors and adapters for Experiment A evaluation.
+"""Difficulty-based CVPredictor implementations for Experiment A.
 
 All predictors implement the CVPredictor protocol from cross_validation.py,
 allowing them to be used with the unified cross-validation framework.
 
 This module provides:
 1. DifficultyPredictorAdapter - Wraps any DifficultyPredictorBase to implement CVPredictor
-2. ConstantPredictor - Predicts using mean training difficulty
+2. ConstantPredictor - Predicts using mean training difficulty (baseline)
 3. OraclePredictor - Uses true IRT difficulties (upper bound)
 """
 

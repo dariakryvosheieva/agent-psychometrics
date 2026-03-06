@@ -37,7 +37,7 @@ from experiment_a.shared.cross_validation import (
     evaluate_predictor_cv,
     CrossValidationResult,
 )
-from experiment_a.shared.baselines import (
+from experiment_a.shared.difficulty_predictors import (
     ConstantPredictor,
     OraclePredictor,
     DifficultyPredictorAdapter,
