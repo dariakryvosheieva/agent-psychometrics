@@ -1,8 +1,7 @@
 """Abstract dataset interface for Experiment A across different benchmarks.
 
 This module provides:
-- ExperimentData: Base class for datasets
-- BinaryExperimentData: For binary outcomes (0/1 per agent-task pair)
+- ExperimentData: Dataset with binary outcomes (0/1 per agent-task pair)
 - load_dataset: Factory function to load any dataset type
 """
 
@@ -132,8 +131,6 @@ class ExperimentData:
 
 
 # Keep alias for backwards compatibility with existing code
-BinaryExperimentData = ExperimentData
-
 
 def _load_abilities(abilities_path: Path) -> pd.DataFrame:
     """Load agent abilities from IRT model."""

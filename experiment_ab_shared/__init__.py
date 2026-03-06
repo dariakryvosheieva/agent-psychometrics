@@ -8,7 +8,6 @@ This module provides the core abstractions for difficulty prediction:
 
 from experiment_ab_shared.dataset import (
     ExperimentData,
-    BinaryExperimentData,
     load_dataset,
     load_dataset_for_fold,
     stable_split_tasks,
@@ -38,7 +37,6 @@ from experiment_ab_shared.train_irt_split import (
 __all__ = [
     # Dataset
     "ExperimentData",
-    "BinaryExperimentData",
     "load_dataset",
     "load_dataset_for_fold",
     "stable_split_tasks",
