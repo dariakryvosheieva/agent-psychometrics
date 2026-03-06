@@ -76,7 +76,7 @@ Run with: `python -m experiment_a.run_all_datasets --feature_irt`
 
 ## Evaluation Protocol
 
-1. **Split tasks** (not agents) into train/test sets using deterministic hash-based splitting
+1. **Split tasks** (not agents) into train/test sets using k-fold cross-validation (sklearn)
 2. **Train IRT on train tasks only** to get uncontaminated ground truth difficulties
 3. **Train difficulty predictor** on train tasks using train-only IRT difficulties as targets
 4. **Predict difficulty** for test tasks
@@ -110,8 +110,8 @@ class CVPredictor(Protocol):
 
 | File | Purpose |
 |------|---------|
-| `dataset.py` | `ExperimentData` ABC with `BinaryExperimentData`, `load_dataset()` |
-| `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource` |
+| `dataset.py` | `ExperimentData`, `load_dataset_for_fold()` |
+| `feature_source.py` | `TaskFeatureSource` ABC with `EmbeddingFeatureSource`, `CSVFeatureSource`, `GroupedFeatureSource` |
 | `feature_predictor.py` | `DifficultyPredictorBase` ABC, `FeatureBasedPredictor`, `GroupedRidgePredictor` |
 | `evaluator.py` | `compute_irt_probability()`, `convert_numpy()` |
 
