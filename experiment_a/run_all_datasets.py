@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from experiment_a.shared.config import DATASET_DEFAULTS
+from experiment_a.config import DATASET_DEFAULTS
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,8 +46,8 @@ def run_single_dataset(
     Returns:
         Tuple of (dataset_display_name, results_dict).
     """
-    from experiment_a.shared.config import ExperimentAConfig
-    from experiment_a.shared.pipeline import cross_validate_all_predictors
+    from experiment_a.config import ExperimentAConfig
+    from experiment_a.pipeline import cross_validate_all_predictors
 
     try:
         config = ExperimentAConfig.for_dataset(dataset)
@@ -58,7 +58,7 @@ def run_single_dataset(
     # Set up coefficient extraction if requested
     diagnostics_extractors = None
     if coefficients:
-        from experiment_a.shared.coefficient_analysis import make_llm_coef_extractor
+        from experiment_a.coefficient_analysis import make_llm_coef_extractor
         diagnostics_extractors = make_llm_coef_extractor()
 
     # Run the experiment
@@ -71,7 +71,7 @@ def run_single_dataset(
 
         # Print coefficient analysis if requested
         if coefficients:
-            from experiment_a.shared.coefficient_analysis import (
+            from experiment_a.coefficient_analysis import (
                 print_coefficient_table,
                 save_coefficient_bar_chart,
             )
@@ -279,7 +279,7 @@ def main():
     # Resolve predictor factory
     predictor_factory = None
     if args.feature_irt:
-        from experiment_a.shared.feature_irt import feature_irt_predictor_factory
+        from experiment_a.feature_irt import feature_irt_predictor_factory
         predictor_factory = feature_irt_predictor_factory
 
     training_method = "Feature-IRT (joint training)" if args.feature_irt else "Ridge regression"

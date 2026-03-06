@@ -74,7 +74,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                         CV PREDICTOR PROTOCOL                                    │
-│                     (experiment_a/shared/cross_validation.py)                    │
+│                     (experiment_a/cross_validation.py)                    │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                  │
 │  CVPredictor (Protocol)                                                          │
@@ -126,7 +126,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                          CROSS-VALIDATION                                        │
-│                    (experiment_a/shared/cross_validation.py)                     │
+│                    (experiment_a/cross_validation.py)                     │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                  │
 │  k_fold_split_tasks(task_ids, k=5) → [(train_ids, test_ids), ...]               │
@@ -150,7 +150,7 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                         PIPELINE ORCHESTRATION                                   │
-│                       (experiment_a/shared/pipeline.py)                          │
+│                       (experiment_a/pipeline.py)                          │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                  │
 │  cross_validate_all_predictors(config):                                           │
@@ -219,9 +219,9 @@ This document describes the class hierarchy and data flow for Experiment A (Prio
 | Component | File |
 |-----------|------|
 | Entry point | `run_all_datasets.py` |
-| Pipeline orchestration | `shared/pipeline.py` |
-| CV framework | `shared/cross_validation.py` |
-| Baselines/Oracle | `shared/baselines.py` |
+| Pipeline orchestration | `pipeline.py` |
+| CV framework | `cross_validation.py` |
+| Baselines/Oracle | `difficulty_predictors.py` |
 | Feature sources | `../experiment_ab_shared/feature_source.py` |
 | Predictors | `../experiment_ab_shared/feature_predictor.py` |
 | Dataset classes | `../experiment_ab_shared/dataset.py` |

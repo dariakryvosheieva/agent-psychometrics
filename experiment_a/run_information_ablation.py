@@ -26,8 +26,8 @@ import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
-from experiment_a.shared.config import ExperimentAConfig
-from experiment_a.shared.pipeline import cross_validate_all_predictors
+from experiment_a.config import ExperimentAConfig
+from experiment_a.pipeline import cross_validate_all_predictors
 
 
 ROOT = Path(__file__).resolve().parents[1]

@@ -1,4 +1,4 @@
-"""Shared pipeline for running Experiment A across different datasets.
+"""Pipeline for running Experiment A across different datasets.
 
 This module provides the common evaluation pipeline that all datasets use.
 The experiments differ only in:
@@ -31,17 +31,17 @@ from experiment_ab_shared.dataset import (
     _load_binary_responses,
 )
 
-from experiment_a.shared.cross_validation import (
+from experiment_a.cross_validation import (
     k_fold_split_tasks,
     evaluate_predictor_cv,
     CrossValidationResult,
 )
-from experiment_a.shared.difficulty_predictors import (
+from experiment_a.difficulty_predictors import (
     ConstantPredictor,
     OraclePredictor,
     DifficultyPredictorAdapter,
 )
-from experiment_a.shared.cross_validation import CVPredictor
+from experiment_a.cross_validation import CVPredictor
 
 
 @dataclass

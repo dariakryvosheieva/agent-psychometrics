@@ -115,14 +115,14 @@ class CVPredictor(Protocol):
 | `feature_predictor.py` | `DifficultyPredictorBase` ABC, `FeatureBasedPredictor`, `GroupedRidgePredictor` |
 | `evaluator.py` | `compute_irt_probability()`, `convert_numpy()` |
 
-**`experiment_a/shared/`** - Experiment A orchestration:
+**`experiment_a/`** - Experiment A orchestration:
 
 | File | Purpose |
 |------|---------|
 | `config.py` | `ExperimentAConfig`, `DATASET_DEFAULTS` registry |
 | `pipeline.py` | `CVPredictorConfig`, `cross_validate_all_predictors()`, `build_cv_predictors()` |
 | `cross_validation.py` | `CVPredictor` protocol, `evaluate_predictor_cv()`, `k_fold_split_tasks()` |
-| `baselines.py` | `OraclePredictor`, `ConstantPredictor`, `DifficultyPredictorAdapter` |
+| `difficulty_predictors.py` | `OraclePredictor`, `ConstantPredictor`, `DifficultyPredictorAdapter` |
 | `feature_irt.py` | `JointTrainingCVPredictor` (with per-source L2 regularization), `feature_irt_predictor_factory()` |
 | `coefficient_analysis.py` | `extract_llm_coefficients()`, `print_coefficient_table()`, `save_coefficient_bar_chart()` |
 

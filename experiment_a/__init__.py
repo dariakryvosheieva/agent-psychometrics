@@ -7,7 +7,7 @@ Entry point:
 - python -m experiment_a.run_all_datasets
 """
 
-# Re-export core classes from shared modules for convenience
+# Re-export core classes for convenience
 from experiment_ab_shared import (
     DifficultyPredictorBase,
     FeatureBasedPredictor,
@@ -15,15 +15,25 @@ from experiment_ab_shared import (
     CSVFeatureSource,
 )
 
-from experiment_a.shared import (
+from experiment_a.pipeline import (
+    CVPredictorConfig,
+    build_cv_predictors,
+    cross_validate_all_predictors,
+)
+from experiment_a.cross_validation import (
     CVPredictor,
     CrossValidationResult,
+    k_fold_split_tasks,
+    evaluate_predictor_cv,
+)
+from experiment_a.difficulty_predictors import (
     ConstantPredictor,
     OraclePredictor,
     DifficultyPredictorAdapter,
+)
+from experiment_a.feature_irt import (
     JointTrainingCVPredictor,
-    evaluate_predictor_cv,
-    k_fold_split_tasks,
+    feature_irt_predictor_factory,
 )
 
 __all__ = [
@@ -32,13 +42,19 @@ __all__ = [
     "FeatureBasedPredictor",
     "EmbeddingFeatureSource",
     "CSVFeatureSource",
-    # From experiment_a.shared
+    # Pipeline
+    "CVPredictorConfig",
+    "build_cv_predictors",
+    "cross_validate_all_predictors",
+    # Cross-validation
     "CVPredictor",
     "CrossValidationResult",
     "ConstantPredictor",
     "OraclePredictor",
     "DifficultyPredictorAdapter",
+    # Feature-IRT
     "JointTrainingCVPredictor",
+    "feature_irt_predictor_factory",
     "evaluate_predictor_cv",
     "k_fold_split_tasks",
 ]
