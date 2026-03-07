@@ -58,10 +58,12 @@ if [ -z "$SECURITY_GROUP" ]; then
             --group-names "$SG_NAME" \
             --query 'SecurityGroups[0].GroupId' --output text)
 
+    MY_IP="$(curl -s https://checkip.amazonaws.com)/32"
+    echo "Restricting SSH to current IP: $MY_IP"
     aws ec2 authorize-security-group-ingress \
         --region "$REGION" \
         --group-id "$SECURITY_GROUP" \
-        --protocol tcp --port 22 --cidr 0.0.0.0/0 2>/dev/null || true
+        --protocol tcp --port 22 --cidr "$MY_IP" 2>/dev/null || true
     echo "Security group: $SECURITY_GROUP"
 fi
 
@@ -108,10 +110,14 @@ echo "  4. Log out and back in (for Docker group), then:"
 echo "     cd model_irt && source .venv/bin/activate && bash aws_setup/run_all_auditor.sh"
 echo ""
 echo "=== IMPORTANT: Cleanup when done ==="
-echo "This is a PERSISTENT spot instance. It will auto-restart if stopped."
-echo "To fully stop billing, you must TERMINATE (not just stop) the instance:"
+echo "This is a PERSISTENT spot request. Terminating alone will NOT stop billing."
+echo "You must cancel the spot request first, then terminate the instance:"
 echo ""
+echo "  # 1. Cancel the spot request"
+echo "  SPOT_REQ_ID=\$(aws ec2 describe-instances --region $REGION --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].SpotInstanceRequestId' --output text)"
+echo "  aws ec2 cancel-spot-instance-requests --region $REGION --spot-instance-request-ids \$SPOT_REQ_ID"
+echo ""
+echo "  # 2. Terminate the instance"
 echo "  aws ec2 terminate-instances --region $REGION --instance-ids $INSTANCE_ID"
 echo ""
-echo "This terminates the instance, deletes the EBS volume, and cancels the spot request."
 echo "Make sure to scp your results back BEFORE terminating."
