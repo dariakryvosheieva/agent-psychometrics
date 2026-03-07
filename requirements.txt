@@ -9,3 +9,8 @@ ordered-set
 matplotlib
 rich
 typer
+inspect-ai
+inspect-evals
+datasets
+anthropic
+pyyaml

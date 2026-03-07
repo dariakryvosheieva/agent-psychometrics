@@ -32,13 +32,7 @@ source .venv/bin/activate
 # Install dependencies
 echo "Installing Python dependencies..."
 pip install --upgrade pip
-pip install -r requirements.txt 2>/dev/null || pip install \
-    inspect-ai \
-    inspect-evals \
-    datasets \
-    pandas \
-    pyyaml \
-    anthropic
+pip install -r requirements.txt
 
 # Clone terminal-bench-2 repo (needed for Terminal Bench task metadata)
 if [ ! -d "terminal-bench-2" ]; then
