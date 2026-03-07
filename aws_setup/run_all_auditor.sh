@@ -13,8 +13,16 @@
 
 set -euo pipefail
 
+S3_BUCKET="fulcrum-auditor-agent-results-2026"
+
 echo "=== Running V4 auditor on all datasets ==="
 echo "Start time: $(date)"
+echo ""
+
+# Download any existing results from S3 (for resuming after a previous run)
+echo "=== Downloading existing results from S3 ==="
+mkdir -p chris_output/auditor_features
+aws s3 sync "s3://$S3_BUCKET/auditor_features/" chris_output/auditor_features/ || true
 echo ""
 
 # GSO — 102 tasks, images share base layers, can do all at once
@@ -24,6 +32,7 @@ python -m llm_judge_feature_extraction.auditor_agent.run_auditor \
     --batch_size 50 \
     --max_connections 30
 echo "GSO complete: $(date)"
+docker system prune -af
 echo ""
 
 # Terminal Bench — 89 tasks, different repos per task
@@ -33,6 +42,7 @@ python -m llm_judge_feature_extraction.auditor_agent.run_auditor \
     --batch_size 44 \
     --max_connections 30
 echo "Terminal Bench complete: $(date)"
+docker system prune -af
 echo ""
 
 # SWE-bench Pro — 731 tasks, largest dataset
@@ -42,6 +52,7 @@ python -m llm_judge_feature_extraction.auditor_agent.run_auditor \
     --batch_size 50 \
     --max_connections 30
 echo "SWE-bench Pro complete: $(date)"
+docker system prune -af
 echo ""
 
 # SWE-bench Verified — 500 tasks, re-extract with V4
@@ -57,7 +68,6 @@ echo "=== All datasets complete ==="
 echo "End time: $(date)"
 
 # Upload results to S3 and self-terminate
-S3_BUCKET="fulcrum-auditor-agent-results-2026"
 echo ""
 echo "=== Uploading results to S3 ==="
 aws s3 sync chris_output/auditor_features/ "s3://$S3_BUCKET/auditor_features/"
