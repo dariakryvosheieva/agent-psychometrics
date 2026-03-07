@@ -117,7 +117,7 @@ Environment-level features (8 features) are extracted via an agentic pipeline us
 
 ```bash
 # Run auditor on SWE-bench Verified
-inspect eval llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4 \
+inspect eval llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4_swebench_verified \
     --model anthropic/claude-opus-4-6 --limit 1
 ```
 

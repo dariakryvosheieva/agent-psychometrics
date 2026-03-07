@@ -45,7 +45,7 @@ from llm_judge_feature_extraction.auditor_agent.parse_outputs import (
 # Dataset configurations: maps dataset name to inspect task path, ID source, etc.
 DATASET_CONFIGS = {
     "swebench_verified": {
-        "inspect_task": "llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4",
+        "inspect_task": "llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4_swebench_verified",
         "hf_dataset": "princeton-nlp/SWE-bench_Verified",
         "id_field": "instance_id",
         "log_dir_name": "swebench_verified_v4",

@@ -9,7 +9,7 @@ them on difficulty-related axes. Supports:
 
 Usage:
     # SWE-bench Verified
-    inspect eval llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4 \
+    inspect eval llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4_swebench_verified \
         --model anthropic/claude-opus-4-6 --limit 1
 
     # SWE-bench Pro
@@ -128,7 +128,7 @@ def load_hf_samples_with_sandbox(
 # =============================================================================
 
 @task
-def auditor_task_v4(
+def auditor_task_v4_swebench_verified(
     dataset: str = "princeton-nlp/SWE-bench_Verified",
     split: str = "test",
     task_type: str = "swebench_verified",
