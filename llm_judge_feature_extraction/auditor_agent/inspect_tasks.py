@@ -102,7 +102,7 @@ def auditor_task_v4_swebench_verified(
     split: str = "test",
     task_type: str = "swebench_verified",
     max_attempts: int = 1,
-    message_limit: int = 50,
+    message_limit: int = 100,
 ) -> Task:
     """Run the V4 auditor agent on SWE-bench Verified tasks.
 
@@ -125,7 +125,7 @@ def auditor_task_v4_swebench_verified(
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type=task_type)),
-        tools=[bash(timeout=120)],
+        tools=[bash(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
@@ -192,14 +192,14 @@ def load_swebench_pro_samples(
 def auditor_task_v4_swebench_pro(
     split: str = "test",
     max_attempts: int = 1,
-    message_limit: int = 50,
+    message_limit: int = 100,
 ) -> Task:
     """Run V4 auditor agent on SWE-bench Pro tasks."""
     samples = load_swebench_pro_samples(split=split)
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type="swebench_pro")),
-        tools=[bash(timeout=120)],
+        tools=[bash(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
@@ -307,7 +307,7 @@ def load_terminalbench_samples(
 @task
 def auditor_task_v4_terminalbench(
     max_attempts: int = 1,
-    message_limit: int = 50,
+    message_limit: int = 100,
 ) -> Task:
     """Run V4 auditor agent on Terminal Bench tasks."""
     samples = load_terminalbench_samples()
@@ -316,7 +316,7 @@ def auditor_task_v4_terminalbench(
         init=system_message(
             build_auditor_system_prompt(task_type="terminalbench")
         ),
-        tools=[bash(timeout=120)],
+        tools=[bash(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
@@ -384,14 +384,14 @@ def load_gso_samples(
 def auditor_task_v4_gso(
     split: str = "test",
     max_attempts: int = 1,
-    message_limit: int = 50,
+    message_limit: int = 100,
 ) -> Task:
     """Run V4 auditor agent on GSO tasks."""
     samples = load_gso_samples(split=split)
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type="gso")),
-        tools=[bash(timeout=120)],
+        tools=[bash(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",

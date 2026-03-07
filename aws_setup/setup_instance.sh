@@ -14,12 +14,28 @@ set -euo pipefail
 
 echo "=== Setting up EC2 instance for auditor extraction ==="
 
-# Install Docker
+# Install Docker + Docker Compose plugin
 echo "Installing Docker..."
 sudo dnf install -y docker
-sudo systemctl start docker
 sudo systemctl enable docker
 sudo usermod -aG docker ec2-user
+
+# Expand Docker network address pool (default pool is too small for 30+ containers)
+echo "Configuring Docker network pool..."
+sudo tee /etc/docker/daemon.json > /dev/null << 'DAEMONJSON'
+{
+  "default-address-pools": [
+    {"base": "172.17.0.0/12", "size": 24}
+  ]
+}
+DAEMONJSON
+sudo systemctl start docker
+
+echo "Installing Docker Compose plugin..."
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+    -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 # Install Python 3.12 and dev tools
 echo "Installing Python..."
@@ -54,6 +70,19 @@ if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
     echo "API key saved to ~/.bashrc"
 else
     echo "ANTHROPIC_API_KEY already set"
+fi
+
+# Prompt for HuggingFace token (needed for gated datasets like GSO)
+if [ -z "${HF_TOKEN:-}" ]; then
+    echo ""
+    echo "Enter your HuggingFace token (input hidden):"
+    read -rs HF_KEY
+    echo ""
+    echo "export HF_TOKEN='${HF_KEY}'" >> ~/.bashrc
+    export HF_TOKEN="${HF_KEY}"
+    echo "HF token saved to ~/.bashrc"
+else
+    echo "HF_TOKEN already set"
 fi
 
 echo ""
