@@ -74,9 +74,9 @@ def run_docker_cleanup(remove_images: bool = True):
     """
     print("\n--- Cleaning Docker state ---")
 
-    # First, stop any running containers using swebench images
+    # Stop all running containers
     result = subprocess.run(
-        ["docker", "ps", "-q", "--filter", "ancestor=swebench"],
+        ["docker", "ps", "-q"],
         capture_output=True,
         text=True,
     )
