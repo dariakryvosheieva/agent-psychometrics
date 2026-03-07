@@ -294,6 +294,12 @@ def main():
         action="store_true",
         help="Skip Docker cleanup between batches",
     )
+    parser.add_argument(
+        "--s3_bucket",
+        type=str,
+        default=None,
+        help="S3 bucket to sync incremental CSV to after each batch",
+    )
 
     args = parser.parse_args()
 
@@ -379,6 +385,17 @@ def main():
         append_batch_to_incremental_csv(
             batch_log_dir, args.log_dir, expected_features
         )
+
+        # Sync incremental CSV to S3 after each batch
+        if args.s3_bucket:
+            incremental_csv = args.log_dir / INCREMENTAL_CSV_NAME
+            if incremental_csv.exists():
+                s3_dest = f"s3://{args.s3_bucket}/{incremental_csv}"
+                print(f"Syncing to {s3_dest}")
+                subprocess.run(
+                    ["aws", "s3", "cp", str(incremental_csv), s3_dest],
+                    check=False,
+                )
 
         # Cleanup between batches
         if not args.skip_cleanup:
