@@ -1,7 +1,7 @@
 """Parse auditor agent outputs and extract features to CSV.
 
 This module reads Inspect AI log files from auditor runs and extracts
-the 6 difficulty-related features into a CSV file for use in Experiment A.
+the 8 difficulty-related features into a CSV file for use in Experiment A.
 
 Usage:
     # Parse logs and create CSV
@@ -22,7 +22,7 @@ import pandas as pd
 from inspect_ai.log import read_eval_log
 
 # Add project root to path
-_project_root = Path(__file__).parent.parent.parent.parent
+_project_root = Path(__file__).parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 

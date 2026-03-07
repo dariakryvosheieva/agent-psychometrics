@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 
 # Add project root to path so we can import project modules
-_project_root = Path(__file__).parent.parent.parent.parent
+_project_root = Path(__file__).parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
@@ -217,8 +217,8 @@ def auditor_task_v4_swebench_pro(
 
 TERMINALBENCH_DOCKER_REPO = "xiangyangli"
 TERMINALBENCH_DOCKER_TAG = "20260204"
-DEFAULT_TB_ITEMS_PATH = Path("data/terminalbench/irt/1d_1pl/items.csv")
-DEFAULT_TB_REPO_PATH = Path("terminal-bench-2")
+DEFAULT_TB_ITEMS_PATH = _project_root / "data/terminalbench/irt/1d_1pl/items.csv"
+DEFAULT_TB_REPO_PATH = _project_root / "terminal-bench-2"
 
 
 def _get_terminalbench_image(task_id: str) -> str:
