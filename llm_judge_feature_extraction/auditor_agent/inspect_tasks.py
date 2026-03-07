@@ -67,6 +67,7 @@ def load_swebench_verified_samples(
     samples = hf_dataset(
         path=dataset,
         split=split,
+        revision="c104f840cc67f8b6eec6f759ebc8b2693d585d4a",
         sample_fields=FieldSpec(
             input="problem_statement",
             id="instance_id",
@@ -160,6 +161,7 @@ def load_swebench_pro_samples(
     samples = hf_dataset(
         path=dataset,
         split=split,
+        revision="7ab5114912baf22bb098818e604c02fe7ad2c11f",
         sample_fields=FieldSpec(
             input="problem_statement",
             id="instance_id",
@@ -353,6 +355,7 @@ def load_gso_samples(
     samples = hf_dataset(
         path=dataset,
         split=split,
+        revision="00b25e92aba52f9bab4026f1ecb511df40e98c67",
         sample_fields=FieldSpec(
             input="prob_script",
             id="instance_id",

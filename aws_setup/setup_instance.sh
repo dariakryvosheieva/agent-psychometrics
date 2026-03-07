@@ -5,6 +5,7 @@
 #
 # Usage:
 #   ssh -i ~/.ssh/auditor-key.pem ec2-user@<IP>
+#   sudo dnf install -y git
 #   git clone https://github.com/<your-org>/model_irt.git
 #   cd model_irt
 #   bash aws_setup/setup_instance.sh
