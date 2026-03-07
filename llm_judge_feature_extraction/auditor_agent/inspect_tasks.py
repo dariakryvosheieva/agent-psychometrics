@@ -52,9 +52,7 @@ from llm_judge_feature_extraction.sandbox_utils import (
     get_swebench_image_name,
     get_sandbox_config,
 )
-from llm_judge_feature_extraction.auditor_agent.prompts_v4 import (
-    build_auditor_system_prompt_v4,
-)
+from llm_judge_feature_extraction.task_context import build_auditor_system_prompt
 
 
 # =============================================================================
@@ -157,7 +155,7 @@ def auditor_task_v4(
     samples = load_hf_samples_with_sandbox(dataset, split)
 
     auditor_agent = basic_agent(
-        init=system_message(build_auditor_system_prompt_v4(task_type=task_type)),
+        init=system_message(build_auditor_system_prompt(task_type=task_type)),
         tools=[bash(timeout=120)],
         max_attempts=max_attempts,
         message_limit=message_limit,
@@ -230,7 +228,7 @@ def auditor_task_v4_swebench_pro(
     samples = load_swebench_pro_samples(split=split)
 
     auditor_agent = basic_agent(
-        init=system_message(build_auditor_system_prompt_v4(task_type="swebench_pro")),
+        init=system_message(build_auditor_system_prompt(task_type="swebench_pro")),
         tools=[bash(timeout=120)],
         max_attempts=max_attempts,
         message_limit=message_limit,
@@ -346,7 +344,7 @@ def auditor_task_v4_terminalbench(
 
     auditor_agent = basic_agent(
         init=system_message(
-            build_auditor_system_prompt_v4(task_type="terminalbench")
+            build_auditor_system_prompt(task_type="terminalbench")
         ),
         tools=[bash(timeout=120)],
         max_attempts=max_attempts,
@@ -421,7 +419,7 @@ def auditor_task_v4_gso(
     samples = load_gso_samples(split=split)
 
     auditor_agent = basic_agent(
-        init=system_message(build_auditor_system_prompt_v4(task_type="gso")),
+        init=system_message(build_auditor_system_prompt(task_type="gso")),
         tools=[bash(timeout=120)],
         max_attempts=max_attempts,
         message_limit=message_limit,

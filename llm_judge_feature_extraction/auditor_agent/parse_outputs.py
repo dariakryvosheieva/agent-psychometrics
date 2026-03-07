@@ -26,9 +26,10 @@ _project_root = Path(__file__).parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from llm_judge_feature_extraction.auditor_agent.prompts_v4 import get_feature_names_v4
+from llm_judge_feature_extraction.feature_registry import get_features_by_level
+from llm_judge_feature_extraction.prompt_config import InfoLevel
 
-EXPECTED_FEATURES_V4 = get_feature_names_v4()
+EXPECTED_FEATURES_V4 = [f.name for f in get_features_by_level(InfoLevel.ENVIRONMENT)]
 
 # Default to V4 (current version)
 EXPECTED_FEATURES = EXPECTED_FEATURES_V4

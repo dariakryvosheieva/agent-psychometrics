@@ -1,10 +1,11 @@
 #!/bin/bash
 # Set up an EC2 instance for auditor agent extraction.
 #
-# Run this ONCE after SSH-ing into the instance and scp-ing the repo.
+# Run this ONCE after SSH-ing into the instance.
 #
 # Usage:
 #   ssh -i ~/.ssh/auditor-key.pem ec2-user@<IP>
+#   git clone https://github.com/<your-org>/model_irt.git
 #   cd model_irt
 #   bash aws_setup/setup_instance.sh
 
@@ -19,13 +20,13 @@ sudo systemctl start docker
 sudo systemctl enable docker
 sudo usermod -aG docker ec2-user
 
-# Install Python 3.11 and dev tools
+# Install Python 3.12 and dev tools
 echo "Installing Python..."
-sudo dnf install -y python3.11 python3.11-pip python3.11-devel git
+sudo dnf install -y python3.12 python3.12-pip python3.12-devel git
 
 # Create virtual environment
 echo "Creating Python virtual environment..."
-python3.11 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies

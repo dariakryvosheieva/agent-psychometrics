@@ -14,6 +14,7 @@ Usage:
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
+from llm_judge_feature_extraction.feature_registry import get_features_by_level
 from llm_judge_feature_extraction.prompt_config import InfoLevel
 
 
@@ -224,6 +225,12 @@ SWEBENCH_VERIFIED_CONTEXT = TaskContext(
             "This is a BUG FIX task in a Python repository. "
             "You only have access to the problem statement."
         ),
+        InfoLevel.ENVIRONMENT: (
+            "You are auditing a **bug-fix** task in a Python repository. "
+            "The /testbed directory contains the project codebase with a known bug. "
+            "The problem statement describes the bug, and there are failing tests "
+            "(FAIL_TO_PASS) that should pass after the fix."
+        ),
         InfoLevel.TEST: (
             "You are analyzing a SWE-bench Verified coding task to predict its difficulty. "
             "This is a BUG FIX task in a Python repository. "
@@ -253,6 +260,13 @@ SWEBENCH_PRO_CONTEXT = TaskContext(
             "This is a BUG FIX task in a Python repository. "
             "SWE-bench Pro contains more challenging tasks than standard SWE-bench. "
             "You only have access to the problem statement."
+        ),
+        InfoLevel.ENVIRONMENT: (
+            "You are auditing a **bug-fix** task in a Python repository. "
+            "The /testbed directory contains the project codebase with a known bug. "
+            "The problem statement describes the bug, and there are failing tests "
+            "(FAIL_TO_PASS) that should pass after the fix. "
+            "These are more challenging tasks than standard SWE-bench."
         ),
         InfoLevel.TEST: (
             "You are analyzing a SWE-bench Pro coding task to predict its difficulty. "
@@ -344,6 +358,12 @@ TERMINALBENCH_CONTEXT = TaskContext(
             "This task requires writing shell commands or scripts to accomplish a goal. "
             "You only have access to the task instruction."
         ),
+        InfoLevel.ENVIRONMENT: (
+            "You are auditing a **terminal automation** task in a sandboxed environment. "
+            "The task requires using command-line tools to accomplish a goal. "
+            "The environment may include pre-installed tools, configuration files, "
+            "and multi-service Docker setups."
+        ),
         InfoLevel.TEST: (
             "You are analyzing a TerminalBench terminal/shell task to predict its difficulty. "
             "This task requires writing shell commands or scripts to accomplish a goal. "
@@ -426,6 +446,12 @@ GSO_CONTEXT = TaskContext(
             "The goal is to make code run faster while maintaining correctness. "
             "You only have access to the task description."
         ),
+        InfoLevel.ENVIRONMENT: (
+            "You are auditing a **performance optimization** task in a software project. "
+            "The /testbed directory contains a codebase where specific code needs to be "
+            "optimized for speed. The task includes performance tests that measure "
+            "execution time before and after changes."
+        ),
         InfoLevel.TEST: (
             "You are analyzing a GSO (Software Optimization Benchmark) task to predict its difficulty. "
             "This is a PERFORMANCE OPTIMIZATION task, NOT a bug fix. "
@@ -467,3 +493,86 @@ def get_task_context(dataset: str) -> TaskContext:
             f"Available: {sorted(TASK_CONTEXTS.keys())}"
         )
     return TASK_CONTEXTS[dataset]
+
+
+# =============================================================================
+# Auditor agent prompt builder (ENVIRONMENT level)
+# =============================================================================
+
+def build_auditor_system_prompt(task_type: str = "swebench_verified") -> str:
+    """Build the system prompt for the auditor agent.
+
+    Reads ENVIRONMENT-level feature definitions from the feature registry and
+    the dataset-specific intro from the task context.
+
+    Args:
+        task_type: One of the registered dataset names.
+
+    Returns:
+        Complete system prompt string.
+
+    Raises:
+        KeyError: If task_type is not registered or lacks an ENVIRONMENT intro.
+    """
+    ctx = get_task_context(task_type)
+    task_context = ctx.system_intros[InfoLevel.ENVIRONMENT]
+    env_features = get_features_by_level(InfoLevel.ENVIRONMENT)
+
+    # Build feature descriptions from registry
+    features_text = "\n\n".join(
+        feat.get_scale_text("default") for feat in env_features
+    )
+
+    # Build example JSON
+    example_features = [
+        f'  "{feat.name}": {{"value": 3, "reasoning": "Brief explanation"}}'
+        for feat in env_features
+    ]
+    example_json = "{\n" + ",\n".join(example_features) + "\n}"
+
+    num_features = len(env_features)
+
+    return f"""You are a codebase auditor evaluating task environments for difficulty prediction. Your job is to explore the environment and rate it on {num_features} difficulty-related axes.
+
+## Task Context
+
+{task_context}
+
+## Your Task
+
+1. Explore the working directory to understand the project structure
+2. Read the problem statement (provided as input)
+3. Try to understand the scope and complexity of the task
+4. Check available tools, tests, and dependencies
+5. Rate the environment on the {num_features} axes below
+
+## Features to Assess (1-5 scale)
+
+{features_text}
+
+## Output Format
+
+After your exploration (use 3-8 tool calls), output your final assessment as a JSON object with exactly {num_features} features. Each feature should be an object with "value" (1-5 integer) and "reasoning" (brief explanation):
+
+```json
+{example_json}
+```
+
+**CRITICAL**: Your final message MUST contain a valid JSON object with all {num_features} features. Do not forget any features.
+
+## Tips
+
+- Start with `ls` or `find` to understand the project structure
+- Check for test files, configuration files, and dependency files
+- Look at file extensions to understand the tech stack
+- Use `wc -l` or `find . -type f | wc -l` to gauge codebase size
+- Check `requirements.txt`, `setup.py`, `Cargo.toml`, etc. for dependencies
+- Keep your exploration focused - aim for 3-8 tool calls
+
+## IMPORTANT: How to Complete
+
+After 3-8 exploration commands, you MUST call the `submit()` function with your JSON report.
+Do NOT try to solve the task - just audit and rate the environment.
+
+Now begin your audit. Start by exploring the working directory structure, then submit your ratings.
+"""

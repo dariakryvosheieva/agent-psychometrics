@@ -4,12 +4,8 @@ This module provides an LLM-based agent that explores task environments
 via Docker shell access and rates them on difficulty-related axes.
 """
 
-from llm_judge_feature_extraction.auditor_agent.prompts_v4 import (
-    build_auditor_system_prompt_v4,
-    get_feature_names_v4,
-)
+from llm_judge_feature_extraction.task_context import build_auditor_system_prompt
 
 __all__ = [
-    "build_auditor_system_prompt_v4",
-    "get_feature_names_v4",
+    "build_auditor_system_prompt",
 ]
