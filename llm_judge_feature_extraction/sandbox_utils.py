@@ -69,29 +69,12 @@ def get_sandbox_config(
     return str(config_file)
 
 
-def get_swebench_images() -> list[str]:
-    """Get list of currently loaded SWE-bench eval images."""
-    result = subprocess.run(
-        ["docker", "images", "--format", "{{.Repository}}:{{.Tag}}"],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        return []
-
-    images = []
-    for line in result.stdout.strip().split("\n"):
-        # Match any swebench image (eval or env)
-        if line and line.startswith("swebench/"):
-            images.append(line)
-    return images
-
 
 def run_docker_cleanup(remove_images: bool = True):
     """Clean up Docker state to free memory.
 
     Args:
-        remove_images: If True, remove SWE-bench eval images entirely (frees ~500MB per image)
+        remove_images: If True, remove all unused images (frees ~500MB per image)
     """
     print("\n--- Cleaning Docker state ---")
 
@@ -124,30 +107,15 @@ def run_docker_cleanup(remove_images: bool = True):
     if result.returncode == 0 and result.stdout.strip():
         print(f"  Volumes pruned")
 
-    # Remove SWE-bench images entirely
+    # Remove all unused images
     if remove_images:
-        swebench_images = get_swebench_images()
-        if swebench_images:
-            print(f"  Removing {len(swebench_images)} SWE-bench images...")
-            for image in swebench_images:
-                result = subprocess.run(
-                    ["docker", "rmi", "-f", image],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.returncode != 0:
-                    print(f"    Warning: Could not remove {image}: {result.stderr.strip()}")
-
-            # Verify removal
-            remaining = get_swebench_images()
-            if remaining:
-                print(f"  WARNING: {len(remaining)} images still remain!")
-                for img in remaining:
-                    print(f"    - {img}")
-            else:
-                print(f"  Successfully removed all {len(swebench_images)} images")
-        else:
-            print("  No SWE-bench images to remove")
+        result = subprocess.run(
+            ["docker", "image", "prune", "-af"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            print(f"  Images pruned: {result.stdout.strip().splitlines()[-1]}")
 
     # Final prune to clean up any dangling layers
     subprocess.run(
