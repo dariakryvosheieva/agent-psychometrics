@@ -67,6 +67,11 @@ if [ -z "$SECURITY_GROUP" ]; then
     echo "Security group: $SECURITY_GROUP"
 fi
 
+# Create S3 bucket for results
+S3_BUCKET="auditor-results-$(date +%Y%m%d-%H%M%S)"
+echo "Creating S3 bucket: $S3_BUCKET"
+aws s3 mb "s3://$S3_BUCKET" --region "$REGION"
+
 # Launch spot instance
 echo "Launching spot instance..."
 INSTANCE_ID=$(aws ec2 run-instances \
@@ -75,9 +80,10 @@ INSTANCE_ID=$(aws ec2 run-instances \
     --instance-type "$INSTANCE_TYPE" \
     --key-name "$KEY_NAME" \
     --security-group-ids "$SECURITY_GROUP" \
-    --instance-market-options '{"MarketType":"spot","SpotOptions":{"MaxPrice":"'"$SPOT_MAX_PRICE"'","SpotInstanceType":"persistent","InstanceInterruptionBehavior":"stop"}}' \
-    --block-device-mappings '[{"DeviceName":"/dev/xvda","Ebs":{"VolumeSize":'"$EBS_SIZE_GB"',"VolumeType":"gp3","Iops":3000,"Throughput":125}}]' \
-    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=auditor-agent}]' \
+    --instance-market-options '{"MarketType":"spot","SpotOptions":{"MaxPrice":"'"$SPOT_MAX_PRICE"'","SpotInstanceType":"one-time"}}' \
+    --instance-initiated-shutdown-behavior terminate \
+    --block-device-mappings '[{"DeviceName":"/dev/xvda","Ebs":{"VolumeSize":'"$EBS_SIZE_GB"',"VolumeType":"gp3","Iops":3000,"Throughput":125,"DeleteOnTermination":true}}]' \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=auditor-agent},{Key=S3Bucket,Value='"$S3_BUCKET"'}]' \
     --query 'Instances[0].InstanceId' \
     --output text)
 
@@ -107,17 +113,20 @@ echo "  1. SSH into the instance"
 echo "  2. git clone your repo:  git clone https://github.com/<your-org>/model_irt.git"
 echo "  3. cd model_irt && bash aws_setup/setup_instance.sh"
 echo "  4. Log out and back in (for Docker group), then:"
-echo "     cd model_irt && source .venv/bin/activate && bash aws_setup/run_all_auditor.sh"
+echo "     cd model_irt && source .venv/bin/activate"
+echo "     export S3_BUCKET=$S3_BUCKET"
+echo "     bash aws_setup/run_all_auditor.sh"
 echo ""
-echo "=== IMPORTANT: Cleanup when done ==="
-echo "This is a PERSISTENT spot request. Terminating alone will NOT stop billing."
-echo "You must cancel the spot request first, then terminate the instance:"
+echo "=== Auto-termination ==="
+echo "The instance will automatically upload results to S3 and terminate itself"
+echo "when run_all_auditor.sh completes. No manual cleanup needed."
 echo ""
-echo "  # 1. Cancel the spot request"
-echo "  SPOT_REQ_ID=\$(aws ec2 describe-instances --region $REGION --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].SpotInstanceRequestId' --output text)"
-echo "  aws ec2 cancel-spot-instance-requests --region $REGION --spot-instance-request-ids \$SPOT_REQ_ID"
+echo "S3 bucket: $S3_BUCKET"
+echo "Download results when done:"
+echo "  aws s3 sync s3://$S3_BUCKET/auditor_features/ ./auditor_features/"
 echo ""
-echo "  # 2. Terminate the instance"
+echo "Delete the S3 bucket when you no longer need the results:"
+echo "  aws s3 rb s3://$S3_BUCKET --force"
+echo ""
+echo "To manually terminate early:"
 echo "  aws ec2 terminate-instances --region $REGION --instance-ids $INSTANCE_ID"
-echo ""
-echo "Make sure to scp your results back BEFORE terminating."

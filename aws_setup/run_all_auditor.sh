@@ -55,12 +55,23 @@ echo ""
 
 echo "=== All datasets complete ==="
 echo "End time: $(date)"
-echo ""
-echo "Results:"
-echo "  chris_output/auditor_features/gso_v4/auditor_features_incremental.csv"
-echo "  chris_output/auditor_features/terminalbench_v4/auditor_features_incremental.csv"
-echo "  chris_output/auditor_features/swebench_pro_v4/auditor_features_incremental.csv"
-echo "  chris_output/auditor_features/swebench_verified_v4/auditor_features_incremental.csv"
-echo ""
-echo "scp them back with:"
-echo "  scp -i ~/.ssh/auditor-key.pem ec2-user@\$(curl -s ifconfig.me):~/model_irt/chris_output/auditor_features/*/auditor_features_incremental.csv ."
+
+# Upload results to S3 and self-terminate
+if [ -n "${S3_BUCKET:-}" ]; then
+    echo ""
+    echo "=== Uploading results to S3 ==="
+    aws s3 sync chris_output/auditor_features/ "s3://$S3_BUCKET/auditor_features/"
+    echo "Upload complete. Results in s3://$S3_BUCKET/auditor_features/"
+    echo ""
+    echo "=== Shutting down instance ==="
+    sudo shutdown -h now
+else
+    echo ""
+    echo "Results:"
+    echo "  chris_output/auditor_features/gso_v4/auditor_features_incremental.csv"
+    echo "  chris_output/auditor_features/terminalbench_v4/auditor_features_incremental.csv"
+    echo "  chris_output/auditor_features/swebench_pro_v4/auditor_features_incremental.csv"
+    echo "  chris_output/auditor_features/swebench_verified_v4/auditor_features_incremental.csv"
+    echo ""
+    echo "No S3_BUCKET set — skipping upload. scp results manually or set S3_BUCKET and re-run."
+fi
