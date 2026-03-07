@@ -21,6 +21,7 @@ trajectory_data/unified_trajs/
 trajectory_data/filtered_unified/
 trajectory_data/swebench_pro/
 terminal-bench-2/
+gso-experiments/
 
 # Embeddings from cluster (large files, don't sync back)
 out/
