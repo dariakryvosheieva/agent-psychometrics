@@ -48,9 +48,9 @@ from inspect_ai.util import SandboxEnvironmentSpec
 
 from inspect_evals.utils.huggingface import hf_dataset
 
-from llm_judge_feature_extraction.sandbox_utils import (
-    get_swebench_image_name,
+from llm_judge_feature_extraction.auditor_agent.sandbox_utils import (
     get_sandbox_config,
+    get_swebench_image_name,
 )
 from llm_judge_feature_extraction.task_context import build_auditor_system_prompt
 
@@ -59,66 +59,34 @@ from llm_judge_feature_extraction.task_context import build_auditor_system_promp
 # Shared helpers
 # =============================================================================
 
-def load_hf_samples_with_sandbox(
+def load_swebench_verified_samples(
     dataset: str = "princeton-nlp/SWE-bench_Verified",
     split: str = "test",
-    input_field: str = "problem_statement",
-    id_field: str = "instance_id",
-    metadata_fields: list[str] | None = None,
-    image_name_fn=None,
-    working_dir: str = "/testbed",
 ):
-    """Load a HuggingFace dataset and attach Docker sandbox configs to each sample.
-
-    Args:
-        dataset: HuggingFace dataset path.
-        split: Dataset split (default: test).
-        input_field: Field name for the task input/problem statement.
-        id_field: Field name for the task ID.
-        metadata_fields: Additional fields to include as metadata. If None,
-            uses the default SWE-bench fields.
-        image_name_fn: Optional callable(sample) -> str that returns the Docker
-            image name for a sample. If None, uses SWE-bench naming convention.
-        working_dir: Working directory inside the container.
-
-    Returns:
-        List of Inspect samples with sandbox configs attached.
-    """
-    if metadata_fields is None:
-        metadata_fields = [
-            "base_commit",
-            "patch",
-            "repo",
-            "version",
-            "FAIL_TO_PASS",
-            "PASS_TO_PASS",
-        ]
-
+    """Load SWE-bench Verified dataset with Docker sandbox configs."""
     samples = hf_dataset(
         path=dataset,
         split=split,
         sample_fields=FieldSpec(
-            input=input_field,
-            id=id_field,
-            metadata=metadata_fields,
+            input="problem_statement",
+            id="instance_id",
+            metadata=[
+                "base_commit",
+                "patch",
+                "repo",
+                "version",
+                "FAIL_TO_PASS",
+                "PASS_TO_PASS",
+            ],
         ),
     )
 
-    # Add sandbox config to each sample
     for sample in samples:
-        if image_name_fn is not None:
-            image = image_name_fn(sample)
-            sample.sandbox = SandboxEnvironmentSpec(
-                type="docker",
-                config=get_sandbox_config(
-                    str(sample.id), image_name=image, working_dir=working_dir
-                ),
-            )
-        else:
-            sample.sandbox = SandboxEnvironmentSpec(
-                type="docker",
-                config=get_sandbox_config(str(sample.id), working_dir=working_dir),
-            )
+        image = get_swebench_image_name(str(sample.id))
+        sample.sandbox = SandboxEnvironmentSpec(
+            type="docker",
+            config=get_sandbox_config(str(sample.id), image_name=image),
+        )
 
     return samples
 
@@ -152,7 +120,7 @@ def auditor_task_v4_swebench_verified(
         max_attempts: Max submissions (we only want 1 - the JSON output).
         message_limit: Max total messages in conversation.
     """
-    samples = load_hf_samples_with_sandbox(dataset, split)
+    samples = load_swebench_verified_samples(dataset=dataset, split=split)
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type=task_type)),

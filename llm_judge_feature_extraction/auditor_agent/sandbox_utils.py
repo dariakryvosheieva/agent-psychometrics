@@ -30,23 +30,19 @@ def get_swebench_image_name(instance_id: str) -> str:
 
 def get_sandbox_config(
     instance_id: str,
-    image_name: str | None = None,
+    image_name: str,
     working_dir: str = "/testbed",
 ) -> str:
     """Generate Docker compose config for a task instance.
 
     Args:
         instance_id: Unique identifier for this task (used for temp file naming).
-        image_name: Docker image name. If None, derives from instance_id using
-            SWE-bench naming convention.
+        image_name: Docker image name.
         working_dir: Working directory inside the container (default: /testbed).
 
     Returns:
         Path to a temporary compose.yaml file that Inspect will use.
     """
-    if image_name is None:
-        image_name = get_swebench_image_name(instance_id)
-
     # Create compose config with root user access
     content = f"""services:
   default:

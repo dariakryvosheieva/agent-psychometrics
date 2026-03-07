@@ -35,7 +35,7 @@ _project_root = Path(__file__).parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from llm_judge_feature_extraction.sandbox_utils import run_docker_cleanup
+from llm_judge_feature_extraction.auditor_agent.sandbox_utils import run_docker_cleanup
 from llm_judge_feature_extraction.auditor_agent.parse_outputs import (
     parse_all_logs,
     validate_results,
@@ -46,14 +46,16 @@ from llm_judge_feature_extraction.auditor_agent.parse_outputs import (
 DATASET_CONFIGS = {
     "swebench_verified": {
         "inspect_task": "llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4_swebench_verified",
-        "hf_dataset": "princeton-nlp/SWE-bench_Verified",
-        "id_field": "instance_id",
+        "items_csv": "data/swebench_verified/irt/1d_1pl/items.csv",
         "log_dir_name": "swebench_verified_v4",
     },
     "swebench_pro": {
         "inspect_task": "llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4_swebench_pro",
+        "items_csv": "data/swebench_pro/irt/1d_1pl/items.csv",
+        # SWE-bench Pro HF IDs differ from IRT IDs (HF adds "instance_" prefix
+        # and version suffix). We need to map IRT IDs → HF IDs for --sample-id.
         "hf_dataset": "ScaleAI/SWE-bench_Pro",
-        "id_field": "instance_id",
+        "hf_id_field": "instance_id",
         "log_dir_name": "swebench_pro_v4",
     },
     "terminalbench": {
@@ -63,8 +65,7 @@ DATASET_CONFIGS = {
     },
     "gso": {
         "inspect_task": "llm_judge_feature_extraction/auditor_agent/inspect_tasks.py@auditor_task_v4_gso",
-        "hf_dataset": "gso-bench/gso",
-        "id_field": "instance_id",
+        "items_csv": "data/gso/irt/1d_1pl/items.csv",
         "log_dir_name": "gso_v4",
     },
 }
@@ -73,32 +74,56 @@ INCREMENTAL_CSV_NAME = "auditor_features_incremental.csv"
 
 
 def get_all_instance_ids(dataset: str) -> list[str]:
-    """Get all instance IDs for a dataset.
+    """Get all instance IDs for a dataset from IRT items files.
+
+    For most datasets, the IRT item IDs match the Inspect sample IDs directly.
+    For SWE-bench Pro, the HF/Inspect IDs differ from IRT IDs (HF adds an
+    "instance_" prefix and version suffix), so we map IRT IDs → HF IDs.
 
     Args:
         dataset: Dataset name (one of DATASET_CONFIGS keys).
 
     Returns:
-        List of instance ID strings.
+        List of instance ID strings (in the format expected by --sample-id).
 
     Raises:
-        FileNotFoundError: If a local items CSV doesn't exist.
-        ValueError: If no ID source is configured for the dataset.
+        FileNotFoundError: If the items CSV doesn't exist.
     """
     config = DATASET_CONFIGS[dataset]
+    items_path = Path(config["items_csv"])
+    if not items_path.exists():
+        raise FileNotFoundError(f"Items file not found: {items_path}")
 
+    items_df = pd.read_csv(items_path, index_col=0)
+    irt_ids = list(items_df.index.astype(str))
+
+    # If HF IDs differ from IRT IDs, build a mapping
     if "hf_dataset" in config:
-        print(f"Loading {config['hf_dataset']} dataset...")
         ds = load_dataset(config["hf_dataset"], split="test")
-        return [sample[config["id_field"]] for sample in ds]
-    elif "items_csv" in config:
-        items_path = Path(config["items_csv"])
-        if not items_path.exists():
-            raise FileNotFoundError(f"Items file not found: {items_path}")
-        items_df = pd.read_csv(items_path, index_col=0)
-        return list(items_df.index.astype(str))
-    else:
-        raise ValueError(f"No ID source configured for dataset: {dataset}")
+        id_field = config["hf_id_field"]
+        hf_ids = [sample[id_field] for sample in ds]
+
+        # Map IRT ID → HF ID: the IRT ID is a prefix of the HF ID (after
+        # stripping the "instance_" prefix from the HF ID)
+        irt_to_hf = {}
+        for hf_id in hf_ids:
+            bare = hf_id.removeprefix("instance_")
+            for irt_id in irt_ids:
+                if bare.startswith(irt_id):
+                    irt_to_hf[irt_id] = hf_id
+                    break
+
+        missing = [iid for iid in irt_ids if iid not in irt_to_hf]
+        if missing:
+            raise ValueError(
+                f"Could not map {len(missing)} IRT IDs to HF IDs for {dataset}: "
+                f"{missing[:5]}"
+            )
+
+        print(f"Mapped {len(irt_to_hf)} IRT IDs → HF IDs for {dataset}")
+        return [irt_to_hf[iid] for iid in irt_ids]
+
+    return irt_ids
 
 
 def get_completed_ids_from_csv(log_dir: Path) -> set[str]:
