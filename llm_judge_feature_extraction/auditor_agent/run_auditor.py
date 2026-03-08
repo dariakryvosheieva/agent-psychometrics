@@ -320,8 +320,8 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="anthropic/claude-opus-4-6",
-        help="Model to use (default: anthropic/claude-opus-4-6)",
+        default="openai/gpt-5.4-2026-03-05",
+        help="Model to use (default: openai/gpt-5.4-2026-03-05)",
     )
     parser.add_argument(
         "--log_dir",

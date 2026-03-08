@@ -161,7 +161,7 @@ python -m llm_judge_feature_extraction.auditor_agent.run_auditor \
 | `--dataset` | `swebench_verified` | Dataset: `gso`, `swebench_pro`, `swebench_verified`, `terminalbench` |
 | `--batch_size` | 10 | Tasks per batch (Docker cleanup runs between batches) |
 | `--max_connections` | 10 | Parallel Docker containers per batch |
-| `--model` | `anthropic/claude-opus-4-6` | LLM model (e.g., `openai/gpt-5.4-2026-03-05`) |
+| `--model` | `openai/gpt-5.4-2026-03-05` | LLM model |
 | `--log_dir` | auto | Output directory (default: `chris_output/auditor_features/{dataset}_v4`) |
 | `--s3_bucket` | none | Sync incremental CSV to S3 after each batch |
 | `--limit` | none | Limit to first N tasks (for testing) |
