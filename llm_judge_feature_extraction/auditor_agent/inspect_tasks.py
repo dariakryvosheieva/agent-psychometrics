@@ -354,23 +354,32 @@ def _get_gso_image(sample) -> str:
 def load_gso_samples(
     dataset: str = GSO_DATASET,
     split: str = "test",
+    input_field: str = "prob_script",
 ):
-    """Load GSO dataset with Docker sandbox configs."""
+    """Load GSO dataset with Docker sandbox configs.
+
+    Args:
+        dataset: HuggingFace dataset path.
+        split: Dataset split.
+        input_field: Which field to use as the agent's input message.
+            "prob_script" (default) gives the full benchmark script (TEST-level).
+            "api" gives only the function name (PROBLEM-level), used for the
+            information ablation where ENVIRONMENT must sit below TEST.
+    """
+    # When using "api" as input, omit "prob_script" and "tests" from metadata
+    # so no benchmark scripts are accessible to the agent.
+    metadata = ["repo", "base_commit", "gt_diff", "hints_text"]
+    if input_field == "prob_script":
+        metadata.extend(["api", "tests"])
+
     samples = hf_dataset(
         path=dataset,
         split=split,
         revision="00b25e92aba52f9bab4026f1ecb511df40e98c67",
         sample_fields=FieldSpec(
-            input="prob_script",
+            input=input_field,
             id="instance_id",
-            metadata=[
-                "repo",
-                "base_commit",
-                "api",
-                "gt_diff",
-                "hints_text",
-                "tests",
-            ],
+            metadata=metadata,
         ),
     )
 
@@ -406,5 +415,35 @@ def auditor_task_v4_gso(
         solver=auditor_agent,
         scorer=None,
         name="auditor_v4_gso",
+        config=GenerateConfig(max_tokens=16384),
+    )
+
+
+@task
+def auditor_task_v4_gso_ablation(
+    split: str = "test",
+    max_attempts: int = 1,
+    message_limit: int = 100,
+) -> Task:
+    """V4 auditor on GSO with PROBLEM-level input only (no benchmark script).
+
+    For the information ablation study: the agent sees only the API function
+    name, not the full benchmark script, so ENVIRONMENT sits below TEST.
+    """
+    samples = load_gso_samples(split=split, input_field="api")
+
+    auditor_agent = basic_agent(
+        init=system_message(build_auditor_system_prompt(task_type="gso")),
+        tools=[bash(timeout=240), python(timeout=240)],
+        max_attempts=max_attempts,
+        message_limit=message_limit,
+        submit_description="Submit your JSON audit report with all 8 features rated.",
+    )
+
+    return Task(
+        dataset=samples,
+        solver=auditor_agent,
+        scorer=None,
+        name="auditor_v4_gso_ablation",
         config=GenerateConfig(max_tokens=16384),
     )
