@@ -242,9 +242,8 @@ chris_output/experiment_b/frontier_analysis_v3/
 # LLM judge coefficient analysis (regenerable)
 chris_output/llm_judge_coefficient_analysis/
 
-# LLM judge features — ignore everything except README.md
-chris_output/llm_judge_features/*/
-!chris_output/llm_judge_features/README.md
+# LLM judge features (regenerable)
+chris_output/llm_judge_features/
 chris_output/experiment_b/llm_judge_v7_features/
 chris_output/experiment_b/experiment_b_mode_comparison_llm_judge_v7.json
 
