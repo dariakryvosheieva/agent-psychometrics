@@ -213,6 +213,9 @@ chris_output/llm_judge_features/swebench_full_combined/
 # Unified core features (filtered to 8 common features, regenerable)
 chris_output/llm_judge_features/*_unified_core/
 
+# Unified 15-feature CSVs (filtered from v7_plus_auditor, regenerable)
+chris_output/llm_judge_features/v7_unified_15/
+
 # Tensor analysis outputs (regenerable)
 chris_output/tensor_analysis/
 
@@ -256,6 +259,7 @@ chris_output/llm_judge_features/*_no_solution/
 chris_output/llm_judge_features/*_problem_only/
 chris_output/llm_judge_features/*_no_tooling/
 chris_output/llm_judge_features/*_new_features/
+chris_output/llm_judge_features/ablation/
 chris_output/llm_judge_features/swebench_ablation/
 chris_output/llm_judge_features/swebench_ablation_controlled/
 chris_output/llm_judge_features/swebench_ablation_controlled_v2/
@@ -285,3 +289,6 @@ chris_output/llm_judge_features/swebench_pro_v7_*/
 chris_output/llm_judge_features/*_v8_*/
 chris_output/experiment_b/llm_judge_v7_features/
 chris_output/experiment_b/experiment_b_mode_comparison_llm_judge_v7.json
+
+# Unified feature search outputs (regenerable)
+chris_output/unified_feature_search/

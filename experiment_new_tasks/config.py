@@ -25,9 +25,14 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "princeton-nlp_SWE-bench_Verified__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/v7_opus_solution_top15/swebench_verified/llm_judge_features.csv"
+            "chris_output/llm_judge_features/v7_unified_15/swebench_verified/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {},
+        "judge_ablation_paths": {
+            "1_problem_15": Path("chris_output/llm_judge_features/ablation/swebench_verified/1_problem_15.csv"),
+            "2_problem_auditor_15": Path("chris_output/llm_judge_features/ablation/swebench_verified/2_problem_auditor_15.csv"),
+            "3_problem_auditor_test_15": Path("chris_output/llm_judge_features/ablation/swebench_verified/3_problem_auditor_test_15.csv"),
+            "4_full_15": Path("chris_output/llm_judge_features/ablation/swebench_verified/4_full_15.csv"),
+        },
     },
     "gso": {
         "display_name": "GSO",
@@ -42,9 +47,14 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "gso-bench_gso__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/v7_opus_solution_top15/gso/llm_judge_features.csv"
+            "chris_output/llm_judge_features/v7_unified_15/gso/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {},
+        "judge_ablation_paths": {
+            "1_problem_15": Path("chris_output/llm_judge_features/ablation/gso/1_problem_15.csv"),
+            "2_problem_auditor_15": Path("chris_output/llm_judge_features/ablation/gso/2_problem_auditor_15.csv"),
+            "3_problem_auditor_test_15": Path("chris_output/llm_judge_features/ablation/gso/3_problem_auditor_test_15.csv"),
+            "4_full_15": Path("chris_output/llm_judge_features/ablation/gso/4_full_15.csv"),
+        },
     },
     "swebench_pro": {
         "display_name": "SWE-bench Pro",
@@ -59,9 +69,14 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "ScaleAI_SWE-bench_Pro__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/v7_opus_solution_top15/swebench_pro/llm_judge_features.csv"
+            "chris_output/llm_judge_features/v7_unified_15/swebench_pro/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {},
+        "judge_ablation_paths": {
+            "1_problem_15": Path("chris_output/llm_judge_features/ablation/swebench_pro/1_problem_15.csv"),
+            "2_problem_auditor_15": Path("chris_output/llm_judge_features/ablation/swebench_pro/2_problem_auditor_15.csv"),
+            "3_problem_auditor_test_15": Path("chris_output/llm_judge_features/ablation/swebench_pro/3_problem_auditor_test_15.csv"),
+            "4_full_15": Path("chris_output/llm_judge_features/ablation/swebench_pro/4_full_15.csv"),
+        },
     },
     "terminalbench": {
         "display_name": "TerminalBench",
@@ -76,9 +91,14 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "json_terminal_bench_tasks.jsonl__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/v7_opus_solution_top15/terminalbench/llm_judge_features.csv"
+            "chris_output/llm_judge_features/v7_unified_15/terminalbench/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {},
+        "judge_ablation_paths": {
+            "1_problem_15": Path("chris_output/llm_judge_features/ablation/terminalbench/1_problem_15.csv"),
+            "2_problem_auditor_15": Path("chris_output/llm_judge_features/ablation/terminalbench/2_problem_auditor_15.csv"),
+            "3_problem_auditor_test_15": Path("chris_output/llm_judge_features/ablation/terminalbench/3_problem_auditor_test_15.csv"),
+            "4_full_15": Path("chris_output/llm_judge_features/ablation/terminalbench/4_full_15.csv"),
+        },
     },
 }
 

@@ -2,23 +2,29 @@
 
 Semantic task features extracted via LLM structured output for difficulty prediction.
 
-## Active Default: `v7_opus_solution_top15/`
+## Active Default: `v7_unified_15/`
 
-Top 15 features per dataset selected by Ridge coefficient magnitude from v7 Opus 4.6 solution-level features + auditor features.
+15 unified features used across all 4 datasets, selected from 28 (20 judge + 8 auditor).
 
 **Base model**: Claude Opus 4.6 (`claude-opus-4-6`)
 **Info Level**: Solution override (all features see full task info including gold patch)
-**Features**: 15 per dataset (selected from 28 = 20 judge + 8 auditor)
-**Selection**: Ridge regression (alpha=1.0) on standardized features vs IRT difficulty
+**Features**: 15 (same set for all datasets: 10 Problem + 1 Test + 1 Solution + 3 Auditor)
 
-| Dataset | Path | Features | Auditor Features Included |
-|---------|------|----------|--------------------------|
-| SWE-bench Verified | `v7_opus_solution_top15/swebench_verified/llm_judge_features.csv` | 15 (from 28) | 3/8 (environment_setup_complexity, fix_localization, implementation_language_complexity) |
-| GSO | `v7_opus_solution_top15/gso/llm_judge_features.csv` | 15 (from 28) | 1/8 (codebase_scale) |
-| SWE-bench Pro | `v7_opus_solution_top15/swebench_pro/llm_judge_features.csv` | 15 (from 28) | 3/8 (implementation_language_complexity, testing_infrastructure_quality, change_blast_radius) |
-| TerminalBench | `v7_opus_solution_top15/terminalbench/llm_judge_features.csv` | 15 (from 28) | 4/8 (dependency_complexity, fix_localization, testing_infrastructure_quality, codebase_scale) |
+**Problem (10)**: atypicality, codebase_scope, debugging_complexity, domain_knowledge_required, error_specificity, logical_reasoning_required, side_effect_risk, similar_issue_likelihood, solution_hint, verification_difficulty
+**Test (1)**: test_edge_case_coverage
+**Solution (1)**: solution_complexity
+**Auditor (3)**: codebase_scale, fix_localization, implementation_language_complexity
 
-Note: The top 15 are selected per-dataset. A future goal is a unified feature set that performs comparably across all datasets.
+| Dataset | Path | Tasks |
+|---------|------|-------|
+| SWE-bench Verified | `v7_unified_15/swebench_verified/llm_judge_features.csv` | 500 |
+| GSO | `v7_unified_15/gso/llm_judge_features.csv` | 102 |
+| SWE-bench Pro | `v7_unified_15/swebench_pro/llm_judge_features.csv` | 730 |
+| TerminalBench | `v7_unified_15/terminalbench/llm_judge_features.csv` | 89 |
+
+### Previous Default: `v7_opus_solution_top15/`
+
+Per-dataset top 15 features selected by Ridge coefficient magnitude. Slightly higher AUC (mean 0.7990 vs 0.7935) but uses different features per dataset.
 
 ## Full Feature Source: `v7_opus_solution/`
 
