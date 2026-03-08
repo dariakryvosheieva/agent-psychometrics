@@ -24,7 +24,6 @@ model_irt/
 ├── data/                              # Input data + IRT models (data/{dataset}/irt/)
 ├── chris_output/                      # Outputs and results
 ├── trajectory_data/                   # Downloaded trajectories (76 agents)
-├── aws_setup/                         # AWS cluster setup
 └── docs/                              # Detailed documentation
 ```
 

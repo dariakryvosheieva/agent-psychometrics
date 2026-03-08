@@ -6,7 +6,7 @@
 #
 # Usage:
 #   cd model_irt && source .venv/bin/activate
-#   bash aws_setup/run_all_auditor.sh
+#   bash llm_judge_feature_extraction/auditor_agent/run_all_auditor.sh
 #
 # To run a single dataset:
 #   python -m llm_judge_feature_extraction.auditor_agent.run_auditor --dataset gso --batch_size 50 --max_connections 25

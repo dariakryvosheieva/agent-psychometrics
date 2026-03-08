@@ -190,15 +190,15 @@ The auditor is fully resumable. After each batch, results are appended to `audit
 
 ### AWS Deployment
 
-For running all 4 datasets on EC2, see `aws_setup/`:
+For running all 4 datasets on EC2, see `llm_judge_feature_extraction/auditor_agent/`:
 
 ```bash
 # Launch spot instance
-bash aws_setup/launch_spot.sh
+bash llm_judge_feature_extraction/auditor_agent/launch_spot.sh
 
 # On EC2: setup + run all datasets
-bash aws_setup/setup_instance.sh
-bash aws_setup/run_all_auditor.sh  # runs all 4 datasets, syncs to S3, auto-terminates
+bash llm_judge_feature_extraction/auditor_agent/setup_instance.sh
+bash llm_judge_feature_extraction/auditor_agent/run_all_auditor.sh  # runs all 4 datasets, syncs to S3, auto-terminates
 ```
 
 ### Auditor Agent Files

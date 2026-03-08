@@ -8,7 +8,7 @@
 #   sudo dnf install -y git
 #   git clone https://github.com/<your-org>/model_irt.git
 #   cd model_irt
-#   bash aws_setup/setup_instance.sh
+#   bash llm_judge_feature_extraction/auditor_agent/setup_instance.sh
 
 set -euo pipefail
 
@@ -94,4 +94,4 @@ echo "  ssh -i ~/.ssh/auditor-key.pem ec2-user@<IP>"
 echo ""
 echo "Then run:"
 echo "  cd model_irt && source .venv/bin/activate"
-echo "  bash aws_setup/run_all_auditor.sh"
+echo "  bash llm_judge_feature_extraction/auditor_agent/run_all_auditor.sh"

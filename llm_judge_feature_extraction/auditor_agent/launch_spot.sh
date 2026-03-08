@@ -16,7 +16,7 @@
 #
 # Usage:
 #   export AWS_KEY_NAME="auditor-key"
-#   bash aws_setup/launch_spot.sh
+#   bash llm_judge_feature_extraction/auditor_agent/launch_spot.sh
 
 set -euo pipefail
 
@@ -112,9 +112,9 @@ echo "  1. SSH into the instance"
 echo "  2. Install git and clone the repo (private — use a GitHub PAT with repo read access):"
 echo "     sudo dnf install -y git"
 echo "     git clone https://<YOUR_PAT>@github.com/dariakryvosheieva/agent-psychometrics.git model_irt"
-echo "  3. cd model_irt && bash aws_setup/setup_instance.sh"
+echo "  3. cd model_irt && bash llm_judge_feature_extraction/auditor_agent/setup_instance.sh"
 echo "  4. Log out and back in (for Docker group), then:"
-echo "     cd model_irt && source .venv/bin/activate && bash aws_setup/run_all_auditor.sh"
+echo "     cd model_irt && source .venv/bin/activate && bash llm_judge_feature_extraction/auditor_agent/run_all_auditor.sh"
 echo ""
 echo "=== Auto-termination ==="
 echo "The instance will automatically upload results to S3 and terminate itself"
