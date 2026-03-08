@@ -42,6 +42,7 @@ except ModuleNotFoundError:
 
 from inspect_ai import Task, task
 from inspect_ai.dataset import FieldSpec, Sample
+from inspect_ai.model import GenerateConfig
 from inspect_ai.solver import basic_agent, system_message
 from inspect_ai.tool import bash, python
 from inspect_ai.util import SandboxEnvironmentSpec
@@ -136,6 +137,7 @@ def auditor_task_v4_swebench_verified(
         solver=auditor_agent,
         scorer=None,
         name=f"auditor_v4_{task_type}",
+        config=GenerateConfig(max_tokens=16384),
     )
 
 
@@ -210,6 +212,7 @@ def auditor_task_v4_swebench_pro(
         solver=auditor_agent,
         scorer=None,
         name="auditor_v4_swebench_pro",
+        config=GenerateConfig(max_tokens=16384),
     )
 
 
@@ -327,6 +330,7 @@ def auditor_task_v4_terminalbench(
         solver=auditor_agent,
         scorer=None,
         name="auditor_v4_terminalbench",
+        config=GenerateConfig(max_tokens=16384),
     )
 
 
@@ -402,4 +406,5 @@ def auditor_task_v4_gso(
         solver=auditor_agent,
         scorer=None,
         name="auditor_v4_gso",
+        config=GenerateConfig(max_tokens=16384),
     )
