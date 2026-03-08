@@ -204,18 +204,6 @@ chris_output/grouped_ridge_coefficient_analysis.json
 chris_output/gso_llm_judge_features_v1/
 threshold_sweep.log
 
-# LLM judge feature extraction outputs
-chris_output/llm_judge_features/swebench_v*_sample/
-chris_output/llm_judge_features/swebench_selected/
-chris_output/llm_judge_features/swebench_combined/
-chris_output/llm_judge_features/swebench_full_combined/
-
-# Unified core features (filtered to 8 common features, regenerable)
-chris_output/llm_judge_features/*_unified_core/
-
-# Unified 15-feature CSVs (filtered from v7_plus_auditor, regenerable)
-chris_output/llm_judge_features/v7_unified_15/
-
 # Tensor analysis outputs (regenerable)
 chris_output/tensor_analysis/
 
@@ -254,39 +242,9 @@ chris_output/experiment_b/frontier_analysis_v3/
 # LLM judge coefficient analysis (regenerable)
 chris_output/llm_judge_coefficient_analysis/
 
-# LLM judge feature experiment variants (regenerable via LLM API)
-chris_output/llm_judge_features/*_no_solution/
-chris_output/llm_judge_features/*_problem_only/
-chris_output/llm_judge_features/*_no_tooling/
-chris_output/llm_judge_features/*_new_features/
-chris_output/llm_judge_features/ablation/
-chris_output/llm_judge_features/swebench_ablation/
-chris_output/llm_judge_features/swebench_ablation_controlled/
-chris_output/llm_judge_features/swebench_ablation_controlled_v2/
-chris_output/llm_judge_features/swebench_all_combined/
-chris_output/llm_judge_features/swebench_baseline_plus_test/
-chris_output/llm_judge_features/swebench_with_test/
-chris_output/llm_judge_features/swebench_problem_extended/
-chris_output/llm_judge_features/swebench_test_quality/
-chris_output/llm_judge_features/experiment_a_defaults_backup*/
-chris_output/llm_judge_features/terminalbench_error_specificity_fix.json
-
-# LLM judge feature subsets and versions (regenerable via LLM API)
-chris_output/llm_judge_features/subsets/
-chris_output/llm_judge_features/v2_full_20features/
-chris_output/llm_judge_features/v2_trimmed_17features/
-chris_output/llm_judge_features/v3_solution_level/
-chris_output/llm_judge_features/v4_opt_scale_natural/
-chris_output/llm_judge_features/v4_opt_scale_solution/
-chris_output/llm_judge_features/v5_anthropic_solution/
-chris_output/llm_judge_features/v6_anthropic_natural/
-chris_output/llm_judge_features/v7_*/
-chris_output/llm_judge_features/v8_*/
-chris_output/llm_judge_features/gso_v7_*/
-chris_output/llm_judge_features/terminalbench_v7_*/
-chris_output/llm_judge_features/swebench_verified_v7_*/
-chris_output/llm_judge_features/swebench_pro_v7_*/
-chris_output/llm_judge_features/*_v8_*/
+# LLM judge features — ignore everything except README.md
+chris_output/llm_judge_features/*/
+!chris_output/llm_judge_features/README.md
 chris_output/experiment_b/llm_judge_v7_features/
 chris_output/experiment_b/experiment_b_mode_comparison_llm_judge_v7.json
 
