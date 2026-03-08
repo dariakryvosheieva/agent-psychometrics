@@ -89,6 +89,31 @@ def parse_completion(
         except json.JSONDecodeError:
             pass
 
+    # Try to recover truncated JSON by appending missing closing braces
+    start = completion.find('{')
+    if start >= 0:
+        json_str = completion[start:]
+        depth = 0
+        for c in json_str:
+            if c == '{':
+                depth += 1
+            elif c == '}':
+                depth -= 1
+        if depth > 0:
+            # Truncated — close any open strings and add missing braces
+            # Try with just closing braces first
+            for attempt in [json_str + '}' * depth,
+                            json_str + '"}' * depth,
+                            json_str + '"}}' + '}' * max(0, depth - 2)]:
+                try:
+                    data = json.loads(attempt)
+                    result = extract_features_from_json(data, expected_features)
+                    # Only accept if we got at least some features
+                    if any(v is not None for k, v in result.items() if not k.endswith('_reasoning')):
+                        return result
+                except json.JSONDecodeError:
+                    continue
+
     return None
 
 
@@ -137,6 +162,47 @@ def extract_features_from_json(
     return features
 
 
+def _extract_from_submit_tool_call(
+    messages: list,
+    expected_features: list[str] | None = None,
+) -> dict[str, Any] | None:
+    """Try to extract features from the submit tool call in message history.
+
+    When the agent submits via a tool call, the JSON may be in the tool call
+    arguments or in the subsequent tool response message, even if
+    sample.output.completion is truncated.
+    """
+    for msg in reversed(messages):
+        # Check tool call arguments on assistant messages
+        tool_calls = getattr(msg, 'tool_calls', None)
+        if tool_calls:
+            for tc in tool_calls:
+                func = getattr(tc, 'function', None) or getattr(tc, 'type', None)
+                func_name = func if isinstance(func, str) else getattr(func, 'name', '')
+                if 'submit' in str(func_name).lower():
+                    args = getattr(tc, 'arguments', None) or getattr(tc, 'input', None)
+                    if isinstance(args, dict):
+                        # Arguments might contain the JSON directly
+                        text = args.get('answer', '') or args.get('submission', '') or str(args)
+                        result = parse_completion(text, expected_features)
+                        if result:
+                            return result
+                    elif isinstance(args, str):
+                        result = parse_completion(args, expected_features)
+                        if result:
+                            return result
+
+        # Check tool response content
+        role = getattr(msg, 'role', '')
+        content = getattr(msg, 'content', '')
+        if role == 'tool' and isinstance(content, str) and '{' in content:
+            result = parse_completion(content, expected_features)
+            if result:
+                return result
+
+    return None
+
+
 def parse_log_file(
     log_path: Path,
     expected_features: list[str] | None = None,
@@ -165,12 +231,20 @@ def parse_log_file(
             # Get completion
             completion = sample.output.completion if sample.output else None
 
+            features = None
             if completion:
                 features = parse_completion(completion, expected_features)
-                if features:
-                    result.update(features)
-                else:
-                    result["_parse_error"] = "Could not parse completion"
+
+            # Fallback: extract JSON from submit tool call in messages
+            if not features:
+                features = _extract_from_submit_tool_call(
+                    sample.messages, expected_features
+                )
+
+            if features:
+                result.update(features)
+            elif completion:
+                result["_parse_error"] = "Could not parse completion"
             else:
                 result["_parse_error"] = "No completion"
 
