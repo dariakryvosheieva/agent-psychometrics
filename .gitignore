@@ -282,5 +282,6 @@ chris_output/llm_judge_features/gso_v7_*/
 chris_output/llm_judge_features/terminalbench_v7_*/
 chris_output/llm_judge_features/swebench_verified_v7_*/
 chris_output/llm_judge_features/swebench_pro_v7_*/
+chris_output/llm_judge_features/*_v8_*/
 chris_output/experiment_b/llm_judge_v7_features/
 chris_output/experiment_b/experiment_b_mode_comparison_llm_judge_v7.json
