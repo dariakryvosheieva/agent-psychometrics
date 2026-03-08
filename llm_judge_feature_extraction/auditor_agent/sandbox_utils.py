@@ -78,25 +78,26 @@ def run_docker_cleanup(remove_images: bool = True):
     """
     print("\n--- Cleaning Docker state ---")
 
-    # Stop all running containers
+    # Force-remove ALL containers (running + stopped), including Compose ones
     result = subprocess.run(
-        ["docker", "ps", "-q"],
+        ["docker", "ps", "-aq"],
         capture_output=True,
         text=True,
     )
     if result.returncode == 0 and result.stdout.strip():
         container_ids = result.stdout.strip().split("\n")
-        print(f"  Stopping {len(container_ids)} running containers...")
-        subprocess.run(["docker", "stop"] + container_ids, capture_output=True)
+        print(f"  Force-removing {len(container_ids)} containers...")
+        subprocess.run(
+            ["docker", "rm", "-f"] + container_ids, capture_output=True
+        )
 
-    # Remove stopped containers
-    result = subprocess.run(
-        ["docker", "container", "prune", "-f"],
+    # Remove orphaned networks (Compose leaves these behind)
+    subprocess.run(
+        ["docker", "network", "prune", "-f"],
         capture_output=True,
         text=True,
     )
-    if result.returncode == 0 and result.stdout.strip():
-        print(f"  Containers pruned")
+    print("  Containers and networks cleaned")
 
     # Remove unused volumes
     result = subprocess.run(
