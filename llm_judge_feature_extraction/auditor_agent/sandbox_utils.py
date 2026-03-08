@@ -43,11 +43,15 @@ def get_sandbox_config(
     Returns:
         Path to a temporary compose.yaml file that Inspect will use.
     """
-    # Create compose config with root user access
+    # Create compose config with root user access.
+    # Override entrypoint to /bin/sh because some images (e.g. SWE-bench Pro
+    # NodeBB) have a broken /bin/bash. Use "sleep infinity" via /bin/sh -c
+    # so it works even when the default entrypoint is broken.
     content = f"""services:
   default:
     image: {image_name}
-    command: "sleep infinity"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep infinity"]
     working_dir: {working_dir}
     user: root
     deploy:
