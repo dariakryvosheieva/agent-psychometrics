@@ -43,7 +43,7 @@ except ModuleNotFoundError:
 from inspect_ai import Task, task
 from inspect_ai.dataset import FieldSpec, Sample
 from inspect_ai.solver import basic_agent, system_message
-from inspect_ai.tool import bash
+from inspect_ai.tool import bash, python
 from inspect_ai.util import SandboxEnvironmentSpec
 
 from inspect_evals.utils.huggingface import hf_dataset
@@ -125,7 +125,7 @@ def auditor_task_v4_swebench_verified(
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type=task_type)),
-        tools=[bash(timeout=240)],
+        tools=[bash(timeout=240), python(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
@@ -199,7 +199,7 @@ def auditor_task_v4_swebench_pro(
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type="swebench_pro")),
-        tools=[bash(timeout=240)],
+        tools=[bash(timeout=240), python(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
@@ -316,7 +316,7 @@ def auditor_task_v4_terminalbench(
         init=system_message(
             build_auditor_system_prompt(task_type="terminalbench")
         ),
-        tools=[bash(timeout=240)],
+        tools=[bash(timeout=240), python(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
@@ -391,7 +391,7 @@ def auditor_task_v4_gso(
 
     auditor_agent = basic_agent(
         init=system_message(build_auditor_system_prompt(task_type="gso")),
-        tools=[bash(timeout=240)],
+        tools=[bash(timeout=240), python(timeout=240)],
         max_attempts=max_attempts,
         message_limit=message_limit,
         submit_description="Submit your JSON audit report with all 8 features rated.",
