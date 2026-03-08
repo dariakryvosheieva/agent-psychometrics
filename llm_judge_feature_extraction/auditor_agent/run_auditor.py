@@ -25,6 +25,7 @@ Usage:
 import argparse
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import pandas as pd
@@ -35,7 +36,10 @@ _project_root = Path(__file__).parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from llm_judge_feature_extraction.auditor_agent.sandbox_utils import run_docker_cleanup
+from llm_judge_feature_extraction.auditor_agent.sandbox_utils import (
+    get_swebench_image_name,
+    run_docker_cleanup,
+)
 from llm_judge_feature_extraction.auditor_agent.parse_outputs import (
     parse_all_logs,
     validate_results,
@@ -71,6 +75,65 @@ DATASET_CONFIGS = {
 }
 
 INCREMENTAL_CSV_NAME = "auditor_features_incremental.csv"
+
+
+def get_docker_images_for_batch(dataset: str, instance_ids: list[str]) -> list[str]:
+    """Get Docker image names for a batch of instance IDs.
+
+    Args:
+        dataset: Dataset name.
+        instance_ids: List of instance IDs.
+
+    Returns:
+        List of Docker image name strings.
+    """
+    if dataset == "swebench_verified":
+        return [get_swebench_image_name(iid) for iid in instance_ids]
+    elif dataset == "swebench_pro":
+        # SWE-bench Pro images use a dockerhub_tag from HF metadata.
+        # We need to load the dataset to get the tags.
+        ds = load_dataset("ScaleAI/SWE-bench_Pro", split="test")
+        id_to_tag = {s["instance_id"]: s["dockerhub_tag"] for s in ds}
+        return [f"jefzda/sweap-images:{id_to_tag[iid]}" for iid in instance_ids if iid in id_to_tag]
+    elif dataset == "terminalbench":
+        return [f"xiangyangli/{iid}:20260204" for iid in instance_ids]
+    elif dataset == "gso":
+        return [f"slimshetty/gso:gso.eval.x86_64.{iid.lower()}" for iid in instance_ids]
+    else:
+        raise ValueError(f"Unknown dataset: {dataset}")
+
+
+def pre_pull_images(images: list[str], max_workers: int = 30) -> None:
+    """Pull Docker images in parallel.
+
+    Args:
+        images: List of Docker image names to pull.
+        max_workers: Number of parallel pull threads.
+    """
+    print(f"\n=== Pre-pulling {len(images)} Docker images ({max_workers} parallel) ===")
+
+    def pull_one(image: str) -> tuple[str, bool]:
+        result = subprocess.run(
+            ["docker", "pull", image],
+            capture_output=True, text=True,
+        )
+        return image, result.returncode == 0
+
+    succeeded = 0
+    failed = []
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(pull_one, img): img for img in images}
+        for future in as_completed(futures):
+            image, ok = future.result()
+            if ok:
+                succeeded += 1
+            else:
+                failed.append(image)
+            print(f"  [{succeeded + len(failed)}/{len(images)}] {'OK' if ok else 'FAIL'}: {image.split('/')[-1]}")
+
+    print(f"Pre-pull complete: {succeeded} succeeded, {len(failed)} failed")
+    if failed:
+        print(f"Failed images: {failed}")
 
 
 def get_all_instance_ids(dataset: str) -> list[str]:
@@ -362,6 +425,10 @@ def main():
             df.to_csv(output_path, index=False)
             print(f"\nSaved to {output_path}")
         return
+
+    # Pre-pull Docker images for all remaining tasks
+    images = get_docker_images_for_batch(args.dataset, remaining_ids)
+    pre_pull_images(images, max_workers=args.max_connections)
 
     # Split into batches
     batches = [
