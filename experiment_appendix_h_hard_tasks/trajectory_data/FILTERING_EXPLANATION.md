@@ -1,6 +1,6 @@
 # Trajectory Filtering Explanation
 
-This document explains what the trajectory filter (`llm_judge/trajectory_filter.py`) removes from SWE-bench agent trajectories.
+This document explains what the trajectory filter (`experiment_appendix_h_hard_tasks/trajectory_upload/trajectory_filter.py`) removes from SWE-bench agent trajectories.
 
 ## Goal
 
@@ -176,18 +176,18 @@ Mid-conversation system messages:
 
 ```bash
 # Filter all unified trajectories
-python llm_judge/trajectory_filter.py --all_unified --output_dir trajectory_data/filtered_unified
+python experiment_appendix_h_hard_tasks/trajectory_upload/trajectory_filter.py --all_unified --output_dir experiment_appendix_h_hard_tasks/trajectory_data/filtered_unified
 
 # Filter single trajectory
-python llm_judge/trajectory_filter.py --traj path/to/file.json --output filtered.json
+python experiment_appendix_h_hard_tasks/trajectory_upload/trajectory_filter.py --traj path/to/file.json --output filtered.json
 
 # Preview without saving
-python llm_judge/trajectory_filter.py --traj path/to/file.json
+python experiment_appendix_h_hard_tasks/trajectory_upload/trajectory_filter.py --traj path/to/file.json
 ```
 
 ## Related Files
 
-- `llm_judge/trajectory_filter.py` - Main filtering script
-- `llm_judge/trajectory_converter.py` - Converts raw trajectories to unified format
+- `experiment_appendix_h_hard_tasks/trajectory_upload/trajectory_filter.py` - Main filtering script
+- `experiment_appendix_h_hard_tasks/trajectory_upload/trajectory_converter.py` - Converts raw trajectories to unified format
 - `trajectory_data/filter_verification.md` - Verification status for each agent
-- `trajectory_data/filtered_unified/_filter_summary.json` - Filtering statistics
+- `experiment_appendix_h_hard_tasks/trajectory_data/filtered_unified/_filter_summary.json` - Filtering statistics

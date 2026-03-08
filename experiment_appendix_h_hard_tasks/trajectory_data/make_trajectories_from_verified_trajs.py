@@ -221,7 +221,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument(
         "--output",
         type=Path,
-        default=Path("trajectory_data/verified_trajectories.jsonl"),
+        default=Path("experiment_appendix_h_hard_tasks/trajectory_data/verified_trajectories.jsonl"),
         help="Output trajectories JSONL path.",
     )
     p.add_argument(

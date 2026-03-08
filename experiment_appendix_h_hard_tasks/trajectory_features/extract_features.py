@@ -112,7 +112,7 @@ class TrajectoryFeatureExtractor:
     def __init__(
         self,
         model: str = "claude-sonnet-4-5-20250929",
-        trajectory_dir: str = "trajectory_data/unified_trajs",
+        trajectory_dir: str = "experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs",
         max_retries: int = 3,
     ):
         """Initialize the extractor.
@@ -418,7 +418,7 @@ def sample_trajectories(
     if agents is None:
         agents = AGENT_NAMES
 
-    trajectory_dir = Path("trajectory_data/unified_trajs")
+    trajectory_dir = Path("experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs")
     pairs = []
 
     for agent in agents:
@@ -457,7 +457,7 @@ def sample_by_task(
     if agents is None:
         agents = AGENT_NAMES
 
-    trajectory_dir = Path("trajectory_data/unified_trajs")
+    trajectory_dir = Path("experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs")
 
     # Build task -> available agents mapping
     task_agents: Dict[str, List[str]] = {}

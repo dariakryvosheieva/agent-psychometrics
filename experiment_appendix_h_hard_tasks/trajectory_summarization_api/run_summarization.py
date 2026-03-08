@@ -57,7 +57,7 @@ def parse_args():
     parser.add_argument(
         "--trajectory_dir",
         type=Path,
-        default=Path("trajectory_data/unified_trajs"),
+        default=Path("experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs"),
         help="Directory containing trajectory JSON files",
     )
     parser.add_argument(

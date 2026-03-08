@@ -172,7 +172,7 @@
   "validated_agents": {
     "description": "78 agents with valid multi-turn trajectory data suitable for analysis",
     "count": 78,
-    "location": "trajectory_data/unified_trajs/<agent_name>/",
+    "location": "experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs/<agent_name>/",
     "agents": [
       "20240402_sweagent_claude3opus",
       "20240402_sweagent_gpt4",
@@ -258,7 +258,7 @@
   "blob_style_agents": {
     "description": "39 agents with blob-style or limited trajectory data - not useful for trajectory analysis",
     "count": 39,
-    "location": "trajectory_data/unified_trajs/_blob_style/",
+    "location": "experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs/_blob_style/",
     "reasons": {
       "single_text_blob": "Single text dump without conversation structure",
       "patch_only": "Only contains final diff patch, no intermediate reasoning",

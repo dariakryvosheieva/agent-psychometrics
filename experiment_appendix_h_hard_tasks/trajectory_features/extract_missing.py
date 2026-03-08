@@ -151,7 +151,7 @@ async def extract_missing(
     dry_run: bool = False,
 ) -> pd.DataFrame:
     """Extract missing trajectories and merge with existing data."""
-    trajectory_dir = Path("trajectory_data/unified_trajs")
+    trajectory_dir = Path("experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs")
 
     # Load existing data
     if existing_path.exists():

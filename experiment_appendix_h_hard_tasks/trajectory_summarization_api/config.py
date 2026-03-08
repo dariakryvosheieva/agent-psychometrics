@@ -25,7 +25,7 @@ class SummarizationConfig:
     requests_per_minute: int = 5000  # Conservative RPM (Tier 5 allows much more)
 
     # Data paths
-    trajectory_dir: Path = Path("trajectory_data/unified_trajs")
+    trajectory_dir: Path = Path("experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs")
     output_dir: Path = Path("chris_output/trajectory_summaries_api")
     checkpoint_file: Path = Path("chris_output/trajectory_summaries_api/.checkpoint.json")
 

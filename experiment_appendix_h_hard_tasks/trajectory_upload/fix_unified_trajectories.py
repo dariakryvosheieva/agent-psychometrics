@@ -67,7 +67,7 @@ def main():
     parser.add_argument(
         "--trajectories_dir",
         type=str,
-        default="trajectory_data/unified_trajs",
+        default="experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs",
         help="Directory containing unified trajectories",
     )
     parser.add_argument(

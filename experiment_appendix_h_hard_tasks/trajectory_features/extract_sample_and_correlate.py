@@ -104,7 +104,7 @@ def main():
 
     # Build task dicts for sample only
     print(f"\nLoading trajectories for {len(sample_task_ids)} sample tasks...")
-    trajs_dir = Path("trajectory_data/unified_trajs")
+    trajs_dir = Path("experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs")
     task_dicts, missing = build_task_dicts(
         sample_task_ids, args.agent, trajs_dir,
         max_messages=200,  # More messages for fuller trajectory

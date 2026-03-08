@@ -367,6 +367,9 @@ predictor.fit(task_ids, ground_truth_b, responses)  # responses = pre-frontier o
 experiment_appendix_h_hard_tasks/
 ├── compare_methods.py        # Main evaluation script
 ├── threshold_sweep.py        # Threshold sweep analysis
+├── trajectory_data/          # Downloaded trajectories (76 agents)
+├── trajectory_summarization_api/  # Trajectory summarization via OpenAI API
+├── trajectory_upload/        # Trajectory conversion and upload
 ├── shared/
 │   ├── config_base.py        # DatasetConfig base class with lazy-loaded properties
 │   ├── data_preparation.py   # Data loading, frontier ID, baseline IRT

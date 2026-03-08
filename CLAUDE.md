@@ -16,14 +16,14 @@ Two regimes:
 model_irt/
 ├── experiment_new_tasks/              # Main experiment on the solvable regime (+ shared IRT infrastructure)
 ├── experiment_appendix_h_hard_tasks/  # Frontier task difficulty prediction
+│   ├── trajectory_data/               #   Downloaded trajectories (76 agents)
+│   ├── trajectory_summarization_api/  #   Trajectory summarization
+│   └── trajectory_upload/             #   Trajectory conversion and upload
 ├── llm_judge_feature_extraction/      # LLM-based task feature extraction
 ├── swebench_irt/                      # IRT model training
-├── trajectory_upload/                 # Trajectory conversion and upload
-├── trajectory_summarization_api/      # Trajectory summarization
 ├── py_irt/                            # IRT library (local fork)
 ├── data/                              # Input data + IRT models (data/{dataset}/irt/)
 ├── chris_output/                      # Outputs and results
-├── trajectory_data/                   # Downloaded trajectories (76 agents)
 └── docs/                              # Detailed documentation
 ```
 
@@ -122,4 +122,4 @@ See [experiment_new_tasks/README.md](experiment_new_tasks/README.md) and [experi
 **OpenAI API Usage:**
 - Use the new Responses API (`client.responses.create()`) instead of the older Chat Completions API (`client.chat.completions.create()`)
 - Key differences: use `input=` instead of `messages=`, and access output via `response.output_text`
-- See `trajectory_summarization_api/openai_client.py` for async implementation example
+- See `experiment_appendix_h_hard_tasks/trajectory_summarization_api/openai_client.py` for async implementation example

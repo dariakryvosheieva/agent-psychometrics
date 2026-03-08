@@ -72,8 +72,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument(
         "--output",
         type=Path,
-        default=Path("trajectory_data/irt_verified.jsonlines"),
-        help="Output JSON Lines path (default: trajectory_data/irt_verified.jsonlines).",
+        default=Path("experiment_appendix_h_hard_tasks/trajectory_data/irt_verified.jsonlines"),
+        help="Output JSON Lines path (default: experiment_appendix_h_hard_tasks/trajectory_data/irt_verified.jsonlines).",
     )
     p.add_argument(
         "--instances",
