@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The error traceback points to the minimal_blocks() method and a list deletion issue, providing a vague hint about where the bug is. However, fixing this requires deep understanding of permutation group theory and SymPy's combinatorics internals. The bug involves index handling during list modification, which requires careful reasoning about the algorithm's invariants, but verification is straightforward with the provided test case.",
+  "_task_id": "sympy__sympy-19954",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:35.714581"
+}

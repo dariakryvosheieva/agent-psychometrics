@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explains the root cause (DPI doubling for high-DPI screens during show, then saving doubled DPI), but doesn't specify exact fix location. Requires deep knowledge of matplotlib's figure pickling/unpickling mechanism and high-DPI handling internals. The platform-specific nature (M1 Mac) and interaction between serialization and display scaling makes this an unusual pattern.",
+  "_task_id": "matplotlib__matplotlib-23476",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:51.931617"
+}

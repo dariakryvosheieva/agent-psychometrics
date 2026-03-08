@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of QEMU virtualization, Alpine Linux administration, and SSH server configuration. While the goal is clearly specified (SSH access on port 2222 with specific credentials), the execution involves multiple complex steps: launching QEMU with proper port forwarding, configuring the VM's SSH daemon, setting root password, and ensuring proper networking. The individual components are well-documented but combining them correctly requires significant systems expertise.",
+  "_task_id": "qemu-alpine-ssh",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.428063"
+}

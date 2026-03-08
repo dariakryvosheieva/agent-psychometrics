@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints section provides the exact solution - changing `self.select[0].field` to `self.select[0].target` in django/db/models/sql/query.py. However, understanding WHY this fix works requires deep knowledge of Django's ORM internals, including how Col, output_field, target, and SimpleLazyObject interact in nested subqueries. The problem is crystal clear with a reproducible test case, but the domain expertise needed to arrive at this solution independently would be substantial.",
+  "_task_id": "django__django-12663",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:25.460630"
+}

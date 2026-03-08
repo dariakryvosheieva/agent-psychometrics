@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that CreateModel + AlterModelManagers should be optimized similarly to how CreateModel + AlterModelOptions is already handled. This provides a clear pattern to follow in the existing codebase. However, it requires deep understanding of Django's migration optimizer internals and the specific operation reduction mechanisms. The verification is straightforward with the provided test case.",
+  "_task_id": "django__django-15499",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.650611"
+}

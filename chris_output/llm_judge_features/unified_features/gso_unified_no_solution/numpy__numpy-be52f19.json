@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly indicates the solution involves enabling fast indexed loops for complex add/subtract/multiply operations in ufunc.at. This requires expert-level knowledge of NumPy's internal ufunc implementation and C-level optimizations. The task is atypical as it involves modifying NumPy's core ufunc machinery for complex number operations, which is not a standard optimization pattern with readily available examples.",
+  "_task_id": "numpy__numpy-be52f19",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:44.473851"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing Pydantic model attribute assignment performance, which demands deep understanding of Pydantic's internal validation and setter mechanisms. No solution hint is provided, and the optimization likely involves understanding how Pydantic handles attribute validation on assignment. The verification is straightforward via equivalence checking, but finding the optimization requires knowledge of Pydantic internals like model_config settings or bypassing validation.",
+  "_task_id": "pydantic__pydantic-addf1f9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:23.093422"
+}

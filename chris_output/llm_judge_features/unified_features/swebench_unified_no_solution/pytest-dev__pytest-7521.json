@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with excellent reproducers and even a bisect pointing to the exact commit that introduced the regression. However, fixing it requires deep understanding of pytest's capture internals, specifically how EncodedFile handles text encoding and newline translation. The hint provides the exact commit that caused the issue, making it easier to understand what changed but still requiring knowledge of Python's I/O system and newline handling modes.",
+  "_task_id": "pytest-dev__pytest-7521",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:33.365298"
+}

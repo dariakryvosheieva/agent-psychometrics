@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a complete chess move generator using only regex substitutions, which is an extremely unusual and creative constraint. It demands deep knowledge of chess rules (castling, en passant, promotion) combined with expert-level regex skills to encode game logic through pattern matching. The approach of encoding a full game state machine in regex substitution pairs is highly novel with no standard patterns to follow.",
+  "_task_id": "regex-chess",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:57.027771"
+}

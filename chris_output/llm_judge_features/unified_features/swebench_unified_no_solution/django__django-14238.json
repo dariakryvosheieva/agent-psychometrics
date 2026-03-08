@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement explicitly identifies the exact fix needed: modify AutoFieldMeta.__subclasscheck__ by allowing subclasses of BigAutoField and SmallAutoField in the _subclasses property. The issue is crystal clear with full traceback and reproduction steps. However, it requires deep Django internals knowledge about metaclass subclass checking. The fix itself is straightforward once located, and verification is easy with the provided failing tests.",
+  "_task_id": "django__django-14238",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:54.644112"
+}

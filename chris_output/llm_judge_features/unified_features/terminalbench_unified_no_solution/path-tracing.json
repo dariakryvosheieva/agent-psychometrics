@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires reverse-engineering a programmatically rendered image (likely a ray-traced or path-traced scene based on the task ID) and recreating the algorithm that generated it in C, without being able to embed the image data directly. This demands deep knowledge of computer graphics, ray tracing algorithms, and the ability to deduce scene parameters (geometry, lighting, materials) from visual inspection alone. The 2k compressed size limit ensures an algorithmic solution is required, making this an extremely challenging reverse-engineering and graphics programming task.",
+  "_task_id": "path-tracing",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:47.746881"
+}

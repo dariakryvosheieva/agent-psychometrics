@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing integer square root and Fibonacci computation using only basic logic gates (AND, OR, XOR, NOT) within a constrained number of operations. This is essentially a hardware/circuit design problem requiring deep knowledge of digital logic, arithmetic circuit design (for sqrt), and iterative computation in combinational logic. The combination of isqrt and Fibonacci in gate-level logic is extremely unusual and requires sophisticated algorithm design for bit-level operations.",
+  "_task_id": "circuit-fibsqrt",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.345442"
+}

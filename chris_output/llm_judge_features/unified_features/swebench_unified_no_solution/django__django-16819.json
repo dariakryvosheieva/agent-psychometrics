@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires implementing optimization for AddIndex/RemoveIndex migration operations in Django's migration optimizer. This requires deep knowledge of Django's migration system internals, specifically how operation reduction/optimization works. The test name clearly indicates what needs to pass, and similar patterns exist for other operations (like AddField/RemoveField), making the pattern somewhat standard within Django's codebase.",
+  "_task_id": "django__django-16819",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:40.641478"
+}

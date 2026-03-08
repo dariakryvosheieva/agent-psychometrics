@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies the missing edge case (when a % p == 0, x = 0 is a root) and provides a concrete example. The fix requires understanding modular arithmetic and the nthroot_mod function's internals, but the solution approach is straightforward - add a check for when a % p == 0 and include 0 in the results. Verification is easy with the provided test case.",
+  "_task_id": "sympy__sympy-18199",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:26.155106"
+}

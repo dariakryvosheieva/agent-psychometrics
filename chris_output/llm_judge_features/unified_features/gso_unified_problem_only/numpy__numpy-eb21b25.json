@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing np.add.at and np.subtract.at operations which are NumPy ufunc methods for unbuffered in-place operations. The optimization likely requires deep understanding of NumPy internals, possibly involving C-level optimizations or algorithmic improvements for handling repeated indices. No solution hint is provided and this is not a standard optimization pattern with well-documented solutions.",
+  "_task_id": "numpy__numpy-eb21b25",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:47.646417"
+}

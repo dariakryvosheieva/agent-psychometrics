@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of numerical linear algebra (eigenvalue algorithms like power iteration, QR algorithm) and performance optimization techniques. The constraint to beat numpy's highly optimized implementation while handling complex eigenvalues for non-symmetric matrices adds significant complexity. While the power method is a well-known approach, optimizing it to beat numpy consistently requires careful implementation and potentially using lower-level languages or specialized libraries.",
+  "_task_id": "largest-eigenval",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.856140"
+}

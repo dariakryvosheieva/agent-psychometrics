@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies the bug location (method = builtin_str(method) in sessions.py) and the hint explicitly states the fix should use 'to_native_str' instead. This requires understanding Python 2/3 string handling differences in the requests library, but the solution approach is directly provided. The fix is straightforward once the encoding handling pattern is understood.",
+  "_task_id": "psf__requests-2317",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:06.552840"
+}

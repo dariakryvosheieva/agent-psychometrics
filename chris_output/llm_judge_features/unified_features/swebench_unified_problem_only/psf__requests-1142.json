@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the issue (Content-Length header being added to GET requests) and gives a hint about the expected behavior (don't add it for GET or make it optional). However, fixing this requires understanding the requests library's internals for how headers are prepared and sent, particularly around body handling. The fix location isn't obvious without knowledge of where Content-Length is being set in the request preparation pipeline.",
+  "_task_id": "psf__requests-1142",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:02.211184"
+}

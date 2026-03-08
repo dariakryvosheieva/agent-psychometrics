@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires modifying Sphinx's autodoc extension to handle multiple signatures from overloaded methods in docstrings. It requires deep understanding of Sphinx's autodoc internals and how docstring_signature processing works. The problem statement hints at the direction (pick up all signatures instead of just the first) but doesn't provide implementation details. The test names suggest changes to how class content and docstring signatures interact.",
+  "_task_id": "sphinx-doc__sphinx-7748",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:56.406257"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides the exact solution code to implement. The task is crystal clear - add two printer methods for Min and Max functions. This follows a well-established pattern in SymPy's printer system, and the referenced issue #16669 likely shows similar implementations. Minimal reasoning required as it's essentially copy-paste with the provided code.",
+  "_task_id": "sympy__sympy-22914",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:37.317119"
+}

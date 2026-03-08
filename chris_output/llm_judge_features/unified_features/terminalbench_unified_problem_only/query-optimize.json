@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires SQL query optimization knowledge without any hints about the original query's structure or what optimizations are needed. The solver must analyze the existing query, understand the database schema, identify performance bottlenecks, and apply appropriate optimization techniques (indexes, query restructuring, etc.) while maintaining identical output. While SQL optimization patterns are well-documented, applying them requires understanding both the query and database structure.",
+  "_task_id": "query-optimize",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.238993"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints provide a clear direction for the fix (checking for __main__ module name patterns), but the task requires deep understanding of Python's module system, runpy behavior, and Django's autoreloader internals. The problem involves edge cases with dotted module names and package detection, which is relatively unusual. The test case name clearly indicates what scenario needs to work, making verification moderately straightforward once understood.",
+  "_task_id": "django__django-14311",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:55.223132"
+}

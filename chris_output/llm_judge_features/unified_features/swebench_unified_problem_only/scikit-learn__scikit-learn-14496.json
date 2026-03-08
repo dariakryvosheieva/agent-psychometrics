@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides the exact solution code with detailed explanation. The bug is a simple type conversion issue where a float needs to be converted to int. This is a very common pattern (type casting) that requires minimal domain knowledge beyond understanding the basic context.",
+  "_task_id": "scikit-learn__scikit-learn-14496",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:38.624283"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires understanding Python's asyncio, semaphores for concurrency limiting, and proper signal handling for KeyboardInterrupt to allow task cleanup. The hint about keyboard interrupt and cleanup code adds complexity around exception handling and task cancellation patterns. While asyncio.Semaphore is a standard pattern for limiting concurrency, properly handling cancellation while ensuring cleanup runs requires careful understanding of asyncio's task cancellation behavior.",
+  "_task_id": "cancel-async-tasks",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.177840"
+}

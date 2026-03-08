@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly provides the exact regex fix needed - changing the lookahead from `(?=\\d+:\\d+)` to `(?=-?\\d+:-?\\d+)`. This is a straightforward regex modification requiring basic understanding of lookahead patterns but no deep Django internals knowledge. The failing tests clearly indicate what needs to work, making verification easy.",
+  "_task_id": "django__django-10999",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.885777"
+}

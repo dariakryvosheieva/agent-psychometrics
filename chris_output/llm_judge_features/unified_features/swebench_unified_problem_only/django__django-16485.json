@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly shows the crash with specific inputs and the error message about precision range. However, fixing it requires understanding Django's floatformat implementation and Python's decimal module precision handling. The edge case of '0.00' with precision 0 is unusual but the fix likely involves handling the case where precision would be set to 0 or negative.",
+  "_task_id": "django__django-16485",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:33.921063"
+}

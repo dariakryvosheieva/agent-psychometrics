@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the need for an 'edit_only' mode in model formsets to prevent object creation. The hints provide good context about what doesn't work (extra=0, max_num) and there's even a linked PR. However, implementing this requires deep understanding of Django's formset internals, particularly how form data is processed, validated, and how new vs existing objects are distinguished during save operations.",
+  "_task_id": "django__django-14725",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:02.532096"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires knowledge of Python packaging (setup.py/pyproject.toml), building distributions, and running a local PyPI server (e.g., pypiserver). While the requirements are clearly specified including exact package name, version, function signature, and install command, the task combines multiple specialized steps: creating proper package structure, building wheels/sdist, and configuring a PyPI server. Standard patterns exist for each component but combining them requires some expertise.",
+  "_task_id": "pypi-server",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:52.787711"
+}

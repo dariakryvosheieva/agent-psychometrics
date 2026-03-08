@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the missing edge case: when a % p == 0, x = 0 is also a root that should be returned. The fix requires understanding modular arithmetic and the nthroot_mod function's implementation in SymPy. The solution approach is hinted at (check for a % p == 0 condition), making this a focused bug fix requiring domain knowledge of number theory but with a clear pattern to follow.",
+  "_task_id": "sympy__sympy-18199",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:30.920664"
+}

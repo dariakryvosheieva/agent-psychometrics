@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact line of code causing the bug and provides the exact fix needed (adding multi_class=multi_class parameter). The issue requires understanding scikit-learn's LogisticRegression internals and the difference between OvR and multinomial approaches, but the solution is straightforward parameter passing. Verification requires understanding probability calculations but the provided test code makes this manageable.",
+  "_task_id": "scikit-learn__scikit-learn-11578",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:33.054930"
+}

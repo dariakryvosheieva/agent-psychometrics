@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps and comparison to working formats. However, fixing it requires deep understanding of astropy's io.ascii internals to understand why HTML writer doesn't respect the formats parameter while other writers do. The fix likely involves finding where the HTML writer bypasses the formatting logic that other writers use, requiring knowledge of the library's write pipeline architecture.",
+  "_task_id": "astropy__astropy-13453",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:46.673119"
+}

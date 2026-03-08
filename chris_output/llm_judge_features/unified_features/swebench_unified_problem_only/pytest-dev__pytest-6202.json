@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement provides the exact solution: replace `return s.replace(\".[\"`, \"[\")` with `return s`. The author has traced through the code, identified the problematic line, and even verified the fix passes all tests. The only uncertainty is understanding why the original code existed, but the fix itself is trivially clear. Deep pytest internals knowledge was needed to find the bug, but applying the fix requires minimal reasoning.",
+  "_task_id": "pytest-dev__pytest-6202",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:26.030758"
+}

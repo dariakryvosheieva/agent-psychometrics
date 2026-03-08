@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the issue (hardcoded cut-off point causing exponential notation) and suggests the desired behavior (return zeros when number is smaller than decimal_pos allows). This requires understanding Django's numberformat internals and decimal handling logic. The fix involves modifying the threshold logic, which is moderately complex but the direction is clearly indicated.",
+  "_task_id": "django__django-11206",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:01.707235"
+}

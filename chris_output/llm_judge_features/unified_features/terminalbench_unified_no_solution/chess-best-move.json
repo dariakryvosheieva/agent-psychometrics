@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires image processing to parse a chess board from PNG, chess position recognition/OCR, and deep chess analysis to find the best move. It combines computer vision, chess engine expertise, and shell scripting in a highly unusual way. The task requires specialized knowledge of chess engines (like Stockfish), image processing tools, and the ability to convert visual board state to FEN notation for analysis.",
+  "_task_id": "chess-best-move",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:20.999616"
+}

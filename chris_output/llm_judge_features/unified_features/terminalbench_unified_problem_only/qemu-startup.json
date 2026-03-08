@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires knowledge of QEMU command-line options for serial console redirection to telnet, specifically using -serial tcp:127.0.0.1:6665,server,nowait or similar flags. The task is clear about requirements but doesn't hint at the specific QEMU flags needed. Additional complexity comes from needing to start in background and block until ready, requiring understanding of QEMU's startup behavior.",
+  "_task_id": "qemu-startup",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.884970"
+}

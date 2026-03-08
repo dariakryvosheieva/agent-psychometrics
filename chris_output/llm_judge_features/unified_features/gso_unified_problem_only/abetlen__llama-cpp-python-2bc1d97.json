@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing llama-cpp-python inference performance with no hints about what to optimize. It demands deep knowledge of LLM inference internals, GGUF model loading, and llama.cpp parameters (n_threads, n_batch, GPU offloading, etc.). The verification is complex because results must maintain exact completion equivalence while improving latency, and performance is hardware-dependent.",
+  "_task_id": "abetlen__llama-cpp-python-2bc1d97",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.957310"
+}

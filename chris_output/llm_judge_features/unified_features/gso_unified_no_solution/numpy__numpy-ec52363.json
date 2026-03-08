@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves optimizing numpy's flatiter boolean indexing operation. The PR title hints at the general direction (speed up boolean indexing of flatiters) but doesn't reveal implementation details. This requires deep understanding of numpy's internal iterator and memory handling mechanisms, particularly for non-contiguous arrays with different memory layouts (Fortran order, strided views, reversed arrays). The test cases cover various edge cases making verification moderately complex.",
+  "_task_id": "numpy__numpy-ec52363",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:44.922941"
+}

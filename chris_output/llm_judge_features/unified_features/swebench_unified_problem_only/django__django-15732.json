@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's migration system and database constraint handling, particularly how unique_together constraints interact with field-level unique constraints. The problem hints that the issue involves the migration code expecting only one unique constraint but finding two, but doesn't specify where or how to fix it. The edge case of having both a primary key and unique_together on the same field is unusual, and verifying the fix requires specific PostgreSQL setup with this constraint configuration.",
+  "_task_id": "django__django-15732",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:21.373938"
+}

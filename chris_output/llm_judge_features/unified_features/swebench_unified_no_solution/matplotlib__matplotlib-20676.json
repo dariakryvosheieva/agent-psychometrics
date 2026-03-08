@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The bug is clearly described - interactive SpanSelector forces axes limits to include 0 when it shouldn't. However, fixing it requires deep understanding of matplotlib's widget internals, specifically how SpanSelector initializes and interacts with axes limits. The hints clarify the issue occurs at instantiation time, not during interaction, but don't reveal the specific code causing the problem. The test cases make verification straightforward once the fix is implemented.",
+  "_task_id": "matplotlib__matplotlib-20676",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:46.914507"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear - QDP commands should be case-insensitive but the parser only accepts uppercase. The solution approach is clearly implied: make the command parsing case-insensitive (likely by converting to uppercase before comparison). This is a common pattern (case-insensitive string matching) requiring moderate knowledge of the astropy.io.ascii.qdp module to locate where commands are parsed.",
+  "_task_id": "astropy__astropy-14365",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:51.090920"
+}

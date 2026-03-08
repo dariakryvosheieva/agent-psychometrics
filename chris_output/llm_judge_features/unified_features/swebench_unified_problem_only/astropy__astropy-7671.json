@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement clearly identifies the bug (LooseVersion comparison failure), the root cause (Python bug #30272), and explicitly provides the solution (use pkg_resources.parse_version instead, which was previously removed). The fix is straightforward - revert to using parse_version or implement a workaround. Verification is easy as the exact failing case is provided.",
+  "_task_id": "astropy__astropy-7671",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:52.106493"
+}

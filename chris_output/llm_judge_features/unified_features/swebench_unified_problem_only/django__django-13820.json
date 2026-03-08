@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement provides the exact solution: augment the existing check `getattr(m, '__file__', None)` with `and isinstance(m.__path__, list)`. However, this requires deep understanding of Python's import system (PEP-420 namespace packages, __file__ and __path__ attributes) and Django's migration loader internals. Verification is difficult because it requires testing in frozen Python environments which are uncommon setups.",
+  "_task_id": "django__django-13820",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:48.193019"
+}

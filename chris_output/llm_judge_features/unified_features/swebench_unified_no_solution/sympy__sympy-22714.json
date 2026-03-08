@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The issue involves understanding SymPy's evaluate context manager and how it affects the Point2D class's coordinate checking logic. The error message about 'Imaginary coordinates' when using Integer values suggests the is_real check behaves differently under evaluate(False), requiring deep understanding of SymPy's evaluation system. The fix likely involves handling the unevaluated case in the Point class's validation logic.",
+  "_task_id": "sympy__sympy-22714",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:41.566358"
+}

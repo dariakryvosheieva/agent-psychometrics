@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's QuerySet internals, specifically how `.none()` interacts with combined queries (union). The problem is clearly described with reproducible steps, but finding the fix requires deep understanding of Django's ORM query combining mechanisms. The issue is unusual - it's about an edge case where `.none()` doesn't properly return empty results on union querysets, which is not a common pattern with documented solutions.",
+  "_task_id": "django__django-13158",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:33.489079"
+}

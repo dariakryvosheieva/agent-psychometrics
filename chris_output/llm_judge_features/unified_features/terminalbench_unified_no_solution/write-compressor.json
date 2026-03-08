@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires reverse-engineering a decompression algorithm from C code and implementing the corresponding compression algorithm. The solver must understand compression/decompression concepts, analyze the decomp.c source code to understand its format, and write a compressor that produces compatible output under a size constraint. While verification is straightforward (just run the decompressor), the core task of understanding and inverting an unknown compression scheme is challenging.",
+  "_task_id": "write-compressor",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:06.473657"
+}

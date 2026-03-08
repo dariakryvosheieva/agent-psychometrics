@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires designing a custom resharding algorithm that can split files/directories while respecting size and count constraints, then perfectly reconstruct the original structure. The challenge lies in handling edge cases like deeply nested directories, large files requiring splitting, and maintaining metadata for exact reconstruction. The solution requires Python file I/O expertise, understanding of data serialization for metadata, and careful design of a reversible transformation scheme - there's no standard pattern for this specific combination of constraints.",
+  "_task_id": "reshard-c4-data",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:57.785744"
+}

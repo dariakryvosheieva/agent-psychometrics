@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear - Django's XOR fallback SQL for databases without native XOR incorrectly implements 'exactly one true' semantics instead of 'odd parity' semantics. However, fixing this requires deep knowledge of Django's ORM query compilation internals, specifically how Q objects are combined and translated to SQL. The logical reasoning is complex because the fix must correctly implement XOR parity (a^b^c = (a^b)^c) using only AND/OR/NOT operations, which is a non-trivial boolean algebra transformation.",
+  "_task_id": "django__django-16901",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:41.808986"
+}

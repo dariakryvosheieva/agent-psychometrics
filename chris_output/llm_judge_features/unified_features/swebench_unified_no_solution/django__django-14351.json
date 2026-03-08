@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a regression bug in Django's ORM query compiler involving complex Q object OR operations with subqueries. The problem requires deep understanding of Django's internal query compilation, alias handling, and how get_default_columns works. The hints identify the regression commit but don't explain the fix, and the bug involves subtle interactions between subquery generation and GROUP BY clause construction.",
+  "_task_id": "django__django-14351",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.600902"
+}

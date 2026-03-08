@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ASGI middleware chain, async/sync adaptation mechanisms, and how MiddlewareNotUsed exceptions interact with the handler variable state. The problem statement clearly identifies the bug location (base.py#L58) and explains the root cause - handler variable being incorrectly overwritten when middleware is skipped. However, fixing it requires understanding the subtle interaction between adapt_method_mode(), async_capable flags, and the middleware chain poisoning effect in ASGI contexts.",
+  "_task_id": "django__django-13810",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:47.316772"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly states that fixture names should start with an underscore to be 'private' (hidden without -v flag), and points to the exact file and line number where the issue occurs. This requires understanding pytest's fixture naming conventions and internal unittest integration, but the fix is straightforward once located - just adding an underscore prefix to the fixture name. The solution approach is clearly hinted at in the problem description.",
+  "_task_id": "pytest-dev__pytest-8399",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:31.233418"
+}

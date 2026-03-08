@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM's SQL generation for Case/When expressions with negated empty Q objects (~Q(pk__in=[])). The hint references similar past issues (#33374, #26517) suggesting a known pattern, but fixing it requires deep understanding of Django's query compilation internals - specifically how Q objects are resolved to SQL conditions and how empty conditions should be handled. The problem is well-specified with clear error and expected behavior, but the solution requires navigating complex ORM internals.",
+  "_task_id": "django__django-15930",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:25.812070"
+}

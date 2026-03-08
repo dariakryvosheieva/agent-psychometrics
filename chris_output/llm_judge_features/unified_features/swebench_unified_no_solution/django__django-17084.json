@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM internals, specifically how annotations, aggregates, and window functions interact in query compilation. The test name 'test_referenced_window_requires_wrapping' hints that window functions need to be wrapped in subqueries when aggregating, but implementing this requires intimate knowledge of Django's query building machinery. The regression nature (worked in 4.1, broke in 4.2) suggests changes to aggregation annotation pruning logic need careful analysis.",
+  "_task_id": "django__django-17084",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:43.994446"
+}

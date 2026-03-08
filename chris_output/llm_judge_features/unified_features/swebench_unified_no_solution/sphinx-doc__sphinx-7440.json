@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The bug is clearly described - glossary terms 'MySQL' and 'mysql' are being treated as duplicates when they should be case-sensitive. The fix requires understanding Sphinx's glossary directive internals to find where duplicate detection occurs and modify the case-sensitivity behavior. The test case name 'test_glossary' suggests a straightforward verification, but the solution requires knowledge of Sphinx's domain and directive implementation.",
+  "_task_id": "sphinx-doc__sphinx-7440",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:53.543866"
+}

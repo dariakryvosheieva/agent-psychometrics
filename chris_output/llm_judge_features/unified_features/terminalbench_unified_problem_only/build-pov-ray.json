@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires building legacy software (POV-Ray 2.2 from the 1990s) from source, which involves finding archived sources, potentially dealing with outdated build systems and compatibility issues with modern compilers. The task provides clear instructions about paths and verification method, but building such old software typically requires significant troubleshooting of deprecated code and missing dependencies. The specific version requirement and age of the software makes standard patterns unreliable.",
+  "_task_id": "build-pov-ray",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:22.524798"
+}

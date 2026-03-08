@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints provide an exact solution with a diff showing the fix in `_sqrt_match` function - adding a check for `is_positive` before calling `split_surds`. The problem is crystal clear with full traceback and expected behavior. However, it requires understanding SymPy's internal simplification logic for square roots and surds. The fix itself follows a standard defensive programming pattern of adding input validation.",
+  "_task_id": "sympy__sympy-17318",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:28.881278"
+}

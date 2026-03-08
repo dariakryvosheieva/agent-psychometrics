@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with reproduction steps and stacktrace hints pointing to get_order_dir() receiving OrderBy objects instead of strings. However, fixing it requires deep understanding of Django's ORM internals, specifically how Meta.ordering with expressions interacts with multi-table inheritance and the ordering resolution system. The test case is specific, making verification straightforward, but the solution requires knowing Django's query construction internals.",
+  "_task_id": "django__django-11555",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:11.082836"
+}

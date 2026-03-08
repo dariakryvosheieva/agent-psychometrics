@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves understanding Sphinx's internal document processing pipeline, specifically how rst_prolog interacts with domain directives in headings and the toctree. The problem is clearly described with reproduction steps, but solving it requires deep knowledge of Sphinx's parsing and rendering internals. The interaction between rst_prolog injection and heading detection is an unusual edge case that likely requires understanding the document transformation process.",
+  "_task_id": "sphinx-doc__sphinx-11445",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:48.894553"
+}

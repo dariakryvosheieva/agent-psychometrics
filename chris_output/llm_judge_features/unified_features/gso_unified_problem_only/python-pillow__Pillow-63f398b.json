@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing PIL's Image.getbbox() method, which finds the bounding box of non-zero pixels in an image. The test script provides no hints about how to optimize it - you need deep understanding of PIL/Pillow internals and image processing algorithms to identify bottlenecks. The verification is straightforward since getbbox returns deterministic coordinates, but finding the optimization requires understanding how the method scans pixels and potentially implementing SIMD or algorithmic improvements at the C level.",
+  "_task_id": "python-pillow__Pillow-63f398b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:07.992271"
+}

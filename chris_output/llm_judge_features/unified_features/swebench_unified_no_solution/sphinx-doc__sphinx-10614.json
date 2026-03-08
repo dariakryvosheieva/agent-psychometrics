@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is very well documented with clear reproduction steps and analysis of the root cause (SVG links are relative to the SVG file location, not the embedding HTML file). However, fixing this requires deep understanding of Sphinx's inheritance diagram extension, how SVG embedding works with the object tag, and how relative URLs should be computed. The solution involves correcting path calculations in the SVG generation code, which requires knowledge of Sphinx's internal URI handling.",
+  "_task_id": "sphinx-doc__sphinx-10614",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:52.070341"
+}

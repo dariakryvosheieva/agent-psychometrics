@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves understanding Python's internal compilation behavior for debug builds, specifically how literal names like 'False', 'True', 'None' must be handled specially in AST compilation. The bug is in pytest's Expression.compile() which generates AST code that triggers a CPython assertion. Fixing this requires deep knowledge of both pytest internals and Python AST compilation rules, and verification requires a debug Python build.",
+  "_task_id": "pytest-dev__pytest-7324",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:27.626706"
+}

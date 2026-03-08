@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that CAST() is wrapping only the LAG() function instead of the entire window expression, causing SQLite syntax errors. This requires deep knowledge of Django's SQL generation internals, particularly how DecimalField conversions interact with Window functions. The fix involves understanding Django's ORM expression compilation and how type casting should be applied to window expressions rather than just their inner components.",
+  "_task_id": "django__django-13449",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:39.371377"
+}

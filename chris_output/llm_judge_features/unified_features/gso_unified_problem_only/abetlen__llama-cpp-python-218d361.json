@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing llama-cpp-python inference performance without any hints about what to change. It demands deep knowledge of LLM inference optimization (batching, memory management, context handling, threading) and the specific llama.cpp library internals. Verification is challenging due to the requirement for exact output equivalence while improving latency, and the timing-sensitive nature of performance benchmarks.",
+  "_task_id": "abetlen__llama-cpp-python-218d361",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.018709"
+}

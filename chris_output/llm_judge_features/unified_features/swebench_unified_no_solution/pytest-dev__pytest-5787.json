@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that chained exceptions are not being serialized properly when using xdist, and the hint mentions that exception serialization is 'limited and simplistic'. However, fixing this requires deep understanding of pytest's internal report serialization mechanism and how exception chains work in Python. The solution requires modifying serialization/deserialization logic to handle __cause__ and __context__ exception attributes, which is somewhat specialized.",
+  "_task_id": "pytest-dev__pytest-5787",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:27.811149"
+}

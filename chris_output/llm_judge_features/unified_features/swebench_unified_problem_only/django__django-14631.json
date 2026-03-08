@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task provides a very detailed solution approach, including specific method names (bf._did_change()) and even example code for the refactored changed_data property. However, it requires deep understanding of Django forms internals (BaseForm, BoundField, _clean_fields, changed_data). The refactoring involves moving logic between classes while maintaining consistency, which requires careful reasoning about the form data flow.",
+  "_task_id": "django__django-14631",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:01.831226"
+}

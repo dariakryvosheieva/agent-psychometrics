@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints explicitly state the solution: use `__qualname__` instead of `__name__` in `TypeSerializer`. The problem is crystal clear with reproducible examples, and the exact file location is even mentioned (serializer.py#L266). This requires Django migrations internals knowledge, but the fix itself is straightforward once you understand the pattern already applied elsewhere in the codebase.",
+  "_task_id": "django__django-12125",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:18.938871"
+}

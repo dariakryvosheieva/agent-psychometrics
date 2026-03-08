@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep cryptographic knowledge specifically about FEAL cipher differential cryptanalysis, which is a specialized academic topic. The task clearly specifies the approach (differential attack/chosen plaintext) and that round keys are derived from 16-bit seeds, which is a significant hint. While differential cryptanalysis of FEAL is documented in academic literature, implementing it correctly requires understanding differential characteristics, probability calculations, and key recovery techniques.",
+  "_task_id": "feal-differential-cryptanalysis",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.766989"
+}

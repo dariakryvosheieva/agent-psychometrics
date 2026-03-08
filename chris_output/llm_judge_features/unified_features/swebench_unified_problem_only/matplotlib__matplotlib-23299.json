@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves complex interaction between matplotlib's rc_context, backend management, and figure management (Gcf). The problem is clearly described with reproduction code, but solving it requires deep understanding of matplotlib's internal state management and how rc_context affects figure lifecycle. The connection between get_backend() and figure clearing is non-obvious and involves understanding the backend switching mechanism.",
+  "_task_id": "matplotlib__matplotlib-23299",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:49.548103"
+}

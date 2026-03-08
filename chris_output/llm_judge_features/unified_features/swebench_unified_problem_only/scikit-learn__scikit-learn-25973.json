@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The bug is clearly described with a reproducible example showing that passing an iterator of splits to SequentialFeatureSelector fails. However, the solution requires understanding scikit-learn's internal handling of CV iterators vs generators - the issue is likely that the generator gets exhausted after the first use. This requires deep knowledge of how scikit-learn handles cv parameters internally and the distinction between iterables and generators.",
+  "_task_id": "scikit-learn__scikit-learn-25973",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:44.377018"
+}

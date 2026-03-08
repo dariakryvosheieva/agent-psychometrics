@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's migration autodetector not properly handling cross-app ManyToMany 'through' models, causing string references to not be resolved before accessing _meta. Fixing this requires deep understanding of Django's migration system internals, particularly how model dependencies and lazy references work. The problem is clearly described with traceback and reproduction steps, but the solution requires understanding the autodetector's dependency resolution logic.",
+  "_task_id": "django__django-15973",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:25.759095"
+}

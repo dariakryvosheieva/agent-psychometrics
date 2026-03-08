@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized SPARQL query language knowledge for RDF/Turtle data, including understanding of ontology structures, GROUP BY with aggregations, and FILTER conditions. The logical complexity involves combining multiple criteria (professor type, EU country membership, student enrollment counts) in a single query with proper JOIN semantics. While the task is well-specified, SPARQL queries for knowledge graphs with multiple conditions and aggregations are not common shell tasks and require domain expertise.",
+  "_task_id": "sparql-university",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.737459"
+}

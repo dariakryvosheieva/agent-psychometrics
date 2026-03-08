@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding COBOL syntax and semantics to reverse-engineer the program logic, then translate it to Python while maintaining byte-level compatibility with the original data file formats. COBOL's fixed-format record structures, packed decimals, and file handling conventions require specialized knowledge. The verification is moderately difficult as it requires exact binary matching of output files, but the comparison itself is straightforward.",
+  "_task_id": "cobol-modernization",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:25.420247"
+}

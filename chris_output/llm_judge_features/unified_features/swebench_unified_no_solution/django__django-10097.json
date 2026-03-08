@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the RFC 1738 requirement that username/password fields must have certain characters encoded, and gives specific examples of invalid URLs. It requires understanding Django's URLValidator regex internals and URL parsing standards. The fix involves modifying a complex regex pattern to properly reject unencoded special characters, which is a moderately specialized task with established patterns for URL validation.",
+  "_task_id": "django__django-10097",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.812266"
+}

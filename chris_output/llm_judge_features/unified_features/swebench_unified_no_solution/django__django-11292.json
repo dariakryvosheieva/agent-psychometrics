@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly states that a 'skip_checks' stealth option already exists and needs to be exposed as a command-line argument '--skip-checks'. This requires understanding Django's management command infrastructure, specifically how arguments are added to the base parser and how they connect to existing options. The pattern of adding command-line arguments to Django management commands is well-documented, making implementation straightforward once the codebase structure is understood.",
+  "_task_id": "django__django-11292",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:06.001532"
+}

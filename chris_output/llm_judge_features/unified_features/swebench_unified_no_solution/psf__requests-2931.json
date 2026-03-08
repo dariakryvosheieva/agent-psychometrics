@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides a clear reproduction case and identifies the commit that introduced the regression (#2844 involving to_native_string). The fix requires understanding how requests handles binary payloads and string encoding, specifically that to_native_string shouldn't be called on binary data. This is a common encoding/string handling pattern in Python 2/3 compatibility code.",
+  "_task_id": "psf__requests-2931",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:05.938771"
+}

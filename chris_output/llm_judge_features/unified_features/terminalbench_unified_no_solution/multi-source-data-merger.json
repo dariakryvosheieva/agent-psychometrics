@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides very clear specifications including exact field mappings, priority rules, and output formats. It requires knowledge of pandas/data processing libraries and handling multiple file formats (JSON, CSV, Parquet). The ETL pattern with schema mapping and conflict resolution is a common data engineering task, but implementing the conflict tracking and report generation adds moderate complexity.",
+  "_task_id": "multi-source-data-merger",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:46.821171"
+}

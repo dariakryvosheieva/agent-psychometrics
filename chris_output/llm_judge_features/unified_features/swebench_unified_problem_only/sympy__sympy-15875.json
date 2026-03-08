@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of SymPy's internal assumption system and how `is_zero` is computed for complex expressions in the Add class. The problem is clearly stated with a reproducible example, but the fix requires understanding how symbolic evaluation handles complex numbers and when assumptions should return None vs False. The solution involves modifying core symbolic computation logic where incorrectly returning False instead of None propagates errors.",
+  "_task_id": "sympy__sympy-15875",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:21.133246"
+}

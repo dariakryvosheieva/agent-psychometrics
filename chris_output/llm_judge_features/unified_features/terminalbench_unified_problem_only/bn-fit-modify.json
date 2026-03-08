@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Bayesian Networks, causal inference, and DAG structure learning algorithms. The user must understand how to recover DAG structure from data, perform causal interventions (do-calculus), and sample from modified Bayesian Networks. While the steps are clearly outlined, executing them requires specialized statistical/ML packages and understanding of probabilistic graphical models that goes well beyond standard shell scripting.",
+  "_task_id": "bn-fit-modify",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.984750"
+}

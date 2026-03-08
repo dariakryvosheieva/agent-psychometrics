@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact solution approach - adding symmetric handling for `_Unsigned=False` at the same location where `_Unsigned=True` is already handled. The problem statement explicitly identifies the exact code location and the symmetrical fix needed (`.kind == 'u' and unsigned == False`). While deep knowledge of netCDF conventions and xarray's coding internals is required, the fix follows an existing pattern in the codebase. Verification is straightforward with the provided test cases.",
+  "_task_id": "pydata__xarray-4966",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:13.296799"
+}

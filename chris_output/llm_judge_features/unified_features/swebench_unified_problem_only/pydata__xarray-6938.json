@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly demonstrates that swap_dims() mutates the original object when it shouldn't, which is a common copy/reference bug pattern. However, fixing it requires deep understanding of xarray's internal data structures (Dataset, DataArray, dimensions, coordinates) and how they share references. The solution likely involves ensuring proper copying of internal data structures, but finding exactly where the mutation occurs requires tracing through xarray internals.",
+  "_task_id": "pydata__xarray-6938",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:15.251762"
+}

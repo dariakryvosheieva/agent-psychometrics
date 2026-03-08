@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Hermite Normal Form algorithms and matrix rank computations in SymPy's internals. The bug involves incorrect row removal during HNF computation, likely related to rank detection logic. The hints show related cases but don't point to the exact fix, and the mathematical domain (integer matrix normal forms) is highly specialized.",
+  "_task_id": "sympy__sympy-23413",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:43.294290"
+}

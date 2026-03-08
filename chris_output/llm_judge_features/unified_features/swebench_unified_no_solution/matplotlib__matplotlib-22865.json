@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The bug is crystal clear with visual examples showing expected vs actual behavior. However, fixing it requires deep understanding of matplotlib's colorbar internals, specifically how drawedges works with extended colorbars and how edge paths are calculated. The test names suggest the fix involves handling extremity edges when extend='both'/'min'/'max', but the actual implementation requires knowledge of matplotlib's internal colorbar rendering pipeline.",
+  "_task_id": "matplotlib__matplotlib-22865",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:49.381197"
+}

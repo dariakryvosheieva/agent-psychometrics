@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of polylogarithm functions, their mathematical properties, branch cuts, and SymPy's internal handling of special functions including exp_polar. The problem clearly describes the expected behavior (polylog(2, 1/2) should evaluate to -log(2)**2/2 + pi**2/12) and identifies issues with exp_polar in expand_func, but implementing the fix requires understanding complex analysis and SymPy's function evaluation system. Verification requires mathematical correctness checking across multiple cases including branch cuts.",
+  "_task_id": "sympy__sympy-13852",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:14.214531"
+}

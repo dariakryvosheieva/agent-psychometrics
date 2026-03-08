@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints section provides the exact solution code (replacing 'b' in the mode property) and even suggests a specific test to add. The problem is crystal clear with detailed traceback and reproduction steps. The main complexity is understanding pytest's capture internals, but the fix itself is trivial once identified.",
+  "_task_id": "pytest-dev__pytest-5262",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:26.872112"
+}

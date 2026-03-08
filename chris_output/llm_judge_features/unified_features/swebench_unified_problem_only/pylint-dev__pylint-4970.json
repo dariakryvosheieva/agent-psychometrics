@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the current behavior (0 treats every line as duplicate) and desired behavior (0 should disable the check). The solution approach is implied - add a check to skip duplicate code detection when min-similarity-lines is 0. This requires understanding pylint's configuration and similarity checker internals, but follows a common pattern of using 0 to disable a feature.",
+  "_task_id": "pylint-dev__pylint-4970",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:19.011789"
+}

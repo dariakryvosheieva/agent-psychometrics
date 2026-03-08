@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The error traceback points to a specific line in logistic.py where array indexing fails with refit=False, giving a general direction but not the solution. Understanding the fix requires deep knowledge of scikit-learn's LogisticRegressionCV internals, particularly how coefs_paths array dimensions differ between refit=True and refit=False cases. The bug is reproducible with clear steps, making verification straightforward once the fix is implemented.",
+  "_task_id": "scikit-learn__scikit-learn-14087",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:39.035623"
+}

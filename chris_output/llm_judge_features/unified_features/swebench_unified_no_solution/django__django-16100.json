@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly states that transaction handling needs to be added to changelist_view's list_editable processing. This requires deep Django admin internals knowledge to identify exactly where to wrap the transaction, but the pattern of using Django's transaction.atomic() decorator/context manager is well-documented. The test name 'test_list_editable_atomicity' confirms the approach, and the hint explicitly mentions it's about adding transaction wrapping to existing code.",
+  "_task_id": "django__django-16100",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:27.007923"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the bug (extra parentheses causing wrong class creation) and expected vs actual behavior, but doesn't hint at where in the code the fix should be made. Requires understanding of SymPy's symbols() function internals and how it handles nested tuples/sequences when processing the cls parameter. Verification is straightforward since the test case is provided, but finding the fix requires tracing through the symbols parsing logic.",
+  "_task_id": "sympy__sympy-23534",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:41.012075"
+}

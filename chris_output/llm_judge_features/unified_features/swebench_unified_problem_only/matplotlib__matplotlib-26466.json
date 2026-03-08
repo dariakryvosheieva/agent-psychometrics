@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that arrays are being stored by reference instead of being copied, and even demonstrates the workaround (using .copy()). The fix requires finding where xy parameters are stored in matplotlib's annotation code and adding a copy operation. This is a common mutable default/reference bug pattern in Python, though it requires some familiarity with matplotlib's internals to locate the correct code.",
+  "_task_id": "matplotlib__matplotlib-26466",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:01.096225"
+}

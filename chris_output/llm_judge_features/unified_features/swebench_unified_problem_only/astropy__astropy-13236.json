@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides exact solution steps: add a FutureWarning and later remove the code clause. However, it requires deep understanding of astropy's Table internals, Column vs NdarrayMixin behavior, and the serialization implications. The deprecation warning pattern is standard, but understanding where and how to implement it requires familiarity with the codebase.",
+  "_task_id": "astropy__astropy-13236",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:46.872195"
+}

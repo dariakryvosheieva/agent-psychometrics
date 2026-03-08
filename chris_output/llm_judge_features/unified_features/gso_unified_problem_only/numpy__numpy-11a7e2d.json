@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's ufunc.at method (specifically np.minimum.at) which performs unbuffered in-place operations. No solution hint is provided, and optimization likely requires deep understanding of numpy internals, potentially involving changes to how the reduction operation handles memory access patterns or parallelization. The use of .at() with large arrays and NaN handling adds complexity, making this an unusual optimization target without standard patterns.",
+  "_task_id": "numpy__numpy-11a7e2d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.132667"
+}

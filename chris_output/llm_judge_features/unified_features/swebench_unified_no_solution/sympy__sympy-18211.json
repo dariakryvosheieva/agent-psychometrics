@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact diff patch showing the solution - wrapping a try/except around solve_univariate_inequality to catch NotImplementedError and return a ConditionSet instead. The problem is crystal clear with explicit expected behavior. While it requires SymPy-specific knowledge about sets and solvers, the actual fix is a straightforward exception handling pattern.",
+  "_task_id": "sympy__sympy-18211",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:31.478575"
+}

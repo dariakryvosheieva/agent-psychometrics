@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of ELF binary format to parse program headers, sections, and extract memory values at specific addresses. The task hints at the output format but doesn't explain how to parse ELF files or which sections contain 'memory values'. Writing a Node.js ELF parser from scratch or finding appropriate libraries requires specialized systems programming knowledge and understanding of executable file formats.",
+  "_task_id": "extract-elf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.801750"
+}

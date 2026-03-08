@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explicitly states this is 'an edge case in the unit handling code' involving the interaction between twinx, stackplot, and string-based categorical data. This requires deep understanding of matplotlib's internal unit machinery, axes sharing mechanisms, and data limits handling. The test names (test_twin_units) and hint about unit machinery point to the general area but still require understanding complex internal state propagation between twin axes.",
+  "_task_id": "matplotlib__matplotlib-26208",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:01.601879"
+}

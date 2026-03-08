@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's management command infrastructure, specifically how stdout/stderr streams are wrapped and how flush() should propagate. The problem is clear about the symptom (flush not working during migrations) but doesn't hint at where the fix should be applied. Verification is difficult because it involves timing-sensitive output buffering behavior that may be hard to reproduce in tests.",
+  "_task_id": "django__django-13516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:39.776444"
+}

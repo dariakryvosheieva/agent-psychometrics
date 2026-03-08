@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires significant computer vision expertise to detect jump takeoff and landing frames from video using only OpenCV and numpy. The approach is only vaguely hinted at (background subtraction possible since first frame has no runner), but the actual detection algorithm for determining exact takeoff/landing moments must be designed from scratch. Verification is difficult because correct frame numbers depend on subjective interpretation of when a jump begins/ends, and there's no standard well-documented pattern for this specific hurdle jump detection problem.",
+  "_task_id": "video-processing",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:05.546206"
+}

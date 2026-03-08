@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's form field validation internals, specifically how MultiValueField handles required sub-fields when require_all_fields=False. The problem is clearly described with a reproducible example showing the expected vs actual behavior, but finding the fix requires understanding the validation flow in MultiValueField.clean() and how it interacts with empty values and sub-field requirements. The fix likely involves modifying the conditional logic that checks sub-field requirements when the parent field allows empty values.",
+  "_task_id": "django__django-14034",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:52.216844"
+}

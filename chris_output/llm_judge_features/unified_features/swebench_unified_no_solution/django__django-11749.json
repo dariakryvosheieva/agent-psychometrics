@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the issue: call_command only passes individually required arguments to the parser, but doesn't handle mutually exclusive groups where the group itself is required. The solution approach is hinted at - need to also check for arguments that are part of required mutually exclusive groups. However, implementing this requires deep knowledge of Django's management command internals and argparse's internal structures (_mutually_exclusive_groups).",
+  "_task_id": "django__django-11749",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:11.323151"
+}

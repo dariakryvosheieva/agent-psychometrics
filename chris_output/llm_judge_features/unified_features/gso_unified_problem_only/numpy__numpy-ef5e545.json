@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's np.char.isalpha function on a large string array with no hints about the approach. It demands deep knowledge of numpy's string operations internals and potentially SIMD/vectorization techniques. The optimization target is unclear - could involve C-level changes, algorithm improvements, or memory layout optimizations in numpy's character operations module.",
+  "_task_id": "numpy__numpy-ef5e545",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:34.456422"
+}

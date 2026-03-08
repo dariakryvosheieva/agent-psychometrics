@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact file and line numbers where the deprecated kwargs are used, and clearly states the new parameter names ('database' instead of 'db', 'password' instead of 'passwd'). This is a straightforward string replacement task with minimal logic required. The only domain knowledge needed is basic familiarity with Django's database backend structure, and verification is simple - just ensure MySQL connections still work with the new parameter names.",
+  "_task_id": "django__django-14376",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.076873"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with the exact solution provided in the hints - remove the extra <mi></mi> tags wrapping <msub> elements. The fix requires understanding of MathML structure and SymPy's printing module, but the exact problematic code pattern and fix are explicitly described. Verification is straightforward with the provided test case.",
+  "_task_id": "sympy__sympy-15976",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:25.481206"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly shows an IndexError occurring when an expression cannot be denested, and states the expected behavior (return unchanged). The fix requires understanding SymPy's sqrtdenest internals and the call chain through _split_gcd. This is a standard defensive programming pattern - catching an edge case where a tuple is empty - but requires domain knowledge of the symbolic math library to identify the right place to add the guard.",
+  "_task_id": "sympy__sympy-17318",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:24.950705"
+}

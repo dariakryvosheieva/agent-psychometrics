@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires parsing ICS calendar files, implementing a constraint satisfaction algorithm for scheduling, and generating valid ICS output. The complexity comes from handling multiple overlapping constraints (hard constraints like availability windows, soft preferences, buffer times, day-specific rules) and finding the earliest valid slot at minute granularity. While the problem is clearly specified, there's no standard shell pattern for constraint-based calendar scheduling - it requires custom logic combining ICS parsing, temporal reasoning, and constraint satisfaction.",
+  "_task_id": "constraints-scheduling",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.651481"
+}

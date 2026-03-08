@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly describes the solution approach (add _cdf methods with precomputed formulas), provides test cases, references Wikipedia for formulas, and mentions existing implementations (Normal, Uniform) as patterns to follow. However, it requires knowledge of probability distributions, their CDF formulas, and SymPy's stats module internals. Verification involves comparing derivatives of CDFs with PDFs and numeric testing.",
+  "_task_id": "sympy__sympy-13878",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:16.117359"
+}

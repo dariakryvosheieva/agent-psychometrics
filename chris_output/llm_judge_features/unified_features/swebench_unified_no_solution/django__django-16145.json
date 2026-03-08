@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is clearly described - when running `runserver 0:8000`, the output shows `http://0:8000/` instead of `http://0.0.0.0:8000/`. The hints explicitly suggest rewriting address '0' to '0.0.0.0' in runserver's output, pointing to where the fix should be made. This requires Django-specific knowledge of the runserver command implementation but is a straightforward string replacement/normalization task.",
+  "_task_id": "django__django-16145",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:30.252228"
+}

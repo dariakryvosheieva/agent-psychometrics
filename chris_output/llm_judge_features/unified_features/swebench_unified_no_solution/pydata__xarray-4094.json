@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with a minimal reproducible example and expected behavior (roundtrip should work). However, fixing this requires deep understanding of xarray's internal coordinate handling during stacking/unstacking operations, particularly how multiindex coordinates interact with the merge operation. The error message ('conflicting values for variable y') hints at a coordinate conflict issue but doesn't directly point to the solution.",
+  "_task_id": "pydata__xarray-4094",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:12.116900"
+}

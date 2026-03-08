@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that SECRET_KEY_FALLBACKS is not being used for session authentication hashes, pointing to specific functions (salted_hmac and get_session_auth_hash). The hints confirm this is a bug and suggest checking fallback session hashes. However, fixing this requires deep understanding of Django's authentication system, session management, and HMAC signing mechanisms. The solution involves modifying how session auth hashes are verified to iterate through fallback keys.",
+  "_task_id": "django__django-16631",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:35.970062"
+}

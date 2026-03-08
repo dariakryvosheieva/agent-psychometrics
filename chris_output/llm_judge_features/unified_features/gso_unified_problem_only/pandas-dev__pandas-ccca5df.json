@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas groupby.idxmin() operation with no hints about the solution approach. It demands deep understanding of pandas internals, groupby implementation, and potential Cython/algorithm-level optimizations. The task is moderately unusual as groupby optimizations typically focus on common operations like sum/mean rather than idxmin, and verification requires ensuring correctness while achieving measurable speedup.",
+  "_task_id": "pandas-dev__pandas-ccca5df",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.883054"
+}

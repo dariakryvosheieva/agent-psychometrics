@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides the exact solution: change the type check from `isinstance(attr, Expression)` to either duck typing with `hasattr(attr, 'resolve_expression')` or explicit `isinstance(attr, (Expression, F))`. The problem is crystal clear with a complete reproduction case and SQL output showing the bug. While Django ORM internals knowledge is needed to understand why F() isn't caught by the Expression check, the fix itself is trivial once identified.",
+  "_task_id": "django__django-15368",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:14.461601"
+}

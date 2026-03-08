@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves FITS card string parsing/serialization with specific edge cases around quote handling in long strings that span multiple lines. The problem is clearly demonstrated with reproducible test cases, but fixing it requires deep understanding of FITS format specifications and the library's internal string continuation mechanism. The issue only manifests at specific string lengths, indicating complex boundary conditions in the serialization/deserialization logic.",
+  "_task_id": "astropy__astropy-14598",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:52.590542"
+}

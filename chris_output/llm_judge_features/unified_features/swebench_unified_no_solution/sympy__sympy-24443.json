@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the bug location (the `_image()` function handling inverted generators) and hints at the solution approach (simplification needed). However, fixing this requires deep understanding of SymPy's combinatorics module, specifically how PermutationGroups, generators, and homomorphisms work. The test is straightforward to verify but the domain knowledge needed to properly handle inverted generators in the homomorphism checking logic is substantial.",
+  "_task_id": "sympy__sympy-24443",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:46.578269"
+}

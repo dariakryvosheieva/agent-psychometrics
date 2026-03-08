@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing Tornado's BaseIOStream write operations with no hints about the solution approach. Understanding Tornado's internal stream implementation, buffering mechanisms, and memory management is essential. The test script only shows the performance scenario (writing large payloads repeatedly) but gives no indication of what optimization is needed in the library internals, making this a challenging task requiring deep framework knowledge.",
+  "_task_id": "tornadoweb__tornado-1b464c4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:25.838199"
+}

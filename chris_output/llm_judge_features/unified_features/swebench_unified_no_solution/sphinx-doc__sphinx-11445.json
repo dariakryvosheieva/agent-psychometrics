@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints clearly identify both the problematic code location (sphinx/util/rst.py lines 81-91) and the general approach (the prolog is inserted incorrectly between domain directives and heading definitions). However, fixing this requires understanding Sphinx's RST parsing internals and how prolog insertion interacts with document structure. The test names suggest the fix involves handling sections with roles differently based on newline presence.",
+  "_task_id": "sphinx-doc__sphinx-11445",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:52.430329"
+}

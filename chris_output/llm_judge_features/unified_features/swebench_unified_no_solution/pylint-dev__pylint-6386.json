@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear - the short `-v` option incorrectly expects an argument while `--verbose` works fine. This is a standard argparse configuration issue where the short option likely needs `nargs=0` or `action='store_true'` instead of expecting a value. Requires knowledge of Python's argparse/optparse configuration patterns and pylint's config system, but the fix pattern is well-documented.",
+  "_task_id": "pylint-dev__pylint-6386",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:21.827074"
+}

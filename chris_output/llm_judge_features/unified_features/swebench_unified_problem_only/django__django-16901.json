@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with exact expected vs actual behavior, but solving it requires deep understanding of Django's ORM internals, specifically how Q objects are compiled to SQL and how XOR fallback logic works. The fix requires understanding the mathematical difference between 'exactly one true' and 'parity' (odd number true) semantics for XOR operations, and implementing correct fallback SQL generation for databases without native XOR support.",
+  "_task_id": "django__django-16901",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:40.970229"
+}

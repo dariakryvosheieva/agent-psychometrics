@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and identifies the exact line causing the issue. The solution approach is clearly implied - wrap the datetime.date() call in a try-except to catch OverflowError. This is a standard input validation pattern, requiring Django forms/widgets knowledge but straightforward logic.",
+  "_task_id": "django__django-16667",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:40.160604"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly provides the exact solution: change L437 to check against `FigureBase` instead of `Figure`. The issue is crystal clear with a minimal reproducible example, exact traceback, and specific file/line references. The fix is a simple type check modification in the class hierarchy, requiring moderate matplotlib internals knowledge but straightforward logic.",
+  "_task_id": "matplotlib__matplotlib-20859",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:47.129726"
+}

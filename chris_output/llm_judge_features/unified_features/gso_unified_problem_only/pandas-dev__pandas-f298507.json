@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas DataFrame.round() performance without any hint about the solution approach. The test script shows both normal and transposed DataFrames being rounded, suggesting the optimization may involve memory layout or internal pandas implementation details. Understanding pandas internals and how data layout affects performance requires deep library knowledge, and finding the optimization without guidance requires significant reasoning about potential bottlenecks.",
+  "_task_id": "pandas-dev__pandas-f298507",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.360624"
+}

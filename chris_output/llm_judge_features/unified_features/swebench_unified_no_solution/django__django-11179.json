@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints provide exact line numbers and a detailed explanation of the fix needed, essentially giving the solution. The task requires understanding Django's ORM deletion internals (fast delete path vs regular delete), but the fix itself is straightforward - mimicking existing code that sets PK to None. The test case is clear and verification is simple.",
+  "_task_id": "django__django-11179",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:01.639884"
+}

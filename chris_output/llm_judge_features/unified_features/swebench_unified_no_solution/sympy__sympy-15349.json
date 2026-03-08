@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that a sign error exists in the rotation matrix output (one sin(x) should be negative), which strongly hints at the solution being a sign correction in the quaternion-to-rotation-matrix formula. This requires knowledge of quaternion mathematics and the standard rotation matrix formula, which is well-documented. Verification is straightforward since the expected rotation matrix for a quaternion representing rotation around the x-axis is a standard result.",
+  "_task_id": "sympy__sympy-15349",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:23.399601"
+}

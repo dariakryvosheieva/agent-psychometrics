@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires understanding Sphinx's autodoc internals, specifically how it processes type annotations and the nitpick warning system. The problem is clearly described with reproduction steps, but fixing it requires knowledge of how Sphinx handles Literal types differently from regular classes. The solution involves modifying the type annotation processing to recognize Literal values as special cases that shouldn't trigger py:class missing warnings.",
+  "_task_id": "sphinx-doc__sphinx-9602",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:04.011002"
+}

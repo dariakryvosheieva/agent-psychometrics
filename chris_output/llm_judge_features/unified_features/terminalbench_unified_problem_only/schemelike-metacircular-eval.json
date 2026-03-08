@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires writing a metacircular evaluator in a Scheme-like language, which is a classic but highly advanced programming language theory concept. It demands deep understanding of interpreters, evaluation models, and self-referential programs. The requirement that the evaluator must interpret itself adds significant complexity, requiring careful handling of all language constructs including I/O redirection within the interpreted language's constraints.",
+  "_task_id": "schemelike-metacircular-eval",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.747440"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's GenericForeignKey and prefetch_related interaction with UUID primary keys, requiring deep understanding of Django's ORM internals, specifically how GFK lookups handle type conversion between CharField object_id and UUID primary keys. The problem is clearly described with reproduction steps, but the solution requires understanding the internal prefetch mechanism and type coercion logic. The fix likely involves ensuring proper type conversion when matching object_ids to primary keys of different types.",
+  "_task_id": "django__django-11211",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:05.302890"
+}

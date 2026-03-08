@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes wanting to allow arbitrary mul_symbol values instead of restricting to 4 predefined choices. The hint confirms the approach: modify the mapping logic to pass through unknown arguments as literal latex. This requires understanding sympy's latex printer internals but the fix pattern (allowing custom values in a restricted mapping) is straightforward and well-documented.",
+  "_task_id": "sympy__sympy-13798",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:18.637770"
+}

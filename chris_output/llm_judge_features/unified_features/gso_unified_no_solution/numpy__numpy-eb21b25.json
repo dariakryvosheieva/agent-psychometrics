@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint suggests using an 'indexed loop' for ufunc.at optimization, providing only a vague direction. This requires expert-level knowledge of NumPy's internal ufunc implementation and C-level loop optimizations. The task involves understanding how NumPy handles indexed operations and when specialized loop patterns can outperform generic implementations, which is a relatively rare optimization pattern requiring deep library internals knowledge.",
+  "_task_id": "numpy__numpy-eb21b25",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.311776"
+}

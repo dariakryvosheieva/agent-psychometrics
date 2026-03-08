@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement includes essentially the complete solution code for the ITRS to AltAz/HADec transformations. However, implementing this requires deep understanding of astronomical coordinate systems (ITRS, ICRS, CIRS, AltAz, HADec), frame transformations, aberration corrections, and the astropy coordinates framework internals. The verification involves complex astronomical calculations with refraction and coordinate system transformations that are difficult to validate without domain expertise.",
+  "_task_id": "astropy__astropy-13398",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:47.021863"
+}

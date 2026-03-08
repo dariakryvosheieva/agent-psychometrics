@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's sort function performance on integer arrays. Without access to the actual codebase or hints about what optimization is expected, the solver needs deep knowledge of numpy internals, sorting algorithms, and potential optimizations like SIMD, parallel processing, or algorithm selection based on data characteristics. Verification is straightforward since sorted array equality is easy to check, but finding the optimization path requires significant domain expertise.",
+  "_task_id": "numpy__numpy-794f474",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.229026"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM internals, specifically how empty querysets interact with EXISTS subqueries and WHERE clause generation. The reference to a similar issue (#33018) provides a vague hint but not a solution. Understanding requires deep knowledge of Django's query compilation and how EmptyResultSet exceptions propagate through the query building process.",
+  "_task_id": "django__django-15382",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:15.330383"
+}

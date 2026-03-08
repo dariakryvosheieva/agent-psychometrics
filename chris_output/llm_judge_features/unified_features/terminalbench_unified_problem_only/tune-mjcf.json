@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep expertise in MuJoCo physics simulation and MJCF model tuning to achieve 40%+ speedup without changing physics outcomes. The constraint that physical properties cannot be changed while still achieving significant speedup requires knowledge of simulation parameters like timestep, solver iterations, or numerical precision settings. While verification is somewhat automated via eval.py, finding the right combination of parameters requires specialized domain knowledge and experimentation.",
+  "_task_id": "tune-mjcf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:03.665818"
+}

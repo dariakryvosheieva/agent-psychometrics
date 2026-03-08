@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that allow_migrate() is being called with incorrect (app_label, model) pairs during consistency checks - using all models for each app instead of only that app's models. This requires deep understanding of Django's migration system internals, specifically how routers and allow_migrate() work together. The fix involves correcting the iteration logic to pair apps with their own models, which is a moderately complex change in the migration framework.",
+  "_task_id": "django__django-7530",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:44.279066"
+}

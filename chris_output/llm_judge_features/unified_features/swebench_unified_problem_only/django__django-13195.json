@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides an exact code modification that fixes the issue, showing precisely how delete_cookie should be modified to preserve samesite attributes. The task requires Django framework knowledge about cookies and HTTP response handling, but the solution is clearly laid out. Verification requires testing cookie behavior across browsers which adds moderate complexity.",
+  "_task_id": "django__django-13195",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:32.974699"
+}

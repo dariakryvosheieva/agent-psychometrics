@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is crystal clear - add header_rows support to RST writer similar to how ascii.fixed_width already supports it. The problem statement shows exactly what should work. However, it requires understanding astropy's ASCII I/O writer architecture and how the RST class inherits from FixedWidth. The fix likely involves adding header_rows parameter support to the RST class similar to its parent class.",
+  "_task_id": "astropy__astropy-14182",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:47.062198"
+}

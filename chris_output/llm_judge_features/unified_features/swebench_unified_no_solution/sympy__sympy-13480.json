@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 1,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 1,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint explicitly states the exact fix: 'cotm' should be 'cothm' on line 590. This is a simple typo fix requiring no domain knowledge or reasoning - just changing one variable name. The error message clearly points to the problematic line and the undefined variable.",
+  "_task_id": "sympy__sympy-13480",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:15.326468"
+}

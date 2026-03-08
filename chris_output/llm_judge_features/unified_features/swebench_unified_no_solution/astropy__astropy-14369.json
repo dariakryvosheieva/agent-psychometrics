@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints point to the CDS parser in astropy/units/format/cds.py being the source of the bug, but don't indicate the specific fix. Understanding the issue requires knowledge of parser grammar rules and how unit division order is handled in the CDS format. The failing tests clearly indicate what needs to pass, making verification straightforward, but fixing the parser grammar requires understanding the internals of how units are parsed and combined.",
+  "_task_id": "astropy__astropy-14369",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:51.386412"
+}

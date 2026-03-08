@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly describes the exact solution: adjust __eq__, __hash__, and __lt__ methods to consider field.model, with specific guidance about ordering by creation_counter first. This requires deep Django internals knowledge about model field comparison semantics, but the implementation pattern for equality/hash methods is well-documented. The verification is moderately complex due to potential edge cases affecting ordering in other tests.",
+  "_task_id": "django__django-13401",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:37.728415"
+}

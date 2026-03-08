@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a regression bug where polyval produces wrong results with timedelta64 coordinates. The problem is clearly demonstrated with a MVCE showing correct vs incorrect outputs, but no hint at the solution is provided. Fixing this requires deep understanding of xarray's internals, particularly how polyval handles datetime/timedelta coordinate types and what changed between versions. The verification is straightforward since expected outputs are provided.",
+  "_task_id": "pydata__xarray-6599",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:13.644432"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and error traceback. The issue is clearly identified: after a specific commit, the `is_fits` function no longer returns early when filepath doesn't have FITS extension, causing it to access `args[0]` when args is empty. The fix involves adding a bounds check or returning False before accessing `args[0]`. This is a standard defensive programming pattern for tuple/list index access.",
+  "_task_id": "astropy__astropy-14309",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:47.156296"
+}

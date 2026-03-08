@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of SymPy's physics units system and dimensional analysis internals. The bug involves the `_collect_factor_and_dimension()` method not properly recognizing that certain expressions (like second/(ohm*farad)) are dimensionless when used as exponents. While the problem is clearly described with a reproducible example, fixing it requires understanding how dimensional analysis propagates through mathematical functions like exp() and how equivalent dimensions should be detected.",
+  "_task_id": "sympy__sympy-24066",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:45.453796"
+}

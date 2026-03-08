@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep expertise in PyTorch distributed training, pipeline parallelism concepts (AFAB scheduling), and the LLaMA model architecture. The task clearly describes the approach (all-forward-all-backward scheduling with P2P communication), but implementing it correctly requires understanding tensor shapes, gradient flow across pipeline stages, and proper synchronization between ranks. While pipeline parallelism is a known technique, implementing it from scratch with specific constraints (no hooks, proper layer partitioning, correct activation shapes) is non-trivial and doesn't follow a simple copy-paste pattern.",
+  "_task_id": "torch-pipeline-parallelism",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:02.748195"
+}

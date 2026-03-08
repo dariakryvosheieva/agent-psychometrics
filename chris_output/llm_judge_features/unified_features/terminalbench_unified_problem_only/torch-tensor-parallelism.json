@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of PyTorch distributed computing, tensor parallelism patterns (Megatron-LM style), and how to properly shard weights across ranks. While the approach is described (column vs row splitting, all_gather vs all_reduce semantics), implementing it correctly requires understanding distributed tensor operations, gradient flow, and proper weight/bias initialization. The verification involves multi-process testing with various world sizes, making debugging complex.",
+  "_task_id": "torch-tensor-parallelism",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:02.286212"
+}

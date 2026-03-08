@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires debugging a crash that only occurs in release mode with a custom/modified compiler, requiring deep understanding of C++ memory management, compiler optimizations, and potentially modified libstdc++ internals. The solver must analyze the difference between debug and release builds of a custom in-house compiler, examine source code at /build/, and fix memory issues in user.cpp without seeing the actual code - this is an extremely specialized debugging scenario with no standard pattern to follow.",
+  "_task_id": "custom-memory-heap-crash",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.397720"
+}

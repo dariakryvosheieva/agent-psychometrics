@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the root cause - Django's admin incorrectly conflates foreign keys as primary keys with concrete inheritance when checking lookup permissions. However, fixing this requires deep understanding of Django's ORM model inheritance system, the admin's lookup_allowed() method internals, and how primary key relationships differ from concrete inheritance. The bisect commit provides a starting point, but the actual fix requires understanding subtle ORM concepts. Verification is straightforward since the test case is provided.",
+  "_task_id": "django__django-16661",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:38.616284"
+}

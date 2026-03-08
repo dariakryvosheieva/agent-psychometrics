@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of SymPy's combinatorics module, specifically permutation groups and homomorphisms. The problem statement clearly identifies the bug location (inverted generators failing the `in gens` test) and hints at the solution approach (simplifying the logic), but implementing the fix requires understanding how permutation group generators and their inverses should be handled in homomorphism validation. The domain is highly specialized (group theory in computational algebra).",
+  "_task_id": "sympy__sympy-24443",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:42.051718"
+}

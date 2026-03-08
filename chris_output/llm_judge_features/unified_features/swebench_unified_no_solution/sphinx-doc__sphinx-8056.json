@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding Sphinx's napoleon extension internals, specifically how it parses numpy-style docstrings with multiple parameters on one line. The problem is clearly described with expected vs actual behavior, but finding the fix requires knowledge of the docstring parsing code. The test case name 'test_multiple_parameters' gives a hint about what functionality needs to work, but the actual implementation fix location isn't obvious.",
+  "_task_id": "sphinx-doc__sphinx-8056",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:58.510125"
+}

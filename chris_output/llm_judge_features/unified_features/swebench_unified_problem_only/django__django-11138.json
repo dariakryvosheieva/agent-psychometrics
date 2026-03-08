@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement explicitly identifies the exact line of code causing the issue (django/db/backends/mysql/operations.py#L49) and explains that 'UTC' is hardcoded instead of using the database's TIME_ZONE setting. The fix requires understanding Django's database backend internals and timezone handling across MySQL, SQLite, and Oracle. Verification is difficult due to the need for timezone table setup in MySQL and edge cases around midnight.",
+  "_task_id": "django__django-11138",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:00.740421"
+}

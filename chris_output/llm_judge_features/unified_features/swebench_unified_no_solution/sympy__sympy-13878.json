@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly describes the solution approach (add internal `_cdf` methods with precomputed formulas), provides exact test cases, mentions where to find the formulas (Wikipedia), and even describes how to verify correctness (differentiate CDF and compare to PDF). However, it requires knowledge of probability distribution mathematics and SymPy's internal statistics module structure. The test only requires implementing `_cdf` for the Arcsin distribution, following the existing pattern from Normal and Uniform distributions.",
+  "_task_id": "sympy__sympy-13878",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:20.815638"
+}

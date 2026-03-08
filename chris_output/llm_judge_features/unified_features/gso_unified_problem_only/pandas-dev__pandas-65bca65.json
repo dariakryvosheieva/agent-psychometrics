@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas' first_valid_index() and last_valid_index() methods on a DataFrame with nullable Float64 dtype and scattered NA values. The optimization requires deep understanding of pandas internals for handling nullable dtypes and efficient scanning algorithms. No hints are provided about the solution approach, and while the task is clear about what to optimize, the actual optimization strategy requires knowledge of pandas' internal data representation.",
+  "_task_id": "pandas-dev__pandas-65bca65",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:51.738953"
+}

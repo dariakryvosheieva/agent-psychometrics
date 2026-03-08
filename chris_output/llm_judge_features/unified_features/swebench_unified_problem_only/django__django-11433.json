@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's form handling internals, specifically how cleaned_data interacts with model fields and their default values. The problem statement gives a vague hint about the issue but doesn't specify the exact solution. The developer needs to understand the form-to-model data flow and find where default values override cleaned_data modifications.",
+  "_task_id": "django__django-11433",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:06.012126"
+}

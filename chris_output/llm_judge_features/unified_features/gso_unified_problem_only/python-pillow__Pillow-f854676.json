@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing GIF frame counting in Pillow without any hints about the solution approach. It demands deep knowledge of Pillow's GIF plugin internals and how n_frames/is_animated properties are computed. The verification is straightforward (checking frame count matches), but finding the optimization requires understanding how Pillow iterates through GIF frames to count them.",
+  "_task_id": "python-pillow__Pillow-f854676",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:06.941398"
+}

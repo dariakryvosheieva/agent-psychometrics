@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of numerical linear algebra (eigenvalue algorithms like power iteration, QR iteration, etc.) and performance optimization techniques. While the problem is well-specified with clear success criteria, finding an approach faster than numpy's highly optimized LAPACK-based implementation for small matrices is challenging and requires understanding of algorithm trade-offs. The verification is moderately difficult due to timing consistency requirements and numerical accuracy checks.",
+  "_task_id": "largest-eigenval",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:38.951466"
+}

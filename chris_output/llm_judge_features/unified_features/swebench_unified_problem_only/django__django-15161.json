@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly references a previous PR (#14047) that already implemented this pattern for F(), providing an exact template to follow. The solution requires understanding Django's expression deconstruction mechanism and migration system, but the approach is clearly defined. Verification requires checking that expressions deconstruct to simplified paths while still working correctly in migrations.",
+  "_task_id": "django__django-15161",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:10.548402"
+}

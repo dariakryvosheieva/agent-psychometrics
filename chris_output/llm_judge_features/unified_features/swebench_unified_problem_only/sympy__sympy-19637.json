@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a classic 'variable referenced before assignment' bug where the variable 'kern' is used in a conditional check before being defined in some code paths. The error message and traceback clearly indicate the issue location. Fixing requires understanding the kernS function's logic flow in SymPy's sympify module, but the fix pattern (ensuring variable initialization) is standard.",
+  "_task_id": "sympy__sympy-19637",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:30.702115"
+}

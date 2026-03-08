@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires downloading a YouTube video, performing OCR/video text extraction to transcribe on-screen text from a game playthrough, then parsing that to extract only user input commands. It combines video downloading tools (yt-dlp), video frame extraction, OCR technology, and understanding of Zork's text interface format. The extraction of specific 'moves' from transcribed game text requires domain knowledge of how Zork displays user input versus game output, making verification difficult without manually watching the video.",
+  "_task_id": "extract-moves-from-video",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.870333"
+}

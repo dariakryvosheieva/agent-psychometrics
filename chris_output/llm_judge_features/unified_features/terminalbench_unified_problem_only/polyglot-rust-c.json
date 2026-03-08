@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires creating a polyglot program valid in both Rust and C++, which is an extremely unusual and specialized challenge. It demands deep knowledge of both languages' syntax, preprocessor directives, and how to exploit their parsing differences to create code that compiles and runs correctly in both. While the Fibonacci algorithm itself is trivial and verification is straightforward, the polyglot construction technique is rare and requires creative problem-solving.",
+  "_task_id": "polyglot-rust-c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:49.689524"
+}

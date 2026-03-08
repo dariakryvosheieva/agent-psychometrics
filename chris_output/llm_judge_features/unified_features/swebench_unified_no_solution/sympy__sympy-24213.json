@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves the physics units system in SymPy where equivalent dimensions (velocity vs acceleration*time) are not recognized as compatible during addition. The fix requires understanding SymPy's dimension system internals and how to properly compare dimensions for equivalence rather than strict equality. The problem is clearly described with reproducible code, but the solution requires deep knowledge of how dimensions should be normalized or compared for physical equivalence.",
+  "_task_id": "sympy__sympy-24213",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:46.167196"
+}

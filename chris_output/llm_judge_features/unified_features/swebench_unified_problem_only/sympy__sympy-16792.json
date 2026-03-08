@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a minimal reproducible example and the author has identified the root cause in 'codegen'. However, fixing it requires deep understanding of SymPy's code generation internals, specifically how array arguments are handled in the Cython backend. The fix involves ensuring array type signatures are preserved even when arguments don't appear in expressions, which is a moderately unusual edge case.",
+  "_task_id": "sympy__sympy-16792",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:22.446286"
+}

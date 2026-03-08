@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized SPARQL query language knowledge and understanding of RDF/Turtle graph data formats. The query involves complex multi-condition filtering (full professors, EU countries, enrollment counts) with aggregation and grouping. The solver must know EU country codes, understand the ontology structure without seeing it, and compose nested patterns with GROUP_CONCAT - a non-trivial combination that lacks a standard template.",
+  "_task_id": "sparql-university",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.335210"
+}

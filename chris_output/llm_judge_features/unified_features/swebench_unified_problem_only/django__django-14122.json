@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM internals, specifically how Meta.ordering interacts with GROUP BY clause generation during aggregation. The problem statement clearly identifies the issue (Meta.ordering fields incorrectly appearing in GROUP BY) and references a previous incomplete fix, but solving it requires understanding the query compilation pipeline. The fix involves modifying query construction logic to exclude ordering fields from GROUP BY, which is a specific Django internal pattern.",
+  "_task_id": "django__django-14122",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:52.376443"
+}

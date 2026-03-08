@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Django's ORM internals, specifically the query building system including FilteredRelation, split_exclude, and how annotations are propagated to subqueries. The problem statement identifies the faulty function (split_exclude) but doesn't explain exactly how to fix it. The bug involves understanding how Django creates subqueries for exclude operations and why annotations aren't being copied properly to the new query.",
+  "_task_id": "django__django-11265",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:05.066152"
+}

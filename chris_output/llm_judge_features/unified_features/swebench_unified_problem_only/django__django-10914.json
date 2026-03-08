@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task title explicitly states the solution: 'Set default FILE_UPLOAD_PERMISSION to 0o644'. The problem is clearly explained - inconsistent file permissions between MemoryUploadedFile and TemporaryUploadedFile. This requires Django framework knowledge about file upload settings and handlers, but the fix itself is straightforward - changing a default configuration value. Verification requires testing on systems where the permission issue manifests.",
+  "_task_id": "django__django-10914",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.513196"
+}

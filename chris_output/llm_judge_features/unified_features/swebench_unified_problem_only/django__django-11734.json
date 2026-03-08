@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Django's ORM internals, specifically how OuterRef resolution works differently in exclude()/~Q() vs filter(). The problem is clearly demonstrated with a failing test case, but there's no hint at where the fix should be applied. The solver needs to understand Django's query compilation process and why negated queries handle outer references differently than positive queries.",
+  "_task_id": "django__django-11734",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:11.091378"
+}

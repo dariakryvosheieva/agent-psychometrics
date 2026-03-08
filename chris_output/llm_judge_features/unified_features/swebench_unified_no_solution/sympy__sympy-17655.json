@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint explicitly states the solution: define `__rmul__` for the Point class. This is a well-known Python pattern for enabling commutative operations where the left operand doesn't know how to handle the right operand. The problem is crystal clear with exact reproduction steps and expected behavior, and verification is straightforward with provided test cases.",
+  "_task_id": "sympy__sympy-17655",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:30.222799"
+}

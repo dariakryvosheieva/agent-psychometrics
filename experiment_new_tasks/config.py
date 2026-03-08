@@ -25,12 +25,9 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "princeton-nlp_SWE-bench_Verified__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/experiment_a_defaults/swebench_verified.csv"
+            "chris_output/llm_judge_features/v7_opus_solution_top15/swebench_verified/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {
-            "no_solution": Path("chris_output/experiment_a/llm_judge_features/llm_judge_no_solution_plus_auditor.csv"),
-            "problem_only": Path("chris_output/llm_judge_features/swebench_unified_problem_only/llm_judge_features.csv"),
-        },
+        "judge_ablation_paths": {},
     },
     "gso": {
         "display_name": "GSO",
@@ -45,12 +42,9 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "gso-bench_gso__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/experiment_a_defaults/gso.csv"
+            "chris_output/llm_judge_features/v7_opus_solution_top15/gso/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {
-            "no_solution": Path("chris_output/llm_judge_features/gso_unified_no_solution/llm_judge_features.csv"),
-            "problem_only": Path("chris_output/llm_judge_features/gso_unified_problem_only/llm_judge_features.csv"),
-        },
+        "judge_ablation_paths": {},
     },
     "swebench_pro": {
         "display_name": "SWE-bench Pro",
@@ -65,12 +59,9 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "ScaleAI_SWE-bench_Pro__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/experiment_a_defaults/swebench_pro.csv"
+            "chris_output/llm_judge_features/v7_opus_solution_top15/swebench_pro/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {
-            "no_solution": Path("chris_output/llm_judge_features/swebench_pro_unified_no_solution/llm_judge_features.csv"),
-            "problem_only": Path("chris_output/llm_judge_features/swebench_pro_unified_problem_only/llm_judge_features.csv"),
-        },
+        "judge_ablation_paths": {},
     },
     "terminalbench": {
         "display_name": "TerminalBench",
@@ -85,12 +76,9 @@ DATASET_DEFAULTS: Dict[str, Dict[str, Any]] = {
             "json_terminal_bench_tasks.jsonl__test__maxlen8192.npz"
         ),
         "llm_judge_features_path": Path(
-            "chris_output/llm_judge_features/experiment_a_defaults/terminalbench.csv"
+            "chris_output/llm_judge_features/v7_opus_solution_top15/terminalbench/llm_judge_features.csv"
         ),
-        "judge_ablation_paths": {
-            "no_solution": Path("chris_output/llm_judge_features/terminalbench_unified_no_solution/llm_judge_features.csv"),
-            "problem_only": Path("chris_output/llm_judge_features/terminalbench_unified_problem_only/llm_judge_features.csv"),
-        },
+        "judge_ablation_paths": {},
     },
 }
 

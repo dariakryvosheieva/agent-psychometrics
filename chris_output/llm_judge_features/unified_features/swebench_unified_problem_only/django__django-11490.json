@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly demonstrates the bug with a reproducible example showing that composed queries (union) don't properly update columns when values_list() is called multiple times. The hint points to specific lines in compiler.py, giving a vague direction but not the solution. This requires deep understanding of Django's ORM query compilation internals, particularly how composed queries handle column selection and caching.",
+  "_task_id": "django__django-11490",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:09.892874"
+}

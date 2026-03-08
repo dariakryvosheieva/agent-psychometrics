@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires knowledge of Hugging Face transformers library, Flask web framework, and ML model inference - specialized but well-documented domains. The task is extremely well-specified with exact API schemas, endpoints, and expected behavior. While the pattern of Flask API + HuggingFace model is common, integrating multiple components (model downloading, caching, inference pipeline, Flask routing, background service) requires multi-step reasoning and coordination.",
+  "_task_id": "hf-model-inference",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:38.247058"
+}

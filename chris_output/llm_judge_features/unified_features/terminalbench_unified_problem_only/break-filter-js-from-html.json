@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of XSS bypass techniques and HTML/JavaScript security. The solver must understand how filters work and find creative ways to bypass them (e.g., using event handlers, obfuscation, or encoding). While XSS bypass is a well-documented domain with many known patterns, success depends on understanding the specific filter implementation and applying appropriate evasion techniques.",
+  "_task_id": "break-filter-js-from-html",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.513465"
+}

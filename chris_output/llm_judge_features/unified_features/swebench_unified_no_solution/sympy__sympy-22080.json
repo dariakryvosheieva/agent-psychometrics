@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with reproduction steps, and hints point to operator precedence issues in the printer. However, solving it requires deep understanding of SymPy's printer system, precedence handling, and how lambdify interacts with different modules. The discussion shows multiple failed attempts, indicating the solution isn't straightforward and involves understanding interactions between multiple components (precedence, different printers, empty modules handling).",
+  "_task_id": "sympy__sympy-22080",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:41.346168"
+}

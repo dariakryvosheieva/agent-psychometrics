@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints section provides the exact solution patch with the specific file and line change needed. The problem is crystal clear with a reproducible example and expected vs actual behavior. However, understanding WHY this fix works requires knowledge of Django's migration serialization internals, specifically how TypeSerializer handles special cases for models.Model.",
+  "_task_id": "django__django-14580",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:01.922021"
+}

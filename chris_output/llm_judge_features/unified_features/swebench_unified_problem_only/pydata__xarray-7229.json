@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with a good MVCE showing coordinate attributes being incorrectly overwritten. However, fixing it requires deep understanding of xarray's internal attribute merging mechanism and how coordinates vs variables are handled. The user mentions struggling to trace through 'various merge functions' with 'a lot of layers', indicating complex internal logic. The bug was introduced by a seemingly simple lambda change in a previous PR, suggesting subtle interactions in the codebase.",
+  "_task_id": "pydata__xarray-7229",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:16.062616"
+}

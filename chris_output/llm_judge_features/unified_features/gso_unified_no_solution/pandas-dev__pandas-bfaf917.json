@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint clearly indicates avoiding np.divmod in the function and mentions adjusting maybe_sequence_to_range, providing a clear direction. The task requires deep understanding of pandas internals and numpy performance patterns, particularly around arithmetic operations like divmod. Verification is straightforward as the test compares range objects or arrays for equivalence.",
+  "_task_id": "pandas-dev__pandas-bfaf917",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:56.142818"
+}

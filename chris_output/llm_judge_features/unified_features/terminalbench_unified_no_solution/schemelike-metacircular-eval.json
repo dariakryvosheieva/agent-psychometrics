@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires writing a metacircular evaluator - a Scheme interpreter written in Scheme that can interpret itself. This demands deep knowledge of programming language implementation, interpreters, and the specific scheme-like language in interp.py. The self-interpretation requirement adds significant complexity, as the evaluator must handle all language features correctly enough to run itself recursively.",
+  "_task_id": "schemelike-metacircular-eval",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:02.650025"
+}

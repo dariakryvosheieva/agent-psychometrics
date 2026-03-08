@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep molecular biology knowledge about primer design, site-directed mutagenesis, and DNA sequence manipulation. The solver must understand how Q5 SDM kits work, how to compare circular plasmid sequences to identify necessary mutations/insertions, design primers with specific melting temperature constraints using primer3's oligotm tool with specific parameters, and output properly formatted FASTA files. This is a highly specialized bioinformatics task that combines domain expertise with algorithmic sequence analysis.",
+  "_task_id": "dna-insert",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.896765"
+}

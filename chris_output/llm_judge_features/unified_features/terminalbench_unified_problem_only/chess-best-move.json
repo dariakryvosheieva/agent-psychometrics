@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires image recognition/computer vision to read a chess board from PNG, chess domain expertise to understand positions and legal moves, and chess engine-level analysis to determine the 'best' move. The combination of image processing and chess analysis makes this highly unusual for a terminal task, requiring specialized tools like chess engines (Stockfish) and potentially image-to-FEN conversion utilities. Verification is difficult as determining the 'best' move requires chess expertise or engine validation.",
+  "_task_id": "chess-best-move",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:22.721418"
+}

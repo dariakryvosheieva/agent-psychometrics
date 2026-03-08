@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django admin's permission system, particularly how it handles ManyToManyField inlines and auto-created through models. The problem is clearly described with reproduction steps, but the solution requires knowing where in the admin code the permission checking for M2M inlines differs from regular fields. The fix likely involves ensuring that view-only permissions are properly enforced for auto-created M2M through models in inline forms.",
+  "_task_id": "django__django-11149",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:01.910626"
+}

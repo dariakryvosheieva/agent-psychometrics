@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints section provides the exact code change needed - modifying the deconstruct method to check for the 'conditional' attribute. The problem is crystal clear with exact error messages and the fix location is explicitly identified. However, understanding Django's Q objects, the deconstruct pattern for migrations, and conditional expressions requires deep Django ORM knowledge.",
+  "_task_id": "django__django-14140",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:53.222793"
+}

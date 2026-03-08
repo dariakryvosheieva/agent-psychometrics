@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that wspace/hspace parameters in subfigures don't work, and hints point to specific code locations and suggest borrowing logic from Axes positioning. However, fixing this requires deep understanding of matplotlib's figure layout system, gridspec, and transform mechanisms. The discussion reveals complexity around how subfigures should interact with gridspec spacing versus subplots, requiring careful consideration of existing behavior.",
+  "_task_id": "matplotlib__matplotlib-25960",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:58.787036"
+}

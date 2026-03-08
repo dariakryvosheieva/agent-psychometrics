@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The error traceback shows a NoneType error when trying to get a renderer, indicating the figure reference is missing somewhere in the inset_locator code path. This requires understanding matplotlib's internal rendering pipeline and axes_grid1 toolkit internals. The bug is clearly reproducible with minimal code, but fixing it requires knowledge of how figure references are passed through the OffsetBox/AnchoredLocatorBase hierarchy.",
+  "_task_id": "matplotlib__matplotlib-26291",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:00.853300"
+}

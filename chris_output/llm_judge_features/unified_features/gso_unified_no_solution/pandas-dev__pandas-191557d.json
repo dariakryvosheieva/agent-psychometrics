@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions 'value_counts for masked arrays' but the task is about Series.__init__ with Int64 dtype, creating some mismatch. The optimization requires deep understanding of pandas masked array internals and how Int64 (nullable integer) dtype initialization works. Verification is straightforward with the provided equivalence checks on dtype, length, and sum.",
+  "_task_id": "pandas-dev__pandas-191557d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:04.162390"
+}

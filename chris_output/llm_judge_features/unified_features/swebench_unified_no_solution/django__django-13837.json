@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides an exact solution approach with detailed steps on how to use `__main__.__spec__.parent` to detect if Python was launched with `-m`. The task requires deep understanding of Django's autoreload internals and Python's module system, but the solution is clearly documented. The test case name `test_run_as_non_django_module` confirms the fix should generalize beyond just `django` module detection.",
+  "_task_id": "django__django-13837",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:48.767125"
+}

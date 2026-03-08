@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's ufunc.at method (np.divide.at), which is a specialized unbuffered in-place operation. There's no hint about the solution approach, and optimizing this requires deep understanding of numpy's ufunc internals, memory access patterns, and potentially C-level implementation details. The pattern is unusual as ufunc.at is less commonly optimized compared to regular numpy operations.",
+  "_task_id": "numpy__numpy-28706af",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.079440"
+}

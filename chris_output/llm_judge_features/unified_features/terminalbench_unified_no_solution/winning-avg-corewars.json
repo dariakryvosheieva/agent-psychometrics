@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of CoreWars programming, a highly specialized and obscure domain involving assembly-like language for competitive programs. While the task is clearly specified with win rate requirements and testing commands, solving it requires understanding CoreWars strategies (stone, paper, vampire, scanner, etc.) and how to counter multiple opponent types simultaneously. Standard warrior patterns exist in the CoreWars community, but combining them effectively against diverse opponents requires significant domain expertise.",
+  "_task_id": "winning-avg-corewars",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:05.245534"
+}

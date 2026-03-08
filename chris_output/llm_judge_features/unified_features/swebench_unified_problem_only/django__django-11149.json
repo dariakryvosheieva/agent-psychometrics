@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django admin internals, specifically the permission system for inline model admins with auto-created ManyToMany through tables. The problem is clearly stated (view-only users can edit inline M2M relations), but solving it requires deep knowledge of Django's admin permission checking for inlines. No solution approach is hinted at, and this is a regression bug affecting a specific edge case with auto-created through models.",
+  "_task_id": "django__django-11149",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:01.507201"
+}

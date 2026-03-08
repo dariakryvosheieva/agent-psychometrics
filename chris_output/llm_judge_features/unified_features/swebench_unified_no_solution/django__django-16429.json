@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact cause (pivot datetime not preserving tzinfo) and provides the exact fix ('Adding 0, d.tzinfo arguments to the datetime.datetime call'). This is a well-documented timezone-aware datetime handling pattern in Django. The failing tests are clearly specified and the fix is localized to a specific line in the code.",
+  "_task_id": "django__django-16429",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:31.207880"
+}

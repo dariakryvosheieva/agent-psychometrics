@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement hints at the solution (Table instance vs string type mismatch) but is very terse and requires deep Django schema/migration internals knowledge. Finding the _create_unique_sql method and understanding the Columns class interface requires familiarity with Django's database backend code. The fix itself is likely simple once located, but identifying the exact location and understanding the context requires significant domain expertise.",
+  "_task_id": "django__django-14434",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.657322"
+}

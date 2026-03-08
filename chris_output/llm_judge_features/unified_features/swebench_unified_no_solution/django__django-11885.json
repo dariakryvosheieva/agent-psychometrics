@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the optimization needed - combining DELETE queries using OR clauses instead of separate queries. However, implementing this requires deep knowledge of Django's deletion.Collector internals and how fast delete queries are generated and executed. The solution approach is hinted at (combining with OR), but the actual implementation requires understanding Django's ORM query building and the Collector's data structures.",
+  "_task_id": "django__django-11885",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:15.746279"
+}

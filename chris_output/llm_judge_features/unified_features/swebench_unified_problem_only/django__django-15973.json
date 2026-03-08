@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's migration system failing to properly resolve string references to 'through' models in ManyToManyFields when the through model is in a different app. The error trace points to schema.py where it expects a model class but receives a string, indicating a lazy reference resolution issue. Fixing this requires deep understanding of Django's migration state management, model resolution timing, and how cross-app relationships are handled during migration application.",
+  "_task_id": "django__django-15973",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:25.279638"
+}

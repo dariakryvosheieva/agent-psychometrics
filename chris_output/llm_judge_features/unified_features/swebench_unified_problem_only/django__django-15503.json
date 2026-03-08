@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is well-documented with a clear reproduction case showing that numeric string keys fail on SQLite but work on PostgreSQL. However, fixing this requires deep knowledge of Django's database backend implementations for JSONField lookups, specifically understanding how has_key is translated to SQL across different database engines. The solution requires understanding the JSON path syntax differences between SQLite, MySQL, Oracle and PostgreSQL when handling numeric-looking keys.",
+  "_task_id": "django__django-15503",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.536960"
+}

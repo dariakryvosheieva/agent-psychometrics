@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the bug (threshold exceeding 1) and points to the exact line of code causing it, with a suggested fix approach (clipping). However, it requires understanding of ROC curve internals and why the +1 logic exists for adding the (0,0) point. The fix itself is relatively straightforward once understood, but choosing the right approach requires domain knowledge about probability estimates vs. arbitrary scores.",
+  "_task_id": "scikit-learn__scikit-learn-26194",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:44.635741"
+}

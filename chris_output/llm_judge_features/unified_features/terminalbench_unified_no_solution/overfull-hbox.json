@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding LaTeX overfull hbox warnings (typesetting knowledge), parsing synonym constraints, and solving a combinatorial optimization problem to find word replacements that eliminate line-breaking issues. The approach is clearly described (replace words with synonyms) but implementing an efficient solution requires understanding both LaTeX internals and constraint satisfaction. Verification is straightforward - just compile and check for warnings.",
+  "_task_id": "overfull-hbox",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:48.643666"
+}

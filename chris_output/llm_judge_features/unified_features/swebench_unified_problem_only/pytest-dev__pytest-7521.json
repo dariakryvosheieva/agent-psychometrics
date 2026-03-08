@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with excellent reproducers showing \r being converted to \n in pytest 6.0.0rc1's capfd.readouterr(). However, fixing this requires deep understanding of pytest's capture internals to find where this newline translation was introduced. The verification is straightforward with the provided test case, but locating the root cause in the capture mechanism requires framework-specific knowledge.",
+  "_task_id": "pytest-dev__pytest-7521",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:30.100469"
+}

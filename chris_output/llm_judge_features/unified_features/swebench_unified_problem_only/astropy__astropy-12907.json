@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of astropy's modeling internals, specifically how CompoundModels work and how separability matrices are computed for nested structures. The problem is clearly demonstrated with examples showing expected vs actual behavior, but no solution approach is hinted at. Finding the bug requires understanding the recursive computation logic for compound models and why nesting breaks it.",
+  "_task_id": "astropy__astropy-12907",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:46.822111"
+}

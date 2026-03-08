@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with a complete reproduction script and visual evidence. The hint explicitly provides the exact solution: change `self.xy=xy` to `self.xy=np.array(xy)` to make a copy. This is a very common defensive copying pattern in Python, and the fix location is even given with a GitHub link. The only additional work is checking for similar issues in OffsetFrom class.",
+  "_task_id": "matplotlib__matplotlib-26466",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:01.911591"
+}

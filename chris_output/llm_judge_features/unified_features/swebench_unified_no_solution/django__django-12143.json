@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the bug (regex special characters not escaped in formset prefix), points to the exact line of code, and provides the exact solution (use re.escape()). This is a well-known pattern for safely building regex patterns from user input. The fix requires only standard library knowledge of Python's re module.",
+  "_task_id": "django__django-12143",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:19.889676"
+}

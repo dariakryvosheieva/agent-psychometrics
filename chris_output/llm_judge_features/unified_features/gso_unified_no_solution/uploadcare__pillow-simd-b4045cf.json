@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints clearly indicate SIMD optimization (SSE4 & AVX2) for image resampling, pointing to the approach but not exact implementation. This requires expert-level knowledge of SIMD intrinsics, CPU vector operations, and image processing algorithms. The task involves low-level C/assembly optimization of Pillow's resize operation, which is an unusual pattern requiring understanding of coefficient loading, horizontal/vertical passes, and memory alignment for vectorized operations.",
+  "_task_id": "uploadcare__pillow-simd-b4045cf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:11.855017"
+}

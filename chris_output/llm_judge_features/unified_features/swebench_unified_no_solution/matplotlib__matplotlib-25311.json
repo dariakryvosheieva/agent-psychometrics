@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is clear - pickling fails when legend is draggable due to unpicklable FigureCanvas references. Solving this requires understanding matplotlib's internal draggable implementation and Python's pickle protocol (__reduce__/__getstate__). The fix likely involves implementing custom pickle methods to exclude or handle canvas references, which is a known pattern for handling unpicklable objects.",
+  "_task_id": "matplotlib__matplotlib-25311",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:56.932099"
+}

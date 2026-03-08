@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints clearly indicate this is a SIMD optimization task for Color3DLUT, mentioning AVX2 implementation, 16-bit arithmetic, and specific optimizations like preliminary index calculation. This requires expert-level knowledge of SIMD/AVX2 intrinsics, memory layout, and CPU-level optimizations. The task is atypical as it involves low-level C/assembly optimization within a Python imaging library, with no standard pattern available for this specific Color3DLUT SIMD implementation.",
+  "_task_id": "uploadcare__pillow-simd-6eacce9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:07.207863"
+}

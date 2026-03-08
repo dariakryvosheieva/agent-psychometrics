@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task identifies a specific regression commit (2f73e5406d54cb8945e187eff302a3a3373350be) but doesn't explain the fix. It requires deep knowledge of Django's SQLite schema operations and how OneToOneField migrations work. The error is clear ('Cannot add a UNIQUE column') and the test case is specific, making verification straightforward once the fix is implemented.",
+  "_task_id": "django__django-15278",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:12.041857"
+}

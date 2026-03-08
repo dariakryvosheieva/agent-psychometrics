@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a complete MVCE showing that non-dimensional coordinates are being demoted to variables after coarsen.construct. However, fixing this requires deep understanding of xarray's internal coordinate handling, particularly how coordinates vs variables are tracked through the Coarsen.construct operation. The fix likely involves ensuring coordinate metadata is preserved during the transformation, but the exact implementation details are not hinted at.",
+  "_task_id": "pydata__xarray-7233",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:15.827788"
+}

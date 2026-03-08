@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with explicit code examples showing expected vs actual behavior. However, fixing it requires deep understanding of xarray's rolling window internals, specifically how the iterator should handle the 'center' parameter. The fix likely involves modifying how window positions are calculated during iteration, which requires knowledge of xarray's DataArrayRolling implementation.",
+  "_task_id": "pydata__xarray-6744",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:13.788423"
+}

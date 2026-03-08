@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly identifies that compile_json_path() incorrectly uses array paths for integers in has_key lookups on SQLite/MySQL/Oracle backends. This requires deep knowledge of Django's database backend internals and JSON field implementation. The solution involves modifying how JSON paths are compiled for these specific lookups, but the exact implementation details are not provided. Verification is straightforward with the provided test cases.",
+  "_task_id": "django__django-15503",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.811185"
+}

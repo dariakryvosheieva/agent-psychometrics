@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions 'jpeg-loading-without-convertion' which vaguely suggests the optimization relates to avoiding unnecessary conversions, but doesn't specify how to optimize Image.split(). Understanding how Pillow internally handles image channel splitting and memory layout requires deep library knowledge. The task involves optimizing a core PIL function across multiple image modes (RGB, RGBA, LA, P, 1), requiring understanding of internal image representation.",
+  "_task_id": "python-pillow__Pillow-d8af3fc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:13.902426"
+}

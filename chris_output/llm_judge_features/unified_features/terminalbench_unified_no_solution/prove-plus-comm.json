@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of Coq proof assistant and formal theorem proving, which is highly specialized. While proving commutativity of addition is a standard exercise in Coq tutorials, it requires understanding induction tactics, lemmas about successor and addition, and proof strategies. The verification is straightforward (coqc will either compile or fail), but the domain expertise needed is substantial.",
+  "_task_id": "prove-plus-comm",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:51.826244"
+}

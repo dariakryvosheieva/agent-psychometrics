@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of SymPy's set theory implementation, particularly how imageset intersections with Reals are computed. The problem is clearly demonstrated with examples showing expected vs actual behavior, but finding the root cause requires understanding the internal logic of is_subset and intersection operations for symbolic sets. The fix likely involves correcting how membership tests handle the intersection of image sets with real numbers.",
+  "_task_id": "sympy__sympy-21596",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:35.988890"
+}

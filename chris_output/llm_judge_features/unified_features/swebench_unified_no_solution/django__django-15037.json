@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the issue: inspectdb doesn't properly handle foreign keys that reference non-primary-key unique fields. The hint mentions a 'simple patch' and the description mentions a 'potential fix', indicating the solution approach is known. However, this requires deep knowledge of Django's inspectdb internals and database introspection APIs. The fix involves modifying model generation code to include the to_field parameter when FK references a non-PK field.",
+  "_task_id": "django__django-15037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:08.909520"
+}

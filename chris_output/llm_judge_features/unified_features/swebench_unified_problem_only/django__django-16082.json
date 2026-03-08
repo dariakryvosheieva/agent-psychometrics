@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem hints that MOD should behave like other mathematical operators for type resolution, suggesting looking at how other operators handle this. This requires deep knowledge of Django's expression system and how output_field resolution works internally. The fix likely involves adding MOD to whatever mechanism handles type coercion for arithmetic operators, which is a known pattern but requires understanding Django ORM internals.",
+  "_task_id": "django__django-16082",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:27.315964"
+}

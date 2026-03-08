@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding Sphinx's internal signature parsing mechanism, specifically how it handles positional-only arguments (Python 3.8+ feature with `/` syntax). The bug is clearly described with reproducible steps, but fixing it requires knowledge of how `signature_from_str` parses function signatures and handles default values for positional-only parameters. The test name directly points to the problematic function, but the actual fix requires understanding the parsing logic.",
+  "_task_id": "sphinx-doc__sphinx-7757",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:56.902654"
+}

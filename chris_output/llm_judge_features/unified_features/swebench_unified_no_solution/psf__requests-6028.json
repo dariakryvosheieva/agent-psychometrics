@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints provide a very detailed solution: the bug is in `prepend_scheme_if_needed` where auth info is lost when switching from urlparse to urllib3's parse_url, and the fix involves re-adding auth to netloc. The failing tests explicitly show URLs with user:pass credentials that need to be preserved. This is a straightforward URL parsing fix once the cause is identified.",
+  "_task_id": "psf__requests-6028",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:08.022370"
+}

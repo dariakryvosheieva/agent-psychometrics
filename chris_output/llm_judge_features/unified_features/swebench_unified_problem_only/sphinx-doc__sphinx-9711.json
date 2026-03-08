@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that version comparison is done using string comparison instead of proper semantic versioning, causing '0.10' < '0.6' incorrectly. The solution approach is obvious: use proper version comparison (e.g., packaging.version or distutils.version). This is a very common bug pattern with well-documented solutions in Python.",
+  "_task_id": "sphinx-doc__sphinx-9711",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:07.003825"
+}

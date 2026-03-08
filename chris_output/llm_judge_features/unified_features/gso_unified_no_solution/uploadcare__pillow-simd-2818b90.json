@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints clearly indicate SIMD optimization is required for image filtering (SSE4, AVX, AVX2), requiring expert-level knowledge of CPU vector instructions, memory layout, and low-level C optimization. The task involves implementing multiple SIMD variants for 3x3 and 5x5 convolution kernels across different pixel formats (single-band, 4-channel), which is a specialized and unusual optimization pattern. While the hints provide direction on the approach, implementing correct SIMD code with proper memory access and register management requires deep technical expertise.",
+  "_task_id": "uploadcare__pillow-simd-2818b90",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:16.947127"
+}

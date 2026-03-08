@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The bug is clearly described with reproduction code and expected behavior (year should show in offset). However, fixing it requires deep understanding of matplotlib's ConciseDateFormatter internals, specifically how it determines when to show the year offset. The test name 'test_offset_changes' hints at the solution area but doesn't reveal the exact fix needed.",
+  "_task_id": "matplotlib__matplotlib-22871",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:48.798079"
+}

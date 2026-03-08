@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the bug (UnboundLocalError) and the reporter suggests a specific fix approach (adding else: raise NotImplementedError to elif clauses). This is a common pattern of unhandled code paths leading to unbound variables. However, understanding why this happens requires knowledge of SymPy's evalf internals and how expression evaluation works.",
+  "_task_id": "sympy__sympy-13372",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:10.869377"
+}

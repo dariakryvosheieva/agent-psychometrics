@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly states that the 'qop' option in Digest Auth should be quoted according to RFC2617, and references curl's behavior. This requires understanding HTTP Digest Authentication internals and RFC specifications. The fix itself is straightforward (adding quotes around a value), but locating where in the requests library's auth module to make the change requires familiarity with the codebase. The multiple unrelated failing tests suggest possible test infrastructure issues or a broader change needed.",
+  "_task_id": "psf__requests-1766",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:04.962057"
+}

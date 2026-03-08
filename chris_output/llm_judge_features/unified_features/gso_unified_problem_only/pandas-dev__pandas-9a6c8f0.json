@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing DataFrame construction from a dictionary with 10,000 columns, each containing the same Series. No solution hint is provided, and solving it requires deep understanding of pandas DataFrame internals, particularly how data is consolidated and how column alignment works. The verification is straightforward via frame equality checks, but identifying the performance bottleneck requires knowledge of pandas' internal data handling mechanisms.",
+  "_task_id": "pandas-dev__pandas-9a6c8f0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.425292"
+}

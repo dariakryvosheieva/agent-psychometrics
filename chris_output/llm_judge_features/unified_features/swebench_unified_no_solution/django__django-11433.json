@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ModelForm internals, specifically how cleaned_data interacts with model field defaults during form processing. The problem description provides a vague direction (modifying how cleaned_data handles defaults) but doesn't specify the exact code changes needed. The test name suggests the fix involves ensuring non-empty values in cleaned_data aren't overwritten by field defaults.",
+  "_task_id": "django__django-11433",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:06.831262"
+}

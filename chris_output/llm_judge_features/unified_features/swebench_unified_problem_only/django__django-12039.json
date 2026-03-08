@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the exact file and line causing the issue (django/db/backends/ddl_references.py#L87) and explains the root cause (empty strings in col_suffixes instead of truly empty). This requires deep Django ORM/DDL internals knowledge to understand how index creation works, but the fix itself involves handling whitespace concatenation logic. Verification is straightforward by checking the generated SQL output.",
+  "_task_id": "django__django-12039",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:18.185975"
+}

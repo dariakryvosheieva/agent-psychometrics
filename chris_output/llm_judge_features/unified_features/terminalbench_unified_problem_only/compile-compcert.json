@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "Building CompCert from source requires knowledge of OCaml toolchain, Coq proof assistant dependencies, and cross-compilation configuration. The task is clear about requirements but doesn't specify exact build steps. CompCert has documented build instructions, but resolving dependencies (OCaml, Coq, menhir) and handling architecture-specific configuration adds complexity.",
+  "_task_id": "compile-compcert",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.127004"
+}

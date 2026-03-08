@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The solution is explicitly provided in the hints: 'AnnotationBbox.draw should just call open_group() at the beginning and close_group() at the end'. The problem is crystal clear with a reproducible example and specific expected behavior. While it requires understanding matplotlib's rendering internals and SVG output, this is a well-documented pattern that was already applied in PR #15087 for similar cases, making it a straightforward fix to implement.",
+  "_task_id": "matplotlib__matplotlib-24637",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:54.047686"
+}

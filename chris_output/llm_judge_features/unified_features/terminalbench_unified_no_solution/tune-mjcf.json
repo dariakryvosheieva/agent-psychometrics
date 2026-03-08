@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep specialized knowledge of MuJoCo physics simulation and MJCF file format to understand which parameters affect simulation performance without changing physics outcomes. The constraint of achieving 60% speedup while maintaining numerical accuracy within atol=1e-5 requires understanding timestep, solver iterations, and other simulation parameters. While the eval.py helper script aids verification, knowing which knobs to tune without breaking correctness requires expert-level domain knowledge of physics simulation optimization.",
+  "_task_id": "tune-mjcf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:04.576498"
+}

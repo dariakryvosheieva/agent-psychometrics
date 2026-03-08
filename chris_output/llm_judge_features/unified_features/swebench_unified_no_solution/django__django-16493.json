@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explicitly states the solution: use `getattr(self, '_storage_callable', self.storage)` in both lines of the deconstruct method. The problem is crystal clear with a specific reproducible scenario and root cause identified. However, it requires deep Django knowledge about field deconstruction, migrations, and storage internals. The fix itself is straightforward once the approach is known.",
+  "_task_id": "django__django-16493",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:33.265180"
+}

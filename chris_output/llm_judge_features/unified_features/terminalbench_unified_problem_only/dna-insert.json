@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep expertise in molecular biology (primer design, site-directed mutagenesis, plasmid manipulation) combined with bioinformatics tools (primer3's oligotm). The solver must understand DNA sequence analysis, melting temperature calculations with specific parameters, and design optimal primers that convert one plasmid to another while respecting multiple constraints. This is a highly specialized task with no standard shell scripting pattern available.",
+  "_task_id": "dna-insert",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.559635"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires optimizing MultiIndex.intersection while preserving EA (Extension Array) dtypes. The hint mentions 'Improve performance' multiple times but doesn't specify the approach, requiring deep knowledge of pandas MultiIndex internals and EA dtype handling. The optimization likely involves avoiding unnecessary type conversions or using more efficient set intersection algorithms for the specific data structure.",
+  "_task_id": "pandas-dev__pandas-438b957",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:00.475628"
+}

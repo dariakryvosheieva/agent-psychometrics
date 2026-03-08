@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint clearly indicates the solution involves adding ufuncs for startswith/endswith operations, which is a known NumPy optimization pattern (converting character operations to vectorized ufuncs). This requires deep understanding of NumPy's ufunc implementation and dtype handling, but follows an established pattern within the NumPy codebase. Verification is straightforward with the provided test cases checking counts match expected results.",
+  "_task_id": "numpy__numpy-09db9c7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:39.330654"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM internals, specifically how query building, lookups, and lazy evaluation interact. The problem identifies a specific commit as the regression source, providing a vague hint, but fixing it requires understanding how SimpleLazyObject should be resolved during query construction. The reproduction case is clear, but the fix location and approach require tracing through Django's query compilation pipeline.",
+  "_task_id": "django__django-12663",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:24.395917"
+}

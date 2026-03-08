@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the problem (RadioSelect showing blank option when blank=False on ForeignKey), but only vaguely hints at the solution through the PR link. It requires deep understanding of Django's ModelForm, widget system, and how blank/required fields are handled differently for Select vs RadioSelect widgets. The fix likely involves modifying how ModelChoiceField determines whether to include the blank option based on the widget type.",
+  "_task_id": "django__django-12406",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:25.294618"
+}

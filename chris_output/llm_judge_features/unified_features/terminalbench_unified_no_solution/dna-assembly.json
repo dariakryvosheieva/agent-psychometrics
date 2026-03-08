@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep molecular biology knowledge including Golden Gate assembly, BsaI-HF v2 enzyme cut sites, PCR primer design with specific melting temperature calculations, and understanding of DNA cloning workflows. The solver must reason about how to design overlapping primers with proper overhangs for one-pot assembly while respecting multiple constraints on primer properties. This is a highly specialized bioinformatics task combining domain expertise with complex multi-constraint optimization that has no standard shell scripting pattern.",
+  "_task_id": "dna-assembly",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.091489"
+}

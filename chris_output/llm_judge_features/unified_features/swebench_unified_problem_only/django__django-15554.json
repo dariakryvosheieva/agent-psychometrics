@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM internals, specifically how FilteredRelation objects are tracked and how SQL JOINs are generated. The problem is clearly described with a reproducible example, but fixing it requires deep understanding of Django's query compilation process and how aliases are managed. The issue likely involves how Django deduplicates or caches relations, which is not a commonly documented pattern.",
+  "_task_id": "django__django-15554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.830361"
+}

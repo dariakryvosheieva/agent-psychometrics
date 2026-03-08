@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's np.add.at operation for complex128 arrays with no hints about the solution approach. It requires deep knowledge of numpy's ufunc internals and how advanced indexing operations are implemented at the C level. The task is atypical because np.add.at is a specialized unbuffered operation that doesn't follow common optimization patterns, and complex number handling adds additional complexity.",
+  "_task_id": "numpy__numpy-b862e4f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.339553"
+}

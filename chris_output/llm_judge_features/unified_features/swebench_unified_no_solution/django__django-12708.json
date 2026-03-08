@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's migration system, specifically how index_together and unique_together constraints are handled at the database schema level. The problem is clearly described with reproduction steps, but the solution requires understanding how _delete_composed_index() identifies and removes constraints, and how to differentiate between unique and index constraints when both exist on the same fields. The hint about migration optimizer ordering suggests complexity in the interaction between different constraint operations.",
+  "_task_id": "django__django-12708",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:25.639478"
+}

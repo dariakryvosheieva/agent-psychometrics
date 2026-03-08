@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Python packaging, Cython compilation, and NumPy C API compatibility issues between major versions. The solver must diagnose and fix Cython extension compatibility with NumPy 2.x, which involves understanding deprecated APIs and build systems. While the task provides good context about what needs to work, the actual solution requires investigating error messages and modifying source code/build configurations - not a standard documented pattern.",
+  "_task_id": "build-cython-ext",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.097432"
+}

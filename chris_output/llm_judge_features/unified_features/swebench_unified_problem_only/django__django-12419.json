@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact solution: change the default value of SECURE_REFERRER_POLICY to 'same-origin'. This is a straightforward configuration default change requiring Django settings knowledge but minimal reasoning. The fix involves changing a default value in Django's settings and potentially updating documentation/tests.",
+  "_task_id": "django__django-12419",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:22.998111"
+}

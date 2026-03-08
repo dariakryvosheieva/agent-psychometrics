@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a reproducible example and exact error. The user identifies the specific code location and explains that MultiOutputClassifier requires accessing classes_ through estimators_[i].classes_ instead of directly. However, implementing the fix requires deep understanding of scikit-learn's cross-validation internals and how MultiOutputClassifier differs from standard classifiers in its attribute structure.",
+  "_task_id": "scikit-learn__scikit-learn-14629",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:39.548840"
+}

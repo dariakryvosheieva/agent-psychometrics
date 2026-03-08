@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact location (resolve_lookup_value in Query class) and provides the exact fix (use * to expand iterator contents into constructor). This is a clear regression bug with a well-specified solution. However, it requires understanding Django's ORM internals and how named tuples work differently from regular tuples during construction.",
+  "_task_id": "django__django-13590",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:42.940622"
+}

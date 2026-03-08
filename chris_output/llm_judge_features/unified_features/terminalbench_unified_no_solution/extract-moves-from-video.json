@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires downloading a YouTube video, performing OCR/video transcription to extract text from gameplay footage, then parsing that text to identify player input commands. It combines multiple specialized tools (youtube-dl, OCR/video processing, text parsing) and requires understanding Zork's command format to distinguish user inputs from game output. The verification is difficult because OCR accuracy varies and correctly identifying which text represents player moves versus game responses requires domain knowledge of the game.",
+  "_task_id": "extract-moves-from-video",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.432240"
+}

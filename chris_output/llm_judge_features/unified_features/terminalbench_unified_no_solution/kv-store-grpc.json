@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides extremely detailed step-by-step instructions including exact package versions, file paths, port numbers, class names, and message/RPC specifications. This is a standard gRPC tutorial pattern with well-documented examples available. The main challenge is familiarity with gRPC/protobuf tooling and Python implementation, but the explicit instructions significantly reduce difficulty.",
+  "_task_id": "kv-store-grpc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:37.101523"
+}

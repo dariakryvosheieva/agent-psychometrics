@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that pytest markers are lost during multiple inheritance due to MRO behavior, and the solution approach (walking the MRO to collect all markers) is hinted at in the discussion. However, implementing this requires deep understanding of pytest's internal marker handling system and Python's MRO mechanism. The task is moderately atypical as it involves fixing inheritance behavior in a testing framework's marker system.",
+  "_task_id": "pytest-dev__pytest-10356",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:24.676003"
+}

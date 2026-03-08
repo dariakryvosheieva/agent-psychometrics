@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides the exact solution: add a conditional check `if self.max_length is not None:` before appending the MaxLengthValidator in CharField.__init__, following the same pattern as BinaryField.__init__. The task is crystal clear with benchmarks, code examples, and explicit expected behavior. While it requires understanding Django's field internals and validator system, the fix itself is mechanical once understood.",
+  "_task_id": "django__django-15277",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:11.585799"
+}

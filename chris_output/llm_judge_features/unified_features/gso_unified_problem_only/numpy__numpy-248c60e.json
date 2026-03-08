@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's np.char.isdecimal function with no hints about the solution approach. It requires deep understanding of numpy's string operations internals, memory layouts (C vs Fortran order, strided arrays), and Unicode character classification. The optimization likely involves low-level changes to numpy's C implementation or finding alternative vectorized approaches, which is an unusual pattern without standard solutions readily available.",
+  "_task_id": "numpy__numpy-248c60e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:40.415943"
+}

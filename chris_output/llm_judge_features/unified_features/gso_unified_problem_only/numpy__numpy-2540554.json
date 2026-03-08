@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's structured_to_unstructured function, which needs deep understanding of numpy's internal memory layout and structured array handling. No solution hint is provided, and the optimization likely involves understanding how field subsetting and memory copying work internally. The verification is straightforward via equivalence checking, but finding the optimization requires knowledge of numpy internals.",
+  "_task_id": "numpy__numpy-2540554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.011980"
+}

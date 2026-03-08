@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement clearly identifies the exact bug location (UnboundLocalError due to 'substitutions' not being set when loop isn't entered), provides reproduction steps, and even links to the specific code line. The fix is a standard pattern - initializing a variable before a loop that might not execute. This requires Django staticfiles knowledge but the solution is straightforward once the problem is understood.",
+  "_task_id": "django__django-14493",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.900041"
+}

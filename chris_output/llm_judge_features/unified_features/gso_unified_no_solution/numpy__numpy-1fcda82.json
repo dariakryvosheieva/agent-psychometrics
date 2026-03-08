@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explicitly mentions implementing a gufunc with BLAS support for vecdot, giving a clear direction. However, this requires expert-level knowledge of NumPy internals (gufunc implementation), BLAS library integration, and understanding memory layouts for optimal performance. The task involves modifying core NumPy C/Cython code to leverage optimized linear algebra routines, which is an unusual pattern requiring deep understanding of NumPy's ufunc machinery.",
+  "_task_id": "numpy__numpy-1fcda82",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:46.495910"
+}

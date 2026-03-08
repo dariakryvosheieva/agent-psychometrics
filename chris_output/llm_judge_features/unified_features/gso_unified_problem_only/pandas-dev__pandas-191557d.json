@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing the construction of a pandas Series with nullable Int64 dtype from numpy integer array. There is no hint about what to optimize - the solver must understand pandas internals for nullable integer array construction and identify bottlenecks. Deep knowledge of pandas ExtensionArray implementation and memory handling is needed to find optimization opportunities in the Int64 dtype conversion path.",
+  "_task_id": "pandas-dev__pandas-191557d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:05.067987"
+}

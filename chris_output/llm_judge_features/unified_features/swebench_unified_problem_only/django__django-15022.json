@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that multiple search words cause unnecessary JOINs due to the `qs = qs.filter(...)` pattern, hinting at the root cause but not the exact solution. Fixing this requires deep understanding of Django ORM query construction, particularly how filter chaining creates separate JOINs versus combining conditions. The solution likely involves restructuring how search queries are built to avoid redundant joins, which requires knowledge of Django admin internals and ORM optimization.",
+  "_task_id": "django__django-15022",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:06.936461"
+}

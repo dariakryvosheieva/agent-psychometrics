@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The solution is explicitly identified in the hints - a specific line change from 'elif operand.mask is None' to 'elif operand is None' caused the regression. The problem is crystal clear with reproducible examples and version comparison. While it requires understanding of NDData's mask handling, the fix is straightforward once identified, and the discussion provides the exact line that needs to be reverted.",
+  "_task_id": "astropy__astropy-14995",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:51.794006"
+}

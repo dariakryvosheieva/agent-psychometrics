@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly provides the exact solution: add a `make_hashable` call on `through_fields` in `ManyToManyRel`, following the existing pattern used for `limit_choices_to`. The problem is crystal clear with a full reproducible example and detailed stack trace. While it requires understanding Django's ORM internals (specifically `ForeignObjectRel` identity and hashing), the fix follows an established pattern already used elsewhere in the codebase.",
+  "_task_id": "django__django-14672",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:02.604873"
+}

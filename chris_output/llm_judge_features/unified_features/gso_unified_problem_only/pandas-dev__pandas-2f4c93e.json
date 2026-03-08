@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas merge_asof operations with no hint about the solution approach. It demands deep understanding of pandas internals, particularly the merge_asof algorithm implementation which involves sorted array operations and groupby mechanics. The task is moderately atypical as merge_asof optimization isn't a common pattern, and verification requires careful numerical equivalence checking across multiple merge directions.",
+  "_task_id": "pandas-dev__pandas-2f4c93e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.194719"
+}

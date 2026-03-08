@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies the goal (build pMARS without X11 from Debian sources) and provides test commands. It requires knowledge of Debian package management (apt-get source), build systems (make/configure with flags to disable X11), and understanding of how to modify build configurations. The pattern of building from Debian sources and disabling optional dependencies is documented but requires combining several steps correctly.",
+  "_task_id": "build-pmars",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:20.668628"
+}

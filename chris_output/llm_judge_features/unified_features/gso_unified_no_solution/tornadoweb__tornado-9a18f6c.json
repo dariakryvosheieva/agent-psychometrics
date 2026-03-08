@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires optimizing a C extension function (websocket_mask) for WebSocket masking, which demands expert-level knowledge of C programming, SIMD optimizations, and memory layout. The hint mentions optimizing the C function but doesn't explain how. While verification is straightforward (comparing output lengths), the actual optimization likely involves low-level techniques like SIMD vectorization or memory alignment that are not commonly documented patterns for this specific use case.",
+  "_task_id": "tornadoweb__tornado-9a18f6c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:23.880586"
+}

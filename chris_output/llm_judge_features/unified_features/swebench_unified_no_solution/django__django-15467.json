@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides the exact solution code change needed - modifying a single line in django/contrib/admin/options.py to check if 'empty_label' is already in kwargs before setting the default. The problem is crystal clear with a concrete example, exact file location, and line number. This requires Django admin framework knowledge but the fix itself is a simple conditional check pattern.",
+  "_task_id": "django__django-15467",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.568263"
+}

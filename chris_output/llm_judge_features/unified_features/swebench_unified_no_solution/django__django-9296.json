@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 1,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides the exact solution code - a 3-line __iter__ method implementation. This is a very common Python pattern (implementing iterator protocol) that requires minimal Django-specific knowledge. The task is crystal clear and verification is trivial since there's a single test case for iteration.",
+  "_task_id": "django__django-9296",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:44.422761"
+}

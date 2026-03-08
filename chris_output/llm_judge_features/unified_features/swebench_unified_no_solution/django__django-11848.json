@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The RFC 7231 specification is directly quoted, clearly describing the required behavior: two-digit years more than 50 years in the future should be interpreted as the past. This requires understanding HTTP date parsing and Django's utils module, plus implementing date comparison logic relative to current year. The solution approach is well-documented in the RFC, but requires careful handling of date arithmetic and proper test mocking.",
+  "_task_id": "django__django-11848",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:15.545061"
+}

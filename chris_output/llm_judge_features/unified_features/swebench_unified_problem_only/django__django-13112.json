@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes a regression in Django 3.1 where mixed-case app names cause ForeignKey lazy reference resolution to fail. The issue hints at case sensitivity problems ('dj_reglogin' vs 'DJ_RegLogin'), but doesn't specify where in Django's migration system the fix should be applied. Solving this requires deep understanding of Django's app registry, migration system, and how lazy references are resolved - specifically how app labels are normalized and compared internally.",
+  "_task_id": "django__django-13112",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:30.062689"
+}

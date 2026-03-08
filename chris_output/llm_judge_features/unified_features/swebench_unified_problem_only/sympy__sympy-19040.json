@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves the polynomial factorization algorithm in SymPy when using field extensions. The problem is clearly demonstrated with a reproducible example, but fixing it requires deep understanding of SymPy's polynomial algebra internals, specifically how factorization works over algebraic number fields. No solution approach is hinted at, and this is a specialized area of computer algebra systems.",
+  "_task_id": "sympy__sympy-19040",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:27.345683"
+}

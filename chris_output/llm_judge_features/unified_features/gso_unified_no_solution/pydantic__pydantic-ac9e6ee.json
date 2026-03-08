@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explicitly states the solution involves moving enum validation to Rust (pydantic-core), which is a clear architectural approach but requires expert knowledge of pydantic's Rust/Python FFI boundary and pydantic-core internals. This is an atypical optimization pattern as it requires cross-language implementation changes rather than Python-level optimizations. The test script is well-structured for verification, but the actual implementation requires deep understanding of how pydantic delegates to its Rust core.",
+  "_task_id": "pydantic__pydantic-ac9e6ee",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:22.028645"
+}

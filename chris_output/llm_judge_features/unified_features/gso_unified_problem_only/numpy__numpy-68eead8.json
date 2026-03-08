@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's `np.choose` function with no hints about what specific optimization is needed. The test script includes multiple edge cases (empty arrays, object dtypes with refcounting, non-contiguous arrays with casting), suggesting the optimization likely involves memory handling or reference counting in numpy internals. Understanding numpy's C-level implementation details and memory management would be essential to identify and fix performance issues.",
+  "_task_id": "numpy__numpy-68eead8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.098106"
+}

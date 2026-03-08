@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's internal `np.where` function performance with no hints about the solution approach. The test script only shows usage patterns with various boolean conditions but doesn't indicate what specific optimization is needed - this likely involves deep numpy internals like SIMD optimizations, memory access patterns, or algorithmic improvements to the where function implementation. Understanding how to optimize core numpy operations requires expert knowledge of the library's C implementation and memory handling.",
+  "_task_id": "numpy__numpy-780799b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:48.678736"
+}

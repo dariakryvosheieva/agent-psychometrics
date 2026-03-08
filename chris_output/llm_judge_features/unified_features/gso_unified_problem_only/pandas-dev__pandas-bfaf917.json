@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing a pandas internal function `maybe_sequence_to_range` with no hint about the solution approach. The function converts sequences to range objects when possible, requiring deep understanding of pandas internals and efficient array processing. The random data setup (1M elements, 1000 groups) suggests the optimization involves early detection that the data cannot form a range, which is an unusual pattern requiring knowledge of how pandas handles index creation internally.",
+  "_task_id": "pandas-dev__pandas-bfaf917",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.557208"
+}

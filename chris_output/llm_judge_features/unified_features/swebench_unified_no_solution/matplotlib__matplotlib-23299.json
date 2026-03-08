@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint provides a clear description of the root cause involving backend resolution, rc_context stashing a sentinel value, and figure cleanup on backend changes. However, fixing this requires deep understanding of matplotlib's backend management system, rc_context internals, and the lazy backend resolution mechanism. The interaction between these components is unusual and matplotlib-specific, requiring careful reasoning about state management across context managers.",
+  "_task_id": "matplotlib__matplotlib-23299",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:50.358743"
+}

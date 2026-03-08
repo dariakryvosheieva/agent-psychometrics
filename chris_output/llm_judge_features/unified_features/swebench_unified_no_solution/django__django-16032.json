@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints provide an exact solution with specific code changes needed in Query class and related_lookups.py. However, this requires deep understanding of Django's ORM internals including Query.annotation_select_mask, has_select_fields property, and how subqueries interact with the __in lookup. The bug involves subtle interaction between annotate(), alias(), and subquery field selection that few developers would encounter.",
+  "_task_id": "django__django-16032",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:26.478021"
+}

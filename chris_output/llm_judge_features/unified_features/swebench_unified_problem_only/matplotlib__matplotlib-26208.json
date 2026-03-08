@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves understanding Matplotlib's internal data limit management system and how twinx axes share/propagate data limits between siblings. The problem is clearly described with reproduction code, but finding the fix requires deep knowledge of how stackplot interacts with axis data limits and the twinx mechanism. The regression was introduced in 3.4.0, suggesting changes to internal coordinate transformation or limit propagation logic.",
+  "_task_id": "matplotlib__matplotlib-26208",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:59.640015"
+}

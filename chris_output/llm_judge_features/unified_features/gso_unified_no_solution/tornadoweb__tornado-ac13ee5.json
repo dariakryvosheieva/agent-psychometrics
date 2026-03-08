@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints clearly indicate the solution involves using asyncio.Future when available and scheduling callbacks consistently with asyncio's behavior. This requires deep understanding of Tornado's Future implementation and its relationship with asyncio.Future, including callback timing semantics. Verification is difficult due to timing-sensitive behavior changes between implementations.",
+  "_task_id": "tornadoweb__tornado-ac13ee5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:26.449248"
+}

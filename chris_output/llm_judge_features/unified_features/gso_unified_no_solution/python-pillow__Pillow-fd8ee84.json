@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint clearly indicates the solution approach: use n_frames when already known to determine is_animated, avoiding redundant computation. This requires understanding PIL/Pillow's TiffImagePlugin internals and how is_animated and n_frames properties interact. The test script clearly shows both properties being accessed in different orders, suggesting the optimization involves caching or reusing computed values.",
+  "_task_id": "python-pillow__Pillow-fd8ee84",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:16.182008"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires parsing ICS calendar files, implementing complex constraint satisfaction logic with multiple overlapping time constraints (hard constraints, preferences, buffers), and generating valid ICS output. The logical reasoning is significant due to the need to find the intersection of availability windows while respecting existing meetings and applying tie-breaking rules. While ICS format is documented, combining calendar parsing with multi-person constraint scheduling in a shell environment is an unusual pattern without standard solutions.",
+  "_task_id": "constraints-scheduling",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:27.456725"
+}

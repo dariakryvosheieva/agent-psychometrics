@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is crystal clear with exact solution provided: detect boolean arrays and set default levels to [0.5] for contour() and [0, 0.5, 1] for contourf(). The problem statement explicitly describes what to implement and even references a similar autodetection pattern in imshow. Main challenge is knowing where in matplotlib's contour code to add this type-checking logic, but the fix itself is straightforward.",
+  "_task_id": "matplotlib__matplotlib-24870",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:55.418405"
+}

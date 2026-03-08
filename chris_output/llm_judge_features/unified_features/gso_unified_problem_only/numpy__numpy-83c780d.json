@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing np.char.find operations on string arrays. No solution hint is provided, and optimization would require deep knowledge of NumPy's character/string array internals and potentially how to implement faster string searching (possibly using vectorized operations or alternative approaches). The verification is straightforward since it just compares result lists, but finding the optimization approach requires understanding NumPy's string handling implementation.",
+  "_task_id": "numpy__numpy-83c780d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.382938"
+}

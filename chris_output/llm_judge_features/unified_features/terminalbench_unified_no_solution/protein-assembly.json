@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep specialized knowledge in molecular biology (FRET, protein engineering, antibody binding), bioinformatics (PDB API, fpbase API, GenBank files), and DNA sequence design (codon optimization, GC content). The task involves identifying specific fluorescent proteins matching exact wavelengths, finding antibody targets, designing a multi-domain fusion protein with proper linkers, and optimizing nucleotide sequences - all through shell commands and API calls. While the requirements are detailed, the combination of biology domain expertise with programmatic API interaction and sequence design is highly unusual and has no standard pattern.",
+  "_task_id": "protein-assembly",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:56.232341"
+}

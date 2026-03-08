@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that `_pytest.capture.EncodedFile` incorrectly reports `rb+` mode when it should not include `b`, causing youtube-dl to write bytes instead of str. The fix requires understanding pytest's capture mechanism and file mode conventions, but the solution is straightforward once the issue is understood - just modify the mode property to not include 'b'. Verification is easy with a simple test case.",
+  "_task_id": "pytest-dev__pytest-5262",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:23.620465"
+}

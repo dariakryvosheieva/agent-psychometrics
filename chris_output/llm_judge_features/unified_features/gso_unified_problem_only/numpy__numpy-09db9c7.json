@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing np.char.endswith operations with no hints about the solution approach. It requires deep knowledge of NumPy's string handling internals and how character operations are implemented. The test exercises various edge cases (sliced indices, empty suffixes, overlength suffixes), making it a non-standard optimization problem that likely requires understanding NumPy's internal C-level string processing or finding alternative vectorized approaches.",
+  "_task_id": "numpy__numpy-09db9c7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:39.215282"
+}

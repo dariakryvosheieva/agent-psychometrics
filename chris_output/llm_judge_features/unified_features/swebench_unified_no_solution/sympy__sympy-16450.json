@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug (posify not preserving finite assumption) and the hint explicitly states that other assumptions should be retained when adding positive=True. However, fixing this requires understanding SymPy's Symbol assumptions system and how posify creates new symbols. The solution involves modifying posify to copy/preserve existing assumptions, which requires knowledge of SymPy internals but follows logical reasoning once understood.",
+  "_task_id": "sympy__sympy-16450",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:26.415904"
+}

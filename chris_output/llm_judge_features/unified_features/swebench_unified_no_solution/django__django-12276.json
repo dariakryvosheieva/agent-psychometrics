@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact solution: move the `use_required_attribute()` method from `ClearableFileInput` to `FileInput`. The problem is crystal clear with a specific code reference and even includes a test case demonstrating the expected behavior. This requires Django forms/widgets knowledge but follows an established pattern already implemented in the related `ClearableFileInput` class.",
+  "_task_id": "django__django-12276",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:21.098127"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint 'apply specialization optimization' is vague, suggesting some type-specific fast paths but not detailing the approach. Optimizing numpy.repeat requires deep understanding of NumPy internals, memory layout, and how different array types (int, object, structured) are handled internally. The task involves reasoning about when and how to specialize code paths for different data types to improve performance.",
+  "_task_id": "numpy__numpy-905d37e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:44.762342"
+}

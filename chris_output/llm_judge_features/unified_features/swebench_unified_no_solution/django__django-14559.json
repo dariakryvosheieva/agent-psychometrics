@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task description explicitly states the solution: sum the return values from the repeated update() calls in bulk_update(). The problem is crystal clear with exact code location provided. This is a straightforward modification requiring basic Django ORM knowledge, with the main consideration being handling of duplicates across batches (mentioned in hints). The tests are well-defined making verification straightforward.",
+  "_task_id": "django__django-14559",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:01.905415"
+}

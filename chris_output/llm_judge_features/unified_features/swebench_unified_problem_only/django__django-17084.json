@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a regression bug in Django 4.2 involving the interaction between Window functions and aggregate functions in the ORM. It requires deep understanding of Django's query compilation internals, specifically how subqueries are handled when aggregating over window function annotations. The fix likely involves ensuring window function annotations are properly wrapped in subqueries before aggregation, which requires intimate knowledge of Django's SQL generation layer.",
+  "_task_id": "django__django-17084",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:43.510459"
+}

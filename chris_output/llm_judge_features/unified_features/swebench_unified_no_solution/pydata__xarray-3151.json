@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly stated with a good MCVE and expected behavior - identical coordinates should be ignored when checking monotonicity. However, fixing this requires understanding xarray's internal combine_by_coords logic and how it handles coordinate dimensions. The solution requires identifying where the monotonicity check occurs and adding logic to skip dimensions that don't vary between datasets.",
+  "_task_id": "pydata__xarray-3151",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:07.419918"
+}

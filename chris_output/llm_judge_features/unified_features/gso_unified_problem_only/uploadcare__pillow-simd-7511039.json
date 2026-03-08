@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves optimizing PIL/Pillow-SIMD's image reduce operation, which requires deep understanding of SIMD instructions, memory layout, and low-level image processing internals. The task provides no hints about the solution approach, and pillow-simd is a specialized fork requiring expert knowledge of CPU vectorization. The test script only shows what operation to optimize (Image.reduce with various factors) but gives no direction on how to achieve the optimization.",
+  "_task_id": "uploadcare__pillow-simd-7511039",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:09.565161"
+}

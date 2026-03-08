@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's np.char.replace function with no hints about the approach. It demands deep knowledge of numpy's string operations internals and potentially C-level implementations. The task is atypical as string operations in numpy are less commonly optimized compared to numerical operations, and there's no standard well-documented pattern for this specific optimization.",
+  "_task_id": "numpy__numpy-1b861a2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.274678"
+}

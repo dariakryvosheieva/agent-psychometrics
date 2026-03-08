@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves Django's multi-table inheritance (MTI) internals, specifically how primary keys propagate through parent links. The hints provide a clear approach (modifying `_set_pk_val` to handle parent links), but the final solution needs to handle edge cases like multiple inheritance. This requires deep understanding of Django's ORM model inheritance mechanics and the relationship between `pk`, `attname`, and parent pointer fields.",
+  "_task_id": "django__django-12273",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:21.272802"
+}

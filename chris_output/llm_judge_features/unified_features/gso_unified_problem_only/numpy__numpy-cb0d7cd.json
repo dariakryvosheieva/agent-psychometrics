@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's internal string operation (np.strings.ljust) with no hints about what approach to take. It demands deep knowledge of numpy's string handling internals and ufunc mechanisms. The pattern is unusual as it involves optimizing a specific numpy string function that handles variable-width strings with fillchars, which is not a commonly documented optimization scenario.",
+  "_task_id": "numpy__numpy-cb0d7cd",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.971578"
+}

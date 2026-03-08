@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides the exact solution code change needed - adding current_app parameter to the reverse() call. The problem is clearly described with specific file location and line causing the issue. This is a well-known Django pattern for admin site URL resolution, requiring moderate Django admin knowledge but following established conventions.",
+  "_task_id": "django__django-14855",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:06.133204"
+}

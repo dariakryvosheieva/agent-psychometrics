@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires optimizing pandas groupby.nunique with only vague hints about removing a 'fastpath' and int32 handling. Deep knowledge of pandas internals, groupby implementation, and how nunique computes unique counts is essential. The verification is straightforward via equivalence checking, but the optimization approach requires understanding pandas' internal data structures and aggregation mechanisms.",
+  "_task_id": "pandas-dev__pandas-d377cc9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:55.577956"
+}

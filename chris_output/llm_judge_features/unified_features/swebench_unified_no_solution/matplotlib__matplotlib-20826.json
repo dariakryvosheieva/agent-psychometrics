@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints clearly identify the problematic commit and explain that tick rcParams are applied at the wrong place (end of Axes.__init__ instead of Axes.clear/Axis.clear). This requires deep understanding of matplotlib's axes initialization flow and tick visibility management. The fix location is fairly well-specified, but implementing it correctly requires knowledge of how shared axes coordinate tick visibility.",
+  "_task_id": "matplotlib__matplotlib-20826",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:47.035328"
+}

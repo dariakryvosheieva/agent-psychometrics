@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with explicit commands, expected behavior, and even a hint pointing to the exact location in the code (line 676 in pylinter.py). The fix requires understanding pylint's internal file discovery mechanism and how ignore patterns are supposed to be applied during recursive directory traversal. The solution involves adding filtering logic where files are discovered recursively, which is a standard pattern for this type of bug.",
+  "_task_id": "pylint-dev__pylint-6528",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:22.724816"
+}

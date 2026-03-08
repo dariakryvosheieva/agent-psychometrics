@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "CoreWars is a highly specialized programming game requiring deep knowledge of Redcode assembly and warrior strategies. The task requires understanding opponent strategies (stone bombers, replicators, vampires, snakes, clearers) and designing a counter-strategy that achieves specific win rates against each. While verification is straightforward via pMARS, creating a competitive warrior requires extensive domain expertise and complex strategic reasoning about memory-based combat.",
+  "_task_id": "winning-avg-corewars",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:03.952818"
+}

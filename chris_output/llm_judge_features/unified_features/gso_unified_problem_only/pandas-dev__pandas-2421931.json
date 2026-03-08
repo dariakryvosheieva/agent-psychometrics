@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas datetime parsing with timezone-aware strings, which requires deep knowledge of pandas internals and datetime handling. The test script shows the performance bottleneck is in pd.to_datetime with a specific format string, but no hints are given about how to optimize it. The solution likely involves understanding pandas' internal parsing mechanisms or finding alternative approaches for timezone-aware datetime parsing.",
+  "_task_id": "pandas-dev__pandas-2421931",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:07.536735"
+}

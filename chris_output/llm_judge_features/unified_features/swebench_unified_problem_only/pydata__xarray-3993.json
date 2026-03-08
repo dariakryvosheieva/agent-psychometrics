@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is crystal clear - rename the 'dim' argument to 'coord' in DataArray.integrate for API consistency. The solution approach is clearly described (change parameter name, possibly with deprecation cycle). This requires understanding xarray's API design but is a straightforward parameter renaming task with well-established patterns for deprecation cycles.",
+  "_task_id": "pydata__xarray-3993",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:08.504372"
+}

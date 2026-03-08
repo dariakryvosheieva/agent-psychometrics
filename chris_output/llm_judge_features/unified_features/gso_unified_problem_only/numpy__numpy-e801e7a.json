@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing np.char.count operations on string arrays with mixed ASCII/Unicode content. The test script only reveals what needs to be faster, not how to achieve it. Deep knowledge of NumPy's string handling internals, potentially including SIMD optimizations or memory layout considerations for Unicode strings, would be needed. The combination of Unicode handling with substring counting across various character types makes this an unusual optimization target.",
+  "_task_id": "numpy__numpy-e801e7a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:39.234695"
+}

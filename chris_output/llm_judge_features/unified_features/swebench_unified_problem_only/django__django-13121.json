@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM internals, specifically how duration expressions are compiled and converted for SQLite and MySQL backends. The error occurs in the conversion layer where the result format doesn't match expected numeric input, requiring deep understanding of Django's database backend abstraction and expression compilation. The fix likely requires modifying how duration-only expressions are handled differently from mixed datetime/duration expressions on these specific database backends.",
+  "_task_id": "django__django-13121",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:32.007578"
+}

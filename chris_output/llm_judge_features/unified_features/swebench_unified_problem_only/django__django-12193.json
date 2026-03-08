@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies the root cause (CheckboxInput modifying the attrs dict in-place) and points to the exact line of code causing the issue. The fix involves preventing mutation of shared state, which is a well-known pattern (defensive copying). However, it requires understanding Django's widget rendering internals and the interaction between SplitArrayField and CheckboxInput widget.",
+  "_task_id": "django__django-12193",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:19.175158"
+}

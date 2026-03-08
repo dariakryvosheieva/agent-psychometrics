@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (reusing dictionaries in an iterator) and suggests the solution (copy the dictionary before yielding). This is a well-known Python pattern where generators that yield mutable objects should copy them to prevent confusion. The fix is straightforward - add .copy() before yielding - and tests like list(partitions()) make verification easy.",
+  "_task_id": "sympy__sympy-20154",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:35.353812"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes wanting `:private-members:` to accept arguments like `:members:` does, providing a clear reference pattern. However, implementing this requires deep understanding of Sphinx autodoc internals - how options are parsed, how member filtering works, and how to modify the existing infrastructure. The solution follows an existing pattern (`:members:` behavior) which provides a template to follow.",
+  "_task_id": "sphinx-doc__sphinx-8035",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:54.015241"
+}

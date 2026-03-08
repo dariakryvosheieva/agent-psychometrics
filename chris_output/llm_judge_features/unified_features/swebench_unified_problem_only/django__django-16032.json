@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Django ORM internals, specifically how QuerySet.alias() interacts with annotate() and how the __in lookup constructs subqueries. The title hints that selected fields aren't being cleared properly on the RHS, but finding where in Django's query compilation this happens requires intimate knowledge of the ORM's SQL generation. The test case makes verification straightforward, but the fix location is non-obvious.",
+  "_task_id": "django__django-16032",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:26.342463"
+}

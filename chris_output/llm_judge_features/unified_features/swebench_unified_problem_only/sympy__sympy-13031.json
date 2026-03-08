@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly demonstrates a regression in Matrix.hstack behavior with zero-row matrices between versions 1.0 and 1.1, showing expected vs actual output. However, fixing it requires understanding SymPy's Matrix internals and how hstack handles edge cases with empty matrices. The solution approach is not hinted at, requiring investigation into the matrix stacking implementation to find why column counting fails for zero-row matrices.",
+  "_task_id": "sympy__sympy-13031",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:09.026291"
+}

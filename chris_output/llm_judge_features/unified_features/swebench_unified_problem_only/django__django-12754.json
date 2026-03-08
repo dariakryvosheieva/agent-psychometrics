@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug and explicitly states that reversing the operation order fixes it, providing a clear direction for the fix in Django's migration auto-detector. However, implementing this requires deep understanding of Django's migration system internals, specifically how the auto-detector generates and orders operations. The task involves understanding model inheritance, field clashing detection, and operation dependency ordering in Django migrations.",
+  "_task_id": "django__django-12754",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:24.969751"
+}

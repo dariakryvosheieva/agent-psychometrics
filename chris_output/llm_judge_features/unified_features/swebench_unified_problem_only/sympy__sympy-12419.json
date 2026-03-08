@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a complete reproducible example showing the bug. However, fixing it requires deep understanding of SymPy's symbolic matrix internals, particularly how identity matrices handle double summation over their elements. The bug involves symbolic summation evaluation where the Kronecker delta (identity matrix elements) isn't being properly handled when summed over both indices, requiring knowledge of how Sum.doit() interacts with matrix element indexing.",
+  "_task_id": "sympy__sympy-12419",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:08.933141"
+}

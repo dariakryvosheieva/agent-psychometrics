@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task description includes a detailed diff showing exactly what code changes need to be made, including the specific file location and the pattern to follow (using sync_to_async). The problem is clearly explained with the exact issue: async methods on related managers don't call the correct underlying methods. While it requires understanding Django's related managers and async patterns, the solution is essentially mechanical - adding async wrapper methods following the exact pattern shown in the diff.",
+  "_task_id": "django__django-16256",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:30.859480"
+}

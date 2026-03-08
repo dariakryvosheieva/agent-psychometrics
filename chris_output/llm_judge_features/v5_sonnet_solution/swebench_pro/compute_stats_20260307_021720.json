@@ -1,0 +1,36 @@
+{
+  "timestamp": "20260307_021720",
+  "dataset": "swebench_pro",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-6",
+  "features": [
+    "solution_hint",
+    "problem_clarity",
+    "domain_knowledge_required",
+    "logical_reasoning_required",
+    "atypicality",
+    "verification_difficulty",
+    "standard_pattern_available",
+    "error_specificity",
+    "reproduction_clarity",
+    "expected_behavior_clarity",
+    "debugging_complexity",
+    "codebase_scope",
+    "information_completeness",
+    "similar_issue_likelihood",
+    "side_effect_risk",
+    "test_comprehensiveness",
+    "test_assertion_complexity",
+    "test_edge_case_coverage",
+    "solution_complexity",
+    "integration_complexity"
+  ],
+  "stats": {
+    "total": 220,
+    "success": 219,
+    "failed": 1,
+    "failed_task_ids": [
+      "future-architect__vuls-4a72295de7b91faa59d90a5bee91535bbe76755d"
+    ]
+  }
+}

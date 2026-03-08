@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (TooManyRedirects exception not triggering GET fallback) and the solution approach (extend the except clause to include TooManyRedirects). It requires knowledge of Sphinx's linkcheck builder and requests library exceptions, but the fix pattern is straightforward - adding an exception type to an existing except clause. The test name directly indicates what needs to be tested, making verification straightforward.",
+  "_task_id": "sphinx-doc__sphinx-8475",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:01.880921"
+}

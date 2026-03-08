@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of QEMU virtualization, VNC configuration, and nginx setup for a retro computing environment. The specific requirement for programmatic keyboard input (likely QEMU monitor/QMP interface) combined with running Windows 3.11 is an unusual combination. While the task provides clear requirements, verifying the VM is actually at the Windows desktop and properly configured for automated keyboard control requires careful orchestration of multiple components.",
+  "_task_id": "install-windows-3.11",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:37.173450"
+}

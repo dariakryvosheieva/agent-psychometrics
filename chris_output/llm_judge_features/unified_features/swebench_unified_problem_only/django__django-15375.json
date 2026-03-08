@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and the generated SQL showing the bug (missing SELECT columns). However, fixing it requires deep understanding of Django's ORM internals, specifically how aggregate queries with default arguments generate SQL and interact with annotate(). The generated SQL shows 'SELECT FROM' is missing the column list, indicating an issue in the SQL generation code path when combining annotations with aggregate defaults.",
+  "_task_id": "django__django-15375",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:14.785532"
+}

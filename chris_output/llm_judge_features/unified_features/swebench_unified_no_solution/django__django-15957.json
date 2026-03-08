@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM internals, specifically how prefetch_related works with querysets and how to implement top-n-per-group queries. The hints mention window functions, subqueries, and significant refactoring needed, indicating this is a complex architectural change rather than a simple fix. The problem is clearly described but the solution requires novel implementation using advanced database query patterns that Django didn't previously support.",
+  "_task_id": "django__django-15957",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:25.734123"
+}

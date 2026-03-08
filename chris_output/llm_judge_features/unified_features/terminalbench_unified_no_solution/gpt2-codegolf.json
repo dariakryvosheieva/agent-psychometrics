@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a GPT-2 inference engine from scratch in C under 5000 bytes with no dependencies - an extremely difficult code golf challenge. It demands deep knowledge of transformer architecture, TensorFlow checkpoint format parsing, BPE tokenization, and matrix operations, all while fitting in a severely constrained file size. The combination of ML inference implementation, file format parsing, and extreme size constraints makes this a rare and highly specialized task with no standard pattern to follow.",
+  "_task_id": "gpt2-codegolf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.366491"
+}

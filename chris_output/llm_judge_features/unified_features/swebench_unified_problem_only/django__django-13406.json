@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's queryset pickling internals, specifically how values()/values_list() metadata is preserved during pickle/unpickle. The problem statement clearly identifies the issue (dict vs model instances after unpickling) and provides a reproducible example, but the fix requires deep understanding of Django's Query class serialization and the _iterable_class attribute that determines result type. This is an unusual edge case in queryset pickling that doesn't have standard documented solutions.",
+  "_task_id": "django__django-13406",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:38.210376"
+}

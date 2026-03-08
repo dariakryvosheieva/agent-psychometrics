@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM internals, specifically how Prefetch objects work with querysets and why slicing conflicts with the current filtering mechanism. The problem is clearly stated but the solution requires understanding the internal prefetch_related_objects implementation and how to handle sliced querysets specially. There's no standard pattern for this fix as it's a feature enhancement to existing Django behavior.",
+  "_task_id": "django__django-15957",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:24.921749"
+}

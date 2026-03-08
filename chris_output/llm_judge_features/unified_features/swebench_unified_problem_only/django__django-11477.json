@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement is extremely brief and vague, only mentioning an issue with 'optional' arguments in URL translation without explaining the incorrect behavior or expected outcome. This requires deep knowledge of Django's URL routing system, specifically how `translate_url()` handles optional named groups in URL patterns. The bug involves understanding regex-based URL patterns with optional groups and how they interact with Django's internationalization system, which is a fairly specialized and uncommon issue.",
+  "_task_id": "django__django-11477",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:09.611341"
+}

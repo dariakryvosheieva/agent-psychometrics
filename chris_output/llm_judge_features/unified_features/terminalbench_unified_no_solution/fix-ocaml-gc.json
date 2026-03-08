@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires debugging a garbage collector implementation in OCaml's runtime, which demands deep knowledge of memory management, OCaml internals, and C programming. The bug is in run-length compression of free space in the major heap - a highly specialized area with no standard debugging pattern. While verification is straightforward (run testsuite), finding and fixing the actual bug requires expert-level understanding of GC algorithms and OCaml's internal architecture.",
+  "_task_id": "fix-ocaml-gc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.823100"
+}

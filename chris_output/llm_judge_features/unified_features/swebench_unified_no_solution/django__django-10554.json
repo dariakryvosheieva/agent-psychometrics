@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions a bug caused by `.query` attribute change without performing a prior `copy()`, giving a vague direction but not the exact solution. This requires deep understanding of Django's ORM internals, specifically how QuerySet combining operations (union) and query cloning work. The problem involves understanding mutable state management in QuerySets and how ordering interacts with union operations, which is a moderately unusual pattern that requires complex reasoning about Django's query compilation process.",
+  "_task_id": "django__django-10554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.863874"
+}

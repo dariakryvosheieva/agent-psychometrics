@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a regression bug in Django's ORM involving Q object OR operations and subquery column selection. It requires deep understanding of Django's query compilation internals (alias handling, get_default_columns, subquery generation). The problem statement provides detailed debugging output but the actual fix location in the query compiler is not obvious, and the issue involves subtle interactions between JOIN aliasing and subquery column selection.",
+  "_task_id": "django__django-14351",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.408396"
+}

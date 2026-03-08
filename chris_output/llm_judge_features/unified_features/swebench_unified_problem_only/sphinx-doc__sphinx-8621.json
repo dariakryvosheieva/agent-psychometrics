@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with specific examples and expected behavior, but the solution requires understanding Sphinx's kbd role implementation and designing a parsing algorithm that can distinguish between separator characters and keystroke characters based on context. The logical challenge is creating a robust parser that handles edge cases like standalone separators and compound keystrokes containing separator characters. While the problem hints at the issue (simple regexp treating all special chars as separators), the actual fix requires non-trivial parsing logic.",
+  "_task_id": "sphinx-doc__sphinx-8621",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:59.319184"
+}

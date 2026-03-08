@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires knowledge of compiling C projects with gcov instrumentation (passing appropriate CFLAGS like -fprofile-arcs -ftest-coverage), extracting tarballs, and modifying PATH. While SQLite compilation is well-documented and gcov is a standard tool, combining them requires understanding of build systems and compiler flags. Verification requires checking that the binary is in PATH and was actually compiled with gcov instrumentation.",
+  "_task_id": "sqlite-with-gcov",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:01.353586"
+}

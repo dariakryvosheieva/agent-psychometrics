@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of ELF binary format, memory layout, and how to parse compiled C binaries to extract memory values at specific addresses. The output format is specified but the exact method to extract 'memory values' from an ELF file is ambiguous - it could mean parsing sections, segments, or specific data. This requires specialized knowledge of binary formats and Node.js buffer manipulation, with no standard pattern readily available for this specific extraction task.",
+  "_task_id": "extract-elf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.694463"
+}

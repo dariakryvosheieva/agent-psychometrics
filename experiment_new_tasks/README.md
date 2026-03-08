@@ -39,24 +39,25 @@ python -m experiment_new_tasks.run_all_datasets --feature_irt --datasets swebenc
 python -m experiment_new_tasks.run_all_datasets --datasets terminalbench
 ```
 
-## Results (2026-03-04)
+## Results (2026-03-08)
 
 ### Summary Table (Default Ridge)
 
 Run with: `python -m experiment_new_tasks.run_all_datasets`
 
+**LLM features**: v7 Opus 4.6, solution-level override, top 15 features per dataset (selected by Ridge coefficient magnitude from 20 judge + auditor features). See `chris_output/llm_judge_features/README.md` for details.
+
 | Dataset | Tasks | Agents | Oracle | Grouped Ridge (Emb+LLM) | LLM Judge | Embedding | Baseline |
 |---------|-------|--------|--------|-------------------------|-----------|-----------|----------|
-| SWE-bench Verified | 500 | 134 | 0.9447 | **0.8445** | 0.8372 | 0.8242 | 0.7174 |
-| GSO | 102 | 15 | 0.9139 | **0.7642** | 0.7562 | 0.7581 | 0.7130 |
-| TerminalBench | 89 | 112 | 0.9317 | **0.8065** | 0.7835 | 0.8174 | 0.7338 |
-| SWE-bench Pro | 730 | 14 | 0.9183 | **0.7557** | 0.7089 | 0.7550 | 0.6558 |
-
-**LLM features**: SWE-bench Verified uses 15 features (9 semantic + 3 auditor + 3 test); all other datasets use 9 features (8 core + codebase_scope). See Feature Sources section for details.
+| SWE-bench Verified | 500 | 134 | 0.9447 | **0.8501** | 0.8467 | 0.8244 | 0.7175 |
+| GSO | 102 | 15 | 0.9139 | **0.7945** | 0.7873 | 0.7581 | 0.7130 |
+| TerminalBench | 89 | 112 | 0.9317 | **0.8332** | 0.8099 | 0.8174 | 0.7338 |
+| SWE-bench Pro | 731 | 14 | 0.9183 | **0.7664** | 0.7308 | 0.7550 | 0.6558 |
 
 **Key findings**:
 - **Grouped Ridge (Emb+LLM) is best**: Outperforms single sources on all datasets
-- **Combining features helps**: Grouped Ridge outperforms single sources on all datasets
+- **v7 Opus 4.6 solution dominates**: Best mean AUC across all 6 provider/info-level combinations tested
+- **Top-15 selection helps**: Feature selection by Ridge coefficient improves over using all 20+ features
 
 ### Feature-IRT Results (Joint Training)
 
@@ -263,23 +264,21 @@ See [experiment_new_tasks/auditor_agent/README.md](auditor_agent/README.md) for 
 
 Semantic features extracted via LLM structured output:
 
-**SWE-bench Verified (15 features)**:
+**All datasets (20 features, v5 — Anthropic Sonnet 4.6, solution-level override)**:
 
-Default feature set: `chris_output/llm_judge_features/experiment_a_defaults/swebench_verified.csv`
+Default feature set: `chris_output/llm_judge_features/v5_anthropic_solution/{dataset}/llm_judge_features.csv`
 
-15 features selected by Ridge coefficient magnitude:
-- **Problem**: problem_clarity, atypicality, logical_reasoning_required, codebase_scope, information_completeness, similar_issue_likelihood, error_specificity, reproduction_clarity
-- **Auditor (3)**: entry_point_clarity, change_blast_radius, fix_localization
-- **Test (2)**: test_comprehensiveness, test_edge_case_coverage
-- **Solution (2)**: solution_complexity, integration_complexity
+20 features extracted with solution-level context:
+- solution_hint, problem_clarity, domain_knowledge_required, logical_reasoning_required
+- atypicality, verification_difficulty, standard_pattern_available, error_specificity
+- reproduction_clarity, expected_behavior_clarity, debugging_complexity, codebase_scope
+- information_completeness, similar_issue_likelihood, side_effect_risk
+- test_comprehensiveness, test_assertion_complexity, test_edge_case_coverage
+- solution_complexity, integration_complexity
 
-**GSO, TerminalBench, SWE-bench Pro (9 features)**:
+Note: SWE-bench Verified's v5 CSV also includes 3 auditor features (entry_point_clarity, change_blast_radius, fix_localization) for 23 total.
 
-Default feature set: `chris_output/llm_judge_features/experiment_a_defaults/{dataset}.csv`
-
-8 core features + codebase_scope:
-- solution_hint, problem_clarity, solution_complexity, domain_knowledge_required
-- logical_reasoning_required, atypicality, verification_difficulty, standard_pattern_available, codebase_scope
+Old defaults (9-15 features) are archived in `chris_output/llm_judge_features/experiment_a_old_defaults/`.
 
 ### Unified Features (Experimental)
 
@@ -306,7 +305,7 @@ A standardized 9-feature set is available for fair cross-dataset comparison. All
 - `chris_output/llm_judge_features/terminalbench_unified_core/llm_judge_features.csv`
 - `chris_output/llm_judge_features/gso_unified_core/llm_judge_features.csv`
 
-The current defaults use dataset-specific feature sets stored in `experiment_a_defaults/`. To use unified features instead, specify the path explicitly:
+The current defaults use v5 solution-level features stored in `v5_anthropic_solution/`. To use unified features instead, specify the path explicitly:
 ```bash
 python -m experiment_new_tasks.run_all_datasets --unified_judge_suffix _core
 ```

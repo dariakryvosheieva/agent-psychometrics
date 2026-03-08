@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the solution: replace Django's escape() with Python stdlib's html.escape(). The change is straightforward - swap one implementation for another. The only consideration mentioned is a minor backwards-incompatible change in quote escaping format, which is clearly documented. This is a common refactoring pattern with clear guidance.",
+  "_task_id": "django__django-11276",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:05.700105"
+}

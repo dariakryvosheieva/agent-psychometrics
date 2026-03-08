@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of SymPy's set operations, particularly how ImageSet intersections with Reals are computed. The bug involves incorrect intersection logic where the imageset intersect method is returning wrong results. The problem is clear with good examples showing expected vs actual behavior, but finding the fix requires understanding the internal implementation of is_subset and intersection operations for image sets.",
+  "_task_id": "sympy__sympy-21596",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:39.614220"
+}

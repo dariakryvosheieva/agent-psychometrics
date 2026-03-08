@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's arctan2 function performance with no hints about the approach. The optimization likely involves low-level implementation details such as SIMD vectorization, memory access patterns, or math library optimizations within numpy's C code. This requires expert knowledge of numpy internals and numerical computing optimization, as there's no standard pattern for optimizing specific ufunc implementations.",
+  "_task_id": "numpy__numpy-5f94eb8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.010902"
+}

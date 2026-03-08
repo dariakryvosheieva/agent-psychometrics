@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 5,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires cross-compiling Doom source code to MIPS architecture ELF format, which demands deep knowledge of cross-compilation toolchains, MIPS architecture, and build systems. The task is highly atypical as it involves setting up a cross-compiler for an emulated MIPS environment running in Node.js, integrating custom graphics output code. Verification requires running the compiled binary in a JS VM and checking both stdout and frame output, adding complexity.",
+  "_task_id": "make-doom-for-mips",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.529675"
+}

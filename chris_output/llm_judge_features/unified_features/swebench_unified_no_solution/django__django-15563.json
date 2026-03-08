@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint provides an exact solution approach, detailing which classes (UpdateQuery, SQLUpdateCompiler) need modification and how (changing related_ids from list[int] to dict[Model, list[int]]). However, implementing this requires deep understanding of Django's ORM internals, particularly the SQL compilation layer and model-table inheritance (MTI) handling. The problem itself is clearly demonstrated with a reproducible example, but the fix involves complex internal Django mechanisms that are not commonly documented.",
+  "_task_id": "django__django-15563",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:19.625773"
+}

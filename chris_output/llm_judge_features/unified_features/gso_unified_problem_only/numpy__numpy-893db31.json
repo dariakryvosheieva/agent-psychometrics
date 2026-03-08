@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing np.char.isnumeric on a large string array with no hints about the solution approach. It requires deep knowledge of NumPy's character string operations internals and potential vectorization strategies. The task is atypical as np.char functions are rarely the focus of optimization efforts, and there's no standard pattern for optimizing this specific function.",
+  "_task_id": "numpy__numpy-893db31",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:40.204621"
+}

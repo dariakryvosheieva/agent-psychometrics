@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves a specific regression in Django's migration autodetector where renaming both a model and field simultaneously causes a KeyError. While the traceback clearly shows the issue location (line 823 looking up old_model_name instead of new_model_name), fixing it requires understanding Django's migration internals and the order of operations during migration detection. The test case provided makes verification straightforward, but the fix requires knowledge of how renamed models are tracked.",
+  "_task_id": "django__django-15380",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.203987"
+}

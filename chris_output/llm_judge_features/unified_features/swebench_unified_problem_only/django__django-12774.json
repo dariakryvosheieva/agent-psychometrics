@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and error messages. However, it requires deep Django ORM knowledge about UniqueConstraint vs unique=True field options and how in_bulk() validates uniqueness. The fix likely involves modifying the uniqueness check in in_bulk() to also consider UniqueConstraint definitions on the model's Meta class, which requires understanding Django's constraint system internals.",
+  "_task_id": "django__django-12774",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:27.191189"
+}

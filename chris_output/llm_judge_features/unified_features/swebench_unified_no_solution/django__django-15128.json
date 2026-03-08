@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints provide a detailed solution approach - modify bump_prefix to adjust aliases but preserve the initial one for the merge algorithm. However, this requires deep understanding of Django's Query internals, particularly the alias management system, change_map construction, and how queries are combined. The problem involves complex alias collision detection during QuerySet OR operations, which is a specialized internal mechanism.",
+  "_task_id": "django__django-15128",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:11.013114"
+}

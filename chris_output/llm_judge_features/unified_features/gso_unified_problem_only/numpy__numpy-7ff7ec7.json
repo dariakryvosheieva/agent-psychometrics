@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's array_equal function without any hints about the solution approach. The test script only shows various usage patterns (empty arrays, identity checks, NaN handling, large arrays) but doesn't indicate what specific optimization is needed. Deep understanding of numpy internals is required to identify optimization opportunities, particularly around memory layout, identity checks, and early exit conditions.",
+  "_task_id": "numpy__numpy-7ff7ec7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:29.980250"
+}

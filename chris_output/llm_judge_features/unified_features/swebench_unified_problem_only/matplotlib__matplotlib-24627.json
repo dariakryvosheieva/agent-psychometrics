@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the expected behavior (cla/clf should unset .axes and .figure attributes like remove() does) and provides concrete examples. However, implementing this requires deep understanding of matplotlib's artist management system and how cla()/clf() iterate through and handle child artists. The fix likely involves finding where artists are cleared and ensuring their parent attributes are unset, similar to what remove() does.",
+  "_task_id": "matplotlib__matplotlib-24627",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:53.775326"
+}

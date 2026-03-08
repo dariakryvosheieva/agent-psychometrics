@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task provides detailed solution approach including exact code refactoring needed (moving logic to BoundField, using bf._did_change(), accessing values through BoundField). However, it requires deep understanding of Django forms internals (BaseForm, BoundField, _clean_fields(), changed_data). The failing tests are specific and verification is straightforward once the refactoring is complete.",
+  "_task_id": "django__django-14631",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:02.559086"
+}

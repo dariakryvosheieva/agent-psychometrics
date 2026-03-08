@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves FITS format card handling with specific edge cases around quote escaping and string continuation. The problem is crystal clear with excellent reproduction steps showing exactly where the bug manifests. However, fixing it requires deep understanding of FITS card serialization/deserialization internals, particularly how long strings are split across continuation cards and how quotes are escaped/unescaped at card boundaries.",
+  "_task_id": "astropy__astropy-14598",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:51.241284"
+}

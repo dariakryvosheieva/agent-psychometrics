@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Django's ORM internals, specifically the Query.change_aliases, Query.combine, and alias management systems. The problem statement provides a clear explanation of the root cause (change_map keys intersecting with values during alias renaming) and suggests a general solution approach (incrementing alias suffixes until no intersection). However, implementing the fix requires navigating complex internal Django query machinery that is not well-documented externally.",
+  "_task_id": "django__django-15128",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:10.289621"
+}

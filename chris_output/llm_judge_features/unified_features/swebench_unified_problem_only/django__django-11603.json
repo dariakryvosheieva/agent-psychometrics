@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly describes the solution: setting the Avg and Sum aggregate classes to allow DISTINCT. This requires knowledge of Django's aggregate internals and the existing implementation pattern from #28658, but the actual code change is straightforward - likely just setting a class attribute. The fix follows an established pattern already used for other aggregates.",
+  "_task_id": "django__django-11603",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:10.439229"
+}

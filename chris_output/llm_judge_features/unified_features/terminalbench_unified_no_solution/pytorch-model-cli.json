@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires building a binary executable CLI tool for MNIST inference, which involves deep knowledge of neural network architectures, weight serialization formats, image processing, and C/C++ programming to create a standalone binary. The task is atypical because it requires implementing ML inference from scratch without standard frameworks, converting PyTorch-style weights to a custom format, and compiling to a native executable. The lack of specification about the model architecture, image preprocessing requirements, and weight format adds significant complexity.",
+  "_task_id": "pytorch-model-cli",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:52.391225"
+}

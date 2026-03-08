@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of C++ User Defined Literals syntax and Sphinx's internal C++ domain parser (cpp.py). The problem is clear - UDLs like '6.62607015e-34q_J' are not being parsed correctly - and the user even points to the relevant file. However, implementing UDL support requires understanding the C++ lexical grammar for literals and modifying Sphinx's expression parser, which is a specialized and non-trivial modification with no standard pattern to follow.",
+  "_task_id": "sphinx-doc__sphinx-7590",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:56.679501"
+}

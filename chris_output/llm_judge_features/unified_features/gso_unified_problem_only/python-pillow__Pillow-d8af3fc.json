@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing PIL's Image.split() operation without any hints about the approach. Understanding the internal implementation of Pillow's image channel splitting and how to optimize it requires deep knowledge of the library's internals, including memory layout and band extraction mechanisms. The test script only reveals what operation needs to be faster (split on various image modes) but provides no guidance on how to achieve this optimization.",
+  "_task_id": "python-pillow__Pillow-d8af3fc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:07.885800"
+}

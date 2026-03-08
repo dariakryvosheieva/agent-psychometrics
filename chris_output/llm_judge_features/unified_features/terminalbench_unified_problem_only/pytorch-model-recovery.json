@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep PyTorch knowledge including understanding state dictionaries, model architecture reconstruction from weights, layer freezing, TorchScript conversion, and MSE loss computation. The logical reasoning involves inferring model architecture from weight shapes and ensuring only specific layers are tuned. While the individual components (loading weights, freezing layers, TorchScript) are well-documented patterns, combining them for model recovery is moderately unusual.",
+  "_task_id": "pytorch-model-recovery",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.257442"
+}

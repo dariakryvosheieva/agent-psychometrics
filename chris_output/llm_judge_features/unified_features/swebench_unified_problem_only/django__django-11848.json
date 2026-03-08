@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the bug (hardcoded year ranges vs RFC-compliant 50-year rolling window) and quotes the RFC specification that defines the correct behavior. The solution approach is implied - compare against current year rather than hardcoded ranges. This requires understanding HTTP date parsing in Django and implementing the RFC 7231 algorithm, which involves moderate date arithmetic and edge case handling around year boundaries.",
+  "_task_id": "django__django-11848",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:14.989329"
+}

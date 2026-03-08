@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves deep understanding of WCS (World Coordinate System) transformations, specifically how SlicedLowLevelWCS handles coordinate conversions with non-trivial PCij matrices that couple spectral and spatial dimensions. The problem is clearly demonstrated with reproducible code, but finding the root cause requires understanding the internal implementation of WCS slicing and how dropped dimensions should be handled during world_to_pixel transformations. No solution hint is provided and this is a specialized domain with uncommon edge cases.",
+  "_task_id": "astropy__astropy-13579",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:46.636988"
+}

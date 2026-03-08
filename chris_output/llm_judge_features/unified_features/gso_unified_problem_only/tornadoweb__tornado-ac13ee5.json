@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing Tornado's Future class implementation without any hints about what specifically needs optimization. Understanding Tornado's async internals, including Future state management, callback handling, and IOLoop integration is essential. The test script tests multiple Future operations (done check, result retrieval, callbacks) but doesn't indicate which operation is the bottleneck, requiring analysis of the library's source code to identify optimization opportunities.",
+  "_task_id": "tornadoweb__tornado-ac13ee5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:25.002626"
+}

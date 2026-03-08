@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug (leading whitespace stripped from prepend/append) and hints at a solution direction (apply dedent only to literalinclude content, not prepend/append). Requires understanding Sphinx's literalinclude directive internals and how dedent processing works. The fix likely involves modifying the order of operations in the directive processing, which is moderately complex but well-scoped.",
+  "_task_id": "sphinx-doc__sphinx-10323",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:45.083722"
+}

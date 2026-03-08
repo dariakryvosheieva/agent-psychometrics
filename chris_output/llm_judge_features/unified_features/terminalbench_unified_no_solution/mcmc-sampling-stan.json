@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep specialized knowledge in Bayesian statistics, Stan programming language, and R/RStan interface. While the hierarchical model structure is clearly specified and follows a well-documented pattern (beta-binomial hierarchical model), implementing the non-standard prior (alpha+beta)^(-5/2) in Stan requires understanding of Jacobian transformations and proper parameterization. Verification is difficult because MCMC results have inherent stochasticity and require checking convergence diagnostics.",
+  "_task_id": "mcmc-sampling-stan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:41.804615"
+}

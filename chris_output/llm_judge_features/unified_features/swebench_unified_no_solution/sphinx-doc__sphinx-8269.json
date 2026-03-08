@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and expected vs actual output. The solution approach is clearly hinted - HTTP errors should be reported before checking anchors. This requires understanding Sphinx's linkcheck internals and the order of error checking, but follows a standard pattern of prioritizing error types. The test case name 'test_raises_for_invalid_status' confirms the fix involves proper HTTP status code handling.",
+  "_task_id": "sphinx-doc__sphinx-8269",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:01.503931"
+}

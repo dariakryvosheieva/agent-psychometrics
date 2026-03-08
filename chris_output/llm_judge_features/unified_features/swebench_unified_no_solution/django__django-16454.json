@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that CommandParser's special error formatting arguments aren't being passed to subparsers, and even hints that add_subparsers() needs to copy relevant arguments. However, solving this requires deep knowledge of both argparse internals (how subparsers work, _SubParsersAction) and Django's CommandParser customizations. The fix likely involves overriding add_subparsers or the subparser action class to propagate Django-specific arguments.",
+  "_task_id": "django__django-16454",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:32.241768"
+}

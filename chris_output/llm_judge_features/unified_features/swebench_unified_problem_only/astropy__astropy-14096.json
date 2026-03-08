@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a reproducible example and expected behavior. However, fixing it requires deep understanding of how SkyCoord's custom __getattr__ method works and how it handles attribute access for subclasses. The solution involves modifying the error handling in __getattr__ to properly propagate the original AttributeError rather than masking it with a misleading message about the property name.",
+  "_task_id": "astropy__astropy-14096",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:46.693185"
+}

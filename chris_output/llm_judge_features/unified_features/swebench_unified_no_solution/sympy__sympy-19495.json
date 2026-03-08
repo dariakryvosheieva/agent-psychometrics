@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly demonstrates the buggy behavior with concrete examples showing expected vs actual output. However, fixing it requires deep understanding of SymPy's symbolic substitution mechanism, particularly how bound variables in ConditionSet and ImageSet interact with subs(). The hint about bound variable 'x' being mistaken for 'y' points vaguely at the issue but doesn't provide a solution approach.",
+  "_task_id": "sympy__sympy-19495",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:33.592107"
+}

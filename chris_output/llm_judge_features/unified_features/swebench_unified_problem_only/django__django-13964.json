@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's ORM internals for foreign key assignment and how primary keys are cached/handled differently for auto vs non-auto fields. The problem is clearly described with reproducible examples, but fixing it requires deep understanding of Django's descriptor protocol for ForeignKey fields and when/how related object PKs are resolved. The hint about assignment timing and auto vs non-auto PK handling provides only a vague direction.",
+  "_task_id": "django__django-13964",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:48.689849"
+}

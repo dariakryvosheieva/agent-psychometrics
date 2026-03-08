@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires optimizing pandas internal function `ensure_string_array` with only a PR title hint suggesting faster implementation. This requires deep understanding of pandas/numpy internals and Cython implementation details. The optimization target is clear but the specific approach is not documented, requiring knowledge of how string arrays are handled internally in pandas' lib module.",
+  "_task_id": "pandas-dev__pandas-2a08b05",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.359868"
+}

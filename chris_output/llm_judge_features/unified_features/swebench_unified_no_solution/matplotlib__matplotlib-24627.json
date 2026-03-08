@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the inconsistent behavior between remove() and cla()/clf() regarding artist attributes, and the title explicitly states what should happen. However, solving this requires deep understanding of matplotlib's internal artist management system, particularly how cla()/clf() work and where deparented artists need their attributes unset. The test case makes verification straightforward once the fix is implemented.",
+  "_task_id": "matplotlib__matplotlib-24627",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:54.848750"
+}

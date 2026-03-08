@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task combines git bundle operations (specialized knowledge), merge conflict resolution, and algorithm implementation from examples (inductive reasoning). The algorithm synthesis from examples.json requires understanding ARC-AGI style pattern recognition, which is non-trivial. While git operations are documented, combining bundle fetching with algorithmic code generation creates an unusual task pattern that lacks standard solutions.",
+  "_task_id": "merge-diff-arc-agi-task",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.600634"
+}

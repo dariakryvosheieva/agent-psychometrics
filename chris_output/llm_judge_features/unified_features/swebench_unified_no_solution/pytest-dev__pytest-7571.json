@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is a regression bug where the caplog fixture's log level restoration is broken. The hint points to a specific commit that caused the regression, which narrows down where to look. However, fixing it requires understanding pytest's logging internals and fixture cleanup mechanisms. The verification is straightforward with the provided test case.",
+  "_task_id": "pytest-dev__pytest-7571",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:32.525899"
+}

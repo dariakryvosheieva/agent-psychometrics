@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints provide an exact solution approach - create a `tensor_product_simp_Pow` function that distributes the exponent to each argument in the tensor product, following the existing pattern of `tensor_product_simp_Mul`. The problem is crystal clear with examples showing current vs expected behavior. Domain knowledge of SymPy's quantum module internals is needed, but the pattern to follow (existing `_Mul` handler) makes implementation straightforward.",
+  "_task_id": "sympy__sympy-13974",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:21.071319"
+}

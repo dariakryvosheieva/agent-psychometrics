@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint explicitly identifies the exact location of the bug (a typo in factortools.py line 1150) and mentions it was already fixed previously. This is a straightforward typo fix requiring minimal logical reasoning, though understanding the polynomial factorization code requires domain knowledge of SymPy's internals. Verification is easy with the provided test case.",
+  "_task_id": "sympy__sympy-19040",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:32.657773"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task explicitly hints at SSE4 SIMD implementation for the reduce operation, providing clear direction but not exact implementation details. This requires expert-level knowledge of SIMD intrinsics, CPU vectorization, and low-level image processing optimization. The pillow-simd fork specifically targets SIMD optimizations, making this a specialized domain requiring C-level implementation knowledge.",
+  "_task_id": "uploadcare__pillow-simd-7511039",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:08.089710"
+}

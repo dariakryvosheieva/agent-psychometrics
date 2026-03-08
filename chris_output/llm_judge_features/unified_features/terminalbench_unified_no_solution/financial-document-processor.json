@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized OCR tools (like tesseract, pdftotext, or similar) to extract text from both JPG and PDF files, which is non-trivial. The logical complexity includes document classification based on content analysis, regex parsing for financial amounts with multiple edge cases (VAT presence, Total vs Amount Due priority), and aggregating results into a CSV with calculated totals. The combination of image/PDF processing, text extraction, pattern matching for financial data, and file management makes this an unusual and complex multi-step pipeline.",
+  "_task_id": "financial-document-processor",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.102744"
+}

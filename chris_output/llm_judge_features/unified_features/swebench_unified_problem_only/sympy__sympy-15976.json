@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with reproducible steps and expected vs actual behavior. However, fixing it requires understanding SymPy's MathML printer internals and how it handles symbol names with trailing numbers. The bug likely involves incorrect parsing/rendering of subscripts in MathML presentation format, requiring knowledge of both MathML specification and SymPy's printing architecture.",
+  "_task_id": "sympy__sympy-15976",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:21.386356"
+}

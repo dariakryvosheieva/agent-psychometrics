@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly indicates using NumPy's C Iterator API to unify isnaobj 1D/2D implementations, providing a clear direction. However, implementing this requires expert-level knowledge of NumPy C API internals and memory iteration patterns. The verification is straightforward since the test script has clear equivalence checks, but the actual optimization involves low-level C code modifications that are uncommon even for experienced pandas developers.",
+  "_task_id": "pandas-dev__pandas-9097263",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:01.507466"
+}

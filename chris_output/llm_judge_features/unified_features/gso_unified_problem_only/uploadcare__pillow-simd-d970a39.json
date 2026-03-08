@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves optimizing Pillow-SIMD's image reduction operations, which requires deep expertise in SIMD vectorization, image processing algorithms, and low-level C/assembly optimization. The test script only shows the usage pattern (img.reduce with various factors) without any hints about what internal optimizations are needed. The pillow-simd library is specialized for SIMD-optimized image processing, making this a highly specialized optimization task with no standard patterns to follow.",
+  "_task_id": "uploadcare__pillow-simd-d970a39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:09.668669"
+}

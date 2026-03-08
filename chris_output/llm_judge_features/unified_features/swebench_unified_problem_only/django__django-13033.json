@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM internals, specifically how self-referencing foreign keys interact with ordering and join generation. The problem is well-documented with clear examples showing expected vs actual behavior, but fixing it requires deep understanding of Django's query compilation, particularly how `_id` field suffixes are resolved and how default ordering propagates through joins. The workarounds mentioned hint at where the issue lies but don't directly point to the solution.",
+  "_task_id": "django__django-13033",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:29.619416"
+}

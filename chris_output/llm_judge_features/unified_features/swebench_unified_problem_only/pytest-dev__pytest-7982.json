@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact commit that caused the regression, the specific parameter change (`follow_symlinks=False`) that needs to be removed, and even mentions a PR is coming. This is essentially a one-line fix with the solution completely spelled out. The only domain knowledge needed is basic familiarity with pytest's collection mechanism.",
+  "_task_id": "pytest-dev__pytest-7982",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:29.910094"
+}

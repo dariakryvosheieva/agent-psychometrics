@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's migration system, specifically how RenameIndex handles unnamed indexes and state management during forward/backward migrations. The problem is clear (crash when re-applying RenameIndex after backward migration), but fixing it requires understanding the internal state tracking of auto-generated index names. The solution involves properly restoring/tracking the old auto-generated name, which is a non-trivial edge case in migration operations.",
+  "_task_id": "django__django-15695",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:20.409279"
+}

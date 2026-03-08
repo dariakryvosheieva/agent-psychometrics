@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the bug location, explains the root cause (integer division resulting in 0), and even suggests the exact fix ('append a ` or 1` at the end of this line'). The issue is a common edge case pattern where a calculation can result in 0 when a minimum of 1 is required. Verification requires access to a Kubernetes environment or mocking the cgroup files to reproduce.",
+  "_task_id": "pylint-dev__pylint-6903",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:20.717200"
+}

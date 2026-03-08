@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task hints at the solution location (Add.py's assumption handler around line 532-566) and mentions a specific commit that changed behavior. However, fixing this requires deep understanding of SymPy's assumption system and how is_zero is computed for Add expressions with complex numbers. The logical challenge is determining when the handler should return None vs False for expressions that can't be definitively evaluated without simplification.",
+  "_task_id": "sympy__sympy-15875",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:25.807794"
+}

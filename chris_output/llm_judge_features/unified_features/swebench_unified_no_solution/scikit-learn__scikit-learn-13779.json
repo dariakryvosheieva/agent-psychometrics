@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is clearly described with a reproducible example showing that setting an estimator to None causes a failure when sample_weight is passed. The fix requires understanding scikit-learn's VotingClassifier internals, specifically where sample_weight support is checked. The solution pattern (adding a None check) is standard, but locating the exact place in the codebase requires framework knowledge.",
+  "_task_id": "scikit-learn__scikit-learn-13779",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:41.609827"
+}

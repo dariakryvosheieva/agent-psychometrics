@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly provides the exact solution - adding `prog=self.prog_name` to the CommandParser instantiation. The issue is crystal clear with specific code references and line numbers. While it requires understanding Django's management command infrastructure, the fix itself is straightforward parameter passing. The main challenge is writing a proper regression test as hinted.",
+  "_task_id": "django__django-13658",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:45.124707"
+}

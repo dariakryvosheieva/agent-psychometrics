@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies a regression in timezone name handling between Django versions, with specific commit reference. However, fixing it requires deep understanding of Django's timezone internals, the difference between Etc/GMT conventions and standard offsets, and how _get_timezone_name() interacts with database operations. The solution involves understanding the nuanced behavior of timezone offset sign conventions (Etc/GMT uses inverted signs from POSIX).",
+  "_task_id": "django__django-14792",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:06.844681"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's migration system, specifically how AlterField operations are handled differently across database backends (SQLite vs PostgreSQL). The problem hints that 'choices' changes should be no-ops but doesn't specify where or how to implement this fix. Understanding SQLite's schema alteration limitations and Django's schema editor internals is essential.",
+  "_task_id": "django__django-15561",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:17.571502"
+}

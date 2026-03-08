@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding SSL certificate parameters to the PostgreSQL dbshell command, similar to a previous fix (#28322). It requires Django-specific knowledge about how database shell commands work and how to pass environment variables to psql, but the pattern is well-established from the referenced similar bug fix. The solution involves extending existing code to handle additional SSL parameters.",
+  "_task_id": "django__django-11239",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:04.777300"
+}

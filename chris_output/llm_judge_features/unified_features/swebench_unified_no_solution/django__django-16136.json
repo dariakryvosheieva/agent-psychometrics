@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints explicitly state the solution: 'http_method_not_allowed() needs to be adjusted to handle both sync and async cases in the same way as options()' and even provide a draft PR link. The problem is crystal clear with exact reproduction steps. The fix requires understanding Django's async view handling internals, but follows an existing pattern (the options() method). Verification is straightforward with the provided test cases.",
+  "_task_id": "django__django-16136",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:28.544108"
+}

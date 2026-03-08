@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a regression bug between matplotlib versions affecting datetime axis label spacing when usetex=True. The problem is visually clear from the screenshots, but finding the root cause requires deep understanding of matplotlib's datetime formatting, text rendering pipeline, and usetex integration. No solution direction is provided, making this require significant investigation into what changed between versions 3.3 and 3.4 that affects label spacing.",
+  "_task_id": "matplotlib__matplotlib-21568",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:47.644110"
+}

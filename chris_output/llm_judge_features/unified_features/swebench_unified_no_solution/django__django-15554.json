@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM internals specifically around FilteredRelation and SQL JOIN generation. The hint identifies a specific regression commit but doesn't explain the fix. Understanding how Django's query compiler handles multiple FilteredRelations with the same base relation requires deep knowledge of Django's ORM internals, particularly the alias mapping and join reuse logic.",
+  "_task_id": "django__django-15554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:17.708870"
+}

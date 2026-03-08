@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Sphinx's autodoc extension internals, specifically how type hints are processed differently when displayed in signatures versus descriptions. The bug is clearly described with reproduction steps, but fixing it requires understanding the separate code paths for 'signature' vs 'description' type hint rendering and where type aliases need to be applied. The test case makes verification straightforward once the fix is implemented.",
+  "_task_id": "sphinx-doc__sphinx-8459",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:01.736041"
+}

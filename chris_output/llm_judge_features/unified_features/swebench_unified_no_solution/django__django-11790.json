@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies a regression where maxlength HTML attribute is missing from AuthenticationForm's username field, with specific commit references. Fixing this requires understanding Django's form field system and how HTML attributes are set, particularly the relationship between model field max_length and form widget attributes. The test names clearly indicate what needs to work, making verification straightforward.",
+  "_task_id": "django__django-11790",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:13.662036"
+}

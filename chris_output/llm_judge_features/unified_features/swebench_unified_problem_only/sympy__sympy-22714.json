@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves understanding the interaction between SymPy's evaluate context manager and Point2D's coordinate validation. The error about 'Imaginary coordinates' when none are present suggests that with evaluate(False), the is_real check fails because expressions aren't being evaluated. This requires deep knowledge of SymPy's evaluation system and how assumptions work in unevaluated contexts - an unusual pattern that isn't well-documented.",
+  "_task_id": "sympy__sympy-22714",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:37.289787"
+}

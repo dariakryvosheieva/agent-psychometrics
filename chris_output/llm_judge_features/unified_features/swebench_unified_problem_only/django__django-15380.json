@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task identifies a specific regression with a commit hash, pointing to the migration autodetector's generate_renamed_fields method using old_model_name instead of the new model name after a rename. Understanding Django's migration autodetector internals is required to fix this properly. The fix likely involves using the correct model name lookup after model renames are processed, but the exact solution isn't given - just the location of the crash.",
+  "_task_id": "django__django-15380",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:15.474834"
+}

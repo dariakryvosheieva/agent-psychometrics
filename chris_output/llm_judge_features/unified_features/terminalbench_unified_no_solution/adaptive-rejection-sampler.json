@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a specialized statistical algorithm (adaptive rejection sampling from Gilks et al. 1992) which demands deep understanding of computational statistics, log-concave distributions, and sampling theory. The implementation requires multiple interconnected components (piecewise linear envelopes, squeezing functions, log-concavity checks) with stochastic output that makes testing non-trivial. While the task description is clear about requirements, the actual algorithm implementation requires significant domain expertise and is not a common shell/scripting pattern.",
+  "_task_id": "adaptive-rejection-sampler",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.329106"
+}

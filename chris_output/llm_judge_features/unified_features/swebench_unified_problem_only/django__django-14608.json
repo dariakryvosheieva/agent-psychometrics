@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's needed: add a 'nonform' CSS class for non-form errors in FormSets, analogous to the existing 'nonfield' class for non-field errors in Forms. This requires Django forms/formsets knowledge to locate where ErrorList instances are created and how CSS classes are added, but the pattern already exists in the codebase for 'nonfield' errors, making it straightforward to follow.",
+  "_task_id": "django__django-14608",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:01.104755"
+}

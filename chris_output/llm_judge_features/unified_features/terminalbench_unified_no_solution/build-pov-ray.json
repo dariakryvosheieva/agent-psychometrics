@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "Building POV-Ray 2.2 (released in 1993) is a challenging legacy software compilation task requiring deep knowledge of historical build systems, potential patches for modern compilers, and troubleshooting obsolete code. Finding the correct source archives for a 30+ year old program and getting it to compile on a modern system requires significant domain expertise and problem-solving. The task provides a sanity check command but little guidance on the build process itself.",
+  "_task_id": "build-pov-ray",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:21.409324"
+}

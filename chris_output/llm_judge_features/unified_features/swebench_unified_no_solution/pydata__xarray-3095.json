@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint directly identifies the commit that introduced the regression, making it relatively straightforward to locate the problematic code. However, fixing it requires understanding xarray's internal Variable/IndexVariable copy mechanisms and how pandas Index handles unicode dtypes. The test case is clear and the verification is straightforward - just check that dtype is preserved.",
+  "_task_id": "pydata__xarray-3095",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:08.041561"
+}

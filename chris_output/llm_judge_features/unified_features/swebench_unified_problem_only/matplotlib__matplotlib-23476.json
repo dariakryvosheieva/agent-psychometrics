@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves understanding matplotlib's pickle serialization mechanism and how DPI scaling interacts with M1 Mac's Retina display handling. The problem is clearly described with reproducible code, but finding the fix requires deep knowledge of matplotlib's figure state management and backend-specific DPI scaling behavior. The M1 Mac-specific nature and Retina display doubling makes this an unusual platform-specific bug that requires understanding the interaction between pickle's __setstate__ and the MacOSX backend's canvas initialization.",
+  "_task_id": "matplotlib__matplotlib-23476",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:51.760344"
+}

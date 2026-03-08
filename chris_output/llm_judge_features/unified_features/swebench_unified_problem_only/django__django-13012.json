@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Django's ORM internals, specifically how ExpressionWrapper handles the `contains_aggregate` or similar properties that determine GROUP BY clause placement. The problem is clearly described with a reproducible example, but the solution requires understanding how Django's query compiler decides which expressions belong in GROUP BY clauses. The hint that Value works correctly without ExpressionWrapper suggests the fix involves propagating some property from the wrapped expression to the wrapper.",
+  "_task_id": "django__django-13012",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:28.941325"
+}

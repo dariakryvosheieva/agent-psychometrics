@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement includes the exact solution with a diff showing precisely what code to add and where. The fix follows the existing pattern for sync methods by wrapping them with sync_to_async. However, implementing this requires deep understanding of Django's ORM internals, specifically related managers and descriptors, and the fix needs to be applied to multiple manager classes (reverse many-to-one and forward many-to-many).",
+  "_task_id": "django__django-16256",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:30.540383"
+}

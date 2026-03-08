@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact issue (double superscripts in LaTeX) and provides the exact solution (adding curly brackets around the base expression). This is a well-known LaTeX formatting issue. The fix requires knowledge of SymPy's printing system and where to add the brackets, but the solution approach is clearly stated.",
+  "_task_id": "sympy__sympy-21930",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:40.461313"
+}

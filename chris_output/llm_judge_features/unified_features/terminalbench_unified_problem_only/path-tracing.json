@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires reverse-engineering a programmatically rendered image to recreate it algorithmically in C with a <2KB compressed size constraint. This demands expert knowledge of path tracing/ray tracing algorithms, graphics rendering, and the ability to deduce the exact mathematical formulas and scene parameters used to generate the original image. The combination of reverse engineering an unknown rendering algorithm while meeting strict size and similarity constraints makes this extremely difficult.",
+  "_task_id": "path-tracing",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:49.431681"
+}

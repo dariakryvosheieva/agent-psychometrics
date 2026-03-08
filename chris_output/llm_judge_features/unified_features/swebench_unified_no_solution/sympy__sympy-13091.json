@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact line to change (line 316 in basic.py) and the exact fix needed (replace 'return False' with 'return NotImplemented'). The Python documentation pattern for rich comparison returning NotImplemented is well-documented. The main challenge is identifying all similar locations in the codebase that need the same fix, but the core solution is clearly specified.",
+  "_task_id": "sympy__sympy-13091",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:16.098044"
+}

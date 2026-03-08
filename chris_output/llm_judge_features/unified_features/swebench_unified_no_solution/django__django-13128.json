@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM expression system, particularly how output_field resolution works for combined expressions involving temporal types. The problem is clear (temporal subtraction should automatically resolve to DurationField without ExpressionWrapper), but the solution requires understanding Django's internal expression type resolution mechanism. The failing tests span multiple temporal types (date, datetime, time) and scenarios (subqueries, case expressions), indicating a need for careful handling of type inference across the expression system.",
+  "_task_id": "django__django-13128",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:34.022608"
+}

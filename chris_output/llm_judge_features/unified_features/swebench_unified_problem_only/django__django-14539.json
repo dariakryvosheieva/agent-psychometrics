@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves the interaction between HTML entity escaping (like &lt;) and URL parsing with trailing punctuation handling in Django's urlize() function. The developer needs deep understanding of Django's urlize internals, how HTML entities work, and how the trailing punctuation stripping logic incorrectly handles partially-matched HTML entities. The issue is subtle - 'lt' is being incorrectly duplicated due to mishandling of the escaped '<' character at the URL boundary.",
+  "_task_id": "django__django-14539",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:00.387468"
+}

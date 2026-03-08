@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides clear requirements for modernizing Python 2 to 3 code, specifying exact output format, required libraries, and file locations. It requires knowledge of Python 2 to 3 migration patterns, pandas, pathlib, and configparser, but these are well-documented. The logical reasoning involves understanding what Python 2 constructs need updating and how to properly structure the modern script, but follows standard migration patterns.",
+  "_task_id": "modernize-scientific-stack",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:44.472195"
+}

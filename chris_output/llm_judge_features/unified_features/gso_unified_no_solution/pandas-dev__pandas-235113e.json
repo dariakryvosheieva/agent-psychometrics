@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task hints at optimizing DataFrame.duplicated for single-column subsets (PR #45534) but doesn't specify the approach. It requires deep pandas internals knowledge to understand how duplicated() works and where optimization opportunities exist for the single-column case. The verification is straightforward with equivalence checking, and this is a common optimization pattern of specializing general code for specific cases.",
+  "_task_id": "pandas-dev__pandas-235113e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.166616"
+}

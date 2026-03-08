@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires SQL query optimization knowledge including understanding of indexing, query execution plans, and SQLite-specific syntax. The solver must analyze the existing query, understand the database schema, and apply optimization techniques while ensuring output equivalence. Standard SQL optimization patterns exist, but applying them requires understanding the specific query structure and database schema.",
+  "_task_id": "query-optimize",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.704989"
+}

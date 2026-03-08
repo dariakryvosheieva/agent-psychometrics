@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 1,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact solution: add a __reversed__() method to OrderedSet. This is a well-documented Python pattern for making objects reversible. The implementation is straightforward - just define __reversed__ to return reversed(self.dict) or similar, requiring only basic Python knowledge of the iterator protocol.",
+  "_task_id": "django__django-14089",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:52.358300"
+}

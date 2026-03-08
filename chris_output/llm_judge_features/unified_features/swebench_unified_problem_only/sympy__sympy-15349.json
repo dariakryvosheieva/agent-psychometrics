@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that the rotation matrix output is incorrect (sign error on one sin(x) term), but doesn't specify which exact line needs fixing. Requires domain knowledge of quaternion-to-rotation-matrix conversion formulas (3D rotation mathematics). The fix itself is likely a simple sign correction, but identifying which element is wrong requires understanding the standard rotation matrix formula. Verification is straightforward since the correct rotation matrix form is well-documented.",
+  "_task_id": "sympy__sympy-15349",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:19.369428"
+}

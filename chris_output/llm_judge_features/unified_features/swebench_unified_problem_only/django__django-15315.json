@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies the issue (hash changing when field is assigned to model class) and suggests a solution approach (revert the __hash__ change from #31750). However, implementing this requires understanding Django's model field internals and how the previous ticket's fix interacts with hash/equality semantics. The Python pattern of immutable hashing is well-documented, but applying it correctly in Django's context requires framework-specific knowledge.",
+  "_task_id": "django__django-15315",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:11.768355"
+}

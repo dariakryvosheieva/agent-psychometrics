@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's np.char.rfind function with no hints about what optimization is needed. It requires deep understanding of numpy's string operations internals and C-level implementation details. The task is atypical as it involves optimizing a specific numpy character operation rather than common vectorization patterns, and there's no standard optimization pattern readily available for this specific function.",
+  "_task_id": "numpy__numpy-22ab9aa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:34.437297"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires designing a custom resharding algorithm that handles both file size limits (15MB) and directory entry limits (30 items), plus a reversible decompression scheme. The main challenge is creating a metadata system to track how files were split/reorganized so they can be perfectly reconstructed. There's no standard pattern for this specific combination of constraints, requiring novel solution design and careful handling of edge cases like nested directories and file splitting.",
+  "_task_id": "reshard-c4-data",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.081292"
+}

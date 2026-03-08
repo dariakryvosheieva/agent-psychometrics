@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with exact input/output examples showing the parenthesization issue in LaTeX printing. The solution requires understanding SymPy's LaTeX printer internals and precedence handling for the Subs class, which is specialized knowledge. However, the pattern of adding parentheses based on operator precedence is common in printer implementations, making this a well-documented pattern within the codebase.",
+  "_task_id": "sympy__sympy-18763",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:31.128406"
+}

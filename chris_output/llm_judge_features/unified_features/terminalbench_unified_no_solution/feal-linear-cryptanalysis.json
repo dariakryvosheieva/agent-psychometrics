@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep cryptographic knowledge of linear cryptanalysis techniques specific to FEAL ciphers, which is highly specialized. While the task clearly states the approach needed (linear attack on round keys) and provides the necessary files, implementing the actual attack requires understanding linear approximations, bias calculation, and key recovery methods. The verification is straightforward (decrypt and compare), but the implementation is extremely challenging without prior cryptanalysis experience.",
+  "_task_id": "feal-linear-cryptanalysis",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.359849"
+}

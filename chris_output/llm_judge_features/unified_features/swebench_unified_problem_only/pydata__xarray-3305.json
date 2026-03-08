@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with a minimal reproducible example showing that `keep_attrs=True` is being ignored in the `quantile` method. This is a common pattern in xarray where attribute preservation needs to be explicitly handled in reduction operations. The fix likely involves finding where attributes are being dropped in the quantile implementation and ensuring they're preserved when `keep_attrs=True`, which requires moderate xarray internals knowledge but follows a standard pattern.",
+  "_task_id": "pydata__xarray-3305",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:09.462702"
+}

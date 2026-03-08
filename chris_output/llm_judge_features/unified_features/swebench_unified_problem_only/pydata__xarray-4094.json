@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of xarray's internal stacking/unstacking mechanisms and how variables are merged. The MCVE clearly demonstrates the bug with a specific error message about conflicting values, but no hint is given about where or how to fix it. The fix likely involves understanding how single-dimension variables are handled differently in the unstacking process and why coordinate conflicts arise.",
+  "_task_id": "pydata__xarray-4094",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:10.328940"
+}

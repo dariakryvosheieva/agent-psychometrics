@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is well-documented with clear reproduction steps and the hints point to the specific location (set_cmap function and rc parameters) where the fix is needed. However, solving this requires deep understanding of matplotlib's colormap registry system, the distinction between registered names and colormap object names, and how rcParams interact with colormaps. The fix involves understanding internal colormap lookup mechanisms and ensuring consistent name handling.",
+  "_task_id": "matplotlib__matplotlib-25479",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:58.491683"
+}

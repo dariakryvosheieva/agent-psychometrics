@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of both Postfix MTA configuration and Mailman3 mailing list management, including their integration. The configuration involves multiple interconnected services (MTA, list manager, local mail delivery) with specific subscription policies and mail routing rules. While the requirements are clearly stated, implementing the complete mail flow with proper join/leave/post functionality requires specialized sysadmin expertise that goes beyond typical documentation examples.",
+  "_task_id": "mailman",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.371626"
+}

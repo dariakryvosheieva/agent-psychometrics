@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires highly specialized knowledge across multiple domains: molecular biology (FRET, fusion proteins, gBlocks), bioinformatics (PDB API, fpbase API, FASTA parsing, GenBank files), and chemistry (SMILES notation for molecule identification). The solver must integrate data from multiple sources, identify correct proteins matching specific spectral properties (505nm excitation, 610nm emission), design DNA sequences with GC content constraints, and properly order components. The task combines rare bioinformatics APIs with complex biological design requirements that have no standard shell scripting pattern.",
+  "_task_id": "protein-assembly",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.313305"
+}

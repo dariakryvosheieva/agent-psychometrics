@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django ORM internals specifically around QuerySet union operations and ordering. The error 'ORDER BY position 4 is not in select list' indicates a SQL generation issue where ordering references are being corrupted when derived querysets modify the original union queryset. Fixing this requires deep understanding of Django's query compilation, how union queries handle ordering, and the queryset cloning/mutation mechanisms.",
+  "_task_id": "django__django-10554",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.285290"
+}

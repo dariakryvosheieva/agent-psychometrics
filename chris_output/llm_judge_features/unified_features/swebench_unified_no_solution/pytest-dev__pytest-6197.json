@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with a minimal reproduction case and the hints identify the culprit PR (#5831), but the actual fix requires deep understanding of pytest's collection mechanism. The developer needs to understand why pytest is now eagerly collecting __init__.py files and how to restore the previous behavior while maintaining the intended functionality of the original change. The test names suggest issues with both package collection and src layout path handling.",
+  "_task_id": "pytest-dev__pytest-6197",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:28.862705"
+}

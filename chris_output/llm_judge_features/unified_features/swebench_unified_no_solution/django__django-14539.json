@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's urlize() function internals and how it handles HTML-escaped strings (like &lt; for <) combined with trailing punctuation stripping. The bug involves subtle interaction between HTML entity handling and URL parsing logic, which is an unusual edge case. While the problem is clearly demonstrated with expected vs actual output, fixing it requires understanding the complex text processing pipeline in urlize().",
+  "_task_id": "django__django-14539",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:00.078125"
+}

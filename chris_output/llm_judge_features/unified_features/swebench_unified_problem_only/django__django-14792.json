@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's timezone handling internals, specifically how _get_timezone_name() and _prepare_tzname_delta() interact. The problem clearly identifies the regression between Django 3.1 and 3.2, and points to the specific functions involved, but the fix requires understanding the Etc/GMT naming convention (where signs are reversed) and how the Postgres operations class handles timezone deltas. The unusual nature of Etc/GMT zones with inverted signs makes this an atypical edge case.",
+  "_task_id": "django__django-14792",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:05.868675"
+}

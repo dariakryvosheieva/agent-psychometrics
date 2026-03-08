@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's formset internals to implement a new feature that prevents object creation. The problem describes what's needed (edit-only view) but doesn't specify implementation details. The developer must understand how formsets handle new vs existing objects and design an appropriate API (likely a new parameter) to control this behavior.",
+  "_task_id": "django__django-14725",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:01.795684"
+}

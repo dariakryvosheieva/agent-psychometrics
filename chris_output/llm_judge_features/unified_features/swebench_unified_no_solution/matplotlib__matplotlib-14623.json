@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint explicitly provides the exact commit and PR that fixes the issue, pointing directly to the solution location. The problem is clearly described with a reproducible example. However, understanding the fix requires knowledge of matplotlib's axis scaling and limit handling internals. The verification is straightforward since there's a specific test case provided.",
+  "_task_id": "matplotlib__matplotlib-14623",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:45.084297"
+}

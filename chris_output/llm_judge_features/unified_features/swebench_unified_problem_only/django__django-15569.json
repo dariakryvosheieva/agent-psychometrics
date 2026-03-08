@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly describes the exact fix needed: clear the cache in _unregister_lookup() just like it's done in register_lookup(), with specific line references to both methods. The pattern already exists in the codebase (register_lookup), making this a straightforward copy of existing behavior. The only complexity is understanding Django's lookup registration system and knowing to update the related test.",
+  "_task_id": "django__django-15569",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:19.658150"
+}

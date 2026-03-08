@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that Max function produces invalid Mathematica output with parentheses instead of brackets. The hint mentions a known functions table in mathematica.py that doesn't include Max/Min, suggesting the fix involves adding these functions to that table. This is a common pattern for code printers - adding missing function mappings - requiring moderate SymPy knowledge but straightforward implementation.",
+  "_task_id": "sympy__sympy-15345",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:23.384102"
+}

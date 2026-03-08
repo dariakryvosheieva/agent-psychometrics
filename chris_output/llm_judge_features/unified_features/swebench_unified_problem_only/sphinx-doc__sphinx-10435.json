@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the issue (unwanted whitespace in LaTeX output) and even shows the expected fix in the markup (using % to suppress whitespace). However, fixing this requires understanding Sphinx's LaTeX writer internals and how it generates code highlighting markup. The solution involves modifying how the writer outputs the opening/closing of inline code blocks to avoid spurious spaces.",
+  "_task_id": "sphinx-doc__sphinx-10435",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:47.077414"
+}

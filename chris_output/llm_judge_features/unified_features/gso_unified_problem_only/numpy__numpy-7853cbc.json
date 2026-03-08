@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's internal ufunc.at operation, which is a specialized unbuffered in-place operation. The test script only shows usage of np.add.at without any hints about what optimization is needed. Understanding how to optimize this requires deep knowledge of numpy's C implementation, memory access patterns, and potentially SIMD optimizations for the indexed addition operation.",
+  "_task_id": "numpy__numpy-7853cbc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.242376"
+}

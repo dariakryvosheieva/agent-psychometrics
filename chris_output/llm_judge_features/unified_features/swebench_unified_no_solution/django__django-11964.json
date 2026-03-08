@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with excellent test cases showing the exact issue - TextChoices enum values retain their enum type instead of returning the underlying string value when accessed. Fixing this requires deep knowledge of Django's enum choices implementation and Python's enum system, particularly understanding how __str__ methods interact with enum subclasses. The hint confirms the issue is in how values are stored in __dict__, pointing toward needing to modify the Choices class behavior.",
+  "_task_id": "django__django-11964",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:16.964669"
+}

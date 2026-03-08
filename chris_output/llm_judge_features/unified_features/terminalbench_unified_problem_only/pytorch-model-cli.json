@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of ML model inference (MNIST), creating binary executables, JSON weight loading, and image processing - combining multiple specialized domains. The task is unusual because it requires building a standalone binary CLI tool for ML inference rather than using standard Python/PyTorch scripts. While the output format is clear, many implementation details are left unspecified (model architecture, weight format, how to compile to binary).",
+  "_task_id": "pytorch-model-cli",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.675677"
+}

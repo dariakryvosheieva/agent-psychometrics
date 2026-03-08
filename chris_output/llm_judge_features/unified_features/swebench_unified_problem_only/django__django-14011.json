@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that ThreadedWSGIServer doesn't close database connections after each thread, and provides a workaround showing the root cause. However, the actual fix requires deep understanding of Django's LiveServerTestCase internals, WSGI threading, and database connection management. The race condition nature makes this extremely difficult to verify - it only reproduces ~50% of the time and requires specific timing conditions.",
+  "_task_id": "django__django-14011",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:49.562872"
+}

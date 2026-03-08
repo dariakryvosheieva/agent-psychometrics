@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep knowledge of Sphinx's autodoc extension internals, specifically how it processes type annotations and generates cross-references. The problem is clearly demonstrated with reproduction steps, but fixing it requires understanding the difference in how Sphinx handles type annotations for properties vs regular attributes. No solution hint is provided, and this is a fairly specific edge case in Sphinx's documentation generation pipeline.",
+  "_task_id": "sphinx-doc__sphinx-9591",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:03.708234"
+}

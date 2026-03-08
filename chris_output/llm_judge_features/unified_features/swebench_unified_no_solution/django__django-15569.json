@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states the exact solution: add cache clearing to _unregister_lookup() similar to what's already done in register_lookup(). The problem statement includes direct links to the relevant code lines and even references the PR with the fix. This is a simple consistency fix requiring basic Django ORM knowledge, following an existing pattern already in the codebase.",
+  "_task_id": "django__django-15569",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:18.935718"
+}

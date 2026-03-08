@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves deep Django ORM internals - specifically how deferred fields are tracked across prefetch operations and how instances are cached/reused. The problem statement is crystal clear with exact reproduction steps and expected vs actual behavior, but fixing it requires understanding Django's prefetch_related machinery, deferred field tracking, and instance caching mechanisms. The issue involves complex interaction between multiple ORM features (only(), prefetch_related, nested Prefetch objects) making the root cause non-obvious.",
+  "_task_id": "django__django-15280",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:12.954612"
+}

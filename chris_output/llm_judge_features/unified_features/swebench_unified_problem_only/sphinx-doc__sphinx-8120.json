@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Sphinx's internationalization (i18n) system, specifically how locale directories are loaded and prioritized. The problem is crystal clear with reproduction steps and expected behavior, but fixing it requires knowledge of gettext message catalog loading order and Sphinx's internal locale handling. The fix likely involves ensuring user-provided locale directories take precedence over built-in translations.",
+  "_task_id": "sphinx-doc__sphinx-8120",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:54.413382"
+}

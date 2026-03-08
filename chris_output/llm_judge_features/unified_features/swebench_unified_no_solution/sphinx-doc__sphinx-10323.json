@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the issue (dedent being applied to prepend/append content when it shouldn't be) and the hint explicitly states the fix direction ('dedent was applied only to the literalinclude and not to the prepend and append content'). However, implementing this requires understanding Sphinx's directive code internals, specifically the LiteralIncludeReader class and how dedent, prepend, and append options interact. The test name directly indicates what needs to be fixed, making verification straightforward.",
+  "_task_id": "sphinx-doc__sphinx-10323",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:48.810531"
+}

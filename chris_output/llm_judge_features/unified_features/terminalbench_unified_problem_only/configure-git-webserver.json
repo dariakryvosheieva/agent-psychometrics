@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of git server configuration (bare repositories, hooks), SSH setup, and web server configuration. The key complexity is setting up a post-receive hook that deploys content to a web-accessible directory and configuring a web server on port 8080. While each component has documented patterns, combining them correctly requires understanding git internals and server administration.",
+  "_task_id": "configure-git-webserver",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.588598"
+}

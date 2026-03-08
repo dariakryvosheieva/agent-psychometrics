@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge across multiple domains: Git server configuration, SSH authentication setup, Nginx configuration with HTTPS/SSL, and Git hooks. While each component follows standard patterns individually, combining them with proper timing constraints (3-second deployment) and dual-branch deployment adds significant complexity. The task is crystal clear about requirements and testing methodology, but executing it requires coordinating multiple services and configurations correctly.",
+  "_task_id": "git-multibranch",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.643299"
+}

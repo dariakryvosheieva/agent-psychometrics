@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task provides an exact solution with specific code to fix the bug in the `__array__` method of the PandasMultiIndexingAdapter class. However, it requires deep understanding of xarray's indexing internals and how it wraps pandas indexes while preserving dtype information. The fix itself is straightforward once the location and approach are known.",
+  "_task_id": "pydata__xarray-7393",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:17.386731"
+}

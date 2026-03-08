@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug (small decimals showing in exponential notation) and hints at the solution (return zeros when number is smaller than representable with given decimal_pos). It requires understanding Django's numberformat internals and the specific commit mentioned. The fix involves modifying hardcoded logic for handling very small decimals, which is moderately unusual but has clear test cases for verification.",
+  "_task_id": "django__django-11206",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:01.890252"
+}

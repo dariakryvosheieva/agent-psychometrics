@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with a minimal reproducible example showing that single-element tuples are missing the trailing comma in code generation. The bisect hint points to a specific commit in the Python code printer. The fix involves understanding how the code printer handles tuples, specifically ensuring single-element tuples include the trailing comma - a well-known Python syntax requirement. Domain knowledge of SymPy's code generation internals is needed but the pattern is standard.",
+  "_task_id": "sympy__sympy-23262",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:43.278566"
+}

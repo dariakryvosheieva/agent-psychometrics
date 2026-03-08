@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing MultiIndex.intersection() in pandas without any hints about the solution approach. It demands deep knowledge of pandas internals, specifically how MultiIndex set operations are implemented and where performance bottlenecks occur. The test script only shows what needs to be faster, not how to achieve it, requiring the developer to investigate pandas source code and identify optimization opportunities in index intersection algorithms.",
+  "_task_id": "pandas-dev__pandas-438b957",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:01.700420"
+}

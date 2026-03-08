@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep Vim knowledge including macro recording, register manipulation, and efficient keystroke patterns - specialized skills not commonly used. The solver must reverse-engineer the transformation needed by comparing input.csv to expected.csv without seeing them, then craft three distinct macros under 200 keystrokes that work on 1 million rows efficiently. The constraint on allowed commands and keystroke efficiency makes this an unusual optimization problem with no standard pattern available.",
+  "_task_id": "large-scale-text-editing",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:39.290448"
+}

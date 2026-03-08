@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints section provides a detailed solution approach including specific code snippets showing how to modify Window class to handle SQLiteNumericMixin properly with DecimalField. This requires deep knowledge of Django's expression system and SQL compilation internals. While the solution is clearly outlined, implementing it correctly requires understanding Django's ORM expression machinery and the specific interaction between Window functions and type casting on SQLite.",
+  "_task_id": "django__django-13449",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:39.948231"
+}

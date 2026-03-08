@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas groupby skew operations with no hints about the solution approach. It requires deep knowledge of pandas internals, particularly the groupby aggregation machinery and how skew calculations are implemented. The test script only shows the performance scenario without indicating what specifically needs to be optimized, making it challenging to identify the bottleneck.",
+  "_task_id": "pandas-dev__pandas-233bd83",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.498090"
+}

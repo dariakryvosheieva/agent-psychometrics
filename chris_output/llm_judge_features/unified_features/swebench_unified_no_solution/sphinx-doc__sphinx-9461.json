@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem description clearly explains the root cause (classmethod+property combination behaves like a class attribute, making docstring extraction impossible via normal means) and mentions Python 3.10 will fix the underlying issue. However, implementing a fix in Sphinx requires deep understanding of Python's descriptor protocol, how autodoc introspects classes, and Sphinx's internal documentation generation. The solution must handle a relatively novel Python 3.9 feature combination that doesn't follow standard patterns.",
+  "_task_id": "sphinx-doc__sphinx-9461",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:10.677835"
+}

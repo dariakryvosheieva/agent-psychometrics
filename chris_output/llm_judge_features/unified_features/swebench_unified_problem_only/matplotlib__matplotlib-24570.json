@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The bug is crystal clear - the 'top' and 'bottom' alignment options are reversed in HPacker. The problem statement includes reproduction code and visual evidence showing expected vs actual behavior. The fix likely involves swapping the logic for top/bottom alignment in the HPacker implementation, which is a common type of bug fix pattern. Finding the exact location in matplotlib's offsetbox module requires some framework knowledge.",
+  "_task_id": "matplotlib__matplotlib-24570",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:53.327129"
+}

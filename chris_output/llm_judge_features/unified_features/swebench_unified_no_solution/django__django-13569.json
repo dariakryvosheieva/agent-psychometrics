@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task provides an exact solution patch in the problem description, showing how to modify SQLCompiler.get_group_by to exclude Random expressions. However, implementing this requires deep understanding of Django's ORM internals, specifically the SQL compiler and how GROUP BY clauses are constructed. The hints also discuss an alternative approach of skipping expressions with no cols as source expressions, which was adopted in the PR.",
+  "_task_id": "django__django-13569",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:42.814264"
+}

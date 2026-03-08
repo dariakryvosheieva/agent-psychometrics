@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Sphinx's autodoc extension and its interaction with mocked classes during inheritance documentation. It requires deep understanding of Sphinx internals, specifically how base classes are resolved and displayed when mocking is involved. The version-specific behavior suggests a regression in how mock objects handle attribute access (the missing 'Module' part suggests __name__ or similar attribute isn't being returned correctly). Verification requires setting up a complex documentation build environment with mocked dependencies.",
+  "_task_id": "sphinx-doc__sphinx-9658",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:06.080085"
+}

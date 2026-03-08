@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explicitly mentions 'help compilers to auto-vectorize reduction operators' which gives a clear direction but not exact implementation details. This requires expert-level knowledge of SIMD/vectorization, compiler optimization, and low-level NumPy internals. The task involves modifying C-level reduction code to enable auto-vectorization, which is an unusual optimization pattern requiring deep understanding of how compilers generate vectorized code.",
+  "_task_id": "numpy__numpy-330057f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.279763"
+}

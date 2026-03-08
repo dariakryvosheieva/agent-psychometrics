@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with explicit reproduction steps, and the solution is explicitly provided in the hints - adding a loop to set col.info.format from self.data.formats after line 365 in html.py. However, understanding why this fix works requires knowledge of astropy's internal table/column formatting system and how the HTML writer differs from other ASCII writers. The verification is straightforward with the provided test case.",
+  "_task_id": "astropy__astropy-13453",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:46.549434"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The bug is clearly described - `ignore-paths` configuration is not being respected when `--recursive=y` is used. This requires understanding pylint's internal file discovery mechanism and how configuration options are processed differently in recursive vs non-recursive modes. The fix likely involves ensuring the ignore-paths regex patterns are checked during recursive directory traversal, requiring knowledge of pylint's architecture.",
+  "_task_id": "pylint-dev__pylint-7080",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:20.756845"
+}

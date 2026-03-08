@@ -1,0 +1,12 @@
+{
+  "timestamp": "20260129_222903",
+  "dataset": "swebench_unified_no_solution",
+  "provider": "anthropic",
+  "model": "claude-opus-4-5-20251101",
+  "stats": {
+    "total": 1,
+    "success": 1,
+    "failed": 0,
+    "failed_task_ids": []
+  }
+}

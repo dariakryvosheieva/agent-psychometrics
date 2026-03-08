@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides the exact solution code needed to fix the bug, making implementation straightforward. It requires understanding of Python's exception chaining (PEP 415) and Django's debug view internals, but the problem is crystal clear with explicit before/after code. Verification is relatively easy since the behavior can be tested by raising exceptions with `from None` syntax.",
+  "_task_id": "django__django-13513",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:39.413402"
+}

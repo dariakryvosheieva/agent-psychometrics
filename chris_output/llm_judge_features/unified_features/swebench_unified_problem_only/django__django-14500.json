@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's migration system internals, specifically how MigrationExecutor handles squashed migrations and their replaced migrations. The problem statement describes the bug behavior but doesn't hint at the solution. Verifying correctness requires understanding the complex state management of applied/unapplied migrations and their relationships.",
+  "_task_id": "django__django-14500",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.820732"
+}

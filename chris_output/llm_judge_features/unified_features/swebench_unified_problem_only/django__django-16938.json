@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves a complex interaction between Django's serialization system, M2M relations, custom managers with select_related, and a performance optimization (#33937). The problem is clearly described with a reproducible example, but fixing it requires deep understanding of Django's ORM internals, particularly how select_related interacts with deferred fields during serialization. The workaround hints at the issue area but doesn't specify the actual fix needed in Django's codebase.",
+  "_task_id": "django__django-16938",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:41.417571"
+}

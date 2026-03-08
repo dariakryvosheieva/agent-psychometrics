@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the problem and explicitly suggests the solution approach (extend system check to check for USERNAME_FIELD in Model._meta.constraints). However, implementing this requires deep knowledge of Django's authentication system checks, model meta options, and UniqueConstraint handling. The fix involves modifying Django's auth system check logic to recognize an alternative way of enforcing uniqueness.",
+  "_task_id": "django__django-13568",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:42.058481"
+}

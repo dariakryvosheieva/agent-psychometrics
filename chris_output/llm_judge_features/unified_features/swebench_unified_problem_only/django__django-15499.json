@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what optimization is needed and provides an analogous example (CreateModel + AlterModelOptions). However, implementing this requires deep knowledge of Django's migration optimization system and how operations are reduced. The existing pattern for AlterModelOptions provides a template to follow, making this a moderately complex but well-guided task.",
+  "_task_id": "django__django-15499",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:15.455206"
+}

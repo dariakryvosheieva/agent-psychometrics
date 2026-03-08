@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM internals, specifically the SQL query generation and annotation handling in count/exists queries. The problem is well-specified with clear expected behavior (strip unused annotations), but implementing it requires understanding how annotations are referenced by filters, other annotations, and ordering - complex dependency tracking in the query compiler. A WIP PR exists but has test failures, indicating this is a non-trivial optimization requiring careful handling of edge cases.",
+  "_task_id": "django__django-16263",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:31.413573"
+}

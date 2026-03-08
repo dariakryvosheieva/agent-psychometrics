@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires knowledge of compiling C code with gcov instrumentation (using gcc flags like --coverage or -fprofile-arcs -ftest-coverage), extracting tarballs, and modifying PATH. The task is clearly specified but requires understanding of build systems and code coverage tools. While gcov compilation is documented, combining it with SQLite's build system and PATH configuration adds moderate complexity.",
+  "_task_id": "sqlite-with-gcov",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:00.127076"
+}

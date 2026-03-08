@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact solution location (django/forms/fields.py#L1261) and the fix approach (using ensure_ascii=False in json.dumps). The problem is clearly explained with the root cause (ASCII encoding by default) and the solution pattern is well-known (json.dumps parameter). This requires Django forms knowledge but the fix is straightforward once the location is identified.",
+  "_task_id": "django__django-13512",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:40.300474"
+}

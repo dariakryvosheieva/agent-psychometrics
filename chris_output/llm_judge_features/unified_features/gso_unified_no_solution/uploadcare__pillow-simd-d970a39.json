@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves optimizing Image.reduce in pillow-simd, which requires deep knowledge of SIMD instructions and image processing algorithms. The hint mentions special cases (ImagingReduce1x2, ImagingReduce1x3, etc.) suggesting asymmetric reduction factor optimizations are needed, but doesn't explain the implementation approach. This is a specialized low-level optimization task requiring expertise in vectorized image processing operations.",
+  "_task_id": "uploadcare__pillow-simd-d970a39",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:08.745623"
+}

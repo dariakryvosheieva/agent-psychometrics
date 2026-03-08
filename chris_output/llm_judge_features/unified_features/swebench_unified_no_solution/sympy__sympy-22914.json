@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 1,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides the exact solution in multiple forms - both explicit method implementations and a simpler approach via `_known_functions` dictionary. The problem is crystal clear with code examples showing the issue and expected fix. This is a standard pattern in SymPy's printing system, requiring only framework-specific knowledge of how printers work, but the solution is essentially copy-paste from the problem description.",
+  "_task_id": "sympy__sympy-22914",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:42.539445"
+}

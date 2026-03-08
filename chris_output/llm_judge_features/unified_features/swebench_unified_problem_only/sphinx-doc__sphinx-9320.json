@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The bug is very clearly described with reproduction steps and expected behavior. The issue is a simple input validation problem where empty input should trigger an exit but instead shows an error. This requires understanding Sphinx's quickstart CLI code but the fix is straightforward - just handle the empty string case to exit gracefully.",
+  "_task_id": "sphinx-doc__sphinx-9320",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:02.528761"
+}

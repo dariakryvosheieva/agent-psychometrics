@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly states the invariance that should hold (`expr.func(*expr.args) == expr`) and what's currently broken. This requires understanding SymPy's Basic class contract and how args/func should work together. The fix likely involves modifying the String class's __new__ or args property to ensure proper reconstruction, which is a known pattern in SymPy but requires understanding the library's internals.",
+  "_task_id": "sympy__sympy-22456",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:41.712218"
+}

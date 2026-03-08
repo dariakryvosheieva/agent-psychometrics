@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a minimal reproducible example and exact expected behavior. However, fixing it requires deep understanding of pytest's unittest integration, specifically how the --pdb flag interacts with test execution and how class-level skip decorators should prevent tearDown execution. The reference to issue #7215 hints that a similar fix exists for function-level skips, which provides some direction but requires understanding pytest internals to apply to class-level skips.",
+  "_task_id": "pytest-dev__pytest-10081",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:24.795660"
+}

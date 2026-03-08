@@ -64,7 +64,7 @@ class SWEBenchConfig(DatasetConfig):
     )
     llm_judge_path: Optional[Path] = field(
         default_factory=lambda: Path(
-            "chris_output/llm_judge_features/swebench_ablation_controlled_v3/4_full_15.csv"
+            "chris_output/llm_judge_features/ablation_studies/swebench_ablation_controlled_v3/4_full_15.csv"
         )
     )
     trajectory_features_path: Optional[Path] = field(

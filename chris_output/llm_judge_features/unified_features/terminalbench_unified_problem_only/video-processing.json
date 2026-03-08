@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires significant computer vision expertise to detect jump takeoff and landing frames from video using only cv2 and numpy. The hint that the first frame has no runner suggests background subtraction, but the actual jump detection algorithm (distinguishing takeoff vs landing from motion patterns) requires domain knowledge and creative problem-solving. Verification is difficult because frame-accurate jump detection depends on subjective interpretation of when exactly a jump begins/ends.",
+  "_task_id": "video-processing",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:04.562366"
+}

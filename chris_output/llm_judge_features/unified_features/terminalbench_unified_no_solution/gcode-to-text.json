@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding G-code format used in 3D printing and being able to interpret toolpath commands to reconstruct what text pattern would be printed. The solver must parse coordinate movements (G0/G1 commands) and mentally or programmatically visualize the extrusion path to determine what letters/text would be formed. This is a specialized domain requiring knowledge of CNC/3D printer programming with no standard pattern for reverse-engineering text from G-code.",
+  "_task_id": "gcode-to-text",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.729342"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint provides a specific code location (prefetch_one_level) and explains the root cause (prefetched objects being discarded in favor of origin's objects), giving a clear direction. However, fixing this requires deep understanding of Django's ORM prefetch machinery, deferred fields mechanism, and how object caching works. The bug involves a subtle interaction between nested prefetches and deferred fields, which is an unusual edge case requiring complex reasoning about object identity and caching behavior.",
+  "_task_id": "django__django-15280",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:12.896037"
+}

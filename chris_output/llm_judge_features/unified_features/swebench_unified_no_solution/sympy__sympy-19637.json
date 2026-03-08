@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a classic 'variable referenced before assignment' bug, which is a well-known Python error pattern. The error message clearly indicates the problem - the 'kern' variable is used before being assigned in some code path. While understanding the kernS function's purpose requires some SymPy knowledge, the fix itself is straightforward once the problematic code path is identified.",
+  "_task_id": "sympy__sympy-19637",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:34.626058"
+}

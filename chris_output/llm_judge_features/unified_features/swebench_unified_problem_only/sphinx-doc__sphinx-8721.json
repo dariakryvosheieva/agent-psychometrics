@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding Sphinx's build system and how viewcode extension handles multiple output formats (html and epub) in a single build command. The bug involves the viewcode_enable_epub flag not being respected when building both formats simultaneously, requiring knowledge of Sphinx's builder architecture and event handling. The problem is clearly stated but solving it requires understanding how the extension tracks state across different builder invocations.",
+  "_task_id": "sphinx-doc__sphinx-8721",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:00.448006"
+}

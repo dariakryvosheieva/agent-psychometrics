@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of Django's migration system, schema editing, and database constraint handling. The problem is well-documented with tracebacks and reproduction steps, and the comments provide hints about the solution approach (distinguishing constraint naming schemes). However, the fix requires careful handling of edge cases where unique_together constraints overlap with unique=True constraints, and understanding how Django generates constraint names internally.",
+  "_task_id": "django__django-15732",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:21.062679"
+}

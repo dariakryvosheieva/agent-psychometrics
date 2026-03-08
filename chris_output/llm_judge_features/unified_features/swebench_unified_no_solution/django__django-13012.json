@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The exact solution patch is provided in the hints, including the specific method to add and its implementation. The problem is clearly explained with SQL examples showing the expected vs actual behavior. While understanding Django ORM expression internals (get_group_by_cols, ExpressionWrapper) requires deep framework knowledge, the fix itself is mechanical once the solution is given.",
+  "_task_id": "django__django-13012",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:29.459372"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward enhancement request to add a `set_paths()` method to `ContourSet` class. The problem statement explicitly shows the exact API desired (`cs.set_paths(transformed_paths)`), and the current workaround demonstrates exactly what the method should do. The main requirement is knowing matplotlib's ContourSet class structure, but the implementation is a simple setter method following standard Python patterns.",
+  "_task_id": "matplotlib__matplotlib-26342",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:00.701699"
+}

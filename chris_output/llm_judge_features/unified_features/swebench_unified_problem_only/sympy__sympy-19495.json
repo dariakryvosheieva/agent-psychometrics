@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of SymPy's internal handling of bound variables in ConditionSet and ImageSet, specifically how substitution interacts with these symbolic structures. The problem is clearly demonstrated with examples showing expected vs actual behavior, but the fix requires understanding the subtle difference between how subs handles bound variables versus free variables in set expressions. The mention of issue #7483 hints at related work but doesn't provide a direct solution path.",
+  "_task_id": "sympy__sympy-19495",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:30.215564"
+}

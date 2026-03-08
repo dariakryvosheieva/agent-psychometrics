@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact solution in the hints section, including the specific code diff needed. The problem is crystal clear with expected vs actual results shown. The main complexity is understanding scikit-learn's internal `_build_repr` function and class hierarchy, but the solution approach is explicitly provided.",
+  "_task_id": "scikit-learn__scikit-learn-14983",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:43.101498"
+}

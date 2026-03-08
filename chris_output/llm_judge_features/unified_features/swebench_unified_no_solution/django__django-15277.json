@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task description explicitly provides the exact solution: modify CharField.__init__ to only add MaxLengthValidator when max_length is not None, following the same pattern as BinaryField.__init__. The problem is crystal clear with benchmarks and code examples. While it requires understanding Django's field and validator internals, the fix itself is straightforward and the pattern already exists in BinaryField.",
+  "_task_id": "django__django-15277",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:12.339135"
+}

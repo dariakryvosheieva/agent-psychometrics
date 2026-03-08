@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions 'algos.union_with_duplicates losing EA dtypes' which gives a vague direction but doesn't explain the optimization approach. This requires deep understanding of pandas internals, particularly Index operations, Extension Arrays (EA), and dtype handling. The task involves understanding how union operations handle duplicates and preserve dtypes, which is a specialized pandas internal pattern without obvious standard solutions.",
+  "_task_id": "pandas-dev__pandas-c34da50",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:55.650817"
+}

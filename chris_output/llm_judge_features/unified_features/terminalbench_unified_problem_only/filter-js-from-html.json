@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep understanding of HTML parsing and XSS attack vectors - knowing all the ways JavaScript can be embedded in HTML (script tags, event handlers, javascript: URLs, data attributes, etc.). While HTML sanitization libraries exist (like bleach), properly implementing this without breaking legitimate HTML while catching all XSS vectors requires significant security domain knowledge. The requirement to preserve formatting exactly while removing 'harmful substrings' adds complexity, and verification is difficult due to the many edge cases in XSS prevention.",
+  "_task_id": "filter-js-from-html",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:33.124518"
+}

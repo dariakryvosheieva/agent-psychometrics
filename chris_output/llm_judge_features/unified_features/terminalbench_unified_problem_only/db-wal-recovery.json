@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of SQLite WAL file format and internals, as well as understanding of encryption/corruption recovery techniques. The mention of 'corrupted or encrypted' WAL file without specifying which creates ambiguity, and recovering WAL data manually is not a standard documented pattern. The verification is straightforward once you have the JSON output to compare against expected 11 records.",
+  "_task_id": "db-wal-recovery",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:29.606513"
+}

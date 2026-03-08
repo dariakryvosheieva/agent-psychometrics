@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas Index.union() operation with no hints about the solution approach. It demands deep understanding of pandas internals, particularly how Index union operations work and how is_unique/is_monotonic_increasing properties are computed. The performance bottleneck is not obvious from the test script alone, requiring investigation into pandas source code to identify optimization opportunities.",
+  "_task_id": "pandas-dev__pandas-c34da50",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:56.462316"
+}

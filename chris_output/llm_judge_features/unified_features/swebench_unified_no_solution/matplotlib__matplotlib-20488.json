@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a compatibility bug triggered by numpy 1.21.0, requiring deep understanding of matplotlib's color normalization and image processing internals. The error occurs in LogNorm when vmin/vmax become invalid after transformation, but the root cause is subtle and related to how numpy handles certain values differently in the new version. The developer cannot reproduce locally, making debugging particularly challenging, and the fix requires understanding the interaction between masked arrays, log transforms, and huge value ranges.",
+  "_task_id": "matplotlib__matplotlib-20488",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:46.443393"
+}

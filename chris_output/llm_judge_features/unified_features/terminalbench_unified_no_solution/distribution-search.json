@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 5,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of KL divergence and probability distributions, plus sophisticated mathematical reasoning to find a distribution that simultaneously satisfies both forward and backward KL divergence constraints to high precision. The constraint that both KL(P||U) and KL(U||P) equal exactly 10.0 with vocabulary size 150,000 requires deriving a specific parametric form (likely a distribution with specific concentration properties). While verification is straightforward (just compute the KL values), finding the solution requires novel mathematical analysis as this isn't a standard optimization pattern.",
+  "_task_id": "distribution-search",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:27.463228"
+}

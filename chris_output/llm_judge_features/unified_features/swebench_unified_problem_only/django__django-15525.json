@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's serialization/deserialization internals with natural keys and multiple databases. The issue is that when building instances to check natural keys during deserialization, the query uses the wrong database (default instead of the specified 'using' parameter). Fixing this requires deep understanding of Django's serialization pipeline and how database routing works with natural key lookups during fixture loading.",
+  "_task_id": "django__django-15525",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.491165"
+}

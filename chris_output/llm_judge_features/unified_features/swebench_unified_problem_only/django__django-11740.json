@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's migration system, specifically how dependencies are detected when field types change from UUIDField to ForeignKey. The problem is clearly described with a reproducible example, but solving it requires knowledge of Django's migration autodetector internals. The solution involves understanding how Django tracks field type changes and generates migration dependencies, which is specialized knowledge not commonly documented.",
+  "_task_id": "django__django-11740",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:10.416046"
+}

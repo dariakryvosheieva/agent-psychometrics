@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies the bug (TypeError when concatenating string with lazy string) and hints that the add filter needs to handle lazy strings. This requires understanding Django's lazy string mechanism (__proxy__ objects from django.utils.functional) and the template filter system. The fix likely involves converting lazy strings to actual strings before concatenation, which is a known pattern in Django development.",
+  "_task_id": "django__django-13794",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:44.536736"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task explicitly states what needs to be done: change FILE_UPLOAD_PERMISSION default from None to 0o644, update docs and release notes. The hints provide exact steps needed. This is a straightforward configuration default change requiring basic Django settings knowledge, with clear test cases to verify the fix.",
+  "_task_id": "django__django-10914",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.362122"
+}

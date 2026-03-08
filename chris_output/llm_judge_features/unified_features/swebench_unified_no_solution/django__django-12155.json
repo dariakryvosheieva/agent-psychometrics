@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement provides the exact solution code change needed (skipping the first line in the min() calculation), and the hints even provide the complete fix with the default=0 parameter and mention inspect.cleandoc as an alternative. The task is very clear with specific code locations and expected behavior. This is a standard docstring processing pattern following PEP257.",
+  "_task_id": "django__django-12155",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:20.381340"
+}

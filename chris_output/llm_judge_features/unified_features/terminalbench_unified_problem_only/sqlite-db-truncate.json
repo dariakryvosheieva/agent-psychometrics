@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of SQLite's internal file format and database recovery techniques. Binary truncation corruption means understanding how SQLite stores data pages and being able to parse partially damaged files. While the output format is clear, the recovery process itself requires specialized forensic skills and there's no standard straightforward tool for this exact scenario.",
+  "_task_id": "sqlite-db-truncate",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:00.191703"
+}

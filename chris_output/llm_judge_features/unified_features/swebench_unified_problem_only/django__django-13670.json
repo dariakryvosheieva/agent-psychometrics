@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with explicit examples showing the inconsistent behavior for years < 1000. The solution approach is clearly hinted at - the 'y' format character needs to output a zero-padded 2-digit year like Python and PHP do. This requires Django-specific knowledge of the dateformat module but the fix is straightforward string formatting to ensure leading zeros.",
+  "_task_id": "django__django-13670",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:42.921537"
+}

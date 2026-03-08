@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's ufunc.at operation for complex128 arrays, which demands deep understanding of NumPy's internal ufunc implementation and memory handling. There's no hint about what optimization is needed, and the problem is quite specialized - involving NumPy's advanced indexing with unbuffered in-place operations. The verification is moderately difficult due to the need to ensure numerical equivalence while achieving performance gains.",
+  "_task_id": "numpy__numpy-be52f19",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.771315"
+}

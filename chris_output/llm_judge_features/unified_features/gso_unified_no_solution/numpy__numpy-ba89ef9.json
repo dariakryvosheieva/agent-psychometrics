@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions 'speedup ufunc.at when casting is not needed' which gives a vague direction but no implementation details. This requires expert-level knowledge of NumPy's ufunc internals, C implementation details, and memory/type casting mechanics. The optimization involves modifying low-level NumPy code paths, which is highly specialized and not a standard documented pattern.",
+  "_task_id": "numpy__numpy-ba89ef9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.519234"
+}

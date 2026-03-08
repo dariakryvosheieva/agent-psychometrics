@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of KL divergence and probability distributions, plus sophisticated mathematical reasoning to find a distribution that satisfies both forward and backward KL constraints simultaneously at exact values. The problem is novel - finding a distribution with specific symmetric KL divergence values is not a standard pattern, requiring custom optimization or analytical derivation. The large vocabulary size (150,000) adds computational complexity, though verification is straightforward via computing the KL values.",
+  "_task_id": "distribution-search",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:28.681179"
+}

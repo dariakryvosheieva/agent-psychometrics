@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires knowledge of git internals to recover data from rewritten history (using reflog, fsck, or searching objects). The hint about secret format helps locate it, but cleaning history while preserving other commits requires careful use of git filter-branch or BFG. This is a common security/git recovery pattern but requires specialized git knowledge beyond basic usage.",
+  "_task_id": "git-leak-recovery",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.767019"
+}

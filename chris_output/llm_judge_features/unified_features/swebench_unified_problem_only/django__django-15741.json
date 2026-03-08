@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies a regression where lazy strings cause a TypeError in get_format, and points to the specific commit that caused it. The fix requires understanding Django's lazy string evaluation system and how getattr() interacts with lazy objects. The solution pattern (forcing lazy string evaluation before use) is standard in Django, but requires knowledge of Django internals to identify where and how to apply it.",
+  "_task_id": "django__django-15741",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:22.286780"
+}

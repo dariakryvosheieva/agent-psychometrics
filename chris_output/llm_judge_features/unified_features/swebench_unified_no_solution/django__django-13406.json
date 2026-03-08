@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement includes an exact diagnosis identifying that `_iterable_class` is not preserved during pickling, and the hints provide a specific code diff showing the solution approach. However, the task requires deep understanding of Django's QuerySet internals, including the different iterable classes (ValuesIterable, NamedValuesListIterable, FlatValuesListIterable, ValuesListIterable) and how query pickling works. The verification is straightforward with the provided test cases.",
+  "_task_id": "django__django-13406",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:39.920606"
+}

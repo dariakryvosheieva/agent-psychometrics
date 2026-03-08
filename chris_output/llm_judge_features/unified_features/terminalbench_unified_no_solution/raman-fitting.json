@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized knowledge of Raman spectroscopy (knowing where G and 2D peaks of graphene are located ~1580 and ~2700 cm\u207b\u00b9), understanding of Lorentzian peak fitting with parameters x0, gamma, amplitude, and offset, and programming skills to implement curve fitting. The task hints at using a Lorentzian model but doesn't specify the exact fitting approach or data format. Verification is difficult without knowing the expected peak parameters or having domain expertise to validate results.",
+  "_task_id": "raman-fitting",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:55.761096"
+}

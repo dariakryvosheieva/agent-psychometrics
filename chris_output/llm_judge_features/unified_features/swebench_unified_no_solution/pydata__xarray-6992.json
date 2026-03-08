@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves understanding xarray's internal data structures after a significant index refactor. The problem is clearly described with a reproducible example, but fixing it requires deep knowledge of how `_coord_names` and `_variables` interact in the Dataset class, particularly in the context of MultiIndex handling. The solution requires understanding the invariants that should hold between these internal data structures and how reset_index should maintain them.",
+  "_task_id": "pydata__xarray-6992",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:17.908904"
+}

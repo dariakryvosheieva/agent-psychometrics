@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's Multi-Table Inheritance (MTI) internals and how OneToOneField relationships with parent_link are processed. The issue requires deep understanding of Django's model metaclass and field ordering during model construction. The problem is clearly demonstrated with code examples, but the solution requires knowledge of how Django iterates through fields and identifies parent links - the hint that order matters suggests the fix involves iteration order or prioritization logic.",
+  "_task_id": "django__django-12325",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:24.164133"
+}

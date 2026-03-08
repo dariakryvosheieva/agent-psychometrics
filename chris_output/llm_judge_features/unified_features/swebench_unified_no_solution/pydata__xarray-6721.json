@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with a stack trace showing exactly where the issue occurs (accessing `v.data` triggers data loading when checking `hasattr(v.data, \"chunks\")`). However, fixing it requires understanding xarray's lazy loading architecture and how to check for chunks without triggering data materialization. The solution requires knowledge of xarray's variable internals to find an alternative way to detect chunk information without accessing the underlying data.",
+  "_task_id": "pydata__xarray-6721",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:17.497695"
+}

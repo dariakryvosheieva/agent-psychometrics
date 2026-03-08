@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the root cause (Col vs SimpleCol usage in AND vs OR clauses) and shows the expected vs actual SQL output. However, fixing this requires deep understanding of Django's ORM internals, specifically how Q objects are compiled to SQL and how column references work differently in constraint contexts for SQLite/Oracle. The fix involves understanding the query compilation pipeline and ensuring consistent column reference handling across different logical operators.",
+  "_task_id": "django__django-11299",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:05.590689"
+}

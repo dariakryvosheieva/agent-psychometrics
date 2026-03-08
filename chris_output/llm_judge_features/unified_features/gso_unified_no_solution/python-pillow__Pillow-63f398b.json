@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing ImagingGetBBox, which is a C-level function in Pillow's imaging core. The hint only mentions it's about optimizing getbbox() and getextrema() routines without specifying the approach. This requires expert-level knowledge of image processing algorithms, SIMD optimizations, and memory access patterns in C code. Verification is straightforward since the test provides clear correctness checks through bounding box comparisons.",
+  "_task_id": "python-pillow__Pillow-63f398b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:10.135988"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a Django ORM internals bug involving model inheritance and primary key detection. The task requires deep understanding of Django's model metaclass system and how primary keys are inherited. The hints identify the specific commit causing the regression (b5e12d490af3debca8c55ab3c1698189fdedbbdb), but solving it requires understanding the DEFAULT_AUTO_FIELD check logic and why it fails to recognize inherited explicit primary keys.",
+  "_task_id": "django__django-13925",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:49.109795"
+}

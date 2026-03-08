@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that the error message for readonly_fields check should include the field name, similar to how other fields like list_editable do it. This requires Django ModelAdmin knowledge to find where the error message is generated and modify it to include the field name. The solution approach is clearly hinted at by showing the desired format from other similar checks, making this a straightforward string formatting change in the validation code.",
+  "_task_id": "django__django-16899",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:40.796004"
+}

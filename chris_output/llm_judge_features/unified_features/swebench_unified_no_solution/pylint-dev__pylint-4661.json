@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes changing the default pylint home directory to follow XDG Base Directory Specification. The hints mention using 'appdirs' package and suggest specific paths like `$HOME/.local/share/pylint` or `~/.cache`. This is a well-known pattern for cross-platform application data storage, but requires understanding pylint's configuration system and backwards compatibility considerations.",
+  "_task_id": "pylint-dev__pylint-4661",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:19.578974"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task description explicitly provides the solution code using `set()` to deduplicate locations in the `Message.__init__` method. The problem is clearly described with examples of duplicate locations in gettext output. The fix is a standard deduplication pattern, though understanding the Sphinx gettext builder internals helps locate where to apply it.",
+  "_task_id": "sphinx-doc__sphinx-10466",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:51.603584"
+}

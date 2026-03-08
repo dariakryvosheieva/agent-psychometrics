@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides extremely detailed step-by-step instructions including exact file paths, configuration variables, and content strings - essentially a complete recipe. While it requires knowledge of Nginx configuration syntax (custom log formats, rate limiting zones, server blocks), these are well-documented patterns. The main challenge is correctly assembling all the configuration pieces and ensuring proper syntax, but the explicit guidance minimizes reasoning requirements.",
+  "_task_id": "nginx-request-logging",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:46.341925"
+}

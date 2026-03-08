@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and expected vs actual behavior. The hint points directly to the file and hook function where the bug exists, which significantly narrows down the search. However, fixing it requires deep understanding of pytest's internal reporting hooks, skip/xfail mechanics, and how location reporting works. The interaction between --runxfail flag and skip marks is an unusual edge case in pytest's internals.",
+  "_task_id": "pytest-dev__pytest-7432",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:28.544274"
+}

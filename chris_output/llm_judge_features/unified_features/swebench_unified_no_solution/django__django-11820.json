@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly identifies a regression with a specific commit and error message about Meta.ordering with related field pk lookups. However, fixing this requires deep understanding of Django's model validation system and how field lookups are resolved. The specific commit reference provides direction but not the exact solution, and the developer needs to understand how 'pk' is a special case that should be handled differently from regular fields.",
+  "_task_id": "django__django-11820",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:15.566006"
+}

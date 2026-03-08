@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing the Gilks et al. (1992) adaptive rejection sampling algorithm, which demands deep understanding of statistical sampling methods, log-concave distributions, and numerical computation. The implementation requires building piecewise linear envelopes, handling tangent lines at abscissae, and detecting non-log-concavity - all specialized statistical computing concepts. While the task requirements are clearly specified, the algorithm itself is complex and verification requires statistical tests comparing stochastic outputs to known distributions.",
+  "_task_id": "adaptive-rejection-sampler",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:22.604859"
+}

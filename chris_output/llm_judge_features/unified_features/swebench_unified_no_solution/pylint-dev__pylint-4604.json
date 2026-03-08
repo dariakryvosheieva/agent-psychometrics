@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding pylint's internal mechanism for tracking import usage, specifically how it handles type comments (PEP 484 style). The problem is clear - imports used only in type comments are incorrectly flagged as unused. The fix requires knowledge of how pylint's variables checker tracks name usage and how type comments are parsed, which is fairly specialized. The mention of being a follow-up to #3112 suggests prior work exists but the specific fix approach isn't detailed.",
+  "_task_id": "pylint-dev__pylint-4604",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:19.408375"
+}

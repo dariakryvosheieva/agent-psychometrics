@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hints provide the exact solution code with the corrected logic for handling string inputs in the Rational constructor, including specific line numbers and a test case. The bug involves understanding how SymPy's Rational class handles mixed string/numeric inputs, requiring moderate domain knowledge. The fix follows a standard pattern of properly converting and handling numerator/denominator components.",
+  "_task_id": "sympy__sympy-24562",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:47.613696"
+}

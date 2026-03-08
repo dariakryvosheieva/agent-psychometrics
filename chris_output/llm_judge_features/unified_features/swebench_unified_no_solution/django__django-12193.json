@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that CheckboxInput's get_context() mutates the attrs dict passed to it, and even points to the exact line of code. The fix is a standard pattern of copying the dict before modification to prevent mutation side effects. Requires Django forms/widgets knowledge but the issue and solution approach are well-understood.",
+  "_task_id": "django__django-12193",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:19.936827"
+}

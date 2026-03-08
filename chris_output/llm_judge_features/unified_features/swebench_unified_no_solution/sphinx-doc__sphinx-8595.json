@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear - empty __all__ should result in no members being shown, but currently all members are shown. Fixing this requires understanding Sphinx's autodoc internals, specifically how it handles the __all__ attribute filtering logic. The bug likely involves a falsy check on __all__ (treating empty list same as None/missing) rather than checking if __all__ exists explicitly.",
+  "_task_id": "sphinx-doc__sphinx-8595",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:01.968699"
+}

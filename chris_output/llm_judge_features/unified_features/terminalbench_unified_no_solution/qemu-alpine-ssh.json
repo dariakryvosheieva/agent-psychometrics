@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of QEMU virtualization (port forwarding, boot options), Alpine Linux setup, and SSH server configuration. The task clearly states the expected outcome (ssh connection with specific credentials) but requires multiple steps: starting QEMU with proper port forwarding, logging into Alpine, installing/configuring openssh, setting root password, and starting the SSH daemon. While each individual step has documented patterns, combining them requires solid systems administration knowledge.",
+  "_task_id": "qemu-alpine-ssh",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.837153"
+}

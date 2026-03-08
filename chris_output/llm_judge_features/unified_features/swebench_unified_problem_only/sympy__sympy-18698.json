@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding square-free factorization algorithms in polynomial algebra. The bug involves factors with the same multiplicity being listed separately instead of being combined, which requires understanding how sqf_list should aggregate results. While the expected behavior is somewhat clear from the examples, fixing it requires deep knowledge of SymPy's polynomial factorization internals.",
+  "_task_id": "sympy__sympy-18698",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:27.143160"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that FileResponse incorrectly guesses MIME types for compressed file extensions (.br, .Z), returning text/html instead of handling the compression encoding properly. This requires Django-specific knowledge about FileResponse and understanding of MIME type guessing with Python's mimetypes module, particularly how it handles encoding types. The fix likely involves checking for compression encodings and using the underlying file's MIME type instead.",
+  "_task_id": "django__django-16642",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:37.178130"
+}

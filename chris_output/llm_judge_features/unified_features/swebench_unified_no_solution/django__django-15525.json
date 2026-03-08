@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task provides an exact solution in the hints section, showing the precise code changes needed (setting db on the model instance before calling natural_key()). However, implementing this requires deep understanding of Django's serialization internals, model state management, and how database routing works with natural keys. The fix itself is small but requires knowledge of Django's ORM internals like Model._state.db and Model.from_db().",
+  "_task_id": "django__django-15525",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:17.340324"
+}

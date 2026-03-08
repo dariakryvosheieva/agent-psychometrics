@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Sphinx's Python domain internals, specifically how cross-reference resolution works differently between explicit xref roles and implicit xrefs from info fields like :type: and :rtype:. The problem is well-described with a clear reproduction case, but fixing it requires understanding Sphinx's module context tracking and name resolution mechanisms. The hint about comparing explicit vs implicit xref lookup behavior gives a vague direction but not a concrete solution.",
+  "_task_id": "sphinx-doc__sphinx-8551",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:01.999370"
+}

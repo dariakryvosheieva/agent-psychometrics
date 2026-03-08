@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with excellent reproduction steps and expected vs actual behavior. However, fixing it requires deep knowledge of Django's ORM internals, specifically how insert operations handle returning_fields and where database converters should be applied. The task hints at the location (returning_fields on insert) but doesn't specify the exact solution, requiring understanding of the query execution pipeline.",
+  "_task_id": "django__django-14007",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:49.960181"
+}

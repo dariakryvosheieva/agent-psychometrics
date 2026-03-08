@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is clearly described with specific examples showing the bug behavior with keyword-only arguments in Django template tags. However, fixing it requires understanding Django's template tag internals and how it parses and validates keyword arguments. The author mentions having a fix ready but doesn't describe the solution approach, only hinting that the issue is in shared code between simple_tag and inclusion_tag since Django 2.0.",
+  "_task_id": "django__django-12262",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:19.889578"
+}

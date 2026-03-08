@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves optimizing Pillow-SIMD's image filtering (convolution kernel) operation. The instance ID references 'pillow-simd' which is a SIMD-optimized fork of Pillow, suggesting deep knowledge of SIMD instructions, CPU vectorization, and low-level image processing internals is required. There's no hint at what specific optimization is needed, and this involves modifying C/assembly code for performance rather than Python-level changes. The verification is moderately difficult as pixel-exact equivalence must be maintained while optimizing low-level operations.",
+  "_task_id": "uploadcare__pillow-simd-2818b90",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:15.445364"
+}

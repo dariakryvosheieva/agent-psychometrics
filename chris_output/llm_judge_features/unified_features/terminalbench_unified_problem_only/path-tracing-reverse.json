@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires reverse engineering a compiled binary to understand its functionality, then recreating it in C. It demands knowledge of decompilation tools (like Ghidra, objdump, or similar), understanding of compiled code structure, and ability to write equivalent C code. The vague hint about approaches (observing I/O, decompiling) provides some direction, but the actual algorithm inside the mystery program is unknown, requiring significant analysis and reasoning.",
+  "_task_id": "path-tracing-reverse",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:49.740561"
+}

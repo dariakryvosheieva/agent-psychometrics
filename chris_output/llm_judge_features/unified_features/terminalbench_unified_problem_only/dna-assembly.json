@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 5,
+  "atypicality": 5,
+  "verification_difficulty": 5,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep molecular biology expertise in Golden Gate cloning, BsaI enzyme recognition sites, primer design for PCR amplification, and understanding of circular plasmid assembly. The solver must analyze DNA sequences, identify correct overlaps between fragments, design primers with specific melting temperatures using primer3's oligotm tool, and ensure proper enzyme cut-site orientations. This is a highly specialized bioinformatics task that combines domain-specific knowledge with complex multi-step reasoning about sequence assembly.",
+  "_task_id": "dna-assembly",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.611473"
+}

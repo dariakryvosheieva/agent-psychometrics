@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly shows an IndexError in the minimal_blocks() method when computing Sylow subgroups, with a traceback pointing to list deletion. However, fixing this requires deep understanding of SymPy's combinatorics internals, specifically the minimal_blocks algorithm and why it fails for certain dihedral groups. The bug involves list index management during iteration/deletion, a moderately common bug pattern, but the mathematical context (group theory) makes reasoning about the correct fix more complex.",
+  "_task_id": "sympy__sympy-19954",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:31.499635"
+}

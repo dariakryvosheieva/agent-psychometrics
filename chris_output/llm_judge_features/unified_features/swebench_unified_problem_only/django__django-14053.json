@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is well-documented with clear examples of duplicate yields, but the solution requires deep understanding of Django's static files handling internals (HashedFilesMixin, post_process generator pattern, multi-pass processing). The fix involves modifying the yield logic to track which files have already been yielded, but requires understanding the existing architecture. The referenced PR comment hints that this was a known issue but doesn't provide the exact fix.",
+  "_task_id": "django__django-14053",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:52.403733"
+}

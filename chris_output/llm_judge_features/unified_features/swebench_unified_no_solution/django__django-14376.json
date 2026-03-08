@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the problem (deprecated kwargs 'db' and 'passwd' need to be replaced with 'database' and 'password') and points to the exact file and line numbers. The solution approach is straightforward - rename the kwargs - but requires understanding Django's MySQL backend structure. The failing tests provide clear guidance on what needs to work, and this is a common deprecation-handling pattern.",
+  "_task_id": "django__django-14376",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:57.434227"
+}

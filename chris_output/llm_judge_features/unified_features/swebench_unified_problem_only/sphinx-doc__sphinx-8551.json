@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires deep understanding of Sphinx's cross-reference resolution internals, specifically how `:type:` and `:rtype:` info fields create implicit xrefs differently from explicit `:py:class:` roles. The problem is clearly described with a reproducible example, but fixing it requires understanding the module namespace resolution logic in Sphinx's Python domain. The solution involves making info fields respect the current module context the same way explicit roles do.",
+  "_task_id": "sphinx-doc__sphinx-8551",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:58.260545"
+}

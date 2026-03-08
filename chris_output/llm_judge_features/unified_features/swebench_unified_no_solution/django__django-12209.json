@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints provide an exact solution approach - modifying _save_table logic to check pk_set and raw parameters. However, implementing this requires deep understanding of Django's ORM internals, specifically the model saving mechanism and how pk_set tracking works. The regression was caused by a specific commit and the fix involves understanding the interaction between field defaults, explicit pk values, and the INSERT/UPDATE decision logic.",
+  "_task_id": "django__django-12209",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:20.745785"
+}

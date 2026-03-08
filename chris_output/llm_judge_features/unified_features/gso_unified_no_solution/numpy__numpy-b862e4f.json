@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly indicates the solution involves enabling fast indexed loops for complex number operations (add, subtract, multiply), which describes the approach. However, implementing this requires expert-level knowledge of NumPy internals, specifically the ufunc machinery, indexed loop dispatching, and complex number handling at the C level. This is an unusual optimization pattern involving SIMD or specialized loop implementations for complex arithmetic in indexed operations like np.add.at().",
+  "_task_id": "numpy__numpy-b862e4f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:30.520142"
+}

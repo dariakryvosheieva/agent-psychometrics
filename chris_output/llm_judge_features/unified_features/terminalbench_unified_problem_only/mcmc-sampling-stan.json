@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep expertise in Bayesian statistics, Stan probabilistic programming, and R. The hierarchical model structure with the specific prior (alpha + beta)^(-5/2) is a well-known but specialized pattern (Gelman's prior for Beta parameters). While the instructions are extremely detailed with exact steps and file paths, implementing the Stan model correctly and ensuring MCMC convergence requires significant domain knowledge. Verification is difficult because posterior estimates depend on convergence and the specific prior implementation.",
+  "_task_id": "mcmc-sampling-stan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:43.935693"
+}

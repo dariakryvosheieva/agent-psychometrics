@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly indicates the solution involves optimizing `get_caller_module_name` and combining it with `is_call_from_module` into `get_caller_frame_info`, providing a clear direction. However, this requires deep understanding of Pydantic's generic model internals and Python's frame introspection mechanisms. The verification is straightforward through the provided test script that checks both correctness and performance.",
+  "_task_id": "pydantic__pydantic-4a09447",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:16.682460"
+}

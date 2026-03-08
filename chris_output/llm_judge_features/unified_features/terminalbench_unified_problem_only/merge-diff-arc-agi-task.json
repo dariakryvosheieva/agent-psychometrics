@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task combines multiple complex domains: git bundle operations, merge conflict resolution, and algorithm inference from examples (ARC-AGI style). The algorithm inference component is particularly challenging as it requires understanding implicit patterns from examples.json and implementing a generalized solution. While git operations are documented, the combination with algorithmic puzzle-solving makes this highly atypical.",
+  "_task_id": "merge-diff-arc-agi-task",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:43.353889"
+}

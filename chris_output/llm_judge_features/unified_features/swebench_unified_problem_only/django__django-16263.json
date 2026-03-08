@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the optimization needed (strip unused annotations from count queries) and provides a precedent (select_related behavior). However, implementing this requires deep knowledge of Django's ORM internals, query compilation, and annotation dependency tracking. The solution requires analyzing which annotations are actually referenced by filters, ordering, or other annotations - a non-trivial graph dependency analysis within Django's query system.",
+  "_task_id": "django__django-16263",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:29.670471"
+}

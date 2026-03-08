@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly identifies a missing space in SQL generation between 'DISTINCT' and 'CASE WHEN' in Count aggregations. The hint points to the exact commit that introduced the regression. Fixing requires understanding Django's ORM internals for SQL generation, specifically how the Aggregate class handles DISTINCT, but the solution pattern (adding proper spacing in string concatenation) is straightforward once the location is found.",
+  "_task_id": "django__django-10880",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:56.548347"
+}

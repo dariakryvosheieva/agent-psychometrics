@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is well-documented with clear examples showing inherited attributes not being documented. The hint mentions that 'comment based docstring is strongly coupled with its class' and that autodoc uses (namespace, attrname) as search-key without checking baseclass-namespace, pointing to the general solution area. However, fixing this requires deep understanding of Sphinx autodoc internals, particularly how `find_attr_doc` works and how docstrings are cached and resolved across class hierarchies.",
+  "_task_id": "sphinx-doc__sphinx-8548",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:01.906674"
+}

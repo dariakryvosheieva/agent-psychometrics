@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions 'algos.safe_sort with multiindex' which gives a vague direction but not explicit implementation details. This task requires deep understanding of pandas MultiIndex internals and set operation implementations. The optimization involves understanding how sorting algorithms interact with MultiIndex structures, which is specialized pandas knowledge not commonly documented.",
+  "_task_id": "pandas-dev__pandas-c6cf37a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:01.323325"
+}

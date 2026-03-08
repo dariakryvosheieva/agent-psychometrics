@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly indicates the solution approach: avoid updating images during n_frames/is_animated seeking. This requires understanding Pillow's GIF handling internals, specifically how frame counting works and what state updates can be skipped. Verification is straightforward since n_frames and is_animated are simple values to check, but the optimization requires library-specific knowledge about GIF frame iteration.",
+  "_task_id": "python-pillow__Pillow-f854676",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:15.011879"
+}

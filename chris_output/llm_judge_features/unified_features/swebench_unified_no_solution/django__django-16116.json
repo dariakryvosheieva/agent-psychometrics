@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that makemigrations --check should exit without creating migrations, similar to migrate --check and optimizemigration --check. This requires Django management command knowledge and understanding how the --check flag works across different commands. The solution approach is hinted at by comparing to other commands' behavior, and there's a clear test case to verify the fix.",
+  "_task_id": "django__django-16116",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:27.085050"
+}

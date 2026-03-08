@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly demonstrates that swap_dims() is modifying the original object when it shouldn't (mutation bug). The failing test 'test_to_index_variable_copy' hints that the fix involves ensuring a copy is made during Variable type conversion. This requires understanding xarray's internal Variable/IndexVariable classes and the copy semantics, but the pattern of 'ensure copy to prevent mutation' is a standard defensive programming pattern.",
+  "_task_id": "pydata__xarray-6938",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:18.385476"
+}

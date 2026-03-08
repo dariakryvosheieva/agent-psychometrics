@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is clearly demonstrated with examples showing expected vs actual behavior. The task requires understanding SymPy's srepr/printing system to add handling for dict and set types, similar to existing list/tuple handling. The hint that 'fixing it will be an easy job' suggests the pattern already exists for lists/tuples and just needs extension to dicts/sets.",
+  "_task_id": "sympy__sympy-19346",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:28.405956"
+}

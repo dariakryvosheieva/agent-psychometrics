@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing pandas merge operations on MultiIndex DataFrames without any hints about the solution approach. It demands deep knowledge of pandas internals, specifically how merge operations handle MultiIndex structures and potential bottlenecks in index alignment. The test script only shows what needs to be optimized but provides no guidance on implementation details or optimization strategies.",
+  "_task_id": "pandas-dev__pandas-81b5f1d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.129582"
+}

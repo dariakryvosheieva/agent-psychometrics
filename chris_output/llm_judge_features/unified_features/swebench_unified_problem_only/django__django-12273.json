@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's model inheritance internals, specifically how primary keys are handled in multi-table inheritance when resetting a child model's PK. The problem is clearly demonstrated with a test case, but solving it requires deep understanding of Django's ORM, specifically how parent-child model relationships manage their primary key references. The fix likely involves ensuring both the parent and child model's PK fields are properly reset, which is an unusual edge case in Django's inheritance system.",
+  "_task_id": "django__django-12273",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:20.408259"
+}

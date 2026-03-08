@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies a regression where Django 3.1 generates a subquery for delete() that wasn't present in 3.0, and hints that the solution is to revert to the simpler DELETE FROM syntax. However, fixing this requires understanding Django's ORM query compilation internals and why the change was made in 3.1. The fix requires identifying where in Django's deletion code the subquery logic was introduced and determining when it's safe to skip the subquery optimization.",
+  "_task_id": "django__django-12965",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:28.461842"
+}

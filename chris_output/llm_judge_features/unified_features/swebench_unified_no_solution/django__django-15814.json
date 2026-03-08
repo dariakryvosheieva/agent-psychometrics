@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem statement explicitly provides the exact fix needed (replacing `cur_model` with `cur_model._meta.concrete_model`), the exact file and line number (django/db/models/sql/query.py line 745), and even includes a regression test. The main difficulty is understanding Django's ORM internals around proxy models and meta options, but since the solution is handed to the developer, implementation is straightforward.",
+  "_task_id": "django__django-15814",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:21.961895"
+}

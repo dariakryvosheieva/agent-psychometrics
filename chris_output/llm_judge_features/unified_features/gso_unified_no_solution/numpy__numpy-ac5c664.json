@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint explicitly states the solution: 'Vectorize np.partition and np.argpartition using AVX-512', revealing the exact optimization approach. This requires expert-level knowledge of SIMD/AVX-512 vectorization, CPU intrinsics, and NumPy's C-level implementation. While the test setup is clear, implementing AVX-512 optimizations for partition algorithms is a highly specialized task with no standard pattern to follow.",
+  "_task_id": "numpy__numpy-ac5c664",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.274480"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem statement explicitly identifies the exact offending line of code, points to the method that should be used instead, and even references a PR with the patch. This is a straightforward fix where the tzinfo parameter is being ignored and needs to be used. However, it requires understanding Django's ORM internals, specifically the datetime truncation functions and timezone handling.",
+  "_task_id": "django__django-13363",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:37.802598"
+}

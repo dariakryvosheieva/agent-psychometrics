@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's repeat function across multiple data types (int, object, structured arrays) with no hints about the solution approach. The developer needs deep understanding of numpy internals and memory operations to identify optimization opportunities. The test script shows what operations need to be faster but provides no guidance on how to achieve this, requiring investigation of numpy's C implementation.",
+  "_task_id": "numpy__numpy-905d37e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.816344"
+}

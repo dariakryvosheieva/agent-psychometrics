@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that AnnotationBbox's gid is not being passed to the renderer when saving to SVG, and references a previous PR (#15087) that fixed similar issues for other artists. This hints strongly at the solution pattern (passing gid to renderer in the draw method). However, fixing this requires understanding matplotlib's internal rendering pipeline and how gid propagation works between artists and renderers.",
+  "_task_id": "matplotlib__matplotlib-24637",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:53.929688"
+}

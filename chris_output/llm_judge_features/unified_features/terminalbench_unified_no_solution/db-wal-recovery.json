@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of SQLite internals, specifically WAL file format and encryption/corruption recovery. The mention that the WAL is 'corrupted or encrypted' suggests the solver must investigate and potentially decrypt or repair binary data structures. While the output format is clear, the recovery approach is non-standard and requires understanding low-level database file formats.",
+  "_task_id": "db-wal-recovery",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.126979"
+}

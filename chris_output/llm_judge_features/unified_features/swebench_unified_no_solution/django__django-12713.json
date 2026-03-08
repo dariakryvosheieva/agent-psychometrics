@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly states the problem: widget parameter doesn't work in formfield_for_manytomany() but works in formfield_for_foreignkey(), suggesting the fix involves making the m2m method consistent with the foreignkey method. This requires deep Django admin internals knowledge but follows an existing pattern (the foreignkey implementation). The solution is straightforward once you understand the pattern - likely just passing the widget parameter through similar to how formfield_for_foreignkey does it.",
+  "_task_id": "django__django-12713",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:25.714226"
+}

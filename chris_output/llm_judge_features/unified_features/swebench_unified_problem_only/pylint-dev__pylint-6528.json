@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with exact reproduction steps and expected behavior. However, fixing it requires deep understanding of Pylint's internal file discovery mechanism, specifically how recursive mode handles ignore patterns differently from normal mode. The developer needs to understand where in the codebase the recursive file discovery happens and how to properly apply the ignore filtering at that stage.",
+  "_task_id": "pylint-dev__pylint-6528",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:19.417741"
+}

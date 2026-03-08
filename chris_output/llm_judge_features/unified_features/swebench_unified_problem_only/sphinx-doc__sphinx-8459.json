@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem is crystal clear with reproduction steps and expected vs actual behavior. However, fixing it requires deep understanding of Sphinx autodoc internals, specifically how type hints are processed differently when autodoc_typehints='description' vs default mode, and where autodoc_type_aliases should be applied in the code path. No solution approach is hinted at, requiring investigation of Sphinx's autodoc extension internals.",
+  "_task_id": "sphinx-doc__sphinx-8459",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:56.091633"
+}

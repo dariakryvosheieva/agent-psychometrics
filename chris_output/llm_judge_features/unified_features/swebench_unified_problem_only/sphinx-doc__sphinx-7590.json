@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of both C++ language features (User Defined Literals) and Sphinx's C++ domain parser internals. The problem statement clearly identifies what's broken (UDL parsing) and even points to the relevant code location, but solving it requires understanding how to extend the parser grammar. The solution involves modifying a complex domain-specific parser, which is an unusual and specialized task.",
+  "_task_id": "sphinx-doc__sphinx-7590",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:51.385745"
+}

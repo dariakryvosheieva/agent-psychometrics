@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint provides an exact solution with a complete diff showing both the code change and the test case. The problem is crystal clear with specific reproduction steps. However, understanding the fix requires deep knowledge of Django's ORM internals, specifically how EmptyResultSet exceptions propagate through query compilation and how the Exists expression handles negation.",
+  "_task_id": "django__django-15382",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:16.236663"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task involves recovering lost Git changes after checking out master, which is a common Git recovery scenario. It requires knowledge of Git internals like reflog, dangling commits, or stash to find the lost changes. The task hints at the goal (find and merge changes) but doesn't specify the exact Git mechanism involved, requiring moderate domain knowledge of Git recovery techniques.",
+  "_task_id": "fix-git",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:32.139112"
+}

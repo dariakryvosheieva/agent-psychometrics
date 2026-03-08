@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem provides an exact code snippet for the solution (adding a check for AlterField operations in the reduce method). The task requires understanding Django's migration optimizer internals, specifically how the `reduce` method works in `AlterField`, but the pattern follows existing similar optimizations already implemented in the codebase (like AlterField reducing into AddField). Verification is straightforward with the provided test case.",
+  "_task_id": "django__django-16595",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:36.081443"
+}

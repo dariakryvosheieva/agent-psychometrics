@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of special mathematical functions (polylogarithms), their evaluation at special values, and SymPy's internal representation of complex functions. The problem statement provides the expected answer (-log(2)**2/2 + pi**2/12) and discusses issues with exp_polar representation, but implementing the evaluation requires understanding both the mathematics and SymPy's function evaluation framework. The test 'test_polylog_values' suggests specific values need to be added to the polylog evaluation logic.",
+  "_task_id": "sympy__sympy-13852",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:18.657346"
+}

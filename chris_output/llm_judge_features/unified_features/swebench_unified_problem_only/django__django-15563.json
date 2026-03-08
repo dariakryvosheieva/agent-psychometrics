@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug involves Django's ORM internals for handling multiple inheritance in model updates. The problem is clearly demonstrated with a reproducible example showing that queryset updates use wrong primary keys when a model inherits from multiple parent models. Fixing this requires deep understanding of Django's query compilation for multi-table inheritance, specifically how related table primary keys are resolved during UPDATE operations - a highly specialized area of Django's ORM.",
+  "_task_id": "django__django-15563",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:18.754291"
+}

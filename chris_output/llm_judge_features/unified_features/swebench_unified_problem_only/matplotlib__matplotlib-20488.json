@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a failing test due to a suspected numpy change affecting LogNorm with huge ranges. The developer cannot reproduce locally, making debugging difficult. Solving this requires deep understanding of matplotlib's color normalization internals, numpy's behavior with extreme values, and how masked arrays interact with log transforms. The sporadic CI failures and lack of local reproducibility significantly increase difficulty.",
+  "_task_id": "matplotlib__matplotlib-20488",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:45.670657"
+}

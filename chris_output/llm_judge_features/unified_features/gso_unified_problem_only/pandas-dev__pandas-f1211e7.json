@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing DataFrame transpose operations with nullable Int64 dtype and MultiIndex, which involves deep pandas internals knowledge. No hint is given about what specific optimization is needed - the solver must understand pandas' internal array handling, nullable integer implementation, and identify where performance bottlenecks occur in transpose operations. The verification is straightforward through shape and sum checks, but finding the actual optimization requires understanding pandas' BlockManager and ExtensionArray internals.",
+  "_task_id": "pandas-dev__pandas-f1211e7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:53.614586"
+}

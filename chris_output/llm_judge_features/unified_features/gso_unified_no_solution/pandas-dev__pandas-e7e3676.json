@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint mentions 'Split blocks in blk.delete' which provides a vague direction but requires deep understanding of pandas internal block management. This optimization requires knowledge of how pandas stores DataFrame data in memory blocks and how delete operations affect performance. The task involves understanding pandas internals around BlockManager and how block splitting can improve performance for setitem operations.",
+  "_task_id": "pandas-dev__pandas-e7e3676",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.201332"
+}

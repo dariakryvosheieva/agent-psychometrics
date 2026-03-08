@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the issue (ImageField registering unnecessary post_init signal handler) and hints at the solution (only register handler when width_field/height_field are set). This requires understanding Django's signal system and ImageField internals, but the fix itself is straightforward conditional logic. Verification requires testing both configurations (with and without dimension fields) to ensure the optimization doesn't break functionality.",
+  "_task_id": "django__django-16801",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:40.071257"
+}

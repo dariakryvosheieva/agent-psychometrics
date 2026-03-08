@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is crystal clear with a reproducible example and even identifies the likely cause (unicode method name 'infecting' the header). The solution approach is hinted at - encoding the unicode method string to bytes. This is a well-known Python 2 unicode/str compatibility issue that requires knowledge of Python 2's string handling and the requests library internals, but follows a standard pattern of encoding unicode to str/bytes.",
+  "_task_id": "psf__requests-1724",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:03.756410"
+}

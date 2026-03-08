@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep expertise in both R/RStan and Python/PyStan ecosystems, understanding Stan model syntax, and Bayesian inference concepts. The conversion between languages with different Stan interfaces is non-trivial and requires understanding model structure, data formats, and sampling hyperparameters. Verification is difficult because results depend on correct model translation and matching random seeds, with no ability to compare against the original R script output.",
+  "_task_id": "rstan-to-pystan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:58.658166"
+}

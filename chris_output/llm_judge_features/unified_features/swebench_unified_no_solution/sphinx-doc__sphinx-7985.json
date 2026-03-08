@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding Sphinx's linkcheck builder internals to add local/internal link checking functionality. The problem is clearly described with reproduction steps, but the solution requires knowledge of how Sphinx processes documents and resolves internal references. The hints discuss edge cases (deploy scripts, absolute paths) suggesting implementation complexity, though the core feature request is straightforward.",
+  "_task_id": "sphinx-doc__sphinx-7985",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:57.207738"
+}

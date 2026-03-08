@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that @classmethod @property combinations aren't documented due to how Python handles descriptor protocol - the docstring becomes inaccessible because the decorated method behaves like a class attribute. The solution requires deep understanding of Sphinx's autodoc internals, Python's descriptor protocol, and how classmethod/property decorators interact. The issue mentions Python 3.10 will fix this upstream, suggesting a workaround is needed for earlier versions, making this an unusual pattern without standard solutions.",
+  "_task_id": "sphinx-doc__sphinx-9461",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:59:03.973780"
+}

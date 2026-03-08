@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The error message indicates weakref objects cannot be pickled, which is a known Python pickling limitation. The fix requires understanding matplotlib's internals to find where align_labels() stores weakrefs and implement proper __getstate__/__setstate__ methods. This is a moderately common pattern for pickle compatibility, but requires deep knowledge of matplotlib's figure/axes architecture to locate and fix the specific issue.",
+  "_task_id": "matplotlib__matplotlib-25332",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:57.970970"
+}

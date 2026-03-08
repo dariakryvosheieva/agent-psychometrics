@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires creating a polyglot file that is valid in both Python and C, which demands deep knowledge of both languages' syntax quirks and comment/preprocessor mechanisms. While polyglot patterns exist online, combining them with implementing Fibonacci in both languages requires careful logical reasoning about how to structure code that parses correctly in both interpreters/compilers. Verification is straightforward since you just run both commands and check the output.",
+  "_task_id": "polyglot-c-py",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:48.852130"
+}

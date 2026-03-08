@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Python 3.8.12 security changes related to proxy authentication and how the requests library handles proxy credentials. The hint about Python 3.8.12 notable changes provides a vague direction, but understanding the specific CVE fix (likely related to FTP/HTTP header injection) and how it affects proxy-authorization headers requires specialized knowledge. Verification is difficult as it requires a working proxy server with authentication to reproduce the 407 error.",
+  "_task_id": "psf__requests-6028",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:58:06.575452"
+}

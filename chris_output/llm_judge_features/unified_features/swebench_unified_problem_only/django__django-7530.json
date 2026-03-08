@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies that makemigrations is calling allow_migrate() with incorrect (app_label, model) pairs - using all models across apps instead of each app's own models. This requires deep understanding of Django's migration system and database routers. The fix involves understanding consistency checks in the migration framework and ensuring proper pairing of app labels with their corresponding models, which is Django-specific internal knowledge.",
+  "_task_id": "django__django-7530",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:44.391257"
+}

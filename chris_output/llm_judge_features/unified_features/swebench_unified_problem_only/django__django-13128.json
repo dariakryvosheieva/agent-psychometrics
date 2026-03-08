@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Django's ORM expression system, specifically how output_field resolution works for arithmetic operations between F() expressions. The problem is clear (temporal subtraction should automatically infer DurationField output), but fixing it requires understanding Django's internal expression type inference mechanisms. The title hints that ExpressionWrapper shouldn't be needed, suggesting the fix involves automatic output_field resolution.",
+  "_task_id": "django__django-13128",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:56:32.959400"
+}

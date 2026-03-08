@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint clearly describes the optimization approach (using an intermediary boolean array for integer arrays), but implementing it requires deep understanding of NumPy internals and algorithmic tradeoffs. The task requires knowledge of when boolean indexing outperforms set-based lookups and how to calculate optimal parameter thresholds. Verification is straightforward through the provided equivalence checks on shape and count.",
+  "_task_id": "numpy__numpy-cedba62",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:35.068798"
+}

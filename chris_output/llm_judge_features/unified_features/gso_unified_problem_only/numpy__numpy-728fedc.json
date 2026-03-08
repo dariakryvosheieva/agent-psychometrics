@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing numpy's char.rstrip function on a large array of strings. No solution hint is provided, and the optimization likely requires deep knowledge of numpy's internal string handling (possibly involving C-level optimizations or alternative vectorized approaches). The verification is straightforward via element-wise comparison, but finding the optimization approach requires understanding numpy's string operations internals.",
+  "_task_id": "numpy__numpy-728fedc",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:40.551262"
+}

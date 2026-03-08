@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires optimizing NumPy's sum operations across different array layouts (contiguous, non-contiguous, different dtypes). Without access to the actual repository code or any hints about what optimization is expected, the solver must have deep knowledge of NumPy internals, memory layouts, and SIMD optimizations. The task is atypical as it involves modifying NumPy's core implementation rather than user-level code optimization.",
+  "_task_id": "numpy__numpy-330057f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:45.794458"
+}

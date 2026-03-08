@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 5,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 2,
+  "atypicality": 2,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem is very clearly described with exact error traceback and a reproducer. The issue is explicitly identified as a regression from a specific commit, and the root cause is explained (the function now executes isinstance(args[0], ...) when args is empty). The fix requires understanding the io.registry pattern but is a straightforward bounds check - adding a guard to check if args is non-empty before accessing args[0].",
+  "_task_id": "astropy__astropy-14309",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:47.371459"
+}

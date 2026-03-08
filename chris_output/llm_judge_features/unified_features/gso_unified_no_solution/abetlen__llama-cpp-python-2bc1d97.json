@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 5,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 4,
+  "standard_pattern_available": 0,
+  "reasoning": "The hint 'feat: Update llama.cpp' vaguely suggests updating the underlying llama.cpp library but provides no specifics about which version or what optimizations. This task requires expert knowledge of llama.cpp internals, GGUF model inference, and low-level C++ bindings. The optimization target is unclear since 'gen_b' isn't explicitly shown in the test code, and verification requires running large model inference with timing-sensitive correctness checks across multiple prompts.",
+  "_task_id": "abetlen__llama-cpp-python-2bc1d97",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:31.032122"
+}

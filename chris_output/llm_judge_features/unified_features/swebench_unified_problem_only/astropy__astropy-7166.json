@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "The problem clearly identifies the root cause (inspect.isfunction returns False for properties) and points to the specific metaclass. This requires understanding of Python metaclasses, the inspect module, and how properties work differently from functions. The fix likely involves adding a check for properties alongside the existing function check, but the exact implementation requires knowledge of the library's internals.",
+  "_task_id": "astropy__astropy-7166",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:55:51.367248"
+}

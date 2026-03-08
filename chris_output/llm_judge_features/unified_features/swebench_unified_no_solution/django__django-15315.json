@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 2,
+  "standard_pattern_available": 1,
+  "reasoning": "The problem clearly describes that Field.__hash__ changes when assigned to a model class, breaking dict usage. The solution hint suggests reverting the __hash__ change from a specific ticket (#31750), giving a clear direction. However, understanding Django's Field internals and how model metaclasses work requires deep framework knowledge. The fix itself follows the standard Python pattern that __hash__ should be immutable, making verification straightforward.",
+  "_task_id": "django__django-15315",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T21:57:13.101971"
+}

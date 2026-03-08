@@ -1,0 +1,14 @@
+{
+  "solution_hint": 2,
+  "problem_clarity": 4,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 3,
+  "atypicality": 3,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 1,
+  "reasoning": "The task provides clear mathematical formulas and skeleton files with TODO markers, giving a strong hint at the approach. However, it requires knowledge of C Python extensions, matrix operations optimization, and building C extensions. The verification is moderately difficult due to numerical tolerance requirements and performance benchmarks, though automated tests are provided.",
+  "_task_id": "portfolio-optimization",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:48:50.765276"
+}

@@ -1,0 +1,14 @@
+{
+  "solution_hint": 0,
+  "problem_clarity": 2,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Pillow's TIFF handling internals, specifically how is_animated and n_frames properties are computed and potentially cached. The test checks both property access orders (is_animated first vs n_frames first), suggesting a lazy evaluation or caching optimization issue. Without hints about what's slow or the commit context, solving this requires investigating Pillow's internal implementation of multi-frame TIFF handling.",
+  "_task_id": "python-pillow__Pillow-fd8ee84",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:49:15.661239"
+}

