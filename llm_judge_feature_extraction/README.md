@@ -121,6 +121,21 @@ Environment-level features (8 features) are extracted via an **agentic pipeline*
 3. After exploration, the agent submits a JSON report rating 8 features on a 1–5 scale
 4. Results are parsed from Inspect logs into an incremental CSV
 
+### Info Level of Agent Input
+
+The `input` field in Inspect determines what text the agent sees as its initial message. The Docker container (`/testbed`) contains only the repo source code at the base commit — no benchmark scripts, test patches, or gold patches are present (verified by inspecting the Docker images).
+
+| Dataset | `input=` field | Info Level of Input |
+|---------|---------------|---------------------|
+| SWE-bench Verified | `problem_statement` | PROBLEM |
+| SWE-bench Pro | `problem_statement` | PROBLEM |
+| TerminalBench | `instruction.md` text | PROBLEM |
+| GSO | `prob_script` (benchmark script) | TEST |
+
+**GSO note**: The current `inspect_tasks.py` passes `input="prob_script"` (line 364), giving the auditor the full performance benchmark script (TEST-level information). This is intentional for the default pipeline (Experiment New Tasks), which overrides all features to solution level anyway, and GSO tasks carry almost no information without the benchmark script (the `api` field is just a function name).
+
+**For the information ablation study**: To run a clean GSO ablation where the ENVIRONMENT level sits below TEST, new auditor features must be extracted with only PROBLEM-level input (repo + API name). The fix is to change `input="prob_script"` to `input="api"` (or post-process samples to construct a minimal prompt) and move `prob_script` to `metadata`. The existing features should be kept for Experiment New Tasks; the new clean features would be used only for the ablation.
+
 ### 8 Environment Features
 
 | Feature | Scale | What It Measures |
