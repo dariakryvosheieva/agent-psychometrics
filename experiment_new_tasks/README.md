@@ -45,7 +45,7 @@ python -m experiment_new_tasks.run_all_datasets --datasets terminalbench
 
 Run with: `python -m experiment_new_tasks.run_all_datasets`
 
-**LLM features**: v7 Opus 4.6, unified 15 features across all datasets (selected from 28 features = 20 judge + 8 auditor via greedy forward selection maximizing cross-dataset mean AUC). See `chris_output/llm_judge_features/README.md` for details.
+**LLM features**: v7 Opus 4.6, unified 15 features across all datasets (selected from 28 features = 20 judge + 8 auditor via greedy forward selection maximizing cross-dataset mean AUC). See `llm_judge_features/README.md` for details.
 
 | Dataset | Tasks | Agents | Oracle | Grouped Ridge (Emb+LLM) | LLM Judge | Embedding | Baseline |
 |---------|-------|--------|--------|-------------------------|-----------|-----------|----------|
@@ -288,7 +288,7 @@ The default feature set uses **15 unified features** identical across all 4 data
 - **Solution (1)**: solution_complexity
 - **Auditor (3)**: codebase_scale, fix_localization, implementation_language_complexity
 
-**Feature paths**: `chris_output/llm_judge_features/v7_unified_15/{dataset}/llm_judge_features.csv`
+**Feature paths**: `llm_judge_features/defaults/{dataset}/llm_judge_features.csv`
 
 ### LLM Judge Feature Variants (v2, v3, v5, v6)
 

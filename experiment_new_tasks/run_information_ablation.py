@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ALL_DATASETS = ["swebench_verified", "gso", "terminalbench", "swebench_pro"]
 
-ABLATION_OUTPUT_BASE = Path("chris_output/llm_judge_features/ablation")
+ABLATION_OUTPUT_BASE = Path("llm_judge_features/information_ablation")
 
 # Cumulative info levels for the ablation, in order.
 # Each entry: (csv_filename, list of InfoLevels included, display_name)
@@ -75,7 +75,7 @@ def select_top_features(
 def build_ablation_csvs(dataset: str) -> Dict[str, Path]:
     """Build top-15 ablation CSVs for a dataset. Returns {level_filename: output_path}."""
     # Load v8 features (all 28 features at natural info levels)
-    v8_path = ROOT / f"chris_output/llm_judge_features/{dataset}_v8_plus_auditor/llm_judge_features.csv"
+    v8_path = ROOT / f"llm_judge_features/information_ablation/source/{dataset}.csv"
     features_df = pd.read_csv(v8_path)
 
     # Load IRT difficulties as regression target
