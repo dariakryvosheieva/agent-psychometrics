@@ -34,6 +34,7 @@ def run_single_dataset(
     coefficients: bool = False,
     predictor_factory=None,
     llm_judge_features_path: Optional[str] = None,
+    embeddings_path: Optional[str] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     """Run experiment_new_tasks on a single dataset and return results.
 
@@ -44,6 +45,8 @@ def run_single_dataset(
         coefficients: Whether to extract LLM Judge Ridge coefficients.
         predictor_factory: Optional callable(source_name, source, config) -> CVPredictor.
         llm_judge_features_path: Optional override for LLM judge features CSV path.
+            Supports {dataset} template variable.
+        embeddings_path: Optional override for embeddings .npz path.
             Supports {dataset} template variable.
 
     Returns:
@@ -57,6 +60,9 @@ def run_single_dataset(
         if llm_judge_features_path is not None:
             expanded = llm_judge_features_path.replace("{dataset}", dataset)
             overrides["llm_judge_features_path"] = Path(expanded)
+        if embeddings_path is not None:
+            expanded = embeddings_path.replace("{dataset}", dataset)
+            overrides["embeddings_path"] = Path(expanded)
         config = ExperimentAConfig.for_dataset(dataset, **overrides)
     except Exception as e:
         display_name = DATASET_DEFAULTS[dataset]["display_name"]
@@ -285,6 +291,13 @@ def main():
         help="Override LLM judge features CSV path. Supports {dataset} template "
              "(e.g., 'output/.../v2/{dataset}/features.csv').",
     )
+    parser.add_argument(
+        "--embeddings_path",
+        type=str,
+        default=None,
+        help="Override embeddings .npz path. Supports {dataset} template "
+             "(e.g., 'embeddings/my_embeddings_{dataset}.npz').",
+    )
     args = parser.parse_args()
 
     # Filter datasets if specified
@@ -317,6 +330,7 @@ def main():
                 coefficients=args.coefficients,
                 predictor_factory=predictor_factory,
                 llm_judge_features_path=args.llm_judge_features_path,
+                embeddings_path=args.embeddings_path,
             )
             metrics = extract_metrics(results)
             all_results[name] = metrics
@@ -341,6 +355,7 @@ def main():
                     coefficients=args.coefficients,
                     predictor_factory=predictor_factory,
                     llm_judge_features_path=args.llm_judge_features_path,
+                    embeddings_path=args.embeddings_path,
                 ): DATASET_DEFAULTS[dataset]["display_name"]
                 for dataset in datasets_to_run
             }

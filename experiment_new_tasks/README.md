@@ -180,7 +180,7 @@ Pre-computed embeddings are stored in the unified `embeddings/` directory at the
 - TerminalBench: `embeddings/embeddings__...__idnorm_instance-v2__json_terminal_bench_tasks.jsonl__test__maxlen8192.npz`
 - GSO: `embeddings/embeddings__...__gso-bench_gso__test__maxlen8192.npz`
 
-Note: The `embeddings/` directory is git-ignored. Embeddings must be generated or copied separately.
+Note: The `embeddings/` directory is tracked in git (`.npz` files are committed).
 
 To generate new embeddings:
 ```bash
@@ -441,15 +441,16 @@ Fold-specific IRT models (cached): `output/experiment_a_{dataset}/irt_splits/`
 ## Command Line Options
 
 ```
+--output              Output CSV file path (optional)
+--output_dir          Base directory for experiment outputs (default: /tmp/experiment_a_all)
+--datasets            Specific datasets to run (default: all)
+--sequential          Run datasets sequentially instead of in parallel
 --k_folds             Number of folds for cross-validation (default: 5)
---split_seed          Random seed for train/test split (default: 0)
---embeddings_path     Override default embeddings path
---llm_judge_features_path  Override default LLM features path
---unified_judge_suffix    Suffix to append to unified judge paths (e.g., '_core')
---output_dir          Output directory
---dry_run             Show configuration without running
---exclude_unsolved    Exclude tasks no agent solved
---coefficients        Extract and display LLM Judge Ridge coefficients
+--max_workers         Maximum parallel workers for datasets (default: 4)
+--coefficients        Extract and display LLM Judge Ridge coefficients (Table 10 / Figure 3)
+--feature_irt         Use Feature-IRT (joint training) instead of Ridge regression
+--llm_judge_features_path  Override LLM features CSV path; supports {dataset} template
+--embeddings_path     Override embeddings .npz path; supports {dataset} template
 ```
 
 ## Output
