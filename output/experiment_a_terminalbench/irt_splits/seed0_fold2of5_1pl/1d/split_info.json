@@ -1,6 +1,7 @@
 {
-  "test_fraction": 0.2,
   "split_seed": 0,
+  "fold_idx": 2,
+  "k_folds": 5,
   "n_train_tasks": 71,
   "n_test_tasks": 18,
   "train_tasks": [

@@ -280,12 +280,13 @@ def get_or_train_split_irt(
     from py_irt.config import IrtConfig
     from py_irt.training import IrtModelTrainer
 
-    # Configure and train
+    # Configure and train (seed=0 matches predict_question_difficulty.py for reproducibility)
     config = IrtConfig(
         model_type=model_type,
         epochs=epochs,
         priors="hierarchical",
         dims=1,
+        seed=0,
     )
 
     trainer = IrtModelTrainer(

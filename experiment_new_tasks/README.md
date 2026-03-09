@@ -50,9 +50,9 @@ Run with: `python -m experiment_new_tasks.run_all_datasets`
 | Dataset | Tasks | Agents | Oracle | Grouped Ridge (Emb+LLM) | LLM Judge | Embedding | Baseline |
 |---------|-------|--------|--------|-------------------------|-----------|-----------|----------|
 | SWE-bench Verified | 500 | 134 | 0.9447 | **0.8427** | 0.8415 | 0.8244 | 0.7175 |
-| GSO | 102 | 15 | 0.9139 | **0.7944** | 0.7844 | 0.7581 | 0.7130 |
-| TerminalBench | 89 | 112 | 0.9317 | **0.8209** | 0.8059 | 0.8174 | 0.7338 |
-| SWE-bench Pro | 730 | 14 | 0.9183 | **0.7632** | 0.7421 | 0.7550 | 0.6558 |
+| GSO | 102 | 15 | 0.9139 | **0.8048** | 0.7971 | 0.7624 | 0.7140 |
+| TerminalBench | 89 | 112 | 0.9317 | **0.8207** | 0.8059 | 0.8171 | 0.7334 |
+| SWE-bench Pro | 730 | 14 | 0.9183 | **0.7622** | 0.7417 | 0.7548 | 0.6565 |
 
 **Key findings**:
 - **Grouped Ridge (Emb+LLM) is best**: Outperforms single sources on all datasets
