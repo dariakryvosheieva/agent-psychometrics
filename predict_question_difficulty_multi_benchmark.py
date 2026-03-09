@@ -238,17 +238,7 @@ def _combine_model_scaffold_theta(theta_model: float, theta_scaffold: float, *, 
         return s * float(math.hypot(tm, ts))
     raise ValueError(f"Unknown theta combine form {combine!r}. Expected one of {list(THETA_COMBINE_CHOICES)!r}.")
 
-JUDGE_FEATURE_NAMES: List[str] = [
-    "solution_hint",
-    "problem_clarity",
-    "solution_complexity",
-    "domain_knowledge_required",
-    "logical_reasoning_required",
-    "atypicality",
-    "verification_difficulty",
-    "standard_pattern_available",
-    "codebase_scope"
-]
+JUDGE_FEATURE_NAMES: List[str] = list(base.JUDGE_FEATURE_NAMES)
 
 def evaluate_ood_auroc(
     *,
