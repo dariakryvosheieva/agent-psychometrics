@@ -8,6 +8,10 @@ Designed for batched extraction: prefix (cacheable) + suffix (varies per batch).
 import asyncio
 from typing import Optional
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Try to import API clients
 try:
     import anthropic
@@ -80,7 +84,7 @@ class LLMApiClient:
     """
 
     DEFAULT_MODELS = {
-        "anthropic": "claude-sonnet-4-6",
+        "anthropic": "claude-opus-4-6",
         "openai": "gpt-5.4-2026-03-05",
     }
 
