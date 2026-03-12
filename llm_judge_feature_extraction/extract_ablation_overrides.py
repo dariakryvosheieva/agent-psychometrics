@@ -121,11 +121,20 @@ def assemble_per_level_source(
     # Merge
     merged = extract_df.merge(env_df, on="instance_id", how="inner")
 
-    if len(merged) < len(extract_df):
-        missing = set(extract_df["instance_id"]) - set(merged["instance_id"])
+    # Warn if extraction has tasks not in natural source (extra tasks, dropped by inner join)
+    extra_in_extraction = set(extract_df["instance_id"]) - set(env_df["instance_id"])
+    if extra_in_extraction:
+        logger.warning(
+            f"{dataset}/{level}: {len(extra_in_extraction)} task(s) in extraction CSV "
+            f"not in natural source (dropped): {sorted(extra_in_extraction)[:5]}"
+        )
+
+    # Error if natural source has tasks missing from extraction (data loss)
+    missing_from_extraction = set(env_df["instance_id"]) - set(extract_df["instance_id"])
+    if missing_from_extraction:
         raise ValueError(
-            f"{dataset}/{level}: {len(missing)} tasks in extraction CSV missing "
-            f"from natural source: {sorted(missing)[:5]}"
+            f"{dataset}/{level}: {len(missing_from_extraction)} task(s) in natural source "
+            f"missing from extraction CSV: {sorted(missing_from_extraction)[:5]}"
         )
 
     # Order columns: instance_id, then features in registry order, then metadata

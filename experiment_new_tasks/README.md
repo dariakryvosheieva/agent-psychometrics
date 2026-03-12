@@ -373,14 +373,12 @@ Feature count is held constant at 15 via Ridge coefficient-based selection.
 
 | Info Level | SWE-bench Verified | GSO | TerminalBench | SWE-bench Pro |
 |---|---|---|---|---|
-| Baseline | 0.7175 | 0.7130 | 0.7338 | 0.6558 |
-| Problem | 0.7873 | 0.7276 | 0.7984 | 0.7175 |
-| + Auditor | 0.7984 | 0.7296 | 0.8076 | 0.7365 |
-| + Test | 0.8215 | 0.7250 | 0.8059 | 0.7489 |
-| + Solution (Full) | 0.8435 | 0.7343 | 0.8086 | 0.7562 |
+| Baseline | 0.7175 | 0.7140 | 0.7334 | 0.6565 |
+| Problem | 0.7873 | 0.7257 | 0.7987 | 0.7181 |
+| + Auditor | 0.7984 | 0.7270 | 0.8070 | 0.7369 |
+| + Test | 0.8343 | 0.7251 | 0.8070 | 0.7489 |
+| + Solution (Full) | 0.8483 | 0.7971 | 0.8103 | 0.7501 |
 | Oracle | 0.9447 | 0.9139 | 0.9317 | 0.9183 |
-
-*Results above are from v8 natural features — will be updated after re-extraction with info level overrides.*
 
 **Information sources** (28 features total across 4 levels):
 - **Problem** (15 features): Derived from problem statement alone
@@ -397,9 +395,10 @@ Feature count is held constant at 15 via Ridge coefficient-based selection.
 **Feature selection**: Ridge regression (alpha=1.0) on all available features at each level → rank by |coefficient| → keep top 15.
 
 **Key findings**:
-- **SWE-bench Verified** shows clear monotonic improvement: each level adds ~1-2% AUC
-- **SWE-bench Pro** similarly monotonic, with auditor providing the largest single jump (+1.9%)
+- **SWE-bench Verified** shows clear monotonic improvement: +Test gains +1.3% over natural features (0.8343 vs 0.8215)
+- **GSO** sees the largest improvement at +Solution: 0.7971 vs 0.7343 (+6.3%) with info level overrides
 - **TerminalBench** captures most signal at Problem level; additional levels add marginal value
+- **SWE-bench Pro** monotonic from Problem to +Test; +Solution adds minimal additional signal
 - **GSO** is noisy (102 tasks, std ~0.05) — all levels are within noise of each other
 
 To run:
