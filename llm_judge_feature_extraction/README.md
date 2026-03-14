@@ -248,7 +248,7 @@ bash llm_judge_feature_extraction/auditor_agent/run_all_auditor.sh  # runs all 4
 
 ### Active Default: `v7_unified_15/`
 
-15 unified features used across all 4 datasets, selected from 28 (20 judge + 8 auditor).
+15 unified features used across all 4 datasets, manually chosen from 28 (20 judge + 8 auditor).
 
 **Base model**: Claude Opus 4.6 (`claude-opus-4-6`)
 **Info Level**: Solution override (all features see full task info including gold patch)
