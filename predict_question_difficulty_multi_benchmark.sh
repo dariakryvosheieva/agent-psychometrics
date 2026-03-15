@@ -20,5 +20,4 @@ python -u predict_question_difficulty_multi_benchmark.py \
   --out_dir data/held_out_benchmark \
   --method combined \
   --split_by benchmark \
-  --include_zero_success \
   --overwrite

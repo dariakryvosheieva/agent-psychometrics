@@ -438,7 +438,7 @@ def format_qs_solution_instruction(*, question_statement: str, solution: str, in
     qs = _sanitize_text(str(question_statement or "")).strip()
     sol = _sanitize_text(str(solution or "")).strip()
     instr = _sanitize_text(str(instruction or "")).strip()
-    return f"Task statement:\n{qs}\n\nSolution:\n{sol}\n\n{instr}".strip()
+    return f"Task statement:\n{qs}\n\n{instr}".strip()
 
 _GSO_PROMPT_TEMPLATE = """I’ve uploaded a python code repository in the directory workspace_dir_name. Consider the
 following test script showing an example usage of the repository:
@@ -1437,10 +1437,10 @@ def _run_with_judge_features(
 ) -> int:
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
-    include_zero_success = bool(getattr(args, "include_zero_success", False))
-    zero_success_mode = "include" if include_zero_success else "exclude"
+    exclude_zero_success = bool(getattr(args, "exclude_zero_success", False))
+    zero_success_mode = "exclude" if exclude_zero_success else "include"
 
-    if not include_zero_success:
+    if exclude_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
             f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} items "
@@ -1752,7 +1752,6 @@ def _run_with_judge_features(
     if best_joint_state is None or best_fold < 1:
         raise RuntimeError("Failed to select a best CV fold model by ROC-AUC (all folds NaN?).")
 
-    exclude_zero_success = bool(not include_zero_success)
     zero_embedded = [tid for tid in task_ids if tid in zero_success_set] if exclude_zero_success else []
     yhat_zero: Dict[str, float] = {}
     if zero_embedded:
@@ -1835,9 +1834,8 @@ def _run_judge_only(
 
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
-    include_zero_success = bool(getattr(args, "include_zero_success", False))
-    zero_success_mode = "include" if include_zero_success else "exclude"
-    exclude_zero_success = bool(not include_zero_success)
+    exclude_zero_success = bool(getattr(args, "exclude_zero_success", False))
+    zero_success_mode = "exclude" if exclude_zero_success else "include"
 
     if exclude_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
@@ -2146,11 +2144,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
     p.add_argument(
-        "--include_zero_success",
+        "--exclude_zero_success",
         action="store_true",
         help=(
-            "If set, include items with 0 successes across all subjects in --agent_results in the CV/IRT pool. "
-            "If unset (default), exclude them from CV/IRT and predict them separately at the end."
+            "If set, exclude items with 0 successes across all subjects in --agent_results from the CV/IRT pool. "
+            "By default, these items are included in CV/IRT."
         ),
     )
     p.add_argument("--irt_epochs", type=int, default=5000)
@@ -2437,10 +2435,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     zero_success_ids = compute_zero_success_items(all_responses)
     zero_success_set = set(zero_success_ids)
 
-    include_zero_success = bool(getattr(args, "include_zero_success", False))
-    zero_success_mode = "include" if include_zero_success else "exclude"
+    exclude_zero_success = bool(getattr(args, "exclude_zero_success", False))
+    zero_success_mode = "exclude" if exclude_zero_success else "include"
 
-    if not include_zero_success:
+    if exclude_zero_success:
         eligible = [tid for tid in overlap_ids if tid not in zero_success_set]
         print(
             f"Excluding zero-success items from CV/IRT: {len(overlap_ids) - len(eligible)}/{len(overlap_ids)} items "

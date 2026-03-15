@@ -1236,9 +1236,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--overwrite", action="store_true")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument(
-        "--include_zero_success",
+        "--exclude_zero_success",
         action="store_true",
-        help="Include items with 0 successes in CV/IRT and training (not recommended; can destabilize IRT).",
+        help="Exclude items with 0 successes from CV/IRT and training. By default, these items are included.",
     )
 
     p.add_argument(
@@ -1595,7 +1595,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     flat_for_zero_success: List[Tuple[str, Dict[str, int]]] = [(str(sid), resp) for _, sid, resp in all_responses_tagged]
     zero_success_ids = base.compute_zero_success_items(flat_for_zero_success)
     zero_success_set = set(zero_success_ids)
-    exclude_zero_success = not bool(args.include_zero_success)
+    exclude_zero_success = bool(args.exclude_zero_success)
 
     item_ids_by_bench: Dict[str, List[str]] = {}
     for b, rows in responses_by_bench.items():
@@ -1651,7 +1651,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "instruction": str(args.instruction),
                 "instruction_sig": str(instr_sig),
                 "embedding_layer": int(args.embedding_layer),
-                "include_zero_success": bool(args.include_zero_success),
+                "exclude_zero_success": bool(args.exclude_zero_success),
                 "normalize_item_ids": True,
                 "embed_subset": "response_items",
                 "dataset_sources": str(dataset_sources_str),
@@ -1709,7 +1709,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if not verified_ids:
                     raise RuntimeError(
                         "Verified training benchmark: 0 item_ids remain after response-driven filtering "
-                        f"(include_zero_success={bool(args.include_zero_success)})."
+                        f"(exclude_zero_success={bool(args.exclude_zero_success)})."
                     )
                 verified_items, verified_missing = load_swebench_items_by_ids(
                     dataset_name=str(args.verified_dataset_name),
@@ -1733,7 +1733,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if not pro_ids:
                     raise RuntimeError(
                         "Pro training benchmark: 0 item_ids remain after response-driven filtering "
-                        f"(include_zero_success={bool(args.include_zero_success)})."
+                        f"(exclude_zero_success={bool(args.exclude_zero_success)})."
                     )
                 pro_items, pro_missing = load_swebench_items_by_ids(
                     dataset_name=str(args.pro_dataset_name),
@@ -1757,7 +1757,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if not terminal_ids:
                     raise RuntimeError(
                         "Terminal-Bench training benchmark: 0 task_ids remain after response-driven filtering "
-                        f"(include_zero_success={bool(args.include_zero_success)})."
+                        f"(exclude_zero_success={bool(args.exclude_zero_success)})."
                     )
                 terminal_items, terminal_missing = load_terminal_bench_items_by_ids(
                     tasks_jsonl=str(args.terminal_bench_tasks_jsonl),
@@ -1779,7 +1779,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if not gso_ids:
                     raise RuntimeError(
                         "GSO training benchmark: 0 item_ids remain after response-driven filtering "
-                        f"(include_zero_success={bool(args.include_zero_success)})."
+                        f"(exclude_zero_success={bool(args.exclude_zero_success)})."
                     )
                 gso_dataset_name = str(args.gso_dataset_name or "").strip()
                 if not gso_dataset_name:
@@ -3325,8 +3325,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     train_items = list(eligible)
     if not train_items:
         raise RuntimeError(
-            "Training-only mode: after filtering (include_zero_success="
-            f"{bool(args.include_zero_success)}), no train items remain."
+            "Training-only mode: after filtering (exclude_zero_success="
+            f"{bool(args.exclude_zero_success)}), no train items remain."
         )
 
     base.set_torch_determinism(False)
