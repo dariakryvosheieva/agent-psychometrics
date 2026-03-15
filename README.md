@@ -9,7 +9,7 @@ We present a framework for predicting success or failure on individual tasks tai
 ## Quick Start
 
 ```bash
-# Create and activate the virtual environment
+# Create and activate a virtual environment
 python -m venv .venv
 source .venv/bin/activate
 
