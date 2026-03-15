@@ -149,9 +149,10 @@ Oracle data and post-frontier agent data are NEVER exposed during training. Trai
 experiment_appendix_h_hard_tasks/
 ├── compare_methods.py        # Main evaluation script
 ├── threshold_sweep.py        # Threshold sweep analysis
+├── figures/                  # Figure generation scripts
 ├── trajectory_data/          # Downloaded trajectories
-├── trajectory_summarization_api/  # Trajectory summarization via OpenAI API
-├── trajectory_upload/        # Trajectory conversion and upload
+├── trajectory_conversion/    # Trajectory format conversion utilities
+├── trajectory_features/      # Trajectory feature extraction and analysis
 ├── shared/                   # Shared utilities
 │   ├── config_base.py        # DatasetConfig base class
 │   ├── data_preparation.py   # Data loading, frontier identification

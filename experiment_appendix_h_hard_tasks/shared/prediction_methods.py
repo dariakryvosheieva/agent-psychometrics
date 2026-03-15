@@ -5,8 +5,6 @@ This module contains:
 - Helper functions for collecting predictions from various methods
 - Feature source builders
 
-For OrderedLogitIRTPredictor, see ordered_logit_predictor.py.
-
 All prediction method code should live here. Adding a new method should only
 require changes to this file.
 """

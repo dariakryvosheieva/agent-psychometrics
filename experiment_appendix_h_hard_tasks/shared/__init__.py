@@ -42,12 +42,6 @@ from experiment_appendix_h_hard_tasks.shared.prediction_methods import (
     collect_feature_irt_predictions,
 )
 
-# Ordered Logit IRT
-from experiment_appendix_h_hard_tasks.shared.ordered_logit_predictor import (
-    OrderedLogitIRTPredictor,
-    collect_ordered_logit_irt_predictions,
-)
-
 # Frontier evaluation
 from experiment_appendix_h_hard_tasks.shared.frontier_evaluation import (
     DateForecastingData,
@@ -138,9 +132,6 @@ __all__ = [
     "collect_ridge_predictions",
     "collect_grouped_ridge_predictions",
     "collect_feature_irt_predictions",
-    # ordered_logit_predictor
-    "OrderedLogitIRTPredictor",
-    "collect_ordered_logit_irt_predictions",
     # frontier_evaluation
     "DateForecastingData",
     "setup_date_forecasting",
