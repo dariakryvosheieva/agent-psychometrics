@@ -52,16 +52,15 @@ All results use the **zero_pre** frontier definition and report **Mean Per-Agent
 
 ### SWE-bench Verified
 
-**Cutoff**: 2025-05-01 | **Pre-frontier agents**: 76 | **Post-frontier agents**: 55 | **Frontier tasks**: 34
+**Cutoff**: 2025-05-01 | **Pre-frontier agents**: 76 | **Post-frontier agents**: 58 | **Frontier tasks**: 36
 
 | Method | Mean AUC +/- SEM | ROC-AUC |
 |--------|------------------|---------|
-| Oracle (upper bound) | **0.7322 +/- 0.039** | 0.8399 |
-| Trajectory + Ridge | 0.5442 +/- 0.033 | 0.7157 |
-| Grouped Ridge (all features) | 0.5256 +/- 0.032 | 0.7041 |
-| Baseline IRT (pre-frontier only) | 0.4854 +/- 0.031 | 0.7503 |
-| Embedding + Ridge | 0.4716 +/- 0.039 | 0.6868 |
-| LLM Judge + Ridge | 0.4665 +/- 0.034 | 0.6898 |
+| Oracle (upper bound) | **0.7947 +/- 0.022** | 0.8547 |
+| Grouped Ridge (Embedding + LLM Judge) | 0.5333 +/- 0.032 | 0.7168 |
+| LLM Judge + Ridge | 0.5101 +/- 0.031 | 0.7237 |
+| Embedding + Ridge | 0.4910 +/- 0.035 | 0.7189 |
+| Baseline IRT (pre-frontier only) | 0.4643 +/- 0.028 | 0.7588 |
 
 ### SWE-bench Pro
 
@@ -70,33 +69,34 @@ All results use the **zero_pre** frontier definition and report **Mean Per-Agent
 | Method | Mean AUC +/- SEM | ROC-AUC |
 |--------|------------------|---------|
 | Oracle (upper bound) | **0.7377 +/- 0.029** | 0.8000 |
+| Grouped Ridge (Embedding + LLM Judge) | 0.5987 +/- 0.027 | 0.7139 |
 | Embedding + Ridge | 0.5896 +/- 0.029 | 0.7132 |
-| Grouped Ridge | 0.5757 +/- 0.027 | 0.7103 |
 | LLM Judge + Ridge | 0.5419 +/- 0.024 | 0.7018 |
-| Baseline IRT | 0.5055 +/- 0.017 | 0.6958 |
+| Baseline IRT (pre-frontier only) | 0.5055 +/- 0.017 | 0.6958 |
 
 ### TerminalBench
 
-**Cutoff**: 2025-09-01 | **Pre-frontier agents**: 37 | **Post-frontier agents**: 46 | **Frontier tasks**: 11
+**Cutoff**: 2025-09-01 | **Pre-frontier agents**: 39 | **Post-frontier agents**: 73 | **Frontier tasks**: 24
 
 | Method | Mean AUC +/- SEM | ROC-AUC |
 |--------|------------------|---------|
-| Oracle (upper bound) | **0.7614 +/- 0.041** | 0.8348 |
-| Baseline IRT | 0.5910 +/- 0.051 | 0.7681 |
-| LLM Judge + Ridge | 0.5318 +/- 0.046 | 0.7539 |
-| Embedding + Ridge | 0.4253 +/- 0.041 | 0.6676 |
+| Oracle (upper bound) | **0.8970 +/- 0.017** | 0.9144 |
+| Grouped Ridge (Embedding + LLM Judge) | 0.6022 +/- 0.023 | 0.7904 |
+| Embedding + Ridge | 0.5833 +/- 0.030 | 0.7655 |
+| LLM Judge + Ridge | 0.5690 +/- 0.023 | 0.7920 |
+| Baseline IRT (pre-frontier only) | 0.5363 +/- 0.032 | 0.7915 |
 
 ### GSO
 
-**Cutoff**: 2025-08-15 | **Pre-frontier agents**: 8 | **Post-frontier agents**: 6 | **Frontier tasks**: 33
+**Cutoff**: 2025-08-15 | **Pre-frontier agents**: 8 | **Post-frontier agents**: 7 | **Frontier tasks**: 42
 
 | Method | Mean AUC +/- SEM | ROC-AUC |
 |--------|------------------|---------|
-| Oracle (upper bound) | **0.7319 +/- 0.043** | 0.8043 |
-| Grouped Ridge | 0.5886 +/- 0.128 | 0.7351 |
-| LLM Judge + Ridge | 0.5787 +/- 0.114 | 0.7334 |
-| Embedding + Ridge | 0.5678 +/- 0.150 | 0.7023 |
-| Baseline IRT | 0.5206 +/- 0.047 | 0.7155 |
+| Oracle (upper bound) | **0.7330 +/- 0.041** | 0.7912 |
+| Grouped Ridge (Embedding + LLM Judge) | 0.5462 +/- 0.025 | 0.6971 |
+| Baseline IRT (pre-frontier only) | 0.5404 +/- 0.017 | 0.6977 |
+| LLM Judge + Ridge | 0.5369 +/- 0.043 | 0.6973 |
+| Embedding + Ridge | 0.5107 +/- 0.041 | 0.6837 |
 
 ## Methods Compared
 
