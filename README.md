@@ -60,18 +60,17 @@ agent-psychometrics/
 ├── experiment_new_tasks/              # New Tasks experiment
 ├── experiment_agent_features/         # Experiments involving agent features: New Responses, New Agents, and New Benchmarks
 ├── experiment_appendix_h_hard_tasks/  # Frontier task difficulty prediction
-│   ├── trajectory_data/               #   Downloaded trajectories (76 agents)
-│   ├── trajectory_summarization_api/  #   Trajectory summarization
-│   └── trajectory_upload/             #   Trajectory conversion and upload
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction
 ├── llm_judge_features/                # LLM-as-a-judge feature CSV files
 │   ├── backbone_ablation/             #   Features from GPT-5.4 and Claude 4.6 Sonnet (Appendix C.2)
 │   ├── defaults/                      #   Features used in main experiments
 │   └── information_ablation/          #   Features used in the feature source ablation experiment (Table 3)
+├── embeddings/                        # Pre-computed task embeddings (.npz)
 ├── swebench_irt/                      # IRT model training
 ├── py_irt/                            # IRT library (local fork)
-└── data/                              # Input data + IRT models
+├── data/                              # Input data + IRT models
+└── output/                            # Experiment outputs (gitignored)
 ```
 
 ## Datasets
@@ -99,12 +98,15 @@ All input data lives under `data/{dataset}/`:
 | File | Purpose |
 |------|---------|
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks |
+| `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Table 2) |
 | `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 3-5) |
 | `swebench_irt/train.py` | Train IRT models |
 
 ## Citation
 
-<!-- TODO: Fill in once the paper is available on arxiv/Google Scholar -->
+*Citation will be added once the paper is publicly available.*
+
+<!-- TODO: Fill in once the paper is available on arxiv/Google Scholar
 ```bibtex
 @inproceedings{agent-psychometrics,
     title={Agent Psychometrics: Task-Level Performance Prediction in Agentic Coding Benchmarks},
@@ -113,3 +115,4 @@ All input data lives under `data/{dataset}/`:
     year={2026}
 }
 ```
+-->
