@@ -438,7 +438,7 @@ def format_qs_solution_instruction(*, question_statement: str, solution: str, in
     qs = _sanitize_text(str(question_statement or "")).strip()
     sol = _sanitize_text(str(solution or "")).strip()
     instr = _sanitize_text(str(instruction or "")).strip()
-    return f"Task statement:\n{qs}\n\n{instr}".strip()
+    return f"Task statement:\n{qs}\n\nSolution:\n{sol}\n\n{instr}".strip()
 
 _GSO_PROMPT_TEMPLATE = """I’ve uploaded a python code repository in the directory workspace_dir_name. Consider the
 following test script showing an example usage of the repository:
