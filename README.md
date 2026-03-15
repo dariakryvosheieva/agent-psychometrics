@@ -13,11 +13,18 @@ We present a framework for predicting success or failure on individual tasks tai
 ├── experiment_new_tasks/              # New Tasks experiment
 ├── experiment_agent_features/         # Experiments involving agent features: New Responses, New Agents, and New Benchmarks
 ├── experiment_appendix_h_hard_tasks/  # Frontier task difficulty prediction
-├── llm_judge_feature_extraction/      # LLM-based task feature extraction
+│   ├── trajectory_data/               #   Downloaded trajectories (76 agents)
+│   ├── trajectory_summarization_api/  #   Trajectory summarization
+│   └── trajectory_upload/             #   Trajectory conversion and upload
+├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
+│   └── auditor_agent/                 #   Repository state feature extraction
 ├── llm_judge_features/                # LLM-as-a-judge feature CSV files
+│   ├── backbone_ablation/             #   Features from GPT-5.4 and Claude 4.6 Sonnet (Appendix C.2)
+│   ├── defaults/                      #   Features used in main experiments
+│   └── information_ablation/          #   Features used in the feature source ablation experiment (Table 3)
 ├── swebench_irt/                      # IRT model training
 ├── py_irt/                            # IRT library (local fork)
-├── data/                              # Input data + IRT models (data/{dataset}/irt/)
+├── data/                              # Input data + IRT models
 ```
 
 ## Quick Start
