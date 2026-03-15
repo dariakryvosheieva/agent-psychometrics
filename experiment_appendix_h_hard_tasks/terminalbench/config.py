@@ -18,12 +18,22 @@ MODEL_PREFIXES = [
     "openai/",
     "moonshotai/",
     "qwen/",
+    "qwen-",
     "claude-",
+    "deepseek-",
     "gemini-",
+    "glm-",
     "gpt-",
     "grok-",
+    "kimi-",
     "minimax-",
 ]
+
+# Manual date overrides for agents whose model can't be extracted from the ID
+MANUAL_AGENT_DATES = {
+    # Multi-model: claude-haiku-4-5 (20251015) + gemini-3-pro-preview (20251118)
+    "abacus_ai_desktop_multiple": "20251118",
+}
 
 
 def extract_models_from_agent_id(agent_id: str) -> List[str]:
@@ -70,21 +80,23 @@ def extract_models_from_agent_id(agent_id: str) -> List[str]:
             best_idx = -1
 
             for prefix in MODEL_PREFIXES:
-                # Find all occurrences of this prefix
-                search_idx = 0
-                while True:
-                    prefix_idx = model_part.find(prefix, search_idx)
-                    if prefix_idx == -1:
-                        break
+                # Check both hyphen and underscore variants
+                for p in [prefix, prefix.replace("-", "_")]:
+                    # Find all occurrences of this prefix
+                    search_idx = 0
+                    while True:
+                        prefix_idx = model_part.find(p, search_idx)
+                        if prefix_idx == -1:
+                            break
 
-                    # Check if this occurrence is valid (preceded by underscore)
-                    if prefix_idx > 0 and model_part[prefix_idx - 1] == "_":
-                        # Take the last valid occurrence for this prefix
-                        if prefix_idx > best_idx:
-                            best_idx = prefix_idx
-                            best_match = model_part[prefix_idx:]
+                        # Check if this occurrence is valid (preceded by underscore)
+                        if prefix_idx > 0 and model_part[prefix_idx - 1] == "_":
+                            # Take the last valid occurrence
+                            if prefix_idx > best_idx:
+                                best_idx = prefix_idx
+                                best_match = model_part[prefix_idx:]
 
-                    search_idx = prefix_idx + 1
+                        search_idx = prefix_idx + 1
 
             if best_match:
                 models.append(best_match)
@@ -97,6 +109,27 @@ def extract_models_from_agent_id(agent_id: str) -> List[str]:
             )
 
         is_first = False
+
+    # Fallback: if no _at_ found, try to match model prefixes directly in agent_id
+    # Also try underscore variants since agent IDs may use _ instead of -
+    if not models:
+        best_match = None
+        best_idx = -1
+        for prefix in MODEL_PREFIXES:
+            for p in [prefix, prefix.replace("-", "_")]:
+                # Find ALL occurrences and keep the last valid one
+                search_idx = 0
+                while True:
+                    prefix_idx = agent_id.find(p, search_idx)
+                    if prefix_idx == -1:
+                        break
+                    if prefix_idx == 0 or agent_id[prefix_idx - 1] == "_":
+                        if prefix_idx > best_idx:
+                            best_idx = prefix_idx
+                            best_match = agent_id[prefix_idx:]
+                    search_idx = prefix_idx + 1
+        if best_match:
+            models.append(best_match)
 
     if not models:
         raise ValueError(f"No models found in agent ID: '{agent_id}'")
@@ -381,6 +414,10 @@ class TerminalBenchConfig(DatasetConfig):
         dates. For multi-model agents, use the latest (max) release date since
         the agent can't exist before all its models are released.
 
+        Uses normalized lookup (hyphens -> underscores) to handle agent IDs that
+        use underscores where model names use hyphens. Also strips provider
+        prefixes for short-form matching.
+
         Args:
             agents: List of agent IDs from response matrix
 
@@ -391,17 +428,43 @@ class TerminalBenchConfig(DatasetConfig):
             ValueError: If any model is missing from the release dates JSON
         """
         release_dates = self._load_model_release_dates()
+
+        # Build normalized lookup: underscore-only key -> date
+        norm_lookup: Dict[str, str] = {}
+        for key, date in release_dates.items():
+            norm = key.replace("-", "_")
+            norm_lookup[norm] = date
+            # Also add short-form entries (strip provider prefixes)
+            for provider_prefix in [
+                "accounts/fireworks/models/",
+                "openai/",
+                "moonshotai/",
+                "qwen/",
+            ]:
+                if key.startswith(provider_prefix):
+                    short = key[len(provider_prefix):]
+                    short_norm = short.replace("-", "_")
+                    norm_lookup[short_norm] = date
+
         agent_dates = {}
 
         for agent in agents:
+            # Check manual overrides first
+            if agent in MANUAL_AGENT_DATES:
+                agent_dates[agent] = MANUAL_AGENT_DATES[agent]
+                continue
+
             models = extract_models_from_agent_id(agent)
 
             # Look up release date for each model
             model_dates = []
             missing_models = []
             for model in models:
+                norm_model = model.replace("-", "_")
                 if model in release_dates:
                     model_dates.append(release_dates[model])
+                elif norm_model in norm_lookup:
+                    model_dates.append(norm_lookup[norm_model])
                 else:
                     missing_models.append(model)
 
