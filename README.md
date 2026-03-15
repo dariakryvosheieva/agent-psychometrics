@@ -96,12 +96,8 @@ All input data lives under `data/{dataset}/`:
 | File | Purpose |
 |------|---------|
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks |
-| `experiment_appendix_h_hard_tasks/compare_methods.py` | Run Appendix H Hard Tasks |
 | `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 3-5) |
 | `swebench_irt/train.py` | Train IRT models |
-| `swebench_irt/prep_swebench.py` | Build response matrix |
-| `experiment_new_tasks/feature_source.py` | Feature source abstractions (`GroupedFeatureSource`, `RegularizedFeatureSource`) |
-| `experiment_new_tasks/feature_predictor.py` | Predictors (`FeatureBasedPredictor`, `GroupedRidgePredictor`) |
 
 ## Citation
 
