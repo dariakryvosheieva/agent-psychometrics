@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:h200:1
 
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "${SLURM_SUBMIT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 source .venv/bin/activate
 
 export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
