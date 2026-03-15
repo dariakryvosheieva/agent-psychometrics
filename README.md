@@ -22,6 +22,9 @@ pip install -r requirements.txt
 # Run Experiment New Tasks on all datasets
 python -m experiment_new_tasks.run_all_datasets
 
+# Run feature source ablation
+python -m experiment_new_tasks.run_information_ablation
+
 # Run Experiment New Responses
 python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
     --split_by observation \
