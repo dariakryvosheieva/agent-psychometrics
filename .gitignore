@@ -39,7 +39,6 @@ out/
 *.jsonlines
 *.npz
 !embeddings/*.npz
-!output/experiment_a_*/irt_splits/**/*.jsonl
 
 # Matplotlib cache
 .cache/
@@ -60,11 +59,7 @@ out/
 experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs/_blob_style/
 
 # All experiment outputs (regenerable)
-output/**
-!output/**/
-
-# But track cached IRT fold models
-!output/experiment_a_*/irt_splits/**
+output/
 
 # Overnight logs
 overnight.log
