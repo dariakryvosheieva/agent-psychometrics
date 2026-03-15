@@ -15,8 +15,9 @@ from datetime import datetime
 import numpy as np
 
 # Load IRT abilities
+ROOT = Path(__file__).resolve().parents[2]
 abilities = pd.read_csv(
-    "/Users/chrisge/Downloads/model_irt/data/swebench_verified/irt/1d_1pl/abilities.csv",
+    ROOT / "data/swebench_verified/irt/1d_1pl/abilities.csv",
     index_col=0
 )
 
@@ -188,12 +189,14 @@ ax.legend(loc="lower right", fontsize=10)
 plt.tight_layout()
 
 # Save
-output_path = "/Users/chrisge/Downloads/model_irt/output/figures/frontier_ability_over_time.png"
+output_dir = ROOT / "output/figures"
+output_dir.mkdir(parents=True, exist_ok=True)
+output_path = output_dir / "frontier_ability_over_time.png"
 plt.savefig(output_path, dpi=150, bbox_inches="tight")
 print(f"\nSaved plot to: {output_path}")
 
 # Also save as PDF for paper quality
-output_pdf = "/Users/chrisge/Downloads/model_irt/output/figures/frontier_ability_over_time.pdf"
+output_pdf = output_dir / "frontier_ability_over_time.pdf"
 plt.savefig(output_pdf, bbox_inches="tight")
 print(f"Saved PDF to: {output_pdf}")
 

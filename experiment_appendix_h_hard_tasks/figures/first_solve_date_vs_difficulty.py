@@ -19,7 +19,7 @@ import numpy as np
 from scipy import stats
 
 # Paths
-BASE_DIR = Path("/Users/chrisge/Downloads/model_irt")
+BASE_DIR = Path(__file__).resolve().parents[2]
 RESPONSE_MATRIX = BASE_DIR / "data/swebench_verified/responses.jsonl"
 ITEMS_CSV = BASE_DIR / "data/swebench_verified/irt/1d_1pl/items.csv"
 OUTPUT_DIR = BASE_DIR / "output/figures"

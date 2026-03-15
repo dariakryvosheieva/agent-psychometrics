@@ -15,3 +15,6 @@ datasets
 anthropic
 openai
 pyyaml
+transformers>=4.58
+torchmetrics
+huggingface-hub>=1.0

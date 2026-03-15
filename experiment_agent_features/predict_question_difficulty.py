@@ -2130,14 +2130,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     p.add_argument("--instruction", type=str, default=DIFFICULTY_INSTRUCTION, help="Instruction text appended last in the embedding input.")
 
-    p.add_argument("--out_dir", type=str, default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/swebench_verified")
+    p.add_argument("--out_dir", type=str, default="output/swebench_verified")
     p.add_argument("--embeddings_cache", type=str, default="", help="Optional path to existing embeddings cache (.npz).")
     p.add_argument("--overwrite", action="store_true")
 
     p.add_argument(
         "--agent_results",
         type=str,
-        default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/data/swebench_verified/responses.jsonl",
+        default="data/swebench_verified/responses.jsonl",
         help=(
             "Path to a JSONL file with per-subject responses of the form "
             "{'subject_id': ..., 'responses': {'task_id': 0/1, ...}}."

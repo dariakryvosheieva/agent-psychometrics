@@ -168,7 +168,8 @@ def plot_single_model(abilities_path: Path, title_suffix: str, output_prefix: st
     plt.tight_layout()
 
     # Save
-    output_dir = Path("/Users/chrisge/Downloads/model_irt/output/figures")
+    output_dir = Path(__file__).resolve().parents[2] / "output/figures"
+    output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{output_prefix}.png"
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     print(f"  Saved: {output_path}")
@@ -244,7 +245,7 @@ def plot_comparison(abilities_1pl_path: Path, abilities_2pl_path: Path):
     plt.suptitle("Frontier Ability: 1PL vs 2PL IRT Models (130 agents, 500 tasks)", fontsize=14, y=1.02)
     plt.tight_layout()
 
-    output_dir = Path("/Users/chrisge/Downloads/model_irt/output/figures")
+    output_dir = Path(__file__).resolve().parents[2] / "output/figures"
     output_path = output_dir / "frontier_ability_1pl_vs_2pl.png"
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     print(f"\nSaved comparison: {output_path}")
@@ -263,7 +264,7 @@ def main():
                        help="Directory containing 1d/ and 1d_1pl/ subdirectories")
     args = parser.parse_args()
 
-    base_dir = Path("/Users/chrisge/Downloads/model_irt") / args.model_dir
+    base_dir = Path(__file__).resolve().parents[2] / args.model_dir
 
     abilities_2pl_path = base_dir / "1d" / "abilities.csv"
     abilities_1pl_path = base_dir / "1d_1pl" / "abilities.csv"

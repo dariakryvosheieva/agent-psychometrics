@@ -15,7 +15,7 @@ import re
 from typing import Optional
 
 # Model release dates in YYYYMMDD format
-# Sources documented in /Users/chrisge/.claude/plans/humming-spinning-wave.md
+# Sources: public model announcements and release dates
 MODEL_RELEASE_DATES = {
     # Legacy models (2022-2023)
     "gpt35": "20221130",

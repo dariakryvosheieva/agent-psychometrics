@@ -337,7 +337,7 @@ class TerminalBenchConfig(DatasetConfig):
     )
     llm_judge_path: Optional[Path] = field(
         default_factory=lambda: Path(
-            "output/experiment_a_terminalbench/llm_judge_features/llm_judge_features.csv"
+            "llm_judge_features/defaults/terminalbench/llm_judge_features.csv"
         )
     )
 
@@ -418,15 +418,21 @@ class TerminalBenchConfig(DatasetConfig):
 
     @property
     def llm_judge_feature_cols(self) -> List[str]:
-        """TerminalBench-specific LLM judge feature columns.
-
-        Pre-selected subset of 4 features that work well with Ridge regression
-        (verified by comparing Ridge-only vs Lasso+Ridge performance).
-        These differ from SWE-bench features because the task domain is different.
-        """
+        """TerminalBench LLM judge feature columns (unified 15 features)."""
         return [
-            "task_clarity",
-            "domain_knowledge_required",
-            "task_complexity",
             "atypicality",
+            "codebase_scale",
+            "codebase_scope",
+            "debugging_complexity",
+            "domain_knowledge_required",
+            "error_specificity",
+            "fix_localization",
+            "implementation_language_complexity",
+            "logical_reasoning_required",
+            "side_effect_risk",
+            "similar_issue_likelihood",
+            "solution_complexity",
+            "solution_hint",
+            "test_edge_case_coverage",
+            "verification_difficulty",
         ]

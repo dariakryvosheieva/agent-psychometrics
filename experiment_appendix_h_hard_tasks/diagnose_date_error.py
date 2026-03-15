@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from experiment_b import get_dataset_config, list_datasets
+from experiment_appendix_h_hard_tasks import get_dataset_config, list_datasets
 from experiment_appendix_h_hard_tasks.shared import (
     load_and_prepare_data,
     split_agents_by_dates,

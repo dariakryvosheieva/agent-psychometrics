@@ -15,7 +15,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Callable, Dict, Iterator, List, Optional, Sequence, Set, Tuple
 
-import predict_question_difficulty as base
+from . import predict_question_difficulty as base
 
 def _canon_benchmark_name(name: str) -> str:
     s = str(name or "").strip().lower().replace("-", "_")
@@ -1231,7 +1231,7 @@ def train_irt_model_scaffold_1pl(
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
 
-    p.add_argument("--out_dir", type=str, default="/orcd/scratch/orcd/001/daria_k/fulcrum/fellowship/out/multi_benchmark_ood")
+    p.add_argument("--out_dir", type=str, default="output/multi_benchmark_ood")
     p.add_argument("--embeddings_cache", type=str, default="", help="Optional path to existing embeddings cache (.npz).")
     p.add_argument("--overwrite", action="store_true")
     p.add_argument("--seed", type=int, default=0)

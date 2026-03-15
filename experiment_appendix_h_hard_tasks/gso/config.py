@@ -41,7 +41,7 @@ class GSOConfig(DatasetConfig):
     )
     llm_judge_path: Optional[Path] = field(
         default_factory=lambda: Path(
-            "output/gso_llm_judge_features_v1/llm_judge_features.csv"
+            "llm_judge_features/defaults/gso/llm_judge_features.csv"
         )
     )
 
@@ -112,23 +112,21 @@ class GSOConfig(DatasetConfig):
 
     @property
     def llm_judge_feature_cols(self) -> List[str]:
-        """GSO LLM judge feature columns.
-
-        Uses v1 prompt features + deterministic patch features.
-        """
+        """GSO LLM judge feature columns (unified 15 features)."""
         return [
-            # v1 LLM-extracted features (optimization-focused)
-            "solution_in_problem",
-            "problem_clarity",
-            "fix_complexity",
-            "verification_difficulty",
-            "standard_pattern_available",
-            "integration_complexity",
-            "domain_knowledge_required",
             "atypicality",
-            # Deterministic patch features
-            "num_files_modified",
-            "num_hunks",
-            "num_lines_changed",
-            "log_lines_changed",
+            "codebase_scale",
+            "codebase_scope",
+            "debugging_complexity",
+            "domain_knowledge_required",
+            "error_specificity",
+            "fix_localization",
+            "implementation_language_complexity",
+            "logical_reasoning_required",
+            "side_effect_risk",
+            "similar_issue_likelihood",
+            "solution_complexity",
+            "solution_hint",
+            "test_edge_case_coverage",
+            "verification_difficulty",
         ]

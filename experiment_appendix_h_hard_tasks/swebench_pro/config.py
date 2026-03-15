@@ -38,7 +38,7 @@ class SWEBenchProConfig(DatasetConfig):
     )
     llm_judge_path: Optional[Path] = field(
         default_factory=lambda: Path(
-            "output/experiment_a_swebench_pro/llm_judge_features/llm_judge_features.csv"
+            "llm_judge_features/defaults/swebench_pro/llm_judge_features.csv"
         )
     )
 
@@ -108,19 +108,21 @@ class SWEBenchProConfig(DatasetConfig):
 
     @property
     def llm_judge_feature_cols(self) -> List[str]:
-        """SWE-bench Pro LLM judge feature columns.
-
-        Uses v5 prompt features + deterministic patch features.
-        """
+        """SWE-bench Pro LLM judge feature columns (unified 15 features)."""
         return [
-            # v5 LLM-extracted features
-            "fix_complexity",
+            "atypicality",
+            "codebase_scale",
+            "codebase_scope",
+            "debugging_complexity",
+            "domain_knowledge_required",
+            "error_specificity",
+            "fix_localization",
+            "implementation_language_complexity",
+            "logical_reasoning_required",
+            "side_effect_risk",
+            "similar_issue_likelihood",
+            "solution_complexity",
+            "solution_hint",
+            "test_edge_case_coverage",
             "verification_difficulty",
-            "standard_pattern_available",
-            "integration_complexity",
-            # Deterministic patch features
-            "num_files_modified",
-            "num_hunks",
-            "num_lines_changed",
-            "log_lines_changed",
         ]

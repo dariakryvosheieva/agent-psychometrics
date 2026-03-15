@@ -17,7 +17,7 @@ Example (two subjects, three questions):
 From this folder’s parent directory:
 
 ```bash
-cd /orcd/scratch/orcd/001/daria_k/fulcrum/fellowship
+cd /path/to/model_irt
 python -m pip install -r py_irt/requirements.txt
 ```
 

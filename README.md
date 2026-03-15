@@ -1,5 +1,8 @@
 # Agent Psychometrics: Task-Level Performance Prediction in Agentic Coding Benchmarks
 
+<!-- TODO: Replace with arxiv link once available -->
+<!-- [Paper](https://arxiv.org/abs/XXXX.XXXXX) -->
+
 We present a framework for predicting success or failure on individual tasks tailored to the agentic coding regime. Our approach augments **Item Response Theory (IRT)** with rich features extracted from tasks, including issue statements, repository contexts, solutions, and test cases, and introduces a novel decomposition of agent ability into **LLM and scaffold ability components**.
 
 <p align="center">
@@ -20,19 +23,19 @@ pip install -r requirements.txt
 python -m experiment_new_tasks.run_all_datasets
 
 # Run Experiment New Responses
-python experiment_agent_features/predict_question_difficulty_multi_benchmark.py \
+python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
     --split_by observation \
     --train_benchmarks verified,terminalbench,pro,gso \
     --out_dir held_out_responses
 
 # Run Experiment New Agents
-python experiment_agent_features/predict_question_difficulty_multi_benchmark.py \
+python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
     --split_by agent \
     --train_benchmarks verified \
     --out_dir held_out_agents
 
 # Run Experiment New Benchmarks
-python experiment_agent_features/predict_question_difficulty_multi_benchmark.py \
+python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
     --split_by benchmark \
     --train_benchmarks verified,terminalbench,pro \
     --ood_benchmark gso \
@@ -75,14 +78,39 @@ All input data lives under `data/{dataset}/`:
 | Dataset | Tasks | Agents | Response Matrix | IRT Model |
 |---------|-------|--------|----------------|-----------|
 | SWE-bench Verified | 500 | 134 | `data/swebench_verified/responses.jsonl` | `data/swebench_verified/irt/1d_1pl/` |
+| SWE-bench Pro | 730 | 14 | `data/swebench_pro/responses.jsonl` | `data/swebench_pro/irt/1d_1pl/` |
 | GSO | 102 | 15 | `data/gso/responses.jsonl` | `data/gso/irt/1d_1pl/` |
 | Terminal-Bench 2.0 | 89 | 112 | `data/terminalbench/responses.jsonl` | `data/terminalbench/irt/1d_1pl/` |
-| SWE-bench Pro | 730 | 14 | `data/swebench_pro/responses.jsonl` | `data/swebench_pro/irt/1d_1pl/` |
 
 ## Documentation
 
 | Document | Purpose |
 |----------|---------|
 | [experiment_new_tasks/README.md](experiment_new_tasks/README.md) | Experiment New Tasks details |
+| [experiment_agent_features/README.md](experiment_agent_features/README.md) | Agent feature experiments |
 | [experiment_appendix_h_hard_tasks/README.md](experiment_appendix_h_hard_tasks/README.md) | Appendix H Hard Tasks details |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks |
+| `experiment_appendix_h_hard_tasks/compare_methods.py` | Run Appendix H Hard Tasks |
+| `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 3-5) |
+| `swebench_irt/train.py` | Train IRT models |
+| `swebench_irt/prep_swebench.py` | Build response matrix |
+| `experiment_new_tasks/feature_source.py` | Feature source abstractions (`GroupedFeatureSource`, `RegularizedFeatureSource`) |
+| `experiment_new_tasks/feature_predictor.py` | Predictors (`FeatureBasedPredictor`, `GroupedRidgePredictor`) |
+
+## Citation
+
+<!-- TODO: Fill in once the paper is available on arxiv/Google Scholar -->
+```bibtex
+@inproceedings{agent-psychometrics,
+    title={Agent Psychometrics: Task-Level Performance Prediction in Agentic Coding Benchmarks},
+    author={},
+    booktitle={ICLR},
+    year={2026}
+}
+```

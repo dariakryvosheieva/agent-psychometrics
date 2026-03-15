@@ -22,7 +22,6 @@ experiment_appendix_h_hard_tasks/trajectory_data/filtered_unified/
 experiment_appendix_h_hard_tasks/trajectory_data/swebench_pro/
 terminal-bench-2/
 gso-experiments/
-696fe40af46a0d67d47671ce/ 
 
 # Embeddings from cluster (large files, don't sync back)
 out/
@@ -60,9 +59,6 @@ out/
 *.code-workspace
 experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs/_blob_style/
 
-# Experiment B reference papers
-experiment_b/LLM judge inspiration papers/
-
 # All experiment outputs (regenerable)
 output/**
 !output/**/
@@ -86,3 +82,4 @@ training_curves.png
 # Misc
 threshold_sweep.log
 embed_pca_vs_oracle_theta__model.csv
+CLAUDE.md

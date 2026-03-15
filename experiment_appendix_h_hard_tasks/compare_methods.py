@@ -28,7 +28,7 @@ import argparse
 from pathlib import Path
 from typing import Dict, Optional
 
-from experiment_b import get_dataset_config, list_datasets
+from experiment_appendix_h_hard_tasks import get_dataset_config, list_datasets
 
 # Easy-to-change default: set to 0.2 to remove bottom 20% of agents after validation
 DEFAULT_FILTER_BOTTOM_PERCENTILE = 0.0

@@ -97,15 +97,21 @@ class DatasetConfig(ABC):
         Default returns SWE-bench feature columns.
         """
         return [
-            "fix_in_description",
-            "problem_clarity",
-            "error_message_provided",
-            "reproduction_steps",
-            "fix_locality",
-            "domain_knowledge_required",
-            "fix_complexity",
-            "logical_reasoning_required",
             "atypicality",
+            "codebase_scale",
+            "codebase_scope",
+            "debugging_complexity",
+            "domain_knowledge_required",
+            "error_specificity",
+            "fix_localization",
+            "implementation_language_complexity",
+            "logical_reasoning_required",
+            "side_effect_risk",
+            "similar_issue_likelihood",
+            "solution_complexity",
+            "solution_hint",
+            "test_edge_case_coverage",
+            "verification_difficulty",
         ]
 
     def validate_paths(self) -> List[str]:
