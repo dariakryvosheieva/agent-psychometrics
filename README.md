@@ -68,7 +68,6 @@ agent-psychometrics/
 │   ├── backbone_ablation/             #   Features from GPT-5.4 and Claude 4.6 Sonnet (Appendix C.2)
 │   ├── defaults/                      #   Features used in main experiments
 │   └── information_ablation/          #   Features used in the feature source ablation experiment (Table 3)
-├── output/                            # Experiment outputs (gitignored)
 ├── py_irt/                            # IRT library (local fork)
 └── swebench_irt/                      # IRT model training
 ```
