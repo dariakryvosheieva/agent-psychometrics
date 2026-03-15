@@ -24,7 +24,7 @@ We present a framework for predicting success or failure on individual tasks tai
 │   └── information_ablation/          #   Features used in the feature source ablation experiment (Table 3)
 ├── swebench_irt/                      # IRT model training
 ├── py_irt/                            # IRT library (local fork)
-├── data/                              # Input data + IRT models
+└── data/                              # Input data + IRT models
 ```
 
 ## Quick Start
