@@ -9,18 +9,22 @@ source .venv/bin/activate
 
 # New Responses (Section 4.2, Table 3)
 python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by observation --method combined \
-    --train_benchmarks verified,pro,terminal_bench,gso
+    --split_by observation \
+    --train_benchmarks verified,pro,terminal_bench,gso \
+    --out_dir data/held_out_responses
 
 # New Agents (Section 4.3, Table 4)
 python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by agent --method combined \
-    --train_benchmarks verified --ood_benchmark ""
+    --split_by agent \
+    --train_benchmarks verified
 
 # New Benchmark (Section 4.3, Table 5)
 python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by benchmark --method combined \
-    --train_benchmarks verified,pro,terminal_bench --ood_benchmark gso
+    --split_by benchmark \
+    --method combined \
+    --train_benchmarks verified,pro,terminal_bench \
+    --ood_benchmark gso \
+    --out_dir data/held_out_benchmark
 ```
 
 ## Experiments
@@ -45,8 +49,8 @@ Embedding generation requires a GPU. Use `--embeddings_cache` with pre-computed 
 
 | File | Purpose |
 |------|---------|
-| `predict_question_difficulty.py` | Single-benchmark prediction (imported as `base` by multi-benchmark) |
-| `predict_question_difficulty_multi_benchmark.py` | Multi-benchmark experiment script |
-| `run_single.sh` | SLURM script for single-benchmark runs |
-| `run_multi.sh` | SLURM script for multi-benchmark runs |
+| `predict_question_difficulty.py` | Single-benchmark prediction on new tasks (imported as `base` by `predict_question_difficulty_multi_benchmark.py`) |
+| `predict_question_difficulty_multi_benchmark.py` | Multi- and single-benchmark experiments with agent features |
+| `run_single.sh` | SLURM script for `predict_question_difficulty.py` |
+| `run_multi.sh` | SLURM script for `predict_question_difficulty_multi_benchmark.py` |
 | `terminalbench_scatterplot.py` | Generates validation scatter plot (Figure 3) |
