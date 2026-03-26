@@ -157,39 +157,39 @@ def _canon_benchmark_name(name: str) -> str:
 
 def _get_benchmark_defaults(benchmark: str) -> Dict[str, str]:
     b = _canon_benchmark_name(benchmark)
-    base = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) or ".")
+    repo_root = str(Path(__file__).resolve().parents[1])
     defaults: Dict[str, str] = {
         "verified": {
             "dataset_name": "princeton-nlp/SWE-bench_Verified",
             "dataset_path": "",
             "split": "test",
-            "agent_results": os.path.join(base, "data/swebench_verified/responses.jsonl"),
-            "judge_features_dir": os.path.join(base, "llm_judge_features/defaults/swebench_verified/llm_judge_features.csv"),
-            "out_dir": os.path.join(base, "data/swebench_verified"),
+            "agent_results": os.path.join(repo_root, "data/swebench_verified/responses.jsonl"),
+            "judge_features_dir": os.path.join(repo_root, "llm_judge_features/defaults/swebench_verified/llm_judge_features.csv"),
+            "out_dir": os.path.join(repo_root, "data/swebench_verified"),
         },
         "pro": {
             "dataset_name": "ScaleAI/SWE-bench_Pro",
             "dataset_path": "",
             "split": "test",
-            "agent_results": os.path.join(base, "data/swebench_pro/responses.jsonl"),
-            "judge_features_dir": os.path.join(base, "llm_judge_features/defaults/swebench_pro/llm_judge_features.csv"),
-            "out_dir": os.path.join(base, "data/swebench_pro"),
+            "agent_results": os.path.join(repo_root, "data/swebench_pro/responses.jsonl"),
+            "judge_features_dir": os.path.join(repo_root, "llm_judge_features/defaults/swebench_pro/llm_judge_features.csv"),
+            "out_dir": os.path.join(repo_root, "data/swebench_pro"),
         },
         "terminal_bench": {
             "dataset_name": "",
-            "dataset_path": os.path.join(base, "data/terminalbench/tasks.jsonl"),
+            "dataset_path": os.path.join(repo_root, "data/terminalbench/tasks.jsonl"),
             "split": "train",
-            "agent_results": os.path.join(base, "data/terminalbench/responses.jsonl"),
-            "judge_features_dir": os.path.join(base, "llm_judge_features/defaults/terminalbench/llm_judge_features.csv"),
-            "out_dir": os.path.join(base, "data/terminalbench"),
+            "agent_results": os.path.join(repo_root, "data/terminalbench/responses.jsonl"),
+            "judge_features_dir": os.path.join(repo_root, "llm_judge_features/defaults/terminalbench/llm_judge_features.csv"),
+            "out_dir": os.path.join(repo_root, "data/terminalbench"),
         },
         "gso": {
             "dataset_name": "gso-bench/gso",
             "dataset_path": "",
             "split": "test",
-            "agent_results": os.path.join(base, "data/gso/responses.jsonl"),
-            "judge_features_dir": os.path.join(base, "llm_judge_features/defaults/gso/llm_judge_features.csv"),
-            "out_dir": os.path.join(base, "data/gso"),
+            "agent_results": os.path.join(repo_root, "data/gso/responses.jsonl"),
+            "judge_features_dir": os.path.join(repo_root, "llm_judge_features/defaults/gso/llm_judge_features.csv"),
+            "out_dir": os.path.join(repo_root, "data/gso"),
         },
     }
     return defaults[b]
