@@ -6,15 +6,15 @@ Can we select a small, informative subset of benchmark tasks to evaluate new age
 
 **Setting**: We pretend SWE-bench Pro is a new benchmark with no existing response data. We predict task difficulties from other benchmarks (Verified, TerminalBench, GSO) and use Fisher information to adaptively select which tasks to evaluate agents on.
 
-**Metric**: Spearman rank correlation between subset-based agent scores and full-benchmark accuracies (14 agents), as a function of subset size.
+**Metric**: Empirical reliability (`1 - mean(1/I) / var(θ̂)`) of agent ability estimates (14 agents), as a function of subset size. All methods are evaluated using the true IRT difficulty scores for MLE ability estimation and Fisher information — only task selection differs.
 
 **Three methods compared**:
 
-| Method | Task Selection | Agent Score |
-|--------|---------------|-------------|
-| **Fisher (Predicted)** | Maximize Fisher info using cross-benchmark predicted difficulties | MLE ability estimate (θ̂) |
-| **Fisher (Oracle)** | Maximize Fisher info using ground truth IRT difficulties | MLE ability estimate (θ̂) |
-| **Random** | Fixed random ordering (same for all agents) | Subset accuracy |
+| Method | Task Selection |
+|--------|---------------|
+| **Fisher (Predicted)** | Maximize Fisher info using cross-benchmark predicted difficulties |
+| **Fisher (Oracle)** | Maximize Fisher info using ground truth IRT difficulties |
+| **Random** | Fixed random ordering (same for all agents) |
 
 Fisher (Oracle) is an upper bound — what's achievable with perfect difficulty knowledge.
 
@@ -65,7 +65,7 @@ All three methods share the same loop:
    - Selector picks the next task
    - Observe the agent's real binary response
    - Update the agent's score
-2. At each step, compute Spearman correlation of agent scores vs. full-benchmark accuracy
+2. At each step, compute empirical reliability of agent ability estimates (using oracle IRT difficulties for all methods)
 
 For Fisher methods, the selector is adaptive (depends on the agent's evolving θ̂ after each response). For Random, all agents share the same fixed task ordering.
 
@@ -85,9 +85,9 @@ Each run creates a unique subdirectory under `output/experiment_cat/` (hashed fr
 
 ```
 output/experiment_cat/<hash>/
-├── config.json           # Experiment parameters
-├── results.csv           # Spearman correlations at each step
-└── spearman_curves.png   # Main figure
+├── config.json              # Experiment parameters
+├── results.csv              # Empirical reliability at each step
+└── reliability_curves.png   # Main figure
 ```
 
 ## Data

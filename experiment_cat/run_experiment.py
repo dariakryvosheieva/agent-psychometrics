@@ -22,7 +22,6 @@ import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from .cat_simulation import ExperimentConfig, run_experiment
 
@@ -60,6 +59,45 @@ def plot_spearman_curves(
     ax.set_xlabel("Number of Tasks")
     ax.set_ylabel("Spearman Correlation with Full Benchmark")
     ax.set_ylim(-0.2, 1.05)
+    ax.legend(loc="lower right")
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved plot: {output_path}")
+
+
+def plot_reliability_curves(
+    results: dict,
+    output_path: Path,
+) -> None:
+    """Plot empirical reliability vs. number of tasks administered."""
+    # Start from the first step where all methods are defined (non-NaN)
+    import math
+    start = 1
+    for i, s in enumerate(results["step"]):
+        vals = [results[k][i] for k in [
+            "fisher_predicted_reliability", "fisher_oracle_reliability", "random_reliability",
+        ]]
+        if all(not math.isnan(v) for v in vals):
+            start = s
+            break
+    # Cut off at 100 tasks
+    end = min(100, results["step"][-1])
+    mask = [(s >= start and s <= end) for s in results["step"]]
+    steps = [s for s, m in zip(results["step"], mask) if m]
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(steps, [v for v, m in zip(results["fisher_oracle_reliability"], mask) if m],
+            color="tab:blue", linewidth=2, label="Fisher (Oracle)")
+    ax.plot(steps, [v for v, m in zip(results["fisher_predicted_reliability"], mask) if m],
+            color="tab:orange", linewidth=2, label="Fisher (Predicted)")
+    ax.plot(steps, [v for v, m in zip(results["random_reliability"], mask) if m],
+            color="gray", linewidth=2, linestyle="--", label="Random")
+
+    ax.set_xlabel("Number of Tasks")
+    ax.set_ylabel("Empirical Reliability")
+    ax.set_ylim(0.0, 1.05)
     ax.legend(loc="lower right")
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
@@ -137,18 +175,21 @@ def main():
     results_csv = run_dir / "results.csv"
     with open(results_csv, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["step", "fisher_predicted", "fisher_oracle", "random"])
+        writer.writerow([
+            "step",
+            "fisher_predicted_reliability", "fisher_oracle_reliability", "random_reliability",
+        ])
         for i in range(len(results["step"])):
             writer.writerow([
                 results["step"][i],
-                results["fisher_predicted"][i],
-                results["fisher_oracle"][i],
-                results["random"][i],
+                results["fisher_predicted_reliability"][i],
+                results["fisher_oracle_reliability"][i],
+                results["random_reliability"][i],
             ])
     print(f"Saved results: {results_csv}")
 
     # Plot
-    plot_spearman_curves(results, run_dir / "spearman_curves.png")
+    plot_reliability_curves(results, run_dir / "reliability_curves.png")
 
     print(f"All outputs in: {run_dir}")
 

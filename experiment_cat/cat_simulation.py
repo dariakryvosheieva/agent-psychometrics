@@ -14,7 +14,6 @@ from typing import Dict, List, Tuple
 import numpy as np
 from scipy.optimize import minimize
 from scipy.special import expit
-from scipy.stats import spearmanr
 
 from experiment_new_tasks.dataset import _load_binary_responses, _load_items
 
@@ -145,6 +144,53 @@ def estimate_theta_mle(
 
 
 # ---------------------------------------------------------------------------
+# Reliability evaluation
+# ---------------------------------------------------------------------------
+
+def compute_empirical_reliability(
+    theta_hats: np.ndarray,
+    fisher_infos: np.ndarray,
+) -> float:
+    """Empirical reliability: 1 - mean(1/I) / var(θ̂).
+
+    Mirrors mirt::empirical_rxx from the R reference implementation.
+    1/I is the asymptotic variance of each θ̂ estimate (no SE intermediate).
+    """
+    theta_var = np.var(theta_hats, ddof=1)
+    if theta_var < 1e-15:
+        return float("nan")
+    mean_estimate_var = np.mean(1.0 / fisher_infos)
+    return float(1.0 - mean_estimate_var / theta_var)
+
+
+def evaluate_reliability(
+    administered_ids: Dict[str, List[str]],
+    responses: Dict[str, Dict[str, int]],
+    oracle_diffs: Dict[str, float],
+    agent_ids: List[str],
+    prior_sigma: float,
+) -> float:
+    """Compute reliability for one snapshot of administered tasks.
+
+    All agents are evaluated using oracle (true IRT) difficulties for MLE
+    and Fisher information, regardless of how tasks were selected.
+    """
+    theta_hats = []
+    fisher_infos = []
+    for aid in agent_ids:
+        task_ids = administered_ids[aid]
+        diffs = [oracle_diffs[tid] for tid in task_ids]
+        resps = [responses[aid][tid] for tid in task_ids]
+        theta = estimate_theta_mle(resps, diffs, prior_sigma=prior_sigma)
+        b = np.array(diffs)
+        p = expit(theta - b)
+        info = float(np.sum(p * (1.0 - p)))
+        theta_hats.append(theta)
+        fisher_infos.append(info)
+    return compute_empirical_reliability(np.array(theta_hats), np.array(fisher_infos))
+
+
+# ---------------------------------------------------------------------------
 # Task selectors
 # ---------------------------------------------------------------------------
 
@@ -251,29 +297,21 @@ def run_method(
     selector: TaskSelector,
     agent_ids: List[str],
     responses: Dict[str, Dict[str, int]],
-    gt_values: np.ndarray,
     max_steps: int,
     label: str,
-) -> List[float]:
-    """Run a selection method for all agents, return Spearman at each step."""
+) -> Dict[str, List[str]]:
+    """Run a selection method for all agents, return administered task IDs."""
     print(f"Running {label}...")
-    agent_scores: Dict[str, List[float]] = {}
+    administered_ids: Dict[str, List[str]] = {}
     for aid in agent_ids:
         selector.reset()
-        scores: List[float] = []
+        task_ids: List[str] = []
         for _ in range(max_steps):
             tid = selector.select_next()
             selector.update(tid, responses[aid][tid])
-            scores.append(selector.score())
-        agent_scores[aid] = scores
-
-    spearman_values: List[float] = []
-    for step in range(max_steps):
-        step_scores = np.array([agent_scores[aid][step] for aid in agent_ids])
-        corr, _ = spearmanr(step_scores, gt_values)
-        spearman_values.append(float(corr))
-
-    return spearman_values
+            task_ids.append(tid)
+        administered_ids[aid] = task_ids
+    return administered_ids
 
 
 # ---------------------------------------------------------------------------
@@ -293,8 +331,9 @@ class ExperimentConfig:
 def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
     """Run the full CAT experiment with three methods.
 
-    Returns dict with keys 'step', 'fisher_predicted', 'fisher_oracle', 'random',
-    each a list of floats (Spearman correlations at each step).
+    Returns dict with keys 'step', 'fisher_predicted_reliability',
+    'fisher_oracle_reliability', 'random_reliability',
+    each a list of floats (empirical reliability at each step).
     """
     responses, pred_diffs, oracle_diffs, task_pool, agent_ids = load_and_verify_data(
         config.responses_path, config.predictions_csv, config.oracle_items_path,
@@ -302,38 +341,41 @@ def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
 
     max_steps = min(config.max_steps, len(task_pool))
 
-    # Ground truth: each agent's full-benchmark accuracy over the task pool
-    gt_values = np.array([
-        sum(responses[aid][tid] for tid in task_pool) / len(task_pool)
-        for aid in agent_ids
-    ])
-    print(f"Ground truth accuracies: min={gt_values.min():.3f}, "
-          f"max={gt_values.max():.3f}, mean={gt_values.mean():.3f}")
-
-    # Fisher (Predicted)
-    fisher_pred_spearman = run_method(
+    # Run task selection for each method
+    fisher_pred_ids = run_method(
         FisherSelector(pred_diffs, task_pool, config.prior_sigma),
-        agent_ids, responses, gt_values, max_steps, "Fisher (Predicted)",
+        agent_ids, responses, max_steps, "Fisher (Predicted)",
     )
-
-    # Fisher (Oracle)
-    fisher_oracle_spearman = run_method(
+    fisher_oracle_ids = run_method(
         FisherSelector(oracle_diffs, task_pool, config.prior_sigma),
-        agent_ids, responses, gt_values, max_steps, "Fisher (Oracle)",
+        agent_ids, responses, max_steps, "Fisher (Oracle)",
     )
-
-    # Random
     rng = np.random.default_rng(config.seed)
     random_order = list(task_pool)
     rng.shuffle(random_order)
-    random_spearman = run_method(
+    random_ids = run_method(
         RandomSelector(random_order),
-        agent_ids, responses, gt_values, max_steps, "Random",
+        agent_ids, responses, max_steps, "Random",
     )
 
-    return {
+    # Evaluate reliability at each step using oracle difficulties
+    print("Computing reliability...")
+    results: Dict[str, List[float]] = {
         "step": list(range(1, max_steps + 1)),
-        "fisher_predicted": fisher_pred_spearman,
-        "fisher_oracle": fisher_oracle_spearman,
-        "random": random_spearman,
+        "fisher_predicted_reliability": [],
+        "fisher_oracle_reliability": [],
+        "random_reliability": [],
     }
+    for method_key, method_ids in [
+        ("fisher_predicted_reliability", fisher_pred_ids),
+        ("fisher_oracle_reliability", fisher_oracle_ids),
+        ("random_reliability", random_ids),
+    ]:
+        for step in range(1, max_steps + 1):
+            prefix = {aid: method_ids[aid][:step] for aid in agent_ids}
+            rel = evaluate_reliability(
+                prefix, responses, oracle_diffs, agent_ids, config.prior_sigma,
+            )
+            results[method_key].append(rel)
+
+    return results
