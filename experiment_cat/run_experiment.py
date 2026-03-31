@@ -77,9 +77,9 @@ def plot_reliability_curves(
 
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(steps, [v for v, m in zip(results["fisher_oracle_reliability"], mask) if m],
-            color="tab:blue", linewidth=2, label="Fisher (Oracle)")
+            color="tab:blue", linewidth=2, label="IRT (Oracle)")
     ax.plot(steps, [v for v, m in zip(results["fisher_predicted_reliability"], mask) if m],
-            color="tab:orange", linewidth=2, label="Fisher (Predicted)")
+            color="tab:orange", linewidth=2, label="IRT (Predicted)")
     ax.plot(steps, [v for v, m in zip(results["random_reliability"], mask) if m],
             color="gray", linewidth=2, linestyle="--", label="Random")
 
@@ -180,7 +180,7 @@ def main():
     print(f"\nSaved averaged results: {results_csv}")
 
     # Plot
-    plot_reliability_curves(avg_results, run_dir / "reliability_curves.png")
+    plot_reliability_curves(avg_results, run_dir / "reliability_curves.pdf")
 
     print(f"All outputs in: {run_dir}")
 
