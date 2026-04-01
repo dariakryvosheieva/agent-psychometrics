@@ -1,14 +1,14 @@
 """Run the adaptive task selection experiment and generate plots.
 
 Usage:
-    python -m experiment_cat.run_experiment --predictions_csv path/to/predictions.csv
+    python -m experiment_adaptive_testing.run_experiment --predictions_csv path/to/predictions.csv
 
 To generate predictions first (train on Verified+TerminalBench+GSO, predict Pro):
     python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
         --split_by benchmark \
         --train_benchmarks verified,terminalbench,gso \
         --ood_benchmark pro \
-        --out_dir output/experiment_cat/ood_predictions \
+        --out_dir output/experiment_adaptive_testing/ood_predictions \
         --method judge
 """
 
@@ -83,10 +83,11 @@ def plot_reliability_curves(
     ax.plot(steps, [v for v, m in zip(results["random_reliability"], mask) if m],
             color="gray", linewidth=2, linestyle="--", label="Random")
 
-    ax.set_xlabel("Number of Tasks")
-    ax.set_ylabel("Empirical Reliability")
+    ax.set_xlabel("Number of Tasks", fontsize=16)
+    ax.set_ylabel("Empirical Reliability", fontsize=16)
     ax.set_ylim(0.0, 1.05)
-    ax.legend(loc="lower right")
+    ax.legend(loc="lower right", fontsize=14)
+    ax.tick_params(axis="both", labelsize=14)
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     fig.savefig(output_path, dpi=300, bbox_inches="tight")
@@ -99,7 +100,7 @@ def main():
     parser.add_argument(
         "--predictions_csv",
         type=str,
-        default="output/experiment_cat/ood_predictions/predictions.csv",
+        default="output/experiment_adaptive_testing/ood_predictions/predictions.csv",
         help="Path to predicted difficulties CSV from multi-benchmark experiment.",
     )
     parser.add_argument(
@@ -117,7 +118,7 @@ def main():
     parser.add_argument("--max_steps", type=int, default=200)
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 7, 123, 314, 999])
     parser.add_argument("--prior_sigma", type=float, default=3.0)
-    parser.add_argument("--output_dir", type=str, default="output/experiment_cat")
+    parser.add_argument("--output_dir", type=str, default="output/experiment_adaptive_testing")
     args = parser.parse_args()
 
     predictions_path = Path(args.predictions_csv)
@@ -129,7 +130,7 @@ def main():
             f"      --split_by benchmark \\\n"
             f"      --train_benchmarks verified,terminalbench,gso \\\n"
             f"      --ood_benchmark pro \\\n"
-            f"      --out_dir output/experiment_cat/ood_predictions \\\n"
+            f"      --out_dir output/experiment_adaptive_testing/ood_predictions \\\n"
             f"      --method judge"
         )
 

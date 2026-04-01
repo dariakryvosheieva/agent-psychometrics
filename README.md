@@ -46,10 +46,7 @@ python -m experiment_agent_features.predict_question_difficulty_multi_benchmark 
     --method judge
 
 # Run Adaptive Task Selection experiment
-python -m experiment_cat.run_experiment
-
-# Run Appendix H Hard Tasks (frontier task difficulty prediction)
-python -m experiment_appendix_h_hard_tasks.compare_methods
+python -m experiment_adaptive_testing.run_experiment
 
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
@@ -63,8 +60,7 @@ agent-psychometrics/
 ├── data/                              # Input data + IRT models
 ├── embeddings/                        # Pre-computed task embeddings (.npz)
 ├── experiment_agent_features/         # Experiments involving agent features: New Responses, New Agents, and New Benchmarks
-├── experiment_appendix_h_hard_tasks/  # Frontier task difficulty prediction
-├── experiment_cat/                    # Adaptive task selection via Fisher information
+├── experiment_adaptive_testing/        # Adaptive task selection via Fisher information
 ├── experiment_new_tasks/              # New Tasks experiment
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction
@@ -93,8 +89,7 @@ All input data lives under `data/{dataset}/`:
 |----------|---------|
 | [experiment_new_tasks/README.md](experiment_new_tasks/README.md) | Experiment New Tasks details |
 | [experiment_agent_features/README.md](experiment_agent_features/README.md) | Agent feature experiments |
-| [experiment_cat/README.md](experiment_cat/README.md) | Adaptive task selection experiment |
-| [experiment_appendix_h_hard_tasks/README.md](experiment_appendix_h_hard_tasks/README.md) | Appendix H Hard Tasks details |
+| [experiment_adaptive_testing/README.md](experiment_adaptive_testing/README.md) | Adaptive task selection experiment |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
 
 ## Key Files
@@ -104,7 +99,7 @@ All input data lives under `data/{dataset}/`:
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks (Table 2) |
 | `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Table 3) |
 | `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 4-6) |
-| `experiment_cat/run_experiment.py` | Adaptive task selection experiment |
+| `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
 | `swebench_irt/train.py` | Train IRT models |
 
 ## Citation

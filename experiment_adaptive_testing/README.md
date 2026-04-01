@@ -28,24 +28,24 @@ python -m experiment_agent_features.predict_question_difficulty_multi_benchmark 
     --split_by benchmark \
     --train_benchmarks verified,terminalbench,gso \
     --ood_benchmark pro \
-    --out_dir output/experiment_cat/ood_predictions \
+    --out_dir output/experiment_adaptive_testing/ood_predictions \
     --method judge
 
 # Step 2: Run adaptive task selection experiment
-python -m experiment_cat.run_experiment
+python -m experiment_adaptive_testing.run_experiment
 ```
 
 ### Options
 
 ```bash
 # Custom predictions file
-python -m experiment_cat.run_experiment --predictions_csv path/to/predictions.csv
+python -m experiment_adaptive_testing.run_experiment --predictions_csv path/to/predictions.csv
 
 # Custom seeds (results are averaged across all seeds)
-python -m experiment_cat.run_experiment --seeds 42 7 123
+python -m experiment_adaptive_testing.run_experiment --seeds 42 7 123
 
 # Adjust parameters
-python -m experiment_cat.run_experiment --max_steps 300 --prior_sigma 5.0
+python -m experiment_adaptive_testing.run_experiment --max_steps 300 --prior_sigma 5.0
 ```
 
 ## How It Works
@@ -85,7 +85,7 @@ Optimized with L-BFGS-B, bounded to [-6, 6].
 ## Output
 
 ```
-output/experiment_cat/averaged/
+output/experiment_adaptive_testing/averaged/
 ├── config.json              # Experiment parameters (including seeds)
 ├── results.csv              # Averaged empirical reliability at each step
 └── reliability_curves.png   # Main figure
@@ -97,12 +97,12 @@ output/experiment_cat/averaged/
 |------|---------|
 | `data/swebench_pro/responses.jsonl` | Response matrix (14 agents × 730 tasks) |
 | `data/swebench_pro/irt/1d_1pl/items.csv` | Oracle IRT difficulties |
-| `output/experiment_cat/ood_predictions/predictions.csv` | Cross-benchmark predicted difficulties |
+| `output/experiment_adaptive_testing/ood_predictions/predictions.csv` | Cross-benchmark predicted difficulties |
 
 ## Directory Structure
 
 ```
-experiment_cat/
+experiment_adaptive_testing/
 ├── __init__.py
 ├── __main__.py
 ├── cat_simulation.py     # TaskSelector ABC, FisherSelector, RandomSelector, MLE, simulation loop

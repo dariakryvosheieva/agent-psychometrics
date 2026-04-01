@@ -17,9 +17,6 @@ embeddings_takehome/
 samples/
 logs/
 papers/
-experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs/
-experiment_appendix_h_hard_tasks/trajectory_data/filtered_unified/
-experiment_appendix_h_hard_tasks/trajectory_data/swebench_pro/
 terminal-bench-2/
 gso-experiments/
 
@@ -56,7 +53,6 @@ out/
 .idea/
 .vscode/
 *.code-workspace
-experiment_appendix_h_hard_tasks/trajectory_data/unified_trajs/_blob_style/
 
 # All experiment outputs (regenerable)
 output/
