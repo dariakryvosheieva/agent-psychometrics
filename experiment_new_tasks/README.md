@@ -76,16 +76,36 @@ Run with: `python -m experiment_new_tasks.run_all_datasets`
 
 Run with: `python -m experiment_new_tasks.run_information_ablation`
 
-LLM-as-a-Judge AUC by information level, progressively adding features:
+LLM-as-a-Judge AUC by information level. Rows 1-4 are the cumulative additive
+ablation (Problem → +Auditor → +Test → +Solution). Rows 5-6 are non-cumulative:
+row 5 drops the test patch from the +Solution context, and row 6 drops the
+auditor features from the +Solution pool.
 
 | Info Level | SWE-bench Verified | SWE-bench Pro | GSO | Terminal-Bench 2.0 |
 |---|---|---|---|---|
-| Baseline | 0.7175 | 0.6565 | 0.7140 | 0.7334 |
-| Problem | 0.7873 | 0.7181 | 0.7257 | 0.7987 |
-| + Auditor | 0.7984 | 0.7369 | 0.7270 | 0.8070 |
-| + Test | 0.8343 | 0.7489 | 0.7251 | 0.8070 |
-| + Solution (Full) | 0.8483 | 0.7501 | 0.7971 | 0.8103 |
+| Baseline | 0.7175 | 0.6569 | 0.7137 | 0.7335 |
+| Problem | 0.7869 | 0.7184 | 0.7277 | 0.7986 |
+| + Auditor | 0.7981 | 0.7373 | 0.7284 | 0.8073 |
+| + Test | 0.8338 | 0.7459 | 0.7287 | 0.8073 |
+| + Solution (Full) | 0.8481 | 0.7507 | 0.7952 | 0.8099 |
+| Problem + Auditor + Solution (No Test) | 0.8380 | 0.7343 | 0.7675 | 0.8051 |
+| Full Minus Auditor | 0.8425 | 0.7316 | 0.7920 | 0.8084 |
 | Oracle | 0.9447 | 0.9183 | 0.9139 | 0.9317 |
+
+**Row 5 (Problem + Auditor + Solution, No Test).** Judge sees the problem
+statement and gold patch but not the test patch (new `PROBLEM_SOLUTION` info
+level override, Claude Opus 4.6, 17 features = 15 statement + 2 solution
+re-extracted at this context). Concatenated with the same 8 auditor features
+used in rows 2-4; top-15 selected by Ridge. Tests whether the test patch
+contributes information beyond what the solution already provides. AUC drops
+by 1-3 points versus + Solution (Full), so test-patch features are not
+redundant given the solution but are not load-bearing either.
+
+**Row 6 (Full Minus Auditor).** Reuses the 20-feature SOLUTION-override pool
+from row 4 (15 statement + 3 test + 2 solution, no extraction) and drops the
+8 auditor features; top-15 selected by Ridge. AUC drops by less than 2 points
+versus + Solution (Full), so auditor features contribute marginally on top of
+the LLM-judge features extracted with full context.
 
 ### Backbone Ablation (Appendix C)
 

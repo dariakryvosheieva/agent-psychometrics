@@ -59,6 +59,7 @@ EXTRACTABLE_LEVELS = {
     "problem": (InfoLevel.PROBLEM, [InfoLevel.PROBLEM]),
     "test": (InfoLevel.TEST, [InfoLevel.PROBLEM, InfoLevel.TEST]),
     "solution": (InfoLevel.SOLUTION, [InfoLevel.PROBLEM, InfoLevel.TEST, InfoLevel.SOLUTION]),
+    "problem_solution": (InfoLevel.PROBLEM_SOLUTION, [InfoLevel.PROBLEM, InfoLevel.SOLUTION]),
 }
 
 

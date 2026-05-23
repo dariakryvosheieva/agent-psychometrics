@@ -13,17 +13,24 @@ class InfoLevel(Enum):
     """What task information a feature needs access to.
 
     Features are grouped by info level during extraction so that each group's
-    prompt contains only the appropriate task data. Levels are cumulative:
+    prompt contains only the appropriate task data. The first four levels are
+    cumulative:
     - PROBLEM: only problem statement
     - ENVIRONMENT: problem + shell exploration (auditor agent, no tests/solution)
     - TEST: problem + test/evaluation artifact (no solution)
     - SOLUTION: problem + tests + gold solution
+
+    PROBLEM_SOLUTION is non-cumulative: problem + gold solution but NOT tests.
+    Used only as an extraction override level for the non-cumulative ablation
+    row that asks whether tests still help once the solution is known. No
+    features have PROBLEM_SOLUTION as their natural level.
     """
 
     PROBLEM = "problem"
     ENVIRONMENT = "environment"
     TEST = "test"
     SOLUTION = "solution"
+    PROBLEM_SOLUTION = "problem_solution"
 
 
 @dataclass

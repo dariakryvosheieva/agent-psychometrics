@@ -204,10 +204,31 @@ def _make_swebench_formatters(dataset: str) -> Dict[InfoLevel, Callable]:
 {pass_to_pass}
 {hints_section}"""
 
+    def problem_solution_info(task: Dict[str, Any]) -> str:
+        f = _TaskFields(task, dataset)
+        hints = f.optional("hints_text")
+        hints_section = f"\n**Hints:**\n{hints}" if hints else ""
+        patch = _truncate(str(f.require("patch")), _MAX_PATCH_CHARS, "patch")
+        return f"""## TASK INFORMATION
+
+**Instance ID:** {f.require("instance_id")}
+**Repository:** {f.require("repo")}
+**Version:** {f.optional("version", "unknown")}
+
+**Problem Statement:**
+{f.require("problem_statement")}
+
+**Gold Patch (correct solution):**
+```diff
+{patch}
+```
+{hints_section}"""
+
     return {
         InfoLevel.PROBLEM: problem_info,
         InfoLevel.TEST: test_info,
         InfoLevel.SOLUTION: solution_info,
+        InfoLevel.PROBLEM_SOLUTION: problem_solution_info,
     }
 
 
@@ -240,6 +261,11 @@ SWEBENCH_VERIFIED_CONTEXT = TaskContext(
             "You are analyzing a SWE-bench Verified coding task to predict its difficulty. "
             "This is a BUG FIX task in a Python repository. "
             "You have access to the full task information including the gold solution patch."
+        ),
+        InfoLevel.PROBLEM_SOLUTION: (
+            "You are analyzing a SWE-bench Verified coding task to predict its difficulty. "
+            "This is a BUG FIX task in a Python repository. "
+            "You have access to the problem statement and the gold solution patch, but NOT the test patch."
         ),
     },
     format_task_info_fns=_make_swebench_formatters("swebench_verified"),
@@ -279,6 +305,12 @@ SWEBENCH_PRO_CONTEXT = TaskContext(
             "This is a BUG FIX task in a Python repository. "
             "SWE-bench Pro contains more challenging tasks than standard SWE-bench. "
             "You have access to the full task information including the gold solution patch."
+        ),
+        InfoLevel.PROBLEM_SOLUTION: (
+            "You are analyzing a SWE-bench Pro coding task to predict its difficulty. "
+            "This is a BUG FIX task in a Python repository. "
+            "SWE-bench Pro contains more challenging tasks than standard SWE-bench. "
+            "You have access to the problem statement and the gold solution patch, but NOT the test patch."
         ),
     },
     format_task_info_fns=_make_swebench_formatters("swebench_pro"),
@@ -341,10 +373,29 @@ def _make_terminalbench_formatters() -> Dict[InfoLevel, Callable]:
 {_truncate(str(f.require("patch")), _MAX_PATCH_CHARS, "solution patch")}
 ```"""
 
+    def problem_solution_info(task: Dict[str, Any]) -> str:
+        f = _TaskFields(task, ds)
+        tags = f.optional_list("tags")
+        return f"""## TASK INFORMATION
+
+**Task ID:** {f.require("task_id")}
+**Category:** {f.optional("category", "N/A")}
+**Tags:** {", ".join(tags) if tags else "N/A"}
+**Claimed Difficulty:** {f.optional("difficulty", "N/A")}
+
+**Task Instruction:**
+{f.require("problem_statement")}
+
+**Reference Solution (solution.sh):**
+```bash
+{_truncate(str(f.require("patch")), _MAX_PATCH_CHARS, "solution patch")}
+```"""
+
     return {
         InfoLevel.PROBLEM: problem_info,
         InfoLevel.TEST: test_info,
         InfoLevel.SOLUTION: solution_info,
+        InfoLevel.PROBLEM_SOLUTION: problem_solution_info,
     }
 
 
@@ -373,6 +424,11 @@ TERMINALBENCH_CONTEXT = TaskContext(
             "You are analyzing a TerminalBench terminal/shell task to predict its difficulty. "
             "This task requires writing shell commands or scripts to accomplish a goal. "
             "You have access to the full task information including the reference solution."
+        ),
+        InfoLevel.PROBLEM_SOLUTION: (
+            "You are analyzing a TerminalBench terminal/shell task to predict its difficulty. "
+            "This task requires writing shell commands or scripts to accomplish a goal. "
+            "You have access to the task instruction and the reference solution, but NOT the evaluation test harness."
         ),
     },
     format_task_info_fns=_make_terminalbench_formatters(),
@@ -428,10 +484,27 @@ def _make_gso_formatters() -> Dict[InfoLevel, Callable]:
 ```
 {hints_section}"""
 
+    def problem_solution_info(task: Dict[str, Any]) -> str:
+        f = _TaskFields(task, ds)
+        hints = f.optional("hints_text")
+        hints_section = f"\n**Hints:**\n{hints}" if hints else ""
+        return f"""## TASK INFORMATION
+
+**Instance ID:** {f.require("instance_id")}
+**Repository:** {f.require("repo")}
+**API/Function being optimized:** {f.require("api")}
+
+**Gold Patch (optimization solution):**
+```diff
+{f.require("gt_diff")}
+```
+{hints_section}"""
+
     return {
         InfoLevel.PROBLEM: problem_info,
         InfoLevel.TEST: test_info,
         InfoLevel.SOLUTION: solution_info,
+        InfoLevel.PROBLEM_SOLUTION: problem_solution_info,
     }
 
 
@@ -463,6 +536,12 @@ GSO_CONTEXT = TaskContext(
             "This is a PERFORMANCE OPTIMIZATION task, NOT a bug fix. "
             "The goal is to make code run faster while maintaining correctness. "
             "You have access to the full task information including the gold optimization patch."
+        ),
+        InfoLevel.PROBLEM_SOLUTION: (
+            "You are analyzing a GSO (Software Optimization Benchmark) task to predict its difficulty. "
+            "This is a PERFORMANCE OPTIMIZATION task, NOT a bug fix. "
+            "The goal is to make code run faster while maintaining correctness. "
+            "You have access to the task description and the gold optimization patch, but NOT the performance benchmark script."
         ),
     },
     format_task_info_fns=_make_gso_formatters(),
