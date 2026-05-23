@@ -1,28 +1,52 @@
 """Abstract dataset interface for Experiment A across different benchmarks.
 
 This module provides:
-- ExperimentData: Dataset with binary outcomes (0/1 per agent-task pair)
+- ExperimentData: Dataset with per-cell outcomes. Two response formats are
+  supported transparently:
+    * binary: response is int 0 or 1 (one observation per cell)
+    * binomial: response is {"successes": int, "trials": int} (n attempts per cell)
 - load_dataset_for_fold: Load dataset for a specific k-fold CV split
 """
 
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 
 
+ResponseValue = Union[int, Dict[str, int]]
+
+
+def _cell_has_success(response: ResponseValue) -> bool:
+    """True if this cell records at least one successful attempt.
+
+    Accepts both binary (int 0/1) and binomial ({"successes", "trials"}) cells.
+    Fails loudly on malformed values.
+    """
+    if isinstance(response, dict):
+        if "successes" not in response or "trials" not in response:
+            raise ValueError(
+                f"Malformed binomial response (missing 'successes'/'trials'): {response!r}"
+            )
+        return int(response["successes"]) > 0
+    if isinstance(response, (int, float, bool)):
+        return int(response) == 1
+    raise ValueError(f"Unsupported response value type: {type(response).__name__} ({response!r})")
+
+
 def filter_unsolved_tasks(
     task_ids: List[str],
-    responses: Dict[str, Dict[str, int]],
+    responses: Dict[str, Dict[str, ResponseValue]],
 ) -> Tuple[List[str], int]:
     """Filter out tasks where no agent achieved any success.
 
     Args:
         task_ids: List of all task IDs to filter
-        responses: Response matrix {agent_id: {task_id: 0|1}}
+        responses: Response matrix {agent_id: {task_id: response}} where response
+            is either int 0/1 (binary) or {"successes", "trials"} (binomial).
 
     Returns:
         Tuple of (filtered_task_ids, n_excluded)
@@ -33,7 +57,7 @@ def filter_unsolved_tasks(
         for agent_responses in responses.values():
             if task_id not in agent_responses:
                 continue
-            if agent_responses[task_id] == 1:
+            if _cell_has_success(agent_responses[task_id]):
                 task_solved = True
                 break
         if task_solved:
@@ -46,10 +70,16 @@ def filter_unsolved_tasks(
 
 @dataclass
 class ExperimentData:
-    """Dataset for binary outcomes (0/1 success per agent-task pair)."""
+    """Dataset for per-cell outcomes.
 
-    # Response matrix: agent_id -> task_id -> 0|1
-    responses: Dict[str, Dict[str, int]]
+    Supports two response formats transparently:
+    - binary: each cell is int 0 or 1 (one observation per cell)
+    - binomial: each cell is {"successes": int, "trials": int} (n attempts per cell,
+      expanded for AUC into n labeled observations sharing the same predicted score)
+    """
+
+    # Response matrix: agent_id -> task_id -> int (binary) or {"successes","trials"} (binomial)
+    responses: Dict[str, Dict[str, ResponseValue]]
 
     # IRT parameters from train-only model (used for all methods)
     train_abilities: pd.DataFrame  # index=agent_id, columns include 'ability'
@@ -82,11 +112,36 @@ class ExperimentData:
     def n_test_tasks(self) -> int:
         return len(self.test_tasks)
 
+    @property
+    def is_binomial(self) -> bool:
+        """True iff any response value is in the binomial dict format."""
+        for agent_responses in self.responses.values():
+            for value in agent_responses.values():
+                return isinstance(value, dict)
+        return False
+
     def expand_for_auc(
         self, agent_id: str, task_id: str, prob: float
     ) -> Tuple[List[int], List[float]]:
-        """Single observation per (agent, task) pair."""
+        """Expand a cell into per-attempt labeled observations for AUC.
+
+        - Binary cell: returns ([0|1], [prob]) — a single observation per cell.
+        - Binomial cell {"successes": k, "trials": n}: returns n observations with
+          k labels=1 and (n-k) labels=0, all sharing the same predicted probability.
+          sklearn's roc_auc_score handles the resulting score ties correctly via
+          the Mann-Whitney U formulation.
+        """
         actual = self.responses[agent_id][task_id]
+        if isinstance(actual, dict):
+            successes = int(actual["successes"])
+            trials = int(actual["trials"])
+            if successes < 0 or trials < 0 or successes > trials:
+                raise ValueError(
+                    f"Invalid binomial cell for ({agent_id!r}, {task_id!r}): {actual!r}"
+                )
+            labels = [1] * successes + [0] * (trials - successes)
+            scores = [prob] * trials
+            return labels, scores
         return [int(actual)], [prob]
 
     def get_train_difficulties(self) -> np.ndarray:
@@ -112,9 +167,14 @@ def _load_items(items_path: Path) -> pd.DataFrame:
     return pd.read_csv(items_path, index_col=0)
 
 
-def _load_binary_responses(responses_path: Path) -> Dict[str, Dict[str, int]]:
-    """Load binary response matrix from JSONL."""
-    responses = {}
+def _load_responses(responses_path: Path) -> Dict[str, Dict[str, ResponseValue]]:
+    """Load response matrix from JSONL.
+
+    Values per cell may be int 0/1 (binary) or {"successes": int, "trials": int}
+    (binomial). Mixed formats within a single file are not supported (the IRT
+    trainer auto-detects format based on presence of dict-valued cells).
+    """
+    responses: Dict[str, Dict[str, ResponseValue]] = {}
     with open(responses_path, "r") as f:
         for line in f:
             record = json.loads(line)
@@ -167,7 +227,7 @@ def load_dataset_for_fold(
     full_items = _load_items(items_path)
 
     # Load responses
-    responses = _load_binary_responses(responses_path)
+    responses = _load_responses(responses_path)
 
     # Get or train fold-specific IRT model
     if irt_cache_dir is None:

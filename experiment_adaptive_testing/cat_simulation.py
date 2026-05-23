@@ -15,7 +15,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.special import expit
 
-from experiment_new_tasks.dataset import _load_binary_responses, _load_items
+from experiment_new_tasks.dataset import _load_responses, _load_items
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ def load_and_verify_data(
     Returns (responses, pred_diffs, oracle_diffs, task_pool, agent_ids).
     Raises RuntimeError if the three sources don't cover the exact same tasks.
     """
-    responses = _load_binary_responses(responses_path)
+    responses = _load_responses(responses_path)
     pred_diffs = load_predicted_difficulties(predictions_csv)
     oracle_diffs = load_oracle_difficulties(oracle_items_path)
 

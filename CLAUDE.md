@@ -72,6 +72,16 @@ All input data lives under `data/{dataset}/`:
 | Terminal-Bench 2.0 | 89 | 112 | `data/terminalbench/responses.jsonl` | `data/terminalbench/irt/1d_1pl/` |
 | GSO | 102 | 15 | `data/gso/responses.jsonl` | `data/gso/irt/1d_1pl/` |
 
+Terminal-Bench 2.0 also has a per-attempt variant at `data/terminalbench/responses_per_attempt.jsonl` (139 unique agents, 89 tasks; each cell is `{"successes": int, "trials": int}`). This is the binomial-likelihood input — point Experiment New Tasks at it via `--responses_path` to train the 1PL IRT with `dist.Binomial(total_count=trials, ...)` and evaluate AUC over per-attempt-expanded observations.
+
+Produced by `python swebench_irt/prep_terminalbench.py --per_attempt_only --per_attempt_output data/terminalbench/responses_per_attempt.jsonl`, which scrapes the current leaderboard and writes only the per-attempt JSONL (the canonical binary `responses.jsonl` is untouched). The `--fetch_per_attempt_from <binary_jsonl>` mode is an alternative that revisits the binary file's per-agent detail URLs instead of re-scraping the full leaderboard; useful when you want the per-attempt file to be a strict subset of an existing binary snapshot.
+
+Snapshot dates and drift: `responses.jsonl` was scraped on 2026-03-04 (112 agents); `responses_per_attempt.jsonl` was re-scraped on 2026-05-22 for rebuttals (143 raw records, 139 unique agents after collisions on the `create_subject_id` rule when `model_name` is "Multiple": `warp_multiple` ×3, `lemonharness_multiple` ×2, `little_coder_qwen3_6_35b_a3b` ×2). The agent set is **different** from the binary file's 112: 104 agents overlap, 8 binary agents are gone from the leaderboard (or renamed), 35 new agents have appeared (notably `vix_claude_opus_4_7`, `jjagent_*`, multiple `capy_*`, `clnkr_*`, `codebrain_1.5_*`, etc.). Most cells still have 5 trials, but 264 cells have 10 trials and small tails at 1–4 / 6 / 9, reflecting per-agent re-run histories. Task universe (89) is unchanged.
+
+A separate canonical full IRT for the binomial protocol lives at `data/terminalbench/irt_binomial/1d_1pl/` (139 abilities + 89 difficulties). Used as the Oracle baseline when running Experiment New Tasks in binomial mode via `--abilities_path data/terminalbench/irt_binomial/1d_1pl/abilities.csv --items_path data/terminalbench/irt_binomial/1d_1pl/items.csv`. Trained by `python swebench_irt/train.py --dims 1 --model 1pl --data_path data/terminalbench/responses_per_attempt.jsonl --output_dir data/terminalbench/irt_binomial --seed 0` (which auto-detects the binomial format).
+
+The binary file remains the canonical source for the Table 2 binary results in [experiment_new_tasks/README.md](experiment_new_tasks/README.md); the per-attempt file + `irt_binomial/` IRT are the canonical sources for the binomial-likelihood + per-attempt-AUC variant reported in the appendix.
+
 ## Documentation
 
 | Document | Purpose |

@@ -12,6 +12,8 @@ P(success) = sigmoid(theta_j - beta_hat_i)
 
 Then measure AUC by comparing these predicted probabilities to actual binary outcomes across 5-fold cross-validation on tasks.
 
+When the response file uses the per-attempt format (`{"successes": k, "trials": n}` per cell — see [Binomial IRT for Terminal-Bench](#binomial-irt-for-terminal-bench)), each cell is expanded into n labeled observations sharing the same predicted probability before computing AUC.
+
 ## Quick Start
 
 ```bash
@@ -29,6 +31,33 @@ python -m experiment_new_tasks.run_all_datasets --datasets gso terminalbench
 # Plot feature source ablation bar graph (Table 3)
 python -m experiment_new_tasks.plot_information_ablation
 ```
+
+### Useful `run_all_datasets` flags
+
+| Flag | Purpose |
+|------|---------|
+| `--datasets ...` | Subset of `{swebench_verified, swebench_pro, gso, terminalbench}` |
+| `--responses_path PATH` | Override the response matrix JSONL. Supports `{dataset}` template. Use a per-attempt file to switch to binomial-likelihood IRT (see below). |
+| `--per_dataset_output_dir PATH` | Override each dataset's output dir (controls the fold-IRT cache). Supports `{dataset}` template. Pair with `--responses_path` to isolate the cache from the default binary results. |
+| `--llm_judge_features_path PATH` | Override LLM-judge features CSV. Supports `{dataset}` template. |
+| `--embeddings_path PATH` | Override embeddings .npz. Supports `{dataset}` template. |
+| `--output PATH` | Save summary table as CSV. |
+| `--sequential` | Run datasets one at a time instead of in parallel. |
+
+### Binomial IRT for Terminal-Bench
+
+For Terminal-Bench 2.0 we also publish a per-attempt response file `data/terminalbench/responses_per_attempt.jsonl` (each `(agent, task)` cell is `{"successes": int, "trials": int}` rather than 0/1). Pointing the experiment at that file trains the 1PL model with binomial likelihood (via `dist.Binomial(total_count=trials, ...)` in [py_irt](../py_irt/models/one_param_logistic.py)) and evaluates AUC over per-attempt-expanded observations. Run:
+
+```bash
+python -m experiment_new_tasks.run_all_datasets \
+    --datasets terminalbench \
+    --responses_path data/terminalbench/responses_per_attempt.jsonl \
+    --per_dataset_output_dir output/experiment_a_terminalbench_binomial \
+    --output_dir output/experiment_a_terminalbench_binomial \
+    --output output/experiment_a_terminalbench_binomial/results.csv
+```
+
+The per-attempt file is produced by `python swebench_irt/prep_terminalbench.py --fetch_per_attempt_from data/terminalbench/responses.jsonl` (which fetches each agent's detail page via the `detail_url` field already stored in the binary file, so the agent set lines up exactly).
 
 ## Results
 

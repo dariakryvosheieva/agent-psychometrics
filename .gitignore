@@ -31,7 +31,7 @@ out/
 !data/gso/responses.jsonl
 !data/swebench_pro/responses.jsonl
 !data/terminalbench/responses.jsonl
-!data/terminalbench/responses_raw.jsonl
+!data/terminalbench/responses_per_attempt.jsonl
 !data/terminalbench/tasks.jsonl
 *.jsonlines
 *.npz

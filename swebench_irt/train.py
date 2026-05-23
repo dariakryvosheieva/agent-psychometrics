@@ -112,10 +112,39 @@ def set_seed(seed: int) -> None:
         pass
 
 def load_irt_data(filepath):
-    """Load and reshape JSONL data for IRT analysis.
+    """Load JSONL response data for IRT analysis.
 
-    Expects binary (0/1) response data in JSONL format.
+    Auto-detects two formats:
+      * binary: response is 0 or 1 (Bernoulli likelihood)
+      * binomial: response is {"successes": k, "trials": n} (Binomial likelihood,
+        used for benchmarks where each (agent, task) cell records multiple
+        attempts, e.g., Terminal-Bench 2.0).
+
+    The binomial path uses ``Dataset.from_jsonlines`` (which natively supports
+    the dict format and sparse rows). The binary path uses the pivot-via-pandas
+    flow for backwards compatibility with the existing training scripts.
     """
+    has_binomial = False
+    item_set = set()
+    with open(filepath, 'r') as f:
+        for line in f:
+            rec = json.loads(line)
+            for v in rec["responses"].values():
+                if isinstance(v, dict) and "successes" in v:
+                    has_binomial = True
+                item_set.add(None)  # just to short-circuit
+                break
+            for k in rec["responses"].keys():
+                item_set.add(k)
+            if has_binomial:
+                # Still want the full item universe; keep going.
+                continue
+
+    if has_binomial:
+        dataset = Dataset.from_jsonlines(filepath)
+        item_columns = [dataset.ix_to_item_id[i] for i in range(len(dataset.ix_to_item_id))]
+        return dataset, item_columns
+
     data_list = []
     with open(filepath, 'r') as f:
         for line in f:
