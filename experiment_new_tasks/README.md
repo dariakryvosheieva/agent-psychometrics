@@ -43,6 +43,10 @@ python -m experiment_new_tasks.plot_information_ablation
 | `--embeddings_path PATH` | Override embeddings .npz. Supports `{dataset}` template. |
 | `--output PATH` | Save summary table as CSV. |
 | `--sequential` | Run datasets one at a time instead of in parallel. |
+| `--n_fold_seeds N` | Number of independent shuffled 5-fold splits to run. Default: 20. |
+| `--fold_seed_start S` | First fold split seed. The run uses consecutive seeds `S, ..., S + N - 1`. Default: 0. |
+| `--n_bootstrap B` | Number of seed-level bootstrap samples for method-vs-baseline differences. Default: 10,000. |
+| `--bootstrap_seed S` | Random seed for bootstrap resampling. Default: 0. |
 
 ### Binomial IRT for Terminal-Bench
 
@@ -128,6 +132,85 @@ Ablates the model used to extract 12 non-repository-state LLM-as-a-judge feature
 6. **Calculate AUC**: Compare predicted probabilities to actual outcomes
 
 The IRT model is trained separately on train tasks to avoid data leakage. A full IRT model trained on all tasks is used only for the Oracle upper bound.
+
+### Repeated Fold Seeds and Bootstrap
+
+The main New Tasks run repeats the task-level 5-fold cross-validation over
+`N=20` different shuffled fold seeds. The entry point is
+`run_single_dataset()` in `experiment_new_tasks/run_all_datasets.py`, which
+defaults to `k_folds=5`, `n_fold_seeds=20`, `n_bootstrap=10000`, and
+`bootstrap_seed=0`. It constructs the consecutive fold seeds
+`fold_seed_start, ..., fold_seed_start + n_fold_seeds - 1` and passes them into
+`cross_validate_all_predictors_repeated_seeds()` in
+`experiment_new_tasks/pipeline.py`.
+
+The repeated-CV aggregation is implemented in
+`cross_validate_all_predictors_repeated_seeds()` (`pipeline.py`, around lines
+334-489). For each fold seed, it temporarily replaces `config.split_seed` with
+that seed and calls the ordinary `cross_validate_all_predictors()` 5-fold
+evaluation. The per-seed result stores the fold AUCs for every method. For each
+method, the code then computes:
+
+```
+auc_mean_s = mean_folds(AUC_method,s,fold)
+```
+
+The reported AUC in the summary table is `mean_s(auc_mean_s)`, and the reported
+standard deviation is the sample standard deviation across the `N` seed-level
+means. This is intentionally different from the old single-seed fold standard
+deviation: the uncertainty summary now reflects sensitivity to the randomized
+task split, not just variation among the five folds of one split.
+
+For significance testing, each method is compared to the constant baseline using
+paired fold differences from the same fold seed and fold index. In
+`pipeline.py` around lines 406-432, the method fold AUCs and constant-baseline
+fold AUCs are aligned and averaged as:
+
+```
+delta_s = mean_folds(AUC_method,s,fold - AUC_baseline,s,fold)
+```
+
+This produces `N` seed-level mean differences, one per fold seed. These are the
+inputs to `bootstrap_seed_mean_differences()` in
+`experiment_new_tasks/bootstrap.py` (around lines 201-256). The bootstrap treats
+fold seed as the resampling unit: each bootstrap replicate draws `N` values
+with replacement from the observed `{delta_s}` values and computes the replicate
+mean.
+
+Concretely, the bootstrap helper:
+
+- Validates that `B >= 1`, `0 < ci < 1`, and all seed-level differences are
+  finite.
+- Draws a `(B, N)` integer index matrix with `np.random.default_rng(seed)`.
+- Computes `B` bootstrap means by indexing the `N` observed `delta_s` values.
+- Reports the percentile CI using the 2.5% and 97.5% quantiles when `ci=0.95`.
+- Computes a two-sided bootstrap p-value for `H0: mean(delta_s) = 0` by counting
+  how many bootstrap means fall on each side of zero and doubling the smaller
+  tail count.
+
+The p-value uses an add-one correction:
+
+```
+p = min(1, 2 * (min(count(boot_mean <= 0), count(boot_mean >= 0)) + 1) / (B + 1))
+```
+
+This avoids reporting an exact `p=0` from finite Monte Carlo samples. If no
+bootstrap sample crosses zero, the code marks `p_value_is_upper_bound=True`, and
+the printed summary displays the p-value with a leading `<`.
+
+The final per-method outputs are assembled in `pipeline.py` around lines
+440-449:
+
+- The observed mean difference, `mean(delta_s)`.
+- The 95% percentile confidence interval from the bootstrap sample means.
+- A two-sided bootstrap p-value for the null hypothesis that the mean difference
+  is zero, using an add-one correction so finite bootstrap runs do not report
+  an exact p-value of 0.
+
+CSV output is expanded by `save_results_csv()` in
+`experiment_new_tasks/run_all_datasets.py`. It includes the AUC mean, AUC
+standard deviation, method-vs-baseline mean difference, 95% CI bounds, and
+p-value for each method.
 
 ## Feature Sources
 
