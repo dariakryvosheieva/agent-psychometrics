@@ -163,14 +163,14 @@ def compute_empirical_reliability(
     return float(1.0 - mean_estimate_var / theta_var)
 
 
-def evaluate_reliability(
+def compute_agent_stats(
     administered_ids: Dict[str, List[str]],
     responses: Dict[str, Dict[str, int]],
     oracle_diffs: Dict[str, float],
     agent_ids: List[str],
     prior_sigma: float,
-) -> float:
-    """Compute reliability for one snapshot of administered tasks.
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Per-agent (theta_hat, fisher_info) for one snapshot of administered tasks.
 
     All agents are evaluated using oracle (true IRT) difficulties for MLE
     and Fisher information, regardless of how tasks were selected.
@@ -187,7 +187,34 @@ def evaluate_reliability(
         info = float(np.sum(p * (1.0 - p)))
         theta_hats.append(theta)
         fisher_infos.append(info)
-    return compute_empirical_reliability(np.array(theta_hats), np.array(fisher_infos))
+    return np.array(theta_hats), np.array(fisher_infos)
+
+
+def bootstrap_reliability_ci(
+    theta_hats: np.ndarray,
+    fisher_infos: np.ndarray,
+    n_boot: int = 10000,
+    ci: float = 0.95,
+    rng: np.random.Generator | None = None,
+) -> Tuple[float, float, float]:
+    """Percentile bootstrap CI for empirical reliability over agents.
+
+    Resamples the agent index with replacement n_boot times, recomputes
+    reliability per resample, returns (point_estimate, lo, hi).
+    """
+    if rng is None:
+        rng = np.random.default_rng(0)
+    n_agents = len(theta_hats)
+    point = compute_empirical_reliability(theta_hats, fisher_infos)
+    idx = rng.integers(0, n_agents, size=(n_boot, n_agents))
+    boot_vals = np.empty(n_boot, dtype=np.float64)
+    for i in range(n_boot):
+        sel = idx[i]
+        boot_vals[i] = compute_empirical_reliability(theta_hats[sel], fisher_infos[sel])
+    alpha = (1.0 - ci) / 2.0
+    lo = float(np.nanpercentile(boot_vals, 100.0 * alpha))
+    hi = float(np.nanpercentile(boot_vals, 100.0 * (1.0 - alpha)))
+    return point, lo, hi
 
 
 # ---------------------------------------------------------------------------
@@ -326,14 +353,17 @@ class ExperimentConfig:
     max_steps: int = 200
     seed: int = 42
     prior_sigma: float = 3.0
+    n_boot: int = 10000
+    bootstrap_seed: int = 0
 
 
 def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
     """Run the full CAT experiment with three methods.
 
-    Returns dict with keys 'step', 'fisher_predicted_reliability',
-    'fisher_oracle_reliability', 'random_reliability',
-    each a list of floats (empirical reliability at each step).
+    Returns dict with keys 'step' plus a (point, lo, hi) triple per method:
+    'fisher_predicted_reliability', 'fisher_predicted_reliability_lo',
+    'fisher_predicted_reliability_hi', and likewise for fisher_oracle and random.
+    The lo/hi values are 95% percentile-bootstrap CIs over the agent dimension.
     """
     responses, pred_diffs, oracle_diffs, task_pool, agent_ids = load_and_verify_data(
         config.responses_path, config.predictions_csv, config.oracle_items_path,
@@ -359,13 +389,15 @@ def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
     )
 
     # Evaluate reliability at each step using oracle difficulties
-    print("Computing reliability...")
-    results: Dict[str, List[float]] = {
-        "step": list(range(1, max_steps + 1)),
-        "fisher_predicted_reliability": [],
-        "fisher_oracle_reliability": [],
-        "random_reliability": [],
-    }
+    print(f"Computing reliability + bootstrap CIs (n_boot={config.n_boot})...")
+    boot_rng = np.random.default_rng(config.bootstrap_seed)
+    results: Dict[str, List[float]] = {"step": list(range(1, max_steps + 1))}
+    for method_key in ["fisher_predicted_reliability", "fisher_oracle_reliability",
+                       "random_reliability"]:
+        results[method_key] = []
+        results[method_key + "_lo"] = []
+        results[method_key + "_hi"] = []
+
     for method_key, method_ids in [
         ("fisher_predicted_reliability", fisher_pred_ids),
         ("fisher_oracle_reliability", fisher_oracle_ids),
@@ -373,9 +405,14 @@ def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
     ]:
         for step in range(1, max_steps + 1):
             prefix = {aid: method_ids[aid][:step] for aid in agent_ids}
-            rel = evaluate_reliability(
+            theta_hats, fisher_infos = compute_agent_stats(
                 prefix, responses, oracle_diffs, agent_ids, config.prior_sigma,
             )
-            results[method_key].append(rel)
+            point, lo, hi = bootstrap_reliability_ci(
+                theta_hats, fisher_infos, n_boot=config.n_boot, rng=boot_rng,
+            )
+            results[method_key].append(point)
+            results[method_key + "_lo"].append(lo)
+            results[method_key + "_hi"].append(hi)
 
     return results

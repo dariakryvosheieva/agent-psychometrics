@@ -8,6 +8,8 @@ Can we select a small, informative subset of benchmark tasks to evaluate new age
 
 **Metric**: Empirical reliability (`1 - mean(1/I) / var(θ̂)`) of agent ability estimates (14 agents), as a function of subset size. All methods are evaluated using the true IRT difficulty scores for MLE ability estimation and Fisher information — only task selection differs.
 
+**Uncertainty**: 95% CIs come from a percentile bootstrap over the 14 agents (B=10,000 by default; override with `--n_boot`). At each step we resample the agent index with replacement and recompute reliability, then take the 2.5/97.5 percentiles. The bootstrap RNG (`--bootstrap_seed`) is separate from the task-shuffle seed so Random's shuffle variance does not entangle with the agent-bootstrap bands.
+
 **Three methods compared**:
 
 | Method | Task Selection |
@@ -86,9 +88,9 @@ Optimized with L-BFGS-B, bounded to [-6, 6].
 
 ```
 output/experiment_adaptive_testing/averaged/
-├── config.json              # Experiment parameters (including seeds)
-├── results.csv              # Averaged empirical reliability at each step
-└── reliability_curves.png   # Main figure
+├── config.json              # Experiment parameters (including seeds, n_boot)
+├── results.csv              # step + (point, lo, hi) per method, averaged across seeds
+└── reliability_curves.pdf   # Main figure with shaded 95% bootstrap CI bands
 ```
 
 ## Data

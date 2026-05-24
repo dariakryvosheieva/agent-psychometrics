@@ -60,7 +60,6 @@ def plot_reliability_curves(
     output_path: Path,
 ) -> None:
     """Plot empirical reliability vs. number of tasks administered."""
-    # Start from the first step where all methods are defined (non-NaN)
     import math
     start = 1
     for i, s in enumerate(results["step"]):
@@ -70,18 +69,25 @@ def plot_reliability_curves(
         if all(not math.isnan(v) for v in vals):
             start = s
             break
-    # Cut off at 100 tasks
     end = min(100, results["step"][-1])
     mask = [(s >= start and s <= end) for s in results["step"]]
     steps = [s for s, m in zip(results["step"], mask) if m]
 
+    def masked(key):
+        return [v for v, m in zip(results[key], mask) if m]
+
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(steps, [v for v, m in zip(results["fisher_oracle_reliability"], mask) if m],
-            color="tab:blue", linewidth=2, label="IRT (Oracle)")
-    ax.plot(steps, [v for v, m in zip(results["fisher_predicted_reliability"], mask) if m],
-            color="tab:orange", linewidth=2, label="IRT (Predicted)")
-    ax.plot(steps, [v for v, m in zip(results["random_reliability"], mask) if m],
-            color="gray", linewidth=2, linestyle="--", label="Random")
+    method_styles = [
+        ("fisher_oracle_reliability", "tab:blue", "-", "IRT (Oracle)"),
+        ("fisher_predicted_reliability", "tab:orange", "-", "IRT (Predicted)"),
+        ("random_reliability", "gray", "--", "Random"),
+    ]
+    for key, color, linestyle, label in method_styles:
+        point = masked(key)
+        lo = masked(key + "_lo")
+        hi = masked(key + "_hi")
+        ax.fill_between(steps, lo, hi, color=color, alpha=0.2, linewidth=0)
+        ax.plot(steps, point, color=color, linewidth=2, linestyle=linestyle, label=label)
 
     ax.set_xlabel("Number of Tasks", fontsize=16)
     ax.set_ylabel("Empirical Reliability", fontsize=16)
@@ -118,6 +124,10 @@ def main():
     parser.add_argument("--max_steps", type=int, default=200)
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 7, 123, 314, 999])
     parser.add_argument("--prior_sigma", type=float, default=3.0)
+    parser.add_argument("--n_boot", type=int, default=10000,
+                        help="Bootstrap iterations for empirical reliability CIs.")
+    parser.add_argument("--bootstrap_seed", type=int, default=0,
+                        help="Seed for the agent-resampling RNG (separate from --seeds).")
     parser.add_argument("--output_dir", type=str, default="output/experiment_adaptive_testing")
     args = parser.parse_args()
 
@@ -135,9 +145,12 @@ def main():
         )
 
     # Run experiment for each seed and collect results
-    reliability_keys = [
+    method_keys = [
         "fisher_predicted_reliability", "fisher_oracle_reliability", "random_reliability",
     ]
+    reliability_keys = []
+    for k in method_keys:
+        reliability_keys.extend([k, k + "_lo", k + "_hi"])
     all_runs: list[dict[str, list[float]]] = []
     for seed in args.seeds:
         print(f"\n=== Seed {seed} ===")
@@ -148,10 +161,15 @@ def main():
             max_steps=args.max_steps,
             seed=seed,
             prior_sigma=args.prior_sigma,
+            n_boot=args.n_boot,
+            bootstrap_seed=args.bootstrap_seed,
         )
         all_runs.append(run_experiment(config))
 
-    # Average reliability across seeds
+    # Average reliability (and per-step CI endpoints) across seeds.
+    # Fisher methods are deterministic across seeds, so the average just collapses
+    # identical per-seed bands. Random varies per seed; averaging the bands keeps
+    # methodology consistent across all three curves.
     steps = all_runs[0]["step"]
     avg_results: dict[str, list[float]] = {"step": steps}
     for k in reliability_keys:
@@ -170,6 +188,8 @@ def main():
             "max_steps": args.max_steps,
             "seeds": args.seeds,
             "prior_sigma": args.prior_sigma,
+            "n_boot": args.n_boot,
+            "bootstrap_seed": args.bootstrap_seed,
         }, f, indent=2)
 
     results_csv = run_dir / "results.csv"
