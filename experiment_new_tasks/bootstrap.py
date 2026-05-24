@@ -1,4 +1,9 @@
-"""Bootstrap significance tests for paired AUC comparisons."""
+"""Seed-level bootstrap for method-vs-baseline mean differences.
+
+Resamples per-seed mean differences (one per shuffled fold split) with
+replacement to produce a percentile CI and a two-sided p-value for the null
+that the mean difference is zero. The fold seed is the resampling unit.
+"""
 
 from __future__ import annotations
 
