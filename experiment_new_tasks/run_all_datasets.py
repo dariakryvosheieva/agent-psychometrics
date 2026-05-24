@@ -11,20 +11,31 @@ Usage:
 """
 
 import argparse
-import json
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-
-import numpy as np
+from typing import Any, Dict, Optional, Tuple
 
 from experiment_new_tasks.config import DATASET_DEFAULTS
+from experiment_new_tasks.results import (
+    extract_metrics as extract_metrics_with_mapping,
+    format_results_table,
+    save_results_csv,
+    save_summary_json,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 # All datasets in display order
 ALL_DATASETS = ["swebench_verified", "swebench_pro", "gso", "terminalbench"]
+METHOD_NAME_MAPPINGS = {
+    "oracle": "Oracle",
+    "embedding": "Embedding",
+    "llm_judge": "LLM-as-a-Judge",
+    "grouped": "Combined",
+    "constant_baseline": "Baseline",
+}
+RESULT_METHODS = ["Baseline", "Embedding", "LLM-as-a-Judge", "Combined", "Oracle"]
 
 
 def run_single_dataset(
@@ -130,166 +141,7 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dictionary mapping method name -> mean AUC.
     """
-    if "error" in results:
-        return {"error": results["error"]}
-
-    metrics: Dict[str, Optional[float]] = {}
-
-    # Internal name to display name mappings
-    name_mappings = {
-        "oracle": "Oracle",
-        "embedding": "Embedding",
-        "llm_judge": "LLM-as-a-Judge",
-        "grouped": "Combined",
-        "constant_baseline": "Baseline",
-    }
-
-    cv_results = results.get("cv_results", {})
-
-    for internal_name, display_name in name_mappings.items():
-        if internal_name in cv_results:
-            result = cv_results[internal_name]
-            if result.get("mean_auc") is not None:
-                metrics[display_name] = result["mean_auc"]
-                if result.get("std_auc") is not None:
-                    metrics[f"{display_name}__std"] = result["std_auc"]
-                bootstrap = result.get("bootstrap_difference_vs_baseline")
-                if bootstrap is not None:
-                    metrics[f"{display_name}__delta"] = result.get(
-                        "mean_difference_vs_baseline"
-                    )
-                    metrics[f"{display_name}__ci_low"] = bootstrap.get("ci_low")
-                    metrics[f"{display_name}__ci_high"] = bootstrap.get("ci_high")
-                    metrics[f"{display_name}__p_value"] = bootstrap.get("p_value")
-                    metrics[f"{display_name}__p_value_is_upper_bound"] = bootstrap.get(
-                        "p_value_is_upper_bound"
-                    )
-
-    return metrics
-
-
-def format_results_table(
-    all_results: Dict[str, Dict[str, Any]],
-    methods: Optional[List[str]] = None,
-) -> str:
-    """Format results as a markdown table with aligned columns.
-
-    Args:
-        all_results: Dict mapping dataset name -> {method: auc}.
-        methods: List of methods to include (in order).
-
-    Returns:
-        Formatted markdown table string with proper column alignment.
-    """
-    if methods is None:
-        methods = ["Baseline", "Embedding", "LLM-as-a-Judge", "Combined", "Oracle"]
-
-    # Build data rows first to calculate column widths
-    data_rows = []
-    for dataset_name, metrics in all_results.items():
-        if "error" in metrics:
-            values = ["ERROR"] * len(methods)
-        else:
-            values = []
-            for method in methods:
-                if method in metrics and metrics[method] is not None:
-                    std = metrics.get(f"{method}__std")
-                    if std is not None:
-                        values.append(f"{metrics[method]:.4f} +/- {std:.4f}")
-                    else:
-                        values.append(f"{metrics[method]:.4f}")
-                else:
-                    values.append("-")
-        data_rows.append((dataset_name, values))
-
-    # Calculate column widths
-    col_widths = [max(len("Benchmark"), max(len(row[0]) for row in data_rows))]
-    for i, method in enumerate(methods):
-        method_width = len(method)
-        value_width = max(len(row[1][i]) for row in data_rows)
-        col_widths.append(max(method_width, value_width))
-
-    # Build formatted table
-    def pad(text: str, width: int) -> str:
-        return text.ljust(width)
-
-    header = "| " + " | ".join(pad(col, col_widths[i]) for i, col in enumerate(["Benchmark"] + methods)) + " |"
-    separator = "|" + "|".join("-" * (w + 2) for w in col_widths) + "|"
-
-    rows = [header, separator]
-    for dataset_name, values in data_rows:
-        row = "| " + pad(dataset_name, col_widths[0]) + " | " + " | ".join(
-            pad(v, col_widths[i + 1]) for i, v in enumerate(values)
-        ) + " |"
-        rows.append(row)
-
-    return "\n".join(rows)
-
-
-def save_results_csv(
-    all_results: Dict[str, Dict[str, Any]],
-    output_path: Path,
-    methods: Optional[List[str]] = None,
-) -> None:
-    """Save results to a CSV file.
-
-    Args:
-        all_results: Dict mapping dataset name -> {method: auc}.
-        output_path: Path to save CSV.
-        methods: List of methods to include.
-    """
-    import csv
-
-    if methods is None:
-        methods = ["Baseline", "Embedding", "LLM-as-a-Judge", "Combined", "Oracle"]
-
-    with open(output_path, "w", newline="") as f:
-        writer = csv.writer(f)
-        header = ["Benchmark"]
-        for method in methods:
-            header.extend(
-                [
-                    method,
-                    f"{method} SD",
-                    f"{method} Delta vs Baseline",
-                    f"{method} Delta 95% CI Low",
-                    f"{method} Delta 95% CI High",
-                    f"{method} Delta p-value",
-                ]
-            )
-        writer.writerow(header)
-
-        for dataset_name, metrics in all_results.items():
-            row = [dataset_name]
-            for method in methods:
-                if "error" in metrics:
-                    row.extend(["ERROR", "", "", "", "", ""])
-                elif method in metrics and metrics[method] is not None:
-                    std = metrics.get(f"{method}__std")
-                    delta = metrics.get(f"{method}__delta")
-                    ci_low = metrics.get(f"{method}__ci_low")
-                    ci_high = metrics.get(f"{method}__ci_high")
-                    p_value = metrics.get(f"{method}__p_value")
-                    is_upper_bound = metrics.get(f"{method}__p_value_is_upper_bound")
-                    if p_value is None:
-                        p_value_str = ""
-                    elif is_upper_bound:
-                        p_value_str = f"<{p_value:.6g}"
-                    else:
-                        p_value_str = f"{p_value:.6g}"
-                    row.extend(
-                        [
-                            f"{metrics[method]:.4f}",
-                            f"{std:.4f}" if std is not None else "",
-                            f"{delta:.4f}" if delta is not None else "",
-                            f"{ci_low:.4f}" if ci_low is not None else "",
-                            f"{ci_high:.4f}" if ci_high is not None else "",
-                            p_value_str,
-                        ]
-                    )
-                else:
-                    row.extend(["", "", "", "", "", ""])
-            writer.writerow(row)
+    return extract_metrics_with_mapping(results, METHOD_NAME_MAPPINGS)
 
 
 def main():
@@ -529,7 +381,7 @@ def main():
     print("=" * 80 + "\n")
 
     # Print table
-    table = format_results_table(ordered_results)
+    table = format_results_table(ordered_results, RESULT_METHODS)
     print(table)
 
     # Ensure output directory exists before saving any files
@@ -538,22 +390,13 @@ def main():
     # Save CSV if requested
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        save_results_csv(ordered_results, args.output)
+        save_results_csv(ordered_results, args.output, RESULT_METHODS)
         print(f"\nResults saved to: {args.output}")
 
     # Save JSON with full details
     json_path = args.output_dir / "summary.json"
 
-    # Convert any non-serializable types
-    serializable_results = {}
-    for name, metrics in ordered_results.items():
-        serializable_results[name] = {
-            k: float(v) if isinstance(v, (np.floating, float)) and v is not None else v
-            for k, v in metrics.items()
-        }
-
-    with open(json_path, "w") as f:
-        json.dump(serializable_results, f, indent=2)
+    save_summary_json(ordered_results, json_path)
     print(f"Full results saved to: {json_path}")
 
 

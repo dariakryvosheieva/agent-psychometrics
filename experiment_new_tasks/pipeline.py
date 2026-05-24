@@ -35,6 +35,11 @@ from experiment_new_tasks.cross_validation import (
     CrossValidationResult,
 )
 from experiment_new_tasks.bootstrap import bootstrap_seed_mean_differences
+from experiment_new_tasks.results import (
+    finite_auc_values,
+    print_repeated_cv_summary,
+    sample_std,
+)
 from experiment_new_tasks.difficulty_predictors import (
     ConstantPredictor,
     OraclePredictor,
@@ -314,21 +319,6 @@ def cross_validate_all_predictors(
     }
 
 
-def _finite_auc_values(values: List[Optional[float]], *, context: str) -> List[float]:
-    """Return fold AUCs, failing if any requested fold has no valid AUC."""
-    if any(value is None for value in values):
-        missing = [idx for idx, value in enumerate(values) if value is None]
-        raise ValueError(f"Missing fold AUCs for {context}: fold indices {missing}")
-    return [float(value) for value in values]
-
-
-def _std(values: List[float]) -> float:
-    """Sample standard deviation for repeated-seed summaries."""
-    if len(values) < 2:
-        return 0.0
-    return float(np.std(values, ddof=1))
-
-
 def cross_validate_all_predictors_repeated_seeds(
     config: Any,
     root: Path,
@@ -403,11 +393,11 @@ def cross_validate_all_predictors_repeated_seeds(
                     f"constant_baseline is missing for fold seed {fold_seed}"
                 )
 
-            method_fold_aucs = _finite_auc_values(
+            method_fold_aucs = finite_auc_values(
                 seed_cv_results[method_name]["fold_aucs"],
                 context=f"method {method_name!r}, seed {fold_seed}",
             )
-            baseline_fold_aucs = _finite_auc_values(
+            baseline_fold_aucs = finite_auc_values(
                 seed_cv_results["constant_baseline"]["fold_aucs"],
                 context=f"baseline, seed {fold_seed}",
             )
@@ -439,7 +429,7 @@ def cross_validate_all_predictors_repeated_seeds(
         )
         cv_results[method_name] = {
             "mean_auc": float(np.mean(seed_mean_aucs)),
-            "std_auc": _std(seed_mean_aucs),
+            "std_auc": sample_std(seed_mean_aucs),
             "seed_mean_aucs": seed_mean_aucs,
             "seed_fold_aucs": seed_fold_aucs,
             "seed_mean_differences_vs_baseline": seed_mean_differences,
@@ -449,33 +439,12 @@ def cross_validate_all_predictors_repeated_seeds(
             "n_fold_seeds": len(fold_seeds),
         }
 
-    print("\n" + "=" * 95)
-    print(
-        f"SUMMARY: {config.display_name} "
-        f"({len(fold_seeds)} SEEDS x {k}-FOLD CROSS-VALIDATION)"
+    print_repeated_cv_summary(
+        display_name=config.display_name,
+        cv_results=cv_results,
+        n_fold_seeds=len(fold_seeds),
+        k_folds=k,
     )
-    print("=" * 95)
-    print(
-        f"\n{'Method':<24} {'AUC Mean':>10} {'AUC SD':>10} "
-        f"{'Delta':>10} {'95% CI':>23} {'p-value':>10}"
-    )
-    print("-" * 95)
-
-    for method_name, result in sorted(
-        cv_results.items(),
-        key=lambda item: item[1]["mean_auc"],
-        reverse=True,
-    ):
-        bootstrap = result["bootstrap_difference_vs_baseline"]
-        p_value = bootstrap["p_value"]
-        p_value_str = f"<{p_value:.4f}" if bootstrap["p_value_is_upper_bound"] else f"{p_value:.4f}"
-        ci_str = f"[{bootstrap['ci_low']:.4f}, {bootstrap['ci_high']:.4f}]"
-        print(
-            f"{method_name:<24} {result['mean_auc']:>10.4f} "
-            f"{result['std_auc']:>10.4f} "
-            f"{result['mean_difference_vs_baseline']:>10.4f} "
-            f"{ci_str:>23} {p_value_str:>10}"
-        )
 
     return {
         "config": config.to_dict(),

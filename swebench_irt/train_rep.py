@@ -3,8 +3,8 @@ This script trains the IRT model multiple times and averages the results to redu
 It works by running train.py in separate processes to ensure complete isolation between runs.
 
 Call the function using the following syntax:
-    python swebench_irt/train_rep.py --dims 1 2 3 --reps 5 --epochs 5000
-    python swebench_irt/train_rep.py --dims 1 2 3 --reps 5 --epochs 5000 --data_path data/swebench_verified/responses.jsonl
+    python swebench_irt/train_rep.py --dims 1 2 3 --reps 5 --epochs 2000
+    python swebench_irt/train_rep.py --dims 1 2 3 --reps 5 --epochs 2000 --data_path data/swebench_verified/responses.jsonl
 """
 
 from pathlib import Path
@@ -164,8 +164,8 @@ def main():
         help="Directory to save results to")
     parser.add_argument('--data_path', type=str, default="data/swebench_verified/responses.jsonl",
         help="Path to JSONL responses")
-    parser.add_argument('--epochs', type=int, default=5000,
-        help='Number of training epochs per run (default: 5000)')
+    parser.add_argument('--epochs', type=int, default=2000,
+        help='Number of training epochs per run (default: 2000)')
     args = parser.parse_args()
 
     print(f"Training models with {args.reps} repetitions each")

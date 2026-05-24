@@ -2,7 +2,7 @@
 This script trains the IRT model and allows specification the number of dimensions.
 For the main analysis, we look at dimensions 1 - 6.
 Call the function using the following syntax:
-    python swebench_irt/train.py --dims 1 2 3 4 5 6 --output_dir training_results --epochs 5000
+    python swebench_irt/train.py --dims 1 2 3 4 5 6 --output_dir training_results --epochs 2000
     python swebench_irt/train.py --data_path data/swebench_verified/responses.jsonl --dims 1 2 3
 """
 
@@ -325,8 +325,8 @@ def main():
         help="Directory to save results to")
     parser.add_argument('--data_path', type=str, default="data/swebench_verified/responses.jsonl",
         help="Path to JSONL responses")
-    parser.add_argument('--epochs', type=int, default=5000,
-        help='Number of training epochs (default: 5000)')
+    parser.add_argument('--epochs', type=int, default=2000,
+        help='Number of training epochs (default: 2000)')
     parser.add_argument('--model', type=str, default="2pl", choices=["1pl", "2pl"],
         help='IRT model type for 1D (1pl=Rasch, 2pl=discrimination+difficulty)')
     parser.add_argument('--seed', type=int, default=None,

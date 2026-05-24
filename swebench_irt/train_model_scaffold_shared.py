@@ -662,7 +662,7 @@ def main() -> None:
         default="clean_data/training_results_shared_verified_pro",
         help="Directory to save results to",
     )
-    parser.add_argument("--epochs", type=int, default=5000, help="SVI epochs")
+    parser.add_argument("--epochs", type=int, default=2000, help="SVI epochs")
     parser.add_argument(
         "--model",
         type=str,
