@@ -112,10 +112,24 @@ def plot_mae_vs_subset_size(
     for j in range(n_datasets, nrows * ncols):
         axes[j // ncols][j % ncols].axis("off")
 
-    # Single shared legend at the bottom
-    handles, labels = axes[0][0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center",
-               bbox_to_anchor=(0.5, -0.02), ncol=len(handles), fontsize=10)
+    # Single shared legend at the bottom — collect handles from every
+    # subplot and dedupe by label, so the figure renders even when the
+    # first subplot has no data.
+    seen_labels: set = set()
+    handles: list = []
+    labels: list = []
+    for row in axes:
+        for ax in row:
+            ah, al = ax.get_legend_handles_labels()
+            for h, lbl in zip(ah, al):
+                if lbl in seen_labels:
+                    continue
+                seen_labels.add(lbl)
+                handles.append(h)
+                labels.append(lbl)
+    if handles:
+        fig.legend(handles, labels, loc="lower center",
+                   bbox_to_anchor=(0.5, -0.02), ncol=len(handles), fontsize=10)
     fig.tight_layout(rect=(0, 0.04, 1, 1))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
