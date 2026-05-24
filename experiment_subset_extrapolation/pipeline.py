@@ -41,13 +41,19 @@ from experiment_subset_extrapolation.evaluator import (
 from experiment_subset_extrapolation.subset_sampler import sample_subset
 
 
-# Map our method names -> the internal predictor name produced by
-# experiment_new_tasks.pipeline.build_cv_predictors.
-METHOD_TO_INTERNAL: Dict[str, str] = {
-    "oracle": "oracle",
-    "llm_judge": "llm_judge",
-    "combined": "grouped",
+# Map our method names -> (internal predictor name from
+# experiment_new_tasks.pipeline.build_cv_predictors, apply per-agent
+# calibration shift).
+METHOD_TO_INTERNAL: Dict[str, Tuple[str, bool]] = {
+    "embedding": ("embedding", False),
+    "embedding_calibrated": ("embedding", True),
+    "combined": ("grouped", False),
+    "combined_calibrated": ("grouped", True),
+    "oracle": ("oracle", False),
 }
+
+# Methods understood by this experiment (plus "empirical", handled separately).
+SUPPORTED_METHODS: Tuple[str, ...] = ("empirical",) + tuple(METHOD_TO_INTERNAL.keys())
 
 
 def _load_task_universe(items_path: Path) -> List[str]:
@@ -125,15 +131,23 @@ def _evaluate_methods(
         pc_by_name = {pc.name: pc for pc in predictor_configs}
 
         for method in model_methods:
-            internal = METHOD_TO_INTERNAL.get(method)
-            if internal is None or internal not in pc_by_name:
-                out[method] = {"error": f"unknown method {method!r} (internal {internal!r})"}
+            mapping = METHOD_TO_INTERNAL.get(method)
+            if mapping is None:
+                out[method] = {"error": f"unknown method {method!r}"}
+                continue
+            internal, calibrate = mapping
+            if internal not in pc_by_name:
+                out[method] = {"error": f"predictor {internal!r} not built"}
                 continue
             try:
                 mae, preds = evaluate_subset_extrapolation(
-                    pc_by_name[internal].predictor, data_for_model, observed, heldout
+                    pc_by_name[internal].predictor,
+                    data_for_model,
+                    observed,
+                    heldout,
+                    calibrate=calibrate,
                 )
-                out[method] = {"mae": mae, "n_agents": len(preds)}
+                out[method] = {"mae": mae, "n_agents": len(preds), "calibrated": calibrate}
             except Exception as e:
                 out[method] = {
                     "error": f"{type(e).__name__}: {e}",

@@ -16,7 +16,23 @@ DEFAULT_SUBSET_SIZES: Tuple[float, ...] = (
     0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50,
 )
 
-DEFAULT_METHODS: Tuple[str, ...] = ("empirical", "llm_judge", "combined", "oracle")
+DEFAULT_METHODS: Tuple[str, ...] = (
+    "empirical",
+    "embedding",
+    "combined",
+    "combined_calibrated",
+    "oracle",
+)
+
+# All methods this experiment knows how to evaluate.
+SUPPORTED_METHODS: Tuple[str, ...] = (
+    "empirical",
+    "embedding",
+    "embedding_calibrated",
+    "combined",
+    "combined_calibrated",
+    "oracle",
+)
 
 DEFAULT_DATASETS: Tuple[str, ...] = (
     "swebench_verified", "swebench_pro", "gso", "terminalbench",
@@ -57,8 +73,8 @@ class SubsetExtrapolationConfig:
                     f"Unknown dataset {d!r}; valid: {list(DATASET_DEFAULTS.keys())}"
                 )
         for m in self.methods:
-            if m not in {"empirical", "llm_judge", "combined", "oracle"}:
-                raise ValueError(f"Unknown method {m!r}")
+            if m not in SUPPORTED_METHODS:
+                raise ValueError(f"Unknown method {m!r}; valid: {SUPPORTED_METHODS}")
         for s in self.subset_sizes:
             if not 0.0 < s <= 1.0:
                 raise ValueError(f"subset_size must be in (0, 1], got {s}")

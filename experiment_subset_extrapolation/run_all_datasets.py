@@ -34,6 +34,7 @@ from experiment_subset_extrapolation.config import (
     DEFAULT_DATASETS,
     DEFAULT_METHODS,
     DEFAULT_SUBSET_SIZES,
+    SUPPORTED_METHODS,
     SubsetExtrapolationConfig,
 )
 from experiment_subset_extrapolation.pipeline import (
@@ -166,7 +167,7 @@ def main():
     parser.add_argument("--subset_sizes", nargs="+", type=float,
                         default=list(DEFAULT_SUBSET_SIZES))
     parser.add_argument("--methods", nargs="+", default=list(DEFAULT_METHODS),
-                        choices=list(DEFAULT_METHODS))
+                        choices=list(SUPPORTED_METHODS))
     parser.add_argument("--n_seeds", type=int, default=20,
                         help="Target number of successful seeds per (dataset, size).")
     parser.add_argument("--n_seeds_to_attempt", type=int, default=None,

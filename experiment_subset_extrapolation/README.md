@@ -7,9 +7,14 @@ This is useful for benchmark designers who want to evaluate their agents on a ch
 ## Methods compared
 
 - **Empirical-subset (baseline)**: `predicted_pct[agent] = observed_successes / observed_trials`
-- **LLM-Judge (Ridge)**: train fold IRT on the observed subset, fit Ridge on the LLM-judge features, predict held-out task difficulties, then `predicted_pct[agent] = (observed_successes + Σ_heldout sigmoid(θ_agent − β̂_task) · trials) / total_trials`
-- **Combined (Embedding + LLM-Judge)**: same as LLM-Judge but using the Grouped Ridge predictor over the concatenated embedding + LLM-judge feature space.
+- **Embedding (Ridge)**: train fold IRT on the observed subset, fit Ridge on the DeepSeek-R1 embedding features, predict held-out task difficulties, then `predicted_pct[agent] = (observed_successes + Σ_heldout sigmoid(θ_agent − β̂_task) · trials) / total_trials`.
+- **Combined (Embedding + LLM-Judge)**: same as Embedding but uses the Grouped Ridge predictor over the concatenated embedding + LLM-judge feature space.
+- **Combined + calibration**: same as Combined, but each agent's held-out predictions are shifted by `shift_a = actual_obs_rate_a − predicted_obs_rate_a` (clipped to [0, 1]) — see the calibration discussion below.
 - **Oracle (full IRT)**: same aggregation formula but with `θ` and `β` from the full IRT trained on the entire benchmark — represents the IRT model's best possible extrapolation.
+
+### Why calibration
+
+The fold IRT recovers per-agent training-set accuracy almost exactly (MAE ≈ 0.01 in a typical cell). But IRT parameters are only identified up to an additive shift, and Pyro's hierarchical priors settle on different shifts for the fold vs full data, so applying fold-IRT θ to tasks outside its training set introduces a per-agent location bias of a few percent. The per-agent calibration shift uses the observed data as a free anchor: it forces `mean(predicted_p on observed) = mean(actual on observed)`, while preserving the model's ranking of held-out tasks. This is what makes the IRT methods able to beat the empirical baseline at small subset sizes.
 
 ## Metric
 
@@ -52,7 +57,7 @@ The full sweep is designed for a 96-CPU node. See `slurm/run_subset_sweep.sbatch
 |------|---------|
 | `--datasets ...` | Subset of `{swebench_verified, swebench_pro, gso, terminalbench}` |
 | `--subset_sizes A B C` | Override the size sweep |
-| `--methods ...` | Subset of `{empirical, llm_judge, combined, oracle}` |
+| `--methods ...` | Subset of `{empirical, embedding, embedding_calibrated, combined, combined_calibrated, oracle}` |
 | `--n_seeds N` | Target successful seeds per (dataset, size). Default: 20 |
 | `--n_seeds_to_attempt M` | Seeds submitted per cell. Defaults to `ceil(1.5 * n_seeds)` so Pyro IRT failures on small datasets don't reduce the effective sample size. |
 | `--seed_start S` | First seed (default 0). Useful for adding more seeds to an existing run. |

@@ -18,15 +18,19 @@ import matplotlib.pyplot as plt
 
 METHOD_DISPLAY = {
     "empirical": "Empirical-subset (baseline)",
-    "llm_judge": "LLM-Judge (Ridge)",
+    "embedding": "Embedding (Ridge)",
+    "embedding_calibrated": "Embedding (Ridge) + calibration",
     "combined": "Combined (Embedding + LLM-Judge)",
+    "combined_calibrated": "Combined + calibration",
     "oracle": "Oracle (full IRT)",
 }
 
 METHOD_COLORS = {
     "empirical": "#9e9e9e",
-    "llm_judge": "#4a90d9",
+    "embedding": "#4a90d9",
+    "embedding_calibrated": "#2d5b8a",
     "combined": "#e8833a",
+    "combined_calibrated": "#b05a1d",
     "oracle": "#59a14f",
 }
 

@@ -6,7 +6,7 @@ observed subset with predicted-probability times trials on the held-out subset
 (or, for the empirical baseline, by extrapolating their observed rate).
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -58,6 +58,8 @@ def evaluate_subset_extrapolation(
     data: ExperimentData,
     observed_tasks: List[str],
     heldout_tasks: List[str],
+    *,
+    calibrate: bool = False,
 ) -> Tuple[float, List[AgentPrediction]]:
     """Evaluate a predictor on a single (size, seed) subset draw.
 
@@ -69,12 +71,24 @@ def evaluate_subset_extrapolation(
     When `predictor is None`, the empirical-subset baseline is computed (no IRT
     fit needed).
 
+    Calibration (`calibrate=True`, ignored when `predictor is None`):
+    The fold IRT theta lives on a slightly different scale than the full-data
+    universe (see investigation in repo history), so raw predictions can carry
+    a per-agent location bias. To correct it, we compute each agent's mean
+    predicted probability on the OBSERVED subset, take the difference to their
+    observed actual rate, and add that constant shift to every held-out
+    prediction (clipped to [0, 1]). This is an unbiased correction in the
+    sense that it forces the predicted pass-rate on observed tasks to equal
+    the actual pass-rate, while preserving the model's relative ranking of
+    held-out tasks.
+
     Args:
         predictor: A fitted-or-fittable CVPredictor, or None for the baseline.
             If non-None, it will be `fit()`-ed on `observed_tasks` here.
         data: ExperimentData with responses and (for non-baseline) train IRT.
         observed_tasks: Task IDs the benchmark designer evaluated.
         heldout_tasks: Task IDs to extrapolate to.
+        calibrate: When True, apply per-agent location calibration described above.
 
     Returns:
         (mean_mae_across_agents, per_agent_predictions). Agents with zero
@@ -85,19 +99,44 @@ def evaluate_subset_extrapolation(
     if predictor is not None:
         predictor.fit(data, observed_tasks)
 
+    # When calibrating, we need predicted probabilities on BOTH observed and
+    # held-out tasks. DifficultyPredictorAdapter lazily caches predictions for
+    # `data.test_tasks` only, so for observed tasks the lookup fails. Force a
+    # cache fill over observed + heldout by calling predict_probability with a
+    # widened `test_tasks` view once. Subsequent calls in the per-agent loop
+    # use the original `data` and hit the cache.
+    if calibrate and predictor is not None and observed_tasks:
+        widened = replace(data, test_tasks=list(observed_tasks) + list(heldout_tasks))
+        sample_agent = data.train_abilities.index[0]
+        _ = predictor.predict_probability(widened, sample_agent, observed_tasks[0])
+
     preds: List[AgentPrediction] = []
 
     for agent_id in data.train_abilities.index:
         agent_resp = data.responses.get(agent_id, {})
 
+        # Pass 1: observed tasks. Always tally actuals; also tally predicted
+        # success-mass on observed when calibrating (so we can compute the
+        # per-agent shift).
         obs_succ = 0
         obs_tr = 0
+        obs_pred_mass = 0.0  # only used when calibrate=True
         for t in observed_tasks:
             if t in agent_resp:
                 s, n = cell_successes_and_trials(agent_resp[t])
                 obs_succ += s
                 obs_tr += n
+                if calibrate and predictor is not None:
+                    p = predictor.predict_probability(data, agent_id, t)
+                    obs_pred_mass += p * n
 
+        # Per-agent calibration shift in probability space. By construction
+        # this forces mean(predicted_p on observed) = mean(actual on observed).
+        shift = 0.0
+        if calibrate and predictor is not None and obs_tr > 0:
+            shift = (obs_succ - obs_pred_mass) / obs_tr
+
+        # Pass 2: held-out tasks.
         held_succ = 0
         held_tr = 0
         method_held_pred = 0.0
@@ -108,6 +147,8 @@ def evaluate_subset_extrapolation(
                 held_tr += n
                 if predictor is not None:
                     p = predictor.predict_probability(data, agent_id, t)
+                    if calibrate:
+                        p = max(0.0, min(1.0, p + shift))
                     method_held_pred += p * n
 
         total_tr = obs_tr + held_tr
