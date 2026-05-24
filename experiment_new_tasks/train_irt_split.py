@@ -182,6 +182,7 @@ def get_or_train_split_irt(
     force_retrain: bool = False,
     dry_run: bool = False,
     exclude_unsolved: bool = False,
+    max_train_attempts: int = 3,
 ) -> Path:
     """Get cached IRT model or train a new one for the specified k-fold split.
 
@@ -197,10 +198,14 @@ def get_or_train_split_irt(
         force_retrain: If True, retrain even if cached
         dry_run: If True, just print what would be done
         exclude_unsolved: If True, unsolved tasks were filtered out (affects cache key)
+        max_train_attempts: Number of attempts for numerically fragile Pyro IRT training
 
     Returns:
         Path to IRT output directory (contains abilities.csv, items.csv, split_info.json)
     """
+    if max_train_attempts < 1:
+        raise ValueError(f"max_train_attempts must be >= 1, got {max_train_attempts}")
+
     cache_dir = get_split_cache_dir(
         output_base, split_seed, fold_idx, k_folds,
         model_type=model_type, exclude_unsolved=exclude_unsolved
@@ -280,28 +285,59 @@ def get_or_train_split_irt(
     from py_irt.config import IrtConfig
     from py_irt.training import IrtModelTrainer
 
-    # Configure and train (seed=0 matches predict_question_difficulty.py for reproducibility)
-    config = IrtConfig(
-        model_type=model_type,
-        epochs=epochs,
-        priors="hierarchical",
-        dims=1,
-        seed=0,
-    )
+    trainer = None
+    last_error = None
+    for attempt_idx in range(max_train_attempts):
+        attempt_number = attempt_idx + 1
+        if max_train_attempts > 1:
+            print(f"   Training attempt {attempt_number}/{max_train_attempts}")
 
-    trainer = IrtModelTrainer(
-        data_path=train_responses_path,
-        config=config,
-    )
-    n_subjects = len(trainer._dataset.subject_ids)
-    n_items = len(trainer._dataset.item_ids)
-    print(f"   Dataset: {n_subjects} subjects, {n_items} items")
+        # Configure and train. The first attempt uses seed=0 to match
+        # predict_question_difficulty.py; retries perturb only failed trainings.
+        config = IrtConfig(
+            model_type=model_type,
+            epochs=epochs,
+            priors="hierarchical",
+            dims=1,
+            seed=attempt_idx,
+        )
 
-    # Disable torch determinism during IRT for numerical stability
-    # (see predict_question_difficulty.py for rationale)
-    set_torch_determinism(False)
-    trainer.train(device="cpu")
-    set_torch_determinism(True)
+        trainer = IrtModelTrainer(
+            data_path=train_responses_path,
+            config=config,
+        )
+        n_subjects = len(trainer._dataset.subject_ids)
+        n_items = len(trainer._dataset.item_ids)
+        print(f"   Dataset: {n_subjects} subjects, {n_items} items")
+
+        # Disable torch determinism during IRT for numerical stability
+        # (see predict_question_difficulty.py for rationale)
+        set_torch_determinism(False)
+        try:
+            trainer.train(device="cpu")
+            last_error = None
+        except Exception as exc:
+            last_error = exc
+            if attempt_number == max_train_attempts:
+                break
+            print(
+                f"   IRT training attempt {attempt_number} failed: {exc}. "
+                "Retrying from a fresh initialization..."
+            )
+            continue
+        finally:
+            set_torch_determinism(True)
+        if check_cached_irt(cache_dir):
+            return cache_dir
+        break
+
+    if last_error is not None:
+        raise RuntimeError(
+            f"IRT training failed after {max_train_attempts} attempts for "
+            f"split_seed={split_seed}, fold={fold_idx + 1}/{k_folds}"
+        ) from last_error
+    if trainer is None:
+        raise RuntimeError("IRT trainer was not initialized")
 
     # Save results
     print("\n7. Saving IRT parameters...")

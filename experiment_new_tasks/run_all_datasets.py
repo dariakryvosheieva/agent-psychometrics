@@ -31,6 +31,10 @@ def run_single_dataset(
     dataset: str,
     output_base: Optional[Path] = None,
     k_folds: int = 5,
+    n_fold_seeds: int = 20,
+    fold_seed_start: int = 0,
+    n_bootstrap: int = 10000,
+    bootstrap_seed: int = 0,
     predictor_factory=None,
     llm_judge_features_path: Optional[str] = None,
     embeddings_path: Optional[str] = None,
@@ -41,6 +45,10 @@ def run_single_dataset(
         dataset: Dataset short name (e.g., "swebench_verified", "gso").
         output_base: Base directory for outputs.
         k_folds: Number of CV folds.
+        n_fold_seeds: Number of different fold seeds to evaluate.
+        fold_seed_start: First fold seed; seeds are consecutive from this value.
+        n_bootstrap: Number of seed-level bootstrap samples.
+        bootstrap_seed: Random seed for bootstrap resampling.
         predictor_factory: Optional callable(source_name, source, config) -> CVPredictor.
         llm_judge_features_path: Optional override for LLM judge features CSV path.
             Supports {dataset} template variable.
@@ -51,7 +59,7 @@ def run_single_dataset(
         Tuple of (dataset_display_name, results_dict).
     """
     from experiment_new_tasks.config import ExperimentAConfig
-    from experiment_new_tasks.pipeline import cross_validate_all_predictors
+    from experiment_new_tasks.pipeline import cross_validate_all_predictors_repeated_seeds
 
     try:
         overrides = {}
@@ -68,8 +76,14 @@ def run_single_dataset(
 
     # Run the experiment
     try:
-        results = cross_validate_all_predictors(
-            config, ROOT, k_folds,
+        fold_seeds = list(range(fold_seed_start, fold_seed_start + n_fold_seeds))
+        results = cross_validate_all_predictors_repeated_seeds(
+            config,
+            ROOT,
+            k=k_folds,
+            fold_seeds=fold_seeds,
+            n_bootstrap=n_bootstrap,
+            bootstrap_seed=bootstrap_seed,
             predictor_factory=predictor_factory,
         )
 
@@ -80,7 +94,7 @@ def run_single_dataset(
         return config.display_name, {"error": f"Execution error: {e}\n{traceback.format_exc()}"}
 
 
-def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
+def extract_metrics(results: Dict[str, Any]) -> Dict[str, Any]:
     """Extract key metrics from experiment results.
 
     Args:
@@ -110,12 +124,25 @@ def extract_metrics(results: Dict[str, Any]) -> Dict[str, Optional[float]]:
             result = cv_results[internal_name]
             if result.get("mean_auc") is not None:
                 metrics[display_name] = result["mean_auc"]
+                if result.get("std_auc") is not None:
+                    metrics[f"{display_name}__std"] = result["std_auc"]
+                bootstrap = result.get("bootstrap_difference_vs_baseline")
+                if bootstrap is not None:
+                    metrics[f"{display_name}__delta"] = result.get(
+                        "mean_difference_vs_baseline"
+                    )
+                    metrics[f"{display_name}__ci_low"] = bootstrap.get("ci_low")
+                    metrics[f"{display_name}__ci_high"] = bootstrap.get("ci_high")
+                    metrics[f"{display_name}__p_value"] = bootstrap.get("p_value")
+                    metrics[f"{display_name}__p_value_is_upper_bound"] = bootstrap.get(
+                        "p_value_is_upper_bound"
+                    )
 
     return metrics
 
 
 def format_results_table(
-    all_results: Dict[str, Dict[str, Optional[float]]],
+    all_results: Dict[str, Dict[str, Any]],
     methods: Optional[List[str]] = None,
 ) -> str:
     """Format results as a markdown table with aligned columns.
@@ -139,7 +166,11 @@ def format_results_table(
             values = []
             for method in methods:
                 if method in metrics and metrics[method] is not None:
-                    values.append(f"{metrics[method]:.4f}")
+                    std = metrics.get(f"{method}__std")
+                    if std is not None:
+                        values.append(f"{metrics[method]:.4f} +/- {std:.4f}")
+                    else:
+                        values.append(f"{metrics[method]:.4f}")
                 else:
                     values.append("-")
         data_rows.append((dataset_name, values))
@@ -169,7 +200,7 @@ def format_results_table(
 
 
 def save_results_csv(
-    all_results: Dict[str, Dict[str, Optional[float]]],
+    all_results: Dict[str, Dict[str, Any]],
     output_path: Path,
     methods: Optional[List[str]] = None,
 ) -> None:
@@ -187,17 +218,50 @@ def save_results_csv(
 
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Benchmark"] + methods)
+        header = ["Benchmark"]
+        for method in methods:
+            header.extend(
+                [
+                    method,
+                    f"{method} SD",
+                    f"{method} Delta vs Baseline",
+                    f"{method} Delta 95% CI Low",
+                    f"{method} Delta 95% CI High",
+                    f"{method} Delta p-value",
+                ]
+            )
+        writer.writerow(header)
 
         for dataset_name, metrics in all_results.items():
             row = [dataset_name]
             for method in methods:
                 if "error" in metrics:
-                    row.append("ERROR")
+                    row.extend(["ERROR", "", "", "", "", ""])
                 elif method in metrics and metrics[method] is not None:
-                    row.append(f"{metrics[method]:.4f}")
+                    std = metrics.get(f"{method}__std")
+                    delta = metrics.get(f"{method}__delta")
+                    ci_low = metrics.get(f"{method}__ci_low")
+                    ci_high = metrics.get(f"{method}__ci_high")
+                    p_value = metrics.get(f"{method}__p_value")
+                    is_upper_bound = metrics.get(f"{method}__p_value_is_upper_bound")
+                    if p_value is None:
+                        p_value_str = ""
+                    elif is_upper_bound:
+                        p_value_str = f"<{p_value:.6g}"
+                    else:
+                        p_value_str = f"{p_value:.6g}"
+                    row.extend(
+                        [
+                            f"{metrics[method]:.4f}",
+                            f"{std:.4f}" if std is not None else "",
+                            f"{delta:.4f}" if delta is not None else "",
+                            f"{ci_low:.4f}" if ci_low is not None else "",
+                            f"{ci_high:.4f}" if ci_high is not None else "",
+                            p_value_str,
+                        ]
+                    )
                 else:
-                    row.append("")
+                    row.extend(["", "", "", "", "", ""])
             writer.writerow(row)
 
 
@@ -234,6 +298,30 @@ def main():
         help="Number of CV folds (default: 5)",
     )
     parser.add_argument(
+        "--n_fold_seeds",
+        type=int,
+        default=20,
+        help="Number of different fold seeds to run (default: 20)",
+    )
+    parser.add_argument(
+        "--fold_seed_start",
+        type=int,
+        default=0,
+        help="First fold seed; seeds are consecutive from this value (default: 0)",
+    )
+    parser.add_argument(
+        "--n_bootstrap",
+        type=int,
+        default=10000,
+        help="Number of seed-level bootstrap samples (default: 10000)",
+    )
+    parser.add_argument(
+        "--bootstrap_seed",
+        type=int,
+        default=0,
+        help="Random seed for seed-level bootstrap resampling (default: 0)",
+    )
+    parser.add_argument(
         "--max_workers",
         type=int,
         default=4,
@@ -259,6 +347,10 @@ def main():
              "(e.g., 'embeddings/my_embeddings_{dataset}.npz').",
     )
     args = parser.parse_args()
+    if args.n_fold_seeds < 1:
+        parser.error("--n_fold_seeds must be >= 1")
+    if args.n_bootstrap < 1:
+        parser.error("--n_bootstrap must be >= 1")
 
     # Filter datasets if specified
     datasets_to_run = args.datasets if args.datasets else ALL_DATASETS
@@ -272,11 +364,13 @@ def main():
     training_method = "Feature-IRT (joint training)" if args.feature_irt else "Ridge regression"
     print(f"Running Experiment A on {len(datasets_to_run)} datasets...")
     print(f"Training method: {training_method}")
-    print(f"K-folds: {args.k_folds}")
+    print(f"Fold seeds: {args.n_fold_seeds}")
+    print(f"K-folds per seed: {args.k_folds}")
+    print(f"Bootstrap samples: {args.n_bootstrap}")
     print(f"Parallelization: datasets={args.max_workers}")
     print()
 
-    all_results: Dict[str, Dict[str, Optional[float]]] = {}
+    all_results: Dict[str, Dict[str, Any]] = {}
 
     if args.sequential:
         # Sequential execution
@@ -287,6 +381,10 @@ def main():
                 dataset,
                 output_base=args.output_dir,
                 k_folds=args.k_folds,
+                n_fold_seeds=args.n_fold_seeds,
+                fold_seed_start=args.fold_seed_start,
+                n_bootstrap=args.n_bootstrap,
+                bootstrap_seed=args.bootstrap_seed,
                 predictor_factory=predictor_factory,
                 llm_judge_features_path=args.llm_judge_features_path,
                 embeddings_path=args.embeddings_path,
@@ -311,6 +409,10 @@ def main():
                     dataset,
                     output_base=args.output_dir,
                     k_folds=args.k_folds,
+                    n_fold_seeds=args.n_fold_seeds,
+                    fold_seed_start=args.fold_seed_start,
+                    n_bootstrap=args.n_bootstrap,
+                    bootstrap_seed=args.bootstrap_seed,
                     predictor_factory=predictor_factory,
                     llm_judge_features_path=args.llm_judge_features_path,
                     embeddings_path=args.embeddings_path,
@@ -338,7 +440,7 @@ def main():
                     print(f"{dataset_name}: EXCEPTION - {e}")
 
     # Sort results by original dataset order
-    ordered_results: Dict[str, Dict[str, Optional[float]]] = {}
+    ordered_results: Dict[str, Dict[str, Any]] = {}
     for dataset in datasets_to_run:
         display_name = DATASET_DEFAULTS[dataset]["display_name"]
         if display_name in all_results:

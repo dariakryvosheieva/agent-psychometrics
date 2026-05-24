@@ -8,7 +8,7 @@ The experiments differ only in:
 """
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -36,6 +36,7 @@ from experiment_new_tasks.cross_validation import (
     evaluate_predictor_cv,
     CrossValidationResult,
 )
+from experiment_new_tasks.bootstrap import bootstrap_seed_mean_differences
 from experiment_new_tasks.difficulty_predictors import (
     ConstantPredictor,
     OraclePredictor,
@@ -312,4 +313,179 @@ def cross_validate_all_predictors(
         "config": config.to_dict(),
         "k_folds": k,
         "cv_results": {name: asdict(result) for name, result in cv_results.items()},
+    }
+
+
+def _finite_auc_values(values: List[Optional[float]], *, context: str) -> List[float]:
+    """Return fold AUCs, failing if any requested fold has no valid AUC."""
+    if any(value is None for value in values):
+        missing = [idx for idx, value in enumerate(values) if value is None]
+        raise ValueError(f"Missing fold AUCs for {context}: fold indices {missing}")
+    return [float(value) for value in values]
+
+
+def _std(values: List[float]) -> float:
+    """Sample standard deviation for repeated-seed summaries."""
+    if len(values) < 2:
+        return 0.0
+    return float(np.std(values, ddof=1))
+
+
+def cross_validate_all_predictors_repeated_seeds(
+    config: Any,
+    root: Path,
+    k: int = 5,
+    fold_seeds: Optional[List[int]] = None,
+    n_bootstrap: int = 10000,
+    bootstrap_seed: int = 0,
+    diagnostics_extractors: Optional[Dict[str, Callable]] = None,
+    predictor_factory: Optional[Callable[[str, Any, Any], CVPredictor]] = None,
+) -> Dict[str, Any]:
+    """Run k-fold CV for multiple fold seeds and aggregate seed-level metrics.
+
+    For each fold seed, this runs ordinary k-fold CV and stores the mean AUC
+    across folds. It then reports the mean and standard deviation across those
+    seed-level means. For every method, it also computes the per-seed mean
+    paired fold difference against the constant baseline and bootstraps the
+    mean of those seed-level differences.
+    """
+    if fold_seeds is None:
+        fold_seeds = list(range(20))
+    if not fold_seeds:
+        raise ValueError("At least one fold seed is required")
+
+    print("=" * 60)
+    print(
+        f"EXPERIMENT A: {len(fold_seeds)} SEEDS x {k}-FOLD CV - "
+        f"{config.display_name}"
+    )
+    print("=" * 60)
+
+    per_seed_results: List[Dict[str, Any]] = []
+    for seed_idx, fold_seed in enumerate(fold_seeds, 1):
+        print(
+            f"\nSeed {seed_idx}/{len(fold_seeds)} "
+            f"(split_seed={int(fold_seed)})"
+        )
+        seeded_config = replace(config, split_seed=int(fold_seed))
+        seed_results = cross_validate_all_predictors(
+            seeded_config,
+            root,
+            k=k,
+            diagnostics_extractors=diagnostics_extractors,
+            predictor_factory=predictor_factory,
+        )
+        per_seed_results.append(
+            {
+                "fold_seed": int(fold_seed),
+                "results": seed_results,
+            }
+        )
+
+    first_cv_results = per_seed_results[0]["results"]["cv_results"]
+    if "constant_baseline" not in first_cv_results:
+        raise ValueError("constant_baseline result is required for paired comparisons")
+
+    method_names = list(first_cv_results.keys())
+    cv_results: Dict[str, Dict[str, Any]] = {}
+    for method_name in method_names:
+        seed_mean_aucs: List[float] = []
+        seed_mean_differences: List[float] = []
+        seed_fold_aucs: List[List[float]] = []
+
+        for per_seed in per_seed_results:
+            fold_seed = int(per_seed["fold_seed"])
+            seed_cv_results = per_seed["results"]["cv_results"]
+            if method_name not in seed_cv_results:
+                raise ValueError(
+                    f"Method {method_name!r} is missing for fold seed {fold_seed}"
+                )
+            if "constant_baseline" not in seed_cv_results:
+                raise ValueError(
+                    f"constant_baseline is missing for fold seed {fold_seed}"
+                )
+
+            method_fold_aucs = _finite_auc_values(
+                seed_cv_results[method_name]["fold_aucs"],
+                context=f"method {method_name!r}, seed {fold_seed}",
+            )
+            baseline_fold_aucs = _finite_auc_values(
+                seed_cv_results["constant_baseline"]["fold_aucs"],
+                context=f"baseline, seed {fold_seed}",
+            )
+            if len(method_fold_aucs) != len(baseline_fold_aucs):
+                raise ValueError(
+                    f"Fold count mismatch for method {method_name!r}, seed {fold_seed}: "
+                    f"{len(method_fold_aucs)} != {len(baseline_fold_aucs)}"
+                )
+
+            seed_mean_aucs.append(float(np.mean(method_fold_aucs)))
+            seed_mean_differences.append(
+                float(
+                    np.mean(
+                        [
+                            method_auc - baseline_auc
+                            for method_auc, baseline_auc in zip(
+                                method_fold_aucs, baseline_fold_aucs
+                            )
+                        ]
+                    )
+                )
+            )
+            seed_fold_aucs.append(method_fold_aucs)
+
+        bootstrap = bootstrap_seed_mean_differences(
+            seed_mean_differences,
+            n_bootstrap=n_bootstrap,
+            seed=bootstrap_seed,
+        )
+        cv_results[method_name] = {
+            "mean_auc": float(np.mean(seed_mean_aucs)),
+            "std_auc": _std(seed_mean_aucs),
+            "seed_mean_aucs": seed_mean_aucs,
+            "seed_fold_aucs": seed_fold_aucs,
+            "seed_mean_differences_vs_baseline": seed_mean_differences,
+            "mean_difference_vs_baseline": float(np.mean(seed_mean_differences)),
+            "bootstrap_difference_vs_baseline": asdict(bootstrap),
+            "k": k,
+            "n_fold_seeds": len(fold_seeds),
+        }
+
+    print("\n" + "=" * 95)
+    print(
+        f"SUMMARY: {config.display_name} "
+        f"({len(fold_seeds)} SEEDS x {k}-FOLD CROSS-VALIDATION)"
+    )
+    print("=" * 95)
+    print(
+        f"\n{'Method':<24} {'AUC Mean':>10} {'AUC SD':>10} "
+        f"{'Delta':>10} {'95% CI':>23} {'p-value':>10}"
+    )
+    print("-" * 95)
+
+    for method_name, result in sorted(
+        cv_results.items(),
+        key=lambda item: item[1]["mean_auc"],
+        reverse=True,
+    ):
+        bootstrap = result["bootstrap_difference_vs_baseline"]
+        p_value = bootstrap["p_value"]
+        p_value_str = f"<{p_value:.4f}" if bootstrap["p_value_is_upper_bound"] else f"{p_value:.4f}"
+        ci_str = f"[{bootstrap['ci_low']:.4f}, {bootstrap['ci_high']:.4f}]"
+        print(
+            f"{method_name:<24} {result['mean_auc']:>10.4f} "
+            f"{result['std_auc']:>10.4f} "
+            f"{result['mean_difference_vs_baseline']:>10.4f} "
+            f"{ci_str:>23} {p_value_str:>10}"
+        )
+
+    return {
+        "config": config.to_dict(),
+        "k_folds": k,
+        "fold_seeds": [int(seed) for seed in fold_seeds],
+        "n_fold_seeds": len(fold_seeds),
+        "n_bootstrap": n_bootstrap,
+        "bootstrap_seed": bootstrap_seed,
+        "cv_results": cv_results,
+        "per_seed_results": per_seed_results,
     }
