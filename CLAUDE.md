@@ -11,6 +11,7 @@ model_irt/
 ├── experiment_new_tasks/              # New Tasks experiment (Table 2)
 ├── experiment_agent_features/         # New Responses, New Agents, New Benchmarks (Tables 4-6)
 ├── experiment_adaptive_testing/        # Adaptive task selection via Fisher information
+├── experiment_subset_extrapolation/    # Predict overall agent scores from a subset of tasks
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction via Docker
 ├── llm_judge_features/                # Extracted feature CSV files
@@ -56,6 +57,10 @@ python -m experiment_agent_features.predict_question_difficulty_multi_benchmark 
 # Adaptive Task Selection experiment
 python -m experiment_adaptive_testing.run_experiment
 
+# Subset Extrapolation — predict each agent's full-benchmark % from a random
+# subset of tasks (sweep across subset sizes 0.10–0.50, 20 seeds each)
+python -m experiment_subset_extrapolation.run_all_datasets --plot
+
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
     --data_path data/swebench_verified/responses.jsonl
@@ -89,6 +94,7 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | [experiment_new_tasks/README.md](experiment_new_tasks/README.md) | New Tasks experiment details |
 | [experiment_agent_features/README.md](experiment_agent_features/README.md) | Agent feature experiments |
 | [experiment_adaptive_testing/README.md](experiment_adaptive_testing/README.md) | Adaptive task selection experiment |
+| [experiment_subset_extrapolation/README.md](experiment_subset_extrapolation/README.md) | Subset extrapolation experiment |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
 
 ## Key Files
@@ -100,6 +106,7 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | `experiment_new_tasks/plot_information_ablation.py` | Plot feature source ablation bar graph (Table 3) |
 | `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 4-6) |
 | `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
+| `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment (MAE of predicted overall score vs empirical-subset baseline) |
 | `swebench_irt/train.py` | Train IRT models |
 | `swebench_irt/prep_swebench.py` | Build response matrix |
 | `experiment_new_tasks/feature_source.py` | Feature source abstractions (`GroupedFeatureSource`, `RegularizedFeatureSource`) |
