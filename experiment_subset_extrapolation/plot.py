@@ -1,9 +1,8 @@
-"""Plot MAE vs subset size for the subset extrapolation experiment.
+"""Plot MAE vs subset task count for the subset extrapolation experiment.
 
 Renders a 2x2 grid (one panel per dataset). Each panel shows mean MAE across
 seeds for each method, with shaded standard-deviation bands. The x-axis is the
-subset size (fraction of tasks observed); a top axis shows the absolute task
-count.
+absolute number of observed tasks.
 """
 
 from __future__ import annotations
@@ -18,18 +17,12 @@ import matplotlib.pyplot as plt
 
 METHOD_DISPLAY = {
     "empirical": "Empirical-subset (baseline)",
-    "embedding": "Embedding (Ridge)",
-    "embedding_calibrated": "Embedding (Ridge) + calibration",
-    "combined": "Combined (Embedding + LLM-Judge)",
-    "combined_calibrated": "Combined + calibration",
+    "combined_calibrated": "Multi-bench IRT + calibration",
     "oracle": "Oracle (full IRT)",
 }
 
 METHOD_COLORS = {
     "empirical": "#9e9e9e",
-    "embedding": "#4a90d9",
-    "embedding_calibrated": "#2d5b8a",
-    "combined": "#e8833a",
     "combined_calibrated": "#b05a1d",
     "oracle": "#59a14f",
 }
@@ -44,27 +37,21 @@ DATASET_DISPLAY = {
 
 def _series_for_method(
     dataset_results: Dict[str, Any], method: str
-) -> Tuple[List[float], List[float], List[float], List[int]]:
-    """Extract (sizes, means, stds, task_counts) for one method, dropping
-    cells with no successful seeds."""
-    sizes: List[float] = []
+) -> Tuple[List[int], List[float], List[float]]:
+    """Extract (counts, means, stds) for one method, dropping cells with no
+    successful seeds."""
+    counts: List[int] = []
     means: List[float] = []
     stds: List[float] = []
-    counts: List[int] = []
-    for size_str in sorted(dataset_results.keys(), key=float):
-        cell = dataset_results[size_str]
+    for key in sorted(dataset_results.keys(), key=lambda k: int(dataset_results[k]["count"])):
+        cell = dataset_results[key]
         ms = cell.get("methods", {}).get(method, {})
         if ms.get("mean_mae") is None:
             continue
-        sizes.append(float(size_str))
+        counts.append(int(cell["count"]))
         means.append(float(ms["mean_mae"]))
         stds.append(float(ms.get("std_mae") or 0.0))
-        # Reconstruct task count by inverting (mean over per-seed n_observed
-        # is roughly size * total_tasks). We don't store this in the summary,
-        # so estimate it via the size and the n_total_tasks field in raw_cells
-        # if present in the future. For now just leave empty.
-        counts.append(0)
-    return sizes, means, stds, counts
+    return counts, means, stds
 
 
 def _approx_total_tasks(raw_cells: Optional[Iterable[Dict[str, Any]]], dataset: str) -> Optional[int]:
@@ -101,40 +88,25 @@ def plot_mae_vs_subset_size(
         ds_results = summary["results"].get(dataset, {})
         n_total = _approx_total_tasks(raw_cells, dataset)
 
-        size_points_set: set = set()
         for method in methods:
-            sizes, means, stds, _ = _series_for_method(ds_results, method)
-            if not sizes:
+            counts, means, stds = _series_for_method(ds_results, method)
+            if not counts:
                 continue
-            size_points_set.update(sizes)
             color = METHOD_COLORS.get(method, "#444444")
-            ax.plot(sizes, means, marker="o", color=color, lw=1.6,
+            ax.plot(counts, means, marker="o", color=color, lw=1.6,
                     label=METHOD_DISPLAY.get(method, method))
             lower = [m - s for m, s in zip(means, stds)]
             upper = [m + s for m, s in zip(means, stds)]
-            ax.fill_between(sizes, lower, upper, color=color, alpha=0.15)
+            ax.fill_between(counts, lower, upper, color=color, alpha=0.15)
 
         title = DATASET_DISPLAY.get(dataset, dataset)
         if n_total is not None:
             title = f"{title}  (N={n_total} tasks)"
         ax.set_title(title, fontsize=12)
-        ax.set_xlabel("Observed fraction")
+        ax.set_xlabel("Number of observed tasks")
         ax.set_ylabel("MAE of predicted overall %")
         ax.grid(True, alpha=0.3)
         ax.set_ylim(bottom=0.0)
-
-        size_points = sorted(size_points_set)
-        if size_points:
-            ax.set_xticks(size_points)
-            ax.set_xticklabels([f"{s:g}" for s in size_points])
-
-        if n_total is not None and size_points:
-            twin = ax.twiny()
-            twin.set_xlim(ax.get_xlim())
-            twin.set_xticks(size_points)
-            twin.set_xticklabels([f"{int(round(s * n_total))}" for s in size_points])
-            twin.set_xlabel("Observed task count", fontsize=9)
-            twin.tick_params(labelsize=8)
 
     # Hide unused subplots
     for j in range(n_datasets, nrows * ncols):
@@ -159,7 +131,7 @@ def main() -> None:
     parser.add_argument("--summary", type=Path,
                         default=Path("output/experiment_subset_extrapolation/summary.json"))
     parser.add_argument("--out", type=Path,
-                        default=Path("output/experiment_subset_extrapolation/mae_vs_subset_size.png"))
+                        default=Path("output/experiment_subset_extrapolation/mae_vs_subset_count.png"))
     args = parser.parse_args()
 
     with open(args.summary) as f:
