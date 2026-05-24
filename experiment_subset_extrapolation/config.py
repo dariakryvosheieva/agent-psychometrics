@@ -18,7 +18,6 @@ DEFAULT_SUBSET_SIZES: Tuple[float, ...] = (
 
 DEFAULT_METHODS: Tuple[str, ...] = (
     "empirical",
-    "embedding",
     "combined",
     "combined_calibrated",
     "oracle",

@@ -4,13 +4,14 @@ Given a randomly chosen subset of S < N benchmark tasks and the agent responses 
 
 This is useful for benchmark designers who want to evaluate their agents on a cheap subset and extrapolate to the full benchmark to estimate difficulty.
 
-## Methods compared
+## Methods compared (default sweep)
 
 - **Empirical-subset (baseline)**: `predicted_pct[agent] = observed_successes / observed_trials`
-- **Embedding (Ridge)**: train fold IRT on the observed subset, fit Ridge on the DeepSeek-R1 embedding features, predict held-out task difficulties, then `predicted_pct[agent] = (observed_successes + Σ_heldout sigmoid(θ_agent − β̂_task) · trials) / total_trials`.
-- **Combined (Embedding + LLM-Judge)**: same as Embedding but uses the Grouped Ridge predictor over the concatenated embedding + LLM-judge feature space.
+- **Combined (Embedding + LLM-Judge)**: train fold IRT on the observed subset, fit the Grouped Ridge predictor over the concatenated DeepSeek-R1 embedding + LLM-judge feature space to predict held-out task difficulties, then `predicted_pct[agent] = (observed_successes + Σ_heldout sigmoid(θ_agent − β̂_task) · trials) / total_trials`.
 - **Combined + calibration**: same as Combined, but each agent's held-out predictions are shifted by `shift_a = actual_obs_rate_a − predicted_obs_rate_a` (clipped to [0, 1]) — see the calibration discussion below.
 - **Oracle (full IRT)**: same aggregation formula but with `θ` and `β` from the full IRT trained on the entire benchmark — represents the IRT model's best possible extrapolation.
+
+Two single-source variants — `embedding` and `embedding_calibrated` (Ridge on embeddings only, with/without calibration) — are also available via `--methods` but are excluded from the default sweep because Combined dominates them across all tested cells.
 
 ### Why calibration
 
