@@ -144,10 +144,14 @@ def _run_single_fold(
             # Get predicted probability
             prob = predictor.predict_probability(data, agent_id, task_id)
 
-            # Get actual outcome
-            actual = data.responses[agent_id][task_id]
-            y_true.append(int(actual))
-            y_scores.append(prob)
+            # Expand the cell into per-attempt observations. For binary data
+            # this returns a single (label, score) pair; for binomial cells
+            # `{"successes": k, "trials": n}` this returns n observations with
+            # k labels=1 and (n-k) labels=0, all sharing the same predicted
+            # score (sklearn's roc_auc_score handles the resulting ties).
+            labels, scores = data.expand_for_auc(agent_id, task_id, prob)
+            y_true.extend(labels)
+            y_scores.extend(scores)
 
     # Compute AUC
     if len(y_true) >= 2 and len(set(y_true)) >= 2:

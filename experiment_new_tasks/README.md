@@ -12,6 +12,8 @@ P(success) = sigmoid(theta_j - beta_hat_i)
 
 Then measure AUC by comparing these predicted probabilities to actual binary outcomes across 5-fold cross-validation on tasks.
 
+When the response file uses the per-attempt format (`{"successes": k, "trials": n}` per cell — see [Binomial IRT for Terminal-Bench](#binomial-irt-for-terminal-bench)), each cell is expanded into n labeled observations sharing the same predicted probability before computing AUC.
+
 ## Quick Start
 
 ```bash
@@ -30,6 +32,33 @@ python -m experiment_new_tasks.run_all_datasets --datasets gso terminalbench
 python -m experiment_new_tasks.plot_information_ablation
 ```
 
+### Useful `run_all_datasets` flags
+
+| Flag | Purpose |
+|------|---------|
+| `--datasets ...` | Subset of `{swebench_verified, swebench_pro, gso, terminalbench}` |
+| `--responses_path PATH` | Override the response matrix JSONL. Supports `{dataset}` template. Use a per-attempt file to switch to binomial-likelihood IRT (see below). |
+| `--per_dataset_output_dir PATH` | Override each dataset's output dir (controls the fold-IRT cache). Supports `{dataset}` template. Pair with `--responses_path` to isolate the cache from the default binary results. |
+| `--llm_judge_features_path PATH` | Override LLM-judge features CSV. Supports `{dataset}` template. |
+| `--embeddings_path PATH` | Override embeddings .npz. Supports `{dataset}` template. |
+| `--output PATH` | Save summary table as CSV. |
+| `--sequential` | Run datasets one at a time instead of in parallel. |
+
+### Binomial IRT for Terminal-Bench
+
+For Terminal-Bench 2.0 we also publish a per-attempt response file `data/terminalbench/responses_per_attempt.jsonl` (each `(agent, task)` cell is `{"successes": int, "trials": int}` rather than 0/1). Pointing the experiment at that file trains the 1PL model with binomial likelihood (via `dist.Binomial(total_count=trials, ...)` in [py_irt](../py_irt/models/one_param_logistic.py)) and evaluates AUC over per-attempt-expanded observations. Run:
+
+```bash
+python -m experiment_new_tasks.run_all_datasets \
+    --datasets terminalbench \
+    --responses_path data/terminalbench/responses_per_attempt.jsonl \
+    --per_dataset_output_dir output/experiment_a_terminalbench_binomial \
+    --output_dir output/experiment_a_terminalbench_binomial \
+    --output output/experiment_a_terminalbench_binomial/results.csv
+```
+
+The per-attempt file is produced by `python swebench_irt/prep_terminalbench.py --fetch_per_attempt_from data/terminalbench/responses.jsonl` (which fetches each agent's detail page via the `detail_url` field already stored in the binary file, so the agent set lines up exactly).
+
 ## Results
 
 ### Main Results (Table 2)
@@ -47,16 +76,36 @@ Run with: `python -m experiment_new_tasks.run_all_datasets`
 
 Run with: `python -m experiment_new_tasks.run_information_ablation`
 
-LLM-as-a-Judge AUC by information level, progressively adding features:
+LLM-as-a-Judge AUC by information level. Rows 1-4 are the cumulative additive
+ablation (Problem → +Auditor → +Test → +Solution). Rows 5-6 are non-cumulative:
+row 5 drops the test patch from the +Solution context, and row 6 drops the
+auditor features from the +Solution pool.
 
 | Info Level | SWE-bench Verified | SWE-bench Pro | GSO | Terminal-Bench 2.0 |
 |---|---|---|---|---|
-| Baseline | 0.7175 | 0.6565 | 0.7140 | 0.7334 |
-| Problem | 0.7873 | 0.7181 | 0.7257 | 0.7987 |
-| + Auditor | 0.7984 | 0.7369 | 0.7270 | 0.8070 |
-| + Test | 0.8343 | 0.7489 | 0.7251 | 0.8070 |
-| + Solution (Full) | 0.8483 | 0.7501 | 0.7971 | 0.8103 |
+| Baseline | 0.7175 | 0.6569 | 0.7137 | 0.7335 |
+| Problem | 0.7869 | 0.7184 | 0.7277 | 0.7986 |
+| + Auditor | 0.7981 | 0.7373 | 0.7284 | 0.8073 |
+| + Test | 0.8338 | 0.7459 | 0.7287 | 0.8073 |
+| + Solution (Full) | 0.8481 | 0.7507 | 0.7952 | 0.8099 |
+| Problem + Auditor + Solution (No Test) | 0.8380 | 0.7343 | 0.7675 | 0.8051 |
+| Full Minus Auditor | 0.8425 | 0.7316 | 0.7920 | 0.8084 |
 | Oracle | 0.9447 | 0.9183 | 0.9139 | 0.9317 |
+
+**Row 5 (Problem + Auditor + Solution, No Test).** Judge sees the problem
+statement and gold patch but not the test patch (new `PROBLEM_SOLUTION` info
+level override, Claude Opus 4.6, 17 features = 15 statement + 2 solution
+re-extracted at this context). Concatenated with the same 8 auditor features
+used in rows 2-4; top-15 selected by Ridge. Tests whether the test patch
+contributes information beyond what the solution already provides. AUC drops
+by 1-3 points versus + Solution (Full), so test-patch features are not
+redundant given the solution but are not load-bearing either.
+
+**Row 6 (Full Minus Auditor).** Reuses the 20-feature SOLUTION-override pool
+from row 4 (15 statement + 3 test + 2 solution, no extraction) and drops the
+8 auditor features; top-15 selected by Ridge. AUC drops by less than 2 points
+versus + Solution (Full), so auditor features contribute marginally on top of
+the LLM-judge features extracted with full context.
 
 ### Backbone Ablation (Appendix C)
 

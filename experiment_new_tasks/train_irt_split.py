@@ -148,26 +148,38 @@ def save_filtered_responses(
 ):
     """Save filtered responses as JSONL in py_irt format.
 
+    Only writes responses that are actually present in the input. py_irt handles
+    sparse per-agent responses natively (Dataset.from_jsonlines iterates over
+    each agent's response dict). Treating absence as failure (the previous
+    behavior) is semantically wrong and corrupts non-binary response formats
+    such as binomial `{"successes", "trials"}` dicts.
+
     Args:
         responses: Filtered response matrix
         output_path: Path to write JSONL
-        task_ids: Complete list of task IDs (for complete matrix)
+        task_ids: List of task IDs to consider for this split
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    task_set = set(task_ids)
+    n_written = 0
     with open(output_path, "w") as f:
         for agent_id, agent_responses in responses.items():
-            complete_responses = {
-                task_id: agent_responses.get(task_id, 0)
-                for task_id in task_ids
+            present_responses = {
+                task_id: agent_responses[task_id]
+                for task_id in task_set
+                if task_id in agent_responses
             }
+            if not present_responses:
+                continue
             record = {
                 "subject_id": agent_id,
-                "responses": complete_responses,
+                "responses": present_responses,
             }
             f.write(json.dumps(record) + "\n")
+            n_written += 1
 
-    print(f"Saved {len(responses)} agents to {output_path}")
+    print(f"Saved {n_written} agents to {output_path}")
 
 
 def get_or_train_split_irt(

@@ -54,6 +54,11 @@ INFO_LEVELS = [
     ("2_problem_auditor_15.csv", [InfoLevel.PROBLEM, InfoLevel.ENVIRONMENT], "+ Auditor", "environment.csv"),
     ("3_problem_auditor_test_15.csv", [InfoLevel.PROBLEM, InfoLevel.ENVIRONMENT, InfoLevel.TEST], "+ Test", "test.csv"),
     ("4_full_15.csv", [InfoLevel.PROBLEM, InfoLevel.ENVIRONMENT, InfoLevel.TEST, InfoLevel.SOLUTION], "+ Solution (Full)", "solution.csv"),
+    # Non-cumulative ablation rows. Row 5 needs its own per-level source extracted
+    # with PROBLEM_SOLUTION context (judge sees problem + gold patch, no tests).
+    # Row 6 reuses solution.csv but drops ENV via the levels list.
+    ("5_problem_auditor_solution_15.csv", [InfoLevel.PROBLEM, InfoLevel.ENVIRONMENT, InfoLevel.SOLUTION], "Problem + Auditor + Solution (No Test)", "problem_solution.csv"),
+    ("6_problem_test_solution_15.csv", [InfoLevel.PROBLEM, InfoLevel.TEST, InfoLevel.SOLUTION], "Full Minus Auditor", "solution.csv"),
 ]
 
 

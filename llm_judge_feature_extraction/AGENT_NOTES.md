@@ -84,19 +84,7 @@ no benchmark scripts, test patches, or gold patches are present.
 | SWE-bench Verified | `problem_statement` | PROBLEM |
 | SWE-bench Pro | `problem_statement` | PROBLEM |
 | TerminalBench | `instruction.md` text | PROBLEM |
-| GSO | `prob_script` (benchmark script) | TEST |
-
-**GSO note**: `inspect_tasks.py` passes `input="prob_script"` (line 364), giving the auditor
-the full performance benchmark script (TEST-level information). This is intentional for the
-default pipeline (Experiment New Tasks), which overrides all features to solution level anyway,
-and GSO tasks carry almost no information without the benchmark script (the `api` field is just
-a function name).
-
-**For the information ablation study**: To run a clean GSO ablation where the ENVIRONMENT level
-sits below TEST, new auditor features must be extracted with only PROBLEM-level input (repo +
-API name). The fix is to change `input="prob_script"` to `input="api"` and move `prob_script`
-to `metadata`. The existing features should be kept for Experiment New Tasks; the new clean
-features would be used only for the ablation.
+| GSO | `prob_script` (benchmark script) | PROBLEM |
 
 ## AWS Deployment
 

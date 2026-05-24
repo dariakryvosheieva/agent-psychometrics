@@ -38,6 +38,10 @@ def run_single_dataset(
     predictor_factory=None,
     llm_judge_features_path: Optional[str] = None,
     embeddings_path: Optional[str] = None,
+    responses_path: Optional[str] = None,
+    output_dir: Optional[Path] = None,
+    abilities_path: Optional[str] = None,
+    items_path: Optional[str] = None,
 ) -> Tuple[str, Dict[str, Any]]:
     """Run experiment_new_tasks on a single dataset and return results.
 
@@ -54,6 +58,20 @@ def run_single_dataset(
             Supports {dataset} template variable.
         embeddings_path: Optional override for embeddings .npz path.
             Supports {dataset} template variable.
+        responses_path: Optional override for the response matrix JSONL path.
+            Supports {dataset} template variable. Use this to point at a
+            per-attempt file (`{"successes", "trials"}` cells) for binomial-
+            likelihood IRT instead of the default binary file.
+        output_dir: Optional override for the dataset's output directory (and
+            therefore its IRT cache). Use a distinct directory when running
+            with non-default responses to avoid mixing fold caches with the
+            canonical binary results.
+        abilities_path / items_path: Optional overrides for the full-IRT
+            abilities/items CSV files used by the Oracle predictor. Supports
+            {dataset} template. Required when --responses_path points to a
+            file that includes agents not represented in the default full-IRT
+            (e.g., when running binomial against a refreshed per-attempt
+            scrape with new agents).
 
     Returns:
         Tuple of (dataset_display_name, results_dict).
@@ -69,6 +87,15 @@ def run_single_dataset(
         if embeddings_path is not None:
             expanded = embeddings_path.replace("{dataset}", dataset)
             overrides["embeddings_path"] = Path(expanded)
+        if responses_path is not None:
+            expanded = responses_path.replace("{dataset}", dataset)
+            overrides["responses_path"] = Path(expanded)
+        if output_dir is not None:
+            overrides["output_dir"] = Path(output_dir)
+        if abilities_path is not None:
+            overrides["abilities_path"] = Path(abilities_path.replace("{dataset}", dataset))
+        if items_path is not None:
+            overrides["items_path"] = Path(items_path.replace("{dataset}", dataset))
         config = ExperimentAConfig.for_dataset(dataset, **overrides)
     except Exception as e:
         display_name = DATASET_DEFAULTS[dataset]["display_name"]
@@ -346,6 +373,40 @@ def main():
         help="Override embeddings .npz path. Supports {dataset} template "
              "(e.g., 'embeddings/my_embeddings_{dataset}.npz').",
     )
+    parser.add_argument(
+        "--responses_path",
+        type=str,
+        default=None,
+        help="Override the response matrix JSONL path. Supports {dataset} "
+             "template. Use a per-attempt file (`{\"successes\", \"trials\"}` "
+             "cells) to train the IRT model with binomial likelihood and to "
+             "evaluate AUC over expanded per-attempt observations.",
+    )
+    parser.add_argument(
+        "--per_dataset_output_dir",
+        type=str,
+        default=None,
+        help="Override each dataset's output directory (which also controls the "
+             "fold-IRT cache). Supports {dataset} template. Use this together "
+             "with --responses_path to isolate caches from the default binary "
+             "results.",
+    )
+    parser.add_argument(
+        "--abilities_path",
+        type=str,
+        default=None,
+        help="Override full-IRT abilities.csv path (Oracle predictor). Supports "
+             "{dataset} template. Required when --responses_path introduces "
+             "agents that aren't in the default full IRT (e.g., new agents in a "
+             "refreshed per-attempt scrape).",
+    )
+    parser.add_argument(
+        "--items_path",
+        type=str,
+        default=None,
+        help="Override full-IRT items.csv path (Oracle predictor). Supports "
+             "{dataset} template. Pair with --abilities_path.",
+    )
     args = parser.parse_args()
     if args.n_fold_seeds < 1:
         parser.error("--n_fold_seeds must be >= 1")
@@ -372,6 +433,17 @@ def main():
 
     all_results: Dict[str, Dict[str, Any]] = {}
 
+    def _per_dataset_output_dir(dataset: str) -> Optional[Path]:
+        if args.per_dataset_output_dir is None:
+            return None
+        expanded = args.per_dataset_output_dir.replace("{dataset}", dataset)
+        if "{dataset}" not in args.per_dataset_output_dir and len(datasets_to_run) > 1:
+            raise SystemExit(
+                "--per_dataset_output_dir must contain the {dataset} template when "
+                "multiple datasets are selected, to avoid cache collisions."
+            )
+        return Path(expanded)
+
     if args.sequential:
         # Sequential execution
         for dataset in datasets_to_run:
@@ -388,6 +460,10 @@ def main():
                 predictor_factory=predictor_factory,
                 llm_judge_features_path=args.llm_judge_features_path,
                 embeddings_path=args.embeddings_path,
+                responses_path=args.responses_path,
+                output_dir=_per_dataset_output_dir(dataset),
+                abilities_path=args.abilities_path,
+                items_path=args.items_path,
             )
             metrics = extract_metrics(results)
             all_results[name] = metrics
@@ -416,6 +492,8 @@ def main():
                     predictor_factory=predictor_factory,
                     llm_judge_features_path=args.llm_judge_features_path,
                     embeddings_path=args.embeddings_path,
+                    responses_path=args.responses_path,
+                    output_dir=_per_dataset_output_dir(dataset),
                 ): DATASET_DEFAULTS[dataset]["display_name"]
                 for dataset in datasets_to_run
             }

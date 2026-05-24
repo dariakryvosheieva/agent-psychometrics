@@ -25,11 +25,9 @@ from experiment_new_tasks.feature_predictor import (
 from experiment_new_tasks.dataset import (
     load_dataset_for_fold,
     filter_unsolved_tasks,
+    _load_responses,
 )
 import numpy as np
-from experiment_new_tasks.dataset import (
-    _load_binary_responses,
-)
 
 from experiment_new_tasks.cross_validation import (
     k_fold_split_tasks,
@@ -229,7 +227,7 @@ def cross_validate_all_predictors(
 
     # Optionally filter unsolved tasks before generating folds
     if config.exclude_unsolved:
-        responses = _load_binary_responses(responses_path)
+        responses = _load_responses(responses_path)
         all_task_ids, n_excluded = filter_unsolved_tasks(all_task_ids, responses)
         print(f"\nExcluded {n_excluded} unsolved tasks ({len(all_task_ids)} remaining)")
 

@@ -83,6 +83,15 @@ All input data lives under `data/{dataset}/`:
 | GSO | 102 | 15 | `data/gso/responses.jsonl` | `data/gso/irt/1d_1pl/` |
 | Terminal-Bench 2.0 | 89 | 112 | `data/terminalbench/responses.jsonl` | `data/terminalbench/irt/1d_1pl/` |
 
+### Evaluation Data Sources
+
+The evaluation data used for agents on each of the four benchmarks mentioned in the paper are sourced from these public repositories:
+
+- SWE-bench Verified — <https://github.com/SWE-bench/experiments>
+- SWE-bench Pro — <https://docent.transluce.org/dashboard/032fb63d-4992-4bfc-911d-3b7dafcb931f/agent_run>
+- Terminal-Bench 2.0 — <https://www.tbench.ai/leaderboard/terminal-bench/2.0>
+- GSO — <https://github.com/gso-bench/gso-experiments>
+
 ## Documentation
 
 | Document | Purpose |
