@@ -188,7 +188,7 @@ def get_or_train_agent_split_irt(
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Train/load model+scaffold IRT for one train-agent fold."""
 
-    from experiment_agent_features.predict_question_difficulty_multi_benchmark import (
+    from agent_features.irt_training import (
         build_multibench_obs_from_tagged_responses,
         train_irt_model_scaffold_1pl,
     )
@@ -248,7 +248,7 @@ def get_or_train_oracle_irt(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Train/load full standard agent IRT used only by the oracle predictor."""
 
-    from experiment_agent_features.predict_question_difficulty_multi_benchmark import (
+    from agent_features.irt_training import (
         train_standard_irt_1pl_agents,
     )
 
