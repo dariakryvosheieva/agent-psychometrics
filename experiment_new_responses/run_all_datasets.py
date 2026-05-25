@@ -13,6 +13,7 @@ from experiment_new_tasks.results import (
     save_results_csv,
     save_summary_json,
 )
+from swebench_irt.model_scaffold_combine import THETA_COMBINE_CHOICES
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,7 +152,7 @@ def main() -> None:
     parser.add_argument("--irt_device", type=str, default="cuda")
     parser.add_argument("--irt_lr", type=float, default=0.01)
     parser.add_argument("--irt_model", type=str, default="1d_1pl", choices=["1d_1pl", "2d_1pl"])
-    parser.add_argument("--theta_combine", type=str, default="sum", choices=["sum", "mean", "l2"])
+    parser.add_argument("--theta_combine", type=str, default="sum", choices=THETA_COMBINE_CHOICES)
     parser.add_argument("--skip_four_benchmark", action="store_true")
     args = parser.parse_args()
 

@@ -6,21 +6,11 @@ from experiment_new_responses.cross_validation import probability_from_theta
 from experiment_new_responses.dataset import (
     ResponseExperimentData,
 )
+from swebench_irt.model_scaffold_combine import combine_theta
 
 
 def _subject_id(agent_key: str) -> str:
     return str(agent_key).split("::", 1)[1] if "::" in str(agent_key) else str(agent_key)
-
-
-def combine_theta(theta_model: float, theta_scaffold: float, *, combine: str) -> float:
-    combine_norm = str(combine or "sum").strip().lower()
-    if combine_norm == "sum":
-        return float(theta_model) + float(theta_scaffold)
-    if combine_norm == "mean":
-        return (float(theta_model) + float(theta_scaffold)) / 2.0
-    if combine_norm == "l2":
-        return (float(theta_model) ** 2 + float(theta_scaffold) ** 2) ** 0.5
-    raise ValueError(f"Unknown theta_combine={combine!r}")
 
 
 class ModelScaffoldPredictor:

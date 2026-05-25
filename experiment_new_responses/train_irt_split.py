@@ -9,6 +9,10 @@ from typing import Dict, Optional, Sequence, Set, Tuple
 import pandas as pd
 
 from experiment_new_tasks.train_irt_split import set_torch_determinism
+from swebench_irt.model_scaffold_combine import (
+    normalize_theta_combine,
+    theta_combine_cache_suffix,
+)
 
 
 def _make_observation_key(benchmark: str, subject_id: str, task_id: str) -> str:
@@ -20,8 +24,12 @@ def get_split_cache_dir(
     split_seed: int,
     fold_idx: int,
     k_folds: int,
+    theta_combine: str = "sum",
 ) -> Path:
-    split_name = f"seed{split_seed}_fold{fold_idx}of{k_folds}_1d_1pl"
+    split_name = (
+        f"seed{split_seed}_fold{fold_idx}of{k_folds}_1d_1pl"
+        f"{theta_combine_cache_suffix(theta_combine)}"
+    )
     return output_base / split_name
 
 
@@ -99,6 +107,7 @@ def _model_scaffold_cache_meta(
     obs_train,
     *,
     irt_model: str,
+    theta_combine: str,
     epochs: int,
     seed: int,
     lr: float,
@@ -107,7 +116,8 @@ def _model_scaffold_cache_meta(
     obs_signature = hashlib.md5()
     for tensor in [obs_train.model_idx, obs_train.scaffold_idx, obs_train.item_idx, obs_train.y]:
         obs_signature.update(tensor.detach().cpu().numpy().tobytes())
-    return {
+    combine_norm = normalize_theta_combine(theta_combine)
+    meta = {
         "cache_kind": "observation_split_model_scaffold_irt",
         "irt_model": str(irt_model),
         "epochs": int(epochs),
@@ -121,6 +131,20 @@ def _model_scaffold_cache_meta(
         "train_observations_signature": _observations_signature(train_observations),
         "n_train_observations": int(len(train_observations)),
     }
+    if combine_norm != "sum":
+        meta["combine_theta"] = combine_norm
+    return meta
+
+
+def _cache_meta_matches(cached_meta: Dict[str, object], expected_meta: Dict[str, object]) -> bool:
+    def normalize(meta: Dict[str, object]) -> Dict[str, object]:
+        normalized = dict(meta)
+        normalized["combine_theta"] = normalize_theta_combine(
+            normalized.get("combine_theta", "sum")
+        )
+        return normalized
+
+    return normalize(cached_meta) == normalize(expected_meta)
 
 
 def _load_cached_model_scaffold_irt(
@@ -139,7 +163,7 @@ def _load_cached_model_scaffold_irt(
             cached_meta = json.load(f)
     except Exception:
         return None
-    if cached_meta != expected_meta:
+    if not _cache_meta_matches(cached_meta, expected_meta):
         return None
 
     model_df = pd.read_csv(model_path)
@@ -171,6 +195,7 @@ def get_or_train_model_scaffold_observation_split_irt(
     fold_idx: int,
     k_folds: int,
     irt_model: str,
+    theta_combine: str,
     epochs: int,
     device: str,
     lr: float,
@@ -185,7 +210,14 @@ def get_or_train_model_scaffold_observation_split_irt(
     if not train_observations:
         raise ValueError("train_observations was empty")
 
-    cache_dir = get_split_cache_dir(output_base, split_seed, fold_idx, k_folds)
+    theta_combine_norm = normalize_theta_combine(theta_combine)
+    cache_dir = get_split_cache_dir(
+        output_base,
+        split_seed,
+        fold_idx,
+        k_folds,
+        theta_combine_norm,
+    )
     cache_dir.mkdir(parents=True, exist_ok=True)
     train_obs_set = set(str(key) for key in train_observations)
 
@@ -202,6 +234,7 @@ def get_or_train_model_scaffold_observation_split_irt(
     expected_meta = _model_scaffold_cache_meta(
         obs_train,
         irt_model=irt_model,
+        theta_combine=theta_combine_norm,
         epochs=epochs,
         seed=split_seed,
         lr=lr,
@@ -216,6 +249,7 @@ def get_or_train_model_scaffold_observation_split_irt(
         theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
             obs_train=obs_train,
             irt_model=str(irt_model),
+            theta_combine=theta_combine_norm,
             epochs=int(epochs),
             device=str(device),
             seed=int(split_seed),

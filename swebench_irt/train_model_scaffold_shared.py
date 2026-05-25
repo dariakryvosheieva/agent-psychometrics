@@ -74,6 +74,21 @@ except ImportError:
         _version_scaffold_for_agent,
     )
 
+try:
+    from .model_scaffold_combine import (
+        THETA_COMBINE_CHOICES,
+        combine_theta_tensor,
+        normalize_theta_combine,
+        theta_combine_cache_suffix,
+    )
+except ImportError:
+    from model_scaffold_combine import (
+        THETA_COMBINE_CHOICES,
+        combine_theta_tensor,
+        normalize_theta_combine,
+        theta_combine_cache_suffix,
+    )
+
 
 @dataclass(frozen=True)
 class MultiBenchObs:
@@ -315,10 +330,17 @@ def load_multibench_split_irt_data(
 
 
 class ModelScaffold1PL:
-    def __init__(self, num_models: int, num_scaffolds: int, num_items: int):
+    def __init__(
+        self,
+        num_models: int,
+        num_scaffolds: int,
+        num_items: int,
+        theta_combine: str = "sum",
+    ):
         self.num_models = num_models
         self.num_scaffolds = num_scaffolds
         self.num_items = num_items
+        self.theta_combine = normalize_theta_combine(theta_combine)
 
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
@@ -335,7 +357,12 @@ class ModelScaffold1PL:
         theta_m = theta_m_raw - theta_m_raw.mean()
         theta_s = theta_s_raw - theta_s_raw.mean()
         with pyro.plate("obs", y.size(0)):
-            logits = (theta_m[m_idx] + theta_s[s_idx]) - b[items]
+            theta = combine_theta_tensor(
+                theta_m[m_idx],
+                theta_s[s_idx],
+                combine=self.theta_combine,
+            )
+            logits = theta - b[items]
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
     def guide(self, m_idx, s_idx, items, y):
@@ -373,10 +400,17 @@ class ModelScaffold1PL:
 
 
 class ModelScaffold2PL:
-    def __init__(self, num_models: int, num_scaffolds: int, num_items: int):
+    def __init__(
+        self,
+        num_models: int,
+        num_scaffolds: int,
+        num_items: int,
+        theta_combine: str = "sum",
+    ):
         self.num_models = num_models
         self.num_scaffolds = num_scaffolds
         self.num_items = num_items
+        self.theta_combine = normalize_theta_combine(theta_combine)
 
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
@@ -396,7 +430,12 @@ class ModelScaffold2PL:
         theta_m = theta_m_raw - theta_m_raw.mean()
         theta_s = theta_s_raw - theta_s_raw.mean()
         with pyro.plate("obs", y.size(0)):
-            logits = a[items] * ((theta_m[m_idx] + theta_s[s_idx]) - b[items])
+            theta = combine_theta_tensor(
+                theta_m[m_idx],
+                theta_s[s_idx],
+                combine=self.theta_combine,
+            )
+            logits = a[items] * (theta - b[items])
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
     def guide(self, m_idx, s_idx, items, y):
@@ -442,13 +481,21 @@ class ModelScaffold2PL:
 
 
 class ModelScaffold2D1PL:
-    def __init__(self, num_models: int, num_scaffolds: int, num_items: int, dims: int = 2):
+    def __init__(
+        self,
+        num_models: int,
+        num_scaffolds: int,
+        num_items: int,
+        dims: int = 2,
+        theta_combine: str = "sum",
+    ):
         if dims != 2:
             raise ValueError("ModelScaffold2D1PL currently supports dims=2 only.")
         self.num_models = num_models
         self.num_scaffolds = num_scaffolds
         self.num_items = num_items
         self.dims = dims
+        self.theta_combine = normalize_theta_combine(theta_combine)
 
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
@@ -469,7 +516,12 @@ class ModelScaffold2D1PL:
         theta_m = theta_m_raw - theta_m_raw.mean(dim=0, keepdim=True)
         theta_s = theta_s_raw - theta_s_raw.mean(dim=0, keepdim=True)
         with pyro.plate("obs", y.size(0)):
-            logits = ((theta_m[m_idx] + theta_s[s_idx]) - b[items]).sum(-1)
+            theta = combine_theta_tensor(
+                theta_m[m_idx],
+                theta_s[s_idx],
+                combine=self.theta_combine,
+            )
+            logits = (theta - b[items]).sum(-1)
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
     def guide(self, m_idx, s_idx, items, y):
@@ -672,6 +724,13 @@ def main() -> None:
     )
     parser.add_argument("--seed", type=int, default=None, help="Random seed")
     parser.add_argument(
+        "--theta_combine",
+        type=str,
+        default="sum",
+        choices=THETA_COMBINE_CHOICES,
+        help="Functional form used to combine model and scaffold theta in the likelihood.",
+    )
+    parser.add_argument(
         "--lr",
         type=float,
         default=0.01,
@@ -709,15 +768,31 @@ def main() -> None:
     print(f"Observations: {obs.y.numel():,}")
     pyro.clear_param_store()
     if args.model == "1pl":
-        model_obj = ModelScaffold1PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids))
+        model_obj = ModelScaffold1PL(
+            len(obs.model_ids),
+            len(obs.scaffold_ids),
+            len(obs.item_ids),
+            theta_combine=args.theta_combine,
+        )
         subdir = "1d_1pl"
     elif args.model == "2pl":
-        model_obj = ModelScaffold2PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids))
+        model_obj = ModelScaffold2PL(
+            len(obs.model_ids),
+            len(obs.scaffold_ids),
+            len(obs.item_ids),
+            theta_combine=args.theta_combine,
+        )
         subdir = "1d_2pl"
     else:
-        model_obj = ModelScaffold2D1PL(len(obs.model_ids), len(obs.scaffold_ids), len(obs.item_ids), dims=2)
+        model_obj = ModelScaffold2D1PL(
+            len(obs.model_ids),
+            len(obs.scaffold_ids),
+            len(obs.item_ids),
+            dims=2,
+            theta_combine=args.theta_combine,
+        )
         subdir = "2d_1pl"
-    out_dir = out_root / subdir
+    out_dir = out_root / f"{subdir}{theta_combine_cache_suffix(args.theta_combine)}"
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"Training {args.model.upper()} model... output -> {out_dir}")
     _ = train_svi(model_obj.model, model_obj.guide, obs, epochs=args.epochs, lr=args.lr)

@@ -9,6 +9,10 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 import pandas as pd
 
 from experiment_new_tasks.train_irt_split import set_torch_determinism
+from swebench_irt.model_scaffold_combine import (
+    normalize_theta_combine,
+    theta_combine_cache_suffix,
+)
 
 
 def get_split_cache_dir(
@@ -17,8 +21,12 @@ def get_split_cache_dir(
     fold_idx: int,
     k_folds: int,
     irt_model: str,
+    theta_combine: str = "sum",
 ) -> Path:
-    split_name = f"seed{split_seed}_fold{fold_idx}of{k_folds}_{irt_model}"
+    split_name = (
+        f"seed{split_seed}_fold{fold_idx}of{k_folds}_{irt_model}"
+        f"{theta_combine_cache_suffix(theta_combine)}"
+    )
     return output_base / split_name
 
 
@@ -95,11 +103,20 @@ def _load_cached_standard_oracle(
     return abilities.sort_index(), items.sort_index()
 
 
-def _model_scaffold_cache_meta(obs_train, *, irt_model: str, epochs: int, seed: int, lr: float) -> Dict[str, object]:
+def _model_scaffold_cache_meta(
+    obs_train,
+    *,
+    irt_model: str,
+    theta_combine: str,
+    epochs: int,
+    seed: int,
+    lr: float,
+) -> Dict[str, object]:
     obs_signature = hashlib.md5()
     for tensor in [obs_train.model_idx, obs_train.scaffold_idx, obs_train.item_idx, obs_train.y]:
         obs_signature.update(tensor.detach().cpu().numpy().tobytes())
-    return {
+    combine_norm = normalize_theta_combine(theta_combine)
+    meta = {
         "cache_kind": "model_scaffold_irt",
         "irt_model": str(irt_model),
         "epochs": int(epochs),
@@ -111,6 +128,20 @@ def _model_scaffold_cache_meta(obs_train, *, irt_model: str, epochs: int, seed: 
         "n_obs": int(obs_train.y.numel()),
         "obs_signature": obs_signature.hexdigest(),
     }
+    if combine_norm != "sum":
+        meta["combine_theta"] = combine_norm
+    return meta
+
+
+def _cache_meta_matches(cached_meta: Dict[str, object], expected_meta: Dict[str, object]) -> bool:
+    def normalize(meta: Dict[str, object]) -> Dict[str, object]:
+        normalized = dict(meta)
+        normalized["combine_theta"] = normalize_theta_combine(
+            normalized.get("combine_theta", "sum")
+        )
+        return normalized
+
+    return normalize(cached_meta) == normalize(expected_meta)
 
 
 def _load_cached_model_scaffold_irt(
@@ -144,7 +175,7 @@ def _load_cached_model_scaffold_irt(
                 cached_meta = json.load(f)
         except Exception:
             return None
-        if cached_meta != expected_meta:
+        if not _cache_meta_matches(cached_meta, expected_meta):
             return None
     else:
         if set(str(x) for x in model_df.index) != set(
@@ -181,6 +212,7 @@ def get_or_train_agent_split_irt(
     fold_idx: int,
     k_folds: int,
     irt_model: str,
+    theta_combine: str,
     epochs: int,
     device: str,
     lr: float,
@@ -193,7 +225,15 @@ def get_or_train_agent_split_irt(
         train_irt_model_scaffold_1pl,
     )
 
-    cache_dir = get_split_cache_dir(output_base, split_seed, fold_idx, k_folds, irt_model)
+    theta_combine_norm = normalize_theta_combine(theta_combine)
+    cache_dir = get_split_cache_dir(
+        output_base,
+        split_seed,
+        fold_idx,
+        k_folds,
+        irt_model,
+        theta_combine_norm,
+    )
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     obs_train = build_multibench_obs_from_tagged_responses(
@@ -206,6 +246,7 @@ def get_or_train_agent_split_irt(
     expected_meta = _model_scaffold_cache_meta(
         obs_train,
         irt_model=irt_model,
+        theta_combine=theta_combine_norm,
         epochs=epochs,
         seed=split_seed,
         lr=lr,
@@ -219,6 +260,7 @@ def get_or_train_agent_split_irt(
         theta_by_model, theta_by_scaffold, diff_by_item = train_irt_model_scaffold_1pl(
             obs_train=obs_train,
             irt_model=str(irt_model),
+            theta_combine=theta_combine_norm,
             epochs=int(epochs),
             device=str(device),
             seed=int(split_seed),

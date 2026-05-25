@@ -16,6 +16,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Set, Tuple
 
+from swebench_irt.model_scaffold_combine import normalize_theta_combine
+
 
 _V_SUFFIX_RE = re.compile(r"-v(?:\d+|[0-9a-f]{6,}|nan)$", re.IGNORECASE)
 
@@ -294,6 +296,7 @@ def train_irt_model_scaffold_1pl(
     *,
     obs_train,
     irt_model: str,
+    theta_combine: str = "sum",
     epochs: int,
     device: str,
     seed: int,
@@ -337,11 +340,23 @@ def train_irt_model_scaffold_1pl(
     )
 
     irt_model_norm = str(irt_model or "1d_1pl").strip().lower()
+    theta_combine_norm = normalize_theta_combine(theta_combine)
     if irt_model_norm == "1d_1pl":
-        model_obj = ms.ModelScaffold1PL(len(obs_dev.model_ids), len(obs_dev.scaffold_ids), len(obs_dev.item_ids))
+        model_obj = ms.ModelScaffold1PL(
+            len(obs_dev.model_ids),
+            len(obs_dev.scaffold_ids),
+            len(obs_dev.item_ids),
+            theta_combine=theta_combine_norm,
+        )
         model_type = "1pl"
     elif irt_model_norm == "2d_1pl":
-        model_obj = ms.ModelScaffold2D1PL(len(obs_dev.model_ids), len(obs_dev.scaffold_ids), len(obs_dev.item_ids), dims=2)
+        model_obj = ms.ModelScaffold2D1PL(
+            len(obs_dev.model_ids),
+            len(obs_dev.scaffold_ids),
+            len(obs_dev.item_ids),
+            dims=2,
+            theta_combine=theta_combine_norm,
+        )
         model_type = "2d_1pl"
     else:
         raise ValueError(f"Unknown IRT model: {irt_model!r} (expected '1d_1pl' or '2d_1pl').")

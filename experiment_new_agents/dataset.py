@@ -18,6 +18,7 @@ from experiment_new_agents.train_irt_split import (
     get_or_train_agent_split_irt,
     get_or_train_oracle_irt,
 )
+from swebench_irt.model_scaffold_combine import combine_theta
 
 
 ResponseValue = int
@@ -50,17 +51,6 @@ class AgentExperimentData:
                 )
             )
         return values
-
-
-def combine_theta(theta_model: float, theta_scaffold: float, *, combine: str) -> float:
-    combine_norm = str(combine or "sum").strip().lower()
-    if combine_norm == "sum":
-        return float(theta_model) + float(theta_scaffold)
-    if combine_norm == "mean":
-        return (float(theta_model) + float(theta_scaffold)) / 2.0
-    if combine_norm == "l2":
-        return (float(theta_model) ** 2 + float(theta_scaffold) ** 2) ** 0.5
-    raise ValueError(f"Unknown theta_combine={combine!r}")
 
 
 def benchmark_key_for_dataset(dataset: str) -> str:
@@ -200,6 +190,7 @@ def load_dataset_for_agent_fold(
                 fold_idx=fold_idx,
                 k_folds=k_folds,
                 irt_model=irt_model,
+                theta_combine=theta_combine,
                 epochs=irt_epochs,
                 device=irt_device,
                 lr=irt_lr,

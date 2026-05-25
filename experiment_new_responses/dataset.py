@@ -234,6 +234,7 @@ def load_dataset_for_observation_fold(
                 fold_idx=fold_idx,
                 k_folds=k_folds,
                 irt_model=irt_model,
+                theta_combine=theta_combine,
                 epochs=irt_epochs,
                 device=irt_device,
                 lr=irt_lr,
