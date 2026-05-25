@@ -24,6 +24,7 @@ Usage:
 """
 
 import argparse
+import csv
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -34,7 +35,7 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
 from experiment_new_tasks.config import ExperimentAConfig, DATASET_DEFAULTS
-from experiment_new_tasks.pipeline import cross_validate_all_predictors
+from experiment_new_tasks.pipeline import cross_validate_all_predictors_repeated_seeds
 from llm_judge_feature_extraction.feature_registry import get_features_by_level
 from llm_judge_feature_extraction.prompt_config import InfoLevel
 
@@ -147,9 +148,19 @@ def build_ablation_csvs(dataset: str) -> Dict[str, Path]:
 
 
 def run_ablation_for_dataset(
-    dataset: str, k_folds: int, rebuild: bool
+    dataset: str,
+    k_folds: int,
+    rebuild: bool,
+    n_fold_seeds: int,
+    fold_seed_start: int,
+    max_seed_workers: int,
 ) -> Tuple[str, Dict[str, Tuple[float, float]]]:
-    """Run the full ablation for one dataset. Returns (display_name, {level: (mean_auc, std_auc)})."""
+    """Run the full ablation for one dataset.
+
+    Returns (display_name, {level_filename or 'oracle'/'constant_baseline':
+    (mean_auc, std_auc)}). Both stats are the seed-level mean and Bessel-
+    corrected sample SD across ``n_fold_seeds`` shuffled k-fold splits.
+    """
     display_name = DATASET_DEFAULTS[dataset]["display_name"]
     print(f"\n{'='*60}")
     print(f"Dataset: {display_name}")
@@ -163,7 +174,9 @@ def run_ablation_for_dataset(
     if rebuild or any_missing:
         build_ablation_csvs(dataset)
 
-    # Run CV for each info level
+    fold_seeds = list(range(fold_seed_start, fold_seed_start + n_fold_seeds))
+
+    # Run repeated-seed CV for each info level
     results = {}
     for filename, _, level_name, _ in INFO_LEVELS:
         csv_path = ABLATION_OUTPUT_BASE / dataset / filename
@@ -173,7 +186,17 @@ def run_ablation_for_dataset(
             embeddings_path=None,  # Disables embedding + grouped predictors
         )
 
-        cv_output = cross_validate_all_predictors(config, ROOT, k=k_folds)
+        # The repeated-seeds pipeline always also runs a seed-level bootstrap
+        # of the method-vs-baseline delta. The ablation table only surfaces
+        # mean ± SD, so the bootstrap output (n_bootstrap=10000, seed=0
+        # defaults) is computed but unused.
+        cv_output = cross_validate_all_predictors_repeated_seeds(
+            config,
+            ROOT,
+            k=k_folds,
+            fold_seeds=fold_seeds,
+            max_seed_workers=max_seed_workers,
+        )
         cv_results = cv_output["cv_results"]
 
         llm_result = cv_results.get("llm_judge", {})
@@ -202,14 +225,14 @@ def run_ablation_for_dataset(
 def format_results_table(
     all_results: Dict[str, Tuple[str, Dict[str, Tuple[float, float]]]]
 ) -> str:
-    """Format results as a markdown-style table."""
+    """Format results as a markdown-style table with ``mean ± std`` cells."""
     # Column order matches ALL_DATASETS
     datasets = list(all_results.keys())
     display_names = [all_results[d][0] for d in datasets]
 
     # Column widths
-    level_col_w = 20
-    data_col_w = max(len(n) for n in display_names) + 4  # room for "0.xxxx ± 0.xxxx"
+    level_col_w = max(20, max(len(level_name) for _, _, level_name, _ in INFO_LEVELS))
+    data_col_w = max(max(len(n) for n in display_names), len("0.xxxx ± 0.xxxx"))
     data_col_w = max(data_col_w, 18)
 
     # Header
@@ -227,7 +250,10 @@ def format_results_table(
             _, level_results = all_results[dataset]
             mean_auc, std_auc = level_results.get(key, (float("nan"), float("nan")))
             if not np.isnan(mean_auc):
-                cell = f"{mean_auc:.4f}"
+                if std_auc is not None and not np.isnan(std_auc):
+                    cell = f"{mean_auc:.4f} ± {std_auc:.4f}"
+                else:
+                    cell = f"{mean_auc:.4f}"
             else:
                 cell = "N/A"
             row += f" | {cell:^{data_col_w}}"
@@ -249,6 +275,50 @@ def format_results_table(
     return "\n".join(lines)
 
 
+def save_results_csv(
+    all_results: Dict[str, Tuple[str, Dict[str, Tuple[float, float]]]],
+    output_path: Path,
+) -> None:
+    """Save the ablation table as a CSV with AUC and SD columns per dataset.
+
+    Columns: ``Info Level, <Display 1> AUC, <Display 1> SD, <Display 2> AUC, ...``
+    Rows: ``Baseline``, the six info-level rows from ``INFO_LEVELS`` in order,
+    then ``Oracle``.
+    """
+    datasets = list(all_results.keys())
+    display_names = [all_results[d][0] for d in datasets]
+
+    header = ["Info Level"]
+    for name in display_names:
+        header.extend([f"{name} AUC", f"{name} SD"])
+
+    def _row_values(key: str) -> List[str]:
+        cells: List[str] = []
+        for dataset in datasets:
+            _, level_results = all_results[dataset]
+            mean_auc, std_auc = level_results.get(
+                key, (float("nan"), float("nan"))
+            )
+            if np.isnan(mean_auc):
+                cells.extend(["", ""])
+            else:
+                cells.append(f"{mean_auc:.4f}")
+                if std_auc is None or np.isnan(std_auc):
+                    cells.append("")
+                else:
+                    cells.append(f"{std_auc:.4f}")
+        return cells
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        writer.writerow(["Baseline"] + _row_values("constant_baseline"))
+        for filename, _, level_name, _ in INFO_LEVELS:
+            writer.writerow([level_name] + _row_values(filename))
+        writer.writerow(["Oracle"] + _row_values("oracle"))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run information level ablation study")
     parser.add_argument("--rebuild_csvs", action="store_true", help="Regenerate ablation CSVs")
@@ -258,25 +328,60 @@ def main():
         choices=ALL_DATASETS, help="Datasets to run (default: all)"
     )
     parser.add_argument("--sequential", action="store_true", help="Run datasets sequentially (for debugging)")
+    parser.add_argument(
+        "--n_fold_seeds", type=int, default=20,
+        help="Number of shuffled k-fold splits per info level (default: 20, "
+             "matching the main Table 2 protocol)."
+    )
+    parser.add_argument(
+        "--fold_seed_start", type=int, default=0,
+        help="First fold split seed; seeds are consecutive from this value "
+             "(default: 0)."
+    )
+    parser.add_argument(
+        "--max_seed_workers", type=int, default=1,
+        help="Parallel workers for fold seeds within each (dataset, info level) "
+             "run (default: 1, serial). Set higher to fan out per-seed CV runs."
+    )
+    parser.add_argument(
+        "--output", type=Path, default=None,
+        help="Optional CSV output path. Writes one row per "
+             "(Baseline + 6 info levels + Oracle) and AUC/SD columns per dataset."
+    )
     args = parser.parse_args()
 
     print("=" * 70)
     print("INFORMATION LEVEL ABLATION STUDY")
     print("=" * 70)
+    print(
+        f"n_fold_seeds={args.n_fold_seeds}, fold_seed_start={args.fold_seed_start}, "
+        f"max_seed_workers={args.max_seed_workers}"
+    )
 
     all_results: Dict[str, Tuple[str, Dict[str, Tuple[float, float]]]] = {}
 
     if args.sequential:
         for dataset in args.datasets:
             display_name, results = run_ablation_for_dataset(
-                dataset, args.k_folds, args.rebuild_csvs
+                dataset,
+                args.k_folds,
+                args.rebuild_csvs,
+                args.n_fold_seeds,
+                args.fold_seed_start,
+                args.max_seed_workers,
             )
             all_results[dataset] = (display_name, results)
     else:
         with ProcessPoolExecutor(max_workers=len(args.datasets)) as executor:
             futures = {
                 executor.submit(
-                    run_ablation_for_dataset, dataset, args.k_folds, args.rebuild_csvs
+                    run_ablation_for_dataset,
+                    dataset,
+                    args.k_folds,
+                    args.rebuild_csvs,
+                    args.n_fold_seeds,
+                    args.fold_seed_start,
+                    args.max_seed_workers,
                 ): dataset
                 for dataset in args.datasets
             }
@@ -299,6 +404,10 @@ def main():
     print()
     print(format_results_table(ordered_results))
     print()
+
+    if args.output is not None:
+        save_results_csv(ordered_results, args.output)
+        print(f"Saved CSV to: {args.output}")
 
 
 if __name__ == "__main__":

@@ -319,6 +319,29 @@ def cross_validate_all_predictors(
     }
 
 
+def _run_single_seed_for_repeated_cv(
+    fold_seed: int,
+    config: Any,
+    root: Path,
+    k: int,
+    diagnostics_extractors: Optional[Dict[str, Callable]],
+    predictor_factory: Optional[Callable[[str, Any, Any], CVPredictor]],
+) -> Dict[str, Any]:
+    """Worker: run a single fold-seed CV and return its results dict.
+
+    Defined at module scope so ProcessPoolExecutor can pickle it.
+    """
+    seeded_config = replace(config, split_seed=int(fold_seed))
+    seed_results = cross_validate_all_predictors(
+        seeded_config,
+        root,
+        k=k,
+        diagnostics_extractors=diagnostics_extractors,
+        predictor_factory=predictor_factory,
+    )
+    return {"fold_seed": int(fold_seed), "results": seed_results}
+
+
 def cross_validate_all_predictors_repeated_seeds(
     config: Any,
     root: Path,
@@ -328,6 +351,7 @@ def cross_validate_all_predictors_repeated_seeds(
     bootstrap_seed: int = 0,
     diagnostics_extractors: Optional[Dict[str, Callable]] = None,
     predictor_factory: Optional[Callable[[str, Any, Any], CVPredictor]] = None,
+    max_seed_workers: int = 1,
 ) -> Dict[str, Any]:
     """Run k-fold CV for multiple fold seeds and aggregate seed-level metrics.
 
@@ -336,11 +360,18 @@ def cross_validate_all_predictors_repeated_seeds(
     seed-level means. For every method, it also computes the per-seed mean
     paired fold difference against the constant baseline and bootstraps the
     mean of those seed-level differences.
+
+    When ``max_seed_workers > 1``, the per-seed iterations run in a
+    ``ProcessPoolExecutor``. Each fold seed writes to a distinct
+    ``seed{seed}_fold{fold}`` IRT cache subdirectory (see
+    ``train_irt_split.get_split_cache_dir``), so parallel seeds never collide.
     """
     if fold_seeds is None:
         fold_seeds = list(range(20))
     if not fold_seeds:
         raise ValueError("At least one fold seed is required")
+    if max_seed_workers < 1:
+        raise ValueError(f"max_seed_workers must be >= 1, got {max_seed_workers}")
 
     print("=" * 60)
     print(
@@ -349,26 +380,56 @@ def cross_validate_all_predictors_repeated_seeds(
     )
     print("=" * 60)
 
-    per_seed_results: List[Dict[str, Any]] = []
-    for seed_idx, fold_seed in enumerate(fold_seeds, 1):
+    if max_seed_workers == 1:
+        per_seed_results: List[Dict[str, Any]] = []
+        for seed_idx, fold_seed in enumerate(fold_seeds, 1):
+            print(
+                f"\nSeed {seed_idx}/{len(fold_seeds)} "
+                f"(split_seed={int(fold_seed)})"
+            )
+            per_seed_results.append(
+                _run_single_seed_for_repeated_cv(
+                    int(fold_seed),
+                    config,
+                    root,
+                    k,
+                    diagnostics_extractors,
+                    predictor_factory,
+                )
+            )
+    else:
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+
+        workers = min(int(max_seed_workers), len(fold_seeds))
         print(
-            f"\nSeed {seed_idx}/{len(fold_seeds)} "
-            f"(split_seed={int(fold_seed)})"
+            f"\nRunning {len(fold_seeds)} fold seeds in parallel "
+            f"(max_seed_workers={workers})"
         )
-        seeded_config = replace(config, split_seed=int(fold_seed))
-        seed_results = cross_validate_all_predictors(
-            seeded_config,
-            root,
-            k=k,
-            diagnostics_extractors=diagnostics_extractors,
-            predictor_factory=predictor_factory,
-        )
-        per_seed_results.append(
-            {
-                "fold_seed": int(fold_seed),
-                "results": seed_results,
+        results_by_seed: Dict[int, Dict[str, Any]] = {}
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(
+                    _run_single_seed_for_repeated_cv,
+                    int(fold_seed),
+                    config,
+                    root,
+                    k,
+                    diagnostics_extractors,
+                    predictor_factory,
+                ): int(fold_seed)
+                for fold_seed in fold_seeds
             }
-        )
+            completed = 0
+            for future in as_completed(futures):
+                fold_seed = futures[future]
+                completed += 1
+                seed_result = future.result()
+                results_by_seed[fold_seed] = seed_result
+                print(
+                    f"  Seed {completed}/{len(fold_seeds)} done "
+                    f"(split_seed={fold_seed})"
+                )
+        per_seed_results = [results_by_seed[int(s)] for s in fold_seeds]
 
     first_cv_results = per_seed_results[0]["results"]["cv_results"]
     if "constant_baseline" not in first_cv_results:

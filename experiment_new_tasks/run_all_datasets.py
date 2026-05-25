@@ -53,6 +53,7 @@ def run_single_dataset(
     output_dir: Optional[Path] = None,
     abilities_path: Optional[str] = None,
     items_path: Optional[str] = None,
+    max_seed_workers: int = 1,
 ) -> Tuple[str, Dict[str, Any]]:
     """Run experiment_new_tasks on a single dataset and return results.
 
@@ -123,6 +124,7 @@ def run_single_dataset(
             n_bootstrap=n_bootstrap,
             bootstrap_seed=bootstrap_seed,
             predictor_factory=predictor_factory,
+            max_seed_workers=max_seed_workers,
         )
 
         return config.display_name, results
@@ -205,6 +207,15 @@ def main():
         type=int,
         default=4,
         help="Maximum parallel workers for datasets (default: 4)",
+    )
+    parser.add_argument(
+        "--max_seed_workers",
+        type=int,
+        default=1,
+        help="Maximum parallel workers for fold seeds within each dataset "
+             "(default: 1, serial). Set higher to parallelize the per-seed "
+             "CV runs in a ProcessPoolExecutor. Distinct fold seeds use "
+             "distinct IRT cache subdirs, so they don't collide.",
     )
     parser.add_argument(
         "--feature_irt",
@@ -316,6 +327,7 @@ def main():
                 output_dir=_per_dataset_output_dir(dataset),
                 abilities_path=args.abilities_path,
                 items_path=args.items_path,
+                max_seed_workers=args.max_seed_workers,
             )
             metrics = extract_metrics(results)
             all_results[name] = metrics
@@ -346,6 +358,9 @@ def main():
                     embeddings_path=args.embeddings_path,
                     responses_path=args.responses_path,
                     output_dir=_per_dataset_output_dir(dataset),
+                    abilities_path=args.abilities_path,
+                    items_path=args.items_path,
+                    max_seed_workers=args.max_seed_workers,
                 ): DATASET_DEFAULTS[dataset]["display_name"]
                 for dataset in datasets_to_run
             }
