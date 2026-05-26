@@ -11,8 +11,7 @@ LLM-judge feature block) on the (b, features) pairs of every IRT-training
 item across all 4 benchmarks, then predicts `b̂` for each held-out target
 task.
 
-This module does NOT define any new Ridge code. It wires together the
-existing block-Ridge stack from `predict_question_difficulty.py`:
+This module wires together a local subset of the historical block-Ridge stack:
   - `_try_load_concat_embeddings_from_single_benchmark_caches`
   - `_build_judge_index`, `_load_judge_vector`
   - `_parse_alpha_list`, `_select_block_alphas_inner_cv`,
@@ -36,7 +35,7 @@ from experiment_subset_extrapolation.multibench_trainer import (
 )
 
 
-# Defaults match experiment_agent_features.predict_question_difficulty_multi_benchmark.
+# Defaults match the historical multi-benchmark difficulty predictor.
 DEFAULT_ALPHA_GRID = "1e-4,1e-3,1e-2,1e-1,1,10,100,1000,10000"
 DEFAULT_INNER_SPLITS = 5
 
@@ -97,8 +96,8 @@ class HeldoutDifficultyPredictor:
     def fit(self, irt: MultiBenchIRT) -> None:
         """Build training matrices and fit block Ridge on all IRT items."""
         # Lazy imports — only the worker process needs the ML deps.
-        from experiment_agent_features import predict_question_difficulty as base
-        from experiment_agent_features.predict_question_difficulty_multi_benchmark import (
+        from utils import difficulty_prediction as base
+        from utils.multibench import (
             _try_load_concat_embeddings_from_single_benchmark_caches,
         )
 
@@ -206,7 +205,7 @@ class HeldoutDifficultyPredictor:
         if self._ridge_state is None or self._emb_X is None:
             raise RuntimeError("HeldoutDifficultyPredictor.fit() must be called before predict().")
 
-        from experiment_agent_features import predict_question_difficulty as base
+        from utils import difficulty_prediction as base
 
         # Held-out tasks belong to the target benchmark; route their features
         # through that benchmark's judge source.
@@ -259,7 +258,7 @@ class HeldoutDifficultyPredictor:
         if bench is None:
             return None
         ctx = self._bench_ctx[bench]
-        from experiment_agent_features import predict_question_difficulty as base
+        from utils import difficulty_prediction as base
 
         return base._load_judge_vector(
             task_id,

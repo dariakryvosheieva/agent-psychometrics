@@ -6,17 +6,15 @@ For each (target_dataset, observed_task_subset) cell, this module:
      (cached at module scope — these don't change across cells).
   2. Combines them with the target benchmark's responses restricted to
      `observed_tasks`.
-  3. Trains a shared model+scaffold 1PL IRT via the existing infrastructure
-     (`train_irt_model_scaffold_1pl` from experiment_agent_features).
+  3. Trains a shared model+scaffold 1PL IRT via the local compatibility
+     wrapper around the shared IRT infrastructure.
   4. Caches `(theta_by_model, theta_by_scaffold, diff_by_item)` and the
      per-benchmark training item list under the provided cache directory so
      re-runs skip Pyro entirely.
 
 Reuses (does not duplicate):
-  - `train_irt_model_scaffold_1pl` and `build_multibench_obs_from_tagged_responses`
-    from experiment_agent_features/predict_question_difficulty_multi_benchmark.py
   - `load_multibench_split_irt_data` from swebench_irt/train_model_scaffold_shared.py
-  - Per-benchmark response loaders from experiment_agent_features.
+  - Small local compatibility wrappers for response loading and model+scaffold IRT.
 """
 
 from __future__ import annotations
@@ -100,8 +98,8 @@ def _load_all_benches_once() -> None:
 
         # Lazy imports — these pull in torch/pyro, which we want to defer to
         # worker processes (not the parent CLI).
-        from experiment_agent_features import predict_question_difficulty as base
-        from experiment_agent_features.predict_question_difficulty_multi_benchmark import (
+        from utils import difficulty_prediction as base
+        from utils.multibench import (
             load_all_responses_terminal,
             load_all_responses_generic,
         )
@@ -280,7 +278,7 @@ def train_fold(
     keep_items.update(obs_target_set)
 
     # Lazy imports so workers (not the parent CLI) pay the torch/pyro cost.
-    from experiment_agent_features.predict_question_difficulty_multi_benchmark import (
+    from utils.multibench import (
         build_multibench_obs_from_tagged_responses,
         train_irt_model_scaffold_1pl,
     )

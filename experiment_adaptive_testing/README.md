@@ -26,12 +26,9 @@ Fisher (Oracle) is an upper bound — what's achievable with perfect difficulty 
 source .venv/bin/activate
 
 # Step 1: Generate predicted difficulties (train on Verified+TerminalBench+GSO, predict Pro)
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by benchmark \
-    --train_benchmarks verified,terminalbench,gso \
-    --ood_benchmark pro \
-    --out_dir output/experiment_adaptive_testing/ood_predictions \
-    --method judge
+python -m experiment_new_benchmarks.run_all_datasets \
+    --heldout_datasets swebench_pro \
+    --output_dir output/experiment_adaptive_testing/ood_predictions
 
 # Step 2: Run adaptive task selection experiment
 python -m experiment_adaptive_testing.run_experiment

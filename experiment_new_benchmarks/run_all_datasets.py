@@ -2,6 +2,7 @@
 """Run held-out benchmark generalization experiments."""
 
 import argparse
+import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -234,6 +235,14 @@ def main() -> None:
     summary_path = args.output_dir / "summary.json"
     save_summary_json(ordered, summary_path)
     print(f"Full results saved to: {summary_path}")
+
+    if len(args.heldout_datasets) == 1:
+        heldout_dataset = args.heldout_datasets[0]
+        per_heldout_predictions = args.output_dir / heldout_dataset / "predictions.csv"
+        top_level_predictions = args.output_dir / "predictions.csv"
+        if per_heldout_predictions.exists():
+            shutil.copyfile(per_heldout_predictions, top_level_predictions)
+            print(f"Judge predictions saved to: {top_level_predictions}")
 
 
 if __name__ == "__main__":

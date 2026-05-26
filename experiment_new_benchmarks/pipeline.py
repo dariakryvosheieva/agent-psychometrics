@@ -1,5 +1,6 @@
 """Pipeline for held-out benchmark generalization."""
 
+import csv
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
@@ -173,6 +174,12 @@ def evaluate_heldout_benchmark(
         predictor = _make_feature_predictor(method_name, source, config)
         predictor.fit(train_task_ids, train_items.loc[train_task_ids, "b"].values)
         predicted_difficulties = predictor.predict(test_task_ids)
+        if method_name == "judge":
+            _write_judge_predictions(
+                root / config.output_dir / heldout_dataset / "predictions.csv",
+                predicted_difficulties,
+                heldout_benchmark=heldout_benchmark,
+            )
         method_predictions[method_name] = _score_with_item_difficulties(
             test_records,
             model_abilities=train_model,
@@ -295,6 +302,39 @@ def _make_feature_predictor(
     if method_name == "combined":
         return GroupedRidgePredictor(source)  # type: ignore[arg-type]
     return FeatureBasedPredictor(source, alphas=list(config.ridge_alphas))
+
+
+def _write_judge_predictions(
+    path: Path,
+    predicted_difficulties: Mapping[str, float],
+    *,
+    heldout_benchmark: str,
+) -> None:
+    """Write held-out LLM-judge item difficulty predictions for downstream CAT."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["item_id", "diff_pred", "split", "fold"])
+        writer.writeheader()
+        for task_id in sorted(predicted_difficulties):
+            writer.writerow(
+                {
+                    "item_id": _unprefix_task_id(task_id, heldout_benchmark),
+                    "diff_pred": float(predicted_difficulties[task_id]),
+                    "split": "ood",
+                    "fold": "",
+                }
+            )
+    print(f"Wrote LLM-as-a-Judge predictions: {path}")
+
+
+def _unprefix_task_id(task_id: str, benchmark: str) -> str:
+    prefix = f"{benchmark}::"
+    task_id_s = str(task_id)
+    if not task_id_s.startswith(prefix):
+        raise ValueError(
+            f"Expected held-out task ID {task_id_s!r} to start with benchmark prefix {prefix!r}"
+        )
+    return task_id_s[len(prefix) :]
 
 
 def _build_test_records(

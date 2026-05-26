@@ -17,6 +17,12 @@ For each held-out benchmark, the experiment:
 4. compares each method against a baseline that predicts the LLM's empirical
    training success rate, ignoring scaffold.
 
+The LLM-as-a-judge held-out item difficulty predictions are written as
+`{output_dir}/{heldout_dataset}/predictions.csv` with columns
+`item_id,diff_pred,split,fold`. When running a single held-out benchmark, the
+same file is also copied to `{output_dir}/predictions.csv` for downstream tools
+such as adaptive task selection.
+
 Significance is computed with paired clustered bootstrapping of
 `AUC(method) - AUC(baseline)`, clustering held-out observations by task.
 
