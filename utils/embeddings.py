@@ -43,7 +43,8 @@ DIFFICULTY_INSTRUCTION = (
     "floating-point number from 0 (very easy) to 1 (very hard). Your difficulty score:\n"
 )
 
-EMBEDDING_TEXT_FORMAT = "qs_solution_instruction_v1"
+EMBEDDING_TEXT_FORMAT_WITH_SOLUTION = "qs_solution_instruction_v1"
+EMBEDDING_TEXT_FORMAT_WITHOUT_SOLUTION = "qs_instruction_v1"
 
 _V_SUFFIX_RE = re.compile(r"-v(?:\d+|[0-9a-f]{6,}|nan)$", re.IGNORECASE)
 
@@ -116,9 +117,10 @@ def normalize_swebench_item_id(raw_item_id: str) -> str:
     return s.strip()
 
 
-def prompt_signature(instruction: str) -> str:
+def prompt_signature(instruction: str, *, include_solution: bool = True) -> str:
     h = hashlib.sha1(str(instruction).encode("utf-8")).hexdigest()[:8]
-    return f"qs_sol_instr_{h}"
+    prefix = "qs_sol_instr" if bool(include_solution) else "qs_instr"
+    return f"{prefix}_{h}"
 
 
 def _sanitize_text(s: str) -> str:
@@ -130,6 +132,12 @@ def format_qs_solution_instruction(*, question_statement: str, solution: str, in
     sol = _sanitize_text(str(solution or "")).strip()
     instr = _sanitize_text(str(instruction or "")).strip()
     return f"Task statement:\n{qs}\n\nSolution:\n{sol}\n\n{instr}".strip()
+
+
+def format_qs_instruction(*, question_statement: str, instruction: str) -> str:
+    qs = _sanitize_text(str(question_statement or "")).strip()
+    instr = _sanitize_text(str(instruction or "")).strip()
+    return f"Task statement:\n{qs}\n\n{instr}".strip()
 
 
 _GSO_PROMPT_TEMPLATE = """I've uploaded a python code repository in the directory workspace_dir_name. Consider the
@@ -397,6 +405,7 @@ def embed_items(
     attn_implementation: str,
     instruction: str,
     embedding_layer: int,
+    include_solution: bool = True,
 ) -> Tuple[List[str], Dict[str, np.ndarray], Dict[str, int], int]:
     _require_embedding_dependency("torch", torch)
     _require_embedding_dependency("transformers", AutoModel)
@@ -515,11 +524,17 @@ def embed_items(
             counts[str(item_id)] = int(len(str(text)))
 
     for rec in tqdm(items, desc="embed_items"):
-        text = format_qs_solution_instruction(
-            question_statement=rec.question_statement,
-            solution=rec.solution,
-            instruction=instruction,
-        )
+        if bool(include_solution):
+            text = format_qs_solution_instruction(
+                question_statement=rec.question_statement,
+                solution=rec.solution,
+                instruction=instruction,
+            )
+        else:
+            text = format_qs_instruction(
+                question_statement=rec.question_statement,
+                instruction=instruction,
+            )
         if not text.strip():
             continue
         batch_ids.append(rec.item_id)
@@ -593,10 +608,11 @@ def default_embeddings_cache_path(
     embedding_layer: int,
     dataset_sources: str,
     split: str,
+    include_solution: bool = True,
 ) -> str:
     safe_backbone = str(backbone).replace("/", "__")
     idnorm_flag = "__idnorm_instance-v1"
-    instr_sig = prompt_signature(str(instruction))
+    instr_sig = prompt_signature(str(instruction), include_solution=bool(include_solution))
     cache_meta = {
         "backbone": str(backbone),
         "max_length": int(max_length),
@@ -612,6 +628,9 @@ def default_embeddings_cache_path(
         "dataset_sources": str(dataset_sources),
         "split": str(split),
     }
+    if not bool(include_solution):
+        cache_meta["include_solution"] = False
+        cache_meta["text_format"] = EMBEDDING_TEXT_FORMAT_WITHOUT_SOLUTION
     cache_key = hashlib.sha1(json.dumps(cache_meta, sort_keys=True).encode("utf-8")).hexdigest()[:12]
     model_short = re.sub(r"[^a-zA-Z0-9_.-]+", "_", str(safe_backbone))[:48].strip("_") or "model"
     return os.path.join(_shared_embeddings_dir(), f"embeddings__{model_short}__{cache_key}__maxlen{int(max_length)}.npz")
@@ -631,11 +650,13 @@ def save_embeddings_cache(
     backbone: str,
     max_length: int,
     embedding_layer: int,
+    include_solution: bool = True,
 ) -> None:
     ensure_dir(os.path.dirname(path) or ".")
     ids_sorted = list(task_ids)
     X = np.stack([embeddings_by_id[item_id] for item_id in ids_sorted], axis=0).astype(np.float32)
     counts_arr = np.array([int(counts_by_id.get(item_id, 0)) for item_id in ids_sorted], dtype=np.int64)
+    text_format = EMBEDDING_TEXT_FORMAT_WITH_SOLUTION if bool(include_solution) else EMBEDDING_TEXT_FORMAT_WITHOUT_SOLUTION
     np.savez_compressed(
         path,
         task_ids=np.array(ids_sorted, dtype=object),
@@ -647,9 +668,9 @@ def save_embeddings_cache(
         dataset_path=np.array([str(dataset_path)], dtype=object),
         n_items=np.array([int(len(ids_sorted))], dtype=np.int64),
         instruction=np.array([str(instruction)], dtype=object),
-        instruction_signature=np.array([str(prompt_signature(instruction))], dtype=object),
-        text_format=np.array([str(EMBEDDING_TEXT_FORMAT)], dtype=object),
-        includes_solution=np.array([True], dtype=np.bool_),
+        instruction_signature=np.array([str(prompt_signature(instruction, include_solution=bool(include_solution)))], dtype=object),
+        text_format=np.array([str(text_format)], dtype=object),
+        includes_solution=np.array([bool(include_solution)], dtype=np.bool_),
         backbone=np.array([str(backbone)], dtype=object),
         max_length=np.array([int(max_length)], dtype=np.int64),
         embedding_dim=np.array([int(embedding_dim)], dtype=np.int64),
@@ -773,6 +794,7 @@ def load_compatible_embeddings_cache(
                 same_prompt_template_family = (
                     cached_instr_sig == req_instr_sig
                     or (cached_instr_sig.startswith("qs_sol_") and req_instr_sig.startswith("qs_sol_"))
+                    or (cached_instr_sig.startswith("qs_instr_") and req_instr_sig.startswith("qs_instr_"))
                 )
 
             cached_backbone = _meta_str(data.get("backbone", None), "")
@@ -789,8 +811,15 @@ def load_compatible_embeddings_cache(
                 else False
             )
             text_format = _meta_str(data.get("text_format", None), "")
+            known_text_format = text_format in {
+                EMBEDDING_TEXT_FORMAT_WITH_SOLUTION,
+                EMBEDDING_TEXT_FORMAT_WITHOUT_SOLUTION,
+            }
             cache_prompt_template_ok = (
-                includes_solution or text_format == EMBEDDING_TEXT_FORMAT or cached_instr_sig.startswith("qs_sol_")
+                includes_solution
+                or known_text_format
+                or cached_instr_sig.startswith("qs_sol_")
+                or cached_instr_sig.startswith("qs_instr_")
             )
             if not (cache_prompt_template_ok and (same_prompt_template_family or not req_instr_sig)):
                 return None
@@ -823,6 +852,7 @@ def load_compatible_embeddings_cache(
                 "backbone": str(cached_backbone),
                 "dataset_name": str(cached_dataset_source),
                 "text_format": str(text_format),
+                "includes_solution": bool(includes_solution),
             }
             return task_ids, X, meta
     except Exception:
@@ -871,8 +901,8 @@ def find_compatible_embeddings_cache(
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate Experiment New Tasks embedding cache (.npz).")
-    parser.add_argument("--benchmark", type=str, default="", help="One of: verified, pro, terminalbench, gso.")
+    parser = argparse.ArgumentParser(description="Generate embedding cache (.npz).")
+    parser.add_argument("--benchmark", type=str, default="verified", help="One of: verified, pro, terminalbench, gso.")
     parser.add_argument("--dataset_name", type=str, default="princeton-nlp/SWE-bench_Verified")
     parser.add_argument("--dataset_path", type=str, default="")
     parser.add_argument("--split", type=str, default="test")
@@ -887,8 +917,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--embedding_layer", type=int, default=-1)
     parser.add_argument("--instruction", type=str, default=DIFFICULTY_INSTRUCTION)
     parser.add_argument("--out", type=str, default="", help="Output .npz path. Defaults to embeddings/<cache-key>.npz.")
+    parser.add_argument(
+        "--no_solution",
+        action="store_true",
+        help="Embed only the task statement and instruction.",
+    )
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
+    include_solution = not bool(args.no_solution)
 
     if args.benchmark:
         defaults = get_benchmark_dataset_defaults(args.benchmark)
@@ -916,6 +952,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             embedding_layer=int(args.embedding_layer),
             dataset_sources=str(dataset_sources),
             split=str(args.split),
+            include_solution=bool(include_solution),
         )
 
     if os.path.exists(out_path) and not bool(args.overwrite):
@@ -935,6 +972,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         attn_implementation=str(args.attn_implementation),
         instruction=str(args.instruction),
         embedding_layer=int(args.embedding_layer),
+        include_solution=bool(include_solution),
     )
     if not ids_sorted:
         raise RuntimeError("No embeddings were produced.")
@@ -952,8 +990,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         backbone=str(args.backbone),
         max_length=int(args.max_length),
         embedding_layer=int(args.embedding_layer),
+        include_solution=bool(include_solution),
     )
-    print(f"Wrote embeddings cache: {out_path} (n={len(ids_sorted)}, dim={embedding_dim})")
+    print(
+        f"Wrote embeddings cache: {out_path} "
+        f"(n={len(ids_sorted)}, dim={embedding_dim}, includes_solution={include_solution})"
+    )
     return 0
 
 
