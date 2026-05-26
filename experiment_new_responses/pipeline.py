@@ -359,11 +359,18 @@ def cross_validate_four_benchmark_model_scaffold_repeated_seeds(
                     if task_id not in train_items.index:
                         raise ValueError(f"Task {task_id!r} has no train-fold IRT difficulty")
                     from experiment_new_responses.difficulty_predictors import combine_theta
+                    from swebench_irt.model_scaffold_combine import theta_combine_weights_from_attrs
 
                     theta = combine_theta(
                         train_model.loc[model, "theta"],
                         train_scaffold.loc[scaffold, "theta"],
                         combine=theta_combine,
+                        model_id=model,
+                        **theta_combine_weights_from_attrs(
+                            train_model,
+                            train_scaffold,
+                            combine=theta_combine,
+                        ),
                     )
                     from experiment_new_responses.cross_validation import probability_from_theta
 

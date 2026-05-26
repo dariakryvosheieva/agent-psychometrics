@@ -110,6 +110,41 @@ def _agent_key(benchmark: str, agent: str) -> str:
     return f"{benchmark}::{agent}"
 
 
+def _sample_theta_combine_weights(theta_combine: str, one: torch.Tensor, *, num_models: int):
+    combine_norm = normalize_theta_combine(theta_combine)
+    if combine_norm == "model_scaffold_scale":
+        zero = one.new_tensor(0.0)
+        half = one.new_tensor(0.5)
+        with pyro.plate("model_scaffold_scales", num_models):
+            scale = pyro.sample("model_scaffold_scale", dist.LogNormal(zero, half))
+        return {"model_scaffold_scale": scale}
+    if combine_norm != "weighted_sum":
+        return {}
+    return {
+        "w_m": pyro.sample("w_m", dist.HalfNormal(one)),
+        "w_s": pyro.sample("w_s", dist.HalfNormal(one)),
+    }
+
+
+def _guide_theta_combine_weights(theta_combine: str, device: torch.device, *, num_models: int):
+    combine_norm = normalize_theta_combine(theta_combine)
+    if combine_norm == "model_scaffold_scale":
+        scale_q = pyro.param(
+            "model_scaffold_scale_q",
+            torch.ones(num_models, device=device),
+            constraint=constraints.positive,
+        )
+        with pyro.plate("model_scaffold_scales", num_models):
+            pyro.sample("model_scaffold_scale", dist.Delta(scale_q))
+        return
+    if combine_norm != "weighted_sum":
+        return
+    w_m_q = pyro.param("w_m_q", torch.tensor(1.0, device=device), constraint=constraints.positive)
+    w_s_q = pyro.param("w_s_q", torch.tensor(1.0, device=device), constraint=constraints.positive)
+    pyro.sample("w_m", dist.Delta(w_m_q))
+    pyro.sample("w_s", dist.Delta(w_s_q))
+
+
 def load_multibench_split_irt_data(
     *,
     verified_path: Path,
@@ -345,6 +380,9 @@ class ModelScaffold1PL:
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
         zero = y.new_tensor(0.0)
+        combine_weights = _sample_theta_combine_weights(
+            self.theta_combine, one, num_models=self.num_models
+        )
         sigma_theta_m = pyro.sample("sigma_theta_model", dist.HalfNormal(one))
         sigma_theta_s = pyro.sample("sigma_theta_scaffold", dist.HalfNormal(one))
         sigma_b = pyro.sample("sigma_b", dist.HalfNormal(one))
@@ -361,12 +399,15 @@ class ModelScaffold1PL:
                 theta_m[m_idx],
                 theta_s[s_idx],
                 combine=self.theta_combine,
+                model_idx=m_idx,
+                **combine_weights,
             )
             logits = theta - b[items]
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
     def guide(self, m_idx, s_idx, items, y):
         dev = y.device
+        _guide_theta_combine_weights(self.theta_combine, dev, num_models=self.num_models)
         sigma_theta_m_q = pyro.param(
             "sigma_theta_model_q", torch.tensor(1.0, device=dev), constraint=constraints.positive
         )
@@ -415,6 +456,9 @@ class ModelScaffold2PL:
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
         zero = y.new_tensor(0.0)
+        combine_weights = _sample_theta_combine_weights(
+            self.theta_combine, one, num_models=self.num_models
+        )
         sigma_theta_m = pyro.sample("sigma_theta_model", dist.HalfNormal(one))
         sigma_theta_s = pyro.sample("sigma_theta_scaffold", dist.HalfNormal(one))
         sigma_b = pyro.sample("sigma_b", dist.HalfNormal(one))
@@ -434,12 +478,15 @@ class ModelScaffold2PL:
                 theta_m[m_idx],
                 theta_s[s_idx],
                 combine=self.theta_combine,
+                model_idx=m_idx,
+                **combine_weights,
             )
             logits = a[items] * (theta - b[items])
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
     def guide(self, m_idx, s_idx, items, y):
         dev = y.device
+        _guide_theta_combine_weights(self.theta_combine, dev, num_models=self.num_models)
         sigma_theta_m_q = pyro.param(
             "sigma_theta_model_q", torch.tensor(1.0, device=dev), constraint=constraints.positive
         )
@@ -499,6 +546,9 @@ class ModelScaffold2D1PL:
 
     def model(self, m_idx, s_idx, items, y):
         one = y.new_tensor(1.0)
+        combine_weights = _sample_theta_combine_weights(
+            self.theta_combine, one, num_models=self.num_models
+        )
         sigma_theta_m = pyro.sample(
             "sigma_theta_model", dist.HalfNormal(one).expand([self.dims]).to_event(1)
         )
@@ -520,12 +570,15 @@ class ModelScaffold2D1PL:
                 theta_m[m_idx],
                 theta_s[s_idx],
                 combine=self.theta_combine,
+                model_idx=m_idx,
+                **combine_weights,
             )
             logits = (theta - b[items]).sum(-1)
             pyro.sample("y", dist.Bernoulli(logits=logits), obs=y)
 
     def guide(self, m_idx, s_idx, items, y):
         dev = y.device
+        _guide_theta_combine_weights(self.theta_combine, dev, num_models=self.num_models)
         sigma_theta_m_q = pyro.param(
             "sigma_theta_model_q", torch.ones(self.dims, device=dev), constraint=constraints.positive
         )
@@ -587,6 +640,23 @@ def _centered_loc(loc_raw: torch.Tensor) -> torch.Tensor:
 
 def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+    param_store = pyro.get_param_store()
+    if "w_m_q" in param_store and "w_s_q" in param_store:
+        weights = {
+            "w_m": float(pyro.param("w_m_q").detach().cpu().item()),
+            "w_s": float(pyro.param("w_s_q").detach().cpu().item()),
+        }
+        with open(out_dir / "theta_combine_weights.json", "w") as f:
+            json.dump(weights, f, indent=2, sort_keys=True)
+    model_scaffold_scales = None
+    if "model_scaffold_scale_q" in param_store:
+        scale_values = pyro.param("model_scaffold_scale_q").detach().cpu().numpy()
+        model_scaffold_scales = {
+            str(model_id): float(scale_values[i])
+            for i, model_id in enumerate(obs.model_ids)
+        }
+        with open(out_dir / "theta_combine_model_scales.json", "w") as f:
+            json.dump(model_scaffold_scales, f, indent=2, sort_keys=True)
     b_loc = pyro.param("loc_b").detach().cpu().numpy()
     b_scale = pyro.param("scale_b").detach().cpu().numpy()
     if model_type == "2d_1pl":
@@ -641,6 +711,10 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
             },
             index=obs.model_ids,
         )
+        if model_scaffold_scales is not None:
+            model_df["scaffold_scale"] = [
+                model_scaffold_scales[str(model_id)] for model_id in model_df.index
+            ]
         model_df["theta_sum"] = model_df["theta1"] + model_df["theta2"]
         model_df["theta_avg"] = 0.5 * model_df["theta_sum"]
         model_df.sort_values("theta_avg", ascending=False).to_csv(out_dir / "model_abilities.csv")
@@ -648,6 +722,10 @@ def save_outputs(*, out_dir: Path, obs: MultiBenchObs, model_type: str) -> None:
         model_df = pd.DataFrame(
             {"theta": theta_m_loc.numpy(), "theta_std": theta_m_scale.numpy()}, index=obs.model_ids
         ).sort_values("theta", ascending=False)
+        if model_scaffold_scales is not None:
+            model_df["scaffold_scale"] = [
+                model_scaffold_scales[str(model_id)] for model_id in model_df.index
+            ]
         model_df.to_csv(out_dir / "model_abilities.csv")
     theta_s_loc_raw = pyro.param("loc_theta_scaffold_raw").detach().cpu()
     theta_s_scale = pyro.param("scale_theta_scaffold_raw").detach().cpu()

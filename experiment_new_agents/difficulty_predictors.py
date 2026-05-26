@@ -4,6 +4,7 @@ from typing import List
 
 from experiment_new_agents.cross_validation import probability_from_theta
 from experiment_new_agents.dataset import AgentExperimentData, combine_theta
+from swebench_irt.model_scaffold_combine import theta_combine_weights_from_attrs
 
 
 class ModelScaffoldPredictor:
@@ -26,6 +27,12 @@ class ModelScaffoldPredictor:
             float(data.train_model_abilities.loc[model, "theta"]),
             float(data.train_scaffold_abilities.loc[scaffold, "theta"]),
             combine=data.theta_combine,
+            model_id=model,
+            **theta_combine_weights_from_attrs(
+                data.train_model_abilities,
+                data.train_scaffold_abilities,
+                combine=data.theta_combine,
+            ),
         )
 
     def predict_probability(

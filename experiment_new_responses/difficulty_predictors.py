@@ -6,7 +6,7 @@ from experiment_new_responses.cross_validation import probability_from_theta
 from experiment_new_responses.dataset import (
     ResponseExperimentData,
 )
-from swebench_irt.model_scaffold_combine import combine_theta
+from swebench_irt.model_scaffold_combine import combine_theta, theta_combine_weights_from_attrs
 
 
 def _subject_id(agent_key: str) -> str:
@@ -37,6 +37,12 @@ class ModelScaffoldPredictor:
             data.train_model_abilities.loc[model, "theta"],
             data.train_scaffold_abilities.loc[scaffold, "theta"],
             combine=data.theta_combine,
+            model_id=model,
+            **theta_combine_weights_from_attrs(
+                data.train_model_abilities,
+                data.train_scaffold_abilities,
+                combine=data.theta_combine,
+            ),
         )
         return probability_from_theta(theta, data.train_items.loc[task_id, "b"])
 

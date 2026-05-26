@@ -10,6 +10,7 @@ import pandas as pd
 
 from experiment_new_tasks.train_irt_split import set_torch_determinism
 from swebench_irt.model_scaffold_combine import (
+    attach_theta_combine_weights_from_path,
     normalize_theta_combine,
     theta_combine_cache_suffix,
 )
@@ -193,12 +194,18 @@ def _load_cached_model_scaffold_irt(
         with open(meta_path, "w") as f:
             json.dump(expected_meta, f, indent=2, sort_keys=True)
 
-    print(f"Found cached model+scaffold IRT model at {cache_dir}")
-    return (
-        model_df.sort_index(),
-        scaffold_df.sort_index(),
-        item_df.sort_index(),
+    model_df = model_df.sort_index()
+    scaffold_df = scaffold_df.sort_index()
+    item_df = item_df.sort_index()
+    attach_theta_combine_weights_from_path(
+        model_df,
+        scaffold_df,
+        cache_dir,
+        combine=expected_meta.get("combine_theta", "sum"),
     )
+
+    print(f"Found cached model+scaffold IRT model at {cache_dir}")
+    return model_df, scaffold_df, item_df
 
 
 def get_or_train_agent_split_irt(
@@ -273,6 +280,12 @@ def get_or_train_agent_split_irt(
     model_df = _as_frame(theta_by_model, "model", "theta")
     scaffold_df = _as_frame(theta_by_scaffold, "scaffold", "theta")
     item_df = _as_frame(diff_by_item, "item_id", "b")
+    attach_theta_combine_weights_from_path(
+        model_df,
+        scaffold_df,
+        cache_dir,
+        combine=theta_combine_norm,
+    )
     with open(cache_dir / "cache_meta.json", "w") as f:
         json.dump(expected_meta, f, indent=2, sort_keys=True)
     return model_df, scaffold_df, item_df

@@ -28,6 +28,7 @@ from experiment_new_responses.dataset import (
     parse_observation_key,
 )
 from experiment_new_responses.difficulty_predictors import combine_theta
+from swebench_irt.model_scaffold_combine import theta_combine_weights_from_attrs
 from experiment_new_responses.train_irt_split import (
     get_or_train_model_scaffold_observation_split_irt,
 )
@@ -416,6 +417,12 @@ def _score_with_item_difficulties(
             model_abilities.loc[model, "theta"],
             scaffold_abilities.loc[scaffold, "theta"],
             combine=theta_combine,
+            model_id=model,
+            **theta_combine_weights_from_attrs(
+                model_abilities,
+                scaffold_abilities,
+                combine=theta_combine,
+            ),
         )
         scored.append(
             {

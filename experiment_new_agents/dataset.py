@@ -18,7 +18,7 @@ from experiment_new_agents.train_irt_split import (
     get_or_train_agent_split_irt,
     get_or_train_oracle_irt,
 )
-from swebench_irt.model_scaffold_combine import combine_theta
+from swebench_irt.model_scaffold_combine import combine_theta, theta_combine_weights_from_attrs
 
 
 ResponseValue = int
@@ -48,6 +48,12 @@ class AgentExperimentData:
                     float(self.train_model_abilities.loc[model, "theta"]),
                     float(self.train_scaffold_abilities.loc[scaffold, "theta"]),
                     combine=self.theta_combine,
+                    model_id=model,
+                    **theta_combine_weights_from_attrs(
+                        self.train_model_abilities,
+                        self.train_scaffold_abilities,
+                        combine=self.theta_combine,
+                    ),
                 )
             )
         return values
