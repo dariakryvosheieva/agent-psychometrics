@@ -1,12 +1,9 @@
-"""Shared IRT training helpers used by the split experiments.
-
-This module contains the small subset of shared IRT code that the newer
-experiment packages need.
-"""
+"""Shared IRT training helpers used by the split experiments."""
 
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import os
 import re
@@ -15,6 +12,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Set, Tuple
+
+import pandas as pd
 
 from swebench_irt.model_scaffold_combine import normalize_theta_combine
 
@@ -43,6 +42,61 @@ def _import_swebench_irt_module(module_name: str):
 
 def _import_shared_irt_module():
     return _import_swebench_irt_module("train_model_scaffold_shared")
+
+
+def as_frame(values: Dict[str, float], index_name: str, value_name: str) -> pd.DataFrame:
+    df = pd.DataFrame(
+        [{index_name: key, value_name: float(value)} for key, value in values.items()]
+    )
+    if df.empty:
+        raise RuntimeError(f"IRT returned no {value_name} values")
+    return df.set_index(index_name).sort_index()
+
+
+def responses_signature(
+    all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
+    all_item_ids: Set[str],
+) -> str:
+    item_set = {str(item_id) for item_id in all_item_ids}
+    rows = []
+    for benchmark, subject_id, responses in all_responses_tagged:
+        filtered = {
+            str(task_id): int(value)
+            for task_id, value in responses.items()
+            if str(task_id) in item_set
+        }
+        if filtered:
+            rows.append(
+                {
+                    "benchmark": str(benchmark),
+                    "subject_id": str(subject_id),
+                    "responses": dict(sorted(filtered.items())),
+                }
+            )
+    payload = json.dumps(rows, sort_keys=True, separators=(",", ":"))
+    return hashlib.md5(payload.encode("utf-8")).hexdigest()
+
+
+def cache_meta_matches(cached_meta: Dict[str, object], expected_meta: Dict[str, object]) -> bool:
+    def normalize(meta: Dict[str, object]) -> Dict[str, object]:
+        normalized = dict(meta)
+        normalized["combine_theta"] = normalize_theta_combine(
+            normalized.get("combine_theta", "sum")
+        )
+        return normalized
+
+    return normalize(cached_meta) == normalize(expected_meta)
+
+
+def all_item_ids_from_responses(
+    tagged: Sequence[Tuple[str, str, Dict[str, int]]],
+) -> Set[str]:
+    items: Set[str] = set()
+    for _, _, responses in tagged:
+        items.update(str(item_id) for item_id in responses.keys())
+    if not items:
+        raise RuntimeError("Response matrix contains 0 item IDs")
+    return items
 
 
 def train_irt_1pl(

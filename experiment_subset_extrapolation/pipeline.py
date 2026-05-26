@@ -44,7 +44,7 @@ from experiment_subset_extrapolation.subset_sampler import sample_subset_by_coun
 def _load_response_iter(target_dataset: str):
     """Iterate (subject_id, responses) tuples from the dataset's response file."""
     from utils import difficulty_prediction as base
-    from utils.multibench import (
+    from utils.difficulty_prediction import (
         load_all_responses_terminal,
         load_all_responses_generic,
     )

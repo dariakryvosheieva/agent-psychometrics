@@ -95,7 +95,7 @@ python -m experiment_subset_extrapolation.plot
 
 ## Implementation notes
 
-- **Multi-bench IRT** uses shared helpers in `utils/multibench.py` and the implementation in `swebench_irt/train_model_scaffold_shared.py` (`load_multibench_split_irt_data`, `ModelScaffold1PL`).
+- **Multi-bench IRT** uses the implementation in `swebench_irt/train_model_scaffold_shared.py` (`load_multibench_split_irt_data`, `ModelScaffold1PL`).
 - **Cross-benchmark Ridge** uses the existing block-Ridge stack (`_try_load_concat_embeddings_from_single_benchmark_caches`, `_build_judge_index`, `_load_judge_vector`, `_select_block_alphas_inner_cv`, `_fit_block_ridge`, `_predict_block_ridge`). No new Ridge code.
 - **Cache key**: `(dataset, count, seed)` — each cell gets its own directory because the IRT training data depends on the random subset draw.
 - **CPU parallelism**: each worker trains one Pyro IRT independently. `OMP_NUM_THREADS=1` etc. are set in the worker initializer to avoid oversubscription.

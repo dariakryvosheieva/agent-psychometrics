@@ -4,7 +4,6 @@ import hashlib
 from typing import Any, Callable, Dict, List, Optional, Protocol, Sequence, Tuple
 
 import numpy as np
-from scipy.special import expit as sigmoid
 from sklearn.metrics import roc_auc_score
 
 from experiment_new_responses.dataset import (
@@ -13,6 +12,7 @@ from experiment_new_responses.dataset import (
     parse_observation_key,
 )
 from experiment_new_tasks.cross_validation import CrossValidationResult
+from utils.difficulty_prediction import probability_from_theta
 
 
 class CVPredictor(Protocol):
@@ -163,7 +163,3 @@ def evaluate_predictor_cv(
         k=len(folds),
         fold_diagnostics=fold_diagnostics if diagnostics_extractor is not None else None,
     )
-
-
-def probability_from_theta(theta: float, difficulty: float) -> float:
-    return float(sigmoid(float(theta) - float(difficulty)))

@@ -3,7 +3,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence, Set, Tuple
+from typing import Dict, List, Sequence, Tuple
 
 import pandas as pd
 
@@ -19,6 +19,7 @@ from swebench_irt.split_agents_model_scaffold import (
     _model_for_subject,
     _scaffold_for_subject,
 )
+from utils.irt_training import all_item_ids_from_responses
 
 
 ResponseValue = int
@@ -89,17 +90,6 @@ def load_tagged_responses(responses_path: Path, dataset: str) -> TaggedResponses
     if not tagged:
         raise RuntimeError(f"Parsed 0 agents from {responses_path}")
     return tagged
-
-
-def all_item_ids_from_responses(
-    tagged: Sequence[Tuple[str, str, Dict[str, int]]],
-) -> Set[str]:
-    items: Set[str] = set()
-    for _, _, responses in tagged:
-        items.update(str(item_id) for item_id in responses.keys())
-    if not items:
-        raise RuntimeError("Response matrix contains 0 item IDs")
-    return items
 
 
 def all_observation_keys_from_responses(

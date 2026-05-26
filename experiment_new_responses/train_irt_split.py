@@ -14,6 +14,11 @@ from swebench_irt.model_scaffold_combine import (
     normalize_theta_combine,
     theta_combine_cache_suffix,
 )
+from utils.irt_training import (
+    as_frame as _as_frame,
+    cache_meta_matches as _cache_meta_matches,
+    responses_signature as _responses_signature,
+)
 
 
 def _make_observation_key(benchmark: str, subject_id: str, task_id: str) -> str:
@@ -32,39 +37,6 @@ def get_split_cache_dir(
         f"{theta_combine_cache_suffix(theta_combine)}"
     )
     return output_base / split_name
-
-
-def _as_frame(values: Dict[str, float], index_name: str, value_name: str) -> pd.DataFrame:
-    df = pd.DataFrame(
-        [{index_name: key, value_name: float(value)} for key, value in values.items()]
-    )
-    if df.empty:
-        raise RuntimeError(f"IRT returned no {value_name} values")
-    return df.set_index(index_name).sort_index()
-
-
-def _responses_signature(
-    all_responses_tagged: Sequence[Tuple[str, str, Dict[str, int]]],
-    all_item_ids: Set[str],
-) -> str:
-    item_set = {str(item_id) for item_id in all_item_ids}
-    rows = []
-    for benchmark, subject_id, responses in all_responses_tagged:
-        filtered = {
-            str(task_id): int(value)
-            for task_id, value in responses.items()
-            if str(task_id) in item_set
-        }
-        if filtered:
-            rows.append(
-                {
-                    "benchmark": str(benchmark),
-                    "subject_id": str(subject_id),
-                    "responses": dict(sorted(filtered.items())),
-                }
-            )
-    payload = json.dumps(rows, sort_keys=True, separators=(",", ":"))
-    return hashlib.md5(payload.encode("utf-8")).hexdigest()
 
 
 def _observations_signature(observation_keys: Set[str]) -> str:
@@ -135,17 +107,6 @@ def _model_scaffold_cache_meta(
     if combine_norm != "sum":
         meta["combine_theta"] = combine_norm
     return meta
-
-
-def _cache_meta_matches(cached_meta: Dict[str, object], expected_meta: Dict[str, object]) -> bool:
-    def normalize(meta: Dict[str, object]) -> Dict[str, object]:
-        normalized = dict(meta)
-        normalized["combine_theta"] = normalize_theta_combine(
-            normalized.get("combine_theta", "sum")
-        )
-        return normalized
-
-    return normalize(cached_meta) == normalize(expected_meta)
 
 
 def _load_cached_model_scaffold_irt(

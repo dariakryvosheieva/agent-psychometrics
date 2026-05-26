@@ -99,7 +99,7 @@ def _load_all_benches_once() -> None:
         # Lazy imports — these pull in torch/pyro, which we want to defer to
         # worker processes (not the parent CLI).
         from utils import difficulty_prediction as base
-        from utils.multibench import (
+        from utils.difficulty_prediction import (
             load_all_responses_terminal,
             load_all_responses_generic,
         )
@@ -278,7 +278,7 @@ def train_fold(
     keep_items.update(obs_target_set)
 
     # Lazy imports so workers (not the parent CLI) pay the torch/pyro cost.
-    from utils.multibench import (
+    from utils.irt_training import (
         build_multibench_obs_from_tagged_responses,
         train_irt_model_scaffold_1pl,
     )

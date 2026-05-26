@@ -1,9 +1,4 @@
-"""Shared difficulty-prediction helpers.
-
-These are the small response-loading, judge-feature, and block-ridge utilities
-used by experiments that need the historical difficulty-prediction behavior.
-Embedding generation and cache lookup live in `utils.embeddings`.
-"""
+"""Shared difficulty-prediction helpers."""
 
 from __future__ import annotations
 
@@ -14,6 +9,7 @@ import os
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple
 
 import numpy as np
+from scipy.special import expit as sigmoid
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
@@ -22,12 +18,17 @@ from utils import embeddings as embedding_utils
 
 
 DIFFICULTY_INSTRUCTION = embedding_utils.DIFFICULTY_INSTRUCTION
-EMBEDDING_TEXT_FORMAT = embedding_utils.EMBEDDING_TEXT_FORMAT
+EMBEDDING_TEXT_FORMAT = embedding_utils.EMBEDDING_TEXT_FORMAT_WITH_SOLUTION
 normalize_swebench_item_id = embedding_utils.normalize_swebench_item_id
 prompt_signature = embedding_utils.prompt_signature
 _candidate_embedding_roots = embedding_utils._candidate_embedding_roots
 load_compatible_embeddings_cache = embedding_utils.load_compatible_embeddings_cache
 find_compatible_embeddings_cache = embedding_utils.find_compatible_embeddings_cache
+
+
+def probability_from_theta(theta: float, difficulty: float) -> float:
+    return float(sigmoid(float(theta) - float(difficulty)))
+
 
 JUDGE_FEATURE_NAMES: List[str] = [
     "atypicality",

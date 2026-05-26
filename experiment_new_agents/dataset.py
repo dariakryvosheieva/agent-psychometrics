@@ -3,7 +3,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence, Set, Tuple
+from typing import Dict, List, Sequence, Tuple
 
 import pandas as pd
 
@@ -19,6 +19,7 @@ from experiment_new_agents.train_irt_split import (
     get_or_train_oracle_irt,
 )
 from swebench_irt.model_scaffold_combine import combine_theta, theta_combine_weights_from_attrs
+from utils.irt_training import all_item_ids_from_responses
 
 
 ResponseValue = int
@@ -141,17 +142,6 @@ def load_agent_model_scaffold_map(
             f"No Terminal-Bench agents in {responses_path} had usable model/scaffold metadata"
         )
     return mapping
-
-
-def all_item_ids_from_responses(
-    tagged: Sequence[Tuple[str, str, Dict[str, int]]],
-) -> Set[str]:
-    items: Set[str] = set()
-    for _, _, responses in tagged:
-        items.update(str(item_id) for item_id in responses.keys())
-    if not items:
-        raise RuntimeError("Response matrix contains 0 item IDs")
-    return items
 
 
 def load_dataset_for_agent_fold(

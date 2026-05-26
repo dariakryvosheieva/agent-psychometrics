@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -67,6 +67,62 @@ class _BenchFeatureCtx:
     normalize_item_ids: bool
 
 
+def _try_load_concat_embeddings_from_single_benchmark_caches(
+    *,
+    train_benchmarks: Sequence[str],
+    required_ids_by_bench: Dict[str, List[str]],
+    out_dir: str,
+    backbone: str,
+    max_length: int,
+    embedding_layer: int,
+    instruction_sig: str,
+) -> Optional[Tuple[List[str], np.ndarray, Dict[str, str]]]:
+    from utils import embeddings as embedding_utils
+
+    roots: List[str] = []
+    roots.extend(embedding_utils._candidate_embedding_roots(out_dir=str(out_dir)))
+    roots = [str(r) for r in roots if str(r).strip()]
+
+    used_files: Dict[str, str] = {}
+    rows: List[np.ndarray] = []
+    task_ids: List[str] = []
+    seen_ids: Set[str] = set()
+
+    for bench in train_benchmarks:
+        bench_key = str(bench)
+        required_ids = [str(tid) for tid in list(required_ids_by_bench.get(bench_key, []))]
+        if not required_ids:
+            raise RuntimeError(f"{bench_key} training benchmark: 0 item_ids remain after response-driven filtering.")
+
+        found = embedding_utils.find_compatible_embeddings_cache(
+            preferred_paths=[],
+            search_roots=roots,
+            backbone=str(backbone),
+            max_length=int(max_length),
+            instruction_sig=str(instruction_sig),
+            expected_n_items=int(len(required_ids)),
+            require_single_dataset_source=True,
+        )
+        if found is None:
+            return None
+        cache_path, cache_task_ids, cache_X, _ = found
+        used_files[bench_key] = str(cache_path)
+        idx_by_id = {str(tid): int(i) for i, tid in enumerate(cache_task_ids)}
+        for tid in required_ids:
+            if tid not in idx_by_id:
+                return None
+            if tid in seen_ids:
+                continue
+            seen_ids.add(tid)
+            task_ids.append(tid)
+            rows.append(cache_X[int(idx_by_id[tid])].astype(np.float32, copy=False))
+
+    if not task_ids or not rows:
+        return None
+    X = np.stack(rows, axis=0).astype(np.float32)
+    return task_ids, X, used_files
+
+
 class HeldoutDifficultyPredictor:
     """Wraps the existing cross-benchmark block-Ridge for one fold.
 
@@ -97,9 +153,6 @@ class HeldoutDifficultyPredictor:
         """Build training matrices and fit block Ridge on all IRT items."""
         # Lazy imports — only the worker process needs the ML deps.
         from utils import difficulty_prediction as base
-        from utils.multibench import (
-            _try_load_concat_embeddings_from_single_benchmark_caches,
-        )
 
         # 1. Set up per-benchmark judge feature contexts and task->bench map.
         # Each training item is routed to its owning benchmark's feature source.
