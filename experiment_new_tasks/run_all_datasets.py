@@ -17,8 +17,10 @@ from typing import Any, Dict, Optional, Tuple
 
 from experiment_new_tasks.config import DATASET_DEFAULTS
 from experiment_new_tasks.results import (
+    apply_holm_correction,
     extract_metrics as extract_metrics_with_mapping,
     format_results_table,
+    print_holm_summary,
     save_results_csv,
     save_summary_json,
 )
@@ -36,6 +38,10 @@ METHOD_NAME_MAPPINGS = {
     "constant_baseline": "Baseline",
 }
 RESULT_METHODS = ["Baseline", "Embedding", "LLM-as-a-Judge", "Combined", "Oracle"]
+# Family for the Holm-Bonferroni correction: every benchmark x method
+# comparison against the baseline reported together. Oracle is a skyline,
+# not a tested claim, so it is excluded.
+HOLM_FAMILY_METHODS = ["Embedding", "LLM-as-a-Judge", "Combined"]
 
 
 def run_single_dataset(
@@ -398,6 +404,9 @@ def main():
     # Print table
     table = format_results_table(ordered_results, RESULT_METHODS)
     print(table)
+
+    apply_holm_correction(ordered_results, HOLM_FAMILY_METHODS)
+    print_holm_summary(ordered_results, HOLM_FAMILY_METHODS)
 
     # Ensure output directory exists before saving any files
     args.output_dir.mkdir(parents=True, exist_ok=True)

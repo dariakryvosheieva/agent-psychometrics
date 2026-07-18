@@ -17,8 +17,10 @@ from experiment_new_benchmarks.config import (
 )
 from experiment_new_benchmarks.pipeline import METHOD_DISPLAY_NAMES
 from experiment_new_tasks.results import (
+    apply_holm_correction,
     extract_metrics as extract_metrics_with_mapping,
     format_results_table,
+    print_holm_summary,
     save_results_csv,
     save_summary_json,
 )
@@ -34,6 +36,10 @@ METHOD_NAME_MAPPINGS = {
     "oracle": "Oracle",
 }
 RESULT_METHODS = ["Baseline", "Embedding", "LLM-as-a-Judge", "Combined", "Oracle"]
+# Family for the Holm-Bonferroni correction: every held-out benchmark x
+# method comparison against the baseline. Oracle is a skyline, not a tested
+# claim, so it is excluded.
+HOLM_FAMILY_METHODS = ["Embedding", "LLM-as-a-Judge", "Combined"]
 
 
 def run_single_heldout(
@@ -225,6 +231,9 @@ def main() -> None:
     print("EXPERIMENT NEW BENCHMARKS RESULTS SUMMARY")
     print("=" * 80 + "\n")
     print(format_results_table(ordered, RESULT_METHODS))
+
+    apply_holm_correction(ordered, HOLM_FAMILY_METHODS)
+    print_holm_summary(ordered, HOLM_FAMILY_METHODS)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     if args.output:

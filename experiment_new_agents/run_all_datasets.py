@@ -8,8 +8,10 @@ from typing import Any, Dict, Optional, Tuple
 
 from experiment_new_agents.config import DATASET_DEFAULTS
 from experiment_new_tasks.results import (
+    apply_holm_correction,
     extract_metrics as extract_metrics_with_mapping,
     format_results_table,
+    print_holm_summary,
     save_results_csv,
     save_summary_json,
 )
@@ -24,6 +26,10 @@ METHOD_NAME_MAPPINGS = {
     "constant_baseline": "Baseline",
 }
 RESULT_METHODS = ["Baseline", "Model+Scaffold", "Oracle"]
+# Family for the Holm-Bonferroni correction: the per-benchmark
+# Model+Scaffold vs baseline comparisons. Oracle is a skyline, not a tested
+# claim, so it is excluded.
+HOLM_FAMILY_METHODS = ["Model+Scaffold"]
 
 
 def run_single_dataset(
@@ -176,6 +182,9 @@ def main() -> None:
     print("EXPERIMENT NEW AGENTS RESULTS SUMMARY")
     print("=" * 80 + "\n")
     print(format_results_table(ordered, RESULT_METHODS))
+
+    apply_holm_correction(ordered, HOLM_FAMILY_METHODS)
+    print_holm_summary(ordered, HOLM_FAMILY_METHODS)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     if args.output:

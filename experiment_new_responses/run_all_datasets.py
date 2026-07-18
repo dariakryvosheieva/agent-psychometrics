@@ -8,8 +8,10 @@ from typing import Any, Dict, Optional, Tuple
 
 from experiment_new_responses.config import DATASET_DEFAULTS
 from experiment_new_tasks.results import (
+    apply_holm_correction,
     extract_metrics as extract_metrics_with_mapping,
     format_results_table,
+    print_holm_summary,
     save_results_csv,
     save_summary_json,
 )
@@ -24,6 +26,10 @@ METHOD_NAME_MAPPINGS = {
     "standard_irt_baseline": "Standard IRT",
 }
 RESULT_METHODS = ["Standard IRT", "Model+Scaffold", "Oracle"]
+# Family for the Holm-Bonferroni correction: the per-benchmark
+# Model+Scaffold vs Standard IRT comparisons. The four-benchmark row is a
+# separate analysis and Oracle is a skyline, so both are excluded.
+HOLM_FAMILY_METHODS = ["Model+Scaffold"]
 FOUR_BENCHMARK_DISPLAY_NAME = "Verified + Pro + Terminal-Bench + GSO"
 
 
@@ -254,6 +260,14 @@ def main() -> None:
     print("EXPERIMENT NEW RESPONSES RESULTS SUMMARY")
     print("=" * 80 + "\n")
     print(format_results_table(ordered, RESULT_METHODS))
+
+    per_benchmark_results = {
+        name: metrics
+        for name, metrics in ordered.items()
+        if name != FOUR_BENCHMARK_DISPLAY_NAME
+    }
+    apply_holm_correction(per_benchmark_results, HOLM_FAMILY_METHODS)
+    print_holm_summary(per_benchmark_results, HOLM_FAMILY_METHODS)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     if args.output:

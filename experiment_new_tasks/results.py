@@ -7,6 +7,83 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from experiment_new_tasks.bootstrap import holm_bonferroni_adjust
+
+
+def apply_holm_correction(
+    all_results: Dict[str, Dict[str, Any]],
+    family_methods: List[str],
+) -> None:
+    """Add Holm-Bonferroni adjusted p-values for one experiment's test family.
+
+    The family is every (benchmark, method) bootstrap comparison for the
+    given methods across all non-errored benchmarks in ``all_results``.
+    Mutates each metrics dict in place, adding ``{method}__p_value_holm`` and
+    ``{method}__p_value_holm_is_upper_bound``. Callers decide the family by
+    what they pass: restrict ``all_results`` / ``family_methods`` to the rows
+    reported together (e.g., exclude Oracle, which is a skyline rather than a
+    tested claim).
+    """
+    entries: List[Any] = []
+    p_values: List[float] = []
+    bounds: List[bool] = []
+    for dataset_name, metrics in all_results.items():
+        if "error" in metrics:
+            continue
+        for method in family_methods:
+            p_value = metrics.get(f"{method}__p_value")
+            if p_value is None:
+                raise ValueError(
+                    f"Missing bootstrap p-value for method {method!r} on "
+                    f"{dataset_name!r}; cannot apply the Holm correction to an "
+                    "incomplete family"
+                )
+            entries.append((metrics, method))
+            p_values.append(float(p_value))
+            bounds.append(bool(metrics.get(f"{method}__p_value_is_upper_bound")))
+    if not entries:
+        raise ValueError("No bootstrap p-values found; cannot apply the Holm correction")
+
+    adjusted = holm_bonferroni_adjust(p_values, bounds)
+    for (metrics, method), result in zip(entries, adjusted):
+        metrics[f"{method}__p_value_holm"] = result.p_value
+        metrics[f"{method}__p_value_holm_is_upper_bound"] = result.p_value_is_upper_bound
+
+
+def format_p_value(p_value: Optional[float], is_upper_bound: Optional[bool]) -> str:
+    """Format a p-value, prefixing '<' when it is only an upper bound."""
+
+    if p_value is None:
+        return ""
+    if is_upper_bound:
+        return f"<{p_value:.6g}"
+    return f"{p_value:.6g}"
+
+
+def print_holm_summary(
+    all_results: Dict[str, Dict[str, Any]],
+    family_methods: List[str],
+) -> None:
+    """Print raw and Holm-adjusted p-values for the experiment family."""
+
+    print("\nHolm-Bonferroni adjusted p-values "
+          "(family = all benchmark x method comparisons above):")
+    for dataset_name, metrics in all_results.items():
+        if "error" in metrics:
+            continue
+        for method in family_methods:
+            if f"{method}__p_value_holm" not in metrics:
+                continue
+            raw = format_p_value(
+                metrics.get(f"{method}__p_value"),
+                metrics.get(f"{method}__p_value_is_upper_bound"),
+            )
+            adjusted = format_p_value(
+                metrics.get(f"{method}__p_value_holm"),
+                metrics.get(f"{method}__p_value_holm_is_upper_bound"),
+            )
+            print(f"  {dataset_name} / {method}: p={raw}, Holm-adjusted p={adjusted}")
+
 
 def extract_metrics(
     results: Dict[str, Any],
@@ -162,6 +239,7 @@ def save_results_csv(
                     f"{method} Delta 95% CI Low",
                     f"{method} Delta 95% CI High",
                     f"{method} Delta p-value",
+                    f"{method} Delta Holm p-value",
                 ]
             )
         writer.writerow(header)
@@ -170,16 +248,16 @@ def save_results_csv(
             row = [dataset_name]
             for method in methods:
                 if "error" in metrics:
-                    row.extend(["ERROR", "", "", "", "", ""])
+                    row.extend(["ERROR", "", "", "", "", "", ""])
                 elif method in metrics and metrics[method] is not None:
-                    p_value = metrics.get(f"{method}__p_value")
-                    is_upper_bound = metrics.get(f"{method}__p_value_is_upper_bound")
-                    if p_value is None:
-                        p_value_str = ""
-                    elif is_upper_bound:
-                        p_value_str = f"<{p_value:.6g}"
-                    else:
-                        p_value_str = f"{p_value:.6g}"
+                    p_value_str = format_p_value(
+                        metrics.get(f"{method}__p_value"),
+                        metrics.get(f"{method}__p_value_is_upper_bound"),
+                    )
+                    holm_p_value_str = format_p_value(
+                        metrics.get(f"{method}__p_value_holm"),
+                        metrics.get(f"{method}__p_value_holm_is_upper_bound"),
+                    )
                     row.extend(
                         [
                             f"{metrics[method]:.4f}",
@@ -188,10 +266,11 @@ def save_results_csv(
                             _format_optional_float(metrics.get(f"{method}__ci_low")),
                             _format_optional_float(metrics.get(f"{method}__ci_high")),
                             p_value_str,
+                            holm_p_value_str,
                         ]
                     )
                 else:
-                    row.extend(["", "", "", "", "", ""])
+                    row.extend(["", "", "", "", "", "", ""])
             writer.writerow(row)
 
 

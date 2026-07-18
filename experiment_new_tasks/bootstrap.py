@@ -33,6 +33,62 @@ class BootstrapAUCResult:
 
 
 @dataclass
+class HolmAdjustedPValue:
+    """A Holm-Bonferroni adjusted p-value.
+
+    ``p_value_is_upper_bound`` is True when the adjusted value derives from a
+    raw p-value that was itself only an upper bound (Monte Carlo resolution
+    floor of the bootstrap), so the adjusted value is an upper bound too.
+    """
+
+    p_value: float
+    p_value_is_upper_bound: bool
+
+
+def holm_bonferroni_adjust(
+    p_values: Sequence[float],
+    p_value_is_upper_bound: Sequence[bool],
+) -> List[HolmAdjustedPValue]:
+    """Holm-Bonferroni step-down adjustment for one family of m tests.
+
+    Sorts the m raw p-values ascending, multiplies the i-th smallest by
+    (m - i), and enforces monotonicity via a running maximum, capping at 1.
+    Adjusted values are returned in the input order and control the
+    family-wise error rate without independence assumptions. Raw p-values
+    that are upper bounds stay valid upper bounds after adjustment because
+    the adjusted value is monotone in each raw p-value.
+    """
+    if len(p_values) != len(p_value_is_upper_bound):
+        raise ValueError(
+            "p_values and p_value_is_upper_bound must have equal length; "
+            f"got {len(p_values)} and {len(p_value_is_upper_bound)}"
+        )
+    if len(p_values) == 0:
+        raise ValueError("At least one p-value is required")
+    for p in p_values:
+        if not 0.0 <= float(p) <= 1.0:
+            raise ValueError(f"p-values must be in [0, 1], got {p}")
+
+    m = len(p_values)
+    order = sorted(range(m), key=lambda idx: float(p_values[idx]))
+    adjusted: List[Optional[HolmAdjustedPValue]] = [None] * m
+    running = 0.0
+    running_is_bound = False
+    for rank, idx in enumerate(order):
+        candidate = (m - rank) * float(p_values[idx])
+        if candidate > running:
+            running = candidate
+            running_is_bound = bool(p_value_is_upper_bound[idx])
+        elif candidate == running:
+            running_is_bound = running_is_bound or bool(p_value_is_upper_bound[idx])
+        adjusted[idx] = HolmAdjustedPValue(
+            p_value=min(1.0, running),
+            p_value_is_upper_bound=running_is_bound,
+        )
+    return [entry for entry in adjusted if entry is not None]
+
+
+@dataclass
 class SeedMeanDifferenceBootstrapResult:
     """Bootstrap result for seed-level mean AUC differences."""
 
