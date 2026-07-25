@@ -26,27 +26,19 @@ python -m experiment_new_tasks.run_all_datasets
 python -m experiment_new_tasks.run_information_ablation
 
 # Run Experiment New Responses
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by observation \
-    --train_benchmarks verified,terminalbench,pro,gso \
-    --out_dir data/held_out_responses/all_benchmarks
+python -m experiment_new_responses.run_all_datasets --sequential
 
 # Run Experiment New Agents
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by agent \
-    --train_benchmarks verified \
-    --out_dir data/held_out_agents/swebench_verified
+python -m experiment_new_agents.run_all_datasets --sequential
 
 # Run Experiment New Benchmarks
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by benchmark \
-    --train_benchmarks verified,terminalbench,pro \
-    --ood_benchmark gso \
-    --out_dir data/held_out_benchmark/gso \
-    --method judge
+python -m experiment_new_benchmarks.run_all_datasets --sequential
 
 # Run Adaptive Task Selection experiment
 python -m experiment_adaptive_testing.run_experiment
+
+# Run Subset Extrapolation experiment
+python -m experiment_subset_extrapolation.run_all_datasets --plot
 
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
@@ -59,9 +51,12 @@ python swebench_irt/train.py --dims 1 --model 1pl \
 agent-psychometrics/
 ├── data/                              # Input data + IRT models
 ├── embeddings/                        # Pre-computed task embeddings (.npz)
-├── experiment_agent_features/         # Experiments involving agent features: New Responses, New Agents, and New Benchmarks
-├── experiment_adaptive_testing/        # Adaptive task selection via Fisher information
+├── experiment_adaptive_testing/       # Adaptive task selection via Fisher information
+├── experiment_new_agents/             # New Agents experiment
+├── experiment_new_benchmarks/         # New Benchmarks experiment
+├── experiment_new_responses/          # New Responses experiment
 ├── experiment_new_tasks/              # New Tasks experiment
+├── experiment_subset_extrapolation/   # Predict overall agent scores from a subset of tasks
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction
 ├── llm_judge_features/                # LLM-as-a-judge feature CSV files
@@ -97,8 +92,11 @@ The evaluation data used for agents on each of the four benchmarks mentioned in 
 | Document | Purpose |
 |----------|---------|
 | [experiment_new_tasks/README.md](experiment_new_tasks/README.md) | Experiment New Tasks details |
-| [experiment_agent_features/README.md](experiment_agent_features/README.md) | Agent feature experiments |
+| [experiment_new_responses/README.md](experiment_new_responses/README.md) | Experiment New Responses details |
+| [experiment_new_agents/README.md](experiment_new_agents/README.md) | Experiment New Agents details |
+| [experiment_new_benchmarks/README.md](experiment_new_benchmarks/README.md) | Experiment New Benchmarks details |
 | [experiment_adaptive_testing/README.md](experiment_adaptive_testing/README.md) | Adaptive task selection experiment |
+| [experiment_subset_extrapolation/README.md](experiment_subset_extrapolation/README.md) | Subset extrapolation experiment |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
 
 ## Key Files
@@ -107,8 +105,11 @@ The evaluation data used for agents on each of the four benchmarks mentioned in 
 |------|---------|
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks (Table 2) |
 | `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Table 3) |
-| `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 4-6) |
+| `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 4) |
+| `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 5) |
+| `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 6) |
 | `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
+| `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment |
 | `swebench_irt/train.py` | Train IRT models |
 
 ## Citation

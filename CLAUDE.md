@@ -9,9 +9,11 @@ model_irt/
 ├── data/                              # Input data + IRT models (data/{dataset}/irt/)
 ├── embeddings/                        # Pre-computed task embeddings (.npz)
 ├── experiment_new_tasks/              # New Tasks experiment (Table 2)
-├── experiment_agent_features/         # New Responses, New Agents, New Benchmarks (Tables 4-6)
-├── experiment_adaptive_testing/        # Adaptive task selection via Fisher information
-├── experiment_subset_extrapolation/    # Predict overall agent scores from a subset of tasks
+├── experiment_new_responses/          # New Responses experiment (Table 4)
+├── experiment_new_agents/             # New Agents experiment (Table 5)
+├── experiment_new_benchmarks/         # New Benchmarks experiment (Table 6)
+├── experiment_adaptive_testing/       # Adaptive task selection via Fisher information
+├── experiment_subset_extrapolation/   # Predict overall agent scores from a subset of tasks
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction via Docker
 ├── llm_judge_features/                # Extracted feature CSV files
@@ -35,24 +37,13 @@ python -m experiment_new_tasks.run_all_datasets
 python -m experiment_new_tasks.run_information_ablation
 
 # Experiment New Responses — held-out observations (Table 4)
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by observation \
-    --train_benchmarks verified,terminalbench,pro,gso \
-    --out_dir data/held_out_responses
+python -m experiment_new_responses.run_all_datasets --sequential
 
 # Experiment New Agents — unseen agents (Table 5)
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by agent \
-    --train_benchmarks verified \
-    --out_dir data/held_out_agents
+python -m experiment_new_agents.run_all_datasets --sequential
 
-# Experiment New Benchmarks — OOD benchmarks (Table 6)
-python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-    --split_by benchmark \
-    --train_benchmarks verified,terminalbench,pro \
-    --ood_benchmark gso \
-    --out_dir data/held_out_benchmark \
-    --method judge
+# Experiment New Benchmarks — OOD benchmarks, holds out SWE-bench Pro and GSO (Table 6)
+python -m experiment_new_benchmarks.run_all_datasets --sequential
 
 # Adaptive Task Selection experiment
 python -m experiment_adaptive_testing.run_experiment
@@ -92,7 +83,9 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | Document | Purpose |
 |----------|---------|
 | [experiment_new_tasks/README.md](experiment_new_tasks/README.md) | New Tasks experiment details |
-| [experiment_agent_features/README.md](experiment_agent_features/README.md) | Agent feature experiments |
+| [experiment_new_responses/README.md](experiment_new_responses/README.md) | New Responses experiment details |
+| [experiment_new_agents/README.md](experiment_new_agents/README.md) | New Agents experiment details |
+| [experiment_new_benchmarks/README.md](experiment_new_benchmarks/README.md) | New Benchmarks experiment details |
 | [experiment_adaptive_testing/README.md](experiment_adaptive_testing/README.md) | Adaptive task selection experiment |
 | [experiment_subset_extrapolation/README.md](experiment_subset_extrapolation/README.md) | Subset extrapolation experiment |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
@@ -104,7 +97,9 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks (Table 2) |
 | `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Table 3) |
 | `experiment_new_tasks/plot_information_ablation.py` | Plot feature source ablation bar graph (Table 3) |
-| `experiment_agent_features/predict_question_difficulty_multi_benchmark.py` | Agent feature experiments (Tables 4-6) |
+| `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 4) |
+| `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 5) |
+| `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 6) |
 | `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
 | `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment (MAE of predicted overall score vs empirical-subset baseline) |
 | `swebench_irt/train.py` | Train IRT models |

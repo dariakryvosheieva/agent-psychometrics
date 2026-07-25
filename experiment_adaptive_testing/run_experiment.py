@@ -4,12 +4,9 @@ Usage:
     python -m experiment_adaptive_testing.run_experiment --predictions_csv path/to/predictions.csv
 
 To generate predictions first (train on Verified+TerminalBench+GSO, predict Pro):
-    python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \
-        --split_by benchmark \
-        --train_benchmarks verified,terminalbench,gso \
-        --ood_benchmark pro \
-        --out_dir output/experiment_adaptive_testing/ood_predictions \
-        --method judge
+    python -m experiment_new_benchmarks.run_all_datasets \
+        --heldout_datasets swebench_pro \
+        --output_dir output/experiment_adaptive_testing/ood_predictions
 """
 
 from __future__ import annotations
@@ -136,12 +133,9 @@ def main():
         raise FileNotFoundError(
             f"Predictions file not found: {predictions_path}\n"
             f"Generate it first with:\n"
-            f"  python -m experiment_agent_features.predict_question_difficulty_multi_benchmark \\\n"
-            f"      --split_by benchmark \\\n"
-            f"      --train_benchmarks verified,terminalbench,gso \\\n"
-            f"      --ood_benchmark pro \\\n"
-            f"      --out_dir output/experiment_adaptive_testing/ood_predictions \\\n"
-            f"      --method judge"
+            f"  python -m experiment_new_benchmarks.run_all_datasets \\\n"
+            f"      --heldout_datasets swebench_pro \\\n"
+            f"      --output_dir output/experiment_adaptive_testing/ood_predictions"
         )
 
     # Run experiment for each seed and collect results
