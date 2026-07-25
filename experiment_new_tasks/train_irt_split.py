@@ -22,7 +22,8 @@ def set_torch_determinism(enabled: bool) -> None:
     IRT training can be numerically unstable with deterministic algorithms
     enabled. This function temporarily disables determinism during IRT training.
 
-    Copied from predict_question_difficulty.py - see that file for full rationale.
+    Copied from the removed predict_question_difficulty.py (see git history for
+    full rationale).
     """
     import torch
     on = bool(enabled)
@@ -304,8 +305,8 @@ def get_or_train_split_irt(
         if max_train_attempts > 1:
             print(f"   Training attempt {attempt_number}/{max_train_attempts}")
 
-        # Configure and train. The first attempt uses seed=0 to match
-        # predict_question_difficulty.py; retries perturb only failed trainings.
+        # Configure and train. The first attempt uses seed=0 for backward
+        # compatibility with cached models; retries perturb only failed trainings.
         config = IrtConfig(
             model_type=model_type,
             epochs=epochs,
@@ -323,7 +324,6 @@ def get_or_train_split_irt(
         print(f"   Dataset: {n_subjects} subjects, {n_items} items")
 
         # Disable torch determinism during IRT for numerical stability
-        # (see predict_question_difficulty.py for rationale)
         set_torch_determinism(False)
         try:
             trainer.train(device="cpu")

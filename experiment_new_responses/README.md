@@ -17,7 +17,7 @@ Terminal-Bench 2.0, and GSO.
 ```bash
 source .venv/bin/activate
 
-python -m experiment_new_responses.run_all_datasets --sequential
+python -m experiment_new_responses.run_all_datasets
 ```
 
 Useful options:

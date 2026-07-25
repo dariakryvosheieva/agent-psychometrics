@@ -21,6 +21,8 @@ model_irt/
 │   └── backbone_ablation/             #   GPT-5.4 and Claude 4.6 Sonnet features (Appendix C.2)
 ├── swebench_irt/                      # IRT model training
 ├── py_irt/                            # IRT library (local fork)
+├── utils/                             # Shared experiment utilities (IRT training, embeddings, difficulty prediction)
+├── slurm/                             # Batch scripts for the engaging cluster
 └── output/                            # Experiment outputs (gitignored)
 ```
 
@@ -36,13 +38,13 @@ python -m experiment_new_tasks.run_all_datasets
 python -m experiment_new_tasks.run_information_ablation
 
 # Experiment New Responses — held-out observations (Table 20, Appendix G.1)
-python -m experiment_new_responses.run_all_datasets --sequential
+python -m experiment_new_responses.run_all_datasets
 
-# Experiment New Agents — unseen agents (Table 4)
-python -m experiment_new_agents.run_all_datasets --sequential
+# Experiment New Agents — held-out LLM-scaffold pairs (Table 4)
+python -m experiment_new_agents.run_all_datasets
 
 # Experiment New Benchmarks — OOD benchmarks, holds out SWE-bench Pro and GSO (Table 5)
-python -m experiment_new_benchmarks.run_all_datasets --sequential
+python -m experiment_new_benchmarks.run_all_datasets
 
 # Adaptive Task Selection — new-agent CAT with IRT-Agent prior (paper figure)
 python -m experiment_adaptive_testing.run_new_agent_experiment \

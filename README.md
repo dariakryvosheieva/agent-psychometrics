@@ -25,14 +25,14 @@ python -m experiment_new_tasks.run_all_datasets
 # Run feature source ablation
 python -m experiment_new_tasks.run_information_ablation
 
-# Run Experiment New Responses
-python -m experiment_new_responses.run_all_datasets --sequential
+# Run Experiment New Responses (held-out observations)
+python -m experiment_new_responses.run_all_datasets
 
-# Run Experiment New Agents
-python -m experiment_new_agents.run_all_datasets --sequential
+# Run Experiment New Agents (held-out LLM-scaffold pairs)
+python -m experiment_new_agents.run_all_datasets
 
-# Run Experiment New Benchmarks
-python -m experiment_new_benchmarks.run_all_datasets --sequential
+# Run Experiment New Benchmarks (held-out benchmark, default: SWE-bench Pro and GSO)
+python -m experiment_new_benchmarks.run_all_datasets
 
 # Run Adaptive Task Selection experiment (new-agent CAT with IRT-Agent prior, paper Figure 2)
 python -m experiment_adaptive_testing.run_new_agent_experiment \
@@ -54,10 +54,10 @@ agent-psychometrics/
 ├── data/                              # Input data + IRT models
 ├── embeddings/                        # Pre-computed task embeddings (.npz)
 ├── experiment_adaptive_testing/       # Adaptive task selection via Fisher information
-├── experiment_new_agents/             # New Agents experiment
-├── experiment_new_benchmarks/         # New Benchmarks experiment
-├── experiment_new_responses/          # New Responses experiment
 ├── experiment_new_tasks/              # New Tasks experiment
+├── experiment_new_responses/          # New Responses experiment (held-out observations)
+├── experiment_new_agents/             # New Agents experiment (held-out LLM-scaffold pairs)
+├── experiment_new_benchmarks/         # New Benchmarks experiment (held-out benchmark)
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction
 ├── llm_judge_features/                # LLM-as-a-judge feature CSV files
@@ -65,7 +65,8 @@ agent-psychometrics/
 │   ├── defaults/                      #   Features used in main experiments
 │   └── information_ablation/          #   Features used in the feature source ablation experiments (Tables 3 & 10)
 ├── py_irt/                            # IRT library (local fork)
-└── swebench_irt/                      # IRT model training
+├── swebench_irt/                      # IRT model training
+└── utils/                             # Shared experiment utilities (IRT training, embeddings, difficulty prediction)
 ```
 
 ## Datasets

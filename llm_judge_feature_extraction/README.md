@@ -108,7 +108,7 @@ python -m llm_judge_feature_extraction.extract_ablation_overrides \
 ```
 
 **Options:**
-- `--info-level` — `problem`, `test`, or `solution` (required)
+- `--info-level` — `problem`, `test`, `solution`, or `problem_solution` (required)
 - `--datasets` — Which datasets to process (default: all 4)
 - `--provider` / `--model` — LLM provider and model (default: anthropic / claude-opus-4-6)
 - `--parallel` / `--concurrency` — Parallel extraction (default concurrency: 30)

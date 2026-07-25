@@ -16,7 +16,7 @@ Runs are currently configured for SWE-bench Verified and Terminal-Bench 2.0.
 ```bash
 source .venv/bin/activate
 
-python -m experiment_new_agents.run_all_datasets --sequential
+python -m experiment_new_agents.run_all_datasets
 ```
 
 Useful options:
@@ -39,3 +39,8 @@ python -m experiment_new_agents.run_all_datasets \
 
 Fold IRT models are cached under each dataset output directory in `irt_splits/`.
 The oracle IRT is cached under `irt_oracle/`.
+
+Significance of `Model+Scaffold` vs `Baseline` is computed by bootstrapping
+seed-level mean fold-AUC differences (`bootstrap_seed_mean_differences` from
+`experiment_new_tasks/bootstrap.py`), with p-values Holm-Bonferroni corrected
+per dataset (see `HOLM_FAMILY_METHODS` in `run_all_datasets.py`).

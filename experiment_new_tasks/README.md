@@ -56,12 +56,16 @@ For Terminal-Bench 2.0 we also publish a per-attempt response file `data/termina
 python -m experiment_new_tasks.run_all_datasets \
     --datasets terminalbench \
     --responses_path data/terminalbench/responses_per_attempt.jsonl \
+    --abilities_path data/terminalbench/irt_binomial/1d_1pl/abilities.csv \
+    --items_path data/terminalbench/irt_binomial/1d_1pl/items.csv \
     --per_dataset_output_dir output/experiment_a_terminalbench_binomial \
     --output_dir output/experiment_a_terminalbench_binomial \
     --output output/experiment_a_terminalbench_binomial/results.csv
 ```
 
-The per-attempt file is produced by `python swebench_irt/prep_terminalbench.py --fetch_per_attempt_from data/terminalbench/responses.jsonl` (which fetches each agent's detail page via the `detail_url` field already stored in the binary file, so the agent set lines up exactly).
+The `--abilities_path`/`--items_path` overrides point the Oracle at the canonical binomial full IRT (`data/terminalbench/irt_binomial/1d_1pl/`, 139 agents). They are required because the per-attempt file's agent set differs from the binary file's: the default Oracle (`data/terminalbench/irt/1d_1pl/`) only covers the 112 binary-snapshot agents.
+
+The canonical per-attempt file was produced by `python swebench_irt/prep_terminalbench.py --per_attempt_only --per_attempt_output data/terminalbench/responses_per_attempt.jsonl`, which re-scrapes the current leaderboard (2026-05-22 snapshot; 139 unique agents vs the binary file's 112). The alternative `--fetch_per_attempt_from data/terminalbench/responses.jsonl` mode instead revisits the binary file's per-agent `detail_url` pages, producing a per-attempt file whose agent set is a strict subset of the binary snapshot.
 
 ## Results
 
@@ -147,8 +151,8 @@ defaults to `k_folds=5`, `n_fold_seeds=20`, `n_bootstrap=10000`, and
 `experiment_new_tasks/pipeline.py`.
 
 The repeated-CV aggregation is implemented in
-`cross_validate_all_predictors_repeated_seeds()` (`pipeline.py`, around lines
-334-489). For each fold seed, it temporarily replaces `config.split_seed` with
+`cross_validate_all_predictors_repeated_seeds()` in `pipeline.py`. For each
+fold seed, it temporarily replaces `config.split_seed` with
 that seed and calls the ordinary `cross_validate_all_predictors()` 5-fold
 evaluation. The per-seed result stores the fold AUCs for every method. For each
 method, the code then computes:
@@ -165,7 +169,7 @@ task split, not just variation among the five folds of one split.
 
 For significance testing, each method is compared to the constant baseline using
 paired fold differences from the same fold seed and fold index. In
-`pipeline.py` around lines 406-432, the method fold AUCs and constant-baseline
+`pipeline.py`, the method fold AUCs and constant-baseline
 fold AUCs are aligned and averaged as:
 
 ```
@@ -174,7 +178,7 @@ delta_s = mean_folds(AUC_method,s,fold - AUC_baseline,s,fold)
 
 This produces `N` seed-level mean differences, one per fold seed. These are the
 inputs to `bootstrap_seed_mean_differences()` in
-`experiment_new_tasks/bootstrap.py` (around lines 201-256). The bootstrap treats
+`experiment_new_tasks/bootstrap.py`. The bootstrap treats
 fold seed as the resampling unit: each bootstrap replicate draws `N` values
 with replacement from the observed `{delta_s}` values and computes the replicate
 mean.
@@ -200,8 +204,7 @@ This avoids reporting an exact `p=0` from finite Monte Carlo samples. If no
 bootstrap sample crosses zero, the code marks `p_value_is_upper_bound=True`, and
 the printed summary displays the p-value with a leading `<`.
 
-The final per-method outputs are assembled in `pipeline.py` around lines
-440-449:
+The final per-method outputs are assembled in `pipeline.py`:
 
 - The observed mean difference, `mean(delta_s)`.
 - The 95% percentile confidence interval from the bootstrap sample means.
@@ -209,10 +212,21 @@ The final per-method outputs are assembled in `pipeline.py` around lines
   is zero, using an add-one correction so finite bootstrap runs do not report
   an exact p-value of 0.
 
+Because each dataset tests three methods against the baseline (Embedding,
+LLM-as-a-Judge, Combined; `HOLM_FAMILY_METHODS` in `run_all_datasets.py`), the
+raw p-values are then adjusted with a Holm-Bonferroni step-down correction per
+dataset (`holm_bonferroni_adjust()` in `experiment_new_tasks/bootstrap.py`,
+applied via `apply_holm_correction()` in `experiment_new_tasks/results.py`).
+The adjustment sorts the `m` raw p-values ascending, multiplies the i-th
+smallest by `m - i`, and enforces monotonicity with a running maximum, capping
+at 1; this controls the family-wise error rate without independence
+assumptions. Raw p-values that are Monte Carlo upper bounds remain upper
+bounds after adjustment and are printed with a leading `<`.
+
 CSV output is expanded by `save_results_csv()` in
-`experiment_new_tasks/run_all_datasets.py`. It includes the AUC mean, AUC
+`experiment_new_tasks/results.py`. It includes the AUC mean, AUC
 standard deviation, method-vs-baseline mean difference, 95% CI bounds, and
-p-value for each method.
+raw and Holm-adjusted p-values for each method.
 
 ## Feature Sources
 
