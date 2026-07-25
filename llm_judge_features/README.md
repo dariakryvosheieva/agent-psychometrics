@@ -12,7 +12,7 @@ llm_judge_features/
 │   ├── swebench_pro/llm_judge_features.csv
 │   └── terminalbench/llm_judge_features.csv
 │
-├── information_ablation/              # Features for info-level ablation (Table 3)
+├── information_ablation/              # Features for info-level ablation (Tables 3 & 10)
 │   ├── source/                        # 28-feature source CSVs (input to ablation)
 │   │   ├── swebench_verified.csv
 │   │   ├── gso.csv

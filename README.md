@@ -62,7 +62,7 @@ agent-psychometrics/
 ├── llm_judge_features/                # LLM-as-a-judge feature CSV files
 │   ├── backbone_ablation/             #   Features from GPT-5.4 and Claude 4.6 Sonnet (Appendix C.2)
 │   ├── defaults/                      #   Features used in main experiments
-│   └── information_ablation/          #   Features used in the feature source ablation experiment (Table 3)
+│   └── information_ablation/          #   Features used in the feature source ablation experiments (Tables 3 & 10)
 ├── py_irt/                            # IRT library (local fork)
 └── swebench_irt/                      # IRT model training
 ```
@@ -104,10 +104,10 @@ The evaluation data used for agents on each of the four benchmarks mentioned in 
 | File | Purpose |
 |------|---------|
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks (Table 2) |
-| `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Table 3) |
-| `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 4) |
-| `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 5) |
-| `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 6) |
+| `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Tables 3 & 10) |
+| `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 20, Appendix G.1) |
+| `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 4) |
+| `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 5) |
 | `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
 | `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment |
 | `swebench_irt/train.py` | Train IRT models |

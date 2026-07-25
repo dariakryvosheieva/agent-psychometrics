@@ -220,7 +220,7 @@ Pre-computed feature CSVs live in [`llm_judge_features/`](../llm_judge_features/
 | Directory | Purpose | Features |
 |-----------|---------|----------|
 | `defaults/` | Default features for Experiment New Tasks (Table 2) | 15 per dataset |
-| `information_ablation/` | Per-info-level features for ablation (Table 3) | Top-15 at each level |
+| `information_ablation/` | Per-info-level features for ablation (Tables 3 & 10) | Top-15 at each level |
 | `backbone_ablation/` | Alternative LLM backbones (Appendix C.2) | 28 per dataset |
 
 ### Regenerating Information Ablation Features

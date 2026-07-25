@@ -9,16 +9,16 @@ model_irt/
 ├── data/                              # Input data + IRT models (data/{dataset}/irt/)
 ├── embeddings/                        # Pre-computed task embeddings (.npz)
 ├── experiment_new_tasks/              # New Tasks experiment (Table 2)
-├── experiment_new_responses/          # New Responses experiment (Table 4)
-├── experiment_new_agents/             # New Agents experiment (Table 5)
-├── experiment_new_benchmarks/         # New Benchmarks experiment (Table 6)
+├── experiment_new_responses/          # New Responses experiment (Table 20, Appendix G.1)
+├── experiment_new_agents/             # New Agents experiment (Table 4)
+├── experiment_new_benchmarks/         # New Benchmarks experiment (Table 5)
 ├── experiment_adaptive_testing/       # Adaptive task selection via Fisher information
 ├── experiment_subset_extrapolation/   # Predict overall agent scores from a subset of tasks
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction via Docker
 ├── llm_judge_features/                # Extracted feature CSV files
 │   ├── defaults/                      #   Features used in main experiments
-│   ├── information_ablation/          #   Per-source features for ablation (Table 3)
+│   ├── information_ablation/          #   Per-source features for ablation (Tables 3 & 10)
 │   └── backbone_ablation/             #   GPT-5.4 and Claude 4.6 Sonnet features (Appendix C.2)
 ├── swebench_irt/                      # IRT model training
 ├── py_irt/                            # IRT library (local fork)
@@ -33,16 +33,16 @@ source .venv/bin/activate
 # Experiment New Tasks — 5-fold CV on held-out tasks (Table 2)
 python -m experiment_new_tasks.run_all_datasets
 
-# Feature source ablation (Table 3)
+# Feature source ablation (Tables 3 & 10)
 python -m experiment_new_tasks.run_information_ablation
 
-# Experiment New Responses — held-out observations (Table 4)
+# Experiment New Responses — held-out observations (Table 20, Appendix G.1)
 python -m experiment_new_responses.run_all_datasets --sequential
 
-# Experiment New Agents — unseen agents (Table 5)
+# Experiment New Agents — unseen agents (Table 4)
 python -m experiment_new_agents.run_all_datasets --sequential
 
-# Experiment New Benchmarks — OOD benchmarks, holds out SWE-bench Pro and GSO (Table 6)
+# Experiment New Benchmarks — OOD benchmarks, holds out SWE-bench Pro and GSO (Table 5)
 python -m experiment_new_benchmarks.run_all_datasets --sequential
 
 # Adaptive Task Selection experiment
@@ -76,7 +76,7 @@ Snapshot dates and drift: `responses.jsonl` was scraped on 2026-03-04 (112 agent
 
 A separate canonical full IRT for the binomial protocol lives at `data/terminalbench/irt_binomial/1d_1pl/` (139 abilities + 89 difficulties). Used as the Oracle baseline when running Experiment New Tasks in binomial mode via `--abilities_path data/terminalbench/irt_binomial/1d_1pl/abilities.csv --items_path data/terminalbench/irt_binomial/1d_1pl/items.csv`. Trained by `python swebench_irt/train.py --dims 1 --model 1pl --data_path data/terminalbench/responses_per_attempt.jsonl --output_dir data/terminalbench/irt_binomial --seed 0` (which auto-detects the binomial format).
 
-The binary file remains the canonical source for the Table 2 binary results in [experiment_new_tasks/README.md](experiment_new_tasks/README.md); the per-attempt file + `irt_binomial/` IRT are the canonical sources for the binomial-likelihood + per-attempt-AUC variant reported in the appendix.
+The binary file remains the canonical source for the Table 2 binary results in [experiment_new_tasks/README.md](experiment_new_tasks/README.md); the per-attempt file + `irt_binomial/` IRT are the canonical sources for the binomial-likelihood + per-attempt-AUC variant reported in Appendix C.6 (Table 13) of the paper.
 
 ## Documentation
 
@@ -95,11 +95,11 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | File | Purpose |
 |------|---------|
 | `experiment_new_tasks/run_all_datasets.py` | Run Experiment New Tasks (Table 2) |
-| `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Table 3) |
-| `experiment_new_tasks/plot_information_ablation.py` | Plot feature source ablation bar graph (Table 3) |
-| `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 4) |
-| `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 5) |
-| `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 6) |
+| `experiment_new_tasks/run_information_ablation.py` | Feature source ablation (Tables 3 & 10) |
+| `experiment_new_tasks/plot_information_ablation.py` | Plot feature source ablation bar graph (Tables 3 & 10) |
+| `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 20, Appendix G.1) |
+| `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 4) |
+| `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 5) |
 | `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
 | `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment (MAE of predicted overall score vs empirical-subset baseline) |
 | `swebench_irt/train.py` | Train IRT models |

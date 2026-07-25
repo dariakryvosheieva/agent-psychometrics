@@ -22,13 +22,13 @@ source .venv/bin/activate
 # Run all datasets (Table 2)
 python -m experiment_new_tasks.run_all_datasets
 
-# Feature source ablation (Table 3)
+# Feature source ablation (Tables 3 & 10)
 python -m experiment_new_tasks.run_information_ablation
 
 # Run specific datasets only
 python -m experiment_new_tasks.run_all_datasets --datasets gso terminalbench
 
-# Plot feature source ablation bar graph (Table 3)
+# Plot feature source ablation bar graph (Tables 3 & 10)
 python -m experiment_new_tasks.plot_information_ablation
 ```
 
@@ -76,14 +76,16 @@ Run with: `python -m experiment_new_tasks.run_all_datasets`
 | GSO | 0.7137 | 0.7610 | 0.7856 | **0.8044** | 0.9139 |
 | Terminal-Bench 2.0 | 0.7335 | 0.7744 | 0.8059 | **0.8101** | 0.9317 |
 
-### Feature Source Ablation (Table 3)
+### Feature Source Ablation (Tables 3 & 10)
 
 Run with: `python -m experiment_new_tasks.run_information_ablation`
 
 LLM-as-a-Judge AUC by information level. Rows 1-4 are the cumulative additive
-ablation (Problem → +Auditor → +Test → +Solution). Rows 5-6 are non-cumulative:
-row 5 drops the test patch from the +Solution context, and row 6 drops the
-auditor features from the +Solution pool.
+ablation (Problem → +Auditor → +Test → +Solution), reported as Table 10 in
+Appendix C.3 of the paper. Rows 5-6 are non-cumulative and feed the
+leave-one-out ablation (Table 3 in the paper): row 5 drops the test patch from
+the +Solution context, and row 6 drops the auditor features from the +Solution
+pool.
 
 | Info Level | SWE-bench Verified | SWE-bench Pro | GSO | Terminal-Bench 2.0 |
 |---|---|---|---|---|
@@ -111,7 +113,7 @@ from row 4 (15 statement + 3 test + 2 solution, no extraction) and drops the
 versus + Solution (Full), so auditor features contribute marginally on top of
 the LLM-judge features extracted with full context.
 
-### Backbone Ablation (Appendix C)
+### Backbone Ablation (Appendix C.2)
 
 Ablates the model used to extract 12 non-repository-state LLM-as-a-judge features, keeping the same 15 features. The 3 repository state features are kept constant.
 
