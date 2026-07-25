@@ -12,8 +12,7 @@ model_irt/
 ├── experiment_new_responses/          # New Responses experiment (Table 20, Appendix G.1)
 ├── experiment_new_agents/             # New Agents experiment (Table 4)
 ├── experiment_new_benchmarks/         # New Benchmarks experiment (Table 5)
-├── experiment_adaptive_testing/       # Adaptive task selection via Fisher information
-├── experiment_subset_extrapolation/   # Predict overall agent scores from a subset of tasks
+├── experiment_adaptive_testing/       # New-agent CAT via Fisher information (paper Fig. 2)
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction via Docker
 ├── llm_judge_features/                # Extracted feature CSV files
@@ -45,12 +44,13 @@ python -m experiment_new_agents.run_all_datasets --sequential
 # Experiment New Benchmarks — OOD benchmarks, holds out SWE-bench Pro and GSO (Table 5)
 python -m experiment_new_benchmarks.run_all_datasets --sequential
 
-# Adaptive Task Selection experiment
-python -m experiment_adaptive_testing.run_experiment
-
-# Subset Extrapolation — predict each agent's full-benchmark % from a random
-# subset of tasks (sweep across subset sizes 0.10–0.50, 20 seeds each)
-python -m experiment_subset_extrapolation.run_all_datasets --plot
+# Adaptive Task Selection — new-agent CAT with IRT-Agent prior (paper figure)
+python -m experiment_adaptive_testing.run_new_agent_experiment \
+    --dataset swebench_verified \
+    --split_seed 2 \
+    --max_tasks 100 \
+    --n_random_subsets 20 \
+    --output_dir output/experiment_adaptive_testing/new_agent
 
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
@@ -87,7 +87,6 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | [experiment_new_agents/README.md](experiment_new_agents/README.md) | New Agents experiment details |
 | [experiment_new_benchmarks/README.md](experiment_new_benchmarks/README.md) | New Benchmarks experiment details |
 | [experiment_adaptive_testing/README.md](experiment_adaptive_testing/README.md) | Adaptive task selection experiment |
-| [experiment_subset_extrapolation/README.md](experiment_subset_extrapolation/README.md) | Subset extrapolation experiment |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
 
 ## Key Files
@@ -100,8 +99,7 @@ The binary file remains the canonical source for the Table 2 binary results in [
 | `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 20, Appendix G.1) |
 | `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 4) |
 | `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 5) |
-| `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
-| `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment (MAE of predicted overall score vs empirical-subset baseline) |
+| `experiment_adaptive_testing/run_new_agent_experiment.py` | New-agent CAT experiment (paper Fig. 2); `run_experiment.py` is the old cross-benchmark variant |
 | `swebench_irt/train.py` | Train IRT models |
 | `swebench_irt/prep_swebench.py` | Build response matrix |
 | `experiment_new_tasks/feature_source.py` | Feature source abstractions (`GroupedFeatureSource`, `RegularizedFeatureSource`) |

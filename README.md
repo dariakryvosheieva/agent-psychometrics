@@ -34,11 +34,13 @@ python -m experiment_new_agents.run_all_datasets --sequential
 # Run Experiment New Benchmarks
 python -m experiment_new_benchmarks.run_all_datasets --sequential
 
-# Run Adaptive Task Selection experiment
-python -m experiment_adaptive_testing.run_experiment
-
-# Run Subset Extrapolation experiment
-python -m experiment_subset_extrapolation.run_all_datasets --plot
+# Run Adaptive Task Selection experiment (new-agent CAT with IRT-Agent prior, paper Figure 2)
+python -m experiment_adaptive_testing.run_new_agent_experiment \
+    --dataset swebench_verified \
+    --split_seed 2 \
+    --max_tasks 100 \
+    --n_random_subsets 20 \
+    --output_dir output/experiment_adaptive_testing/new_agent
 
 # Train IRT model
 python swebench_irt/train.py --dims 1 --model 1pl \
@@ -56,7 +58,6 @@ agent-psychometrics/
 ├── experiment_new_benchmarks/         # New Benchmarks experiment
 ├── experiment_new_responses/          # New Responses experiment
 ├── experiment_new_tasks/              # New Tasks experiment
-├── experiment_subset_extrapolation/   # Predict overall agent scores from a subset of tasks
 ├── llm_judge_feature_extraction/      # LLM-as-a-judge feature extraction
 │   └── auditor_agent/                 #   Repository state feature extraction
 ├── llm_judge_features/                # LLM-as-a-judge feature CSV files
@@ -96,7 +97,6 @@ The evaluation data used for agents on each of the four benchmarks mentioned in 
 | [experiment_new_agents/README.md](experiment_new_agents/README.md) | Experiment New Agents details |
 | [experiment_new_benchmarks/README.md](experiment_new_benchmarks/README.md) | Experiment New Benchmarks details |
 | [experiment_adaptive_testing/README.md](experiment_adaptive_testing/README.md) | Adaptive task selection experiment |
-| [experiment_subset_extrapolation/README.md](experiment_subset_extrapolation/README.md) | Subset extrapolation experiment |
 | [llm_judge_feature_extraction/README.md](llm_judge_feature_extraction/README.md) | LLM judge feature extraction |
 
 ## Key Files
@@ -108,8 +108,7 @@ The evaluation data used for agents on each of the four benchmarks mentioned in 
 | `experiment_new_responses/run_all_datasets.py` | Run Experiment New Responses (Table 20, Appendix G.1) |
 | `experiment_new_agents/run_all_datasets.py` | Run Experiment New Agents (Table 4) |
 | `experiment_new_benchmarks/run_all_datasets.py` | Run Experiment New Benchmarks (Table 5) |
-| `experiment_adaptive_testing/run_experiment.py` | Adaptive task selection experiment |
-| `experiment_subset_extrapolation/run_all_datasets.py` | Subset extrapolation experiment |
+| `experiment_adaptive_testing/run_new_agent_experiment.py` | Adaptive task selection experiment (new-agent CAT, paper Figure 2) |
 | `swebench_irt/train.py` | Train IRT models |
 
 ## Citation
