@@ -1,110 +1,84 @@
 # Adaptive Task Selection via Fisher Information
 
-Can we select a small, informative subset of benchmark tasks to evaluate new agents on — using only cross-benchmark difficulty predictions — and still recover the correct agent ranking?
+How few benchmark tasks does an agent developer need to run before they can reliably estimate the ability of a new LLM--scaffold combination?
 
 ## Overview
 
-**Setting**: We pretend SWE-bench Pro is a new benchmark with no existing response data. We predict task difficulties from other benchmarks (Verified, TerminalBench, GSO) and use Fisher information to adaptively select which tasks to evaluate agents on.
+We instantiate classical computerized adaptive testing (CAT) in our New Agents setting: the benchmark has been thoroughly evaluated on existing agents but the new agent has no responses yet. After each task we re-estimate the new agent's ability by MAP under a Gaussian prior and use the current estimate to pick the next, most informative task by Fisher information. The paper-specific contribution is using the IRT-Agent prediction (an LLM+scaffold ability decomposition trained on the other agents) as an informative prior, which shifts the win exactly to the small-budget regime that matters for iterative development.
 
-**Metric**: Empirical reliability (`1 - mean(1/I) / var(θ̂)`) of agent ability estimates (14 agents), as a function of subset size. All methods are evaluated using the true IRT difficulty scores for MLE ability estimation and Fisher information — only task selection differs.
+**Three methods compared** (all use the fold's IRT difficulties `b_i` for ability estimation):
 
-**Uncertainty**: 95% CIs come from a percentile bootstrap over the 14 agents (B=10,000 by default; override with `--n_boot`). At each step we resample the agent index with replacement and recompute reliability, then take the 2.5/97.5 percentiles. The bootstrap RNG (`--bootstrap_seed`) is separate from the task-shuffle seed so Random's shuffle variance does not entangle with the agent-bootstrap bands.
+| Method | Task selection | Prior on `θ` |
+|---|---|---|
+| **Random + weak prior** | Uniform random | `N(0, 3²)` |
+| **Fisher + weak prior** | Greedy max Fisher info | `N(0, 3²)` |
+| **Fisher + IRT-Agent prior** (ours) | Greedy max Fisher info | `N(θ_LLM + θ_scaffold, σ_prior²)` from the held-out fold's IRT-Agent |
 
-**Three methods compared**:
-
-| Method | Task Selection |
-|--------|---------------|
-| **Fisher (Predicted)** | Maximize Fisher info using cross-benchmark predicted difficulties |
-| **Fisher (Oracle)** | Maximize Fisher info using ground truth IRT difficulties |
-| **Random** | Fixed random ordering (same for all agents) |
-
-Fisher (Oracle) is an upper bound — what's achievable with perfect difficulty knowledge.
+`σ_prior` is one global scalar: the empirical RMSE of `(θ_prior, θ_true)` across all held-out agents.
 
 ## Quick Start
 
 ```bash
 source .venv/bin/activate
 
-# Step 1: Generate predicted difficulties (train on Verified+TerminalBench+GSO, predict Pro)
-python -m experiment_new_benchmarks.run_all_datasets \
-    --heldout_datasets swebench_pro \
-    --output_dir output/experiment_adaptive_testing/ood_predictions
-
-# Step 2: Run adaptive task selection experiment
-python -m experiment_adaptive_testing.run_experiment
+# Run the new-agent CAT experiment on SWE-bench Verified.
+# Fold-specific IRT models are cached under
+# output/experiment_new_agents_verified/irt_splits/ on first run.
+python -m experiment_adaptive_testing.run_new_agent_experiment \
+    --dataset swebench_verified \
+    --split_seed 2 \
+    --max_tasks 100 \
+    --n_random_subsets 20 \
+    --output_dir output/experiment_adaptive_testing/new_agent
 ```
 
-### Options
-
-```bash
-# Custom predictions file
-python -m experiment_adaptive_testing.run_experiment --predictions_csv path/to/predictions.csv
-
-# Custom seeds (results are averaged across all seeds)
-python -m experiment_adaptive_testing.run_experiment --seeds 42 7 123
-
-# Adjust parameters
-python -m experiment_adaptive_testing.run_experiment --max_steps 300 --prior_sigma 5.0
-```
-
-## How It Works
-
-### Fisher Information for 1PL
-
-For the Rasch model, `P(success) = sigmoid(θ - b)`, the item information is:
-
-```
-I(θ, b) = P(1 - P)
-```
-
-This is maximized when `P = 0.5` (i.e., `θ ≈ b`), so Fisher selection picks tasks whose difficulty matches the agent's current estimated ability.
-
-### Simulation Loop
-
-All three methods share the same loop:
-
-1. For each step t = 1, ..., max_steps:
-   - Selector picks the next task
-   - Observe the agent's real binary response
-   - Update the agent's score
-2. At each step, compute empirical reliability of agent ability estimates (using oracle IRT difficulties for all methods)
-
-For Fisher methods, the selector is adaptive (depends on the agent's evolving θ̂ after each response). For Random, all agents share the same fixed task ordering. Since Random depends on task order, results are averaged across multiple random seeds (5 by default).
-
-### MLE Ability Estimation
-
-Fisher methods estimate agent ability via MAP with a weak Gaussian prior (σ = 3.0 by default):
-
-```
-maximize: Σ [y_j log P_j + (1-y_j) log(1-P_j)] - θ²/(2σ²)
-```
-
-Optimized with L-BFGS-B, bounded to [-6, 6].
+`--split_seed 2` is the canonical seed: it passes the eligible-pairs filter in `stable_k_fold_split_agent_pairs` (LLMs and scaffolds with only one observation are dropped, so the held-out pair's marginals are guaranteed in training). Several other seeds fail this check; if you change the seed, expect a `RuntimeError` on bad ones.
 
 ## Output
 
 ```
-output/experiment_adaptive_testing/averaged/
-├── config.json              # Experiment parameters (including seeds, n_boot)
-├── results.csv              # step + (point, lo, hi) per method, averaged across seeds
-└── reliability_curves.pdf   # Main figure with shaded 95% bootstrap CI bands
+output/experiment_adaptive_testing/new_agent/
+├── error_curves.pdf       # Headline figure: MAE vs K, with 95% bootstrap CIs
+├── error_curves.csv       # per-step mean/lo/hi for each method
+├── summary.json           # n_agents, sigma_prior, prior_rmse, prior_mae
+└── per_agent_records.csv  # per (fold, agent) rows: theta_true, theta_prior
 ```
 
-## Data
+## Headline numbers (SWE-bench Verified, split_seed=2, 30 held-out pairs)
 
-| File | Purpose |
-|------|---------|
-| `data/swebench_pro/responses.jsonl` | Response matrix (14 agents × 730 tasks) |
-| `data/swebench_pro/irt/1d_1pl/items.csv` | Oracle IRT difficulties |
-| `output/experiment_adaptive_testing/ood_predictions/predictions.csv` | Cross-benchmark predicted difficulties |
+- Prior alone (`K = 0`): MAE 0.79; matched by Random only after ~10 tasks.
+- To reach MAE ≈ 0.5: Fisher + IRT-Agent needs ≈ 5 tasks; Fisher + weak ≈ 15; Random ≈ 20.
+- Methods converge by `K ≈ 40`; the prior is washed out by the data.
 
-## Directory Structure
+## How It Works
+
+Per held-out (LLM, scaffold) pair `i`:
+
+1. Load the fold-specific IRT-Agent from `output/experiment_new_agents_verified/irt_splits/seed{S}_fold{F}of5_1d_1pl/`. This gives item difficulties `b_i`, plus `θ_LLM` and `θ_scaffold` for every LLM and scaffold in the training agents.
+2. **Ground truth**: MAP estimate `θ*_i` using all 500 of the agent's binary responses against the fold's `b_i`.
+3. **Prior**: `θ_prior = θ_LLM + θ_scaffold` (combine="sum"), with global `σ_prior` = RMSE of `(θ_prior, θ*_i)` across folds.
+4. For `K = 1 ... max_tasks`, each method picks the next task, observes the response, re-estimates `θ̂_K` by MAP, and records `|θ̂_K - θ*_i|`.
+
+Bands on the headline figure are **bootstrap CIs on the mean** across the 30 held-out agents (10 000 resamples), not per-agent percentiles, since the question is "is the average error of method A lower than method B" not "what's the worst-case error for an individual new agent."
+
+## Old experiment (kept for reference)
+
+A different framing of adaptive testing — assuming we have *no* response data for the target benchmark and must predict difficulties cross-benchmark — lives in [run_experiment.py](run_experiment.py). It corresponds to the New Benchmarks setting and was the original version of this experiment; it has been superseded by the new-agent version for the paper. See git history for the rationale.
+
+```bash
+# Old experiment (cross-benchmark difficulty prediction on SWE-bench Pro)
+python -m experiment_new_benchmarks.run_all_datasets \
+    --heldout_datasets swebench_pro \
+    --output_dir output/experiment_adaptive_testing/ood_predictions
+python -m experiment_adaptive_testing.run_experiment
+```
+
+## Files
 
 ```
 experiment_adaptive_testing/
-├── __init__.py
-├── __main__.py
-├── cat_simulation.py     # TaskSelector ABC, FisherSelector, RandomSelector, MLE, simulation loop
-├── run_experiment.py     # CLI entry point, plotting
-└── README.md
+├── cat_simulation.py            # Shared: FisherSelector, MAP estimator, bands
+├── new_agent_simulation.py      # New-agent CAT simulation (per-fold leave-pair-out)
+├── run_new_agent_experiment.py  # CLI for the new-agent experiment (headline)
+└── run_experiment.py            # CLI for the old cross-benchmark experiment
 ```

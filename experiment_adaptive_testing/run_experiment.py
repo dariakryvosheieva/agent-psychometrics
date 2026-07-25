@@ -18,7 +18,6 @@ import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from .cat_simulation import ExperimentConfig, run_experiment
 
@@ -119,12 +118,14 @@ def main():
         help="Path to response matrix JSONL.",
     )
     parser.add_argument("--max_steps", type=int, default=200)
-    parser.add_argument("--seeds", type=int, nargs="+", default=[42, 7, 123, 314, 999])
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Seed for both the initial-task sampler (Fisher) and the "
+                             "random-subset sampler (Random).")
     parser.add_argument("--prior_sigma", type=float, default=3.0)
-    parser.add_argument("--n_boot", type=int, default=10000,
-                        help="Bootstrap iterations for empirical reliability CIs.")
-    parser.add_argument("--bootstrap_seed", type=int, default=0,
-                        help="Seed for the agent-resampling RNG (separate from --seeds).")
+    parser.add_argument("--n_init_tasks", type=int, default=100,
+                        help="Number of initial tasks to sample for the Fisher bands.")
+    parser.add_argument("--n_random_subsets", type=int, default=100,
+                        help="Number of independent random subsets per size for the Random band.")
     parser.add_argument("--output_dir", type=str, default="output/experiment_adaptive_testing")
     args = parser.parse_args()
 
@@ -138,39 +139,26 @@ def main():
             f"      --output_dir output/experiment_adaptive_testing/ood_predictions"
         )
 
-    # Run experiment for each seed and collect results
     method_keys = [
         "fisher_predicted_reliability", "fisher_oracle_reliability", "random_reliability",
     ]
     reliability_keys = []
     for k in method_keys:
         reliability_keys.extend([k, k + "_lo", k + "_hi"])
-    all_runs: list[dict[str, list[float]]] = []
-    for seed in args.seeds:
-        print(f"\n=== Seed {seed} ===")
-        config = ExperimentConfig(
-            responses_path=Path(args.responses),
-            oracle_items_path=Path(args.oracle_items),
-            predictions_csv=predictions_path,
-            max_steps=args.max_steps,
-            seed=seed,
-            prior_sigma=args.prior_sigma,
-            n_boot=args.n_boot,
-            bootstrap_seed=args.bootstrap_seed,
-        )
-        all_runs.append(run_experiment(config))
 
-    # Average reliability (and per-step CI endpoints) across seeds.
-    # Fisher methods are deterministic across seeds, so the average just collapses
-    # identical per-seed bands. Random varies per seed; averaging the bands keeps
-    # methodology consistent across all three curves.
-    steps = all_runs[0]["step"]
-    avg_results: dict[str, list[float]] = {"step": steps}
-    for k in reliability_keys:
-        arr = np.array([run[k] for run in all_runs])
-        avg_results[k] = np.nanmean(arr, axis=0).tolist()
+    config = ExperimentConfig(
+        responses_path=Path(args.responses),
+        oracle_items_path=Path(args.oracle_items),
+        predictions_csv=predictions_path,
+        max_steps=args.max_steps,
+        seed=args.seed,
+        prior_sigma=args.prior_sigma,
+        n_init_tasks=args.n_init_tasks,
+        n_random_subsets=args.n_random_subsets,
+    )
+    results = run_experiment(config)
+    steps = results["step"]
 
-    # Save config and averaged results
     run_dir = Path(args.output_dir) / "averaged"
     os.makedirs(run_dir, exist_ok=True)
 
@@ -180,10 +168,10 @@ def main():
             "oracle_items_path": args.oracle_items,
             "responses_path": args.responses,
             "max_steps": args.max_steps,
-            "seeds": args.seeds,
+            "seed": args.seed,
             "prior_sigma": args.prior_sigma,
-            "n_boot": args.n_boot,
-            "bootstrap_seed": args.bootstrap_seed,
+            "n_init_tasks": args.n_init_tasks,
+            "n_random_subsets": args.n_random_subsets,
         }, f, indent=2)
 
     results_csv = run_dir / "results.csv"
@@ -191,11 +179,10 @@ def main():
         writer = csv.writer(f)
         writer.writerow(["step"] + reliability_keys)
         for i in range(len(steps)):
-            writer.writerow([steps[i]] + [avg_results[k][i] for k in reliability_keys])
-    print(f"\nSaved averaged results: {results_csv}")
+            writer.writerow([steps[i]] + [results[k][i] for k in reliability_keys])
+    print(f"\nSaved results: {results_csv}")
 
-    # Plot
-    plot_reliability_curves(avg_results, run_dir / "reliability_curves.pdf")
+    plot_reliability_curves(results, run_dir / "reliability_curves.pdf")
 
     print(f"All outputs in: {run_dir}")
 

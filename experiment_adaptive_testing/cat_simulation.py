@@ -100,22 +100,20 @@ def estimate_theta_mle(
     responses: List[int],
     difficulties: List[float],
     theta_init: float = 0.0,
+    prior_mean: float = 0.0,
     prior_sigma: float = 3.0,
     bounds: Tuple[float, float] = (-6.0, 6.0),
 ) -> float:
-    """Estimate ability via MAP with a weak Gaussian prior.
+    """Estimate ability via MAP with a Gaussian prior N(prior_mean, prior_sigma^2).
 
     Minimizes the negative log-posterior:
-        nll = -sum[y_j * log(P_j) + (1 - y_j) * log(1 - P_j)] + theta^2 / (2 * sigma^2)
-    where P_j = sigmoid(theta - b_j).
+        nll = -sum[y_j * log(P_j) + (1 - y_j) * log(1 - P_j)] + (theta - mu)^2 / (2 * sigma^2)
+    where P_j = sigmoid(theta - b_j) and mu = prior_mean.
 
-    Gradient: -sum(y_j - P_j) + theta / sigma^2
-    (from d/dtheta log sigmoid(theta - b) = 1 - P and d/dtheta log(1 - sigmoid) = -P)
-
-    Returns theta_hat. With 0 observations, returns theta_init.
+    Returns theta_hat. With 0 observations, returns prior_mean (the prior mode).
     """
     if len(responses) == 0:
-        return theta_init
+        return prior_mean
 
     y = np.array(responses, dtype=np.float64)
     b = np.array(difficulties, dtype=np.float64)
@@ -125,17 +123,18 @@ def estimate_theta_mle(
         theta = theta_scalar[0]
         p = np.clip(expit(theta - b), 1e-15, 1.0 - 1e-15)
         nll = -np.sum(y * np.log(p) + (1.0 - y) * np.log(1.0 - p))
-        nll += 0.5 * (theta ** 2) / sigma_sq
+        nll += 0.5 * ((theta - prior_mean) ** 2) / sigma_sq
         return nll
 
     def neg_log_posterior_grad(theta_scalar):
         theta = theta_scalar[0]
         p = expit(theta - b)
-        return np.array([-np.sum(y - p) + theta / sigma_sq])
+        return np.array([-np.sum(y - p) + (theta - prior_mean) / sigma_sq])
 
+    init = theta_init if theta_init != 0.0 else prior_mean
     result = minimize(
         neg_log_posterior,
-        x0=[theta_init],
+        x0=[init],
         jac=neg_log_posterior_grad,
         method="L-BFGS-B",
         bounds=[bounds],
@@ -190,31 +189,21 @@ def compute_agent_stats(
     return np.array(theta_hats), np.array(fisher_infos)
 
 
-def bootstrap_reliability_ci(
-    theta_hats: np.ndarray,
-    fisher_infos: np.ndarray,
-    n_boot: int = 10000,
+def summarize_reliability_bands(
+    per_trajectory: np.ndarray,
     ci: float = 0.95,
-    rng: np.random.Generator | None = None,
-) -> Tuple[float, float, float]:
-    """Percentile bootstrap CI for empirical reliability over agents.
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Per-step mean and percentile band across trajectories.
 
-    Resamples the agent index with replacement n_boot times, recomputes
-    reliability per resample, returns (point_estimate, lo, hi).
+    `per_trajectory` has shape (n_trajectories, n_steps). Returns
+    (mean, lo, hi), each of length n_steps, where lo/hi are the
+    2.5/97.5 percentiles for ci=0.95.
     """
-    if rng is None:
-        rng = np.random.default_rng(0)
-    n_agents = len(theta_hats)
-    point = compute_empirical_reliability(theta_hats, fisher_infos)
-    idx = rng.integers(0, n_agents, size=(n_boot, n_agents))
-    boot_vals = np.empty(n_boot, dtype=np.float64)
-    for i in range(n_boot):
-        sel = idx[i]
-        boot_vals[i] = compute_empirical_reliability(theta_hats[sel], fisher_infos[sel])
     alpha = (1.0 - ci) / 2.0
-    lo = float(np.nanpercentile(boot_vals, 100.0 * alpha))
-    hi = float(np.nanpercentile(boot_vals, 100.0 * (1.0 - alpha)))
-    return point, lo, hi
+    mean = np.nanmean(per_trajectory, axis=0)
+    lo = np.nanpercentile(per_trajectory, 100.0 * alpha, axis=0)
+    hi = np.nanpercentile(per_trajectory, 100.0 * (1.0 - alpha), axis=0)
+    return mean, lo, hi
 
 
 # ---------------------------------------------------------------------------
@@ -249,18 +238,19 @@ class FisherSelector(TaskSelector):
     """Select tasks by maximizing Fisher information; score via MLE ability."""
 
     def __init__(self, difficulties: Dict[str, float], task_pool: List[str],
-                 prior_sigma: float = 3.0):
+                 prior_sigma: float = 3.0, prior_mean: float = 0.0):
         self.difficulties = difficulties
         self.task_pool = task_pool
         self.prior_sigma = prior_sigma
+        self.prior_mean = prior_mean
         self.remaining: List[str] = []
-        self.theta_hat: float = 0.0
+        self.theta_hat: float = prior_mean
         self.administered_responses: List[int] = []
         self.administered_diffs: List[float] = []
 
     def reset(self) -> None:
         self.remaining = list(self.task_pool)
-        self.theta_hat = 0.0
+        self.theta_hat = self.prior_mean
         self.administered_responses = []
         self.administered_diffs = []
 
@@ -280,7 +270,8 @@ class FisherSelector(TaskSelector):
         self.administered_diffs.append(self.difficulties[task_id])
         self.theta_hat = estimate_theta_mle(
             self.administered_responses, self.administered_diffs,
-            theta_init=self.theta_hat, prior_sigma=self.prior_sigma,
+            theta_init=self.theta_hat, prior_mean=self.prior_mean,
+            prior_sigma=self.prior_sigma,
         )
 
     def score(self) -> float:
@@ -341,6 +332,31 @@ def run_method(
     return administered_ids
 
 
+def run_fisher_from_init(
+    initial_tid: str,
+    difficulties: Dict[str, float],
+    task_pool: List[str],
+    agent_ids: List[str],
+    responses: Dict[str, Dict[str, int]],
+    max_steps: int,
+    prior_sigma: float,
+) -> Dict[str, List[str]]:
+    """Run greedy Fisher for all agents, forcing the first administered task."""
+    administered_ids: Dict[str, List[str]] = {}
+    for aid in agent_ids:
+        selector = FisherSelector(difficulties, task_pool, prior_sigma)
+        selector.reset()
+        selector.remaining.remove(initial_tid)
+        selector.update(initial_tid, responses[aid][initial_tid])
+        task_ids = [initial_tid]
+        for _ in range(max_steps - 1):
+            tid = selector.select_next()
+            selector.update(tid, responses[aid][tid])
+            task_ids.append(tid)
+        administered_ids[aid] = task_ids
+    return administered_ids
+
+
 # ---------------------------------------------------------------------------
 # Full experiment
 # ---------------------------------------------------------------------------
@@ -353,17 +369,80 @@ class ExperimentConfig:
     max_steps: int = 200
     seed: int = 42
     prior_sigma: float = 3.0
-    n_boot: int = 10000
-    bootstrap_seed: int = 0
+    n_init_tasks: int = 100
+    n_random_subsets: int = 100
+
+
+def _fisher_reliability_per_trajectory(
+    label: str,
+    difficulties: Dict[str, float],
+    task_pool: List[str],
+    agent_ids: List[str],
+    responses: Dict[str, Dict[str, int]],
+    oracle_diffs: Dict[str, float],
+    max_steps: int,
+    prior_sigma: float,
+    initial_tasks: List[str],
+) -> np.ndarray:
+    """For each initial task, run greedy Fisher and return reliability per step.
+
+    Shape: (len(initial_tasks), max_steps).
+    """
+    print(f"Running {label}: {len(initial_tasks)} initial tasks × {max_steps} steps...")
+    per_traj = np.empty((len(initial_tasks), max_steps), dtype=np.float64)
+    for t_idx, initial_tid in enumerate(initial_tasks):
+        admin = run_fisher_from_init(
+            initial_tid, difficulties, task_pool, agent_ids, responses,
+            max_steps, prior_sigma,
+        )
+        for step in range(1, max_steps + 1):
+            prefix = {aid: admin[aid][:step] for aid in agent_ids}
+            theta_hats, fisher_infos = compute_agent_stats(
+                prefix, responses, oracle_diffs, agent_ids, prior_sigma,
+            )
+            per_traj[t_idx, step - 1] = compute_empirical_reliability(theta_hats, fisher_infos)
+    return per_traj
+
+
+def _random_reliability_per_subset(
+    task_pool: List[str],
+    agent_ids: List[str],
+    responses: Dict[str, Dict[str, int]],
+    oracle_diffs: Dict[str, float],
+    max_steps: int,
+    prior_sigma: float,
+    n_subsets: int,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """For each subset size k, draw n_subsets independent random subsets of
+    size k and return reliability per (subset, size).
+
+    Shape: (n_subsets, max_steps).
+    """
+    print(f"Running Random: {n_subsets} subsets × {max_steps} sizes...")
+    per_subset = np.empty((n_subsets, max_steps), dtype=np.float64)
+    pool_array = np.array(task_pool)
+    for step in range(1, max_steps + 1):
+        for s_idx in range(n_subsets):
+            subset = rng.choice(pool_array, size=step, replace=False).tolist()
+            admin = {aid: subset for aid in agent_ids}
+            theta_hats, fisher_infos = compute_agent_stats(
+                admin, responses, oracle_diffs, agent_ids, prior_sigma,
+            )
+            per_subset[s_idx, step - 1] = compute_empirical_reliability(theta_hats, fisher_infos)
+    return per_subset
 
 
 def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
     """Run the full CAT experiment with three methods.
 
-    Returns dict with keys 'step' plus a (point, lo, hi) triple per method:
+    Returns a dict with keys 'step' plus a (mean, lo, hi) triple per method:
     'fisher_predicted_reliability', 'fisher_predicted_reliability_lo',
     'fisher_predicted_reliability_hi', and likewise for fisher_oracle and random.
-    The lo/hi values are 95% percentile-bootstrap CIs over the agent dimension.
+    For the Fisher methods the band is over `n_init_tasks` trajectories that
+    each start from a different uniformly-sampled initial task; for Random it
+    is over `n_random_subsets` independent random subsets per size. All bands
+    are 2.5/97.5 percentiles.
     """
     responses, pred_diffs, oracle_diffs, task_pool, agent_ids = load_and_verify_data(
         config.responses_path, config.predictions_csv, config.oracle_items_path,
@@ -371,48 +450,36 @@ def run_experiment(config: ExperimentConfig) -> Dict[str, List[float]]:
 
     max_steps = min(config.max_steps, len(task_pool))
 
-    # Run task selection for each method
-    fisher_pred_ids = run_method(
-        FisherSelector(pred_diffs, task_pool, config.prior_sigma),
-        agent_ids, responses, max_steps, "Fisher (Predicted)",
-    )
-    fisher_oracle_ids = run_method(
-        FisherSelector(oracle_diffs, task_pool, config.prior_sigma),
-        agent_ids, responses, max_steps, "Fisher (Oracle)",
-    )
     rng = np.random.default_rng(config.seed)
-    random_order = list(task_pool)
-    rng.shuffle(random_order)
-    random_ids = run_method(
-        RandomSelector(random_order),
-        agent_ids, responses, max_steps, "Random",
+
+    n_init = min(config.n_init_tasks, len(task_pool))
+    if n_init < config.n_init_tasks:
+        print(f"Warning: requested {config.n_init_tasks} initial tasks but pool has "
+              f"only {len(task_pool)}; using {n_init}.")
+    initial_tasks = rng.choice(task_pool, size=n_init, replace=False).tolist()
+
+    fisher_pred_traj = _fisher_reliability_per_trajectory(
+        "Fisher (Predicted)", pred_diffs, task_pool, agent_ids, responses,
+        oracle_diffs, max_steps, config.prior_sigma, initial_tasks,
+    )
+    fisher_oracle_traj = _fisher_reliability_per_trajectory(
+        "Fisher (Oracle)", oracle_diffs, task_pool, agent_ids, responses,
+        oracle_diffs, max_steps, config.prior_sigma, initial_tasks,
+    )
+    random_traj = _random_reliability_per_subset(
+        task_pool, agent_ids, responses, oracle_diffs, max_steps,
+        config.prior_sigma, config.n_random_subsets, rng,
     )
 
-    # Evaluate reliability at each step using oracle difficulties
-    print(f"Computing reliability + bootstrap CIs (n_boot={config.n_boot})...")
-    boot_rng = np.random.default_rng(config.bootstrap_seed)
     results: Dict[str, List[float]] = {"step": list(range(1, max_steps + 1))}
-    for method_key in ["fisher_predicted_reliability", "fisher_oracle_reliability",
-                       "random_reliability"]:
-        results[method_key] = []
-        results[method_key + "_lo"] = []
-        results[method_key + "_hi"] = []
-
-    for method_key, method_ids in [
-        ("fisher_predicted_reliability", fisher_pred_ids),
-        ("fisher_oracle_reliability", fisher_oracle_ids),
-        ("random_reliability", random_ids),
+    for method_key, traj in [
+        ("fisher_predicted_reliability", fisher_pred_traj),
+        ("fisher_oracle_reliability", fisher_oracle_traj),
+        ("random_reliability", random_traj),
     ]:
-        for step in range(1, max_steps + 1):
-            prefix = {aid: method_ids[aid][:step] for aid in agent_ids}
-            theta_hats, fisher_infos = compute_agent_stats(
-                prefix, responses, oracle_diffs, agent_ids, config.prior_sigma,
-            )
-            point, lo, hi = bootstrap_reliability_ci(
-                theta_hats, fisher_infos, n_boot=config.n_boot, rng=boot_rng,
-            )
-            results[method_key].append(point)
-            results[method_key + "_lo"].append(lo)
-            results[method_key + "_hi"].append(hi)
+        mean, lo, hi = summarize_reliability_bands(traj)
+        results[method_key] = mean.tolist()
+        results[method_key + "_lo"] = lo.tolist()
+        results[method_key + "_hi"] = hi.tolist()
 
     return results
