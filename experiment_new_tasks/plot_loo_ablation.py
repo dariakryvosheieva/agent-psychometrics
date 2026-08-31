@@ -55,7 +55,8 @@ BASELINE_ROW = "Baseline"
 BAR_WIDTH = 0.15
 AXIS_LABEL_SIZE = 14
 TICK_LABEL_SIZE = 11
-LEGEND_SIZE = 10
+LEGEND_SIZE = 14
+TITLE_SIZE = 16
 
 OUT = Path("output/loo_ablation_barplot.png")
 
@@ -114,6 +115,7 @@ def main() -> None:
             linestyle="--", color="#9e9e9e", linewidth=1.4, zorder=1,
         )
 
+    ax.set_title("New Tasks (feature source ablation)", fontsize=TITLE_SIZE)
     ax.set_ylabel("AUC-ROC", fontsize=AXIS_LABEL_SIZE)
     ax.set_ylim(0.6, 0.9)
     ax.set_xticks(x)
