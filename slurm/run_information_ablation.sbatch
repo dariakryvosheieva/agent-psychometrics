@@ -6,7 +6,7 @@
 #SBATCH --output=output/information_ablation/slurm-%j.out
 #SBATCH --error=output/information_ablation/slurm-%j.err
 
-# Run the hierarchical (rows 1-4) and leave-one-out (rows 5-7) information
+# Run the hierarchical (rows 1-4) and leave-one-out (rows 5-6) information
 # ablation across all four datasets with 20 shuffled k-fold splits per cell,
 # matching the main Table 2 protocol. Produces mean ± std per cell where
 # std = Bessel-corrected sample SD across 20 seed-level mean AUCs.

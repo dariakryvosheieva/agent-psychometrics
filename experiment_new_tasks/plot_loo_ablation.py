@@ -1,15 +1,17 @@
 """Plot leave-one-out feature source ablation bar graph.
 
-Each dataset gets 5 bars: the full LLM-judge feature set, then one bar per
-feature source removed (Problem, Repo State, Tests, Solution). Each
+Each dataset gets 4 bars: the full LLM-judge feature set, then one bar per
+agentic feature source removed (Repo State, Tests, Solution). Each
 leave-one-out bar is colored by the source that was removed, matching the
 colors in plot_information_ablation.py. The per-dataset constant baseline is
 drawn as a dashed line across each group.
 
-Rows are read from the ablation results CSVs (see run_information_ablation.py
---output). Later CSVs in RESULTS_CSVS only fill in rows missing from earlier
-ones, so provisional single-seed numbers never override the canonical
-20-seed results.
+The problem statement is deliberately not left out: the other sources rely on
+it for extraction context, so its information cannot be removed by dropping
+PROBLEM-level features (see the paper's New Tasks ablation discussion).
+
+Rows are read from the ablation results CSV (see run_information_ablation.py
+--output).
 
 Usage:
     python -m experiment_new_tasks.plot_loo_ablation
@@ -26,11 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-# Canonical results first, provisional fill-ins after.
-RESULTS_CSVS = [
-    Path("output/information_ablation/results_with_std.csv"),
-    Path("output/information_ablation/results_provisional_seed0.csv"),
-]
+RESULTS_CSV = Path("output/information_ablation/results_with_std.csv")
 
 # Display order matches plot_information_ablation.py.
 DATASETS = [
@@ -42,14 +40,12 @@ DATASETS = [
 
 # (results-CSV row name, legend label, bar color)
 COLOR_FULL = "#4a4a4a"
-COLOR_PROBLEM = "#4a90d9"
 COLOR_REPO = "#e8833a"
 COLOR_TESTS = "#59a14f"
 COLOR_SOLUTION = "#b07aa1"
 
 BARS = [
     ("+ Solution (Full)", "Full (all sources)", COLOR_FULL),
-    ("Full Minus Problem", "− Problem Statement", COLOR_PROBLEM),
     ("Full Minus Auditor", "− Repo State", COLOR_REPO),
     ("Problem + Auditor + Solution (No Test)", "− Tests", COLOR_TESTS),
     ("+ Test", "− Solution", COLOR_SOLUTION),
@@ -65,28 +61,20 @@ OUT = Path("output/loo_ablation_barplot.png")
 
 
 def load_results() -> Dict[str, Dict[str, Tuple[float, Optional[float]]]]:
-    """Return {row_name: {dataset_display: (auc, sd_or_None)}}.
-
-    Earlier CSVs in RESULTS_CSVS win; later ones only add missing rows.
-    """
+    """Return {row_name: {dataset_display: (auc, sd_or_None)}}."""
+    if not RESULTS_CSV.exists():
+        raise FileNotFoundError(f"Results CSV not found: {RESULTS_CSV}")
     results: Dict[str, Dict[str, Tuple[float, Optional[float]]]] = {}
-    for csv_path in RESULTS_CSVS:
-        if not csv_path.exists():
-            continue
-        df = pd.read_csv(csv_path)
-        for _, row in df.iterrows():
-            name = str(row["Info Level"])
-            if name in results:
-                continue
-            per_dataset: Dict[str, Tuple[float, Optional[float]]] = {}
-            for display, _ in DATASETS:
-                auc = float(row[f"{display} AUC"])
-                sd_raw = row.get(f"{display} SD")
-                sd = None if pd.isna(sd_raw) else float(sd_raw)
-                per_dataset[display] = (auc, sd)
-            results[name] = per_dataset
-    if not results:
-        raise FileNotFoundError(f"No results CSVs found among: {RESULTS_CSVS}")
+    df = pd.read_csv(RESULTS_CSV)
+    for _, row in df.iterrows():
+        name = str(row["Info Level"])
+        per_dataset: Dict[str, Tuple[float, Optional[float]]] = {}
+        for display, _ in DATASETS:
+            auc = float(row[f"{display} AUC"])
+            sd_raw = row.get(f"{display} SD")
+            sd = None if pd.isna(sd_raw) else float(sd_raw)
+            per_dataset[display] = (auc, sd)
+        results[name] = per_dataset
     return results
 
 
@@ -97,9 +85,9 @@ def main() -> None:
     missing = [name for name in needed if name not in results]
     if missing:
         raise ValueError(
-            f"Missing rows {missing} in results CSVs {RESULTS_CSVS}. "
-            "Run experiment_new_tasks.run_information_ablation (row 7, "
-            "'Full Minus Problem', requires a rerun with the updated INFO_LEVELS)."
+            f"Missing rows {missing} in {RESULTS_CSV}. "
+            "Run experiment_new_tasks.run_information_ablation with --output "
+            "pointing at that CSV."
         )
 
     x = np.arange(len(DATASETS))
