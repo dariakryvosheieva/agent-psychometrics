@@ -15,6 +15,7 @@ AGENT_ABILITIES = Path("data/terminalbench/irt_oracle/abilities.csv")
 AGENT_SPLITS = Path("data/terminalbench/1d_1pl/agent_splits.csv")
 
 OUT = Path("data/terminalbench_scatterplot.pdf")
+OUT_SVG = Path("data/terminalbench_scatterplot.svg")
 
 ANNOTATION_FONT_SIZE = 16
 AXIS_LABEL_FONT_SIZE = 22
@@ -209,4 +210,6 @@ plt.tight_layout()
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 plt.savefig(OUT)
+plt.savefig(OUT_SVG)
 print(str(OUT))
+print(str(OUT_SVG))
