@@ -37,6 +37,10 @@ out/
 *.npz
 !embeddings/*.npz
 
+# Regenerated inputs for terminalbench_scatterplot.py
+data/terminalbench/1d_1pl/
+data/terminalbench/irt_oracle/
+
 # Matplotlib cache
 .cache/
 .mplconfig/

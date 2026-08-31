@@ -16,30 +16,19 @@ AGENT_SPLITS = Path("data/terminalbench/1d_1pl/agent_splits.csv")
 
 OUT = Path("data/terminalbench_scatterplot.pdf")
 
-ANNOTATION_FONT_SIZE = 10
-AXIS_LABEL_FONT_SIZE = 14
-TICK_LABEL_FONT_SIZE = 12
-TITLE_FONT_SIZE = 14
-LEGEND_FONT_SIZE = 12
+ANNOTATION_FONT_SIZE = 16
+AXIS_LABEL_FONT_SIZE = 22
+TICK_LABEL_FONT_SIZE = 16
+TITLE_FONT_SIZE = 22
 
+# model_id -> (dx points, dy points, ha, va) for the annotation placement
 LABELED_MODEL_IDS = {
-    "Claude Opus 4.6",
-    "Claude Sonnet 4.5",
-    "GPT-5",
-    "GPT-5.2",
-    "GPT-5.3-Codex",
-    "Gemini 3 Pro",
-    "GLM 5",
-    "Kimi K2.5",
-    "GLM 4.7",
-    "MiniMax M2.1",
-    "Claude Haiku 4.5",
-    "GPT-5-Mini",
-    "Grok 4",
-    "GPT OSS 120B",
-    "Gemini 2.5 Flash",
-    "GPT-5-Nano",
-    "GPT OSS 20B",
+    "Claude Opus 4.6": (8, -4, "left", "center"),
+    "GPT-5.3-Codex": (8, -4, "left", "center"),
+    "Gemini 3 Pro": (-8, 6, "right", "bottom"),
+    "Kimi K2.5": (8, -2, "left", "center"),
+    "Gemini 2.5 Flash": (-8, -2, "right", "center"),
+    "GPT OSS 20B": (8, 8, "left", "bottom"),
 }
 
 
@@ -191,35 +180,31 @@ if all_vals:
             linestyle="-",
             linewidth=1.2,
             alpha=0.8,
-            label=f"fit: y={a:.2f}+{b:.2f}x",
         )
 
-for i, (x, y, mid, sid) in enumerate(labeled_points):
-    dx = 5 if (i % 2 == 0) else -5
-    dy = 5 if (i % 3 == 0) else (-5 if (i % 3 == 1) else 0)
+for x, y, mid, sid in labeled_points:
+    dx, dy, ha, va = LABELED_MODEL_IDS[mid]
     plt.annotate(
         mid,
         (x, y),
         textcoords="offset points",
         xytext=(dx, dy),
-        ha="left" if dx >= 0 else "right",
-        va="bottom" if dy >= 0 else "top",
+        ha=ha,
+        va=va,
         fontsize=ANNOTATION_FONT_SIZE,
         alpha=0.9,
         bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.62),
     )
 
-plt.xlim(left=-6)
-plt.xlabel("LLM ability", fontsize=AXIS_LABEL_FONT_SIZE)
-plt.ylabel("Terminus 2 agent ability", fontsize=AXIS_LABEL_FONT_SIZE)
+plt.xlim(-6, 5.4)
+plt.xlabel("Derived LLM ability", fontsize=AXIS_LABEL_FONT_SIZE)
+plt.ylabel("Measured fixed-scaffold agent ability", fontsize=AXIS_LABEL_FONT_SIZE)
 plt.title(
-    f"Terminal-Bench: Terminus 2 (standard IRT) vs full data (IRT-Agent)"
-    f" – n={len(points)}, r={r:.3f}",
+    "Sanity-checking LLM ability scores against\nagent scores with a fixed scaffold",
     fontsize=TITLE_FONT_SIZE,
 )
 plt.tick_params(axis="both", labelsize=TICK_LABEL_FONT_SIZE)
 plt.grid(True, alpha=0.25)
-plt.legend(loc="lower right", fontsize=LEGEND_FONT_SIZE)
 plt.tight_layout()
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
