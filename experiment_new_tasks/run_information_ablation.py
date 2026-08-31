@@ -60,6 +60,10 @@ INFO_LEVELS = [
     # Row 6 reuses solution.csv but drops ENV via the levels list.
     ("5_problem_auditor_solution_15.csv", [InfoLevel.PROBLEM, InfoLevel.ENVIRONMENT, InfoLevel.SOLUTION], "Problem + Auditor + Solution (No Test)", "problem_solution.csv"),
     ("6_problem_test_solution_15.csv", [InfoLevel.PROBLEM, InfoLevel.TEST, InfoLevel.SOLUTION], "Full Minus Auditor", "solution.csv"),
+    # Row 7 completes the leave-one-out set (rows 3, 5, 6 are full minus
+    # Solution / Test / Auditor). Reuses solution.csv but drops PROBLEM
+    # features via the levels list, mirroring the row 6 convention.
+    ("7_auditor_test_solution_15.csv", [InfoLevel.ENVIRONMENT, InfoLevel.TEST, InfoLevel.SOLUTION], "Full Minus Problem", "solution.csv"),
 ]
 
 
